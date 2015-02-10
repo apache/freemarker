@@ -286,21 +286,25 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * <p><b>About the "incompatible improvements" setting</b>
      *
-     * <p>The setting value is the FreeMarker version number where the bugfixes/improvements to enable were already
-     * implemented (but possibly wasn't active by default, as that would break backward-compatibility).
+     * <p>This setting value is the FreeMarker version number where the not 100% backward compatible bug fixes and
+     * improvements that you want to enable were already implemented. In new projects you should set this to the
+     * FreeMarker version that you are actually using. In older projects it's also usually better to keep this high,
+     * however you better check the changes activated (find them below), at least if not only the 3rd version number
+     * (the micro version) of {@code incompatibleImprovements} is increased. Generally, as far as you only increase the
+     * last version number of this setting, the changes are always low risk. The default value is 2.3.0 to maximize
+     * backward compatibility, but that value isn't recommended.
      * 
-     * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
-     * existing application. For actively developed applications usually you should set this to the highest possible
-     * value where the 1st or 2nd version is still the same as in the version where you have started development.
-     * As far as the 1st and 2nd version number remains, these changes are always very low-risk, so usually they don't
-     * break anything. Of course, you are still encouraged to read the list of changes below.
+     * <p>Bugfixes and improvements that are fully backward compatible, also those that are important security fixes,
+     * are enabled regardless of the incompatible improvements setting.
      * 
-     * <p>Note that at FreeMarker minor (2nd) or major (1st) version number increments, it's possible that emulating
+     * <p>An important consequence of setting this setting is that now your application will check if the stated minimum
+     * FreeMarker version requirement is met. Like if you set this setting to 2.3.22, but accidentally the application
+     * is deployed with FreeMarker 2.3.21, then FreeMarker will fail, telling that a higher version is required. After
+     * all, the fixes/improvements you have requested aren't available on a lower version.
+     * 
+     * <p>Note that as FreeMarker's minor (2nd) or major (1st) version number increments, it's possible that emulating
      * some of the old bugs will become unsupported, that is, even if you set this setting to a low value, it silently
-     * wont bring back the old behavior anymore.
-     * 
-     * <p>This setting doesn't affect important not-fully-backward compatible security fixes; they are always enabled,
-     * regardless of what you set here.
+     * wont bring back the old behavior anymore. Information about that will be present here.
      * 
      * <p>Currently the effects of this setting are:
      * <ul>

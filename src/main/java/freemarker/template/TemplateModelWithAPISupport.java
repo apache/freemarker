@@ -16,7 +16,7 @@
 
 package freemarker.template;
 
-import freemarker.template.utility.APIObjectWrapper;
+import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 /**
  * <b>Experimental - subject to change:</b> A {@link TemplateModel} on which the {@code ?api} operation can be applied.
@@ -31,7 +31,7 @@ public interface TemplateModelWithAPISupport extends TemplateModel {
 
     /**
      * Returns the model that exposes the (Java) API of the value. This is usually implemented by delegating to
-     * {@link APIObjectWrapper#wrapAsAPI(Object)}.
+     * {@link ObjectWrapperWithAPISupport#wrapAsAPI(Object)}.
      */
     TemplateModel getAPI() throws TemplateModelException;
 

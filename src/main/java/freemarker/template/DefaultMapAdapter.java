@@ -23,7 +23,7 @@ import java.util.SortedMap;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._TemplateModelException;
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.template.utility.APIObjectWrapper;
+import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 /**
  * Adapts a {@link Map} to the corresponding {@link TemplateModel} interface(s), most importantly to
@@ -55,7 +55,7 @@ public class DefaultMapAdapter extends WrappingTemplateModel
      * @param wrapper
      *            The {@link ObjectWrapper} used to wrap the items in the array.
      */
-    public static DefaultMapAdapter adapt(Map map, APIObjectWrapper wrapper) {
+    public static DefaultMapAdapter adapt(Map map, ObjectWrapperWithAPISupport wrapper) {
         return new DefaultMapAdapter(map, wrapper);
     }
     
@@ -155,7 +155,7 @@ public class DefaultMapAdapter extends WrappingTemplateModel
     }
 
     public TemplateModel getAPI() throws TemplateModelException {
-        return ((APIObjectWrapper) getObjectWrapper()).wrapAsAPI(map);
+        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(map);
     }
 
 }

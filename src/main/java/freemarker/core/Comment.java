@@ -19,7 +19,10 @@ package freemarker.core;
 import freemarker.template.utility.StringUtil;
 
 /**
- * A template element where the content is ignored, a Comment.
+ * <b>Internal API - subject to change:</b> A template element where the content is ignored, a Comment.
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 public final class Comment extends TemplateElement {
 
