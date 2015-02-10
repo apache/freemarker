@@ -29,6 +29,6 @@ import freemarker.template.ObjectWrapperAndUnwrapper;
  * 
  * @since 2.3.22
  */
-public interface RichObjectWrapper extends ObjectWrapperAndUnwrapper, APIObjectWrapper {
+public interface RichObjectWrapper extends ObjectWrapperAndUnwrapper, ObjectWrapperWithAPISupport {
 
 }

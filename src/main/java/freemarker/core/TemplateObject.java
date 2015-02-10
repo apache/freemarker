@@ -23,6 +23,9 @@ package freemarker.core;
  * 
  * @see TemplateElement
  * @see Expression
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 public abstract class TemplateObject {
     

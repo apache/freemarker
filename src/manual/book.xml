@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.22 Release Candidate 2 Nightly</subtitle>
+  <subtitle>For FreeMarker 2.3.22 Release Candidate 2</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -7933,6 +7933,164 @@ c</programlisting>
             <listitem>
               <para>Surviving malfunctioning ``portlets'' and such expendable
               page sections: <xref linkend="ref_directive_attempt"/></para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
+      <section xml:id="pgui_config_incompatible_improvements">
+        <title>The "incompatible improvements" setting</title>
+
+        <indexterm>
+          <primary>incompatible improvements</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>incompatible_improvements</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>incompatibleImprovements</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>backward compatibility</primary>
+        </indexterm>
+
+        <section>
+          <title>What does it do</title>
+
+          <para>This setting specifies the FreeMarker version number where the
+          not 100% backward compatible bug fixes and improvements
+          <emphasis>that you want to enable</emphasis> were already
+          implemented. Usually, it's a bad idea to left it on its default,
+          which is 2.3.0 (maximum backward compatibility).</para>
+
+          <para>In new projects you should set this to the FreeMarker version
+          that you are actually using. In older projects it's also usually
+          better to keep this high, however you better check the changes
+          activated (find them in <link
+          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-">the
+          API JavaDoc of the <literal>Configuration(Version)</literal>
+          constructor</link>), at least if not only the 3rd version number
+          (the micro version) of <quote>incompatible improvements</quote>
+          setting is increased. Generally, as far as you only increase the
+          last version number of this setting, the changes are always low
+          risk.</para>
+
+          <para>Bug fixes and improvements that are fully backward compatible,
+          also those that are important security fixes, are enabled regardless
+          of the <quote>incompatible improvements</quote> setting.</para>
+
+          <para>An important consequence of setting this setting is that now
+          your application will check if the stated minimum FreeMarker version
+          requirement is met. Like if you set this setting to 2.3.22, but
+          accidentally the application is deployed with FreeMarker 2.3.21,
+          then FreeMarker will fail, telling that a higher version is
+          required. After all, the fixes/improvements you have requested
+          aren't available on a lower version.</para>
+        </section>
+
+        <section xml:id="pgui_config_incompatible_improvements_how_to_set">
+          <title>How to set it</title>
+
+          <para>The incompatible improvements setting exists on the
+          <literal>Configuration</literal> level. It can be set on multiple
+          ways (let's assume that we want to set it to 2.3.22):</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Create the
+              <literal>freemarker.template.Configuration</literal> object like
+              <literal>new
+              Configuration(Configuration.VERSION_2_3_22)</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Or, alter the <literal>Configuration</literal> singleton
+              where you initialize its other settings like
+              <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22)</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Or, if you are configuring FreeMarker with properties
+              (<literal>*.properties</literal> file or
+              <literal>java.util.Properties</literal> object), add:</para>
+
+              <programlisting role="unspecified">incompatible_improvements=2.3.22</programlisting>
+            </listitem>
+
+            <listitem>
+              <para>Or, if you are configuring FreeMarker through
+              <literal>FreemarkerServlet</literal>, add this
+              <literal>init-param</literal> to it in the
+              <literal>web.xml</literal>:</para>
+
+              <programlisting role="unspecified">&lt;init-param&gt;
+    &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
+    &lt;param-value&gt;2.3.22&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+            </listitem>
+          </itemizedlist>
+
+          <para>But, <emphasis>if you set the
+          <literal>object_wrapper</literal> setting</emphasis> (same as
+          <literal>Configuration.setObjectWrapper(ObjectWrapper)</literal>) of
+          your configuration, then it's important to know that
+          <literal>BeansWrapper</literal> and its subclasses (most
+          importantly, <literal>DefaultObjectWrapper</literal>) has its own
+          independent <literal>incompatibleImprovements</literal> property,
+          and some fixes/improvements are activated by that, no by
+          <literal>Configuration</literal>'s similar setting. You don't have
+          to be aware of this complication if you aren't setting the
+          <literal>object_wrapper</literal> configuration setting anywhere,
+          because the default <literal>object_wrapper</literal> has the same
+          <quote>incompatible improvements</quote> as of the
+          <literal>Configuration</literal>. But if you are setting the
+          <literal>object_wrapper</literal>, then you must not forget to set
+          the <literal>incompatibleImprovements</literal> property of the
+          <literal>ObjectWrapper</literal> itself, in additionally to that of
+          the <literal>Configuration</literal>. (Note that it'ss fine to have
+          different <quote>incompatible improvements</quote> for the
+          <literal>Configuration</literal> and for the
+          <literal>ObjectWrapper</literal>, only it should be conscious
+          decision.) Depending on how you create/set the
+          <literal>ObjectWrapper</literal>, it can be done like this (let's
+          assume you want <literal>DefaultObjectWrapper</literal> with
+          <literal>incompatibleImprovements</literal> 2.3.22):</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>If you are using a builder to create the
+              <literal>ObjectWrapper</literal>: <literal>new
+              DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build()</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Or, if you are using a constructor: <literal>new
+              DefaultObjectWrapper(Configuration.VERSION_2_3_22)</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Or, if you are using the <literal>object_wrapper</literal>
+              property (<literal>*.properties</literal> file or
+              <literal>java.util.Properties</literal>
+              object):<literal/></para>
+
+              <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.21)</programlisting>
+            </listitem>
+
+            <listitem>
+              <para>Or, if you are configuring the
+              <literal>object_wrapper</literal> through a
+              <literal>FreemarkerServlet</literal> with an
+              <literal>init-param</literal> in
+              <literal>web.xml</literal>:</para>
+
+              <programlisting role="unspecified">&lt;init-param&gt;
+    &lt;param-name&gt;object_wrapper&lt;/param-name&gt;
+    &lt;param-value&gt;DefaultObjectWrapper(2.3.21)&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
         </section>
@@ -22303,9 +22461,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_22">
-        <title>2.3.22 Release Candidate 2 Nightly</title>
+        <title>2.3.22 Release Candidate 2</title>
 
-        <para>Date of release: 2015-02-[TODO]</para>
+        <para>Date of release: 2015-03-01 (planned for the final
+        release)</para>
 
         <para>To find changes since RC01, search for <quote>since
         RC02</quote>!</para>
@@ -22315,8 +22474,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         improvements and fixes described below are only activated when you
         specifically ask for 2.3.22 <quote>incompatible
         improvements</quote></emphasis>, because they could, with very small
-        chance, break existing applications. (See how to set that <link
-        linkend="versions_2_3_21">here...</link>)</para>
+        chance, break existing applications. See <link
+        linkend="pgui_config_incompatible_improvements_how_to_set">how to set
+        <quote>incomplatible improvements</quote> here</link>.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -22750,7 +22910,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>&lt;param-value&gt;[ WEB-INF/templates,
                   classpath:com/example/myapp/templates
                   ]&lt;/param-value&gt;</literal>. This internally creates a
-                  <literal>freemarker.cache.MultiTemplateLoader</literal>.</para>
+                  <literal>freemarker.cache.MultiTemplateLoader</literal>.
+                  (Since RC02.)</para>
                 </listitem>
 
                 <listitem>
@@ -23129,11 +23290,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Fixed some bugs in 2.3.22-rc01, where still name was
-                  used instead of <literal>templateName</literal>, and where
-                  assumptions were made about the template name format instead
-                  of using the <literal>TemplateNameFormat</literal> setting
-                  (since RC02).</para>
+                  <para>Fixed some bugs in 2.3.22-rc01, where still
+                  <literal>name</literal> was used instead of
+                  <literal>sourceName</literal>, and where assumptions were
+                  made about the template name format instead of using the
+                  <literal>TemplateNameFormat</literal> setting (since
+                  RC02).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23266,6 +23428,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Some fixes and improvements in template canonical form
                   output, and as a consequence of that, in FTL stack trace
                   instruction displaying.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Marked some historically public but otherwise internal
+                  API-s as deprecated, so that the disclaimer is more apparent
+                  in IDE-s (since RC02).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23447,57 +23615,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         improvements</quote></emphasis>, because they could, with very small
         chance, break existing applications. If the dependent project is still
         actively developed, allowing 2.3.21 "incompatible improvements" is
-        highly recommended. That can be achieved on various ways:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>Create the
-            <literal>freemarker.template.Configuration</literal> object like
-            <literal>new
-            Configuration(Configuration.VERSION_2_3_21)</literal></para>
-          </listitem>
-
-          <listitem>
-            <para>Or alter the <literal>Configuration</literal> where you
-            initialize its other settings like
-            <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21)</literal></para>
-          </listitem>
-
-          <listitem>
-            <para>Or if you are configuring FreeMarker with properties
-            (<literal>*.properties</literal> file or
-            <literal>java.util.Properties</literal> object), add
-            <literal>incompatible_improvements=2.3.21</literal> to
-            them.</para>
-          </listitem>
-
-          <listitem>
-            <para>Or if you are configuring FreeMarker through
-            <literal>FreemarkerServlet</literal>, add this
-            <literal>init-param</literal> to it in the
-            <literal>web.xml</literal>:</para>
-
-            <programlisting role="unspecified">&lt;init-param&gt;
-    &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.21&lt;/param-value&gt;
-&lt;/init-param&gt;</programlisting>
-          </listitem>
-        </itemizedlist>
-
-        <para>Some changes require the
-        <literal>incompatible_improvements</literal> of the
-        <literal>object_wrapper</literal> to be set. If you aren't setting the
-        <literal>object_wrapper</literal> anywhere, that's the same as the
-        <literal>incompatible_improvements</literal> of the
-        <literal>Configuration</literal>. Otherwise it has to be set of the
-        <literal>ObjectWrapper</literal> itself (if you are using a builder,
-        like <literal>new
-        DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build()</literal>,
-        if you are using a constructor, then <literal>new
-        DefaultObjectWrapper(Configuration.VERSION_2_3_21)</literal>, or if
-        you are using the <literal>object_wrapper</literal> property (a string
-        value) or FreemarkerSerlvet init-param, then
-        <literal>"DefaultObjectWrapper(2.3.21)"</literal>.)</para>
+        highly recommended. See <link
+        linkend="pgui_config_incompatible_improvements_how_to_set">how to set
+        <quote>incomplatible improvements</quote> here</link>.</para>
 
         <para>Note that we have changed our proprietary BSD-style license to
         Apache License, Version 2.0. See the <link linkend="app_license">new

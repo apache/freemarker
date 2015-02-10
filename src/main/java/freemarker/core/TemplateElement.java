@@ -33,6 +33,9 @@ import freemarker.template.TemplateSequenceModel;
  * non-expression node in the parsed template. Some information that can be found here can be accessed through the
  * {@link Environment#getCurrentDirectiveCallPlace()}, which a published API, and thus promises backward
  * compatibility.
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 abstract public class TemplateElement extends TemplateObject {
 
