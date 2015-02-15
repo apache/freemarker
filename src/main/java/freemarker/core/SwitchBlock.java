@@ -116,5 +116,9 @@ final class SwitchBlock extends TemplateElement {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.VALUE;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

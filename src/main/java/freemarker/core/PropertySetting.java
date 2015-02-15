@@ -136,5 +136,9 @@ final class PropertySetting extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

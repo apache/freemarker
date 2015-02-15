@@ -45,4 +45,9 @@ public abstract class Macro extends TemplateElement implements TemplateModel {
 
     public abstract boolean isFunction();
 
+    boolean isNestedBlockRepeater() {
+        // Because of recursive calls
+        return true;
+    }
+    
 }

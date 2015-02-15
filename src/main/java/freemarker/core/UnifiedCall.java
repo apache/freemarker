@@ -339,5 +339,9 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     public String getTemplateSourceName() {
         return getUnboundTemplate().getSourceName();
     }
+
+    boolean isNestedBlockRepeater() {
+        return true;
+    }
     
 }

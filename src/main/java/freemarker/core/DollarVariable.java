@@ -76,5 +76,9 @@ final class DollarVariable extends TemplateElement {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.CONTENT;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

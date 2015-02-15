@@ -383,5 +383,9 @@ public final class TextBlock extends TemplateElement {
     boolean isOutputCacheable() {
         return true;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

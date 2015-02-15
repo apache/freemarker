@@ -99,5 +99,9 @@ final class IfBlock extends TemplateElement {
     boolean isShownInStackTrace() {
         return false;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

@@ -62,5 +62,9 @@ final class RecoveryBlock extends TemplateElement {
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

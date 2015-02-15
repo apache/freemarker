@@ -225,6 +225,10 @@ final class Include extends TemplateElement {
         }
     }
 
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
+
 /*
     boolean heedsOpeningWhitespace() {
         return true;

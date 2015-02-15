@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateDirectiveBody;
 
 
 /**
@@ -175,6 +176,23 @@ public class _CoreAPI {
     /** Used for implementing the deprecated {@link Template} method with similar name. */
     public static List<TemplateElement> containingElements(UnboundTemplate unboundTemplate, int column, int line) {
         return unboundTemplate.containingElements(column, line);
+    }
+    
+    /**
+     * ATTENTION: This is used by https://github.com/kenshoo/freemarker-online. Don't break backward
+     * compatibility without updating that project too! 
+     */
+    static final public void addThreadInterruptedChecks(Template template) {
+        try {
+            new ThreadInterruptionSupportTemplatePostProcessor().postProcess(template);
+        } catch (TemplatePostProcessorException e) {
+            throw new RuntimeException("Template post-processing failed", e);
+        }
+    }
+    
+    static final public void checkHasNoNestedContent(TemplateDirectiveBody body)
+            throws NestedContentNotSupportedException {
+        NestedContentNotSupportedException.check(body);
     }
     
 }
