@@ -89,5 +89,9 @@ final class TrimInstruction extends TemplateElement {
     boolean isOutputCacheable() {
         return true;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

@@ -66,5 +66,9 @@ final class CompressedBlock extends TemplateElement {
     boolean isIgnorable() {
         return nestedBlock == null || nestedBlock.isIgnorable();
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

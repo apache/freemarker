@@ -136,7 +136,6 @@ final class IteratorBlock extends TemplateElement {
             this.listValue = listValue;
         }
         
-        
         void runLoop(Environment env) throws TemplateException, IOException {
             if (listValue instanceof TemplateCollectionModel) {
                 final TemplateCollectionModel tcm = (TemplateCollectionModel)listValue;
@@ -200,6 +199,10 @@ final class IteratorBlock extends TemplateElement {
             }
             return variableNames;
         }
+    }
+
+    boolean isNestedBlockRepeater() {
+        return true;
     }
     
 }

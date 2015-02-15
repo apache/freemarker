@@ -36,6 +36,10 @@ final class MixedContent extends TemplateElement {
         nestedElements.add(element);
     }
 
+    void addElement(int index, TemplateElement element) {
+        nestedElements.add(index, element);
+    }
+    
     TemplateElement postParseCleanup(boolean stripWhitespace)
         throws ParseException 
     {
@@ -106,5 +110,9 @@ final class MixedContent extends TemplateElement {
     
     boolean isIgnorable() {
         return nestedElements == null || nestedElements.size() == 0;
+    }
+
+    boolean isNestedBlockRepeater() {
+        return false;
     }
 }

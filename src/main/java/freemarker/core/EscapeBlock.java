@@ -96,5 +96,9 @@ class EscapeBlock extends TemplateElement {
     boolean isOutputCacheable() {
         return true;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

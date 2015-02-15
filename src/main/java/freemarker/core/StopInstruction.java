@@ -65,5 +65,9 @@ final class StopInstruction extends TemplateElement {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.MESSAGE;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

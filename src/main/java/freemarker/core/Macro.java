@@ -322,5 +322,10 @@ public final class Macro extends TemplateElement implements TemplateModel {
             }
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        // Because of recursive calls
+        return true;
+    }
     
 }

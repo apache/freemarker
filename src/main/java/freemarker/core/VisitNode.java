@@ -106,5 +106,9 @@ final class VisitNode extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return true;
+    }
     
 }

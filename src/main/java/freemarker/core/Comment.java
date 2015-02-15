@@ -70,5 +70,9 @@ public final class Comment extends TemplateElement {
     boolean isOutputCacheable() {
         return true;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }
