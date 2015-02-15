@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
+import freemarker.template.Template;
+import freemarker.template.TemplateDirectiveBody;
+
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -104,6 +107,23 @@ public class _CoreAPI {
      */
     public static Set/*<String>*/ getConfigurableSettingNames(Configurable cfgable) {
         return cfgable.getSettingNames();
+    }
+
+    /**
+     * ATTENTION: This is used by https://github.com/kenshoo/freemarker-online. Don't break backward
+     * compatibility without updating that project too! 
+     */
+    static final public void addThreadInterruptedChecks(Template template) {
+        try {
+            new ThreadInterruptionSupportTemplatePostProcessor().postProcess(template);
+        } catch (TemplatePostProcessorException e) {
+            throw new RuntimeException("Template post-processing failed", e);
+        }
+    }
+    
+    static final public void checkHasNoNestedContent(TemplateDirectiveBody body)
+            throws NestedContentNotSupportedException {
+        NestedContentNotSupportedException.check(body);
     }
     
 }

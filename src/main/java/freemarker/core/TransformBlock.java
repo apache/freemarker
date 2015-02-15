@@ -148,5 +148,9 @@ final class TransformBlock extends TemplateElement {
         sortedNamedArgsCache = new SoftReference(res);
         return res;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

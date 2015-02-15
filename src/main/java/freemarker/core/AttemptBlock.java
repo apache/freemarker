@@ -81,5 +81,9 @@ final class AttemptBlock extends TemplateElement {
     boolean isShownInStackTrace() {
         return false;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

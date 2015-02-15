@@ -108,4 +108,8 @@ public final class LibraryLoad extends TemplateElement {
     public String getTemplateName() {
         return importedTemplateNameExp.toString();
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
 }

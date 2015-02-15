@@ -352,18 +352,7 @@ public final class Environment extends Configurable {
             nested = null;
         }
         else {
-            nested = new TemplateDirectiveBody() {
-                public void render(Writer newOut) throws TemplateException, IOException {
-                    Writer prevOut = out;
-                    out = newOut;
-                    try {
-                        Environment.this.visit(element);
-                    }
-                    finally {
-                        out = prevOut;
-                    }
-                }
-            };
+            nested = new NestedElementTemplateDirectiveBody(element);
         }
         final TemplateModel[] outArgs;
         if(bodyParameterNames == null || bodyParameterNames.isEmpty()) {
@@ -2249,6 +2238,31 @@ public final class Environment extends Configurable {
      */
     public void __setitem__(String key, Object o) throws TemplateException {
         setGlobalVariable(key, getObjectWrapper().wrap(o));
+    }
+
+    final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
+
+        private final TemplateElement element;
+
+        private NestedElementTemplateDirectiveBody(TemplateElement element) {
+            this.element = element;
+        }
+
+        public void render(Writer newOut) throws TemplateException, IOException {
+            Writer prevOut = out;
+            out = newOut;
+            try {
+                Environment.this.visit(element);
+            }
+            finally {
+                out = prevOut;
+            }
+        }
+
+        public TemplateElement getElement() {
+            return element;
+        }
+        
     }
 
     private static final class NumberFormatKey

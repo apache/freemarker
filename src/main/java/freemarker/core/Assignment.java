@@ -158,5 +158,9 @@ final class Assignment extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }
