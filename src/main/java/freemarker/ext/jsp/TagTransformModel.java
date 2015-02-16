@@ -86,12 +86,8 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
             pageContext.pushTopTag(tag);
             pageContext.pushWriter(w);
             return w;
-        }
-        catch(TemplateModelException e) {
-            throw e;
-        }
-        catch(Exception e) {
-            throw toTemplateModelException(e);
+        } catch (Exception e) {
+            throw toTemplateModelExceptionOrRethrow(e);
         }
     }
 
@@ -347,12 +343,8 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                         throw new RuntimeException("Illegal return value " + dst + " from " + tag.getClass().getName() + ".doStartTag()");
                     }
                 }
-            }
-            catch(TemplateModelException e) {
-                throw e;
-            }
-            catch(Exception e) {
-                throw toTemplateModelException(e);
+            } catch (Exception e) {
+                throw toTemplateModelExceptionOrRethrow(e);
             }
         }
         
@@ -364,26 +356,19 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 if(isIterationTag) {
                     int dab = ((IterationTag)tag).doAfterBody();
                     switch(dab) {
-                        case Tag.SKIP_BODY: {
+                        case Tag.SKIP_BODY:
                             endEvaluation();
                             return END_EVALUATION;
-                        }
-                        case IterationTag.EVAL_BODY_AGAIN: {
+                        case IterationTag.EVAL_BODY_AGAIN:
                             return REPEAT_EVALUATION;
-                        }
-                        default: {
+                        default:
                             throw new TemplateModelException("Unexpected return value " + dab + "from " + tag.getClass().getName() + ".doAfterBody()");
-                        }
                     }
                 }
                 endEvaluation();
                 return END_EVALUATION;
-            }
-            catch(TemplateModelException e) {
-                throw e;
-            }
-            catch(Exception e) {
-                throw toTemplateModelException(e);
+            } catch (Exception e) {
+                throw toTemplateModelExceptionOrRethrow(e);
             }
         }
         
