@@ -123,7 +123,7 @@ class JspTagModelBase
                         if (e instanceof IllegalArgumentException && !(setterType.isAssignableFrom(String.class))
                                 && argArray[0] != null && argArray[0] instanceof String) {
                             desc.tip(new Object[] {
-                                    "This problem is often caused by unnecessary parameter quotation. Paramteres "
+                                    "This problem is often caused by unnecessary parameter quotation. Paramters "
                                     + "aren't quoted in FTL, similarly as they aren't quoted in most languages. "
                                     + "For example, these parameter assignments are wrong: ",
                                     "<@my.tag p1=\"true\" p2=\"10\" p3=\"${someVariable}\" p4=\"${x+1}\" />",
