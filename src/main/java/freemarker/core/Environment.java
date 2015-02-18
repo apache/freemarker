@@ -200,7 +200,7 @@ public final class Environment extends Configurable {
         this.currentTemplate = getMainTemplate();
         this.out = out;
         this.rootDataModel = rootDataModel;
-        predefineMacros(template);
+        predefineCallables(template);
     }
 
     /**
@@ -2084,7 +2084,7 @@ public final class Environment extends Configurable {
         final Template prevCurrentTemplate = currentTemplate;
         try {
             currentTemplate = includedTemplate;
-            predefineMacros(includedTemplate);
+            predefineCallables(includedTemplate);
             try {
                 visit(includedTemplate.getRootTreeNode());
             } finally {
@@ -2218,9 +2218,16 @@ public final class Environment extends Configurable {
         }
     }
 
-    void predefineMacros(Template template) {
-        for (Iterator it = template.getMacros().values().iterator(); it.hasNext();) {
-            visitCallableDefinition((UnboundCallable) it.next());
+    /**
+     * Used for creating the callables that are defined by #macro/#function elements that weren't executed yet.  
+     */
+    void predefineCallables(Template template) {
+        final Map<String, UnboundCallable> unboundCallables
+                = _CoreAPI.getUnboundCallables(template.getUnboundTemplate());
+        if (unboundCallables != null) {
+            for (UnboundCallable unboundCallable : unboundCallables.values()) {
+                visitCallableDefinition(unboundCallable);
+            }
         }
     }
 

@@ -540,10 +540,30 @@ public class Template extends Configurable {
     }
     
     /**
+     * For 2.3 backward compatibility. Initialized on demand.
+     */
+    private volatile Map<String, Macro> legacyMacroMap;
+    
+    /**
+     * Returns the {@link Map} that maps the macro names to the actual macros. This map shouldn't be modified; if you
+     * absolutely has to use these deprecated API-s for adding a macro, at least use {@link #addMacro(Macro)}.
+     * (Specifying the {@link Map} key has no purpose anyway, as the macro will be always defined with its original
+     * name, as returned by {@link Macro#getName()}.) 
+     * 
      * @deprecated Should only be used internally, and might will be removed later.
      */
     public Map getMacros() {
-        return _CoreAPI.getMacros(unboundTemplate);
+        Map<String, Macro> legacyMacroMap = this.legacyMacroMap;
+        if (legacyMacroMap == null) {
+            synchronized (this) {
+                legacyMacroMap = this.legacyMacroMap;
+                if (legacyMacroMap == null) {
+                    legacyMacroMap = _CoreAPI.createAdapterMacroMapForUnboundCallables(unboundTemplate);
+                    this.legacyMacroMap = legacyMacroMap;
+                }
+            }
+        }
+        return legacyMacroMap;
     }
 
     /**

@@ -19,9 +19,12 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -122,19 +125,28 @@ public class _CoreAPI {
      * For emulating legacy {@link Template#addMacro(Macro)}.
      */
     public static void addMacro(UnboundTemplate unboundTemplate, Macro macro) {
-        // A bit of backward compatibility complication, since in 2.4 Macro was split to bound- and unbound callables:
-        final UnboundCallable unboundCallable; 
+        final UnboundCallable unboundCallable = macroToUnboundCallable(macro);
+        unboundTemplate.addUnboundCallable(unboundCallable);
+    }
+
+    /**
+     * In 2.4 {@link Macro} was split to {@link BoundCallable} and {@link UnboundCallable}, but because of BC
+     * constraints sometimes we can only expect a {@link Macro}, but that can always converted to
+     * {@link UnboundCallable}.
+     */
+    private static UnboundCallable macroToUnboundCallable(Macro macro) {
         if (macro instanceof UnboundCallable) {
             // It's coming from the AST:
-            unboundCallable = (UnboundCallable) macro;
+            return (UnboundCallable) macro;
         } else if (macro instanceof BoundCallable) {
             // It's coming from an FTL variable:
-            unboundCallable = ((BoundCallable) macro).getUnboundCallable(); 
+            return ((BoundCallable) macro).getUnboundCallable(); 
+        } else if (macro == null) {
+            return null;
         } else {
             // Impossible, Macro should have only two subclasses.
             throw new BugException();
         }
-        unboundTemplate.addUnboundCallable(unboundCallable);
     }
 
     public static void addImport(UnboundTemplate unboundTemplate, LibraryLoad libLoad) {
@@ -159,7 +171,7 @@ public class _CoreAPI {
     }
     
     /** Used for implementing the deprecated {@link Template} method with similar name. */
-    public static Map getMacros(UnboundTemplate unboundTemplate) {
+    public static Map<String, UnboundCallable> getUnboundCallables(UnboundTemplate unboundTemplate) {
         return unboundTemplate.getUnboundCallables();
     }
 
@@ -193,6 +205,216 @@ public class _CoreAPI {
     static final public void checkHasNoNestedContent(TemplateDirectiveBody body)
             throws NestedContentNotSupportedException {
         NestedContentNotSupportedException.check(body);
+    }
+
+    public static Map<String, Macro> createAdapterMacroMapForUnboundCallables(UnboundTemplate unboundTemplate) {
+        return new AdapterMacroMap(getUnboundCallables(unboundTemplate));
+    }
+    
+    /**
+     * Wraps a {@code Map<String, UnboundCallable>} as if it was a {@code Map<String, Macro>}. This is for backward
+     * compatibility. The important use case is being able to put any {@link Macro} subclass into this {@code Map},
+     * despite that the backing {@link Macro} can only store {@code UnboundCallable}. Reading works a bit strangely,
+     * because if you put a non-{@link UnboundCallable} value in, then get it with the same key, you get the
+     * corresponding {@link UnboundCallable} back instead of the original object. That's also a {@code Macro} though. 
+     */
+    private static class AdapterMacroMap implements Map<String, Macro> {
+        
+        private final Map<String, UnboundCallable> adapted;
+
+        public AdapterMacroMap(Map<String, UnboundCallable> unboundCallableMap) {
+            this.adapted = unboundCallableMap;
+        }
+
+        public int size() {
+            return adapted.size();
+        }
+
+        public boolean isEmpty() {
+            return adapted.isEmpty();
+        }
+
+        public boolean containsKey(Object key) {
+            return adapted.containsKey(key);
+        }
+
+        public boolean containsValue(Object value) {
+            return adapted.containsValue(value);
+        }
+
+        public UnboundCallable get(Object key) {
+            return adapted.get(key);
+        }
+
+        public UnboundCallable put(String key, Macro value) {
+            return adapted.put(key, macroToUnboundCallable(value));
+        }
+
+        public UnboundCallable remove(Object key) {
+            return adapted.remove(key);
+        }
+
+        public void putAll(Map<? extends String, ? extends Macro> t) {
+            for (Map.Entry<? extends String, ? extends Macro> ent : t.entrySet()) {
+                put(ent.getKey(), ent.getValue());
+            }
+        }
+
+        public void clear() {
+            adapted.clear();
+        }
+
+        public Set<String> keySet() {
+            return adapted.keySet();
+        }
+
+        public Collection<Macro> values() {
+            // According the Map API, this Collection doesn't allows adding elements, it's safe to treat as a
+            // Collection<Macro>.
+            return (Collection) adapted.values();
+        }
+
+        public Set<Entry<String, Macro>> entrySet() {
+            // According the Map API, this set doesn't allows adding elements, but, the Map.Entry-s are still
+            // modifiable.
+            return new AdapterMacroMapEntrySet(adapted.entrySet());
+        }
+
+        public boolean equals(Object o) {
+            return adapted.equals(o);
+        }
+
+        public int hashCode() {
+            return adapted.hashCode();
+        }
+        
+    }
+    
+    /** Helper for {@link AdapterMacroMap}. */
+    private static class AdapterMacroMapEntrySet implements Set<Map.Entry<String, Macro>> {
+        
+        private final Set<Map.Entry<String, UnboundCallable>> adapted;
+
+        public AdapterMacroMapEntrySet(Set<Entry<String, UnboundCallable>> adapted) {
+            this.adapted = adapted;
+        }
+
+        public int size() {
+            return adapted.size();
+        }
+
+        public boolean isEmpty() {
+            return adapted.isEmpty();
+        }
+
+        public boolean contains(Object o) {
+            return adapted.contains(o);
+        }
+
+        public Iterator<Entry<String, Macro>> iterator() {
+            return new AdapterMacroMapEntrySetIterator(adapted.iterator());
+        }
+
+        public Object[] toArray() {
+            return adapted.toArray();
+        }
+
+        public <T> T[] toArray(T[] a) {
+            return adapted.toArray(a);
+        }
+
+        public boolean add(Entry<String, Macro> o) {
+            // Won't be allowed anyway
+            return adapted.add((Entry) o);
+        }
+
+        public boolean remove(Object o) {
+            return adapted.remove(o);
+        }
+
+        public boolean containsAll(Collection<?> c) {
+            return adapted.containsAll(c);
+        }
+
+        public boolean addAll(Collection<? extends Entry<String, Macro>> c) {
+            // Won't be allowed anyway
+            return adapted.addAll((Collection) c);
+        }
+
+        public boolean retainAll(Collection<?> c) {
+            return adapted.retainAll(c);
+        }
+
+        public boolean removeAll(Collection<?> c) {
+            return adapted.removeAll(c);
+        }
+
+        public void clear() {
+            adapted.clear();
+        }
+
+        public boolean equals(Object o) {
+            return adapted.equals(o);
+        }
+
+        public int hashCode() {
+            return adapted.hashCode();
+        }
+        
+    }
+    
+    /** Helper for {@link AdapterMacroMap}. */
+    private static class AdapterMacroMapEntrySetIterator implements Iterator<Map.Entry<String, Macro>> {
+        
+        private final Iterator<Map.Entry<String, UnboundCallable>> adapted;
+
+        public AdapterMacroMapEntrySetIterator(Iterator<Entry<String, UnboundCallable>> adapted) {
+            this.adapted = adapted;
+        }
+
+        public boolean hasNext() {
+            return adapted.hasNext();
+        }
+
+        public Entry<String, Macro> next() {
+            return new AdapterMacroMapEntry(adapted.next());
+        }
+
+        public void remove() {
+            adapted.remove();
+        }
+        
+    }
+    
+    /** Helper for {@link AdapterMacroMap}. */
+    private static class AdapterMacroMapEntry implements Map.Entry<String, Macro> {
+        
+        private final Map.Entry<String, UnboundCallable> adapted;
+
+        public AdapterMacroMapEntry(Entry<String, UnboundCallable> adapted) {
+            this.adapted = adapted;
+        }
+
+        public String getKey() {
+            return adapted.getKey();
+        }
+
+        public UnboundCallable getValue() {
+            return adapted.getValue();
+        }
+
+        public UnboundCallable setValue(Macro value) {
+            return adapted.setValue(macroToUnboundCallable(value));
+        }
+
+        public boolean equals(Object o) {
+            return adapted.equals(o);
+        }
+
+        public int hashCode() {
+            return adapted.hashCode();
+        }
+        
     }
     
 }

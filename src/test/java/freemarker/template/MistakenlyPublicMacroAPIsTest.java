@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -108,10 +109,20 @@ public class MistakenlyPublicMacroAPIsTest {
         TemplateModel m1 = env.getVariable("m1");
         assertThat(m1, instanceOf(Macro.class));
         
-        Template t = new Template(null, "<#assign x = 1><@m1/>", cfg);
-        t.getMacros().put("m1", m1);
-        
-        assertEquals("1", getTemplateOutput(t));
+        for (int variation : new int[] { 1, 2 }) {
+            Template t = new Template(null, "<#assign x = 1><@m1/>", cfg);
+            if (variation == 1) {
+                t.getMacros().put("m1", m1);
+            } else {
+                t.getMacros().put("m1", null); // Just so it appears in the Entry Set.
+                for (Map.Entry<String, Macro> ent : (Set<Map.Entry>) t.getMacros().entrySet()) {
+                    if (ent.getKey().equals("m1")) {
+                        ent.setValue((Macro) m1);
+                    }
+                }
+            }
+            assertEquals("1", getTemplateOutput(t));
+        }
     }
     
     private String getTemplateOutput(Template t) throws TemplateException, IOException {
