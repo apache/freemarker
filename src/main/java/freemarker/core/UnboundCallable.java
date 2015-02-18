@@ -23,8 +23,8 @@ import java.util.Map;
 import freemarker.template.TemplateModel;
 
 /**
- * Represents the definition of a macro or function in the AST. For understanding related concepts more, see
- * {@link BoundCallable}.
+ * Represents the definition of a macro or function (or other future callable entity) in the AST. For understanding
+ * related concepts more, see {@link BoundCallable}.
  * 
  * <p>
  * Historical note: Prior to 2.4, the two concepts ({@link UnboundCallable} and {@link BoundCallable}) were these same,
@@ -81,7 +81,7 @@ class UnboundCallable extends Macro {
     }
     
     public String[] getArgumentNames() {
-        return (String[])paramNames.clone();
+        return paramNames.clone();
     }
 
     String[] getArgumentNamesInternal() {
@@ -152,6 +152,10 @@ class UnboundCallable extends Macro {
         return false;
     }
     
+    boolean isNestedBlockRepeater() {
+        // Because of recursive calls
+        return true;
+    }
     public boolean isFunction() {
         return function;
     }

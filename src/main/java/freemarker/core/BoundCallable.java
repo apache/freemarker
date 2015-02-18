@@ -42,8 +42,8 @@ import freemarker.template.TemplateException;
  * Historical note: Prior to 2.4, the two concepts ({@link UnboundCallable} and {@link BoundCallable}) were these same,
  * represented by {@link Macro}, which still exists due to backward compatibility constraints. This class extends
  * {@link Macro} only for the sake of legacy applications which expect macro and function FTL variables to be
- * {@link Macro}-s. Especially this class should not extend {@link TemplateElement} (which it does, because
- * {@link Macro} is a subclass of that), but it had to, for backward compatibility. It just delegates {@link Macro}
+ * {@link Macro}-s. Especially, this class should not extend {@link TemplateElement} (which it does, because
+ * {@link Macro} is a subclass of that), but it had to, for backward compatibility. It just delegates the {@link Macro}
  * methods to the embedded {@link UnboundCallable}.
  * 
  * @see UnboundCallable
@@ -142,6 +142,11 @@ final class BoundCallable extends Macro {
     @Override
     ParameterRole getParameterRole(int idx) {
         return unboundCallable.getParameterRole(idx);
+    }
+
+    @Override
+    boolean isNestedBlockRepeater() {
+        return unboundCallable.isNestedBlockRepeater();
     }
     
 }

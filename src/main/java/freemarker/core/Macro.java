@@ -23,7 +23,7 @@ import freemarker.template.TemplateModel;
  * representation isn't a public class, but is {@code insteanceof} this for backward compatibility.
  * 
  * <p>
- * Historical note: This class exists for bacward compatibility with 2.3. 2.4 has introduced {@link UnboundTemplate}-s,
+ * Historical note: This class exists for backward compatibility with 2.3. 2.4 has introduced {@link UnboundTemplate}-s,
  * thus, the definition of a callable and the runtime callable value has become to two different things:
  * {@link UnboundCallable} and {@link BoundCallable}. Both extends this class for backward compatibility.
  * 
@@ -44,10 +44,5 @@ public abstract class Macro extends TemplateElement implements TemplateModel {
     public abstract String getName();
 
     public abstract boolean isFunction();
-
-    boolean isNestedBlockRepeater() {
-        // Because of recursive calls
-        return true;
-    }
     
 }
