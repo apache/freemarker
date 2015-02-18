@@ -35,6 +35,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.ObjectWrapperAndUnwrapper;
+import freemarker.template.Template;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
@@ -123,7 +124,7 @@ class JspTagModelBase
                         if (e instanceof IllegalArgumentException && !(setterType.isAssignableFrom(String.class))
                                 && argArray[0] != null && argArray[0] instanceof String) {
                             desc.tip(new Object[] {
-                                    "This problem is often caused by unnecessary parameter quotation. Paramteres "
+                                    "This problem is often caused by unnecessary parameter quotation. Paramters "
                                     + "aren't quoted in FTL, similarly as they aren't quoted in most languages. "
                                     + "For example, these parameter assignments are wrong: ",
                                     "<@my.tag p1=\"true\" p2=\"10\" p3=\"${someVariable}\" p4=\"${x+1}\" />",
@@ -140,15 +141,33 @@ class JspTagModelBase
         }
     }
 
-    protected final TemplateModelException toTemplateModelException(Exception e) {
+    protected final TemplateModelException toTemplateModelExceptionOrRethrow(Exception e) throws TemplateModelException {
+        if (e instanceof RuntimeException && !isCommonRuntimeException((RuntimeException) e)) {
+            throw (RuntimeException) e;
+        }
         if (e instanceof TemplateModelException) {
-            return (TemplateModelException) e;
+            throw (TemplateModelException) e;
         }
         if (e instanceof TemplateExceptionWrapperJspException) {
             return (TemplateModelException) e.getCause();
         }
         return new _TemplateModelException(e, new Object[] {
                 "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception" });
+    }
+
+    /**
+     * Runtime exceptions that we don't want to propagate, instead we warp them into a more helpful exception. These are
+     * the ones where it's very unlikely that someone tries to catch specifically these around
+     * {@link Template#process(Object, java.io.Writer)}.
+     */
+    private boolean isCommonRuntimeException(RuntimeException e) {
+        final Class eClass = e.getClass();
+        // We deliberately don't accept sub-classes. Those are possibly application specific and some want to catch them
+        // outside the template.
+        return eClass == NullPointerException.class
+                || eClass == IllegalArgumentException.class
+                || eClass == ClassCastException.class
+                || eClass == IndexOutOfBoundsException.class;
     }
     
 }

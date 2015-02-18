@@ -53,6 +53,25 @@ public class MistakenlyPublicMacroAPIsTest {
         
         assertEquals("123b 1b23b", getTemplateOutput(t));
     }
+    
+    /**
+     * Same as {@link #testMacroCopyingExploit()}, but to make it worse, it adds the macros directly through the macro
+     * {@link Map}. 
+     */
+    @Test
+    public void testMacroCopyingExploitWithMapModification() throws IOException, TemplateException {
+        Template tMacros = new Template(null, "<#macro m1>1</#macro><#macro m2>2</#macro>", cfg);
+        Map<String, Macro> macros = tMacros.getMacros();
+        
+        Template t = new Template(null,
+                "<@m1/><@m2/><@m3/>"
+                + "<#macro m1>1b</#macro><#macro m3>3b</#macro> "
+                + "<@m1/><@m2/><@m3/>", cfg);
+        t.getMacros().put("m1", macros.get("m1"));
+        t.getMacros().put("whatever", macros.get("m2"));  // Legacy bug: Map key doesn't mater, only original macro name
+        
+        assertEquals("123b 1b23b", getTemplateOutput(t));
+    }    
 
     @Test
     public void testMacroCopyingExploitAndNamespaces() throws IOException, TemplateException {
@@ -73,6 +92,24 @@ public class MistakenlyPublicMacroAPIsTest {
         
         Template t = new Template(null, "<#assign x = 1><@m1/>", cfg);
         t.addMacro((Macro) m1);
+        
+        assertEquals("1", getTemplateOutput(t));
+    }
+
+    /**
+     * Same as {@link #testMacroCopyingFromFTLVariable()}, but to make it worse, it adds the macros directly through the
+     * {@link Map}.
+     */
+    @Test
+    public void testMacroCopyingFromFTLVariableWithMapModification() throws IOException, TemplateException {
+        Template tMacros = new Template(null, "<#assign x = 0><#macro m1>${x}</#macro>", cfg);
+        Environment env = tMacros.createProcessingEnvironment(null, NullWriter.INSTANCE);
+        env.process();
+        TemplateModel m1 = env.getVariable("m1");
+        assertThat(m1, instanceOf(Macro.class));
+        
+        Template t = new Template(null, "<#assign x = 1><@m1/>", cfg);
+        t.getMacros().put("m1", m1);
         
         assertEquals("1", getTemplateOutput(t));
     }

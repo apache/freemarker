@@ -20937,12 +20937,6 @@ End book</programlisting>
         <primary>FAQ</primary>
       </indexterm>
 
-      <para>Translations: Chinese in the <link
-      xlink:href="https://sourceforge.net/projects/freemarker/files/chinese-manual/FreeMarker_Manual_zh_CN.pdf/download">Chinese
-      translation of the Manual (PDF)</link>, <link
-      xlink:href="http://science.webhostinggeeks.com/dodatak-faq">Serbo-Croatian
-      (based on FreeMarker 2.3.19)</link></para>
-
       <qandaset>
         <qandaentry xml:id="faq_jsp_vs_freemarker">
           <question>
