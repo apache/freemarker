@@ -43,8 +43,17 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
 
     TemplateElement parent;
 
-    // Only one of nestedBlock and nestedElements can be non-null.
+    /**
+     * Used by elements that has a fixed schema for its child elements. For example, {@code #switch} can only have
+     * {@code #case} and {@code #default} child elements. Only one of {@link #nestedBlock} and {@link #nestedBlock} can
+     * be non-{@code null} (or both).
+     */
     TemplateElement nestedBlock;
+    
+    /**
+     * Used by elements that has no fixed schema for its child elements. For example, an {@code #if} can enclose any
+     * kind of elements. Only one of {@link #nestedBlock} and {@link #nestedBlock} can be non-{@code null} (or both).
+     */
     List nestedElements; 
 
     /**
@@ -88,6 +97,14 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     boolean isShownInStackTrace() {
         return true;
     }
+    
+    /**
+     * Tells if this element possibly executes its {@link #nestedBlock} for many times. This flag is useful when
+     * a template AST is modified for running time limiting (see {@link ThreadInterruptionSupportTemplatePostProcessor}).
+     * Elements that use {@link #nestedElements} should not need this, as the insertion of the timeout checks is
+     * impossible there, given their rigid nested element schema.
+     */
+    abstract boolean isNestedBlockRepeater();
 
     /**
      * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place.

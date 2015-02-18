@@ -285,6 +285,10 @@ PARSER_END(FMParser)
 TOKEN_MGR_DECLS:
 {
 
+    private static final String PLANNED_DIRECTIVE_HINT
+            = "(If you have seen this directive in use elsewhere, this was a planned directive, "
+                + "so maybe you need to upgrade FreeMarker.)";
+
     /**
      * The noparseTag is set when we enter a block of text that the parser more or less ignores. These are <noparse> and
      * <comment>. This variable tells us what the closing tag should be, and when we hit that, we resume parsing. Note
@@ -618,8 +622,9 @@ TOKEN:
                             + "available, and if it indeed supports camel case. Until that, use all-lowercase.";
                 } else if (!dn.toLowerCase().equals(dn)) {
                     tip = "In FreeMarker 2.3.x, directive names are all-lower-case.";
-                } else if (dn.equals("set")) {
-                    tip = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
+                } else if (dn.equals("set") || dn.equals("var")) {
+                    tip = "Use #assign or #local or #global, depending on the intented scope "
+                          + "(#assign is template-scope). " + PLANNED_DIRECTIVE_HINT;
                 } else if (dn.equals("else_if")) {
                 	tip = "Use #elseif.";
                 } else if (dn.equals("no_escape")) {
@@ -632,6 +637,10 @@ TOKEN:
                 	tip = "You may meant #attempt.";
                 } else if (dn.equals("for") || dn.equals("each") || dn.equals("iterate") || dn.equals("iterator")) {
                     tip = "You may meant #list (http://freemarker.org/docs/ref_directive_list.html).";
+                } else if (dn.equals("item") || dn.equals("sep")) {
+                    tip = PLANNED_DIRECTIVE_HINT;
+                } else if (dn.equals("prefix")) {
+                    tip = "You may meant #import. " + PLANNED_DIRECTIVE_HINT;
                 } else {
                     tip = "Help (latest version): http://freemarker.org/docs/ref_directive_alphaidx.html; "
                             + "you're using FreeMarker " + Configuration.getVersion() + ".";

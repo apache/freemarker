@@ -136,4 +136,8 @@ final class NumericalOutput extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
 }

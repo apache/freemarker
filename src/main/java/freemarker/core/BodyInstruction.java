@@ -135,4 +135,8 @@ final class BodyInstruction extends TemplateElement {
             return bodyParameterNames == null ? Collections.EMPTY_LIST : bodyParameterNames;
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
 }
