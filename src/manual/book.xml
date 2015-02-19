@@ -23135,14 +23135,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   which returns a <literal>DirectiveCallPlace</literal> object
                   when called from a custom directive (i.e., from
                   <literal>TemplateDirectiveModel.execute()</literal>). The
-                  <literal>DirectiveCallPlace</literal> objects lets you query
-                  where the directive was called from (template source name,
-                  line, column). It also lets you associate an arbitrary
-                  object to the directive invocation inside the template,
-                  which can be used for call-place-bound caching (like the
-                  minification of non-dynamic nested content). See
-                  <literal>DirectiveCallPlace</literal> in the Java API
-                  documentation for more.</para>
+                  <literal>DirectiveCallPlace</literal> objects lets you
+                  associate an arbitrary object to the directive invocation
+                  inside the template, which can be used for call-place-bound
+                  caching (like the minification of non-dynamic nested
+                  content). See <literal>DirectiveCallPlace</literal> in the
+                  Java API documentation for more.</para>
                 </listitem>
 
                 <listitem>
