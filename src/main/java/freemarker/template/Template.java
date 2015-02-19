@@ -796,8 +796,6 @@ public class Template extends Configurable {
     /**
      * @return an array of the {@link TemplateElement}s containing the given column and line numbers.
      * @deprecated Should only be used internally, and might will be removed later.
-     * 
-     * @return an array of the elements containing the given column and line numbers.
      */
     public TreePath containingElements(int column, int line) {
         final ArrayList elements = new ArrayList();
