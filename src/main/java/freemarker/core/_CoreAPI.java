@@ -161,8 +161,8 @@ public class _CoreAPI {
         return obj instanceof BoundCallable;
     }
 
-    public static UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
-        return UnboundTemplate.createPlainTextTemplate(sourceName, content, config);
+    public static UnboundTemplate newUnboundTemplate(String content, String sourceName, Configuration config) {
+        return new UnboundTemplate(content, sourceName, config);
     }
     
     /** Used for implementing the deprecated {@link Template} method with similar name. */

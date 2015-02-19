@@ -203,9 +203,9 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        return new Template(_CoreAPI.createPlainTextTemplate(
-                sourceName != null ? sourceName : name,
-                content, config), name, config);
+        return new Template(
+                _CoreAPI.newUnboundTemplate(content, sourceName != null ? sourceName : name, config),
+                name, config);
     }
 
     /**

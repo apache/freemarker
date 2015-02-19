@@ -60,24 +60,15 @@ public final class UnboundTemplate {
     private final Map<String, UnboundCallable> unboundCallables = new HashMap<String, UnboundCallable>(0);
     // Earlier it was a Vector, so I thought the safest is to keep it synchronized:
     private final List<LibraryLoad> imports = Collections.synchronizedList(new ArrayList<LibraryLoad>(0));
-    private TemplateElement rootElement;
+    private final TemplateElement rootElement;
     private String defaultNamespaceURI;
-    private int actualTagSyntax;
+    private final int actualTagSyntax;
     
     private final ArrayList lines = new ArrayList();
     
     private Map<String, String> prefixToNamespaceURIMapping;
     private Map<String, String> namespaceURIToPrefixMapping;
 
-    private UnboundTemplate(String sourceName, Configuration cfg) {
-        this.sourceName = sourceName;
-        
-        NullArgumentException.check(cfg);
-        this.cfg = cfg;
-        
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
-    }
-    
     /**
      * @param reader
      *            Reads the template source code
@@ -93,7 +84,10 @@ public final class UnboundTemplate {
      */
     UnboundTemplate(Reader reader, String sourceName, Configuration cfg, String assumedEncoding)
             throws IOException {
-        this(sourceName, cfg);
+        NullArgumentException.check(cfg);
+        this.cfg = cfg;
+        this.sourceName = sourceName;
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
 
         try {
             if (!(reader instanceof BufferedReader)) {
@@ -128,6 +122,19 @@ public final class UnboundTemplate {
         }
     }
     
+    /**
+     * Creates a plain text (unparsed) template. 
+     */
+    UnboundTemplate(String content, String sourceName, Configuration cfg) {
+        NullArgumentException.check(cfg);
+        this.cfg = cfg;
+        this.sourceName = sourceName;
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
+        
+        rootElement = new TextBlock(content);
+        actualTagSyntax = cfg.getTagSyntax();
+    }
+
     private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         int v = incompatibleImprovements.intValue();
@@ -140,13 +147,6 @@ public final class UnboundTemplate {
         }
     }
     
-    static UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
-        UnboundTemplate unboundTemplate = new UnboundTemplate(sourceName, config);
-        unboundTemplate.rootElement = new TextBlock(content);
-        unboundTemplate.actualTagSyntax = config.getTagSyntax();
-        return unboundTemplate;
-    }
-
     /**
      * Returns a string representing the raw template text in canonical form.
      */
