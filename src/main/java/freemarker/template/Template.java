@@ -58,10 +58,6 @@ public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = UnboundTemplate.DEFAULT_NAMESPACE_PREFIX;
     public static final String NO_NS_PREFIX = UnboundTemplate.NO_NS_PREFIX;
     
-    /** This is only non-null during parsing. It's used internally to make some information available through the
-     *  Template API-s earlier than the parsing was finished. */
-    private transient FMParser parser;
-
     private final UnboundTemplate unboundTemplate;
     private final String name;
     private String encoding;
