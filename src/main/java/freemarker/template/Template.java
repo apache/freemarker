@@ -30,13 +30,13 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
-import freemarker.core.FMParser;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 import freemarker.core.UnboundTemplate;
 import freemarker.core._CoreAPI;
+import freemarker.debug.impl.DebuggerService;
 
 /**
  * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
@@ -162,6 +162,7 @@ public class Template extends Configurable {
         this(_CoreAPI.newUnboundTemplate(
                 reader, sourceName != null ? sourceName : name, toNonNull(cfg), encoding), name, cfg);
         this.encoding = encoding;
+        DebuggerService.registerTemplate(this);
     }
 
     /**
@@ -199,9 +200,11 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        return new Template(
+        Template t = new Template(
                 _CoreAPI.newUnboundTemplate(content, sourceName != null ? sourceName : name, config),
                 name, config);
+        DebuggerService.registerTemplate(t);
+        return t;
     }
 
     /**
