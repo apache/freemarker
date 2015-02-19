@@ -63,18 +63,17 @@ public final class UnboundTemplate {
     
     /** Attributes added via {@code <#ftl attributes=...>}. */
     private LinkedHashMap<String, Object> customAttributes;
-    
-    private Map<String, UnboundCallable> unboundCallables = new HashMap<String, UnboundCallable>();
+    private final Map<String, UnboundCallable> unboundCallables = new HashMap<String, UnboundCallable>(0);
     // Earlier it was a Vector, so I thought the safest is to keep it synchronized:
-    private final List<LibraryLoad> imports = Collections.synchronizedList(new ArrayList<LibraryLoad>());
+    private final List<LibraryLoad> imports = Collections.synchronizedList(new ArrayList<LibraryLoad>(0));
     private TemplateElement rootElement;
     private String defaultNamespaceURI;
     private int actualTagSyntax;
     
     private final ArrayList lines = new ArrayList();
     
-    private Map<String, String> nodePrefixToNamespaceURIMapping = new HashMap<String, String>();
-    private Map<String, String> namespaceURIToPrefixMapping = new HashMap<String, String>();
+    private Map<String, String> prefixToNamespaceURIMapping;
+    private Map<String, String> namespaceURIToPrefixMapping;
 
     private UnboundTemplate(String sourceName, Configuration cfg) {
         this.sourceName = sourceName;
@@ -131,8 +130,10 @@ public final class UnboundTemplate {
             reader.close();
         }
 
-        namespaceURIToPrefixMapping = Collections.unmodifiableMap(namespaceURIToPrefixMapping);
-        nodePrefixToNamespaceURIMapping = Collections.unmodifiableMap(nodePrefixToNamespaceURIMapping);
+        if (prefixToNamespaceURIMapping != null) {
+            prefixToNamespaceURIMapping = Collections.unmodifiableMap(prefixToNamespaceURIMapping);
+            namespaceURIToPrefixMapping = Collections.unmodifiableMap(namespaceURIToPrefixMapping);
+        }
     }
     
     private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
@@ -317,17 +318,25 @@ public final class UnboundTemplate {
             throw new IllegalArgumentException("The prefix: " + prefix
                     + " cannot be registered, it's reserved for special internal use.");
         }
-        if (nodePrefixToNamespaceURIMapping.containsKey(prefix)) {
-            throw new IllegalArgumentException("The prefix: '" + prefix + "' was repeated. This is illegal.");
+        
+        if (prefixToNamespaceURIMapping != null) {
+            if (prefixToNamespaceURIMapping.containsKey(prefix)) {
+                throw new IllegalArgumentException("The prefix: '" + prefix + "' was repeated. This is illegal.");
+            }
+            if (namespaceURIToPrefixMapping.containsKey(nsURI)) {
+                throw new IllegalArgumentException("The namespace URI: " + nsURI
+                        + " cannot be mapped to 2 different prefixes.");
+            }
         }
-        if (namespaceURIToPrefixMapping.containsKey(nsURI)) {
-            throw new IllegalArgumentException("The namespace URI: " + nsURI
-                    + " cannot be mapped to 2 different prefixes.");
-        }
+        
         if (prefix.equals(DEFAULT_NAMESPACE_PREFIX)) {
             this.defaultNamespaceURI = nsURI;
         } else {
-            nodePrefixToNamespaceURIMapping.put(prefix, nsURI);
+            if (prefixToNamespaceURIMapping == null) {
+                prefixToNamespaceURIMapping = new HashMap<String, String>();                
+                namespaceURIToPrefixMapping = new HashMap<String, String>();
+            }
+            prefixToNamespaceURIMapping.put(prefix, nsURI);
             namespaceURIToPrefixMapping.put(nsURI, prefix);
         }
     }
@@ -343,7 +352,9 @@ public final class UnboundTemplate {
         if (prefix.equals("")) {
             return defaultNamespaceURI == null ? "" : defaultNamespaceURI;
         }
-        return nodePrefixToNamespaceURIMapping.get(prefix);
+        
+        final Map<String, String> m = prefixToNamespaceURIMapping;
+        return m != null ? m.get(prefix) : null;
     }
 
     /**
@@ -359,7 +370,9 @@ public final class UnboundTemplate {
         if (nsURI.equals(defaultNamespaceURI)) {
             return "";
         }
-        return namespaceURIToPrefixMapping.get(nsURI);
+        
+        final Map<String, String> m = namespaceURIToPrefixMapping;
+        return m != null ? m.get(nsURI) : null;
     }
 
     /**
