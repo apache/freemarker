@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>FreeMarker-master</name>
+	<name>FreeMarker-2.3-gae</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -29,7 +29,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1416528675344</id>
+			<id>0</id>
 			<name></name>
 			<type>26</type>
 			<matcher>
