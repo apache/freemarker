@@ -53,11 +53,6 @@ import freemarker.template.utility.ObjectFactory;
 public interface DirectiveCallPlace {
 
     /**
-     * The template's name that directly contains the invocation of the directive. See {@link Template#getSourceName()}.
-     */
-    String getTemplateSourceName();
-
-    /**
      * The 1-based column number of the first character of the directive call in the template source code, or -1 if it's
      * not known.
      */
