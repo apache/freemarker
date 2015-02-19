@@ -51,12 +51,6 @@ public final class UnboundTemplate {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
 
-    /**
-     * This is only non-null during parsing. It's used internally to make some information available through the
-     * Template API-s earlier than the parsing was finished.
-     */
-    private transient FMParser parser;
-
     private final String sourceName;
     private final Configuration cfg;
     private final Version templateLanguageVersion;
@@ -108,7 +102,7 @@ public final class UnboundTemplate {
             reader = new LineTableBuilder(reader);
 
             try {
-                parser = new FMParser(this,
+                FMParser parser = new FMParser(this,
                         reader, assumedEncoding,
                         cfg.getStrictSyntaxMode(),
                         cfg.getWhitespaceStripping(),
@@ -120,8 +114,6 @@ public final class UnboundTemplate {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
                 throw exc.toParseException(this);
-            } finally {
-                parser = null;
             }
         } catch (ParseException e) {
             e.setTemplateName(getSourceName());
