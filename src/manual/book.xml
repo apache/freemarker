@@ -8050,10 +8050,10 @@ c</programlisting>
           <literal>object_wrapper</literal>, then you must not forget to set
           the <literal>incompatibleImprovements</literal> property of the
           <literal>ObjectWrapper</literal> itself, in additionally to that of
-          the <literal>Configuration</literal>. (Note that it'ss fine to have
+          the <literal>Configuration</literal>. (Note that it's fine to have
           different <quote>incompatible improvements</quote> for the
           <literal>Configuration</literal> and for the
-          <literal>ObjectWrapper</literal>, only it should be conscious
+          <literal>ObjectWrapper</literal>, only it should be a conscious
           decision.) Depending on how you create/set the
           <literal>ObjectWrapper</literal>, it can be done like this (let's
           assume you want <literal>DefaultObjectWrapper</literal> with
@@ -8074,8 +8074,7 @@ c</programlisting>
             <listitem>
               <para>Or, if you are using the <literal>object_wrapper</literal>
               property (<literal>*.properties</literal> file or
-              <literal>java.util.Properties</literal>
-              object):<literal/></para>
+              <literal>java.util.Properties</literal> object):</para>
 
               <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.21)</programlisting>
             </listitem>
