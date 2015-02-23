@@ -8991,130 +8991,160 @@ TemplateHashModel roundingModeEnums =
           <primary>Log4j2</primary>
         </indexterm>
 
-        <para>Is short, the recommended setup in contemporary application (as
-        of 2015) is using SLF4J API for logging everywhere. To get FreeMarker
-        2.3.x. to use SLF4J, simply add the
-        <literal>org.slf4j:log4j-over-slf4j</literal> dependency to your
-        project, and ensure that <literal>log4j:log4j</literal> isn't present.
-        (Starting from FreeMarker 2.4.x you don't need
-        <literal>log4j-over-slf4j</literal> anymore, though it does no harm
-        either.)</para>
+        <section>
+          <title>Logging library selection</title>
 
-        <para>Read on if you are curious about the details, or if you can't
-        use SLF4J...</para>
+          <para>Is short, the recommended setup in contemporary application
+          (as of 2015) is using SLF4J API for logging everywhere. To get
+          FreeMarker 2.3.x. to use SLF4J, simply add the
+          <literal>org.slf4j:log4j-over-slf4j</literal> dependency to your
+          project, and ensure that <literal>log4j:log4j</literal> isn't
+          present. (Starting from FreeMarker 2.4.x you don't need
+          <literal>log4j-over-slf4j</literal> anymore, though it does no harm
+          either.)</para>
 
-        <para>FreeMarker integrates with the following logging libraries:
-        <link xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
-        xlink:href="http://commons.apache.org/logging/">Apache Commons
-        Logging</link>, <link
-        xlink:href="http://jakarta.apache.org/log4j">Log4J</link> 1.x, <link
-        xlink:href="http://jakarta.apache.org/avalon/logkit">Avalon
-        LogKit</link>, and <link
-        xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>.
-        By default, FreeMarker will look for the these logging libraries in
-        the following order, and will automatically use the first one it finds
-        (in 2.3.x): <remark>[2.4 - un-remark this] SLF4J, Apache Commons
-        Logging, </remark>Log4J (will use SLF4J instead if it's a properly
-        installed <literal>log4j-over-slf4j</literal>, since 2.3.22), Apache
-        Avalon LogKit, <literal>java.util.logging</literal>. As you can see,
-        Log4j has the highest priority. The presence of Log4j is simply
-        detected from the presence of the
-        <literal>org.apache.log4j.Logger</literal> class, which means that
-        Log4j redirections like <literal>log4j-over-slf4j</literal> or
-        <literal>log4j-1.2-api</literal> will also get the highest
-        priority.</para>
+          <para>Read on if you are curious about the details, or if you can't
+          use SLF4J...</para>
 
-        <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging aren't
-        searched automatically due to backward compatibility constraints. But
-        if you have <literal>org.slf4j:log4j-over-slf4j</literal> properly
-        installed (means, you have no real Log4j in your class path, and SLF4J
-        has a backing implementation like <literal>logback-classic</literal>),
-        then FreeMarker will use the SLF4J API directly instead of the Log4j
-        API (since FreeMarker 2.3.22).</para>
+          <para>FreeMarker integrates with the following logging libraries:
+          <link xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
+          xlink:href="http://commons.apache.org/logging/">Apache Commons
+          Logging</link>, <link
+          xlink:href="http://jakarta.apache.org/log4j">Log4J</link> 1.x, <link
+          xlink:href="http://jakarta.apache.org/avalon/logkit">Avalon
+          LogKit</link>, and <link
+          xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>.
+          By default, FreeMarker will look for the these logging libraries in
+          the following order, and will automatically use the first one it
+          finds (in 2.3.x): <remark>[2.4 - un-remark this] SLF4J, Apache
+          Commons Logging, </remark>Log4J (will use SLF4J instead if it's a
+          properly installed <literal>log4j-over-slf4j</literal>, since
+          2.3.22), Apache Avalon LogKit, <literal>java.util.logging</literal>.
+          As you can see, Log4j has the highest priority. The presence of
+          Log4j is simply detected from the presence of the
+          <literal>org.apache.log4j.Logger</literal> class, which means that
+          Log4j redirections like <literal>log4j-over-slf4j</literal> or
+          <literal>log4j-1.2-api</literal> will also get the highest
+          priority.</para>
 
-        <para>Note that a similar trick can be applied for logging into
-        Log4j2: If <literal>org.apache.logging.log4j:log4j-1.2-api</literal>
-        is present, FreeMarker 2.3.x will pick that as it looks like Log4j,
-        but all the messages will actually go to Log4j2.</para>
+          <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging
+          aren't searched automatically due to backward compatibility
+          constraints. But if you have
+          <literal>org.slf4j:log4j-over-slf4j</literal> properly installed
+          (means, you have no real Log4j in your class path, and SLF4J has a
+          backing implementation like <literal>logback-classic</literal>),
+          then FreeMarker will use the SLF4J API directly instead of the Log4j
+          API (since FreeMarker 2.3.22).</para>
 
-        <para>If the auto detection doesn't give you the result that you want,
-        you can set the <literal>org.freemarker.loggerLibrary</literal> system
-        property to select a logger library explicitly (since 2.3.22),
-        like:</para>
+          <para>Note that a similar trick can be applied for logging into
+          Log4j2: If <literal>org.apache.logging.log4j:log4j-1.2-api</literal>
+          is present, FreeMarker 2.3.x will pick that as it looks like Log4j,
+          but all the messages will actually go to Log4j2.</para>
 
-        <programlisting role="unspecified">java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
+          <para>If the auto detection doesn't give you the result that you
+          want, you can set the
+          <literal>org.freemarker.loggerLibrary</literal> system property to
+          select a logger library explicitly (since 2.3.22), like:</para>
 
-        <para>The supported system property values are:
-        <literal>SLF4J</literal>, <literal>CommonsLogging</literal>,
-        <literal>JUL</literal> (for <literal>java.util.logging</literal>),
-        <literal>Avalon</literal>, <literal>auto</literal> (the default
-        behavior), <literal>none</literal> (disables logging).</para>
+          <programlisting role="unspecified">java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
 
-        <para>Note that for reliable operation, the system property should be
-        set when the JVM starts (like above), not later from Java code.</para>
+          <para>The supported system property values are:
+          <literal>SLF4J</literal>, <literal>CommonsLogging</literal>,
+          <literal>JUL</literal> (for <literal>java.util.logging</literal>),
+          <literal>Avalon</literal>, <literal>auto</literal> (the default
+          behavior), <literal>none</literal> (disables logging).</para>
 
-        <para>Using SLF4J is recommended, as it works best with FreeMarker,
-        and also because it will be the highest priority auto detected logger
-        starting from FreeMarker 2.4.</para>
+          <para>Note that for reliable operation, the system property should
+          be set when the JVM starts (like above), not later from Java
+          code.</para>
 
-        <para>All log messages produced by FreeMarker are logged with a logger
-        category that starts with <literal>freemarker.</literal>. The
-        currently used logger categories are:</para>
+          <para>Using SLF4J is recommended, as it works best with FreeMarker,
+          and also because it will be the highest priority auto detected
+          logger starting from FreeMarker 2.4.</para>
+        </section>
 
-        <informaltable border="1">
-          <thead>
-            <tr>
-              <th>Log category name</th>
+        <section>
+          <title>Logging categories</title>
 
-              <th>Purpose</th>
-            </tr>
-          </thead>
+          <para>All log messages produced by FreeMarker are logged with a
+          logger category that starts with <literal>freemarker.</literal>. The
+          currently used logger categories are:</para>
 
-          <tbody>
-            <tr>
-              <td><literal>freemarker.beans</literal></td>
+          <informaltable border="1">
+            <thead>
+              <tr>
+                <th>Log category name</th>
 
-              <td>Logs messages of the Beans wrapper module.</td>
-            </tr>
+                <th>Purpose</th>
+              </tr>
+            </thead>
 
-            <tr>
-              <td><literal>freemarker.cache</literal></td>
+            <tbody>
+              <tr>
+                <td><literal>freemarker.beans</literal></td>
 
-              <td>Logs messages related to template loading and caching.</td>
-            </tr>
+                <td>Logs messages of the Beans wrapper module.</td>
+              </tr>
 
-            <tr>
-              <td><literal>freemarker.runtime</literal></td>
+              <tr>
+                <td><literal>freemarker.cache</literal></td>
 
-              <td>Logs template exceptions thrown during template
-              processing.</td>
-            </tr>
+                <td>Logs messages related to template loading and
+                caching.</td>
+              </tr>
 
-            <tr>
-              <td><literal>freemarker.runtime.attempt</literal></td>
+              <tr>
+                <td><literal>freemarker.runtime</literal></td>
 
-              <td>Logs template exceptions thrown during template processing
-              and caught by
-              <literal>attempt</literal>/<literal>recover</literal>
-              directives, with DEBUG severity. Note that such exceptions will
-              be still also logged with their normal logger (like
-              <literal>freemarker.runtime</literal>).</td>
-            </tr>
+                <td>Logs messages related to template execution that doesn't
+                fit any of the more specific categories. Most importantly, it
+                logs template exceptions thrown during template processing
+                (however that should be disabled in modern application; see
+                later).</td>
+              </tr>
 
-            <tr>
-              <td><literal>freemarker.servlet</literal></td>
+              <tr>
+                <td><literal>freemarker.runtime.attempt</literal></td>
 
-              <td>Logs messages of the <literal>FreemarkerServlet</literal>
-              class.</td>
-            </tr>
+                <td>Logs template exceptions thrown during template processing
+                and caught by
+                <literal>attempt</literal>/<literal>recover</literal>
+                directives, with DEBUG severity. Note that such exceptions
+                will be still also logged with their normal logger (like
+                <literal>freemarker.runtime</literal>).</td>
+              </tr>
 
-            <tr>
-              <td><literal>freemarker.jsp</literal></td>
+              <tr>
+                <td><literal>freemarker.servlet</literal></td>
 
-              <td>Logs messages of the FreeMarker JSP support.</td>
-            </tr>
-          </tbody>
-        </informaltable>
+                <td>Logs messages of the <literal>FreemarkerServlet</literal>
+                class.</td>
+              </tr>
+
+              <tr>
+                <td><literal>freemarker.jsp</literal></td>
+
+                <td>Logs messages of the FreeMarker JSP support.</td>
+              </tr>
+            </tbody>
+          </informaltable>
+
+          <para>One quirk relating this is that FreeMarker will log exceptions
+          during template execution under the
+          <literal>freemarker.runtime</literal> category even if the exception
+          continues propagating and so eventually will be thrown by
+          <literal>Template.process</literal> or
+          <literal>Environment.process</literal> anyway. (Those are the API
+          calls with which the template was invoked from the application or
+          the application framework.) Well behaving applications log the
+          exceptions thrown at them, or rarely, handle them and deliberately
+          don't want to log them. But as FreeMarker has already logged that
+          exception, you will end up one more log entry than expected. To fix
+          that (since 2.3.22), set the
+          <literal>log_template_exceptions</literal>
+          (<literal>Configurable.setLogTemplateExceptions(boolean)</literal>)
+          setting to <literal>false</literal>.</para>
+        </section>
       </section>
 
       <section xml:id="pgui_misc_servlet">
