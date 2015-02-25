@@ -1,0 +1,19 @@
+This is the (draft) of the 2.4.0 change log so far. It's not in the Manual yet, as merging in XDocBook XML
+changes from the 2.3 branch would be rather difficult.
+
+- [NBC] Removed deprecated:
+  Template#Template(String name, TemplateElement root, Configuration cfg) // package visible
+- [NBC] Removed TemplateObject.getTemplate()
+- [NBC] When resolving  arithmetic expressions and comparisons on parsing time (happens when only literal operands
+  are involved), Template.getArithmeticEngine() isn't used any more. Configuration.getArithmeticEngine() is
+  used instead.
+- [NBC] FMParser constructors aren't public any more (and were changed).
+- Added Environment.getCurrentTemplate()
+- There are no separate org.freemarker:freemarker-gae and org.freemarker:freemarker artifacts anymore.
+  There's only org.freemarker:freemarker, which is backward compatible.
+- Custom attributes now keep the order of adding them
+- [NBC] Removed command-line tools (main methods in a library, often classified as CWE-489 "Leftover Debug Code"):
+  - freemarker.core.CommandLine (jar main-class) class.
+  - freemarker.ext.dom.Transform class
+  - freemarker.template.utility.ToCanonical class
+  - freemarker.ext.jdom.NodeListModel.main() method
