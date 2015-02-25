@@ -1202,6 +1202,8 @@ implements
      * document from the standard input, passes it to the template as variable
      * <tt>document</tt> and writes the result of template processing to
      * standard output.
+     * 
+     * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
      */
     public static void main(String[] args)
     throws
