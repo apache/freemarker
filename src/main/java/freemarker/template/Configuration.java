@@ -232,6 +232,24 @@ public class Configuration extends Configurable implements Cloneable {
         }
     }
     
+    private static final String FM_24_DETECTION_CLASS_NAME = "freemarker.core._2_4_OrLaterMarker";
+    private static final boolean FM_24_DETECTED;
+    static {
+        boolean fm24detected;
+        try {
+            Class.forName(FM_24_DETECTION_CLASS_NAME);
+            fm24detected = true;
+        } catch (ClassNotFoundException e) {
+            fm24detected = false;
+        } catch (LinkageError e) {
+            fm24detected = true;
+        } catch (Throwable e) {
+            // Unexpected. We assume that there's no clash.
+            fm24detected = false;
+        }
+        FM_24_DETECTED = fm24detected;
+    }
+    
     private final static Object defaultConfigLock = new Object();
     private static Configuration defaultConfig;
 
@@ -478,6 +496,11 @@ public class Configuration extends Configurable implements Cloneable {
     public Configuration(Version incompatibleImprovements) {
         super(incompatibleImprovements);
         
+        // We postpone this until here (rather that doing this in static initializer) for two reason:
+        // - Class initialization errors are often not reported very well
+        // - This way we avoid the error if FM isn't actually used
+        checkFreeMarkerVersionClash();
+        
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
@@ -485,6 +508,14 @@ public class Configuration extends Configurable implements Cloneable {
         loadBuiltInSharedVariables();
     }
 
+    private static void checkFreeMarkerVersionClash() {
+        if (FM_24_DETECTED) {
+            throw new RuntimeException("Clashing FreeMarker versions (" + VERSION + " and some post-2.3.x) detected: "
+                    + "found post-2.3.x class " + FM_24_DETECTION_CLASS_NAME + ". You probably have two different "
+                    + "freemarker.jar-s in the classpath.");
+        }
+    }
+    
     private void createTemplateCache() {
         cache = new TemplateCache(
                 getDefaultTemplateLoader(),
