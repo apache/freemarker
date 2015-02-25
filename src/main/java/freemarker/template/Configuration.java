@@ -518,7 +518,7 @@ public class Configuration extends Configurable implements Cloneable {
                     + "freemarker.jar-s in the classpath.");
         }
     }
-
+    
     private void createTemplateCache() {
         cache = new TemplateCache(
                 getDefaultTemplateLoader(),
