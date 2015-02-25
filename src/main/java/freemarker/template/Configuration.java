@@ -235,6 +235,24 @@ public class Configuration extends Configurable implements Cloneable {
         }
     }
     
+    private static final String FM_23_DETECTION_CLASS_NAME = "freemarker.core.CommandLine";
+    private static final boolean FM_23_DETECTED;
+    static {
+        boolean fm23detected;
+        try {
+            Class.forName(FM_23_DETECTION_CLASS_NAME);
+            fm23detected = true;
+        } catch (ClassNotFoundException e) {
+            fm23detected = false;
+        } catch (LinkageError e) {
+            fm23detected = true;
+        } catch (Throwable e) {
+            // Unexpected. We assume that there's no clash.
+            fm23detected = false;
+        }
+        FM_23_DETECTED = fm23detected;
+    }
+    
     private final static Object defaultConfigLock = new Object();
     private static Configuration defaultConfig;
 
@@ -481,11 +499,24 @@ public class Configuration extends Configurable implements Cloneable {
     public Configuration(Version incompatibleImprovements) {
         super(incompatibleImprovements);
         
+        // We postpone this until here (rather that doing this in static initializer) for two reason:
+        // - Class initialization errors are often not reported very well
+        // - This way we avoid the error if FM isn't actually used
+        checkFreeMarkerVersionClash();
+        
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
         createTemplateCache();
         loadBuiltInSharedVariables();
+    }
+
+    private static void checkFreeMarkerVersionClash() {
+        if (FM_23_DETECTED) {
+            throw new RuntimeException("Clashing FreeMarker versions (" + VERSION + " and some pre-2.4) detected: "
+                    + "found pre-2.4 class " + FM_23_DETECTION_CLASS_NAME + ". You probably have two different "
+                    + "freemarker.jar-s in the classpath.");
+        }
     }
 
     private void createTemplateCache() {
