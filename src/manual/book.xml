@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.22 Release Candidate 2</subtitle>
+  <subtitle>For FreeMarker 2.3.22</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -6776,37 +6776,69 @@ public class RepeatDirective implements TemplateDirectiveModel {
             </listitem>
 
             <listitem xml:id="topic.defaultObjectWrapperIcI">
-              <para>It has a <literal>incompatibleImprovements</literal>
-              property, that's highly recommended to set to 2.3.22 or higher
-              (see the API documentation for the effects). Here's how:</para>
+              <para><literal>DefaultObjectWrapper</literal> has an
+              <literal>incompatibleImprovements</literal> property, that's
+              highly recommended to set to 2.3.22 or higher (see the <link
+              xlink:href="http://freemarker.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API
+              documentation</link> for the effects). How to set it:</para>
 
               <itemizedlist>
                 <listitem>
                   <para>If you have set the
-                  <literal>incompatible_improvements</literal> setting of the
-                  <literal>Configuration</literal> to 2.3.22 or higher, and
-                  you don't set the <literal>object_wrapper</literal> setting
-                  (so it remains on its default), then you have to do nothing,
+                  <literal>incompatible_improvements</literal> setting
+                  <emphasis>of the <literal>Configuration</literal></emphasis>
+                  to 2.3.22 or higher, and you didn't set the
+                  <literal>object_wrapper</literal> setting (so it had
+                  remained on its default value), then you have to do nothing,
                   as it already uses a <literal>DefaultObjectWrapper</literal>
-                  singleton with the matching
-                  <literal>incompatibleImprovements</literal>.</para>
+                  singleton with the equivalent
+                  <literal>incompatibleImprovements</literal> property
+                  value.</para>
                 </listitem>
 
-                <listitem>
-                  <para>Otherwise, if you configuring FreeMarker with a
-                  <literal>.properties</literal> file (or from a
-                  <literal>java.util.Properties</literal> constructed
-                  otherwise), or with <literal>FreemarkerServlet</literal>
-                  init-params, set <literal>object_wrapper</literal> to
-                  <literal>DefaultObjectWrapper(2.3.22)</literal> (literally,
-                  that's the string value).</para>
-                </listitem>
+                <listitem xml:id="topic.setDefaultObjectWrapperIcIIndividually">
+                  <para>Otherwise you have to set the
+                  <literal>incompatibleImprovements</literal> independently of
+                  the <literal>Configuration</literal>. Depending on how you
+                  create/set the <literal>ObjectWrapper</literal>, it can be
+                  done like this (let's assume you want
+                  <literal>incompatibleImprovements</literal> 2.3.22):</para>
 
-                <listitem>
-                  <para>Otherwise, if you are configuring FreeMarker through
-                  its Java API:</para>
+                  <itemizedlist>
+                    <listitem>
+                      <para>If you are using the builder API:</para>
 
-                  <programlisting role="unspecified">cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build());</programlisting>
+                      <programlisting role="unspecified">... = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build()</programlisting>
+                    </listitem>
+
+                    <listitem>
+                      <para>Or, if you are using the constructor:</para>
+
+                      <programlisting role="unspecified">... = new DefaultObjectWrapper(Configuration.VERSION_2_3_22)</programlisting>
+                    </listitem>
+
+                    <listitem>
+                      <para>Or, if you are using the
+                      <literal>object_wrapper</literal> property
+                      (<literal>*.properties</literal> file or
+                      <literal>java.util.Properties</literal> object):</para>
+
+                      <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.21)</programlisting>
+                    </listitem>
+
+                    <listitem>
+                      <para>Or, if you are configuring the
+                      <literal>object_wrapper</literal> through a
+                      <literal>FreemarkerServlet</literal> with an
+                      <literal>init-param</literal> in
+                      <literal>web.xml</literal>:</para>
+
+                      <programlisting role="unspecified">&lt;init-param&gt;
+    &lt;param-name&gt;object_wrapper&lt;/param-name&gt;
+    &lt;param-value&gt;DefaultObjectWrapper(2.3.21)&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+                    </listitem>
+                  </itemizedlist>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -8001,15 +8033,17 @@ c</programlisting>
           <itemizedlist>
             <listitem>
               <para>Create the
-              <literal>freemarker.template.Configuration</literal> object like
-              <literal>new
-              Configuration(Configuration.VERSION_2_3_22)</literal></para>
+              <literal>freemarker.template.Configuration</literal> object
+              like:</para>
+
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_22)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
-              where you initialize its other settings like
-              <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22)</literal></para>
+              where you initialize its other settings like:</para>
+
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22)</programlisting>
             </listitem>
 
             <listitem>
@@ -8040,7 +8074,7 @@ c</programlisting>
           <literal>BeansWrapper</literal> and its subclasses (most
           importantly, <literal>DefaultObjectWrapper</literal>) has its own
           independent <literal>incompatibleImprovements</literal> property,
-          and some fixes/improvements are activated by that, no by
+          and some fixes/improvements are activated by that, not by
           <literal>Configuration</literal>'s similar setting. You don't have
           to be aware of this complication if you aren't setting the
           <literal>object_wrapper</literal> configuration setting anywhere,
@@ -8054,44 +8088,12 @@ c</programlisting>
           different <quote>incompatible improvements</quote> for the
           <literal>Configuration</literal> and for the
           <literal>ObjectWrapper</literal>, only it should be a conscious
-          decision.) Depending on how you create/set the
-          <literal>ObjectWrapper</literal>, it can be done like this (let's
-          assume you want <literal>DefaultObjectWrapper</literal> with
-          <literal>incompatibleImprovements</literal> 2.3.22):</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>If you are using a builder to create the
-              <literal>ObjectWrapper</literal>: <literal>new
-              DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build()</literal></para>
-            </listitem>
-
-            <listitem>
-              <para>Or, if you are using a constructor: <literal>new
-              DefaultObjectWrapper(Configuration.VERSION_2_3_22)</literal></para>
-            </listitem>
-
-            <listitem>
-              <para>Or, if you are using the <literal>object_wrapper</literal>
-              property (<literal>*.properties</literal> file or
-              <literal>java.util.Properties</literal> object):</para>
-
-              <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.21)</programlisting>
-            </listitem>
-
-            <listitem>
-              <para>Or, if you are configuring the
-              <literal>object_wrapper</literal> through a
-              <literal>FreemarkerServlet</literal> with an
-              <literal>init-param</literal> in
-              <literal>web.xml</literal>:</para>
-
-              <programlisting role="unspecified">&lt;init-param&gt;
-    &lt;param-name&gt;object_wrapper&lt;/param-name&gt;
-    &lt;param-value&gt;DefaultObjectWrapper(2.3.21)&lt;/param-value&gt;
-&lt;/init-param&gt;</programlisting>
-            </listitem>
-          </itemizedlist>
+          decision.) <link
+          linkend="topic.setDefaultObjectWrapperIcIIndividually">See here how
+          to set it</link> in the case of
+          <literal>DefaultObjectWrapper</literal> (for
+          <literal>BeansWrapper</literal> it's the same, only with different
+          class name of course).</para>
         </section>
       </section>
     </chapter>
@@ -22484,20 +22486,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_22">
-        <title>2.3.22 Release Candidate 2</title>
+        <title>2.3.22</title>
 
-        <para>Date of release: 2015-03-01 (planned for the final
-        release)</para>
-
-        <para>To find changes since RC01, search for <quote>since
-        RC02</quote>!</para>
+        <para>Date of release: 2015-03-01</para>
 
         <para>Note that since 2.3.22 is designed to be fully backward
         compatible with the previous 2.3.x releases, <emphasis>some of the
         improvements and fixes described below are only activated when you
         specifically ask for 2.3.22 <quote>incompatible
-        improvements</quote></emphasis>, because they could, with very small
-        chance, break existing applications. See <link
+        improvements</quote></emphasis> (it's always clearly indicated),
+        because they could, with very small chance, break existing
+        applications. For actively maintained applications it's probably
+        better to allow them. See <link
         linkend="pgui_config_incompatible_improvements_how_to_set">how to set
         <quote>incomplatible improvements</quote> here</link>.</para>
 
@@ -22514,9 +22514,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>,
               if the value itself supports this extra feature. This meant to
               be used rarely, when you need to call a Java method of an
-              object, but the simplistic view of the value that FreeMarker
-              exposes to the templates hides that, and there's no equivalent
-              built-in either. For example, when you put a
+              object, but the by-design simplistic view of the value that
+              FreeMarker exposes to the templates hides that, and there's no
+              equivalent built-in either. For example, when you put a
               <literal>Map</literal> into the data-model (and you are using
               the default object wrapper), <literal>myMap.myMethod()</literal>
               in a template basically translates to <literal>((Method)
@@ -22525,9 +22525,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>myMap?api.myMethod()</literal> instead, that means
               <literal>myMap.myMethod()</literal> in Java.</para>
 
-              <para><emphasis>You should avoid using <literal>api</literal>,
-              and rely on the capabilities of the FTL types and the related
-              built-ins as far as possible.</emphasis></para>
+              <para><emphasis>If you can, rely on the capabilities of the FTL
+              types and the related built-ins as far as possible. Using
+              <literal>?api</literal> is only the last
+              resort.</emphasis></para>
 
               <para>Using <literal>?api</literal> also happens to offer a
               workaround for the lack of non-<literal>String</literal>
@@ -22546,18 +22547,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Identifiers (like <literal>someVariable</literal>) can now
               contain minus (<literal>-</literal>), dot
               (<literal>.</literal>), and colon (<literal>:</literal>) at any
-              position, but <emphasis>must be escaped with a preceding
-              backslash</emphasis> (<literal>\</literal>), or else they would
-              be interpreted as operators. For example, to read the variable
-              whose name is <quote>data-id</quote>, the expression is
-              <literal>data\-id</literal>, as <literal>data-id</literal> would
-              be interpreted as <quote>data minus id</quote>. This also works
-              for named macro parameters, which is useful when you want to
-              accept arbitrary HTML attributes in a catch-all parameter, like
-              in <literal>&lt;@box class="someCssClass" data\-id=product.id
-              /&gt;</literal>. (When you enumerate the catch-all hash inside
-              the macro, the key string you get is just
-              <literal>"data-id"</literal> of course.)</para>
+              position, but those characters <emphasis>must be escaped with a
+              preceding backslash</emphasis> (<literal>\</literal>), or else
+              they would be interpreted as operators. For example, to read the
+              variable whose name is <quote>data-id</quote>, the correct
+              expression is <literal>data\-id</literal>, as
+              <literal>data-id</literal> would be interpreted as <quote>data
+              minus id</quote>. This also works for named macro parameters,
+              which is useful when you want to accept arbitrary HTML
+              attributes in a catch-all parameter, like in <literal>&lt;@box
+              class="someCssClass" data\-id=product.id /&gt;</literal>. (When
+              you enumerate the catch-all parameter names inside the macro,
+              the key string you get is <literal>"data-id"</literal> without
+              <literal>\</literal> of course.)</para>
             </listitem>
 
             <listitem>
@@ -22572,8 +22574,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>"aa"</literal>, <literal>"ab"</literal>, etc. This is
               the same logic that you can see in column labels in spreadsheet
               applications (like Excel or Calc). <link
-              linkend="ref_builtin_lower_abc">More details...</link> (since
-              RC02)</para>
+              linkend="ref_builtin_lower_abc">More details...</link></para>
             </listitem>
 
             <listitem>
@@ -22582,7 +22583,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>"foo.bar.txt"?keep_before_last</literal> returns
               <literal>"foo.bar"</literal>,
               <literal>"foo.bar.txt"?keep_after_last</literal> returns
-              <literal>"txt"</literal> (since RC02).</para>
+              <literal>"txt"</literal>. (These work like
+              <literal>?keep_before</literal> and
+              <literal>?keep_before</literal>, but those look for the first
+              occurrence of the separator.)</para>
             </listitem>
 
             <listitem>
@@ -22622,14 +22626,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>The <literal>#setting</literal> directive gives more
                   helpful error message when the setting name is not
-                  recognized, and lists the allowed setting names when
-                  appropriate (since RC02).</para>
+                  recognized, and lists the allowed setting names or a
+                  correction suggestion.</para>
                 </listitem>
 
                 <listitem>
-                  <para>When a bad special variable
-                  (<literal>.<replaceable>name</replaceable></literal>) name
-                  is encountered, the list of available names is shown in the
+                  <para>When a bad special variable name
+                  (<literal>.<replaceable>name</replaceable></literal>) is
+                  encountered, the list of available names is shown in the
                   error message.</para>
                 </listitem>
 
@@ -22854,13 +22858,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>MetaInfTldSources</literal> and/or
                   <literal>ClasspathTlds</literal>
                   <literal>FreemarkerServlet</literal> init-params (see the
-                  Java API documentation of
-                  <literal>FreemarkerServlet</literal> for the description of
-                  these). For example, if you run your application from
-                  Eclipse with an embedded Servlet container, and thus the tag
-                  library jar-s aren't on the standard locations but are in
-                  the classpath like any other dependencies, now you can just
-                  write:</para>
+                  <link
+                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
+                  API documentation of
+                  <literal>FreemarkerServlet</literal></link> for the
+                  description of these). For example, if you run your
+                  application from Eclipse with an embedded Servlet container,
+                  and thus the tag library jar-s aren't on the standard
+                  locations but are in the classpath like any other
+                  dependencies, now you can just write:</para>
 
                   <programlisting role="unspecified">&lt;init-param&gt;
   &lt;param-name&gt;MetaInfTldSources&lt;/param-name&gt;
@@ -22880,8 +22886,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>org.freemarker.jsp.classpathTlds</literal>,
                   respectively. Thus one can adjust these in the Eclipse run
                   configuration without modifying the
-                  <literal>web.xml</literal>. (See the Java API documentation
-                  of <literal>FreemarkerServlet</literal> for more.)</para>
+                  <literal>web.xml</literal>. (See the <link
+                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
+                  API documentation of
+                  <literal>FreemarkerServlet</literal></link> for
+                  more.)</para>
                 </listitem>
 
                 <listitem>
@@ -22906,7 +22915,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Added new servlet init-param,
                   <literal>BufferSize</literal>. This sets the buffer size via
                   <literal>HTTPServletResponse.setBufferSize()</literal> if
-                  the response state still allows that.</para>
+                  the response state still allows that, ignores it
+                  otherwise.</para>
                 </listitem>
 
                 <listitem>
@@ -22919,22 +22929,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   initializes <literal>FreemarkerSerlvet</literal>, and thus
                   will work even if <literal>freemarker.jar</literal> is not
                   local to the web application. <literal>class://</literal>
-                  had the problem that it uses the defining class loader of
+                  has the problem that it uses the defining class loader of
                   <literal>FreemarkerSerlvet</literal> itself (or of its
                   subclass).</para>
                 </listitem>
 
                 <listitem>
                   <para>If <literal>incompatible_improvements</literal> is set
-                  to 2.3.22, the <literal>TemplatePath</literal> servlet
-                  init-param supports specifying multiple comma separated
-                  paths inside
+                  to 2.3.22 (or higher), the <literal>TemplatePath</literal>
+                  servlet init-param supports specifying multiple comma
+                  separated paths inside
                   <literal>[<replaceable>...</replaceable>]</literal>, like
                   <literal>&lt;param-value&gt;[ WEB-INF/templates,
                   classpath:com/example/myapp/templates
                   ]&lt;/param-value&gt;</literal>. This internally creates a
-                  <literal>freemarker.cache.MultiTemplateLoader</literal>.
-                  (Since RC02.)</para>
+                  <literal>freemarker.cache.MultiTemplateLoader</literal>.</para>
                 </listitem>
 
                 <listitem>
@@ -22975,7 +22984,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Bug fixed, only active with
                   <literal>incompatible_improvements</literal> set to 2.3.22
-                  or higher: Some kind of values, when put into the JSP
+                  (or higher): Some kind of values, when put into the JSP
                   <emphasis>page</emphasis> scope (via
                   <literal>#global</literal> or via the JSP
                   <literal>PageContext</literal> API) and later read back with
@@ -23060,7 +23069,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   puts a TLD directly under <literal>WEB-INF</literal>, he
                   meant that to be used in that particular web application,
                   rather than the TLD-s coming from the dependency jars which
-                  are shared by multiple web applications.</para>
+                  are often shared by multiple web applications.</para>
                 </listitem>
 
                 <listitem>
@@ -23122,8 +23131,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   -Dorg.freemarker.loggerLibrary=SLF4J</literal>. This option
                   deprecates
                   <literal>Logger.selectLoggerLibrary(int)</literal> as that
-                  was inherently unreliable. The system property has
-                  precedence over
+                  was inherently unreliable (because you usually can't control
+                  class initialization order very well). The system property
+                  has precedence over
                   <literal>Logger.selectLoggerLibrary</literal>.</para>
                 </listitem>
 
@@ -23192,11 +23202,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (<literal>Configuration.setTemplateLookupStrategy(TemplateLookupStrategy)</literal>).
                   This allows customizing what
                   <literal>TemplateLoader</literal>-level names will be tried
-                  when a template is requested. With this you can define a
-                  custom localized lookup sequence instead of the default
-                  (which looks like: <literal>foo_de_LU_MAC.ftl,
-                  foo_de_LU.ftl, foo_de.ftl,</literal><literal>
-                  foo.ftl</literal>).</para>
+                  when a template is requested. With this you can, for
+                  example, define a custom localized lookup sequence instead
+                  of the default (which looks like:
+                  <literal>foo_de_LU_MAC.ftl, foo_de_LU.ftl,
+                  foo_de.ftl,</literal><literal> foo.ftl</literal>).</para>
                 </listitem>
 
                 <listitem>
@@ -23240,8 +23250,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   legacy glitches (bugs), mostly related to the interpretation
                   of <literal>..</literal> after special steps like
                   <literal>.</literal> or <literal>*</literal>. See the full
-                  list of differences in the Java API documentation of
-                  <literal>TemplateNameFormat.DEFAULT_2_4_0</literal>.</para>
+                  list of differences in the <link
+                  xlink:href="http://freemarker.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0">Java
+                  API documentation of
+                  <literal>TemplateNameFormat.DEFAULT_2_4_0</literal></link>.</para>
                 </listitem>
 
                 <listitem>
@@ -23307,16 +23319,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   than its <literal>name</literal>. You should also use the
                   <literal>sourceName</literal> in
                   <literal>registerTemplateSpi</literal> and such, not the
-                  <literal>name</literal> (since RC02).</para>
-                </listitem>
-
-                <listitem>
-                  <para>Fixed some bugs in 2.3.22-rc01, where still
-                  <literal>name</literal> was used instead of
-                  <literal>sourceName</literal>, and where assumptions were
-                  made about the template name format instead of using the
-                  <literal>TemplateNameFormat</literal> setting (since
-                  RC02).</para>
+                  <literal>name</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23368,7 +23371,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <literal>incompatible_improvements</literal> and has
                       always used
                       <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>. This
-                      fix only has effects when
+                      fix only matters when
                       <literal>incompatible_improvements</literal> is exactly
                       2.3.21, as that's when the default object wrapper was
                       changed from
@@ -23390,8 +23393,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Bug fixed: Changing the value of the
                   <literal>localized_lookup</literal> setting now empties the
-                  template cache, so that old lookup results won't be
-                  reused.</para>
+                  template cache, so that old lookup results won't be reused.
+                  (This of course only matters if you change this setting
+                  under an already running service, which is very
+                  unlikely.)</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23454,7 +23459,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Marked some historically public but otherwise internal
                   API-s as deprecated, so that the disclaimer is more apparent
-                  in IDE-s (since RC02).</para>
+                  in IDE-s.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
