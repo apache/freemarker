@@ -41,5 +41,5 @@ relinquished the copyright in behalf of Visigoth Software Society.
 
 With FreeMarker 2.3.21 the license has changed to Apache License,
 Version 2.0, and the owner has changed from Visigoth Software Society
-to three of the FreeMarker 2.X developers, Attila Szegedi, Daniel
+to three of the FreeMarker 2.x developers, Attila Szegedi, Daniel
 Dekany, and Jonathan Revusky.
