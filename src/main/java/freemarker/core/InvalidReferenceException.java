@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.template.TemplateException;
 
 /**
@@ -109,7 +108,7 @@ public class InvalidReferenceException extends TemplateException {
                 } else if (blamed instanceof DynamicKeyName) {
                     errDescBuilder.tips(new Object[] { TIP_LAST_STEP_SQUARE_BRACKET, TIP });
                 } else if (blamed instanceof Identifier
-                        && ((Identifier) blamed).getName().equals(FreemarkerServlet.KEY_JSP_TAGLIBS)) {
+                        && ((Identifier) blamed).getName().equals("JspTaglibs")) {
                     errDescBuilder.tips(new Object[] { TIP_JSP_TAGLIBS, TIP });
                 } else {
                     errDescBuilder.tip(TIP);
