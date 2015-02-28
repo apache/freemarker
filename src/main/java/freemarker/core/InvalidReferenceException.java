@@ -48,8 +48,8 @@ public class InvalidReferenceException extends TemplateException {
             "It's the final [] step that caused this error, not those before it.";
     
     private static final String TIP_JSP_TAGLIBS =
-            "The \"" + FreemarkerServlet.KEY_JSP_TAGLIBS + "\" variable isn't a core FreeMarker feature; "
-            + "it's only available when templates are invoked through " + FreemarkerServlet.class.getName()
+            "The \"JspTaglibs\" variable isn't a core FreeMarker feature; "
+            + "it's only available when templates are invoked through freemarker.ext.servlet.FreemarkerServlet"
             + " (or other custom FreeMarker-JSP integration solution).";
     
     /**
