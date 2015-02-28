@@ -188,7 +188,7 @@ public abstract class TemplateNameFormat {
             
             if (findSchemeSectionEnd(targetName) != 0) {
                 return targetName;
-            } else if (targetName.startsWith("/"))  {
+            } else if (targetName.startsWith("/"))  {  // targetName is an absolute path
                 final String targetNameAsRelative = targetName.substring(1);
                 final int schemeSectionEnd = findSchemeSectionEnd(baseName);
                 if (schemeSectionEnd == 0) {
@@ -197,11 +197,12 @@ public abstract class TemplateNameFormat {
                     // Prepend the scheme of baseName:
                     return baseName.substring(0, schemeSectionEnd) + targetNameAsRelative;
                 }
-            } else {  // targetName is a relativespath
+            } else {  // targetName is a relative path
                 if (!baseName.endsWith("/")) {
                     // Not a directory name => get containing directory name
                     int baseEnd = baseName.lastIndexOf("/") + 1;
                     if (baseEnd == 0) {
+                        // For something like "classpath:t.ftl", must not remove the scheme part:
                         baseEnd = findSchemeSectionEnd(baseName);
                     }
                     baseName = baseName.substring(0, baseEnd);

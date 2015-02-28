@@ -146,10 +146,10 @@ public class StringUtilTest {
 
     @Test
     public void testIsTrimmedToEmpty() {
-        assertTrue(StringUtil.isTrimmedToEmpty("".toCharArray()));
-        assertTrue(StringUtil.isTrimmedToEmpty("\r\r\n\u0001".toCharArray()));
-        assertFalse(StringUtil.isTrimmedToEmpty("x".toCharArray()));
-        assertFalse(StringUtil.isTrimmedToEmpty("  x  ".toCharArray()));
+        assertTrue(StringUtil.isTrimmableToEmpty("".toCharArray()));
+        assertTrue(StringUtil.isTrimmableToEmpty("\r\r\n\u0001".toCharArray()));
+        assertFalse(StringUtil.isTrimmableToEmpty("x".toCharArray()));
+        assertFalse(StringUtil.isTrimmableToEmpty("  x  ".toCharArray()));
     }
     
 }

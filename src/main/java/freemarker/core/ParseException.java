@@ -16,6 +16,7 @@
 
 package freemarker.core;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -38,7 +39,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @see TokenMgrError
  */
-public class ParseException extends java.io.IOException implements FMParserConstants {
+public class ParseException extends IOException implements FMParserConstants {
 
     /**
      * This is the last token that has been consumed successfully.  If

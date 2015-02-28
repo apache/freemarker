@@ -136,7 +136,7 @@ public final class TextBlock extends TemplateElement {
                     if (lastNewLineIndex >=0  || beginColumn == 1) {
                         char[] firstPart = substring(text, 0, lastNewLineIndex + 1);
                         char[] lastLine = substring(text, 1+lastNewLineIndex); 
-                        if (StringUtil.isTrimmedToEmpty(lastLine)) {
+                        if (StringUtil.isTrimmableToEmpty(lastLine)) {
                             this.text = firstPart;
                             this.endColumn = 0;
                         } else {
@@ -185,7 +185,7 @@ public final class TextBlock extends TemplateElement {
                     }
                     char[] trailingPart = substring(text, firstLineIndex);
                     char[] openingPart = substring(text, 0, firstLineIndex);
-                    if (StringUtil.isTrimmedToEmpty(openingPart)) {
+                    if (StringUtil.isTrimmableToEmpty(openingPart)) {
                         this.text = trailingPart;
                         this.beginLine++;
                         this.beginColumn=1;
@@ -195,7 +195,7 @@ public final class TextBlock extends TemplateElement {
                             lastNonWS--;
                         }
                         char[] printablePart = substring(text, 0, lastNonWS+1);
-                        if (StringUtil.isTrimmedToEmpty(trailingPart)) {
+                        if (StringUtil.isTrimmableToEmpty(trailingPart)) {
                         // THIS BLOCK IS HEINOUS! THERE MUST BE A BETTER WAY! REVISIT (JR)
                             boolean trimTrailingPart = true;
                             for (TemplateElement te = this.nextTerminalNode(); 
@@ -343,7 +343,7 @@ public final class TextBlock extends TemplateElement {
         if (text == null || text.length == 0) {
             return true;
         }
-        if (!StringUtil.isTrimmedToEmpty(text)) {
+        if (!StringUtil.isTrimmableToEmpty(text)) {
             return false;
         }
         boolean atTopLevel = (getParent().getParent() == null);

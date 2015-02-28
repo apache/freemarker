@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.template.TemplateException;
 
 /**
@@ -48,8 +47,8 @@ public class InvalidReferenceException extends TemplateException {
             "It's the final [] step that caused this error, not those before it.";
     
     private static final String TIP_JSP_TAGLIBS =
-            "The \"" + FreemarkerServlet.KEY_JSP_TAGLIBS + "\" variable isn't a core FreeMarker feature; "
-            + "it's only available when templates are invoked through " + FreemarkerServlet.class.getName()
+            "The \"JspTaglibs\" variable isn't a core FreeMarker feature; "
+            + "it's only available when templates are invoked through freemarker.ext.servlet.FreemarkerServlet"
             + " (or other custom FreeMarker-JSP integration solution).";
     
     /**
@@ -109,7 +108,7 @@ public class InvalidReferenceException extends TemplateException {
                 } else if (blamed instanceof DynamicKeyName) {
                     errDescBuilder.tips(new Object[] { TIP_LAST_STEP_SQUARE_BRACKET, TIP });
                 } else if (blamed instanceof Identifier
-                        && ((Identifier) blamed).getName().equals(FreemarkerServlet.KEY_JSP_TAGLIBS)) {
+                        && ((Identifier) blamed).getName().equals("JspTaglibs")) {
                     errDescBuilder.tips(new Object[] { TIP_JSP_TAGLIBS, TIP });
                 } else {
                     errDescBuilder.tip(TIP);

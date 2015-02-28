@@ -58,18 +58,24 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      *            See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}. Not {@code null}. Note
      *            that the version will be normalized to the lowest version where the same incompatible
      *            {@link BeansWrapper} improvements were already present, so for the returned instance
-     *            {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
-     * @param isIncompImprsNormalized
-     *            Tells if the {@code incompatibleImprovements} parameter contains an already normalized value. This
-     *            should only be {@code true} when the class that extends {@link BeansWrapper} also uses
-     *            {@link #incompatibleImprovements} and it adds further versions where a change has occurred.
+     *            {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified
+     *            here.
+     * @param isIncompImprsAlreadyNormalized
+     *            Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em> value.
+     *            This parameter meant to be {@code true} when the class that extends {@link BeansWrapper} needs to add
+     *            additional breaking versions over those of {@link BeansWrapper}. Thus, if this parameter is
+     *            {@code true}, the versions where {@link BeansWrapper} had breaking changes must be already factored
+     *            into the {@code incompatibleImprovements} parameter value, as no more normalization will happen. (You
+     *            can use {@link BeansWrapper#normalizeIncompatibleImprovementsVersion(Version)} to discover those.)
      * 
      * @since 2.3.22
      */
-    protected BeansWrapperConfiguration(Version incompatibleImprovements, boolean isIncompImprsNormalized) {
+    protected BeansWrapperConfiguration(Version incompatibleImprovements, boolean isIncompImprsAlreadyNormalized) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
-        incompatibleImprovements = isIncompImprsNormalized ? incompatibleImprovements : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+        incompatibleImprovements = isIncompImprsAlreadyNormalized
+                ? incompatibleImprovements
+                : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
         classIntrospectorFactory = new ClassIntrospectorBuilder(incompatibleImprovements);

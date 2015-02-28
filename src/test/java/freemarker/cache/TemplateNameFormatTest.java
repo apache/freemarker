@@ -39,6 +39,7 @@ public class TemplateNameFormatTest {
 
     @Test
     public void testToAbsoluteName() throws MalformedTemplateNameException {
+        // Path that are treated the same both in 2.3 and 2.4 format:
         for (TemplateNameFormat tnf : new TemplateNameFormat[] {
                 TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
             // Relative paths:
@@ -59,6 +60,7 @@ public class TemplateNameFormatTest {
             // - No scheme:
             assertEquals("b", tnf.toAbsoluteName("a/", "/b"));
             assertEquals("b", tnf.toAbsoluteName("/a/", "/b"));
+            assertEquals("b", tnf.toAbsoluteName("a/s:/f/", "/b"));
             // - Scheme:
             assertEquals("s://b", tnf.toAbsoluteName("s://x/", "/b"));
             assertEquals("s://b", tnf.toAbsoluteName("s:///x/", "/b"));
@@ -68,16 +70,26 @@ public class TemplateNameFormatTest {
             assertEquals("s://b", tnf.toAbsoluteName("i://a/", "s://b"));
         }
         
-        // Scheme names in 2.4 format:
-        final TemplateNameFormat tnf = TemplateNameFormat.DEFAULT_2_4_0;
-        assertEquals("s:b", tnf.toAbsoluteName("s:f", "b"));
-        assertEquals("s:/b", tnf.toAbsoluteName("s:/f", "b"));
-        assertEquals("s:b", tnf.toAbsoluteName("s:f", "/b"));
-        assertEquals("s:b", tnf.toAbsoluteName("s:/f", "/b"));
-        assertEquals("s:f/b", tnf.toAbsoluteName("s:f/", "b"));
-        assertEquals("s:/f/b", tnf.toAbsoluteName("s:/f/", "b"));
-        assertEquals("s:b", tnf.toAbsoluteName("s:f/", "/b"));
-        assertEquals("s:b", tnf.toAbsoluteName("s:/f/", "/b"));
+        // Scheme names in 2.4 format only:
+        {
+            final TemplateNameFormat tnf = TemplateNameFormat.DEFAULT_2_4_0;
+            assertEquals("s:b", tnf.toAbsoluteName("s:f", "b"));
+            assertEquals("s:/b", tnf.toAbsoluteName("s:/f", "b"));
+            assertEquals("s:b", tnf.toAbsoluteName("s:f", "/b"));
+            assertEquals("s:b", tnf.toAbsoluteName("s:/f", "/b"));
+            assertEquals("s:f/b", tnf.toAbsoluteName("s:f/", "b"));
+            assertEquals("s:/f/b", tnf.toAbsoluteName("s:/f/", "b"));
+            assertEquals("s:b", tnf.toAbsoluteName("s:f/", "/b"));
+            assertEquals("s:b", tnf.toAbsoluteName("s:/f/", "/b"));
+            assertEquals("s:b", tnf.toAbsoluteName("s:/f/", "/b"));
+            assertEquals("b", tnf.toAbsoluteName("a/s://f/", "/b"));
+        }
+        
+        // Scheme names in 2.3 format only:
+        {
+            final TemplateNameFormat tnf = TemplateNameFormat.DEFAULT_2_3_0;
+            assertEquals("a/s://b", tnf.toAbsoluteName("a/s://f/", "/b"));
+        }
     }
 
     @Test

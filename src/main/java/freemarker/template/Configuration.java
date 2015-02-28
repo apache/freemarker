@@ -36,8 +36,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.servlet.ServletContext;
-
 import freemarker.cache.CacheStorage;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -51,7 +49,6 @@ import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
@@ -64,7 +61,6 @@ import freemarker.core._SortedArraySet;
 import freemarker.core._UnmodifiableCompositeSet;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.log.Logger;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
@@ -440,7 +436,7 @@ public class Configuration extends Configurable implements Cloneable {
      *          {@link Template} that contains the macro definition, so there's no change there.   
      *       </li>
      *       <li><p>
-     *          When using {@link FreemarkerServlet}:
+     *          When using {@code freemarker.ext.servlet.FreemarkerServlet}:
      *          <ul>
      *             <li>
      *               <p>When using custom JSP tag libraries: Fixes bug where some kind of
@@ -1041,9 +1037,9 @@ public class Configuration extends Configurable implements Cloneable {
      * Sets the servlet context from which to load templates.
      * This is equivalent to {@code setTemplateLoader(new WebappTemplateLoader(sctxt, path))}
      * or {@code setTemplateLoader(new WebappTemplateLoader(sctxt))} if {@code path} was
-     * {@code null}, so see {@link WebappTemplateLoader} for more details.
+     * {@code null}, so see {@code freemarker.cache.WebappTemplateLoader} for more details.
      * 
-     * @param servletContext the {@link ServletContext} object. (The declared type is {@link Object}
+     * @param servletContext the {@code javax.servlet.ServletContext} object. (The declared type is {@link Object}
      *        to prevent class loading error when using FreeMarker in an environment where
      *        there's no servlet classes available.)
      * @param path the path relative to the ServletContext.

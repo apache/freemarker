@@ -147,13 +147,6 @@ public class DefaultMapAdapter extends WrappingTemplateModel
         return map;
     }
 
-    /**
-     * Returns the {@code toString()} of the underlying {@link Map}.
-     */
-    public String toString() {
-        return map.toString();
-    }
-
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(map);
     }

@@ -79,34 +79,34 @@ public interface DirectiveCallPlace {
      * Returns the custom data, or if that's {@code null}, then it creates and stores it in an atomic operation then
      * returns it. This method is thread-safe, however, it doesn't ensure thread safe (like synchronized) access to the
      * custom data itself. See the top-level documentation of {@link DirectiveCallPlace} to understand the scope and
-     * life-cycle of the custom data. Because of that, be sure the the custom data only depends on things that are fixed
-     * on parse time, not on runtime settings and such.
+     * life-cycle of the custom data. Be sure that the custom data only depends on things that get their final value
+     * during template parsing, not on runtime settings.
      * 
      * <p>
      * This method will block other calls while the {@code objectFactory} is executing, thus, the object will be
      * <em>usually</em> created only once, even if multiple threads request the value when it's still {@code null}. It
-     * doesn't stand though when {@code provierIdentity} mismatches occur (see later). Furthermore, then it's also
-     * possible that multiple objects created by the same {@link ObjectFactory} will be in use one the same time,
-     * because of directive executions already running in parallel, and because of memory synchronization delays
-     * (hardware dependent) between the threads.
+     * doesn't stand though when {@code providerIdentity} mismatches occur (see later). Furthermore, then it's also
+     * possible that multiple objects created by the same {@link ObjectFactory} will be in use on the same time, because
+     * of directive executions already running in parallel, and because of memory synchronization delays (hardware
+     * dependent) between the threads.
      * 
      * <p>
      * Note that this feature will only work on Java 5 or later.
      * 
-     * @param provierIdentity
+     * @param providerIdentity
      *            This is usually the class of the {@link TemplateDirectiveModel} that creates (and uses) the custom
      *            data, or if you are using your own class for the custom data object (as opposed to a class from some
      *            more generic API), then that class. This is needed as the same call place might calls different
      *            directives depending on runtime conditions, and so it must be ensured that these directives won't
-     *            accidentally read each other's custom data, end up with class cast exceptions or worse. In the current
-     *            implementation, if there's a {@code provierIdentity} mismatch (means, the {@code proviedIdentity}
-     *            object used when the custom data was last set isn't the exactly same object as the one provided with
-     *            the parameter now), the previous custom data will be just ignored as if it was {@code null}. So if
-     *            multiple directives that use the custom data feature use the same call place, the caching of the
-     *            custom data can be inefficient, as they will keep overwriting each other's custom data. (In a more
-     *            generic implementation the {@code provierIdentity} would be a key in a {@link IdentityHashMap}, but
-     *            then this feature would be slower, while {@code provierIdentity} mismatches aren't occurring in most
-     *            applications.)
+     *            accidentally read each other's custom data, ending up with class cast exceptions or worse. In the
+     *            current implementation, if there's a {@code providerIdentity} mismatch (means, the
+     *            {@code providerIdentity} object used when the custom data was last set isn't the exactly same object
+     *            as the one provided with the parameter now), the previous custom data will be just ignored as if it
+     *            was {@code null}. So if multiple directives that use the custom data feature use the same call place,
+     *            the caching of the custom data can be inefficient, as they will keep overwriting each other's custom
+     *            data. (In a more generic implementation the {@code providerIdentity} would be a key in a
+     *            {@link IdentityHashMap}, but then this feature would be slower, while {@code providerIdentity}
+     *            mismatches aren't occurring in most applications.)
      * @param objectFactory
      *            Called when the custom data wasn't yet set, to create its initial value. If this parameter is
      *            {@code null} and the custom data wasn't set yet, then {@code null} will be returned. The returned
@@ -117,7 +117,7 @@ public interface DirectiveCallPlace {
      * @throws CallPlaceCustomDataInitializationException
      *             If the {@link ObjectFactory} had to be invoked but failed.
      */
-    Object getOrCreateCustomData(Object provierIdentity, ObjectFactory objectFactory)
+    Object getOrCreateCustomData(Object providerIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException;
 
     /**

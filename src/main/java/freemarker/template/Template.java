@@ -652,7 +652,7 @@ public class Template extends Configurable {
         
         public String getMessage() {
             return "Encoding specified inside the template (" + specifiedEncoding
-                    + ") doesn't match the encoding specified by the Template constructor"
+                    + ") doesn't match the encoding specified for the Template constructor"
                     + (constructorSpecifiedEncoding != null ? " (" + constructorSpecifiedEncoding + ")." : ".");
         }
 

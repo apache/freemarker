@@ -1977,11 +1977,11 @@ public class StringUtil {
     }
 
     /**
-     * Tells if {@link String#trim()} would return a 0-length string for the {@link String} equivalent of the argument.
+     * Tells if {@link String#trim()} will return a 0-length string for the {@link String} equivalent of the argument.
      * 
      * @since 2.3.22
      */
-    public static boolean isTrimmedToEmpty(char[] text) {
+    public static boolean isTrimmableToEmpty(char[] text) {
         int ln = text.length;
         for (int i = 0; i < ln; i++) {
             // We follow Java's String.trim() here, which simply states that c <= ' ' is whitespace.
