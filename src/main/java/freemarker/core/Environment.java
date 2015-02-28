@@ -2160,21 +2160,21 @@ public final class Environment extends Configurable {
      * {@link Configuration#getTemplate(String)}. This is mostly used when a template refers to another template.
      * 
      * @param baseName
-     *            The name relatively to relative {@code targetName}-s will be resolved. Maybe {@code null}, which
-     *            usually means that the base is the root "directory". Assuming {@link TemplateNameFormat#DEFAULT_2_3_0}
-     *            or {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as follows. If you want to specify a base
+     *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null}, which usually
+     *            means that the base is the root "directory". Assuming {@link TemplateNameFormat#DEFAULT_2_3_0} or
+     *            {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as follows. If you want to specify a base
      *            directory here, it must end with {@code "/"}. If it doesn't end with {@code "/"}, it's parent
      *            directory will be used as the base path. Might starts with a scheme part (like {@code "foo://"}, or
      *            with {@link TemplateNameFormat#DEFAULT_2_4_0} even just {@code "foo:"}).
      * @param targetName
-     *            The name of the template, which is maybe a relative maybe an absolute name. Assuming
+     *            The name of the template, which is either a relative or absolute name. Assuming
      *            {@link TemplateNameFormat#DEFAULT_2_3_0} or {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as
-     *            follows. If it starts with {@code "/"} or contains a scheme part ({@code "://"}, or with
-     *            {@link TemplateNameFormat#DEFAULT_2_4_0} even just a {@code ":"} that's not preceded by a {@code "/"})
-     *            then it's an absolute name, otherwise it's a relative path. Relative paths are interpreted relatively
-     *            to the {@code baseName}. Absolute names are simply returned as is, ignoring the {@code baseName},
-     *            except if the {@code baseName} has scheme part, and the {@code targetName} hasn't, in which case it
-     *            will get the schema of the {@code baseName}.
+     *            follows. If it starts with {@code "/"} or contains a scheme part separator ({@code "://"}, also, with
+     *            {@link TemplateNameFormat#DEFAULT_2_4_0} a {@code ":"} with no {@code "/"} anywhere before it) then
+     *            it's an absolute name, otherwise it's a relative path. Relative paths are interpreted relatively to
+     *            the {@code baseName}. Absolute names are simply returned as is, ignoring the {@code baseName}, except,
+     *            when the {@code baseName} has scheme part while the {@code targetName} doesn't have, then the schema
+     *            of the {@code baseName} is prepended to the {@code targetName}.
      * 
      * @since 2.3.22
      */

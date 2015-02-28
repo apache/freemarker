@@ -22,10 +22,7 @@
     />
 
     <conf name="build.base" extends="default" visibility="private"
-        description="for building FreeMarker without dependencies that has multiple versions"
-    />
-    <conf name="build" extends="build.jsp2.0"
-        description="for building FreeMarker with default dependencies"
+        description="for building FreeMarker without dependencies that optinal dependencies"
     />
 
     <conf name="build.j2se1.5" extends="build.base"

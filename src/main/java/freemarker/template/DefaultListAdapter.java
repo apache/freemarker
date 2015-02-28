@@ -127,5 +127,5 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
     public TemplateModel getAPI() throws TemplateModelException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(list);
     }
-
+    
 }
