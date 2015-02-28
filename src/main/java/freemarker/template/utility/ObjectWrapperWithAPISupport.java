@@ -34,7 +34,7 @@ import freemarker.template.TemplateModelException;
 public interface ObjectWrapperWithAPISupport extends ObjectWrapper {
 
     /**
-     * Wraps an object to a {@link TemplateModel} that exposes the object's API.
+     * Wraps an object to a {@link TemplateModel} that exposes the object's "native" (usually, Java) API.
      * 
      * @param obj
      *            The object for which the API model has to be returned. Shouldn't be {@code null}.

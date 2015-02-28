@@ -1000,7 +1000,8 @@ public class Configurable
      * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
      * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
      * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
-     * caught by {@code #attempt}/{@code #recover}; those are always logged, no mater what.
+     * caught by {@code #attempt}; those are always logged, no mater what (because those exceptions won't bubble up
+     * until the API caller).
      * 
      * @since 2.3.22
      */

@@ -878,6 +878,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         return new SimpleMethodModel(object, method, method.getParameterTypes(), this);
     }
     
+    /**
+     * @since 2.3.22
+     */
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
         return new APIModel(obj, this);
     }
@@ -985,6 +988,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         return obj;
     }
 
+    /**
+     * @since 2.3.22
+     */
     public Object tryUnwrapTo(TemplateModel model, Class targetClass) throws TemplateModelException
     {
         return tryUnwrapTo(model, targetClass, 0);

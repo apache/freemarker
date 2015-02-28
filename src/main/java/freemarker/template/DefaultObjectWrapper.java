@@ -319,8 +319,9 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         this.forceLegacyNonListCollections = forceLegacyNonListCollections;
     }
 
-    /** 
+    /**
      * Returns the lowest version number that is equivalent with the parameter version.
+     * 
      * @since 2.3.22
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
@@ -331,6 +332,9 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 ? bwIcI : Configuration.VERSION_2_3_22;
     }
 
+    /**
+     * @since 2.3.22
+     */
     protected String toPropertiesString() {
         String bwProps = super.toPropertiesString();
         

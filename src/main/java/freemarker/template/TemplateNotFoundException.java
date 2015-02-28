@@ -24,6 +24,9 @@ import java.io.FileNotFoundException;
  * FreeMarker can load templates from many other sources.
  *
  * @since 2.3.22
+ * 
+ * @see MalformedTemplateNameException
+ * @see Configuration#getTemplate(String)
  */
 public final class TemplateNotFoundException extends FileNotFoundException {
     
