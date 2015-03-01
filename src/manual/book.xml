@@ -14486,7 +14486,7 @@ Sorted by name.last:
                   <literal>DefaultObjectWrapper</literal> with its
                   <literal>incompatibleImprovements</literal> set to 2.3.22 or
                   higher (<link linkend="topic.defaultObjectWrapperIcI">see
-                  how to set it here</link>) (actually, what matters its that
+                  how to set it here</link>) (actually, what matters is that
                   its <literal>useAdaptersForContainer</literal> property is
                   set to <literal>true</literal>, but that's the default with
                   said <literal>incompatibleImprovements</literal>), FTL
@@ -21160,18 +21160,18 @@ End book</programlisting>
                 <literal>&lt;#if hasWarnigs&gt;<replaceable>print warnings
                 here...</replaceable>&lt;/#if&gt;</literal>, which would then
                 silently never print the warnings, since you have mistyped the
-                variable name. Also think about maintenance, when you later
-                modify your application; probably you will not re-check
-                templates (many applications has hundreds of them) that
-                carefully each time, for all possible scenarios. Unit tests
-                typically doesn't cover web page content very good either (if
-                you have them at all...); they mostly only checks certain
-                manually set patterns in the web page, so they will often
-                gloss though changes that are actually bugs. But if the page
-                fails with exception, that's something human testers will
-                notice and unit sets will notice, and in production the
-                maintainers will notice (assuming somebody check error
-                logs).</para>
+                variable name (have you noticed it?). Also think about
+                maintenance, when you later modify your application; probably
+                you will not re-check templates (many applications has
+                hundreds of them) that carefully each time, for all possible
+                scenarios. Unit tests typically doesn't cover web page content
+                very good either (if you have them at all...); they mostly
+                only check certain manually set patterns in the web page, so
+                they will often gloss though changes that are actually bugs.
+                But if the page fails with exception, that's something human
+                testers will notice and unit test will notice (as the whole
+                page will fail), and in production the maintainers will notice
+                (assuming somebody check error logs).</para>
               </listitem>
 
               <listitem>
@@ -21181,21 +21181,22 @@ End book</programlisting>
                 be 0/false, it is a quite irresponsible and arbitrary thing.
                 Just because it's not know what's your current balance at your
                 bank, can we just say it's $0? Just because it is not known if
-                a patient has penicillin allergy, we can just say he/she
+                a patient has penicillin allergy, can we just say he/she
                 doesn't have it? Just consider the implications of such
                 mistakes. Showing an error page is often better than showing
-                incorrect information that formally looks good.</para>
+                incorrect information that looks good, leading to bad
+                decisions on the user side.</para>
               </listitem>
             </itemizedlist>
 
             <para>Being not picky is mostly sweeping under the carpet in this
-            case (not facing with the problems), which of course most people
-            feels more convenient, but still, we believe that in most cases
-            being strict will save your time and increase your software
-            quality on the long run.</para>
+            case (not facing the problems), which of course most people feels
+            more convenient, but still, we believe that in most cases being
+            strict will save your time and increase your software quality on
+            the long run.</para>
 
             <para>On the other hand, we recognize that there are cases where
-            you don't want FreeMarker to be that picky with good reason, and
+            you don't want FreeMarker to be that picky for good reason, and
             there is solution for them:</para>
 
             <itemizedlist>
@@ -21215,17 +21216,18 @@ End book</programlisting>
                 incomplete/damaged page than an error page. In this case you
                 can <link linkend="pgui_config_errorhandling">use another
                 error handler</link> than the default one. A custom error
-                handler can skip the problematic part instead of aborting the
-                whole page rendering. Note, however, that although the error
-                handlers don't give arbitrary default values to variables, for
-                pages that show critical information it's maybe still better
-                to show an error page.</para>
+                handler can skip the problematic part, or show an error
+                indicator there, instead of aborting the whole page rendering.
+                Note, however, that although the error handlers don't give
+                arbitrary default values to variables, for pages that show
+                critical information it's maybe still better to show an error
+                page.</para>
               </listitem>
 
               <listitem>
                 <para>If the pages contain parts that aren't critically
-                important (like side bars), another feature you may interested
-                in is <link linkend="ref_directive_attempt">the
+                important (like some side bars), another feature you may
+                interested in is <link linkend="ref_directive_attempt">the
                 <literal>attempt</literal>/<literal>recover</literal>
                 directives</link>.</para>
               </listitem>
@@ -21242,9 +21244,9 @@ End book</programlisting>
           <answer>
             <para>FreeMarker uses the locale-sensitive number formatting
             capability of the Java platform. The default number format for
-            your locale may uses grouping or other unwanted formatting. To
-            prevent this, you have to override the number format suggested by
-            the Java platform with the <literal>number_format</literal> <link
+            your locale may uses grouping or other formatting. If you don't
+            want that, you have to override the number format suggested by the
+            Java platform with the <literal>number_format</literal> <link
             linkend="pgui_config_settings">FreeMarker setting</link>. For
             example:</para>
 
@@ -21260,6 +21262,10 @@ End book</programlisting>
             example:</para>
 
             <programlisting role="template">&lt;a href="/shop/productdetails?id=${<emphasis>product.id?c</emphasis>}"&gt;Details...&lt;/a&gt;</programlisting>
+
+            <para>For computer audience you need <literal>?c</literal> anyway,
+            as the decimal separators can also warry depending on the
+            locale.</para>
           </answer>
         </qandaentry>
 
@@ -21751,7 +21757,7 @@ End book</programlisting>
             will have to turn to the Java API of the <literal>Map</literal>.
             You can do it like this:
             <literal>myMap?api.get(nonStringKey)</literal>. However, for
-            <literal>?api</literal> to work, you may need to configured
+            <literal>?api</literal> to work, you may need to configure
             FreeMarker a bit; <link linkend="ref_buitin_api_and_has_api">see
             more here...</link></para>
 
