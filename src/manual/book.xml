@@ -22585,7 +22585,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>"foo.bar.txt"?keep_after_last</literal> returns
               <literal>"txt"</literal>. (These work like
               <literal>?keep_before</literal> and
-              <literal>?keep_before</literal>, but those look for the first
+              <literal>?keep_after</literal>, but those look for the first
               occurrence of the separator.)</para>
             </listitem>
 
