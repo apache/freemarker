@@ -22580,9 +22580,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Added <literal>?keep_before_last</literal> and
               <literal>?keep_after_last</literal>. Example:
-              <literal>"foo.bar.txt"?keep_before_last</literal> returns
+              <literal>"foo.bar.txt"?keep_before_last(".")</literal> returns
               <literal>"foo.bar"</literal>,
-              <literal>"foo.bar.txt"?keep_after_last</literal> returns
+              <literal>"foo.bar.txt"?keep_after_last(".")</literal> returns
               <literal>"txt"</literal>. (These work like
               <literal>?keep_before</literal> and
               <literal>?keep_after</literal>, but those look for the first
