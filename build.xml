@@ -470,6 +470,12 @@
         file="${file}" flags="gs" encoding="utf-8"
         match="/\* (Javadoc style sheet) \*/" replace="/\* \1 - JDK 8 usability fix regexp substitutions applied \*/"
     />
+
+    <!-- Remove broken link: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="@import url\('resources/fonts/dejavu.css'\);\s*" replace=""
+    />
     
     <!-- Font family fixes: -->
     <replaceregexp
