@@ -1667,10 +1667,10 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the character set encoding to use for templates of
-     * a given locale. If there is no explicit encoding set for some
-     * locale, then the default encoding will be used, what you can
-     * set with {@link #setDefaultEncoding}.
+     * Sets the charset (encoding) to use for parsing templates that are requested for a given locale. If there is no
+     * explicit encoding set for some locale, then the default encoding will be used, which you can set with
+     * {@link #setDefaultEncoding}. By default there are no encodings set for any locale, so always
+     * {@link #setDefaultEncoding} will be used.
      *
      * @see #clearEncodingMap
      * @see #loadBuiltInEncodingMap
