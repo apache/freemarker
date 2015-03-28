@@ -41,6 +41,7 @@ import freemarker.cache.NullCacheStorage;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
+import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
@@ -988,6 +989,42 @@ public class ConfigurationTest extends TestCase {
         cfg.setAPIBuiltinEnabled(true);
         new Template(null, "${m?api.hashCode()}", cfg)
                 .process(Collections.singletonMap("m", new HashMap()), NullWriter.INSTANCE);
+    }
+
+    @Test
+    public void testTemplateUpdateDelay() throws IOException, TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+
+        assertEquals(TemplateCache.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS, cfg.getTemplateUpdateDelayMilliseconds());
+        
+        cfg.setTemplateUpdateDelay(4);
+        assertEquals(4000L, cfg.getTemplateUpdateDelayMilliseconds());
+        
+        cfg.setTemplateUpdateDelayMilliseconds(100);
+        assertEquals(100L, cfg.getTemplateUpdateDelayMilliseconds());
+        
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5");
+        assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
+        
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "3 ms");
+        assertEquals(3L, cfg.getTemplateUpdateDelayMilliseconds());
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "4ms");
+        assertEquals(4L, cfg.getTemplateUpdateDelayMilliseconds());
+        
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "3 s");
+        assertEquals(3000L, cfg.getTemplateUpdateDelayMilliseconds());
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "4s");
+        assertEquals(4000L, cfg.getTemplateUpdateDelayMilliseconds());
+        
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "3 m");
+        assertEquals(1000L * 60 * 3, cfg.getTemplateUpdateDelayMilliseconds());
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "4m");
+        assertEquals(1000L * 60 * 4, cfg.getTemplateUpdateDelayMilliseconds());
+
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "1 h");
+        assertEquals(1000L * 60 * 60, cfg.getTemplateUpdateDelayMilliseconds());
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "2h");
+        assertEquals(1000L * 60 * 60 * 2, cfg.getTemplateUpdateDelayMilliseconds());
     }
     
     @Test

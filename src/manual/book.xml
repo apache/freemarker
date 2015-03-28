@@ -22491,6 +22491,45 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_23">
+        <title>2.3.33</title>
+
+        <para>Date of release: TODO</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>TODO</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added
+              <literal>Configuration.setTemplateUpdateDelayMilliseconds(long)</literal>
+              and
+              <literal>Configuration.getTemplateUpdateDelayMilliseconds()</literal>.
+              This deprecates <literal>setTemplateUpdateDelay(int)</literal>,
+              which uses seconds resolution, hence going against Java
+              conventions and often leading to misunderstandings. (Also that
+              couldn't have a getter pair.)</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>template_update_delay</literal> setting now
+              supports time units, like in <literal>template_update_delay=500
+              ms</literal>.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_22">
         <title>2.3.22</title>
 

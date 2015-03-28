@@ -1234,8 +1234,12 @@ public class Configurable
      *       entries is not significant.
      *       
      *   <li><p>{@code "template_update_delay"}:
-     *       See {@link Configuration#setTemplateUpdateDelay}.
-     *       <br>String value: Valid positive integer, the update delay measured in seconds.
+     *       Template update delay in <b>seconds</b> (not in milliseconds) if no unit is specified; see
+     *       {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} for more.
+     *       <br>String value: Valid positive integer, optionally followed by a time unit (recommended). The default
+     *       unit is seconds. It's strongly recommended to specify the unit for clarity, like in "500 ms" or "30 s".
+     *       Supported units are: "s" (seconds), "ms" (milliseconds), "m" (minutes), "h" (hours). The whitespace between
+     *       the unit and the number is optional. Units are only supported since 2.3.23.
      *       
      *   <li><p>{@code "tag_syntax"}:
      *       See {@link Configuration#setTagSyntax(int)}.
