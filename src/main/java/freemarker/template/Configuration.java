@@ -1107,15 +1107,46 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the time in seconds that must elapse before checking whether there is a newer version of a template file
+     * Sets the time in seconds that must elapse before checking whether there is a newer version of a template "file"
      * than the cached one.
      * 
-     * <p>Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe.
-     * While it works well on most hardware, it's not guaranteed that FreeMarker will see the update in all threads,
-     * and theoretically it's also possible that it will see a value that's a binary mixture of the new and the old one.
+     * <p>
+     * Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe. While
+     * it works well on most hardware, it's not guaranteed that FreeMarker will see the update in all threads, and
+     * theoretically it's also possible that it will see a value that's a binary mixture of the new and the old one.
+     * 
+     * @deprecated Use {@link #setTemplateUpdateDelayMilliseconds(long)} instead, because the time granularity of this method
+     *             is often misunderstood to be milliseconds.
      */
     public void setTemplateUpdateDelay(int seconds) {
         cache.setDelay(1000L * seconds);
+    }
+
+    /**
+     * Sets the time in milliseconds that must elapse before checking whether there is a newer version of a template
+     * "file" exists than the cached one. Defaults to 5000 ms.
+     * 
+     * <p>
+     * When you get a template via {@link #getTemplate(String)} (or some of its overloads). FreeMarker will try to get
+     * the template from the template cache. If the template is found, and at least this amount of time was elapsed
+     * since the template last modification date was checked, FreeMarker will re-check the last modification date (this
+     * could mean I/O), possibly reloading the template and updating the cache as a consequence (can mean even more
+     * I/O). The {@link #getTemplate(String)} (or some of its overloads) call will only return after this all is
+     * done, so it will return the fresh template.
+     * 
+     * @since 2.3.23
+     */
+    public void setTemplateUpdateDelayMilliseconds(long millis) {
+        cache.setDelay(millis);
+    }
+    
+    /**
+     * The getter pair of {@link #setTemplateUpdateDelayMilliseconds(long)}.
+     * 
+     * @since 2.3.23
+     */
+    public long getTemplateUpdateDelayMilliseconds() {
+        return cache.getDelay();
     }
     
     /**
@@ -1979,7 +2010,25 @@ public class Configuration extends Configurable implements Cloneable {
                             value, CacheStorage.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(name)) {
-                setTemplateUpdateDelay(Integer.parseInt(value));
+                long multipier;
+                String valueWithoutUnit;
+                if (value.endsWith("ms")) {
+                    multipier = 1;
+                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 2));
+                } else if (value.endsWith("s")) {
+                    multipier = 1000;
+                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
+                } else if (value.endsWith("m")) {
+                    multipier = 1000 * 60;
+                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
+                } else if (value.endsWith("h")) {
+                    multipier = 1000 * 60 * 60;
+                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
+                } else {
+                    multipier = 1000;  // Default is seconds for backward compatibility
+                    valueWithoutUnit = value;
+                }
+                setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multipier);
             } else if (AUTO_INCLUDE_KEY.equals(name)) {
                 setAutoIncludes(parseAsList(value));
             } else if (AUTO_IMPORT_KEY.equals(name)) {
@@ -2031,6 +2080,14 @@ public class Configuration extends Configurable implements Cloneable {
         if (unknown) {
             super.setSetting(name, value);
         }
+    }
+
+    private String rightTrim(String s) {
+        int ln = s.length();
+        while (ln > 0 && Character.isWhitespace(s.charAt(ln - 1))) {
+            ln--;
+        }
+        return s.substring(0, ln);
     }
 
     // [Java 5] Add type param. [FM 2.4] It must return the camelCase names, then make it public.

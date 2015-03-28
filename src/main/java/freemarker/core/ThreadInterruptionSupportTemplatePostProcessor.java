@@ -147,7 +147,10 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
     }
     
     /**
-     * Indicates that the template processing thread's "interrupted" flag was found to be set.  
+     * Indicates that the template processing thread's "interrupted" flag was found to be set.
+     * 
+     * <p>ATTENTION: This is used by https://github.com/kenshoo/freemarker-online. Don't break backward
+     * compatibility without updating that project too! 
      */
     static class TemplateProcessingThreadInterruptedException extends RuntimeException {
         
