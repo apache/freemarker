@@ -53,6 +53,14 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 public class TemplateCache
 {
+    
+    /**
+     * The default template update delay; see {@link Configuration#setTemplateUpdateDelayMilliseconds(long)}.
+     * 
+     * @since 2.3.23
+     */
+    public static final long DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS = 5000L;
+    
     private static final String ASTERISKSTR = "*";
     private static final char ASTERISK = '*';
     private static final char SLASH = '/';
@@ -68,9 +76,9 @@ public class TemplateCache
     private final TemplateNameFormat templateNameFormat;
     
     private final boolean isStorageConcurrent;
-    /** The default refresh delay in milliseconds. */
-    private long delay = 5000;
-    /** Specifies if localized template lookup is enabled or not */
+    /** {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} */
+    private long updateDelay = DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS;
+    /** {@link Configuration#setLocalizedLookup(boolean)} */
     private boolean localizedLookup = true;
 
     private Configuration config;
@@ -299,7 +307,7 @@ public class TemplateCache
         try {
             if (cachedTemplate != null) {
                 // If we're within the refresh delay, return the cached copy
-                if (now - cachedTemplate.lastChecked < delay) {
+                if (now - cachedTemplate.lastChecked < updateDelay) {
                     if(debug) {
                         LOG.debug(debugName + " cached copy not yet stale; using cached.");
                     }
@@ -534,7 +542,7 @@ public class TemplateCache
     {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
-            return delay;
+            return updateDelay;
         }
     }
 
@@ -547,7 +555,7 @@ public class TemplateCache
     {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
-            this.delay = delay;
+            this.updateDelay = delay;
         }
     }
 
