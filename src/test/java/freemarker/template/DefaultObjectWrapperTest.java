@@ -78,6 +78,7 @@ public class DefaultObjectWrapperTest {
         }
         expected.add(Configuration.VERSION_2_3_21);
         expected.add(Configuration.VERSION_2_3_22);
+        expected.add(Configuration.VERSION_2_3_22); // no non-BC change here yet
 
         List<Version> actual = new ArrayList<Version>();
         for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
