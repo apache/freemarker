@@ -17,3 +17,5 @@ changes from the 2.3 branch would be rather difficult.
   - freemarker.ext.dom.Transform class
   - freemarker.template.utility.ToCanonical class
   - freemarker.ext.jdom.NodeListModel.main() method
+- Bugfix: When the same template was both #include-d and #import-ed, the macros from the #import-ed template has
+  ran in the namespace of the #import-ed template.
