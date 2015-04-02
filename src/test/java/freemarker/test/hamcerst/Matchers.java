@@ -18,7 +18,7 @@ package freemarker.test.hamcerst;
 
 import org.hamcrest.Matcher;
 
-public final class Matchers {
+public final class Matchers extends org.hamcrest.Matchers {
     
     private Matchers() {
         // Not meant to be instantiated
