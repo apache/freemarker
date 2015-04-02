@@ -254,7 +254,7 @@ public class TemplateCache
             return new MaybeMissingTemplate(name, "The TemplateLoader was null.");
         }
         
-        Template template = getTemplate(templateLoader, name, locale, customLookupCondition, encoding, parseAsFTL);
+        Template template = getTemplateInternal(name, locale, customLookupCondition, encoding, parseAsFTL);
         return template != null ? new MaybeMissingTemplate(template) : new MaybeMissingTemplate(name, (String) null);
     }    
 
@@ -279,8 +279,7 @@ public class TemplateCache
         return _TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0);        
     }
     
-    private Template getTemplate(
-            final TemplateLoader templateLoader,
+    private Template getTemplateInternal(
             final String name, final Locale locale, final Object customLookupCondition,
             final String encoding, final boolean parseAsFTL)
     throws IOException
@@ -400,7 +399,7 @@ public class TemplateCache
             }
             
             Template template = loadTemplate(
-                    templateLoader, source,
+                    source,
                     name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition,
                     encoding, parseAsFTL);
             cachedTemplate.templateOrException = template;
@@ -477,7 +476,7 @@ public class TemplateCache
     }
 
     private Template loadTemplate(
-            final TemplateLoader templateLoader, final Object source,
+            final Object source,
             final String name, final String sourceName, final Locale locale, final Object customLookupCondition,
             final String initialEncoding, final boolean parseAsFTL) throws IOException {
         Template template;
@@ -613,7 +612,7 @@ public class TemplateCache
      * {@link #setDelay(long)} alone does.
      * 
      * For the meaning of the parameters, see
-     * {@link #getTemplate(TemplateLoader, String, Locale, Object, String, boolean)}.
+     * {@link #getTemplate(String, Locale, Object, String, boolean)}.
      */
     public void removeTemplate(
             String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)

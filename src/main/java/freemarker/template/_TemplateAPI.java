@@ -23,6 +23,7 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.core.TemplateObject;
+import freemarker.core.UnboundTemplate;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -97,6 +98,11 @@ public class _TemplateAPI {
      */
     public static Set/*<String>*/ getConfigurationSettingNames(Configuration cfg) {
         return cfg.getSettingNames();
+    }
+    
+    /** Eventually, this constructor should become public, and then we don't need this anymore. */
+    public static Template unboundTemplateToTemplate(UnboundTemplate unboundTemplate, String name, Configuration cfg) {
+        return new Template(unboundTemplate, name, cfg);
     }
     
 }

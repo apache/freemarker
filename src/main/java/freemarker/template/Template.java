@@ -67,8 +67,7 @@ public class Template extends Configurable {
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    private Template(UnboundTemplate unboundTemplate, String name, Configuration cfg)
-    {
+    Template(UnboundTemplate unboundTemplate, String name, Configuration cfg) {
         super(toNonNull(cfg));
         this.unboundTemplate = unboundTemplate; 
         this.name = name;
