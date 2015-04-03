@@ -16,6 +16,7 @@
 
 package freemarker.template;
 
+import java.util.Locale;
 import java.util.Set;
 
 import freemarker.cache.CacheStorage;
@@ -101,8 +102,12 @@ public class _TemplateAPI {
     }
     
     /** Eventually, this constructor should become public, and then we don't need this anymore. */
-    public static Template unboundTemplateToTemplate(UnboundTemplate unboundTemplate, String name, Configuration cfg) {
-        return new Template(unboundTemplate, name, cfg);
+    public static Template unboundTemplateToTemplate(UnboundTemplate unboundTemplate,
+            String name, Locale locale, Object customLookupCondition,
+            Configuration cfg) {
+        return new Template(unboundTemplate,
+                name, locale, customLookupCondition,
+                cfg);
     }
     
 }

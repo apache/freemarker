@@ -23,6 +23,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import freemarker.cache.TemplateCache;
@@ -67,12 +68,23 @@ public class Template extends Configurable {
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    Template(UnboundTemplate unboundTemplate, String name, Configuration cfg) {
+    private Template(UnboundTemplate unboundTemplate, String name, Configuration cfg) {
         super(toNonNull(cfg));
         this.unboundTemplate = unboundTemplate; 
         this.name = name;
     }
 
+    /**
+     * To be used internally only!
+     */
+    Template(UnboundTemplate unboundTemplate,
+            String name, Locale locale, Object customLookupCondition,
+            Configuration cfg) {
+        this(unboundTemplate, name, cfg);
+        this.setLocale(locale);
+        this.setCustomLookupCondition(customLookupCondition);
+    }
+    
     private static Configuration toNonNull(Configuration cfg) {
         return cfg != null ? cfg : Configuration.getDefaultConfiguration();
     }
