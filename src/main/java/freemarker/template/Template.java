@@ -460,7 +460,16 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns the default character encoding used for reading included files.
+     * Returns the name of the charset used for reading included/imported template files by default.
+     * 
+     * <p>
+     * At least when FreeMarker is built-in template loading mechanism is used, by default this setting is set to
+     * the same value as the {@link UnboundTemplate#getEncoding()} of the wrapped {@link UnboundTemplate}. That is,
+     * it will be the charset used to read the template "file" from which this {@link Template} object was created from.
+     * 
+     * <p>
+     * While "inheriting" charset from the referring template is not seen as a good idea anymore, it's still used by
+     * FreeMarker for backward compatibility (at least by default; as of 2.3.22 no setting exists yet to change that).
      */
     public String getEncoding() {
         return this.encoding;

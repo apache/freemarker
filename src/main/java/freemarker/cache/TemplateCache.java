@@ -480,7 +480,6 @@ public class TemplateCache
             final String name, final String sourceName, final Locale locale, final Object customLookupCondition,
             final String initialEncoding, final boolean parseAsFTL) throws IOException {
         Template template;
-        String actualEncoding;
         {
             if (parseAsFTL) {
                 try {
@@ -490,9 +489,8 @@ public class TemplateCache
                     } finally {
                         reader.close();
                     }
-                    actualEncoding = initialEncoding;
                 } catch (Template.WrongEncodingException wee) {
-                    actualEncoding = wee.getTemplateSpecifiedEncoding();
+                    String actualEncoding = wee.getTemplateSpecifiedEncoding();
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Initial encoding \"" + initialEncoding + "\" was incorrect, re-reading with \""
                                 + actualEncoding + "\". Template: " + sourceName);
@@ -523,13 +521,12 @@ public class TemplateCache
                     reader.close();
                 }
                 template = Template.getPlainTextTemplate(name, sourceName, sw.toString(), config);
-                actualEncoding = initialEncoding;
+                template.setEncoding(initialEncoding);
             }
         }
         
         template.setLocale(locale);
         template.setCustomLookupCondition(customLookupCondition);
-        template.setEncoding(actualEncoding);
         return template;
     }
 

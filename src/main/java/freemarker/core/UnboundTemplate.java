@@ -63,6 +63,7 @@ public final class UnboundTemplate {
     private final TemplateElement rootElement;
     private String defaultNamespaceURI;
     private final int actualTagSyntax;
+    private final String encoding;
     
     private final ArrayList lines = new ArrayList();
     
@@ -102,6 +103,7 @@ public final class UnboundTemplate {
                         cfg.getWhitespaceStripping(),
                         cfg.getTagSyntax(),
                         cfg.getIncompatibleImprovements().intValue());
+                this.encoding = assumedEncoding;
                 this.rootElement = parser.Root();
                 this.actualTagSyntax = parser._getLastTagSyntax();
             } catch (TokenMgrError exc) {
@@ -125,11 +127,12 @@ public final class UnboundTemplate {
     /**
      * Creates a plain text (unparsed) template. 
      */
-    UnboundTemplate(String content, String sourceName, Configuration cfg) {
+    UnboundTemplate(String content, String sourceName, String encoding, Configuration cfg) {
         NullArgumentException.check(cfg);
         this.cfg = cfg;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
+        this.encoding = encoding;
         
         rootElement = new TextBlock(content);
         actualTagSyntax = cfg.getTagSyntax();
@@ -347,6 +350,19 @@ public final class UnboundTemplate {
         
         final Map<String, String> m = prefixToNamespaceURIMapping;
         return m != null ? m.get(prefix) : null;
+    }
+    
+    /**
+     * Optional meta-information; the name of the charset according which the parsed source was interpreted as a
+     * sequence of characters. Currently, assuming the built in template loading mechanism of FreeMarker is used, this
+     * meta information is used as the default value of {@link Template#getEncoding()}, and     thus, mostly to support
+     * backward compatible behavior, it's set even when the source wasn't binary (and so no charset was used to decode
+     * it). This behavior is however not guaranteed. For example, in future its possible that for non-binary sources
+     * this will be {@code null}, or that for binary sources it will be US-ASCII when only that subset of the original
+     * charset was utilized.
+     */
+    public String getEncoding() {
+        return encoding;
     }
 
     /**

@@ -162,7 +162,7 @@ public class _CoreAPI {
     }
 
     public static UnboundTemplate newUnboundTemplate(String content, String sourceName, Configuration config) {
-        return new UnboundTemplate(content, sourceName, config);
+        return new UnboundTemplate(content, sourceName, null, config);
     }
     
     /** Used for implementing the deprecated {@link Template} method with similar name. */
