@@ -90,14 +90,24 @@ public interface TemplateLoader {
     	IOException;
         
     /**
-     * Returns the time of last modification of the specified template source.
-     * This method is called after <code>findTemplateSource()</code>.
-     * @param templateSource an object representing a template source, obtained
-     * through a prior call to {@link #findTemplateSource(String)}.
-     * @return the time of last modification of the specified template source,
-     * or -1 if the time is not known.
+     * Returns the time of last modification of the specified template source, if the backing storage mechanism supports
+     * that.
+     * 
+     * @param templateSource
+     *            an object representing a template source, obtained through a prior call to
+     *            {@link #findTemplateSource(String)}.
+     * @return The time of last modification of the specified template source, or -1 if the time is not known. In
+     *         principle, -1 should be only returned if the backing storage doesn't store last modification times, not
+     *         when there was an error during getting the last modification time (then you should throw
+     *         {@link GetLastModifiedException}). However, Java's {@code File} and {@code URL} API can't differentiate
+     *         between these two cases, so for {@link TemplateLoader} based on those -1 is also used when an error has
+     *         occurred.
+     * 
+     * @throws GetLastModifiedException
+     *             If there was an error when reading the last modification date (since 2.4.0). Note that for backward
+     *             compatibility, this is an unchecked exception, and is not an {@link IOException}.
      */
-    public long getLastModified(Object templateSource);
+    public long getLastModified(Object templateSource) throws GetLastModifiedException;
     
     /**
      * Returns the character stream of a template represented by the specified

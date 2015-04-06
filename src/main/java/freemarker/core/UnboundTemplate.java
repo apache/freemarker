@@ -63,7 +63,7 @@ public final class UnboundTemplate {
     private final TemplateElement rootElement;
     private String defaultNamespaceURI;
     private final int actualTagSyntax;
-    private final String encoding;
+    private final String templateSpecifiedEncoding;
     
     private final ArrayList lines = new ArrayList();
     
@@ -103,9 +103,9 @@ public final class UnboundTemplate {
                         cfg.getWhitespaceStripping(),
                         cfg.getTagSyntax(),
                         cfg.getIncompatibleImprovements().intValue());
-                this.encoding = assumedEncoding;
                 this.rootElement = parser.Root();
                 this.actualTagSyntax = parser._getLastTagSyntax();
+                this.templateSpecifiedEncoding = parser._getTemplateSpecifiedEncoding();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
@@ -127,12 +127,19 @@ public final class UnboundTemplate {
     /**
      * Creates a plain text (unparsed) template. 
      */
-    UnboundTemplate(String content, String sourceName, String encoding, Configuration cfg) {
+    static UnboundTemplate newPlainTextUnboundTemplate(String content, String sourceName, Configuration cfg) {
+        return new UnboundTemplate(content, sourceName, cfg);
+    }
+    
+    /**
+     * Creates a plain text (unparsed) template. 
+     */
+    private UnboundTemplate(String content, String sourceName, Configuration cfg) {
         NullArgumentException.check(cfg);
         this.cfg = cfg;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
-        this.encoding = encoding;
+        this.templateSpecifiedEncoding = null;
         
         rootElement = new TextBlock(content);
         actualTagSyntax = cfg.getTagSyntax();
@@ -353,16 +360,11 @@ public final class UnboundTemplate {
     }
     
     /**
-     * Optional meta-information; the name of the charset according which the parsed source was interpreted as a
-     * sequence of characters. Currently, assuming the built in template loading mechanism of FreeMarker is used, this
-     * meta information is used as the default value of {@link Template#getEncoding()}, and     thus, mostly to support
-     * backward compatible behavior, it's set even when the source wasn't binary (and so no charset was used to decode
-     * it). This behavior is however not guaranteed. For example, in future its possible that for non-binary sources
-     * this will be {@code null}, or that for binary sources it will be US-ASCII when only that subset of the original
-     * charset was utilized.
+     * The encoding (charset name) specified by the template itself (as of 2.3.22, via {@code <#ftl encoding=...>}), or
+     * {@code null} if none was specified.
      */
-    public String getEncoding() {
-        return encoding;
+    public String getTemplateSpecifiedEncoding() {
+        return templateSpecifiedEncoding;
     }
 
     /**

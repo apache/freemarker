@@ -40,6 +40,7 @@ public class FMParser {
     // Necessary for adding macros and setting location info.
     private UnboundTemplate unboundTemplate;
     private String assumedEncoding;
+    private String templateSpecifiedEncoding;
     private boolean stripWhitespace, stripText;
 
     // variables that keep track of whether we are in a loop or a switch.
@@ -113,6 +114,14 @@ public class FMParser {
         return token_source.squBracTagSyntax
                 ? Configuration.SQUARE_BRACKET_TAG_SYNTAX
                 : Configuration.ANGLE_BRACKET_TAG_SYNTAX;
+    }
+    
+    /**
+     * Don't use it, unless you are developing FreeMarker itself.
+     */
+    public String _getTemplateSpecifiedEncoding()
+    {
+        return templateSpecifiedEncoding;
     }
 
     /**
@@ -3142,6 +3151,7 @@ void HeaderElement() :
                             if (assumedEncoding != null && !assumedEncoding.equalsIgnoreCase(vs)) {
                                 throw new Template.WrongEncodingException(vs, assumedEncoding);
                             }
+                            templateSpecifiedEncoding = assumedEncoding;
                         } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE")) {
                             this.stripWhitespace = getBoolean(exp);
                         } else if (ks.equalsIgnoreCase("STRIP_TEXT")) {

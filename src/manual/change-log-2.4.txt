@@ -19,3 +19,12 @@ changes from the 2.3 branch would be rather difficult.
   - freemarker.ext.jdom.NodeListModel.main() method
 - Bugfix: When the same template was both #include-d and #import-ed, the macros from the #import-ed template has
   ran in the namespace of the #import-ed template.
+- TemplateLoader.getLastModified(Object templateSource) can now throw GetLastModifiedException to indicate an
+  error instead of returning -1 (which doesn't count as an error).
+
+When TemplateCache2 will be merged in:
+- [NBC] In 2.3.x, a cached error was thrown as a plain IOException with the original (cached) exception as its cause exception.
+  This is not possible starting from 2.4.x, because the cache doesn't hold reference to the cached exception any more,
+  instead it only stores a String description of it (class name, message, and the same for each its cause exceptions). 
+  The cached error will be throw as a CachedTemplateLoadingException (an IOException subclass), which contains the string
+  description of the original exception in its getMessage() value.

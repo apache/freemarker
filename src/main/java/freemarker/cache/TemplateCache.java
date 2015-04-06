@@ -638,7 +638,9 @@ public class TemplateCache
                     storage.remove(tk);
                 }
             }
-            LOG.debug(debugName + " was removed from the cache, if it was there");
+            if(debug) {
+                LOG.debug(debugName + " was removed from the cache, if it was there");
+            }
         }
     }
 
@@ -712,7 +714,6 @@ public class TemplateCache
         }
         StringBuffer buf = new StringBuffer(path.length()).append(basePath);
         int l = basePath.length();
-        boolean debug = LOG.isDebugEnabled();
         for(;;)
         {
             String fullPath = buf.append(resourcePath).toString();
