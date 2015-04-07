@@ -148,7 +148,7 @@
     <replace
       file="${_javaccOutputDir}/Token.java"
       token="public class Token"
-      value="class Token implements java.io.Serializable"
+      value="class Token"
     />
     <replace
       file="${_javaccOutputDir}/SimpleCharStream.java"

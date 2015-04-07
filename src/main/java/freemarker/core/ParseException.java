@@ -42,6 +42,13 @@ import freemarker.template.utility.StringUtil;
 public class ParseException extends IOException implements FMParserConstants {
 
     /**
+     * The version identifier for this Serializable class.
+     * Increment only if the <i>serialized</i> form of the
+     * class changes.
+     */
+    private static final long serialVersionUID = 1L;
+    
+    /**
      * This is the last token that has been consumed successfully.  If
      * this object has been created due to a parse error, the token
      * following this token will (therefore) be the first error token.

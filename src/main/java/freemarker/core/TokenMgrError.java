@@ -32,6 +32,14 @@ import freemarker.template.Template;
  */
 public class TokenMgrError extends Error
 {
+    
+    /**
+     * The version identifier for this Serializable class.
+     * Increment only if the <i>serialized</i> form of the
+     * class changes.
+     */
+    private static final long serialVersionUID = 1L;
+    
    /*
     * Ordinals for various reasons why an Error of this type can be thrown.
     */
@@ -67,59 +75,57 @@ public class TokenMgrError extends Error
    private Integer endLineNumber, endColumnNumber;
 
    /**
-    * Replaces unprintable characters by their espaced (or unicode escaped)
+    * Replaces unprintable characters by their escaped (or unicode escaped)
     * equivalents in the given string
     */
    protected static final String addEscapes(String str) {
-      StringBuffer retval = new StringBuffer();
-      char ch;
-      for (int i = 0; i < str.length(); i++) {
-        switch (str.charAt(i))
-        {
-           case 0 :
-              continue;
-           case '\b':
-              retval.append("\\b");
-              continue;
-           case '\t':
-              retval.append("\\t");
-              continue;
-           case '\n':
-              retval.append("\\n");
-              continue;
-           case '\f':
-              retval.append("\\f");
-              continue;
-           case '\r':
-              retval.append("\\r");
-              continue;
-           case '\"':
-              retval.append("\\\"");
-              continue;
-           case '\'':
-              retval.append("\\\'");
-              continue;
-           case '\\':
-              retval.append("\\\\");
-              continue;
-           default:
-              if ((ch = str.charAt(i)) < 0x20 || ch > 0x7e) {
-                 String s = "0000" + Integer.toString(ch, 16);
-                 retval.append("\\u" + s.substring(s.length() - 4, s.length()));
-              } else {
-                 retval.append(ch);
-              }
-              continue;
-        }
-      }
-      return retval.toString();
+     StringBuffer retval = new StringBuffer();
+     char ch;
+     for (int i = 0; i < str.length(); i++) {
+       switch (str.charAt(i))
+       {
+         case '\b':
+           retval.append("\\b");
+           continue;
+         case '\t':
+           retval.append("\\t");
+           continue;
+         case '\n':
+           retval.append("\\n");
+           continue;
+         case '\f':
+           retval.append("\\f");
+           continue;
+         case '\r':
+           retval.append("\\r");
+           continue;
+         case '\"':
+           retval.append("\\\"");
+           continue;
+         case '\'':
+           retval.append("\\\'");
+           continue;
+         case '\\':
+           retval.append("\\\\");
+           continue;
+         default:
+           if ((ch = str.charAt(i)) < 0x20 || ch > 0x7e) {
+             String s = "0000" + Integer.toString(ch, 16);
+             retval.append("\\u" + s.substring(s.length() - 4, s.length()));
+           } else {
+             retval.append(ch);
+           }
+           continue;
+       }
+     }
+     return retval.toString();
    }
 
    /**
-    * Returns a detailed message for the Error when it's thrown by the
+    * Returns a detailed message for the Error when it is thrown by the
     * token manager to indicate a lexical error.
-    * Parameters : 
-    *    EOFSeen     : indicates if EOF caused the lexicl error
+    * Parameters :
+    *    EOFSeen     : indicates if EOF caused the lexical error
     *    curLexState : lexical state in which this error occurred
     *    errorLine   : line number when the error occurred
     *    errorColumn : column number when the error occurred
@@ -127,10 +133,13 @@ public class TokenMgrError extends Error
     *    curchar     : the offending character
     * Note: You can customize the lexical error message by modifying this method.
     */
-   protected static String LexicalError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar) {
-      return("Lexical error: encountered " +
-           (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar)) + "\"") + " (" + (int)curChar + "), ") +
-           "after \"" + addEscapes(errorAfter) + "\".");
+   protected static String LexicalErr(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, int curChar) {
+     char curChar1 = (char)curChar;
+     return("Lexical error at line " +
+           errorLine + ", column " +
+           errorColumn + ".  Encountered: " +
+           (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar1)) + "\"") + " (" + (int)curChar + "), ") +
+           "after : \"" + addEscapes(errorAfter) + "\"");
    }
 
    /**
@@ -186,8 +195,8 @@ public class TokenMgrError extends Error
        this.endColumnNumber = new Integer(endColumnNumber); 
     }
 
-   public TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar, int reason) {
-      this(LexicalError(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
+   public TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, int curChar, int reason) {
+      this(LexicalErr(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
       
       this.lineNumber = new Integer(errorLine);  // In J2SE there was no Integer.valueOf(int)
       this.columnNumber = new Integer(errorColumn);
