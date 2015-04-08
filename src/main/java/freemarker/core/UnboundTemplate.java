@@ -23,6 +23,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -90,11 +91,13 @@ public final class UnboundTemplate {
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
 
+        LineTableBuilder ltbReader;
         try {
             if (!(reader instanceof BufferedReader)) {
                 reader = new BufferedReader(reader, 0x1000);
             }
-            reader = new LineTableBuilder(reader);
+            ltbReader = new LineTableBuilder(reader);
+            reader = ltbReader;
 
             try {
                 FMParser parser = new FMParser(this,
@@ -103,7 +106,21 @@ public final class UnboundTemplate {
                         cfg.getWhitespaceStripping(),
                         cfg.getTagSyntax(),
                         cfg.getIncompatibleImprovements().intValue());
-                this.rootElement = parser.Root();
+                
+                TemplateElement rootElement;
+                try {
+                    rootElement = parser.Root();
+                } catch (IndexOutOfBoundsException exc) {
+                    // There's a JavaCC bug where the Reader throws a RuntimeExcepton and then JavaCC fails with
+                    // IndexOutOfBoundsException. If that wasn't the case, we just rethrow. Otherwise we suppress the
+                    // IndexOutOfBoundsException and let the real cause to be thrown later. 
+                    if (!ltbReader.hasFailure()) {
+                        throw exc;
+                    }
+                    rootElement = null;
+                }
+                this.rootElement = rootElement;
+                
                 this.actualTagSyntax = parser._getLastTagSyntax();
                 this.templateSpecifiedEncoding = parser._getTemplateSpecifiedEncoding();
             } catch (TokenMgrError exc) {
@@ -117,6 +134,9 @@ public final class UnboundTemplate {
         } finally {
             reader.close();
         }
+        
+        // Throws any exception that JavaCC has silently treated as EOF:
+        ltbReader.throwFaliure();
 
         if (prefixToNamespaceURIMapping != null) {
             prefixToNamespaceURIMapping = Collections.unmodifiableMap(prefixToNamespaceURIMapping);
@@ -428,48 +448,91 @@ public final class UnboundTemplate {
     }
 
     /**
-     * This is a helper class that builds up the line table info for us.
+     * This is a helper class that builds up the line table
+     * info for us.
      */
     private class LineTableBuilder extends FilterReader {
-    
-        StringBuffer lineBuf = new StringBuffer();
+        
+        private final StringBuffer lineBuf = new StringBuffer();
         int lastChar;
-    
+        boolean closed;
+        
+        /** Needed to work around JavaCC behavior where it silently treats any errors as EOF. */ 
+        private Exception failure; 
+
         /**
-         * @param r
-         *            the character stream to wrap
+         * @param r the character stream to wrap
          */
         LineTableBuilder(Reader r) {
             super(r);
         }
-    
-        public int read() throws IOException {
-            int c = in.read();
-            handleChar(c);
-            return c;
+        
+        public boolean hasFailure() {
+            return failure != null;
         }
-    
-        public int read(char cbuf[], int off, int len) throws IOException {
-            int numchars = in.read(cbuf, off, len);
-            for (int i = off; i < off + numchars; i++) {
-                char c = cbuf[i];
-                handleChar(c);
+
+        public void throwFaliure() throws IOException {
+            if (failure != null) {
+                if (failure instanceof IOException) {
+                    throw (IOException) failure;
+                }
+                if (failure instanceof RuntimeException) {
+                    throw (RuntimeException) failure;
+                }
+                throw new UndeclaredThrowableException(failure);
             }
-            return numchars;
         }
-    
+
+        public int read() throws IOException {
+            try {
+                int c = in.read();
+                handleChar(c);
+                return c;
+            } catch (Exception e) {
+                throw rememberException(e);
+            }
+        }
+
+        private IOException rememberException(Exception e) throws IOException {
+            // JavaCC used to read from the Reader after it was closed. So we must not treat that as a failure. 
+            if (!closed) {
+                failure = e;
+            }
+            if (e instanceof IOException) {
+                return (IOException) e;
+            }
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new UndeclaredThrowableException(e);
+        }
+
+        public int read(char cbuf[], int off, int len) throws IOException {
+            try {
+                int numchars = in.read(cbuf, off, len);
+                for (int i=off; i < off+numchars; i++) {
+                    char c = cbuf[i];
+                    handleChar(c);
+                }
+                return numchars;
+            } catch (Exception e) {
+                throw rememberException(e);
+            }
+        }
+
         public void close() throws IOException {
-            if (lineBuf.length() > 0) {
+            if (lineBuf.length() >0) {
                 lines.add(lineBuf.toString());
                 lineBuf.setLength(0);
             }
             super.close();
+            closed = true;
         }
-    
+
         private void handleChar(int c) {
             if (c == '\n' || c == '\r') {
                 if (lastChar == '\r' && c == '\n') { // CRLF under Windoze
-                    int lastIndex = lines.size() - 1;
+                    int lastIndex = lines.size() -1;
                     String lastLine = (String) lines.get(lastIndex);
                     lines.set(lastIndex, lastLine + '\n');
                 } else {
@@ -479,8 +542,8 @@ public final class UnboundTemplate {
                 }
             }
             else if (c == '\t') {
-                int numSpaces = 8 - (lineBuf.length() % 8);
-                for (int i = 0; i < numSpaces; i++) {
+                int numSpaces = 8 - (lineBuf.length() %8);
+                for (int i=0; i<numSpaces; i++) {
                     lineBuf.append(' ');
                 }
             }
