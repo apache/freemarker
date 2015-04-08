@@ -22526,6 +22526,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               supports time units, like in <literal>template_update_delay=500
               ms</literal>.</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed: If a template <quote>file</quote> was
+              successfully opened for reading, but then there was an
+              <literal>IOException</literal> during reading its content, the
+              parser (JavaCC) acted like if the template <quote>file</quote>
+              was ended there, and the exception was suppressed. It's actually
+              JavaCC that does this, and this quirk of it was never fixed. But
+              now FreeMarker has added a workaround in the
+              <literal>Template</literal> constructor, and so the exceptions
+              will be now thrown by it as expected.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

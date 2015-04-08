@@ -183,11 +183,13 @@ public class Template extends Configurable {
         this(name, sourceName, cfg, true);
         
         this.encoding = encoding;
+        LineTableBuilder ltbReader;
         try {
             if (!(reader instanceof BufferedReader)) {
                 reader = new BufferedReader(reader, 0x1000);
             }
-            reader = new LineTableBuilder(reader);
+            ltbReader = new LineTableBuilder(reader);
+            reader = ltbReader;
             
             try {
                 parser = new FMParser(this, reader,
@@ -214,6 +216,10 @@ public class Template extends Configurable {
         finally {
             reader.close();
         }
+        
+        // Throws any exception that JavaCC has silently treated as EOF:
+        ltbReader.throwFaliure();
+        
         DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
@@ -629,9 +635,13 @@ public class Template extends Configurable {
      * info for us.
      */
     private class LineTableBuilder extends FilterReader {
-
-        StringBuffer lineBuf = new StringBuffer();
+        
+        private final StringBuffer lineBuf = new StringBuffer();
         int lastChar;
+        boolean closed;
+        
+        /** Needed to work around JavaCC behavior where it silently treats any errors as EOF. */ 
+        private IOException failure; 
 
         /**
          * @param r the character stream to wrap
@@ -640,19 +650,41 @@ public class Template extends Configurable {
             super(r);
         }
 
+        public void throwFaliure() throws IOException {
+            if (failure != null) {
+                throw failure;
+            }
+        }
+
         public int read() throws IOException {
-            int c = in.read();
-            handleChar(c);
-            return c;
+            try {
+                int c = in.read();
+                handleChar(c);
+                return c;
+            } catch (IOException e) {
+                throw rememberException(e);
+            }
+        }
+
+        private IOException rememberException(IOException e) throws IOException {
+            // JavaCC used to read from the Reader after it was closed. So we must not treat that as a failure. 
+            if (!closed) {
+                failure = e;
+            }
+            return e;
         }
 
         public int read(char cbuf[], int off, int len) throws IOException {
-            int numchars = in.read(cbuf, off, len);
-            for (int i=off; i < off+numchars; i++) {
-                char c = cbuf[i];
-                handleChar(c);
+            try {
+                int numchars = in.read(cbuf, off, len);
+                for (int i=off; i < off+numchars; i++) {
+                    char c = cbuf[i];
+                    handleChar(c);
+                }
+                return numchars;
+            } catch (IOException e) {
+                throw rememberException(e);
             }
-            return numchars;
         }
 
         public void close() throws IOException {
@@ -661,6 +693,7 @@ public class Template extends Configurable {
                 lineBuf.setLength(0);
             }
             super.close();
+            closed = true;
         }
 
         private void handleChar(int c) {
