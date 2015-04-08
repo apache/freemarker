@@ -136,7 +136,7 @@ public final class UnboundTemplate {
         }
         
         // Throws any exception that JavaCC has silently treated as EOF:
-        ltbReader.throwFaliure();
+        ltbReader.throwFailure();
 
         if (prefixToNamespaceURIMapping != null) {
             prefixToNamespaceURIMapping = Collections.unmodifiableMap(prefixToNamespaceURIMapping);
@@ -448,8 +448,8 @@ public final class UnboundTemplate {
     }
 
     /**
-     * This is a helper class that builds up the line table
-     * info for us.
+     * Reader that builds up the line table info for us, and also helps in working around JavaCC's exception
+     * suppression.
      */
     private class LineTableBuilder extends FilterReader {
         
@@ -471,7 +471,7 @@ public final class UnboundTemplate {
             return failure != null;
         }
 
-        public void throwFaliure() throws IOException {
+        public void throwFailure() throws IOException {
             if (failure != null) {
                 if (failure instanceof IOException) {
                     throw (IOException) failure;
