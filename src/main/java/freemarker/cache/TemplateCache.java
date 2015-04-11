@@ -693,7 +693,7 @@ public class TemplateCache
         // Shortcut in case there is no acquisition
         if(asterisk == -1)
         {
-            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
+            return TemplateLookupResult.from(path, findTemplateSource(path));
         }
         StringTokenizer tok = new StringTokenizer(path, "/");
         int lastAsterisk = -1;
@@ -712,7 +712,7 @@ public class TemplateCache
             tokpath.add(pathToken);
         }
         if (lastAsterisk == -1) {  // if there was no real "*" step after all
-            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
+            return TemplateLookupResult.from(path, findTemplateSource(path));
         }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
@@ -722,11 +722,10 @@ public class TemplateCache
         }
         StringBuffer buf = new StringBuffer(path.length()).append(basePath);
         int l = basePath.length();
-        boolean debug = LOG.isDebugEnabled();
         for(;;)
         {
             String fullPath = buf.append(resourcePath).toString();
-            Object templateSource = modifyForConfIcI(findTemplateSourceAndLog(fullPath));
+            Object templateSource = findTemplateSource(fullPath);
             if(templateSource != null)
             {
                 return TemplateLookupResult.from(fullPath, templateSource);
@@ -740,13 +739,13 @@ public class TemplateCache
         }
     }
 
-    private Object findTemplateSourceAndLog(String path) throws IOException {
+    private Object findTemplateSource(String path) throws IOException {
         final Object result = templateLoader.findTemplateSource(path);
         if (LOG.isDebugEnabled()) {
             LOG.debug("TemplateLoader.findTemplateSource(" +  StringUtil.jQuote(path) + "): "
                     + (result == null ? "Not found" : "Found"));
         }
-        return result;
+        return modifyForConfIcI(result);
     }
 
     /**
