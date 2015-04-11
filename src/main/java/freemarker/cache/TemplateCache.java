@@ -266,8 +266,8 @@ public class TemplateCache
      * Similar to {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
      * {@code customLookupCondition}.
      * 
-     * @returns {@link MaybeMissingTemplate#getTemplate()} of the
-     *          {@link #getTemplate(String, Locale, Object, String, boolean)} return value.
+     * @return {@link MaybeMissingTemplate#getTemplate()} of the
+     *         {@link #getTemplate(String, Locale, Object, String, boolean)} return value.
      * 
      * @deprecated Use {@link #getTemplate(String, Locale, Object, String, boolean)}, which can return more detailed
      *             result when the template is missing.
