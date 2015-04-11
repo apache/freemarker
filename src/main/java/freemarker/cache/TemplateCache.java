@@ -215,7 +215,11 @@ public class TemplateCache
      *
      * @return A {@link MaybeMissingTemplate} object that contains the {@link Template}, or a
      *         {@link MaybeMissingTemplate} object that contains {@code null} as the {@link Template} and information
-     *         about the missing template. The return value itself is never {@code null}.
+     *         about the missing template. The return value itself is never {@code null}. Note that exceptions occurring
+     *         during template loading will not be classified as a missing template, so they will cause an exception to
+     *         be thrown by this method instead of returning a {@link MaybeMissingTemplate}. The idea is that having a
+     *         missing template is normal (not exceptional), providing that the backing storage mechanism could indeed
+     *         check that it's missing.
      * 
      * @throws MalformedTemplateNameException
      *             If the {@code name} was malformed according the current {@link TemplateNameFormat}. However, if the
@@ -261,6 +265,9 @@ public class TemplateCache
     /**
      * Similar to {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
      * {@code customLookupCondition}.
+     * 
+     * @returns {@link MaybeMissingTemplate#getTemplate()} of the
+     *          {@link #getTemplate(String, Locale, Object, String, boolean)} return value.
      * 
      * @deprecated Use {@link #getTemplate(String, Locale, Object, String, boolean)}, which can return more detailed
      *             result when the template is missing.
@@ -955,10 +962,9 @@ public class TemplateCache
         }
         
         /**
-         * When the template was missing, this <em>possibly</em> contains the explanation, or {@code null}. If the
-         * template wasn't missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always
-         * {@code null}. When the template is missing, it will be {@code null} for example if the normalization itself
-         * was unsuccessful.
+         * When the template was missing, this <em>possibly</em> contains its normalized name. If the template wasn't
+         * missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always {@code null}. When the
+         * template is missing, it will be {@code null} for example if the normalization itself was unsuccessful.
          */
         public String getMissingTemplateNormalizedName() {
             return missingTemplateNormalizedName;
