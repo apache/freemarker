@@ -1,30 +1,41 @@
 This is the (draft) of the 2.4.0 change log so far. It's not in the Manual yet, as merging in XDocBook XML
 changes from the 2.3 branch would be rather difficult.
 
-- [NBC] Removed deprecated:
-  Template#Template(String name, TemplateElement root, Configuration cfg) // package visible
-- [NBC] Removed TemplateObject.getTemplate()
-- [NBC] When resolving  arithmetic expressions and comparisons on parsing time (happens when only literal operands
-  are involved), Template.getArithmeticEngine() isn't used any more. Configuration.getArithmeticEngine() is
-  used instead.
-- [NBC] FMParser constructors aren't public any more (and were changed).
+Non-backward compatible (all are unlikely to affect real world applications):
+- Removed command-line tools (main methods in a library, often classified as CWE-489 "Leftover Debug Code"):
+  - freemarker.core.CommandLine (jar main-class). This has only printed the current version and copyright.
+  - freemarker.ext.dom.Transform. This was used to transform an XML file to output file via a template file.
+    Surpassed by FMPP long ago. (If there will be demand for it, it can be still reintroduced in a separate jar.)
+  - freemarker.template.utility.ToCanonical class: Converted a template to its canonical form. As the canonical
+    form was heavily broken before 2.3.21, and is still not perfect, yet nobody has complained, it's assumed
+    that canonicalization isn't used, hence nor the CLI to it.
+  - freemarker.ext.jdom.NodeListModel.main() method: Was used to transform an XML given on stdin with the specified
+    template file and write the output to stdout. The data model used for this transformation (JDOM NodeListModel) was
+    deprecated long ago.
+- Removed TemplateObject.getTemplate(), added getUnboundTemplate() instead. TemplateObject is not to be confused with
+  Template, and is only exploited by very few for some deeper tricks. Although TemplateObject is technically
+  (historically) public, it was marked as internal API and was excluded from the JavaDoc for a while.
+- When TemplateCache2 will be merged in: In 2.3.x, a cached error was thrown as a plain IOException with the original
+  (cached) exception as its cause exception.
+  This is not possible starting from 2.4.x, because to prevent memory leaks, the cache doesn't hold reference to the
+  cached exception any more, instead it only stores a String description of it (class name, message, and the same for
+  each its cause exceptions). The cached error will be throw as a CachedTemplateLoadingException (an IOException
+  subclass), which contains the string description of the original exception in its getMessage() value.
+- Removed deprecated *package visible* method:
+  Template#Template(String name, TemplateElement root, Configuration cfg)
+
+New features:  
+- There are no separate org.freemarker:freemarker-gae and org.freemarker:freemarker artifacts any more.
+  There's only org.freemarker:freemarker, which is GAE compatible.
 - Added Environment.getCurrentTemplate()
-- There are no separate org.freemarker:freemarker-gae and org.freemarker:freemarker artifacts anymore.
-  There's only org.freemarker:freemarker, which is backward compatible.
-- Custom attributes now keep the order of adding them
-- [NBC] Removed command-line tools (main methods in a library, often classified as CWE-489 "Leftover Debug Code"):
-  - freemarker.core.CommandLine (jar main-class) class.
-  - freemarker.ext.dom.Transform class
-  - freemarker.template.utility.ToCanonical class
-  - freemarker.ext.jdom.NodeListModel.main() method
-- Bugfix: When the same template was both #include-d and #import-ed, the macros from the #import-ed template has
-  ran in the namespace of the #import-ed template.
 - TemplateLoader.getLastModified(Object templateSource) can now throw GetLastModifiedException to indicate an
   error instead of returning -1 (which doesn't count as an error).
+- Custom attributes now keep the order of adding them
+- Bug fixed: When the same template was both #include-d and #import-ed, the macros from the #import-ed template has
+  ran in the namespace of the #import-ed template.
 
-When TemplateCache2 will be merged in:
-- [NBC] In 2.3.x, a cached error was thrown as a plain IOException with the original (cached) exception as its cause exception.
-  This is not possible starting from 2.4.x, because the cache doesn't hold reference to the cached exception any more,
-  instead it only stores a String description of it (class name, message, and the same for each its cause exceptions). 
-  The cached error will be throw as a CachedTemplateLoadingException (an IOException subclass), which contains the string
-  description of the original exception in its getMessage() value.
+Notes on internal changes (might need not be in Version History):
+- When resolving  arithmetic expressions and comparisons on parsing time (happens when only literal operands
+  are involved), Template.getArithmeticEngine() isn't used any more. Configuration.getArithmeticEngine() is
+  used instead. This is backward compatible as using published API-s you can't set Template-level settings before the
+  Template is completed by the parser, and so it has defaulted to the Configuration-level artimeticEngine setting anyway.
