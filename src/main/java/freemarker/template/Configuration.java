@@ -1508,17 +1508,21 @@ public class Configuration extends Configurable implements Cloneable {
      *            repeated until either a template is found, or the base path is completely exhausted.
      *
      * @param locale
-     *            The requested locale of the template. Can be {@code null} since 2.3.22, in which case it defaults
-     *            {@link Configuration#getLocale()}. Assuming that you have specified {@code en_US} as the locale and
-     *            {@code myTemplate.ftl} as the name of the template, and the default {@link TemplateLookupStrategy} is
-     *            used and {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first
-     *            try to retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
-     *            {@code myTemplate.ftl}.
+     *            The requested locale of the template. This is what {@link Template#getLocale()} on the resulting
+     *            {@link Template} will return. This parameter can be {@code null} since 2.3.22, in which case it
+     *            defaults to {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the
+     *            default value, not {@code null}). This parameter also drives localized template lookup. Assuming that
+     *            you have specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template,
+     *            and the default {@link TemplateLookupStrategy} is used and
+     *            {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first try to
+     *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
+     *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
+     *            finds {@code myTemplate.ftl}.
      * 
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
      *            Can be {@code null} (though it's up to the custom {@link TemplateLookupStrategy} if it allows that).
-     *            This object will be used as part of a cache key, so it must to have a proper
+     *            This object will be used as part of the cache key, so it must to have a proper
      *            {@link Object#equals(Object)} and {@link Object#hashCode()} method. It also should have reasonable
      *            {@link Object#toString()}, as it's possibly quoted in error messages. The expected type is up to the
      *            custom {@link TemplateLookupStrategy}. See also:

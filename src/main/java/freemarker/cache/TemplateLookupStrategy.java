@@ -23,9 +23,11 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
- * Finds the {@link TemplateLoader}-level (storage-level) template source for a template name. This usually means trying
- * various {@link TemplateLoader}-level template names that were deduced from the requested name. Trying a name usually
- * means calling {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)} with it and checking the value of
+ * Finds the {@link TemplateLoader}-level (storage-level) template source for the template name witch which the template
+ * was requested (as in {@link Configuration#getTemplate(String)}). This usually means trying various
+ * {@link TemplateLoader}-level template names (so called source names; see also {@link Template#getSourceName()}) that
+ * were deduced from the requested name. Trying a name usually means calling
+ * {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)} with it and checking the value of
  * {@link TemplateLookupResult#isPositive()}.
  * 
  * <p>
@@ -38,7 +40,7 @@ import freemarker.template.Template;
  * normalized form of the template name as it was requested (with {@link Configuration#getTemplate(String)}, etc.). It
  * only influences the so called source name of the template ({@link Template#getSourceName()}). The template's name is
  * used as the basis for resolving relative inclusions/imports in the template. The source name is pretty much only used
- * in error messages as error location.
+ * in error messages as error location, and of course, to actually load the template "file".
  * <li>Understand the impact of the last point if your template lookup strategy fiddles not only with the file name part
  * of the template name, but also with the directory part. For example, one may want to map "foo.ftl" to "en/foo.ftl",
  * "fr/foo.ftl", etc. That's legal, but the result is kind of like if you had several root directories ("en/", "fr/",
@@ -84,7 +86,8 @@ public abstract class TemplateLookupStrategy {
      *            are needed to implement the strategy. Some of the important input parameters are:
      *            {@link TemplateLookupContext#getTemplateName()}, {@link TemplateLookupContext#getTemplateLocale()}.
      *            The most important operations are {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)}
-     *            and {@link TemplateLookupContext#createNegativeLookupResult()}.
+     *            and {@link TemplateLookupContext#createNegativeLookupResult()}. (Note that you deliberately can't
+     *            use {@link TemplateLoader}-s directly to implement lookup.)
      * 
      * @return Usually the return value of {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)}, or
      *         {@code TemplateLookupContext#createNegativeLookupResult()} if no matching template exists. Can't be
