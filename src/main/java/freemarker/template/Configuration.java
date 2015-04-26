@@ -437,8 +437,8 @@ public class Configuration extends Configurable implements Cloneable {
      *          generation.) Note that apart from the effect on FTL's {@code .local_template_name} (see
      *          previous point), this should only matter if you have set settings directly on {@link Template} objects,
      *          and almost nobody does that. Also note that macro calls have never changed the {@link Environment}
-     *          parent to the {@link Template} that contains the macro definition, (with is a legacy bug), so there's no
-     *          change there.
+     *          parent to the {@link Template} that contains the macro definition, so this mechanism was always broken.
+     *          As now we consistently never change the parent, the behavior when calling macros didn't change.
      *       </li>
      *       <li><p>
      *          When using {@code freemarker.ext.servlet.FreemarkerServlet}:
