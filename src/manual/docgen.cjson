@@ -6,7 +6,7 @@
 internalBookmarks: {
   "Alpha. index": alphaidx
   "Glossary": gloss
-  "Expressions": exp_cheatsheet 
+  "Expressions": exp_cheatsheet
   "?builtins": ref_builtins_alphaidx
   "#directives": ref_directive_alphaidx
   ".spec_vars": ref_specvar
@@ -39,3 +39,5 @@ tabs: {
 onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
 
 showXXELogo
+
+searchKey: "014728049242975963158:8awjt03uofm"
