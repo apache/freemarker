@@ -1661,7 +1661,7 @@ public class TaglibFactory implements TemplateHashModel {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Custom EL functions won't be loaded because "
                             + (wrapper == null
-                                    ? "no ObjectWarpper was specified "
+                                    ? "no ObjectWrapper was specified "
                                     : "the ObjectWrapper wasn't instance of " + BeansWrapper.class.getName())
                             + ".");
                 }
