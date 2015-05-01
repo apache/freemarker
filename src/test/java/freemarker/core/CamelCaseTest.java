@@ -1,6 +1,10 @@
 package freemarker.core;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -8,8 +12,59 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
-
 public class CamelCaseTest extends TemplateTest {
+
+    @Test
+    public void camelCaseBuiltIns() throws IOException, TemplateException {
+        assertOutput("${'x'?upperCase} ${'x'?upper_case}", "X X");
+    }
+
+    @Test
+    public void camelCaseBuiltInErrorMessage() throws IOException, TemplateException {
+        assertErrorContains("${'x'?upperCasw}", "upperCase", "\\!upper_case");
+        assertErrorContains("${'x'?upper_casw}", "upper_case", "\\!upperCase");
+        // [2.4] If camel case will be the recommended style, then this need to be inverted:
+        assertErrorContains("${'x'?foo}", "upper_case", "\\!upperCase");
+    }
+    
+    @Test
+    public void builtInsHasBothNamingStyle() throws IOException, TemplateException {
+        assertContainsBothNamingStyles(getConfiguration().getSupportedBuiltInNames(), new NamePairAssertion() {
+
+            public void assertPair(String name1, String name2) {
+                BuiltIn bi1  = (BuiltIn) BuiltIn.builtins.get(name1);
+                BuiltIn bi2 = (BuiltIn) BuiltIn.builtins.get(name2);
+                assertTrue("\"" + name1 + "\" and \"" + name2 + "\" doesn't belong to the same BI object.",
+                        bi1 == bi2);
+            }
+            
+        });
+    }
+
+    private void assertContainsBothNamingStyles(Set<String> names, NamePairAssertion namePairAssertion) {
+        Set<String> underscoredNamesWithCamelCasePair = new HashSet<String>();
+        for (String name : names) {
+            if (_CoreStringUtils.isCamelCaseIdentifier(name)) {
+                String underscoredName = correctIsoBIExceptions(_CoreStringUtils.camelCaseToUnderscored(name)); 
+                assertTrue(
+                        "Missing underscored variation \"" + underscoredName + "\" for \"" + name + "\".",
+                        names.contains(underscoredName));
+                assertTrue(underscoredNamesWithCamelCasePair.add(underscoredName));
+                
+                namePairAssertion.assertPair(name, underscoredName);
+            }
+        }
+        for (String name : names) {
+            if (_CoreStringUtils.isUnderscoredIdentifier(name)) {
+                assertTrue("Missing camel case variation for \"" + name + "\".",
+                        underscoredNamesWithCamelCasePair.contains(name));
+            }
+        }
+    }
+    
+    private String correctIsoBIExceptions(String underscoredName) {
+        return underscoredName.replace("_n_z", "_nz").replace("_f_z", "_fz");
+    }
 
     @Test
     public void camelCaseDirectivesNonStrict() throws IOException, TemplateException {
@@ -78,6 +133,12 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains(
                 "<#foreach x in 1..3>${x}</#forEach>",
                 "forEach", "foreach", "camel");
+    }
+    
+    private interface NamePairAssertion {
+        
+        void assertPair(String name1, String name2);
+        
     }
     
 }
