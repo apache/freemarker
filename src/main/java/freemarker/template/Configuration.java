@@ -165,6 +165,10 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
 
+    public static final int AUTO_DETECT_NAMING_CONVENTION = 10;
+    public static final int CAMEL_CASE_NAMING_CONVENTION = 11;
+    public static final int SNAKE_CASE_NAMING_CONVENTION = 12;
+    
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     

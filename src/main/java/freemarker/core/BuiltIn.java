@@ -285,31 +285,34 @@ abstract class BuiltIn extends Expression implements Cloneable {
             names.addAll(builtins.keySet());
             Collections.sort(names);
             char lastLetter = 0;
-            boolean keyCamelCase = _CoreStringUtils.isCamelCaseIdentifier(key);
+            
+            int shownNamingConvention;
+            {
+                int namingConvention = _CoreStringUtils.getIdentifierNamingConvention(key);
+                shownNamingConvention = namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
+                        ? namingConvention : Configuration.SNAKE_CASE_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
+            }
+            
             boolean first = true;
             for (Iterator it = names.iterator(); it.hasNext();) {
-                String name = (String) it.next();
-                if (keyCamelCase
-                        ? !_CoreStringUtils.isUnderscoredIdentifier(name)
-                        : !_CoreStringUtils.isCamelCaseIdentifier(name)) {
+                String correctName = (String) it.next();
+                int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
+                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
+                        ? correctNameNamingConvetion != Configuration.SNAKE_CASE_NAMING_CONVENTION
+                        : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
                     if (first) {
                         first = false;
                     } else {
                         buf.append(", ");
                     }
                     
-                    char firstChar = name.charAt(0);
+                    char firstChar = correctName.charAt(0);
                     if (firstChar != lastLetter) {
                         lastLetter = firstChar;
                         buf.append('\n');
                     }
-                    buf.append(name);
+                    buf.append(correctName);
                 }
-            }
-            if (keyCamelCase) {
-                buf.append("\n(and the underscore_case version of these)");
-            } else {
-                buf.append("\n(and the camelCase version of these)");
             }
                 
             throw new ParseException(buf.toString(), target);

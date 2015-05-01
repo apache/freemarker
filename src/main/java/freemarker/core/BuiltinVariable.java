@@ -34,41 +34,53 @@ import freemarker.template.utility.StringUtil;
  */
 final class BuiltinVariable extends Expression {
 
+    static final String TEMPLATE_NAME_CC = "templateName";
     static final String TEMPLATE_NAME = "template_name";
     static final String NAMESPACE = "namespace";
     static final String MAIN = "main";
     static final String GLOBALS = "globals";
     static final String LOCALS = "locals";
+    static final String DATA_MODEL_CC = "dataModel";
     static final String DATA_MODEL = "data_model";
     static final String LANG = "lang";
     static final String LOCALE = "locale";
+    static final String LOCALE_OBJECT_CC = "localeObject";
     static final String LOCALE_OBJECT = "locale_object";
+    static final String CURRENT_NODE_CC = "currentNode";
     static final String CURRENT_NODE = "current_node";
     static final String NODE = "node";
     static final String PASS = "pass";
     static final String VARS = "vars";
     static final String VERSION = "version";
     static final String ERROR = "error";
+    static final String OUTPUT_ENCODING_CC = "outputEncoding";
     static final String OUTPUT_ENCODING = "output_encoding";
+    static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
     
     static final String[] SPEC_VAR_NAMES = new String[] {
+        CURRENT_NODE_CC,
         CURRENT_NODE,
+        DATA_MODEL_CC,
         DATA_MODEL,
         ERROR,
         GLOBALS,
         LANG,
         LOCALE,
+        LOCALE_OBJECT_CC,
         LOCALE_OBJECT,
         LOCALS,
         MAIN,
         NAMESPACE,
         NODE,
         NOW,
+        OUTPUT_ENCODING_CC,
         OUTPUT_ENCODING,
         PASS,
+        TEMPLATE_NAME_CC,
         TEMPLATE_NAME,
+        URL_ESCAPING_CHARSET_CC,
         URL_ESCAPING_CHARSET,
         VARS,
         VERSION
@@ -81,18 +93,28 @@ final class BuiltinVariable extends Expression {
             StringBuffer sb = new StringBuffer();
             sb.append("Unknown special variable name: ");
             sb.append(StringUtil.jQuote(name)).append(".");
-            final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(name);
-            if (!underscoredName.equals(name) && Arrays.binarySearch(SPEC_VAR_NAMES, underscoredName) >= 0) {
-                sb.append(" Supporting camelCase special variable names is planned for FreeMarker 2.4.0; check if an "
-                            + "update is available, and if it indeed supports camel case. "
-                            + "Until that, use \"").append(underscoredName).append("\".");
-            } else {
-                sb.append(" The allowed special variable names are: ");
-                for (int i = 0; i < SPEC_VAR_NAMES.length; i++) {
-                    if (i != 0) {
+            
+            int shownNamingConvention;
+            {
+                int namingConvention = _CoreStringUtils.getIdentifierNamingConvention(name);
+                shownNamingConvention = namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
+                        ? namingConvention : Configuration.SNAKE_CASE_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
+            }
+            
+            sb.append(" The allowed special variable names are: ");
+            boolean first = true;
+            for (int i = 0; i < SPEC_VAR_NAMES.length; i++) {
+                final String correctName = SPEC_VAR_NAMES[i];
+                int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
+                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
+                        ? correctNameNamingConvetion != Configuration.SNAKE_CASE_NAMING_CONVENTION
+                        : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+                    if (first) {
+                        first = false;
+                    } else {
                         sb.append(", ");
                     }
-                    sb.append(SPEC_VAR_NAMES[i]);
+                    sb.append(correctName);
                 }
             }
             throw new ParseException(sb.toString(), this);
@@ -115,7 +137,7 @@ final class BuiltinVariable extends Expression {
             Macro.Context ctx = env.getCurrentMacroContext();
             return ctx == null ? null : ctx.getLocals();
         }
-        if (name == DATA_MODEL) {
+        if (name == DATA_MODEL || name == DATA_MODEL_CC) {
             return env.getDataModel();
         }
         if (name == VARS) {
@@ -124,16 +146,16 @@ final class BuiltinVariable extends Expression {
         if (name == LOCALE) {
             return new SimpleScalar(env.getLocale().toString());
         }
-        if (name == LOCALE_OBJECT) {
+        if (name == LOCALE_OBJECT || name == LOCALE_OBJECT_CC) {
             return env.getObjectWrapper().wrap(env.getLocale());
         }
         if (name == LANG) {
             return new SimpleScalar(env.getLocale().getLanguage());
         }
-        if (name == CURRENT_NODE || name == NODE) {
+        if (name == CURRENT_NODE || name == NODE || name == CURRENT_NODE_CC) {
             return env.getCurrentVisitorNode();
         }
-        if (name == TEMPLATE_NAME) {
+        if (name == TEMPLATE_NAME || name == TEMPLATE_NAME_CC) {
             return new SimpleScalar(env.getTemplate().getName());
         }
         if (name == PASS) {
@@ -142,11 +164,11 @@ final class BuiltinVariable extends Expression {
         if (name == VERSION) {
             return new SimpleScalar(Configuration.getVersionNumber());
         }
-        if (name == OUTPUT_ENCODING) {
+        if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
             String s = env.getOutputEncoding();
             return s != null ? new SimpleScalar(s) : null;
         }
-        if (name == URL_ESCAPING_CHARSET) {
+        if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {
             String s = env.getURLEscapingCharset();
             return s != null ? new SimpleScalar(s) : null;
         }

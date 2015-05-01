@@ -16,6 +16,7 @@
 
 package freemarker.core;
 
+import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -66,26 +67,22 @@ public final class _CoreStringUtils {
         return StringUtil.replace(StringUtil.replace(StringUtil.replace(name, "-", "\\-"), ".", "\\."), ":", "\\:");
     }
 
-    // [2.4] If camelCase will be the recommended style, check places where this is used to show camelCase by default.
-    public static boolean isCamelCaseIdentifier(String name) {
-        if (name.length() < 2) return false;
-        if (isUpperUSASCII(name.charAt(0))) return false;
-        for (int i = 1; i < name.length(); i++) {
-            if (isUpperUSASCII(name.charAt(i))) {
-                return true;
+    /**
+     * @return {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}, or {@link Configuration#SNAKE_CASE_NAMING_CONVENTION}
+     *         or, {@link Configuration#AUTO_DETECT_NAMING_CONVENTION} when undecidable.
+     */
+    public static int getIdentifierNamingConvention(String name) {
+        final int ln = name.length();
+        for (int i = 0; i < ln; i++) {
+            final char c = name.charAt(i);
+            if (c == '_') {
+                return Configuration.SNAKE_CASE_NAMING_CONVENTION;
+            }
+            if (isUpperUSASCII(c)) {
+                return Configuration.CAMEL_CASE_NAMING_CONVENTION;
             }
         }
-        return false;
-    }
-    
-    // [2.4] If camelCase will be the recommended style, check places where this is used to show camelCase by default.
-    public static boolean isUnderscoredIdentifier(String name) {
-        for (int i = 0; i < name.length(); i++) {
-            if (name.charAt(i) == '_') {
-                return true;
-            }
-        }
-        return false;
+        return Configuration.AUTO_DETECT_NAMING_CONVENTION;
     }
     
     // [2.4] Won't be needed anymore

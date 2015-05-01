@@ -3,7 +3,9 @@ package freemarker.core;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.Test;
@@ -14,6 +16,34 @@ import freemarker.test.TemplateTest;
 
 public class CamelCaseTest extends TemplateTest {
 
+    @Test
+    public void camelCaseSpecialVars() throws IOException, TemplateException {
+        getConfiguration().setOutputEncoding("utf-8");
+        getConfiguration().setURLEscapingCharset("iso-8859-1");
+        getConfiguration().setLocale(Locale.GERMANY);
+        assertOutput("${.dataModel?isHash?c} ${.data_model?isHash?c}", "true true");
+        assertOutput("${.localeObject.toString()} ${.locale_object.toString()}", "de_DE de_DE");
+        assertOutput("${.templateName?length} ${.template_name?length}", "0 0");
+        assertOutput("${.outputEncoding} ${.output_encoding}", "utf-8 utf-8");
+        assertOutput("${.urlEscapingCharset} ${.url_escaping_charset}", "iso-8859-1 iso-8859-1");
+        assertOutput("${.currentNode!'-'} ${.current_node!'-'}", "- -");
+    }
+
+    @Test
+    public void camelCaseSpecialVarsInErrorMessage() throws IOException, TemplateException {
+        assertErrorContains("${.fooBar}", "dataModel", "\\!data_model");
+        assertErrorContains("${.foo_bar}", "data_model", "\\!dataModel");
+        // [2.4] If camel case will be the recommended style, then this need to be inverted:
+        assertErrorContains("${.foo}", "data_model", "\\!dataModel");
+    }
+    
+    @Test
+    public void specialVarsHasBothNamingStyle() throws IOException, TemplateException {
+        assertContainsBothNamingStyles(
+                new HashSet(Arrays.asList(BuiltinVariable.SPEC_VAR_NAMES)),
+                new NamePairAssertion() { public void assertPair(String name1, String name2) { } });
+    }
+    
     @Test
     public void camelCaseBuiltIns() throws IOException, TemplateException {
         assertOutput("${'x'?upperCase} ${'x'?upper_case}", "X X");
@@ -44,7 +74,7 @@ public class CamelCaseTest extends TemplateTest {
     private void assertContainsBothNamingStyles(Set<String> names, NamePairAssertion namePairAssertion) {
         Set<String> underscoredNamesWithCamelCasePair = new HashSet<String>();
         for (String name : names) {
-            if (_CoreStringUtils.isCamelCaseIdentifier(name)) {
+            if (_CoreStringUtils.getIdentifierNamingConvention(name) == Configuration.CAMEL_CASE_NAMING_CONVENTION) {
                 String underscoredName = correctIsoBIExceptions(_CoreStringUtils.camelCaseToUnderscored(name)); 
                 assertTrue(
                         "Missing underscored variation \"" + underscoredName + "\" for \"" + name + "\".",
@@ -55,7 +85,7 @@ public class CamelCaseTest extends TemplateTest {
             }
         }
         for (String name : names) {
-            if (_CoreStringUtils.isUnderscoredIdentifier(name)) {
+            if (_CoreStringUtils.getIdentifierNamingConvention(name) == Configuration.SNAKE_CASE_NAMING_CONVENTION) {
                 assertTrue("Missing camel case variation for \"" + name + "\".",
                         underscoredNamesWithCamelCasePair.contains(name));
             }
