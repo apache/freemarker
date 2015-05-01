@@ -247,6 +247,8 @@ public class FMParser {
         }
         throw new ParseException("Expecting boolean (true/false) parameter", exp);
     }
+    
+    
 }
 
 PARSER_END(FMParser)
@@ -331,7 +333,8 @@ TOKEN_MGR_DECLS:
             tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
-        char firstChar = tok.image.charAt(0);
+        final String image = tok.image;
+        char firstChar = image.charAt(0);
         if (autodetectTagSyntax && !directiveSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
         }
@@ -339,18 +342,53 @@ TOKEN_MGR_DECLS:
             tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
-        if (!strictEscapeSyntax) {
+        if (!strictEscapeSyntax && !isKnownCamelCaseTag(tok)) {
             SwitchTo(newLexState);
             return;
         }
         if (!squBracTagSyntax) {
-            if (!tok.image.startsWith("<#") && !tok.image.startsWith("</#")) {
+            if (image.length() < 3 || image.charAt(1) != '#' && image.charAt(2) != '#') {
                 tok.kind = STATIC_TEXT_NON_WS;
                 return;
             }
         }
         directiveSyntaxEstablished = true;
         SwitchTo(newLexState);
+    }
+    
+    /**
+     * Quickly detects <em>known</em> camel case tags, both in start- and end-tag tokens.
+     */
+    static boolean isKnownCamelCaseTag(Token tok) {
+        final String img = tok.image;
+        final int ln = img.length();
+        
+        int idx = 0;
+        char c = 0;
+        
+        // Skip tag delimiter:
+        while (idx < ln) {
+            c = img.charAt(idx++);
+            if (c != '<' && c != '[' && c != '/' && c != '#') {
+                break;
+            }
+        }
+        if (idx == ln) return false;
+
+        // Note that idx points to the next char after c now.
+        if (c == 'e') {
+            // elseIf?
+            return (idx + 3 < ln && img.charAt(idx + 3) == 'I');
+        } else if (c == 'n') {
+            // noParse or noEscsape?
+            if (idx + 1 < ln) {
+                char c2 = img.charAt(idx + 1);
+                return c2 == 'P' || c2 == 'E';
+            }
+        } else if (c == 'f') {
+            return (idx + 2 < ln && img.charAt(idx + 2) == 'E');
+        }
+        return false;
     }
 
     private void unifiedCall(Token tok) {
@@ -464,11 +502,11 @@ TOKEN:
     |
     <IF : <START_TAG> "if" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
-    <ELSE_IF : <START_TAG> "elseif" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <ELSE_IF : <START_TAG> "else" ("i"|"I") "f" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
     <LIST : <START_TAG> "list" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
-    <FOREACH : <START_TAG> "foreach" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <FOREACH : <START_TAG> "for" ("e"|"E") "ach" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
     <SWITCH : <START_TAG> "switch" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
@@ -506,7 +544,10 @@ TOKEN:
     |
     <TERSE_COMMENT : ("<" | "[") "#--" > { noparseTag = "-->"; strictSyntaxCheck(matchedToken, NO_PARSE); }
     |
-    <NOPARSE : <START_TAG> "noparse" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, NO_PARSE); noparseTag = "noparse"; }
+    <NOPARSE: <START_TAG> "no" ("p" | "P") "arse" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, NO_PARSE);
+        noparseTag = isKnownCamelCaseTag(matchedToken) ? "noParse" : "noparse";
+    }
     |
     <END_IF : <END_TAG> "if" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -516,7 +557,7 @@ TOKEN:
     |
     <END_ATTEMPT : <END_TAG> "attempt" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
-    <END_FOREACH : <END_TAG> "foreach" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_FOREACH : <END_TAG> "for" ("e"|"E") "ach" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <END_LOCAL : <END_TAG> "local" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -568,9 +609,9 @@ TOKEN:
     |
     <END_ESCAPE : <END_TAG> "escape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
-    <NOESCAPE : <START_TAG> "noescape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <NOESCAPE : <START_TAG> "no" ("e"|"E") "scape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
-    <END_NOESCAPE : <END_TAG> "noescape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_NOESCAPE : <END_TAG> "no" ("e"|"E") "scape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <UNIFIED_CALL : "<@" | "[@" > { unifiedCall(matchedToken); }
     |
@@ -617,12 +658,7 @@ TOKEN:
                 }
 
                 String tip = null;
-                if (dn.equals("elseIf") || dn.equals("forEach") || dn.equals("noParse") || dn.equals("noEscape")) {
-                    tip = "Supporting camelCase directive names is planned for FreeMarker 2.4.0; check if an update is "
-                            + "available, and if it indeed supports camel case. Until that, use all-lowercase.";
-                } else if (!dn.toLowerCase().equals(dn)) {
-                    tip = "In FreeMarker 2.3.x, directive names are all-lower-case.";
-                } else if (dn.equals("set") || dn.equals("var")) {
+                if (dn.equals("set") || dn.equals("var")) {
                     tip = "Use #assign or #local or #global, depending on the intented scope "
                           + "(#assign is template-scope). " + PLANNED_DIRECTIVE_HINT;
                 } else if (dn.equals("else_if")) {
@@ -2029,6 +2065,13 @@ IteratorBlock ForEach() :
     block = OptionalBlock()
     end = <END_FOREACH>
     {
+        if (FMParserTokenManager.isKnownCamelCaseTag(start) != FMParserTokenManager.isKnownCamelCaseTag(end)) {
+            throw new ParseException(
+                    "Either both the start-tag and the end-tag must use \"forEach\" (camel-case), "
+                    + "or both must use \"foreach\" (all-lowercase).",
+                    template, end);
+        }
+        
         --loopNesting;
         IteratorBlock result = new IteratorBlock(exp, index.image, block, true);
         result.setLocation(template, start, end);
@@ -2849,13 +2892,20 @@ NoEscapeBlock NoEscape() :
     start = <NOESCAPE>
     {
         if (escapes.isEmpty()) {
-            throw new ParseException("noescape with no matching escape encountered.", template, start);
+            throw new ParseException("#noescape with no matching #escape encountered.", template, start);
         }
         Object escape = escapes.removeFirst();
     }
     content = OptionalBlock()
     end = <END_NOESCAPE>
     {
+        if (FMParserTokenManager.isKnownCamelCaseTag(start) != FMParserTokenManager.isKnownCamelCaseTag(end)) {
+            throw new ParseException(
+                    "Either both the start-tag and the end-tag must use \"noEscape\" (camel-case), "
+                    + "or both must use \"noescape\" (all-lowercase).",
+                    template, end);
+        }
+    
         escapes.addFirst(escape);
         NoEscapeBlock result = new NoEscapeBlock(content);
         result.setLocation(template, start, end);
