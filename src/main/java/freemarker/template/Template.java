@@ -192,11 +192,13 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
+                final Configuration actualCfg = getConfiguration();
                 parser = new FMParser(this, reader,
-                        getConfiguration().getStrictSyntaxMode(),
-                        getConfiguration().getWhitespaceStripping(),
-                        getConfiguration().getTagSyntax(),
-                        getConfiguration().getIncompatibleImprovements().intValue());
+                        actualCfg.getStrictSyntaxMode(),
+                        actualCfg.getWhitespaceStripping(),
+                        actualCfg.getTagSyntax(),
+                        actualCfg.getNamingConvention(),
+                        actualCfg.getIncompatibleImprovements().intValue());
                 this.rootElement = parser.Root();
                 this.actualTagSyntax = parser._getLastTagSyntax();
             }

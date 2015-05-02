@@ -1246,6 +1246,11 @@ public class Configurable
      *       <br>String value: Must be one of
      *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}. 
      *       
+     *   <li><p>{@code "naming_convention"}:
+     *       See {@link Configuration#setNamingConvention(int)}.
+     *       <br>String value: Must be one of
+     *       {@code "auto_detect"}, {@code "legacy"}, and {@code "camel_case"}. 
+     *       
      *   <li><p>{@code "incompatible_improvements"}:
      *       See {@link Configuration#setIncompatibleImprovements(Version)}.
      *       <br>String value: version number like {@code 2.3.20}.

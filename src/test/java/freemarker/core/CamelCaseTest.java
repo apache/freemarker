@@ -21,12 +21,18 @@ public class CamelCaseTest extends TemplateTest {
         getConfiguration().setOutputEncoding("utf-8");
         getConfiguration().setURLEscapingCharset("iso-8859-1");
         getConfiguration().setLocale(Locale.GERMANY);
-        assertOutput("${.dataModel?isHash?c} ${.data_model?isHash?c}", "true true");
-        assertOutput("${.localeObject.toString()} ${.locale_object.toString()}", "de_DE de_DE");
-        assertOutput("${.templateName?length} ${.template_name?length}", "0 0");
-        assertOutput("${.outputEncoding} ${.output_encoding}", "utf-8 utf-8");
-        assertOutput("${.urlEscapingCharset} ${.url_escaping_charset}", "iso-8859-1 iso-8859-1");
-        assertOutput("${.currentNode!'-'} ${.current_node!'-'}", "- -");
+        assertOutput("${.dataModel?isHash?c}", "true");
+        assertOutput("${.data_model?is_hash?c}", "true");
+        assertOutput("${.localeObject.toString()}", "de_DE");
+        assertOutput("${.locale_object.toString()}", "de_DE");
+        assertOutput("${.templateName?length}", "0");
+        assertOutput("${.template_name?length}", "0");
+        assertOutput("${.outputEncoding}", "utf-8");
+        assertOutput("${.output_encoding}", "utf-8");
+        assertOutput("${.urlEscapingCharset}", "iso-8859-1");
+        assertOutput("${.url_escaping_charset}", "iso-8859-1");
+        assertOutput("${.currentNode!'-'}", "-");
+        assertOutput("${.current_node!'-'}", "-");
     }
 
     @Test
@@ -46,15 +52,57 @@ public class CamelCaseTest extends TemplateTest {
     
     @Test
     public void camelCaseBuiltIns() throws IOException, TemplateException {
-        assertOutput("${'x'?upperCase} ${'x'?upper_case}", "X X");
+        assertOutput("${'x'?upperCase}", "X");
+        assertOutput("${'x'?upper_case}", "X");
     }
 
+    @Test
+    public void evalAndInterpret() throws IOException, TemplateException {
+        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
+        // The naming convention detected doesn't affect the enclosing template's naming convention.
+        // - ?eval:
+        assertOutput("${\"'x'?upperCase\"?eval}${'x'?upper_case}", "XX");
+        assertOutput("${\"'x'?upper_case\"?eval}${'x'?upperCase}", "XX");
+        assertOutput("${'x'?upperCase}${\"'x'?upper_case\"?eval}", "XX");
+        assertErrorContains("${\"'x'\n?upperCase\n?is_string\"?eval}",
+                "naming convention", "camel", "upperCase", "is_string", "line 2", "line 3");
+        // - ?interpret:
+        assertOutput("<@r\"${'x'?upperCase}\"?interpret />${'x'?upper_case}", "XX");
+        assertOutput("<@r\"${'x'?upper_case}\"?interpret />${'x'?upperCase}", "XX");
+        assertOutput("${'x'?upper_case}<@r\"${'x'?upperCase}\"?interpret />", "XX");
+        assertErrorContains("<@r\"${'x'\n?upperCase\n?is_string}\"?interpret />",
+                "naming convention", "camel", "upperCase", "is_string", "line 2", "line 3");
+        
+        // Will be inherited by ?eval-ed/?interpreted fragments:
+        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        // - ?eval:
+        assertErrorContains("${\"'x'?upper_case\"?eval}", "naming convention", "camel", "upper_case");
+        assertOutput("${\"'x'?upperCase\"?eval}", "X");
+        // - ?interpret:
+        assertErrorContains("<@r\"${'x'?upper_case}\"?interpret />", "naming convention", "camel", "upper_case");
+        assertOutput("<@r\"${'x'?upperCase}\"?interpret />", "X");
+        
+        // Again, will be inherited by ?eval-ed/?interpreted fragments:
+        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        // - ?eval:
+        assertErrorContains("${\"'x'?upperCase\"?eval}", "naming convention", "legacy", "upperCase");
+        assertOutput("${\"'x'?upper_case\"?eval}", "X");
+        // - ?interpret:
+        assertErrorContains("<@r\"${'x'?upperCase}\"?interpret />", "naming convention", "legacy", "upperCase");
+        assertOutput("<@r\"${'x'?upper_case}\"?interpret />", "X");
+    }
+    
     @Test
     public void camelCaseBuiltInErrorMessage() throws IOException, TemplateException {
         assertErrorContains("${'x'?upperCasw}", "upperCase", "\\!upper_case");
         assertErrorContains("${'x'?upper_casw}", "upper_case", "\\!upperCase");
         // [2.4] If camel case will be the recommended style, then this need to be inverted:
         assertErrorContains("${'x'?foo}", "upper_case", "\\!upperCase");
+        
+        /** TODO
+        assertErrorContains("<#if x><#elseIf y></#if> ${'x'?foo}", "upperCase", "\\!upper_case");
+        assertErrorContains("<#if x><#elseif y></#if>${'x'?foo}", "upper_case", "\\!upperCase");
+        */
     }
     
     @Test
@@ -85,7 +133,7 @@ public class CamelCaseTest extends TemplateTest {
             }
         }
         for (String name : names) {
-            if (_CoreStringUtils.getIdentifierNamingConvention(name) == Configuration.SNAKE_CASE_NAMING_CONVENTION) {
+            if (_CoreStringUtils.getIdentifierNamingConvention(name) == Configuration.LEGACY_NAMING_CONVENTION) {
                 assertTrue("Missing camel case variation for \"" + name + "\".",
                         underscoredNamesWithCamelCasePair.contains(name));
             }
@@ -114,35 +162,54 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput(
                 "<forEach x in 1..3>${x!'?'}</forEach> <foreach x in 1..3>${x}</foreach>",
                 "<forEach x in 1..3>?</forEach> 123");
+
+        assertOutput("<foreach x in 1..3>${x}</foreach> <#foreach x in 1..3>${x}</#foreach>",
+                "123 123");
+        assertErrorContains("<foreach x in 1..3>${x}</foreach> <#forEach x in 1..3>${x}</#forEach>",
+                "naming convention", "legacy", "#forEach");
+        assertErrorContains("<#forEach x in 1..3>${x}</#forEach> <foreach x in 1..3>${x}</foreach>",
+                "naming convention", "camel", "foreach");
         
         camelCaseDirectives();
     }
     
     @Test
     public void camelCaseDirectives() throws IOException, TemplateException {
-        //camelCaseDirectives(false);
+        camelCaseDirectives(false);
         getConfiguration().setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
         camelCaseDirectives(true);
     }
 
     private void camelCaseDirectives(boolean squared) throws IOException, TemplateException {
         assertOutput(
-                squared("<#list 1..4 as x><#if x == 1>one <#elseIf x == 2>two <#elseif x == 3>three "
+                squared("<#list 1..4 as x><#if x == 1>one <#elseIf x == 2>two <#elseIf x == 3>three "
                         + "<#else>more</#if></#list>", squared),
                 "one two three more");
         assertOutput(
-                squared("<#escape x as x?upper_case>${'a'}<#noEscape>${'b'}</#noEscape></#escape> "
-                        + "<#escape x as x?upper_case>${'a'}<#noescape>${'b'}</#noescape></#escape>", squared),
-                "Ab Ab");
+                squared("<#list 1..4 as x><#if x == 1>one <#elseif x == 2>two <#elseif x == 3>three "
+                        + "<#else>more</#if></#list>", squared),
+                "one two three more");
+        
+        assertOutput(
+                squared("<#escape x as x?upperCase>${'a'}<#noEscape>${'b'}</#noEscape></#escape>", squared),
+                "Ab");
+        assertOutput(
+                squared("<#escape x as x?upper_case>${'a'}<#noescape>${'b'}</#noescape></#escape>", squared),
+                "Ab");
+        
         assertOutput(
                 squared("<#noParse></#noparse></#noParse>", squared),
                 squared("</#noparse>", squared));
         assertOutput(
                 squared("<#noparse></#noParse></#noparse>", squared),
                 squared("</#noParse>", squared));
+        
         assertOutput(
-                squared("<#forEach x in 1..3>${x}</#forEach> <#foreach x in 1..3>${x}</#foreach>", squared),
-                "123 123");
+                squared("<#forEach x in 1..3>${x}</#forEach>", squared),
+                "123");
+        assertOutput(
+                squared("<#foreach x in 1..3>${x}</#foreach>", squared),
+                "123");
     }
     
     private String squared(String ftl, boolean squared) {
@@ -150,19 +217,149 @@ public class CamelCaseTest extends TemplateTest {
     }
 
     @Test
-    public void nonMatchingEndTag() {
+    public void explicitNamingConvention() throws IOException, TemplateException {
+        explicitNamingConvention(false);
+        explicitNamingConvention(true);
+    }
+    
+    private void explicitNamingConvention(boolean squared) throws IOException, TemplateException {
+        if (squared) {
+            getConfiguration().setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+        }
+        
+        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        
         assertErrorContains(
-                "<#escape x as x?upper_case>${'a'}<#noEscape>${'b'}</#noescape></#escape>",
-                "noEscape", "noescape", "camel");
+                squared("<#if true>t<#elseif false>f</#if>", squared),
+                "naming convention", "camel", "#elseif");
+        assertOutput(
+                squared("<#if true>t<#elseIf false>f</#if>", squared),
+                "t");
+        
         assertErrorContains(
-                "<#escape x as x?upper_case>${'a'}<#noescape>${'b'}</#noEscape></#escape>",
-                "noEscape", "noescape", "camel");
+                squared("<#noparse>${x}</#noparse>", squared),
+                "naming convention", "camel", "#noparse");
+        assertOutput(
+                squared("<#noParse>${x}</#noParse>", squared),
+                "${x}");
+        
+        assertErrorContains(
+                squared("<#escape x as -x><#noescape>${1}</#noescape></#escape>", squared),
+                "naming convention", "camel", "#noescape");
+        assertOutput(
+                squared("<#escape x as -x><#noEscape>${1}</#noEscape></#escape>", squared),
+                "1");
+        
+        assertErrorContains(
+                squared("<#foreach x in 1..3>${x}</#foreach>", squared),
+                "naming convention", "camel", "#foreach");
+        assertOutput(
+                squared("<#forEach x in 1..3>${x}</#forEach>", squared),
+                "123");
+        
+        // ---
+        
+        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        
+        assertErrorContains(
+                squared("<#if true>t<#elseIf false>f</#if>", squared),
+                "naming convention", "legacy", "#elseIf");
+        assertOutput(
+                squared("<#if true>t<#elseif false>f</#if>", squared),
+                "t");
+        
+        assertErrorContains(
+                squared("<#noParse>${x}</#noParse>", squared),
+                "naming convention", "legacy", "#noParse");
+        assertOutput(
+                squared("<#noparse>${x}</#noparse>", squared),
+                "${x}");
+        
+        assertErrorContains(
+                squared("<#escape x as -x><#noEscape>${1}</#noEscape></#escape>", squared),
+                "naming convention", "legacy", "#noEscape");
+        assertOutput(
+                squared("<#escape x as -x><#noescape>${1}</#noescape></#escape>", squared),
+                "1");
+        
+        assertErrorContains(
+                squared("<#forEach x in 1..3>${x}</#forEach>", squared),
+                "naming convention", "legacy", "#forEach");
+        assertOutput(
+                squared("<#foreach x in 1..3>${x}</#foreach>", squared),
+                "123");
+    }
+    
+    @Test
+    public void inconsistentAutoDetectedNamingConvention() {
+        assertErrorContains(
+                "<#if x><#elseIf y><#elseif z></#if>",
+                "naming convention", "camel");
+        assertErrorContains(
+                "<#if x><#elseif y><#elseIf z></#if>",
+                "naming convention", "legacy");
+        assertErrorContains(
+                "<#if x><#elseIf y></#if><#noparse></#noparse>",
+                "naming convention", "camel");
+        assertErrorContains(
+                "<#if x><#elseif y></#if><#noParse></#noParse>",
+                "naming convention", "legacy");
+        assertErrorContains(
+                "<#if x><#elseif y><#elseIf z></#if>",
+                "naming convention", "legacy");
+        assertErrorContains(
+                "<#escape x as x + 1><#noEscape></#noescape></#escape>",
+                "naming convention", "camel");
+        assertErrorContains(
+                "<#escape x as x + 1><#noEscape></#noEscape><#noescape></#noescape></#escape>",
+                "naming convention", "camel");
+        assertErrorContains(
+                "<#escape x as x + 1><#noescape></#noEscape></#escape>",
+                "naming convention", "legacy");
+        assertErrorContains(
+                "<#escape x as x + 1><#noescape></#noescape><#noEscape></#noEscape></#escape>",
+                "naming convention", "legacy");
         assertErrorContains(
                 "<#forEach x in 1..3>${x}</#foreach>",
-                "forEach", "foreach", "camel");
+                "naming convention", "camel");
+        assertErrorContains(
+                "<#forEach x in 1..3>${x}</#forEach><#foreach x in 1..3>${x}</#foreach>",
+                "naming convention", "camel");
         assertErrorContains(
                 "<#foreach x in 1..3>${x}</#forEach>",
-                "forEach", "foreach", "camel");
+                "naming convention", "legacy");
+        assertErrorContains(
+                "<#foreach x in 1..3>${x}</#foreach><#forEach x in 1..3>${x}</#forEach>",
+                "naming convention", "legacy");
+        
+        assertErrorContains("${x?upperCase?is_string}",
+                "naming convention", "camel", "upperCase", "is_string");
+        assertErrorContains("${x?upper_case?isString}",
+                "naming convention", "legacy", "upper_case", "isString");
+
+        /* TODO
+        assertErrorContains("<#setting outputEncoding='utf-8'>${x?is_string}",
+                "naming convention", "camel", "outputEncoding", "is_string");
+        */
+        assertErrorContains("<#setting output_encoding='utf-8'>${x?isString}",
+                "naming convention", "legacy", "output_encoding", "isString");
+        
+        assertErrorContains("${x?isString}<#setting output_encoding='utf-8'>",
+                "naming convention", "camel", "isString", "output_encoding");
+        /* TODO
+        assertErrorContains("${x?is_string}<#setting outputEncoding='utf-8'>",
+                "naming convention", "legacy", "is_string", "outputEncoding");
+        */
+        
+        assertErrorContains("${.outputEncoding}${x?is_string}",
+                "naming convention", "camel", "outputEncoding", "is_string");
+        assertErrorContains("${.output_encoding}${x?isString}",
+                "naming convention", "legacy", "output_encoding", "isString");
+        
+        assertErrorContains("${x?upperCase}<#noparse></#noparse>",
+                "naming convention", "camel", "upperCase", "noparse");
+        assertErrorContains("${x?upper_case}<#noParse></#noParse>",
+                "naming convention", "legacy", "upper_case", "noParse");
     }
     
     private interface NamePairAssertion {

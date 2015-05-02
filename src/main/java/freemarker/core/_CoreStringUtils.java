@@ -68,7 +68,7 @@ public final class _CoreStringUtils {
     }
 
     /**
-     * @return {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}, or {@link Configuration#SNAKE_CASE_NAMING_CONVENTION}
+     * @return {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}, or {@link Configuration#LEGACY_NAMING_CONVENTION}
      *         or, {@link Configuration#AUTO_DETECT_NAMING_CONVENTION} when undecidable.
      */
     public static int getIdentifierNamingConvention(String name) {
@@ -76,7 +76,7 @@ public final class _CoreStringUtils {
         for (int i = 0; i < ln; i++) {
             final char c = name.charAt(i);
             if (c == '_') {
-                return Configuration.SNAKE_CASE_NAMING_CONVENTION;
+                return Configuration.LEGACY_NAMING_CONVENTION;
             }
             if (isUpperUSASCII(c)) {
                 return Configuration.CAMEL_CASE_NAMING_CONVENTION;
