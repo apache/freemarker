@@ -1853,8 +1853,8 @@ The average of the price of a python and an elephant is:
                   <para><link
                   linkend="dgui_template_exp_stringop_interpolation">Interpolation
                   (or concatenation)</link>:
-                  <literal>"Hello ${user}!"</literal> (or
-                  <literal>"Free" + "Marker"</literal>)</para>
+                  <literal>"Hello ${user}!"</literal> (or <literal>"Hello
+                  " + user + "!"</literal>)</para>
                 </listitem>
 
                 <listitem>
@@ -5570,7 +5570,7 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</prog
 
         <para>In simple cases you can build data-models using
         <literal>java.lang</literal> and <literal>java.util</literal> classes
-        and custom Java Beans:</para>
+        and custom JavaBeans:</para>
 
         <itemizedlist>
           <listitem>
@@ -5621,28 +5621,70 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</prog
       |
       +- name = "green mouse"</programlisting>
 
-        <para>This is the Java code fragment that builds this
-        data-model:</para>
+        <para>This Java code fragment that builds this data-model:</para>
 
         <programlisting role="unspecified">// Create the root hash
-Map root = new HashMap();
+Map&lt;String, Object&gt; root = new HashMap&lt;&gt;();
 // Put string ``user'' into the root
 root.put("user", "Big Joe");
 // Create the hash for ``latestProduct''
-Map latest = new HashMap();
+Map&lt;String, Object&gt; latest = new HashMap&lt;&gt;();
 // and put it into the root
 root.put("latestProduct", latest);
 // put ``url'' and ``name'' into latest
 latest.put("url", "products/greenmouse.html");
 latest.put("name", "green mouse");</programlisting>
 
-        <para>For the <literal>latestProduct</literal> you might as well use a
-        Java Bean that has <literal>url</literal> and <literal>name</literal>
-        properties (that is, an object that has public <literal>String
-        getURL()</literal> and <literal>String getName()</literal> methods);
-        it's the same from viewpoint of the template. Similarly, the root
-        could be a Java Bean with <literal>user</literal> and
-        <literal>lastestProduct</literal> properties.</para>
+        <para>In real applications, instead of <literal>Map</literal>-s, you
+        will often use application-specific classes that has
+        <literal>get<replaceable>Xxx</replaceable></literal>/<literal>is<replaceable>Xxx</replaceable></literal>
+        methods as prescribed by the JavaBeans specification. Like you have a
+        class similar to this:</para>
+
+        <programlisting role="unspecified">public class Product {
+
+    private String url;
+    private String name;
+    ...
+    
+    // As per the JavaBeans spec., this defines the "url" bean property
+    public String getUrl() {
+        return url;
+    }
+    
+    // As per the JavaBean spec., this defines the "name" bean property
+    public String getName() {
+        return name;
+    }
+    
+    ...
+    
+}</programlisting>
+
+        <para>and you add an instance of it to the data-model somehow like
+        this:</para>
+
+        <programlisting role="unspecified">Product latestProducts = getLatestProductFromDatabaseOrSomething();
+root.put("latestProduct", latestProduct);</programlisting>
+
+        <para>The template will be the same as if
+        <literal>latestProduct</literal> was a <literal>Map</literal>, like
+        <literal>${latestProduct.name}</literal> works in both cases.</para>
+
+        <para>The root itself need not be a <literal>Map</literal> either. It
+        could be an object with <literal>getUser()</literal> and
+        <literal>getLastestProduct()</literal> methods too.</para>
+
+        <note>
+          <para>The behavior described here only stands if the value of the
+          <literal>object_wrapper</literal> configuration setting is something
+          that's used in almost all real world setups anyway. Anything that
+          the <literal>ObjectWrapper</literal> wraps to be a hash can be used
+          as the root, and can be traversed in templates with the dot and
+          <literal>[]</literal> operators. Something that it doesn't wrap to
+          be a hash can't be used as the root or be traversed like
+          that.</para>
+        </note>
       </section>
 
       <section xml:id="pgui_quickstart_gettemplate">
@@ -22492,7 +22534,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_23">
-        <title>2.3.33</title>
+        <title>2.3.23</title>
 
         <para>Date of release: TODO</para>
 
@@ -22501,7 +22543,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>TODO</para>
+              <para>Added camel case support for the identifiers that are part
+              of the template language (user defined names aren't affected).
+              For example, now
+              <literal>&lt;#noEscape&gt;${x?upperCase}&lt;/#noEscape&gt;</literal>
+              is valid. However, within the same template, FreeMarker will
+              require you to use the same naming convention consistently for
+              all identifiers that are part of the template language. (Note
+              that it's also possible to enforce a naming convention on all
+              templates from Java, via
+              <literal>Configuration.getNamingConvention(int)</literal>.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -22510,6 +22561,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added
+              <literal>Configuration.setNamingConvention(int)</literal>. By
+              default FreeMarker will auto-detect the naming convention
+              (legacy VS camel case) used for the identifiers that are part of
+              the template language, for each template independently. This
+              setting lets you enforce a naming convention instead.</para>
+            </listitem>
+
             <listitem>
               <para>Added
               <literal>Configuration.setTemplateUpdateDelayMilliseconds(long)</literal>

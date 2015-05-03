@@ -97,7 +97,6 @@ class MessageUtil {
         String templateDesc;
         if (line < 0) {
             templateDesc = "?eval-ed string";
-            line -= TemplateObject.RUNTIME_EVAL_LINE_DISPLACEMENT - 1;
             macroOrFuncName = null;
         } else { 
             templateDesc = templateSourceName != null
@@ -109,7 +108,12 @@ class MessageUtil {
                       ? " in " + (isFunction ? "function " : "macro ") + StringUtil.jQuote(macroOrFuncName)
                       : "")
               + " "
-              + preposition + " line " + line + ", column " + column;
+              + preposition + " " + formatPosition(line, column);
+    }
+    
+    static String formatPosition(int line, int column) {
+        return "line " + (line >= 0 ? line : line - (TemplateObject.RUNTIME_EVAL_LINE_DISPLACEMENT - 1))
+                + ", column " + column;
     }
 
     /**

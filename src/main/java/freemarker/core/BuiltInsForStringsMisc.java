@@ -53,6 +53,9 @@ class BuiltInsForStringsMisc {
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
             token_source.incompatibleImprovements = _TemplateAPI.getTemplateLanguageVersionAsInt(this);
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
+            int namingConvention = env.getConfiguration().getNamingConvention();
+            token_source.initialNamingConvention = namingConvention;
+            token_source.namingConvention = namingConvention;
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getUnboundTemplate());
             Expression exp = null;

@@ -1027,6 +1027,21 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1000L * 60 * 60 * 2, cfg.getTemplateUpdateDelayMilliseconds());
     }
     
+    public void testNamingConventionSetSetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+
+        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
+        
+        cfg.setSetting("naming_convention", "legacy");
+        assertEquals(Configuration.LEGACY_NAMING_CONVENTION, cfg.getNamingConvention());
+        
+        cfg.setSetting("naming_convention", "camel_case");
+        assertEquals(Configuration.CAMEL_CASE_NAMING_CONVENTION, cfg.getNamingConvention());
+        
+        cfg.setSetting("naming_convention", "auto_detect");
+        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
+    }
+    
     @Test
     public void testGetSettingNames() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);

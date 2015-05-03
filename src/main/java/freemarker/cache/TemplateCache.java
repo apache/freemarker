@@ -826,7 +826,7 @@ public class TemplateCache
             return
                 name.hashCode() ^
                 locale.hashCode() ^
-                locale.hashCode() ^
+                encoding.hashCode() ^
                 (customLookupCondition != null ? customLookupCondition.hashCode() : 0) ^
                 Boolean.valueOf(!parse).hashCode();
         }

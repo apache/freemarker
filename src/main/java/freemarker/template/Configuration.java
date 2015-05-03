@@ -135,6 +135,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_IMPORT_KEY = "auto_import";
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
+    public static final String NAMING_CONVENTION_KEY = "naming_convention";
     public static final String TEMPLATE_LOADER_KEY = "template_loader";
     public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "template_lookup_strategy";
     public static final String TEMPLATE_NAME_FORMAT_KEY = "template_name_format";
@@ -152,6 +153,7 @@ public class Configuration extends Configurable implements Cloneable {
         DEFAULT_ENCODING_KEY,
         INCOMPATIBLE_IMPROVEMENTS_KEY,
         LOCALIZED_LOOKUP_KEY,
+        NAMING_CONVENTION_KEY,
         STRICT_SYNTAX_KEY,
         TAG_SYNTAX_KEY,
         TEMPLATE_LOADER_KEY,
@@ -165,6 +167,10 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
 
+    public static final int AUTO_DETECT_NAMING_CONVENTION = 10;
+    public static final int LEGACY_NAMING_CONVENTION = 11;
+    public static final int CAMEL_CASE_NAMING_CONVENTION = 12;
+    
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     
@@ -257,6 +263,7 @@ public class Configuration extends Configurable implements Cloneable {
     private boolean whitespaceStripping = true;
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
+    private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
 
     private TemplateCache cache;
     
@@ -425,15 +432,23 @@ public class Configuration extends Configurable implements Cloneable {
      *          really what you want.)
      *       </li>
      *       <li><p>
+     *          In templates, {@code .template_name} will <em>always</em> return the main (top level) template's name.
+     *          It won't be affected by {@code #include} and {@code #nested} anymore (something like
+     *          {@code .local_template_name} is expected in the future for that, which will actually work, unlike
+     *          {@code .template_name}, which didn't work correctly with macro calls). This is the consequence of the
+     *          lower level fixing described in the next point.
+     *       </li>
+     *       <li><p>
      *          {@code #include} and {@code #nested} doesn't change the parent {@link Template} (see
      *          {@link Configurable#getParent()}) of the {@link Environment} anymore to the {@link Template} that's
      *          included or where {@code #nested} "returns" to. Thus, the parent of {@link Environment} will be now
      *          always the main {@link Template}. (The main {@link Template} is the {@link Template} whose
      *          {@code process} or {@code createProcessingEnvironment} method was called to initiate the output
-     *          generation.)
-     *                  Note all this only matters if you have set settings directly on {@link Template} objects, and almost
-     *          nobody does that. Also note that macro calls have never changed the {@link Environment} parent to the
-     *          {@link Template} that contains the macro definition, so there's no change there.   
+     *          generation.) Note that apart from the effect on FTL's {@code .local_template_name} (see
+     *          previous point), this should only matter if you have set settings directly on {@link Template} objects,
+     *          and almost nobody does that. Also note that macro calls have never changed the {@link Environment}
+     *          parent to the {@link Template} that contains the macro definition, so this mechanism was always broken.
+     *          As now we consistently never change the parent, the behavior when calling macros didn't change.
      *       </li>
      *       <li><p>
      *          When using {@code freemarker.ext.servlet.FreemarkerServlet}:
@@ -1418,6 +1433,79 @@ public class Configuration extends Configurable implements Cloneable {
     public int getTagSyntax() {
         return tagSyntax;
     }
+
+    /**
+     * Sets the naming convention used for the identifiers that are part of the template language. The available naming
+     * conventions are legacy (directive (tag) names are all-lower-case {@code likethis}, others are snake case
+     * {@code like_this}), and camel case ({@code likeThis}). The default is auto-detect, which detects the naming
+     * convention used and enforces that same naming convention for the whole template.
+     * 
+     * <p>
+     * This setting doesn't influence what naming convention is used for the setting names outside templates. Also, it
+     * won't ever convert the names of user-defined things, like of data-model members, or the names of user defined
+     * macros/functions. It only influences the names of the built-in directives ({@code #elseIf} VS {@code elseif}),
+     * built-ins ({@code ?upper_case} VS {@code ?upperCase} ), special variables ({@code .data_model} VS
+     * {@code .dataModel}).
+     * 
+     * <p>
+     * Which convention to use: FreeMarker prior to 2.3.23 has only supported
+     * {@link Configuration#LEGACY_NAMING_CONVENTION}, so that's how most templates and examples out there are written
+     * as of 2015. But as templates today are mostly written by programmers and often access Java API-s which already
+     * use camel case, {@link Configuration#CAMEL_CASE_NAMING_CONVENTION} is the recommended option for most projects.
+     * However, it's no necessary to make a application-wide decision; see auto-detection below.
+     * 
+     * <p>
+     * FreeMarker will decide the naming convention automatically for each template individually when this setting is
+     * set to {@link #AUTO_DETECT_NAMING_CONVENTION} (which is the default). The naming convention of a template is
+     * decided when the first core (non-user-defined) identifier is met during parsing (not during processing) where the
+     * naming convention is relevant (like for {@code s?upperCase} or {@code s?upper_case} it's relevant, but for
+     * {@code s?length} it isn't). At that point, the naming convention of the template is decided, and any later core
+     * identifier that uses a different convention will be a parsing error. As the naming convention is decided per
+     * template, it's not a problem if a template and the other template it {@code #include}-s/{@code #import} uses a
+     * different convention.
+     * 
+     * <p>
+     * FreeMarker always enforces the same naming convention to be used consistently within the same template "file".
+     * Additionally, when this setting is set to non-{@link #AUTO_DETECT_NAMING_CONVENTION}, the selected naming
+     * convention is enforced on all templates. Thus such a setup can be used to enforce an application-wide naming
+     * convention.
+     * 
+     * <p>
+     * Non-strict tags (a long deprecated syntax from FreeMarker 1, activated via {@link #setStrictSyntaxMode(boolean)})
+     * are only recognized as FTL tags when they are using the {@link Configuration#LEGACY_NAMING_CONVENTION} syntax,
+     * regardless of this setting. As they aren't exempt from the naming convention consistency enforcement, generally,
+     * you can't use strict {@link Configuration#CAMEL_CASE_NAMING_CONVENTION} tags mixed with non-strict tags.
+     * 
+     * @param namingConvention
+     *            One of the {@link #AUTO_DETECT_NAMING_CONVENTION} or {@link #LEGACY_NAMING_CONVENTION}
+     *            {@link #CAMEL_CASE_NAMING_CONVENTION}.
+     * 
+     * @throws IllegalArgumentException
+     *             If the parameter isn't one of the valid constants.
+     * 
+     * @since 2.3.23
+     */
+    public void setNamingConvention(int namingConvention) {
+        if (namingConvention != AUTO_DETECT_NAMING_CONVENTION
+            && namingConvention != LEGACY_NAMING_CONVENTION
+            && namingConvention != CAMEL_CASE_NAMING_CONVENTION)
+        {
+            throw new IllegalArgumentException("\"naming_convention\" can only be set to one of these: "
+                    + "Configuration.AUTO_DETECT_NAMING_CONVENTION, "
+                    + "or Configuration.LEGACY_NAMING_CONVENTION"
+                    + "or Configuration.CAMEL_CASE_NAMING_CONVENTION");
+        }
+        this.namingConvention = namingConvention;
+    }
+    
+    /**
+     * The getter pair of {@link #setNamingConvention(int)}.
+     * 
+     * @since 2.3.23
+     */
+    public int getNamingConvention() {
+        return namingConvention;
+    }
     
     /**
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
@@ -1511,17 +1599,21 @@ public class Configuration extends Configurable implements Cloneable {
      *            repeated until either a template is found, or the base path is completely exhausted.
      *
      * @param locale
-     *            The requested locale of the template. Can be {@code null} since 2.3.22, in which case it defaults
-     *            {@link Configuration#getLocale()}. Assuming that you have specified {@code en_US} as the locale and
-     *            {@code myTemplate.ftl} as the name of the template, and the default {@link TemplateLookupStrategy} is
-     *            used and {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first
-     *            try to retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
-     *            {@code myTemplate.ftl}.
+     *            The requested locale of the template. This is what {@link Template#getLocale()} on the resulting
+     *            {@link Template} will return. This parameter can be {@code null} since 2.3.22, in which case it
+     *            defaults to {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the
+     *            default value, not {@code null}). This parameter also drives localized template lookup. Assuming that
+     *            you have specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template,
+     *            and the default {@link TemplateLookupStrategy} is used and
+     *            {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first try to
+     *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
+     *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
+     *            finds {@code myTemplate.ftl}.
      * 
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
      *            Can be {@code null} (though it's up to the custom {@link TemplateLookupStrategy} if it allows that).
-     *            This object will be used as part of a cache key, so it must to have a proper
+     *            This object will be used as part of the cache key, so it must to have a proper
      *            {@link Object#equals(Object)} and {@link Object#hashCode()} method. It also should have reasonable
      *            {@link Object#toString()}, as it's possibly quoted in error messages. The expected type is up to the
      *            custom {@link TemplateLookupStrategy}. See also:
@@ -2040,6 +2132,16 @@ public class Configuration extends Configurable implements Cloneable {
                     setTagSyntax(ANGLE_BRACKET_TAG_SYNTAX);
                 } else if ("square_bracket".equals(value)) {
                     setTagSyntax(SQUARE_BRACKET_TAG_SYNTAX);
+                } else {
+                    throw invalidSettingValueException(name, value);
+                }
+            } else if (NAMING_CONVENTION_KEY.equals(name)) {
+                if ("auto_detect".equals(value)) {
+                    setNamingConvention(AUTO_DETECT_NAMING_CONVENTION);
+                } else if ("legacy".equals(value)) {
+                    setNamingConvention(LEGACY_NAMING_CONVENTION);
+                } else if ("camel_case".equals(value)) {
+                    setNamingConvention(CAMEL_CASE_NAMING_CONVENTION);
                 } else {
                     throw invalidSettingValueException(name, value);
                 }

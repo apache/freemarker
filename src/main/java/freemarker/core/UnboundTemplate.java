@@ -105,6 +105,7 @@ public final class UnboundTemplate {
                         cfg.getStrictSyntaxMode(),
                         cfg.getWhitespaceStripping(),
                         cfg.getTagSyntax(),
+                        cfg.getNamingConvention(),
                         cfg.getIncompatibleImprovements().intValue());
                 
                 TemplateElement rootElement;

@@ -39,7 +39,7 @@ import freemarker.test.templatesuite.TemplateTestSuite;
 @Ignore
 public abstract class TemplateTest {
     
-    private Configuration configuration;
+    private Configuration configuration = new Configuration(Configuration.VERSION_2_3_0);
 
     public Configuration getConfiguration() {
         return configuration;
