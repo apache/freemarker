@@ -64,6 +64,8 @@ public final class UnboundTemplate {
     private final TemplateElement rootElement;
     private String defaultNamespaceURI;
     private final int actualTagSyntax;
+    private final int actualNamingConvention;
+    
     private final String templateSpecifiedEncoding;
     
     private final ArrayList lines = new ArrayList();
@@ -123,6 +125,7 @@ public final class UnboundTemplate {
                 this.rootElement = rootElement;
                 
                 this.actualTagSyntax = parser._getLastTagSyntax();
+                this.actualNamingConvention = parser._getLastNamingConvention();
                 this.templateSpecifiedEncoding = parser._getTemplateSpecifiedEncoding();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
@@ -164,6 +167,7 @@ public final class UnboundTemplate {
         
         rootElement = new TextBlock(content);
         actualTagSyntax = cfg.getTagSyntax();
+        actualNamingConvention = cfg.getNamingConvention();
     }
 
     private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
@@ -211,14 +215,17 @@ public final class UnboundTemplate {
     }
 
     /**
-     * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's
-     * {@link Configuration#SQUARE_BRACKET_TAG_SYNTAX} or {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax
-     * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
-     * returns whatever the default is in the current configuration, so it's maybe
-     * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * See {@link Template#getActualTagSyntax()}.
      */
     public int getActualTagSyntax() {
         return actualTagSyntax;
+    }
+    
+    /**
+     * See {@link Template#getActualNamingConvention()}.
+     */
+    public int getActualNamingConvention() {
+        return actualNamingConvention;
     }
     
     public Configuration getConfiguration() {

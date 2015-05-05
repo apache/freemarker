@@ -140,12 +140,8 @@ public class FMParser {
      * The naming convention used by this template; if it couldn't be detected so far, it will be the most probable one.
      * This could be used for formatting error messages, but not for anything serious.
      */
-    public int _getMostProbableNamingConvention() {
-        if (token_source.namingConvention == Configuration.AUTO_DETECT_NAMING_CONVENTION) {
-            return Configuration.LEGACY_NAMING_CONVENTION; // [2.4] camel case?
-        } else {
-            return token_source.namingConvention;
-        }
+    public int _getLastNamingConvention() {
+        return token_source.namingConvention;
     }
 
     /**

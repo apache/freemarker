@@ -510,6 +510,19 @@ public class Template extends Configurable {
     public int getActualTagSyntax() {
         return unboundTemplate.getActualTagSyntax();
     }
+    
+    /**
+     * Returns the naming convention the parser has chosen for this template. If it could be determined, it's
+     * {@link Configuration#LEGACY_NAMING_CONVENTION} or {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}. If it
+     * couldn't be determined (like because there no identifier that's part of the template language was used where
+     * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
+     * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * 
+     * @since 2.3.23
+     */
+    public int getActualNamingConvention() {
+        return unboundTemplate.getActualNamingConvention();
+    }
 
     /**
      * Dump the raw template in canonical form.
