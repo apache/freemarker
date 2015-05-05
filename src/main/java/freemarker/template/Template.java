@@ -76,6 +76,7 @@ public class Template extends Configurable {
     private String encoding, defaultNS;
     private Object customLookupCondition;
     private int actualTagSyntax;
+    private int actualNamingConvention;
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
@@ -201,6 +202,7 @@ public class Template extends Configurable {
                         actualCfg.getIncompatibleImprovements().intValue());
                 this.rootElement = parser.Root();
                 this.actualTagSyntax = parser._getLastTagSyntax();
+                this.actualNamingConvention = parser._getLastNamingConvention();
             }
             catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
@@ -565,6 +567,19 @@ public class Template extends Configurable {
      */
     public int getActualTagSyntax() {
         return actualTagSyntax;
+    }
+    
+    /**
+     * Returns the naming convention the parser has chosen for this template. If it could be determined, it's
+     * {@link Configuration#LEGACY_NAMING_CONVENTION} or {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}. If it
+     * couldn't be determined (like because there no identifier that's part of the template language was used where
+     * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
+     * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * 
+     * @since 2.3.23
+     */
+    public int getActualNamingConvention() {
+        return actualNamingConvention;
     }
 
     /**
