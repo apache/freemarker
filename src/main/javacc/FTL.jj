@@ -52,6 +52,8 @@ public class FMParser {
 
     /**
      * Create an FM expression parser using a string.
+     *
+     * @Deprecated This is an internal API of FreeMarker; can be removed any time.
      */
     static public FMParser createExpressionParser(String s) {
         SimpleCharStream scs = new SimpleCharStream(new StringReader(s), 1, 1, s.length());
