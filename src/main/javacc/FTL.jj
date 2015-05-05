@@ -49,6 +49,8 @@ public class FMParser {
 
     /**
      * Create an FM expression parser using a string.
+     *
+     * @Deprecated This is an internal API of FreeMarker; can be removed any time.
      */
     static public FMParser createExpressionParser(String s) {
         SimpleCharStream scs = new SimpleCharStream(new StringReader(s), 1, 1, s.length());
@@ -68,6 +70,8 @@ public class FMParser {
      *            The character stream to use as input
      * @param strictEscapeSyntax
      *            Whether FreeMarker directives must start with a #
+     *
+     * @Deprecated This is an internal API of FreeMarker; will be removed in 2.4.
      */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
         this(reader);
@@ -77,15 +81,26 @@ public class FMParser {
         this.stripWhitespace = stripWhitespace;
     }
 
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
         this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax,
                 Configuration.PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS);
     }
 
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
             int tagSyntax, int incompatibleImprovements) {
+        this(template, reader, strictEscapeSyntax, stripWhitespace,
+                tagSyntax, Configuration.AUTO_DETECT_NAMING_CONVENTION, incompatibleImprovements);
     }
 
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
             int tagSyntax, int namingConvention, int incompatibleImprovements) {
         this(template, reader, strictEscapeSyntax, stripWhitespace);
@@ -119,6 +134,9 @@ public class FMParser {
         this.incompatibleImprovements = incompatibleImprovements;
     }
 
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(String template) {
         this(null, new StringReader(template), true, true);
     }
