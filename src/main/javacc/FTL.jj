@@ -1910,7 +1910,7 @@ StringLiteral StringLiteral(boolean interpolate) :
         StringLiteral result = new StringLiteral(s);
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.checkInterpolation();
+            result.parseValue(token_source);
         }
         return result;
     }
