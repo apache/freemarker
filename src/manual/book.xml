@@ -23341,7 +23341,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   requested, a custom
                   <literal>TemplateLookupStrategy</literal> could first look
                   for <literal>@somedomain.com/foo.ftl</literal>, and then for
-                  <literal>@default/foo.ftl</literal>.</para>
+                  <literal>@default/foo.ftl</literal>. See the JavaDoc of the
+                  relevant
+                  <literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>
+                  overload for more details; note there the requirements
+                  regarding the <literal>hashCode</literal> and
+                  <literal>equals</literal> of the
+                  <literal>customLookupCondition</literal>.</para>
                 </listitem>
 
                 <listitem>
