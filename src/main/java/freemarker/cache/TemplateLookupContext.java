@@ -81,8 +81,9 @@ public abstract class TemplateLookupContext {
     }
 
     /**
-     * Return the value of the {@code customLookupCondition} parameter of
-     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean, boolean)}. The interpretation of this
+     * Returns the value of the {@code customLookupCondition} parameter of
+     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean, boolean)}; see requirements there, such
+     * as having a proper {@link Object#equals(Object)} and {@link Object#hashCode()} method. The interpretation of this
      * value is up to the custom {@link TemplateLookupStrategy}. Usually, it's used similarly to as the default lookup
      * strategy uses {@link #getTemplateLocale()}, that is, to look for a template variation that satisfies the
      * condition, and then maybe fall back to more generic template if that's missing.

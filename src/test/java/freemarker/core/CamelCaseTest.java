@@ -57,6 +57,36 @@ public class CamelCaseTest extends TemplateTest {
     }
 
     @Test
+    public void stringLiteralInterpolation() throws IOException, TemplateException {
+        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
+        getConfiguration().setSharedVariable("x", "x");
+        
+        assertOutput("${'-${x?upperCase}-'} ${x?upperCase}", "-X- X");
+        assertOutput("${x?upperCase} ${'-${x?upperCase}-'}", "X -X-");
+        assertOutput("${'-${x?upper_case}-'} ${x?upper_case}", "-X- X");
+        assertOutput("${x?upper_case} ${'-${x?upper_case}-'}", "X -X-");
+
+        assertErrorContains("${'-${x?upper_case}-'} ${x?upperCase}",
+                "naming convention", "legacy", "upperCase", "detection", "9");
+        assertErrorContains("${x?upper_case} ${'-${x?upperCase}-'}",
+                "naming convention", "legacy", "upperCase", "detection", "5");
+        assertErrorContains("${'-${x?upperCase}-'} ${x?upper_case}",
+                "naming convention", "camel", "upper_case");
+        assertErrorContains("${x?upperCase} ${'-${x?upper_case}-'}",
+                "naming convention", "camel", "upper_case");
+        
+        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        assertOutput("${'-${x?upperCase}-'} ${x?upperCase}", "-X- X");
+        assertErrorContains("${'-${x?upper_case}-'}",
+                "naming convention", "camel", "upper_case", "\\!detection");
+        
+        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        assertOutput("${'-${x?upper_case}-'} ${x?upper_case}", "-X- X");
+        assertErrorContains("${'-${x?upperCase}-'}",
+                "naming convention", "legacy", "upperCase", "\\!detection");
+    }
+    
+    @Test
     public void evalAndInterpret() throws IOException, TemplateException {
         assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
         // The naming convention detected doesn't affect the enclosing template's naming convention.
