@@ -36,6 +36,106 @@ tabs: {
   "Java API": "../api/index.html"
 }
 
+// Available icons:
+// .icon-heart
+// .icon-bug
+// .icon-download
+// .icon-star
+secondaryTabs: [{
+  "href": "javascript:;"
+  "text": "Contribute",
+  "class": "icon-heart"
+ }, {
+   "href": "javascript:;"
+   "text": "Report a Bug",
+   "class": "icon-bug"
+}, {
+  "href": "javascript:;"
+  "text": "Download v2.3.21",
+  "class": "icon-download"
+}]
+
+deployUrl: "http://freemarker.org/docs/"
+
+footerSiteMap: {
+    "Overview": [
+      {
+        "text": "What is FreeMarker?",
+        "href": "http://freemarker.org/features.html"
+      },{
+        "text": "Download",
+        "href": "http://freemarker.org/freemarkerdownload.html"
+      },{
+        "text": "Version history",
+        "href": "app_versions.html"
+      },{
+        "text": "About us",
+        "href": "http://freemarker.org/whoWeAre.html"
+      },{
+        "text": "License",
+        "href": "app_license.html"
+      }
+    ],
+    "Community": [
+      {
+        "text": "FreeMarker on Github",
+        "href": "https://github.com/freemarker"
+      },{
+        "text": "Follow us on Twitter",
+        "href": "https://twitter.com/freemarker"
+      },{
+        "text": "Report a bug",
+        "href": "https://sourceforge.net/p/freemarker/bugs/new/"
+      },{
+        "text": "Ask a question",
+        "href": "http://stackoverflow.com/questions/tagged/freemarker"
+      },{
+        "text": "Mailing lists",
+        "href": "http://freemarker.org/mailing-lists.html"
+      }
+    ],
+    "Shortcuts": [
+      {
+        "text": "Expressions cheatsheet",
+        "href": "dgui_template_exp.html#exp_cheatsheet"
+      }, {
+        "text": ".special_vars",
+        "href": "ref_specvar.html"
+      }, {
+        "text": "#directives",
+        "href": "ref_directive_alphaidx.html"
+      }, {
+        "text": "?built_ins",
+        "href": "ref_builtins_alphaidx.html"
+      }, {
+        "text": "FAQ",
+        "href": "app_faq.html"
+      }
+    ]
+}
+
+
+category: {
+  href: "index.html",
+  text: "Manual"
+}
+
+socialLinks: [
+  {
+    "href": "https://github.com/freemarker",
+    "class": "github",
+    "text": "Github"
+  }, {
+    "href": "https://twitter.com/freemarker",
+    "class": "twitter",
+    "text": "Twitter"
+  }, {
+    "href": "https://stackoverflow.com/questions/tagged/freemarker",
+    "class": "stack-overflow",
+    "text": "Stack Overflow"
+  }
+]
+
 onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
 
 showXXELogo
