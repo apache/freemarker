@@ -272,7 +272,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put(nameCamelCase, bi);
     }
     
-    static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {
+    static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key,
+            FMParserTokenManager tokenManager) throws ParseException {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
             StringBuffer buf = new StringBuffer("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
@@ -288,7 +289,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             
             int shownNamingConvention;
             {
-                int namingConvention = _CoreStringUtils.getIdentifierNamingConvention(key);
+                int namingConvention = tokenManager.namingConvention;
                 shownNamingConvention = namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
                         ? namingConvention : Configuration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
             }

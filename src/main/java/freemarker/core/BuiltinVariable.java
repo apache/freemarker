@@ -90,7 +90,7 @@ final class BuiltinVariable extends Expression {
 
     private final String name;
 
-    BuiltinVariable(String name) throws ParseException {
+    BuiltinVariable(String name, FMParserTokenManager tokenManager) throws ParseException {
         if (Arrays.binarySearch(SPEC_VAR_NAMES, name) < 0) {
             StringBuffer sb = new StringBuffer();
             sb.append("Unknown special variable name: ");
@@ -98,7 +98,7 @@ final class BuiltinVariable extends Expression {
             
             int shownNamingConvention;
             {
-                int namingConvention = _CoreStringUtils.getIdentifierNamingConvention(name);
+                int namingConvention = tokenManager.namingConvention;
                 shownNamingConvention = namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
                         ? namingConvention : Configuration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
             }
