@@ -1685,7 +1685,7 @@ BuiltinVariable BuiltinVariable() :
         BuiltinVariable result = null;
         try {
             token_source.checkNamingConvention(name);
-            result = new BuiltinVariable(name.image);
+            result = new BuiltinVariable(name.image, token_source);
         } catch (ParseException pe) {
             pe.lineNumber = dot.beginLine;
             pe.columnNumber = dot.beginColumn;
@@ -1778,7 +1778,7 @@ Expression BuiltIn(Expression exp) :
         BuiltIn result = null;
         try {
             token_source.checkNamingConvention(t);
-            result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t.image);
+            result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t.image, token_source);
         } catch (ParseException pe) {
             pe.lineNumber = t.beginLine;
             pe.columnNumber = t.beginColumn;

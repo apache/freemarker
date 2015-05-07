@@ -41,6 +41,14 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains("${.foo_bar}", "data_model", "\\!dataModel");
         // [2.4] If camel case will be the recommended style, then this need to be inverted:
         assertErrorContains("${.foo}", "data_model", "\\!dataModel");
+        
+        assertErrorContains("<#if x><#elseIf y></#if>${.foo}", "dataModel", "\\!data_model");
+        assertErrorContains("<#if x><#elseif y></#if>${.foo}", "data_model", "\\!dataModel");
+        
+        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        assertErrorContains("${.foo}", "dataModel", "\\!data_model");
+        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        assertErrorContains("${.foo}", "data_model", "\\!dataModel");
     }
     
     @Test
@@ -129,10 +137,13 @@ public class CamelCaseTest extends TemplateTest {
         // [2.4] If camel case will be the recommended style, then this need to be inverted:
         assertErrorContains("${'x'?foo}", "upper_case", "\\!upperCase");
         
-        /** TODO
         assertErrorContains("<#if x><#elseIf y></#if> ${'x'?foo}", "upperCase", "\\!upper_case");
         assertErrorContains("<#if x><#elseif y></#if>${'x'?foo}", "upper_case", "\\!upperCase");
-        */
+        
+        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        assertErrorContains("${'x'?foo}", "upperCase", "\\!upper_case");
+        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        assertErrorContains("${'x'?foo}", "upper_case", "\\!upperCase");
     }
     
     @Test
