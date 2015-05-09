@@ -272,8 +272,15 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put(nameCamelCase, bi);
     }
     
-    static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key,
+    /**
+     * @param target
+     *            Left-hand-operand expression
+     * @param keyTk
+     *            Built-in name token
+     */
+    static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, Token keyTk,
             FMParserTokenManager tokenManager) throws ParseException {
+        String key = keyTk.image;
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
             StringBuffer buf = new StringBuffer("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
@@ -316,7 +323,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
                 }
             }
                 
-            throw new ParseException(buf.toString(), target);
+            throw new ParseException(buf.toString(), null, keyTk);
         }
         
         while (bi instanceof ICIChainMember

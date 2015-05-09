@@ -109,8 +109,8 @@ public class _CoreAPI {
     /**
      * [FM 2.4] getSettingNames() becomes to public; remove this.
      */
-    public static Set/*<String>*/ getConfigurableSettingNames(Configurable cfgable) {
-        return cfgable.getSettingNames();
+    public static Set/*<String>*/ getConfigurableSettingNames(Configurable cfgable, boolean camelCase) {
+        return cfgable.getSettingNames(camelCase);
     }
 
     /**

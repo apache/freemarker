@@ -22547,11 +22547,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               of the template language (user defined names aren't affected).
               For example, now
               <literal>&lt;#noEscape&gt;${x?upperCase}&lt;/#noEscape&gt;</literal>
-              is valid. However, within the same template, FreeMarker will
-              require you to use the same naming convention consistently for
-              all identifiers that are part of the template language. (Note
-              that it's also possible to enforce a naming convention on all
-              templates from Java, via
+              is valid, and also <literal>&lt;#setting
+              numberFormat="0.0"&gt;</literal>. However, within the same
+              template, FreeMarker will require you to use the same naming
+              convention consistently for all identifiers that are part of the
+              template language. (Note that it's also possible to enforce a
+              naming convention on all templates from Java, via
               <literal>Configuration.getNamingConvention(int)</literal>.)</para>
             </listitem>
           </itemizedlist>
@@ -22568,6 +22569,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (legacy VS camel case) used for the identifiers that are part of
               the template language, for each template independently. This
               setting lets you enforce a naming convention instead.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>Configuration</literal> (and in fact any
+              <literal>Configurable</literal>) setting names now can be
+              written with camel case as well. For example, if you are
+              configuring FreeMarker from properties file, you can have
+              <literal>defaultEncoding=utf-8</literal> instead of
+              <literal>default_encoding=utf-8</literal>. You can use the two
+              naming conventions (camel case, and tradition snake case) mixed,
+              and <literal>Configuration.setNamingConvention(int)</literal>
+              does not influence this behavior.</para>
             </listitem>
 
             <listitem>
@@ -22597,6 +22610,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               now FreeMarker has added a workaround in the
               <literal>Template</literal> constructor, and so the exceptions
               will be now thrown by it as expected.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: The <literal>log_template_exceptions</literal>
+              setting (added in 2.3.22) couldn't be set through the
+              <literal>Configurable.setSetting(String, String)</literal>
+              API.</para>
             </listitem>
           </itemizedlist>
         </section>

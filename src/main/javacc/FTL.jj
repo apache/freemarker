@@ -1683,16 +1683,8 @@ BuiltinVariable BuiltinVariable() :
     name = <ID>
     {
         BuiltinVariable result = null;
-        try {
-            token_source.checkNamingConvention(name);
-            result = new BuiltinVariable(name.image, token_source);
-        } catch (ParseException pe) {
-            pe.lineNumber = dot.beginLine;
-            pe.columnNumber = dot.beginColumn;
-            pe.endLineNumber = name.endLine;
-            pe.endColumnNumber = name.endColumn;
-            throw pe;
-        }
+        token_source.checkNamingConvention(name);
+        result = new BuiltinVariable(name, token_source);
         result.setLocation(template, dot, name);
         return result;
     }
@@ -1776,16 +1768,8 @@ Expression BuiltIn(Expression exp) :
     t = <ID>
     {
         BuiltIn result = null;
-        try {
-            token_source.checkNamingConvention(t);
-            result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t.image, token_source);
-        } catch (ParseException pe) {
-            pe.lineNumber = t.beginLine;
-            pe.columnNumber = t.beginColumn;
-            pe.endLineNumber = t.endLine;
-            pe.endColumnNumber = t.endColumn;
-            throw pe;
-        }
+        token_source.checkNamingConvention(t);
+        result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t, token_source);
         result.setLocation(template, exp, t);
         return result;
     }
@@ -3057,7 +3041,7 @@ PropertySetting Setting() :
     end = LooseDirectiveEnd()
     {
         token_source.checkNamingConvention(key);
-        PropertySetting result = new PropertySetting(key.image, value);
+        PropertySetting result = new PropertySetting(key, token_source, value, template.getConfiguration());
         result.setLocation(template, start, end);
         return result;
     }

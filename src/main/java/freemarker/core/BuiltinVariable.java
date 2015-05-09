@@ -88,7 +88,8 @@ final class BuiltinVariable extends Expression {
 
     private final String name;
 
-    BuiltinVariable(String name, FMParserTokenManager tokenManager) throws ParseException {
+    BuiltinVariable(Token nameTk, FMParserTokenManager tokenManager) throws ParseException {
+        String name = nameTk.image;
         if (Arrays.binarySearch(SPEC_VAR_NAMES, name) < 0) {
             StringBuffer sb = new StringBuffer();
             sb.append("Unknown special variable name: ");
@@ -117,7 +118,7 @@ final class BuiltinVariable extends Expression {
                     sb.append(correctName);
                 }
             }
-            throw new ParseException(sb.toString(), this);
+            throw new ParseException(sb.toString(), null, nameTk);
         }
         
         this.name = name.intern();

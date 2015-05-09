@@ -71,58 +71,195 @@ public class Configurable
     private static final String DEFAULT_2_3_0 = "default_2_3_0";
     private static final String JVM_DEFAULT = "JVM default";
     
-    public static final String LOCALE_KEY = "locale";
-    public static final String NUMBER_FORMAT_KEY = "number_format";
-    public static final String TIME_FORMAT_KEY = "time_format";
-    public static final String DATE_FORMAT_KEY = "date_format";
-    public static final String DATETIME_FORMAT_KEY = "datetime_format";
-    public static final String TIME_ZONE_KEY = "time_zone";
-    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY
-            = "sql_date_and_time_time_zone";
-    public static final String CLASSIC_COMPATIBLE_KEY = "classic_compatible";
-    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = "template_exception_handler";
-    public static final String ARITHMETIC_ENGINE_KEY = "arithmetic_engine";
-    public static final String OBJECT_WRAPPER_KEY = "object_wrapper";
-    public static final String BOOLEAN_FORMAT_KEY = "boolean_format";
-    public static final String OUTPUT_ENCODING_KEY = "output_encoding";
-    public static final String URL_ESCAPING_CHARSET_KEY = "url_escaping_charset";
-    /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
-    public static final String STRICT_BEAN_MODELS = "strict_bean_models";
-    /** @since 2.3.22 */
-    public static final String STRICT_BEAN_MODELS_KEY = STRICT_BEAN_MODELS;
-    /** @since 2.3.17 */
-    public static final String AUTO_FLUSH_KEY = "auto_flush";
-    /** @since 2.3.17 */
-    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
-    /** @since 2.3.21 */
-    public static final String SHOW_ERROR_TIPS_KEY = "show_error_tips";
-    /** @since 2.3.22 */
-    public static final String API_BUILTIN_ENABLED_KEY = "api_builtin_enabled";
-    /** @since 2.3.22 */
-    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = "log_template_exceptions";
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String LOCALE_KEY_SNAKE_CASE = "locale";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String LOCALE_KEY_CAMEL_CASE = "locale";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String LOCALE_KEY = LOCALE_KEY_SNAKE_CASE;
     
-    private static final String[] SETTING_NAMES = new String[] {
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String NUMBER_FORMAT_KEY_SNAKE_CASE = "number_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String NUMBER_FORMAT_KEY_CAMEL_CASE = "numberFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String NUMBER_FORMAT_KEY = NUMBER_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_FORMAT_KEY_SNAKE_CASE = "time_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_FORMAT_KEY_CAMEL_CASE = "timeFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TIME_FORMAT_KEY = TIME_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String DATE_FORMAT_KEY_SNAKE_CASE = "date_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String DATE_FORMAT_KEY_CAMEL_CASE = "dateFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String DATE_FORMAT_KEY = DATE_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String DATETIME_FORMAT_KEY_SNAKE_CASE = "datetime_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String DATETIME_FORMAT_KEY_CAMEL_CASE = "datetimeFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String DATETIME_FORMAT_KEY = DATETIME_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_ZONE_KEY_SNAKE_CASE = "time_zone";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_ZONE_KEY_CAMEL_CASE = "timeZone";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TIME_ZONE_KEY = TIME_ZONE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE = "sql_date_and_time_time_zone";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE = "sqlDateAndTimeTimeZone";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY = SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String CLASSIC_COMPATIBLE_KEY_SNAKE_CASE = "classic_compatible";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String CLASSIC_COMPATIBLE_KEY_CAMEL_CASE = "classicCompatible";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String CLASSIC_COMPATIBLE_KEY = CLASSIC_COMPATIBLE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE = "template_exception_handler";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE = "templateExceptionHandler";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String ARITHMETIC_ENGINE_KEY_SNAKE_CASE = "arithmetic_engine";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String ARITHMETIC_ENGINE_KEY_CAMEL_CASE = "arithmeticEngine";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String ARITHMETIC_ENGINE_KEY = ARITHMETIC_ENGINE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String OBJECT_WRAPPER_KEY_SNAKE_CASE = "object_wrapper";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String OBJECT_WRAPPER_KEY_CAMEL_CASE = "objectWrapper";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String OBJECT_WRAPPER_KEY = OBJECT_WRAPPER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String BOOLEAN_FORMAT_KEY_SNAKE_CASE = "boolean_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String BOOLEAN_FORMAT_KEY_CAMEL_CASE = "booleanFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String BOOLEAN_FORMAT_KEY = BOOLEAN_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String OUTPUT_ENCODING_KEY_SNAKE_CASE = "output_encoding";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String OUTPUT_ENCODING_KEY_CAMEL_CASE = "outputEncoding";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String OUTPUT_ENCODING_KEY = OUTPUT_ENCODING_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String URL_ESCAPING_CHARSET_KEY_SNAKE_CASE = "url_escaping_charset";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String URL_ESCAPING_CHARSET_KEY_CAMEL_CASE = "urlEscapingCharset";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String URL_ESCAPING_CHARSET_KEY = URL_ESCAPING_CHARSET_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String STRICT_BEAN_MODELS_KEY_SNAKE_CASE = "strict_bean_models";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String STRICT_BEAN_MODELS_KEY_CAMEL_CASE = "strictBeanModels";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
+    public static final String STRICT_BEAN_MODELS_KEY = STRICT_BEAN_MODELS_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String AUTO_FLUSH_KEY_SNAKE_CASE = "auto_flush";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String AUTO_FLUSH_KEY_CAMEL_CASE = "autoFlush";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.17 */
+    public static final String AUTO_FLUSH_KEY = AUTO_FLUSH_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE = "new_builtin_class_resolver";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE = "newBuiltinClassResolver";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.17 */
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String SHOW_ERROR_TIPS_KEY_SNAKE_CASE = "show_error_tips";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String SHOW_ERROR_TIPS_KEY_CAMEL_CASE = "showErrorTips";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.21 */
+    public static final String SHOW_ERROR_TIPS_KEY = SHOW_ERROR_TIPS_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String API_BUILTIN_ENABLED_KEY_SNAKE_CASE = "api_builtin_enabled";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String API_BUILTIN_ENABLED_KEY_CAMEL_CASE = "apiBuiltinEnabled";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
+    public static final String API_BUILTIN_ENABLED_KEY = API_BUILTIN_ENABLED_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE = "log_template_exceptions";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE = "logTemplateExceptions";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE;
+    
+    /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
+    public static final String STRICT_BEAN_MODELS = STRICT_BEAN_MODELS_KEY;
+    
+    private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
         // Must be sorted alphabetically!
-        API_BUILTIN_ENABLED_KEY,
-        ARITHMETIC_ENGINE_KEY,
-        AUTO_FLUSH_KEY,
-        BOOLEAN_FORMAT_KEY,
-        CLASSIC_COMPATIBLE_KEY,
-        DATE_FORMAT_KEY,
-        DATETIME_FORMAT_KEY,
-        LOCALE_KEY,
-        LOG_TEMPLATE_EXCEPTIONS_KEY,
-        NEW_BUILTIN_CLASS_RESOLVER_KEY,
-        NUMBER_FORMAT_KEY,
-        OBJECT_WRAPPER_KEY,
-        OUTPUT_ENCODING_KEY,
-        SHOW_ERROR_TIPS_KEY,
-        SQL_DATE_AND_TIME_TIME_ZONE_KEY,
-        STRICT_BEAN_MODELS,
-        TEMPLATE_EXCEPTION_HANDLER_KEY,
-        TIME_FORMAT_KEY,
-        TIME_ZONE_KEY,
-        URL_ESCAPING_CHARSET_KEY
+        API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
+        ARITHMETIC_ENGINE_KEY_SNAKE_CASE,
+        AUTO_FLUSH_KEY_SNAKE_CASE,
+        BOOLEAN_FORMAT_KEY_SNAKE_CASE,
+        CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
+        DATE_FORMAT_KEY_SNAKE_CASE,
+        DATETIME_FORMAT_KEY_SNAKE_CASE,
+        LOCALE_KEY_SNAKE_CASE,
+        LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE,
+        NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
+        NUMBER_FORMAT_KEY_SNAKE_CASE,
+        OBJECT_WRAPPER_KEY_SNAKE_CASE,
+        OUTPUT_ENCODING_KEY_SNAKE_CASE,
+        SHOW_ERROR_TIPS_KEY_SNAKE_CASE,
+        SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
+        STRICT_BEAN_MODELS_KEY,
+        TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE,
+        TIME_FORMAT_KEY_SNAKE_CASE,
+        TIME_ZONE_KEY_SNAKE_CASE,
+        URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
+    };
+    
+    private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
+        // Must be sorted alphabetically!
+        API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
+        ARITHMETIC_ENGINE_KEY_CAMEL_CASE,
+        AUTO_FLUSH_KEY_CAMEL_CASE,
+        BOOLEAN_FORMAT_KEY_CAMEL_CASE,
+        CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
+        DATE_FORMAT_KEY_CAMEL_CASE,
+        DATETIME_FORMAT_KEY_CAMEL_CASE,
+        LOCALE_KEY_CAMEL_CASE,
+        LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE,
+        NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
+        NUMBER_FORMAT_KEY_CAMEL_CASE,
+        OBJECT_WRAPPER_KEY_CAMEL_CASE,
+        OUTPUT_ENCODING_KEY_CAMEL_CASE,
+        SHOW_ERROR_TIPS_KEY_CAMEL_CASE,
+        SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
+        STRICT_BEAN_MODELS_KEY_CAMEL_CASE,
+        TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE,
+        TIME_FORMAT_KEY_CAMEL_CASE,
+        TIME_ZONE_KEY_CAMEL_CASE,
+        URL_ESCAPING_CHARSET_KEY_CAMEL_CASE
     };
 
     private Configurable parent;
@@ -1345,19 +1482,21 @@ public class Configurable
         try {
             if (LOCALE_KEY.equals(name)) {
                 setLocale(StringUtil.deduceLocale(value));
-            } else if (NUMBER_FORMAT_KEY.equals(name)) {
+            } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setNumberFormat(value);
-            } else if (TIME_FORMAT_KEY.equals(name)) {
+            } else if (TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setTimeFormat(value);
-            } else if (DATE_FORMAT_KEY.equals(name)) {
+            } else if (DATE_FORMAT_KEY_SNAKE_CASE.equals(name) || DATE_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateFormat(value);
-            } else if (DATETIME_FORMAT_KEY.equals(name)) {
+            } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
-            } else if (TIME_ZONE_KEY.equals(name)) {
+            } else if (TIME_ZONE_KEY_SNAKE_CASE.equals(name) || TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setTimeZone(parseTimeZoneSettingValue(value));
-            } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY.equals(name)) {
+            } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE.equals(name)
+                    || SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setSQLDateAndTimeTimeZone(value.equals("null") ? null : parseTimeZoneSettingValue(value));
-            } else if (CLASSIC_COMPATIBLE_KEY.equals(name)) {
+            } else if (CLASSIC_COMPATIBLE_KEY_SNAKE_CASE.equals(name)
+                    || CLASSIC_COMPATIBLE_KEY_CAMEL_CASE.equals(name)) {
                 char firstChar;
                 if (value != null && value.length() > 0) {
                     firstChar =  value.charAt(0);
@@ -1369,12 +1508,13 @@ public class Configurable
                 } else {
                     setClassicCompatible(value != null ? StringUtil.getYesNo(value) : false);
                 }
-            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY.equals(name)) {
+            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE.equals(name)
+                    || TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) {
                     if ("debug".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.DEBUG_HANDLER);
-                    } else if ("html_debug".equalsIgnoreCase(value)) {
+                    } else if ("html_debug".equalsIgnoreCase(value) || "htmlDebug".equals(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.HTML_DEBUG_HANDLER);
                     } else if ("ignore".equalsIgnoreCase(value)) {
@@ -1392,7 +1532,7 @@ public class Configurable
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
                             value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (ARITHMETIC_ENGINE_KEY.equals(name)) {
+            } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) { 
                     if ("bigdecimal".equalsIgnoreCase(value)) {
                         setArithmeticEngine(ArithmeticEngine.BIGDECIMAL_ENGINE);
@@ -1405,7 +1545,7 @@ public class Configurable
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
                             value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (OBJECT_WRAPPER_KEY.equals(name)) {
+            } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name) || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
                 if (DEFAULT.equalsIgnoreCase(value)) {
                     if (this instanceof Configuration) {
                         ((Configuration) this).unsetObjectWrapper();
@@ -1427,26 +1567,30 @@ public class Configurable
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
                                     value, ObjectWrapper.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
+            } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setBooleanFormat(value);
-            } else if (OUTPUT_ENCODING_KEY.equals(name)) {
+            } else if (OUTPUT_ENCODING_KEY_SNAKE_CASE.equals(name) || OUTPUT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
                 setOutputEncoding(value);
-            } else if (URL_ESCAPING_CHARSET_KEY.equals(name)) {
+            } else if (URL_ESCAPING_CHARSET_KEY_SNAKE_CASE.equals(name)
+                    || URL_ESCAPING_CHARSET_KEY_CAMEL_CASE.equals(name)) {
                 setURLEscapingCharset(value);
-            } else if (STRICT_BEAN_MODELS.equals(name)) {
+            } else if (STRICT_BEAN_MODELS_KEY_SNAKE_CASE.equals(name)
+                    || STRICT_BEAN_MODELS_KEY_CAMEL_CASE.equals(name)) {
                 setStrictBeanModels(StringUtil.getYesNo(value));
-            } else if (AUTO_FLUSH_KEY.equals(name)) {
+            } else if (AUTO_FLUSH_KEY_SNAKE_CASE.equals(name) || AUTO_FLUSH_KEY_CAMEL_CASE.equals(name)) {
                 setAutoFlush(StringUtil.getYesNo(value));
-            } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
+            } else if (SHOW_ERROR_TIPS_KEY_SNAKE_CASE.equals(name) || SHOW_ERROR_TIPS_KEY_CAMEL_CASE.equals(name)) {
                 setShowErrorTips(StringUtil.getYesNo(value));
-            } else if (API_BUILTIN_ENABLED_KEY.equals(name)) {
+            } else if (API_BUILTIN_ENABLED_KEY_SNAKE_CASE.equals(name)
+                    || API_BUILTIN_ENABLED_KEY_CAMEL_CASE.equals(name)) {
                 setAPIBuiltinEnabled(StringUtil.getYesNo(value));
-            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
+            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE.equals(name)
+                    || NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);
                 } else if ("safer".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
-                } else if ("allows_nothing".equals(value)) {
+                } else if ("allows_nothing".equals(value) || "allowsNothing".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
                 } else if (value.indexOf(":") != -1) {
                     List segments = parseAsSegmentedList(value);
@@ -1475,6 +1619,9 @@ public class Configurable
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
+            } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
+                    || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
+                setLogTemplateExceptions(StringUtil.getYesNo(value));
             } else {
                 unknown = true;
             }
@@ -1487,9 +1634,9 @@ public class Configurable
     }
     
     /** Returns the possible setting names. */
-    // [Java 5] Add type param. [FM 2.4] It must return the camelCase names, then make it public.
-    Set/*<String>*/ getSettingNames() {
-        return new _SortedArraySet(SETTING_NAMES); 
+    // [Java 5] Add type param. [FM 2.4] Add public parameterless version the returns the camelCase names.
+    Set/*<String>*/ getSettingNames(boolean camelCase) {
+        return new _SortedArraySet(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE); 
     }
 
     private TimeZone parseTimeZoneSettingValue(String value) {
@@ -1544,25 +1691,12 @@ public class Configurable
             : Environment.getCurrentEnvironment();
     }
     
+    /**
+     * Creates the exception that should be thrown when a setting name isn't recognized.
+     */
     protected TemplateException unknownSettingException(String name) {
-        final String explanation;
-        final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(name);
-        if (!underscoredName.equals(name)) {
-            Collection/*<String>*/ names = this instanceof Configuration
-                    ? _TemplateAPI.getConfigurationSettingNames((Configuration) this)
-                    : getSettingNames();
-            if (names.contains(underscoredName)) {
-                explanation = "Supporting camelCase setting names is planned for FreeMarker 2.4.0; "
-                        + "check if an update is available, and if it indeed supports camel case. "
-                        + "Until that, use \"" + underscoredName + "\".";
-            } else {
-                explanation = null;
-            }
-        } else {
-            explanation = null;
-        }
         return new UnknownSettingException(
-                getEnvironment(), name, explanation, getCorrectedNameForUnknownSetting(name));
+                getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
     }
 
     /**
@@ -1592,10 +1726,9 @@ public class Configurable
      */
     public static class UnknownSettingException extends _MiscTemplateException {
 
-        private UnknownSettingException(Environment env, String name, String explanation, String correctedName) {
+        private UnknownSettingException(Environment env, String name, String correctedName) {
             super(env, new Object[] {
                     "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
-                    explanation == null ? (Object) "" : new Object[] { ". ", explanation }, 
                     correctedName == null
                             ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }
