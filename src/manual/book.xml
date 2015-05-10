@@ -29933,14 +29933,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       </section>
     </appendix>
 
-    <appendix xml:id="search">
-      <title>Search</title>
-
-      <indexterm>
-        <primary>search</primary>
-      </indexterm>
-    </appendix>
-
     <appendix xml:id="app_license">
       <title>License</title>
 
@@ -29997,6 +29989,14 @@ With FreeMarker 2.3.21 the license has changed to Apache License,
 Version 2.0, and the owner has changed from Visigoth Software Society
 to three of the FreeMarker 2.X developers, Attila Szegedi, Daniel
 Dekany, and Jonathan Revusky.</programlisting>
+    </appendix>  
+
+    <appendix xml:id="search">
+      <title>Search</title>
+
+      <indexterm>
+        <primary>search</primary>
+      </indexterm>
     </appendix>
   </part>
 
