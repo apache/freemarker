@@ -1894,7 +1894,8 @@ StringLiteral StringLiteral(boolean interpolate) :
         StringLiteral result = new StringLiteral(s);
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
-            result.parseValue(token_source);
+            // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source);
         }
         return result;
     }
