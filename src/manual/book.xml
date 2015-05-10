@@ -29933,6 +29933,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       </section>
     </appendix>
 
+    <appendix xml:id="search">
+      <title>Search</title>
+
+      <indexterm>
+        <primary>search</primary>
+      </indexterm>
+    </appendix>
+
     <appendix xml:id="app_license">
       <title>License</title>
 
@@ -29991,6 +29999,7 @@ to three of the FreeMarker 2.X developers, Attila Szegedi, Daniel
 Dekany, and Jonathan Revusky.</programlisting>
     </appendix>
   </part>
+
 
   <glossary xml:id="gloss">
     <glossentry xml:id="gloss.startTag">
@@ -30589,8 +30598,4 @@ Dekany, and Jonathan Revusky.</programlisting>
   <index xml:id="alphaidx">
     <title>Alphabetical Index</title>
   </index>
-
-  <search xml:id="search">
-    <title>Search</title>
-  </search>
 </book>
