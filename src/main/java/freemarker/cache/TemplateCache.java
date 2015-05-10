@@ -215,7 +215,11 @@ public class TemplateCache
      *
      * @return A {@link MaybeMissingTemplate} object that contains the {@link Template}, or a
      *         {@link MaybeMissingTemplate} object that contains {@code null} as the {@link Template} and information
-     *         about the missing template. The return value itself is never {@code null}.
+     *         about the missing template. The return value itself is never {@code null}. Note that exceptions occurring
+     *         during template loading will not be classified as a missing template, so they will cause an exception to
+     *         be thrown by this method instead of returning a {@link MaybeMissingTemplate}. The idea is that having a
+     *         missing template is normal (not exceptional), providing that the backing storage mechanism could indeed
+     *         check that it's missing.
      * 
      * @throws MalformedTemplateNameException
      *             If the {@code name} was malformed according the current {@link TemplateNameFormat}. However, if the
@@ -261,6 +265,9 @@ public class TemplateCache
     /**
      * Similar to {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
      * {@code customLookupCondition}.
+     * 
+     * @return {@link MaybeMissingTemplate#getTemplate()} of the
+     *         {@link #getTemplate(String, Locale, Object, String, boolean)} return value.
      * 
      * @deprecated Use {@link #getTemplate(String, Locale, Object, String, boolean)}, which can return more detailed
      *             result when the template is missing.
@@ -686,7 +693,7 @@ public class TemplateCache
         // Shortcut in case there is no acquisition
         if(asterisk == -1)
         {
-            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
+            return TemplateLookupResult.from(path, findTemplateSource(path));
         }
         StringTokenizer tok = new StringTokenizer(path, "/");
         int lastAsterisk = -1;
@@ -705,7 +712,7 @@ public class TemplateCache
             tokpath.add(pathToken);
         }
         if (lastAsterisk == -1) {  // if there was no real "*" step after all
-            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
+            return TemplateLookupResult.from(path, findTemplateSource(path));
         }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
@@ -715,11 +722,10 @@ public class TemplateCache
         }
         StringBuffer buf = new StringBuffer(path.length()).append(basePath);
         int l = basePath.length();
-        boolean debug = LOG.isDebugEnabled();
         for(;;)
         {
             String fullPath = buf.append(resourcePath).toString();
-            Object templateSource = modifyForConfIcI(findTemplateSourceAndLog(fullPath));
+            Object templateSource = findTemplateSource(fullPath);
             if(templateSource != null)
             {
                 return TemplateLookupResult.from(fullPath, templateSource);
@@ -733,13 +739,13 @@ public class TemplateCache
         }
     }
 
-    private Object findTemplateSourceAndLog(String path) throws IOException {
+    private Object findTemplateSource(String path) throws IOException {
         final Object result = templateLoader.findTemplateSource(path);
         if (LOG.isDebugEnabled()) {
             LOG.debug("TemplateLoader.findTemplateSource(" +  StringUtil.jQuote(path) + "): "
                     + (result == null ? "Not found" : "Found"));
         }
-        return result;
+        return modifyForConfIcI(result);
     }
 
     /**
@@ -821,7 +827,7 @@ public class TemplateCache
             return
                 name.hashCode() ^
                 locale.hashCode() ^
-                locale.hashCode() ^
+                encoding.hashCode() ^
                 (customLookupCondition != null ? customLookupCondition.hashCode() : 0) ^
                 Boolean.valueOf(!parse).hashCode();
         }
@@ -955,10 +961,9 @@ public class TemplateCache
         }
         
         /**
-         * When the template was missing, this <em>possibly</em> contains the explanation, or {@code null}. If the
-         * template wasn't missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always
-         * {@code null}. When the template is missing, it will be {@code null} for example if the normalization itself
-         * was unsuccessful.
+         * When the template was missing, this <em>possibly</em> contains its normalized name. If the template wasn't
+         * missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always {@code null}. When the
+         * template is missing, it will be {@code null} for example if the normalization itself was unsuccessful.
          */
         public String getMissingTemplateNormalizedName() {
             return missingTemplateNormalizedName;

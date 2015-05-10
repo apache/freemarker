@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
@@ -47,8 +48,11 @@ import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.core.Configurable;
+import freemarker.core.Configurable.UnknownSettingException;
+import freemarker.core.ConfigurableTest;
 import freemarker.core.Environment;
 import freemarker.core._CoreAPI;
+import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
@@ -923,6 +927,13 @@ public class ConfigurationTest extends TestCase {
         cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, "2.3.21");
         assertEquals(Configuration.VERSION_2_3_21, cfg.getIncompatibleImprovements());
     }
+
+    public void testSetLogTemplateExceptionsViaSetSettingAPI() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        assertEquals(true, cfg.getLogTemplateExceptions());
+        cfg.setSetting(Configuration.LOG_TEMPLATE_EXCEPTIONS_KEY, "false");
+        assertEquals(false, cfg.getLogTemplateExceptions());
+    }
     
     public void testSharedVariables() throws TemplateModelException {
         Configuration cfg = new Configuration();
@@ -1027,21 +1038,129 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1000L * 60 * 60 * 2, cfg.getTemplateUpdateDelayMilliseconds());
     }
     
+    public void testNamingConventionSetSetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+
+        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
+        
+        cfg.setSetting("naming_convention", "legacy");
+        assertEquals(Configuration.LEGACY_NAMING_CONVENTION, cfg.getNamingConvention());
+        
+        cfg.setSetting("naming_convention", "camel_case");
+        assertEquals(Configuration.CAMEL_CASE_NAMING_CONVENTION, cfg.getNamingConvention());
+        
+        cfg.setSetting("naming_convention", "auto_detect");
+        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
+    }
+    
     @Test
-    public void testGetSettingNames() throws Exception {
+    public void testGetSettingNamesAreSorted() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        List<String> names = new ArrayList<String>(cfg.getSettingNames()); 
-        List<String> cfgableNames = new ArrayList<String>(_CoreAPI.getConfigurableSettingNames(cfg));
+        for (boolean camelCase : new boolean[] { false, true }) {
+            List<String> names = new ArrayList<String>(cfg.getSettingNames(camelCase)); 
+            List<String> cfgableNames = new ArrayList<String>(_CoreAPI.getConfigurableSettingNames(cfg, camelCase));
+            assertStartsWith(names, cfgableNames);
+            
+            String prevName = null;
+            for (int i = cfgableNames.size(); i < names.size(); i++) {
+                String name = names.get(i);
+                if (prevName != null) {
+                    assertThat(name, greaterThan(prevName));
+                }
+                prevName = name;
+            }
+        }
+    }
+
+    @Test
+    public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        ConfigurableTest.testGetSettingNamesNameConventionsContainTheSame(
+                new ArrayList<String>(cfg.getSettingNames(false)),
+                new ArrayList<String>(cfg.getSettingNames(true)));
+    }
+
+    @Test
+    public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        List<String> names = new ArrayList<String>(cfg.getSettingNames(false)); 
+        List<String> cfgableNames = new ArrayList<String>(_CoreAPI.getConfigurableSettingNames(cfg, false));
         assertStartsWith(names, cfgableNames);
         
-        String prevName = null;
         for (int i = cfgableNames.size(); i < names.size(); i++) {
             String name = names.get(i);
-            if (prevName != null) {
-                assertThat(name, greaterThan(prevName));
-                assertTrue("No field was found for " + name, keyFieldExists(name));
+            assertTrue("No field was found for " + name, keyFieldExists(name));
+        }
+    }
+    
+    @Test
+    public void testGetSettingNamesCoversAllStaticKeyFields() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Collection<String> names = cfg.getSettingNames(false);
+        
+        for (Class<? extends Configurable> cfgableClass : new Class[] { Configuration.class, Configurable.class }) {
+            for (Field f : cfgableClass.getFields()) {
+                if (f.getName().endsWith("_KEY")) {
+                    final Object name = f.get(null);
+                    assertTrue("Missing setting name: " + name, names.contains(name));
+                }
             }
-            prevName = name;
+        }
+    }
+    
+    @Test
+    public void testKeyStaticFieldsHasAllVariationsAndCorrectFormat() throws IllegalArgumentException, IllegalAccessException {
+        ConfigurableTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(Configuration.class);
+    }
+
+    @Test
+    public void testGetSettingNamesCoversAllSettingNames() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Collection<String> names = cfg.getSettingNames(false);
+        
+        for (Field f : Configurable.class.getFields()) {
+            if (f.getName().endsWith("_KEY")) {
+                final Object name = f.get(null);
+                assertTrue("Missing setting name: " + name, names.contains(name));
+            }
+        }
+    }
+
+    @Test
+    public void testSetSettingSupportsBothNamingConventions() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY_CAMEL_CASE, "UTF-16LE");
+        assertEquals("UTF-16LE", cfg.getDefaultEncoding());
+        cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY_SNAKE_CASE, "UTF-8");
+        assertEquals("UTF-8", cfg.getDefaultEncoding());
+        
+        for (String nameCC : (Set<String>) cfg.getSettingNames(true)) {
+            for (String value : new String[] { "1", "default", "true" }) {
+                Exception resultCC = null;
+                try {
+                    cfg.setSetting(nameCC, value);
+                } catch (Exception e) {
+                    assertThat(e, not(instanceOf(UnknownSettingException.class)));
+                    resultCC = e;
+                }
+                
+                String nameSC = _CoreStringUtils.camelCaseToUnderscored(nameCC);
+                Exception resultSC = null;
+                try {
+                    cfg.setSetting(nameSC, value);
+                } catch (Exception e) {
+                    assertThat(e, not(instanceOf(UnknownSettingException.class)));
+                    resultSC = e;
+                }
+                
+                if (resultCC == null) {
+                    assertNull(resultSC);
+                } else {
+                    assertNotNull(resultSC);
+                    assertEquals(resultCC.getClass(), resultSC.getClass());
+                }
+            }
         }
     }
     
@@ -1054,7 +1173,7 @@ public class ConfigurationTest extends TestCase {
             index++;
         }
     }
-    
+
     private boolean keyFieldExists(String name) throws Exception {
         Field field;
         try {
@@ -1066,19 +1185,6 @@ public class ConfigurationTest extends TestCase {
         return true;
     }
     
-    @Test
-    public void testGetSettingNamesCoversAllSettingNames() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        Collection<String> names = cfg.getSettingNames();
-        
-        for (Field f : Configurable.class.getFields()) {
-            if (f.getName().endsWith("_KEY")) {
-                final Object name = f.get(null);
-                assertTrue("Missing setting name: " + name, names.contains(name));
-            }
-        }
-    }
-
     private static class MyScalarModel implements TemplateScalarModel {
 
         public String getAsString() throws TemplateModelException {

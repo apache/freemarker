@@ -16,16 +16,15 @@
 
 package freemarker.template;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class ActualTagSyntaxTest extends TestCase {
-    
-    public ActualTagSyntaxTest(String name) {
-        super(name);
-    }
+public class ActualTagSyntaxTest {
 
+    @Test
     public void testWithFtlHeader() throws IOException {
         testWithFtlHeader(Configuration.AUTO_DETECT_TAG_SYNTAX);
         testWithFtlHeader(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
@@ -36,13 +35,15 @@ public class ActualTagSyntaxTest extends TestCase {
         assertEquals(getActualTagSyntax("[#ftl]foo", cfgTagSyntax), Configuration.SQUARE_BRACKET_TAG_SYNTAX);
         assertEquals(getActualTagSyntax("<#ftl>foo", cfgTagSyntax), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
     }
-
+    
+    @Test
     public void testUndecidable() throws IOException {
         assertEquals(getActualTagSyntax("foo", Configuration.AUTO_DETECT_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
         assertEquals(getActualTagSyntax("foo", Configuration.ANGLE_BRACKET_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
         assertEquals(getActualTagSyntax("foo", Configuration.SQUARE_BRACKET_TAG_SYNTAX), Configuration.SQUARE_BRACKET_TAG_SYNTAX);
     }
 
+    @Test
     public void testDecidableWithoutFtlHeader() throws IOException {
         assertEquals(getActualTagSyntax("foo<#if true></#if>", Configuration.AUTO_DETECT_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
         assertEquals(getActualTagSyntax("foo<#if true></#if>", Configuration.ANGLE_BRACKET_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);

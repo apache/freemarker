@@ -24,6 +24,7 @@ import java.util.List;
 
 import freemarker.core.BuiltInsForDates.iso_BI;
 import freemarker.core.BuiltInsForDates.iso_utc_or_local_BI;
+import freemarker.core.BuiltInsForMultipleTypes.is_dateLikeBI;
 import freemarker.core.BuiltInsForNodes.ancestorsBI;
 import freemarker.core.BuiltInsForNodes.childrenBI;
 import freemarker.core.BuiltInsForNodes.node_nameBI;
@@ -70,227 +71,259 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final HashMap builtins = new HashMap();
+    static final int NUMBER_OF_BIS = 232;
+    static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
     static {
-        BuiltIn bi;
+        // Note that you must update NUMBER_OF_BIS if you add new items here!
         
-        builtins.put("abs", new absBI());
-        builtins.put("ancestors", new ancestorsBI());
-        builtins.put("api", new BuiltInsForMultipleTypes.apiBI());
-        builtins.put("boolean", new BuiltInsForStringsMisc.booleanBI());
-        builtins.put("byte", new byteBI());
-        builtins.put("c", new BuiltInsForMultipleTypes.cBI());
-        builtins.put("cap_first", new BuiltInsForStringsBasic.cap_firstBI());
-        builtins.put("capitalize", new BuiltInsForStringsBasic.capitalizeBI());
-        builtins.put("ceiling", new ceilingBI());
-        builtins.put("children", new childrenBI());
-        builtins.put("chop_linebreak", new BuiltInsForStringsBasic.chop_linebreakBI());
-        builtins.put("contains", new BuiltInsForStringsBasic.containsBI());        
-        builtins.put("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));
-        builtins.put("date_if_unknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
-        builtins.put("datetime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATETIME));
-        builtins.put("datetime_if_unknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
-        builtins.put("default", new ExistenceBuiltins.defaultBI());
-        builtins.put("double", new doubleBI());
-        builtins.put("ends_with", new BuiltInsForStringsBasic.ends_withBI());
-        builtins.put("ensure_ends_with", new BuiltInsForStringsBasic.ensure_ends_withBI());
-        builtins.put("ensure_starts_with", new BuiltInsForStringsBasic.ensure_starts_withBI());
-        builtins.put("eval", new evalBI());
-        builtins.put("exists", new ExistenceBuiltins.existsBI());
-        builtins.put("first", new firstBI());
-        builtins.put("float", new floatBI());
-        builtins.put("floor", new floorBI());
-        builtins.put("chunk", new chunkBI());
-        builtins.put("has_api", new BuiltInsForMultipleTypes.has_apiBI());
-        builtins.put("has_content", new ExistenceBuiltins.has_contentBI());
-        builtins.put("html", new BuiltInsForStringsEncoding.htmlBI());
-        builtins.put("if_exists", new ExistenceBuiltins.if_existsBI());
-        builtins.put("index_of", new BuiltInsForStringsBasic.index_ofBI(false));
-        builtins.put("int", new intBI());
-        builtins.put("interpret", new Interpret());
-        builtins.put("is_boolean", new BuiltInsForMultipleTypes.is_booleanBI());
-        builtins.put("is_collection", new BuiltInsForMultipleTypes.is_collectionBI());
-        builtins.put("is_collection_ex", new BuiltInsForMultipleTypes.is_collection_exBI());
-        bi = new BuiltInsForMultipleTypes.is_dateLikeBI();
-        builtins.put("is_date", bi);  // misnomer
-        builtins.put("is_date_like", bi);
-        builtins.put("is_date_only", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE));
-        builtins.put("is_unknown_date_like", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
-        builtins.put("is_datetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
-        builtins.put("is_directive", new BuiltInsForMultipleTypes.is_directiveBI());
-        builtins.put("is_enumerable", new BuiltInsForMultipleTypes.is_enumerableBI());
-        builtins.put("is_hash_ex", new BuiltInsForMultipleTypes.is_hash_exBI());
-        builtins.put("is_hash", new BuiltInsForMultipleTypes.is_hashBI());
-        builtins.put("is_infinite", new is_infiniteBI());
-        builtins.put("is_indexable", new BuiltInsForMultipleTypes.is_indexableBI());
-        builtins.put("is_macro", new BuiltInsForMultipleTypes.is_macroBI());
-        builtins.put("is_method", new BuiltInsForMultipleTypes.is_methodBI());
-        builtins.put("is_nan", new is_nanBI());
-        builtins.put("is_node", new BuiltInsForMultipleTypes.is_nodeBI());
-        builtins.put("is_number", new BuiltInsForMultipleTypes.is_numberBI());
-        builtins.put("is_sequence", new BuiltInsForMultipleTypes.is_sequenceBI());
-        builtins.put("is_string", new BuiltInsForMultipleTypes.is_stringBI());
-        builtins.put("is_time", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
-        builtins.put("is_transform", new BuiltInsForMultipleTypes.is_transformBI());
+        putBI("abs", new absBI());
+        putBI("ancestors", new ancestorsBI());
+        putBI("api", new BuiltInsForMultipleTypes.apiBI());
+        putBI("boolean", new BuiltInsForStringsMisc.booleanBI());
+        putBI("byte", new byteBI());
+        putBI("c", new BuiltInsForMultipleTypes.cBI());
+        putBI("cap_first", "capFirst", new BuiltInsForStringsBasic.cap_firstBI());
+        putBI("capitalize", new BuiltInsForStringsBasic.capitalizeBI());
+        putBI("ceiling", new ceilingBI());
+        putBI("children", new childrenBI());
+        putBI("chop_linebreak", "chopLinebreak", new BuiltInsForStringsBasic.chop_linebreakBI());
+        putBI("contains", new BuiltInsForStringsBasic.containsBI());        
+        putBI("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));
+        putBI("date_if_unknown", "dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
+        putBI("datetime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATETIME));
+        putBI("datetime_if_unknown", "datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
+        putBI("default", new ExistenceBuiltins.defaultBI());
+        putBI("double", new doubleBI());
+        putBI("ends_with", "endsWith", new BuiltInsForStringsBasic.ends_withBI());
+        putBI("ensure_ends_with", "ensureEndsWith", new BuiltInsForStringsBasic.ensure_ends_withBI());
+        putBI("ensure_starts_with", "ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
+        putBI("eval", new evalBI());
+        putBI("exists", new ExistenceBuiltins.existsBI());
+        putBI("first", new firstBI());
+        putBI("float", new floatBI());
+        putBI("floor", new floorBI());
+        putBI("chunk", new chunkBI());
+        putBI("has_api", "hasApi", new BuiltInsForMultipleTypes.has_apiBI());
+        putBI("has_content", "hasContent", new ExistenceBuiltins.has_contentBI());
+        putBI("html", new BuiltInsForStringsEncoding.htmlBI());
+        putBI("if_exists", "ifExists", new ExistenceBuiltins.if_existsBI());
+        putBI("index_of", "indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
+        putBI("int", new intBI());
+        putBI("interpret", new Interpret());
+        putBI("is_boolean", "isBoolean", new BuiltInsForMultipleTypes.is_booleanBI());
+        putBI("is_collection", "isCollection", new BuiltInsForMultipleTypes.is_collectionBI());
+        putBI("is_collection_ex", "isCollectionEx", new BuiltInsForMultipleTypes.is_collection_exBI());
+        is_dateLikeBI bi = new BuiltInsForMultipleTypes.is_dateLikeBI();
+        putBI("is_date", "isDate", bi);  // misnomer
+        putBI("is_date_like", "isDateLike", bi);
+        putBI("is_date_only", "isDateOnly", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE));
+        putBI("is_unknown_date_like", "isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
+        putBI("is_datetime", "isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
+        putBI("is_directive", "isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
+        putBI("is_enumerable", "isEnumerable", new BuiltInsForMultipleTypes.is_enumerableBI());
+        putBI("is_hash_ex", "isHashEx", new BuiltInsForMultipleTypes.is_hash_exBI());
+        putBI("is_hash", "isHash", new BuiltInsForMultipleTypes.is_hashBI());
+        putBI("is_infinite", "isInfinite", new is_infiniteBI());
+        putBI("is_indexable", "isIndexable", new BuiltInsForMultipleTypes.is_indexableBI());
+        putBI("is_macro", "isMacro", new BuiltInsForMultipleTypes.is_macroBI());
+        putBI("is_method", "isMethod", new BuiltInsForMultipleTypes.is_methodBI());
+        putBI("is_nan", "isNan", new is_nanBI());
+        putBI("is_node", "isNode", new BuiltInsForMultipleTypes.is_nodeBI());
+        putBI("is_number", "isNumber", new BuiltInsForMultipleTypes.is_numberBI());
+        putBI("is_sequence", "isSequence", new BuiltInsForMultipleTypes.is_sequenceBI());
+        putBI("is_string", "isString", new BuiltInsForMultipleTypes.is_stringBI());
+        putBI("is_time", "isTime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
+        putBI("is_transform", "isTransform", new BuiltInsForMultipleTypes.is_transformBI());
         
-        builtins.put("iso_utc", new iso_utc_or_local_BI(
+        putBI("iso_utc", "isoUtc", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
-        builtins.put("iso_utc_fz", new iso_utc_or_local_BI(
+        putBI("iso_utc_fz", "isoUtcFZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
-        builtins.put("iso_utc_nz", new iso_utc_or_local_BI(
+        putBI("iso_utc_nz", "isoUtcNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
         
-        builtins.put("iso_utc_ms", new iso_utc_or_local_BI(
+        putBI("iso_utc_ms", "isoUtcMs", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
-        builtins.put("iso_utc_ms_nz", new iso_utc_or_local_BI(
+        putBI("iso_utc_ms_nz", "isoUtcMsNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
         
-        builtins.put("iso_utc_m", new iso_utc_or_local_BI(
+        putBI("iso_utc_m", "isoUtcM", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
-        builtins.put("iso_utc_m_nz", new iso_utc_or_local_BI(
+        putBI("iso_utc_m_nz", "isoUtcMNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
         
-        builtins.put("iso_utc_h", new iso_utc_or_local_BI(
+        putBI("iso_utc_h", "isoUtcH", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
-        builtins.put("iso_utc_h_nz", new iso_utc_or_local_BI(
+        putBI("iso_utc_h_nz", "isoUtcHNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
         
-        builtins.put("iso_local", new iso_utc_or_local_BI(
+        putBI("iso_local", "isoLocal", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
-        builtins.put("iso_local_nz", new iso_utc_or_local_BI(
+        putBI("iso_local_nz", "isoLocalNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
         
-        builtins.put("iso_local_ms", new iso_utc_or_local_BI(
+        putBI("iso_local_ms", "isoLocalMs", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
-        builtins.put("iso_local_ms_nz", new iso_utc_or_local_BI(
+        putBI("iso_local_ms_nz", "isoLocalMsNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
         
-        builtins.put("iso_local_m", new iso_utc_or_local_BI(
+        putBI("iso_local_m", "isoLocalM", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
-        builtins.put("iso_local_m_nz", new iso_utc_or_local_BI(
+        putBI("iso_local_m_nz", "isoLocalMNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
         
-        builtins.put("iso_local_h", new iso_utc_or_local_BI(
+        putBI("iso_local_h", "isoLocalH", new iso_utc_or_local_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
-        builtins.put("iso_local_h_nz", new iso_utc_or_local_BI(
+        putBI("iso_local_h_nz", "isoLocalHNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
         
-        builtins.put("iso", new iso_BI(
+        putBI("iso", new iso_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_SECONDS));
-        builtins.put("iso_nz", new iso_BI(
+        putBI("iso_nz", "isoNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS));
         
-        builtins.put("iso_ms", new iso_BI(
+        putBI("iso_ms", "isoMs", new iso_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS));
-        builtins.put("iso_ms_nz", new iso_BI(
+        putBI("iso_ms_nz", "isoMsNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS));
         
-        builtins.put("iso_m", new iso_BI(
+        putBI("iso_m", "isoM", new iso_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_MINUTES));
-        builtins.put("iso_m_nz", new iso_BI(
+        putBI("iso_m_nz", "isoMNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES));
         
-        builtins.put("iso_h", new iso_BI(
+        putBI("iso_h", "isoH", new iso_BI(
                 /* showOffset = */ null, DateUtil.ACCURACY_HOURS));
-        builtins.put("iso_h_nz", new iso_BI(
+        putBI("iso_h_nz", "isoHNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS));
         
-        builtins.put("j_string", new BuiltInsForStringsEncoding.j_stringBI());
-        builtins.put("join", new BuiltInsForSequences.joinBI());
-        builtins.put("js_string", new BuiltInsForStringsEncoding.js_stringBI());
-        builtins.put("json_string", new BuiltInsForStringsEncoding.json_stringBI());
-        builtins.put("keep_after", new BuiltInsForStringsBasic.keep_afterBI());
-        builtins.put("keep_before", new BuiltInsForStringsBasic.keep_beforeBI());
-        builtins.put("keep_after_last", new BuiltInsForStringsBasic.keep_after_lastBI());
-        builtins.put("keep_before_last", new BuiltInsForStringsBasic.keep_before_lastBI());
-        builtins.put("keys", new BuiltInsForHashes.keysBI());
-        builtins.put("last_index_of", new BuiltInsForStringsBasic.index_ofBI(true));
-        builtins.put("last", new lastBI());
-        builtins.put("left_pad", new BuiltInsForStringsBasic.padBI(true));
-        builtins.put("length", new BuiltInsForStringsBasic.lengthBI());
-        builtins.put("long", new longBI());
-        builtins.put("lower_abc", new BuiltInsForNumbers.lower_abcBI());
-        builtins.put("lower_case", new BuiltInsForStringsBasic.lower_caseBI());
-        builtins.put("namespace", new BuiltInsForMultipleTypes.namespaceBI());
-        builtins.put("new", new NewBI());
-        builtins.put("node_name", new node_nameBI());
-        builtins.put("node_namespace", new node_namespaceBI());
-        builtins.put("node_type", new node_typeBI());
-        builtins.put("number", new BuiltInsForStringsMisc.numberBI());
-        builtins.put("number_to_date", new number_to_dateBI(TemplateDateModel.DATE));
-        builtins.put("number_to_time", new number_to_dateBI(TemplateDateModel.TIME));
-        builtins.put("number_to_datetime", new number_to_dateBI(TemplateDateModel.DATETIME));
-        builtins.put("parent", new parentBI());
-        builtins.put("reverse", new reverseBI());
-        builtins.put("right_pad", new BuiltInsForStringsBasic.padBI(false));
-        builtins.put("root", new rootBI());
-        builtins.put("round", new roundBI());
-        builtins.put("remove_ending", new BuiltInsForStringsBasic.remove_endingBI());
-        builtins.put("remove_beginning", new BuiltInsForStringsBasic.remove_beginningBI());
-        builtins.put("rtf", new BuiltInsForStringsEncoding.rtfBI());
-        builtins.put("seq_contains", new seq_containsBI());
-        builtins.put("seq_index_of", new seq_index_ofBI(1));
-        builtins.put("seq_last_index_of", new seq_index_ofBI(-1));
-        builtins.put("short", new shortBI());
-        builtins.put("size", new BuiltInsForMultipleTypes.sizeBI());
-        builtins.put("sort_by", new sort_byBI());
-        builtins.put("sort", new sortBI());
-        builtins.put("split", new BuiltInsForStringsBasic.split_BI());
-        builtins.put("starts_with", new BuiltInsForStringsBasic.starts_withBI());
-        builtins.put("string", new BuiltInsForMultipleTypes.stringBI());
-        builtins.put("substring", new BuiltInsForStringsBasic.substringBI());
-        builtins.put("time", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.TIME));
-        builtins.put("time_if_unknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
-        builtins.put("trim", new BuiltInsForStringsBasic.trimBI());
-        builtins.put("uncap_first", new BuiltInsForStringsBasic.uncap_firstBI());
-        builtins.put("upper_abc", new BuiltInsForNumbers.upper_abcBI());
-        builtins.put("upper_case", new BuiltInsForStringsBasic.upper_caseBI());
-        builtins.put("url", new BuiltInsForStringsEncoding.urlBI());
-        builtins.put("url_path", new BuiltInsForStringsEncoding.urlPathBI());
-        builtins.put("values", new BuiltInsForHashes.valuesBI());
-        builtins.put("web_safe", builtins.get("html"));  // deprecated; use ?html instead
-        builtins.put("word_list", new BuiltInsForStringsBasic.word_listBI());
-        builtins.put("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
-        builtins.put("xml", new BuiltInsForStringsEncoding.xmlBI());
-        builtins.put("matches", new BuiltInsForStringsRegexp.matchesBI());
-        builtins.put("groups", new BuiltInsForStringsRegexp.groupsBI());
-        builtins.put("replace", new BuiltInsForStringsRegexp.replace_reBI());
+        putBI("j_string", "jString", new BuiltInsForStringsEncoding.j_stringBI());
+        putBI("join", new BuiltInsForSequences.joinBI());
+        putBI("js_string", "jsString", new BuiltInsForStringsEncoding.js_stringBI());
+        putBI("json_string", "jsonString", new BuiltInsForStringsEncoding.json_stringBI());
+        putBI("keep_after", "keepAfter", new BuiltInsForStringsBasic.keep_afterBI());
+        putBI("keep_before", "keepBefore", new BuiltInsForStringsBasic.keep_beforeBI());
+        putBI("keep_after_last", "keepAfterLast", new BuiltInsForStringsBasic.keep_after_lastBI());
+        putBI("keep_before_last", "keepBeforeLast", new BuiltInsForStringsBasic.keep_before_lastBI());
+        putBI("keys", new BuiltInsForHashes.keysBI());
+        putBI("last_index_of", "lastIndexOf", new BuiltInsForStringsBasic.index_ofBI(true));
+        putBI("last", new lastBI());
+        putBI("left_pad", "leftPad", new BuiltInsForStringsBasic.padBI(true));
+        putBI("length", new BuiltInsForStringsBasic.lengthBI());
+        putBI("long", new longBI());
+        putBI("lower_abc", "lowerAbc", new BuiltInsForNumbers.lower_abcBI());
+        putBI("lower_case", "lowerCase", new BuiltInsForStringsBasic.lower_caseBI());
+        putBI("namespace", new BuiltInsForMultipleTypes.namespaceBI());
+        putBI("new", new NewBI());
+        putBI("node_name", "nodeName", new node_nameBI());
+        putBI("node_namespace", "nodeNamespace", new node_namespaceBI());
+        putBI("node_type", "nodeType", new node_typeBI());
+        putBI("number", new BuiltInsForStringsMisc.numberBI());
+        putBI("number_to_date", "numberToDate", new number_to_dateBI(TemplateDateModel.DATE));
+        putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
+        putBI("number_to_datetime", "numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
+        putBI("parent", new parentBI());
+        putBI("reverse", new reverseBI());
+        putBI("right_pad", "rightPad", new BuiltInsForStringsBasic.padBI(false));
+        putBI("root", new rootBI());
+        putBI("round", new roundBI());
+        putBI("remove_ending", "removeEnding", new BuiltInsForStringsBasic.remove_endingBI());
+        putBI("remove_beginning", "removeBeginning", new BuiltInsForStringsBasic.remove_beginningBI());
+        putBI("rtf", new BuiltInsForStringsEncoding.rtfBI());
+        putBI("seq_contains", "seqContains", new seq_containsBI());
+        putBI("seq_index_of", "seqIndexOf", new seq_index_ofBI(1));
+        putBI("seq_last_index_of", "seqLastIndexOf", new seq_index_ofBI(-1));
+        putBI("short", new shortBI());
+        putBI("size", new BuiltInsForMultipleTypes.sizeBI());
+        putBI("sort_by", "sortBy", new sort_byBI());
+        putBI("sort", new sortBI());
+        putBI("split", new BuiltInsForStringsBasic.split_BI());
+        putBI("starts_with", "startsWith", new BuiltInsForStringsBasic.starts_withBI());
+        putBI("string", new BuiltInsForMultipleTypes.stringBI());
+        putBI("substring", new BuiltInsForStringsBasic.substringBI());
+        putBI("time", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.TIME));
+        putBI("time_if_unknown", "timeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
+        putBI("trim", new BuiltInsForStringsBasic.trimBI());
+        putBI("uncap_first", "uncapFirst", new BuiltInsForStringsBasic.uncap_firstBI());
+        putBI("upper_abc", "upperAbc", new BuiltInsForNumbers.upper_abcBI());
+        putBI("upper_case", "upperCase", new BuiltInsForStringsBasic.upper_caseBI());
+        putBI("url", new BuiltInsForStringsEncoding.urlBI());
+        putBI("url_path", "urlPath", new BuiltInsForStringsEncoding.urlPathBI());
+        putBI("values", new BuiltInsForHashes.valuesBI());
+        putBI("web_safe", "webSafe", (BuiltIn) builtins.get("html"));  // deprecated; use ?html instead
+        putBI("word_list", "wordList", new BuiltInsForStringsBasic.word_listBI());
+        putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
+        putBI("xml", new BuiltInsForStringsEncoding.xmlBI());
+        putBI("matches", new BuiltInsForStringsRegexp.matchesBI());
+        putBI("groups", new BuiltInsForStringsRegexp.groupsBI());
+        putBI("replace", new BuiltInsForStringsRegexp.replace_reBI());
+        
+        if (NUMBER_OF_BIS < builtins.size()) {
+            throw new AssertionError("Update NUMBER_OF_BIS! Should be: " + builtins.size());
+        }
+    }
+    
+    private static void putBI(String name, BuiltIn bi) {
+        builtins.put(name, bi);
     }
 
-    static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {
+    private static void putBI(String name, String nameCamelCase, BuiltIn bi) {
+        builtins.put(name, bi);
+        builtins.put(nameCamelCase, bi);
+    }
+    
+    /**
+     * @param target
+     *            Left-hand-operand expression
+     * @param keyTk
+     *            Built-in name token
+     */
+    static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, Token keyTk,
+            FMParserTokenManager tokenManager) throws ParseException {
+        String key = keyTk.image;
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
             StringBuffer buf = new StringBuffer("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
             
-            final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(key);
-            if (!underscoredName.equals(key) && builtins.containsKey(underscoredName)) {
-                buf.append("Supporting camelCase built-in names is planned for FreeMarker 2.4.0; check if an update is "
-                        + "available, and if it indeed supports camel case. "
-                        + "Until that, use \"").append(underscoredName).append("\".");
-            } else {
-                buf.append(
-                        "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
-                        + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
-                        + "The alphabetical list of built-ins:");
-                List names = new ArrayList(builtins.keySet().size());
-                names.addAll(builtins.keySet());
-                Collections.sort(names);
-                char lastLetter = 0;
-                for (Iterator it = names.iterator(); it.hasNext();) {
-                    String name = (String) it.next();
-                    char firstChar = name.charAt(0);
+            buf.append(
+                    "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
+                    + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
+                    + "The alphabetical list of built-ins:");
+            List names = new ArrayList(builtins.keySet().size());
+            names.addAll(builtins.keySet());
+            Collections.sort(names);
+            char lastLetter = 0;
+            
+            int shownNamingConvention;
+            {
+                int namingConvention = tokenManager.namingConvention;
+                shownNamingConvention = namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
+                        ? namingConvention : Configuration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
+            }
+            
+            boolean first = true;
+            for (Iterator it = names.iterator(); it.hasNext();) {
+                String correctName = (String) it.next();
+                int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
+                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
+                        ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
+                        : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        buf.append(", ");
+                    }
+                    
+                    char firstChar = correctName.charAt(0);
                     if (firstChar != lastLetter) {
                         lastLetter = firstChar;
                         buf.append('\n');
                     }
-                    buf.append(name);
-                    
-                    if (it.hasNext()) {
-                        buf.append(", ");
-                    }
+                    buf.append(correctName);
                 }
             }
-            throw new ParseException(buf.toString(), target);
+                
+            throw new ParseException(buf.toString(), null, keyTk);
         }
         
         while (bi instanceof ICIChainMember

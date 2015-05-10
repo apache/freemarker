@@ -16,6 +16,7 @@
 
 package freemarker.core;
 
+import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -65,6 +66,24 @@ public final class _CoreStringUtils {
     private static String backslashEscapeIdentifier(String name) {
         return StringUtil.replace(StringUtil.replace(StringUtil.replace(name, "-", "\\-"), ".", "\\."), ":", "\\:");
     }
+
+    /**
+     * @return {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}, or {@link Configuration#LEGACY_NAMING_CONVENTION}
+     *         or, {@link Configuration#AUTO_DETECT_NAMING_CONVENTION} when undecidable.
+     */
+    public static int getIdentifierNamingConvention(String name) {
+        final int ln = name.length();
+        for (int i = 0; i < ln; i++) {
+            final char c = name.charAt(i);
+            if (c == '_') {
+                return Configuration.LEGACY_NAMING_CONVENTION;
+            }
+            if (isUpperUSASCII(c)) {
+                return Configuration.CAMEL_CASE_NAMING_CONVENTION;
+            }
+        }
+        return Configuration.AUTO_DETECT_NAMING_CONVENTION;
+    }
     
     // [2.4] Won't be needed anymore
     /**
@@ -85,7 +104,7 @@ public final class _CoreStringUtils {
         sb.append(camelCaseName.substring(0, i));
         while (i < camelCaseName.length()) {
             final char c = camelCaseName.charAt(i);
-            if (Character.isUpperCase(c)) {
+            if (isUpperUSASCII(c)) {
                 sb.append('_');
                 sb.append(Character.toLowerCase(c));
             } else {
@@ -94,6 +113,10 @@ public final class _CoreStringUtils {
             i++;
         }
         return sb.toString();
-    }    
+    }
+    
+    public static boolean isUpperUSASCII(char c) {
+        return c >= 'A' && c <= 'Z';
+    }
 
 }

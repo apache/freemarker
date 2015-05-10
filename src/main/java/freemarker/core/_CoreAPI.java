@@ -50,10 +50,12 @@ public class _CoreAPI {
         names.add("default");
         names.add("else");
         names.add("elseif");
+        names.add("elseIf");
         names.add("escape");
         names.add("fallback");
         names.add("flush");
         names.add("foreach");
+        names.add("forEach");
         names.add("ftl");
         names.add("function");
         names.add("global");
@@ -66,7 +68,9 @@ public class _CoreAPI {
         names.add("macro");
         names.add("nested");
         names.add("noescape");
+        names.add("noEscape");
         names.add("noparse");
+        names.add("noParse");
         names.add("nt");
         names.add("recover");
         names.add("recurse");
@@ -105,8 +109,8 @@ public class _CoreAPI {
     /**
      * [FM 2.4] getSettingNames() becomes to public; remove this.
      */
-    public static Set/*<String>*/ getConfigurableSettingNames(Configurable cfgable) {
-        return cfgable.getSettingNames();
+    public static Set/*<String>*/ getConfigurableSettingNames(Configurable cfgable, boolean camelCase) {
+        return cfgable.getSettingNames(camelCase);
     }
 
     /**

@@ -78,6 +78,7 @@ public class Template extends Configurable {
     private String encoding, defaultNS;
     private Object customLookupCondition;
     private int actualTagSyntax;
+    private int actualNamingConvention;
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
@@ -185,20 +186,25 @@ public class Template extends Configurable {
         this(name, sourceName, cfg, true);
         
         this.encoding = encoding;
+        LineTableBuilder ltbReader;
         try {
             if (!(reader instanceof BufferedReader)) {
                 reader = new BufferedReader(reader, 0x1000);
             }
-            reader = new LineTableBuilder(reader);
+            ltbReader = new LineTableBuilder(reader);
+            reader = ltbReader;
             
             try {
+                final Configuration actualCfg = getConfiguration();
                 parser = new FMParser(this, reader,
-                        getConfiguration().getStrictSyntaxMode(),
-                        getConfiguration().getWhitespaceStripping(),
-                        getConfiguration().getTagSyntax(),
-                        getConfiguration().getIncompatibleImprovements().intValue());
+                        actualCfg.getStrictSyntaxMode(),
+                        actualCfg.getWhitespaceStripping(),
+                        actualCfg.getTagSyntax(),
+                        actualCfg.getNamingConvention(),
+                        actualCfg.getIncompatibleImprovements().intValue());
                 this.rootElement = parser.Root();
                 this.actualTagSyntax = parser._getLastTagSyntax();
+                this.actualNamingConvention = parser._getLastNamingConvention();
             }
             catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
@@ -216,6 +222,10 @@ public class Template extends Configurable {
         finally {
             reader.close();
         }
+        
+        // Throws any exception that JavaCC has silently treated as EOF:
+        ltbReader.throwFailure();
+        
         DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
@@ -560,6 +570,19 @@ public class Template extends Configurable {
     public int getActualTagSyntax() {
         return actualTagSyntax;
     }
+    
+    /**
+     * Returns the naming convention the parser has chosen for this template. If it could be determined, it's
+     * {@link Configuration#LEGACY_NAMING_CONVENTION} or {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}. If it
+     * couldn't be determined (like because there no identifier that's part of the template language was used where
+     * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
+     * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * 
+     * @since 2.3.23
+     */
+    public int getActualNamingConvention() {
+        return actualNamingConvention;
+    }
 
     /**
      * Dump the raw template in canonical form.
@@ -627,13 +650,17 @@ public class Template extends Configurable {
     }
 
     /**
-     * This is a helper class that builds up the line table
-     * info for us.
+     * Reader that builds up the line table info for us, and also helps in working around JavaCC's exception
+     * suppression.
      */
     private class LineTableBuilder extends FilterReader {
-
-        StringBuffer lineBuf = new StringBuffer();
+        
+        private final StringBuffer lineBuf = new StringBuffer();
         int lastChar;
+        boolean closed;
+        
+        /** Needed to work around JavaCC behavior where it silently treats any errors as EOF. */ 
+        private IOException failure; 
 
         /**
          * @param r the character stream to wrap
@@ -642,19 +669,41 @@ public class Template extends Configurable {
             super(r);
         }
 
+        public void throwFailure() throws IOException {
+            if (failure != null) {
+                throw failure;
+            }
+        }
+
         public int read() throws IOException {
-            int c = in.read();
-            handleChar(c);
-            return c;
+            try {
+                int c = in.read();
+                handleChar(c);
+                return c;
+            } catch (IOException e) {
+                throw rememberException(e);
+            }
+        }
+
+        private IOException rememberException(IOException e) throws IOException {
+            // JavaCC used to read from the Reader after it was closed. So we must not treat that as a failure. 
+            if (!closed) {
+                failure = e;
+            }
+            return e;
         }
 
         public int read(char cbuf[], int off, int len) throws IOException {
-            int numchars = in.read(cbuf, off, len);
-            for (int i=off; i < off+numchars; i++) {
-                char c = cbuf[i];
-                handleChar(c);
+            try {
+                int numchars = in.read(cbuf, off, len);
+                for (int i=off; i < off+numchars; i++) {
+                    char c = cbuf[i];
+                    handleChar(c);
+                }
+                return numchars;
+            } catch (IOException e) {
+                throw rememberException(e);
             }
-            return numchars;
         }
 
         public void close() throws IOException {
@@ -663,6 +712,7 @@ public class Template extends Configurable {
                 lineBuf.setLength(0);
             }
             super.close();
+            closed = true;
         }
 
         private void handleChar(int c) {
