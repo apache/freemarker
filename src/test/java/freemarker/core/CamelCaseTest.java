@@ -52,6 +52,31 @@ public class CamelCaseTest extends TemplateTest {
     }
     
     @Test
+    public void camelCaseSettingNames() throws IOException, TemplateException {
+        assertOutput("<#setting booleanFormat='Y,N'>${true} <#setting booleanFormat='+,-'>${true}", "Y +");
+        assertOutput("<#setting boolean_format='Y,N'>${true} <#setting boolean_format='+,-'>${true}", "Y +");
+        
+        // Still works inside ?interpret
+        assertOutput("<@r\"<#setting booleanFormat='Y,N'>${true}\"?interpret />", "Y");
+    }
+    
+    @Test
+    public void camelCaseSettingNamesInErrorMessages() throws IOException, TemplateException {
+        assertErrorContains("<#setting fooBar=1>", "booleanFormat", "\\!boolean_format");
+        assertErrorContains("<#setting foo_bar=1>", "boolean_format", "\\!booleanFormat");
+        // [2.4] If camel case will be the recommended style, then this need to be inverted:
+        assertErrorContains("<#setting foo=1>", "boolean_format", "\\!booleanFormat");
+
+        assertErrorContains("<#if x><#elseIf y></#if><#setting foo=1>", "booleanFormat", "\\!boolean_format");
+        assertErrorContains("<#if x><#elseif y></#if><#setting foo=1>", "boolean_format", "\\!booleanFormat");
+        
+        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        assertErrorContains("<#setting foo=1>", "booleanFormat", "\\!boolean_format");
+        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        assertErrorContains("<#setting foo=1>", "boolean_format", "\\!booleanFormat");
+    }
+    
+    @Test
     public void specialVarsHasBothNamingStyle() throws IOException, TemplateException {
         assertContainsBothNamingStyles(
                 new HashSet(Arrays.asList(BuiltinVariable.SPEC_VAR_NAMES)),
@@ -378,19 +403,15 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains("${x?upper_case?isString}",
                 "naming convention", "legacy", "upper_case", "isString");
 
-        /* TODO
         assertErrorContains("<#setting outputEncoding='utf-8'>${x?is_string}",
                 "naming convention", "camel", "outputEncoding", "is_string");
-        */
         assertErrorContains("<#setting output_encoding='utf-8'>${x?isString}",
                 "naming convention", "legacy", "output_encoding", "isString");
         
         assertErrorContains("${x?isString}<#setting output_encoding='utf-8'>",
                 "naming convention", "camel", "isString", "output_encoding");
-        /* TODO
         assertErrorContains("${x?is_string}<#setting outputEncoding='utf-8'>",
                 "naming convention", "legacy", "is_string", "outputEncoding");
-        */
         
         assertErrorContains("${.outputEncoding}${x?is_string}",
                 "naming convention", "camel", "outputEncoding", "is_string");

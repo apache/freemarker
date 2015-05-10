@@ -97,8 +97,8 @@ public class _TemplateAPI {
     /**
      * [FM 2.4] getSettingNames() becomes to public; remove this.
      */
-    public static Set/*<String>*/ getConfigurationSettingNames(Configuration cfg) {
-        return cfg.getSettingNames();
+    public static Set<String> getConfigurationSettingNames(Configuration cfg, boolean camelCase) {
+        return cfg.getSettingNames(camelCase);
     }
     
     /** Eventually, this constructor should become public, and then we don't need this anymore. */

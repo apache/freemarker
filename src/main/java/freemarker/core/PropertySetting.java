@@ -18,11 +18,13 @@ package freemarker.core;
 
 import java.util.Arrays;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -35,55 +37,73 @@ final class PropertySetting extends TemplateElement {
     private final Expression value;
     
     static final String[] SETTING_NAMES = new String[] {
-            Configurable.BOOLEAN_FORMAT_KEY,
-            Configurable.CLASSIC_COMPATIBLE_KEY,
-            Configurable.DATE_FORMAT_KEY,
-            Configurable.DATETIME_FORMAT_KEY,
+            // Must be sorted alphabetically!
+            Configurable.BOOLEAN_FORMAT_KEY_CAMEL_CASE,
+            Configurable.BOOLEAN_FORMAT_KEY_SNAKE_CASE,
+            Configurable.CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
+            Configurable.CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
+            Configurable.DATE_FORMAT_KEY_CAMEL_CASE,
+            Configurable.DATE_FORMAT_KEY_SNAKE_CASE,
+            Configurable.DATETIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.DATETIME_FORMAT_KEY_SNAKE_CASE,
             Configurable.LOCALE_KEY,
-            Configurable.NUMBER_FORMAT_KEY,
-            Configurable.OUTPUT_ENCODING_KEY,
+            Configurable.NUMBER_FORMAT_KEY_CAMEL_CASE,
+            Configurable.NUMBER_FORMAT_KEY_SNAKE_CASE,
+            Configurable.OUTPUT_ENCODING_KEY_CAMEL_CASE,
+            Configurable.OUTPUT_ENCODING_KEY_SNAKE_CASE,
+            Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
             Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
-            Configurable.TIME_FORMAT_KEY,
-            Configurable.TIME_ZONE_KEY,
-            Configurable.URL_ESCAPING_CHARSET_KEY
+            Configurable.TIME_FORMAT_KEY_CAMEL_CASE,
+            Configurable.TIME_ZONE_KEY_CAMEL_CASE,
+            Configurable.TIME_FORMAT_KEY_SNAKE_CASE,
+            Configurable.TIME_ZONE_KEY_SNAKE_CASE,
+            Configurable.URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
+            Configurable.URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
     };
 
-    PropertySetting(String key, Expression value) {
-        this.key = key;
-        this.value = value;
-    }
-
-    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws
-        ParseException
-    {
-        super.setLocation(unboundTemplate, beginColumn, beginLine, endColumn, endLine);
-        
+    PropertySetting(Token keyTk, FMParserTokenManager tokenManager, Expression value, Configuration cfg)
+            throws ParseException {
+        String key = keyTk.image;
         if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
             StringBuffer sb = new StringBuffer();
-            sb.append("Unknown setting name: ");
-            sb.append(StringUtil.jQuote(key)).append(".");
-            final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(key);
-            if (!underscoredName.equals(key) && Arrays.binarySearch(SETTING_NAMES, underscoredName) >= 0) {
-                sb.append(" Supporting camelCase setting names is planned for FreeMarker 2.4.0; check if an update is "
-                            + "available, and if it indeed supports camel case. "
-                            + "Until that, use \"").append(underscoredName).append("\".");
-            } else if (Configurable.getConfigurableSettingNames().contains(key)
-                    || Configurable.getConfigurableSettingNames().contains(underscoredName)) {
-                sb.append(" The setting name is recognized, but changing this setting in a template isn't supported.");                
+            if (_TemplateAPI.getConfigurationSettingNames(cfg, true).contains(key)
+                    || _TemplateAPI.getConfigurationSettingNames(cfg, false).contains(key)) {
+                sb.append("The setting name is recognized, but changing this setting from inside a template isn't "
+                        + "supported.");                
             } else {
+                sb.append("Unknown setting name: ");
+                sb.append(StringUtil.jQuote(key)).append(".");
                 sb.append(" The allowed setting names are: ");
+
+                int shownNamingConvention;
+                {
+                    int namingConvention = tokenManager.namingConvention;
+                    shownNamingConvention = namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
+                            ? namingConvention : Configuration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
+                }
+                
+                boolean first = true;
                 for (int i = 0; i < SETTING_NAMES.length; i++) {
-                    if (i != 0) {
-                        sb.append(", ");
+                    String correctName = SETTING_NAMES[i];
+                    int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
+                    if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
+                            ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
+                            : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            sb.append(", ");
+                        }
+                    
+                        sb.append(SETTING_NAMES[i]);
                     }
-                    sb.append(SETTING_NAMES[i]);
                 }
             }
-            throw new ParseException(
-                    sb.toString(),
-                    unboundTemplate, beginLine, beginColumn, endLine, endColumn);
+            throw new ParseException(sb.toString(), (UnboundTemplate) null, keyTk);
         }
+        
+        this.key = key;
+        this.value = value;
     }
 
     void accept(Environment env) throws TemplateException {
