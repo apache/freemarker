@@ -7,7 +7,7 @@ Non-technical
 - The Template Author's Guide is for Web designers. Assume that a
   designer is not a programmer, (s)he doesn't even know what is Java.
   Forget that FM is implemented in Java when you edit the Template
-  Authror's Guide. Try to avoid technical writing.
+  Author's Guide. Try to avoid technical writing.
 
 - In the Guide chapters, be careful not to mention things that were
   not explained earlier. The Guide chapters should be understandable
@@ -95,7 +95,7 @@ Technical
       * designer: for designers.
           E.g.: id="topic.designer.methodDataObject"
       * programmer: for programmers
-      * or omit the secondary cathegoty if it is for everybody
+      * or omit the secondary category if it is for everybody
     - misc: Anything doesn't fit in the above categories
 
   * When you refer to a part, chapter or section, often you should use
