@@ -559,6 +559,7 @@ public final class Environment extends Configurable {
             ictxt.runLoop(this);
         }
         catch (BreakInstruction.Break br) {
+            // No op: Exits loop silently
         }
         catch (TemplateException te) {
             handleTemplateException(te);

@@ -3056,6 +3056,8 @@ TemplateElement FreemarkerDirective() :
     TemplateElement tp;
 }
 {
+    // Note that this doesn't include elements like "else", "recover", etc., because those indicate the end
+    // of the OptionalBlock() of "if", "attempt", etc.
     (
         tp = If()
         |
