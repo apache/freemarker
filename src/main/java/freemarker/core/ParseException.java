@@ -471,10 +471,13 @@ public class ParseException extends IOException implements FMParserConstants {
             }
             return "Unexpected end of file reached."
                     + (endNames.size() == 0 ? "" : " You have an unclosed " + concatWithOrs(endNames) + ".");
-        } else if (kind == END_IF || kind == ELSE_IF || kind == ELSE) {
+        } else if (kind == ELSE) {
+            return "Unexpected directive, \"#else\". "
+                    + "Check if you have a valid #if-#elseif-#else or #list-#else structure.";
+        } else if (kind == END_IF || kind == ELSE_IF) {
             return "Unexpected directive, "
                     + StringUtil.jQuote(nextToken)
-                    + ". Check whether you have a valid #if-#elseif-#else structure.";
+                    + ". Check if you have a valid #if-#elseif-#else structure.";
         }
         return null;
     }

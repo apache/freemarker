@@ -62,6 +62,7 @@ public class _CoreAPI {
         names.add("if");
         names.add("import");
         names.add("include");
+        names.add("item");
         names.add("list");
         names.add("local");
         names.add("lt");

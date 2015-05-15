@@ -551,18 +551,20 @@ public final class Environment extends Configurable {
     /**
      * "visit" an IteratorBlock
      */
-    void visitIteratorBlock(IteratorBlock.Context ictxt)
+    boolean visitIteratorBlock(IteratorBlock.IterationContext ictxt)
     throws TemplateException, IOException
     {
         pushLocalContext(ictxt);
         try {
-            ictxt.runLoop(this);
+            return ictxt.accept(this);
         }
         catch (BreakInstruction.Break br) {
             // No op: Exits loop silently
+            return true;
         }
         catch (TemplateException te) {
             handleTemplateException(te);
+            return true;
         }
         finally {
             popLocalContext();

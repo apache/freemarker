@@ -80,6 +80,7 @@ import freemarker.test.templatesuite.models.BooleanList1;
 import freemarker.test.templatesuite.models.BooleanList2;
 import freemarker.test.templatesuite.models.BooleanVsStringMethods;
 import freemarker.test.templatesuite.models.JavaObjectInfo;
+import freemarker.test.templatesuite.models.ListableValueFactory;
 import freemarker.test.templatesuite.models.MultiModel1;
 import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.OverloadedMethods2;
@@ -297,6 +298,21 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("set", set);
             
             dataModel.put("iterator", linkedList.iterator());
+            
+            List<Integer> emptyArrayList = new ArrayList<Integer>();
+            dataModel.put("emptyArrayList", emptyArrayList);
+            
+            List<Integer> emptyLinkedList = new LinkedList<Integer>();
+            dataModel.put("emptyLinkedList", emptyLinkedList);
+            
+            Set<Integer> emptySet = new TreeSet<Integer>();
+            dataModel.put("emptySet", emptySet);
+            
+            dataModel.put("emptyIterator", emptyLinkedList.iterator());
+        }
+
+        else if (templateName.equals("list2.ftl")) {
+            dataModel.put("factory", new ListableValueFactory());
         }
         
         else if (simpleTestName.startsWith("number-format")) {
