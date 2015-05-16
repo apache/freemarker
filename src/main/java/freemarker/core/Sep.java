@@ -30,7 +30,7 @@ class Sep extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         if (IteratorBlock.findEnclosingIterationContext(env, this).hasNext()) {
-            env.visit(nestedBlock);
+            env.visitByHiddingParent(nestedBlock);
         }
     }
 
