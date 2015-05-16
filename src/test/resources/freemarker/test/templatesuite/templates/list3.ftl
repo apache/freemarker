@@ -39,3 +39,4 @@
 <@hits [] />
 
 <#list listables.list as i><#if i_index gt 1>...<#break></#if>${i}<#sep>, </#sep></#list>
+<#list listables.list>[<#items as i><#if i_index gt 1>...<#break></#if>${i}<#sep>, </#sep></#items>]</#list>

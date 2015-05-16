@@ -215,6 +215,12 @@ final class IteratorBlock extends TemplateElement {
         private boolean executeNestedBlock(Environment env, TemplateElement nestedBlock)
                 throws TemplateModelException, TemplateException, IOException,
                 NonSequenceOrCollectionException, InvalidReferenceException {
+            return executeNestedBlockInner(env, nestedBlock);
+        }
+
+        private boolean executeNestedBlockInner(Environment env, TemplateElement nestedBlock)
+                throws TemplateModelException, TemplateException, IOException, NonSequenceOrCollectionException,
+                InvalidReferenceException {
             final boolean listNotEmpty;
             if (listValue instanceof TemplateCollectionModel) {
                 final TemplateCollectionModel collModel = (TemplateCollectionModel) listValue;
@@ -224,13 +230,17 @@ final class IteratorBlock extends TemplateElement {
                 listNotEmpty = hasNext;
                 if (listNotEmpty) {
                     if (loopVarName != null) {
-                        while (hasNext) {
-                            loopVar = iterModel.next();
-                            hasNext = iterModel.hasNext();
-                            if (nestedBlock != null) {
-                                env.visitByHiddingParent(nestedBlock);
+                        try {
+                            while (hasNext) {
+                                loopVar = iterModel.next();
+                                hasNext = iterModel.hasNext();
+                                if (nestedBlock != null) {
+                                    env.visitByHiddingParent(nestedBlock);
+                                }
+                                index++;
                             }
-                            index++;
+                        } catch (BreakInstruction.Break br) {
+                            // Silently exit loop
                         }
                         openedIteratorModel = null;
                     } else {
@@ -248,12 +258,16 @@ final class IteratorBlock extends TemplateElement {
                 listNotEmpty = size != 0;
                 if (listNotEmpty) {
                     if (loopVarName != null) {
-                        for (index = 0; index < size; index++) {
-                            loopVar = seqModel.get(index);
-                            hasNext = (size > index + 1);
-                            if (nestedBlock != null) {
-                                env.visitByHiddingParent(nestedBlock);
+                        try {
+                            for (index = 0; index < size; index++) {
+                                loopVar = seqModel.get(index);
+                                hasNext = (size > index + 1);
+                                if (nestedBlock != null) {
+                                    env.visitByHiddingParent(nestedBlock);
+                                }
                             }
+                        } catch (BreakInstruction.Break br) {
+                            // Silently exit loop
                         }
                     } else {
                         if (nestedBlock != null) {
@@ -267,8 +281,12 @@ final class IteratorBlock extends TemplateElement {
                     loopVar = listValue;
                     hasNext = false;
                 }
-                if (nestedBlock != null) {
-                    env.visitByHiddingParent(nestedBlock);
+                try {
+                    if (nestedBlock != null) {
+                        env.visitByHiddingParent(nestedBlock);
+                    }
+                } catch (BreakInstruction.Break br) {
+                    // Silently exit "loop"
                 }
             } else {
                 throw new NonSequenceOrCollectionException(

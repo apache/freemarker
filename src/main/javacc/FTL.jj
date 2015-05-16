@@ -37,19 +37,29 @@ import java.util.*;
  */
 public class FMParser {
     
-    /** Used for the {@link #parentLoopFlags} field to indicate that the enclosing loop supports an #item child. */
-    private static final int PARENT_LOOP_FLAG_SUPPORTS_ITEMS = 0x01;
-    /** Used for the {@link #parentLoopFlags} field to indicate that the enclosing loop already have an #item child. */
-    private static final int PARENT_LOOP_FLAG_HAD_ITEMS = 0x02;
-    /** Used for the {@link #parentLoopFlags} field to indicate that the enclosing loop is a #foreach. */
-    private static final int PARENT_LOOP_FLAG_FOREACH = 0x04;
+    /** Used for the {@link #parentListAndForeachFlags} field to indicate that the enclosing loop supports an #item child. */
+    private static final int PARENT_LIST_AND_FOREACH_FLAG_SUPPORTS_ITEMS = 0x01;
+    /** Used for the {@link #parentListAndForeachFlags} field to indicate that the enclosing loop already have an #item child. */
+    private static final int PARENT_LIST_AND_FOREACH_FLAG_HAD_ITEMS = 0x02;
+    /** Used for the {@link #parentListAndForeachFlags} field to indicate that the enclosing loop is a #foreach. */
+    private static final int PARENT_LIST_AND_FOREACH_FLAG_IS_FOREACH = 0x04;
 
-    // Necessary for adding macros and setting location info.
+    /** Necessary for adding macros and setting location info. */
     private Template template;
 
-    // variables that keep track of whether we are in a loop or a switch.
-    private int loopNesting, switchNesting;
-    private int parentLoopFlags;
+    /** Keeps track of #list and #foreach nesting depth. */
+    private int listAndForeachNesting;
+    
+    /**
+     * Keeps track of the nesting depth of directives that support #break.
+     */
+    private int breakableDirectiveNesting;
+    
+    /**
+     * Keeps track of the flags of the innermost parent #list or #foreach directive.
+     */
+    private int parentListAndForeachFlags;
+    
     private boolean inMacro, inFunction, stripWhitespace, stripText;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
@@ -299,6 +309,12 @@ public class FMParser {
         throw new ParseException("Expecting boolean (true/false) parameter", exp);
     }
     
+	private String forEachDirectiveSymbol() {    
+	    // [2.4] Use camel case as the default
+	    return "#for"
+	            + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "E" : "e")
+	            + "ach";
+	}
     
 }
 
@@ -2168,7 +2184,7 @@ TemplateElement List() :
     int lastParentLoopFlags;
 }
 {
-    start = <LIST> { ++loopNesting; }
+    start = <LIST>
     exp = Expression()
     [
         <AS>
@@ -2176,23 +2192,31 @@ TemplateElement List() :
     ]
     <DIRECTIVE_END>
     {
-        lastParentLoopFlags = parentLoopFlags;
-        parentLoopFlags = loopVar != null ? 0 : PARENT_LOOP_FLAG_SUPPORTS_ITEMS;
+        lastParentLoopFlags = parentListAndForeachFlags;
+        parentListAndForeachFlags = loopVar != null ? 0 : PARENT_LIST_AND_FOREACH_FLAG_SUPPORTS_ITEMS;
+        listAndForeachNesting++;
+        
+        if (loopVar != null) breakableDirectiveNesting++;
     }
+    
     mainBlock = OptionalBlock()
     {
-        if (loopVar == null && (parentLoopFlags & PARENT_LOOP_FLAG_HAD_ITEMS) == 0) {
+        if (loopVar == null && (parentListAndForeachFlags & PARENT_LIST_AND_FOREACH_FLAG_HAD_ITEMS) == 0) {
             throw new ParseException(
                     "#list must have either \"as loopVar\" parameter or nested #item that belongs to it.",
                     template, start);
         }
         
-        parentLoopFlags = lastParentLoopFlags;
-        --loopNesting;
+        if (loopVar != null) breakableDirectiveNesting--;
+        
+        listAndForeachNesting--;
+        parentListAndForeachFlags = lastParentLoopFlags;
     }
+    
     [
         elseOfList = ElseOfList()
     ]
+    
     end = <END_LIST>
     {
         IteratorBlock list = new IteratorBlock(exp, loopVar != null ? loopVar.image : null, mainBlock, false);
@@ -2232,20 +2256,27 @@ IteratorBlock ForEach() :
     int lastParentLoopFlags;
 }
 {
-    start = <FOREACH> { ++loopNesting; }
+    start = <FOREACH>
     index = <ID>
     <IN>
     exp = Expression()
     <DIRECTIVE_END>
     {
-        lastParentLoopFlags = parentLoopFlags;
-        parentLoopFlags = PARENT_LOOP_FLAG_FOREACH;
+        listAndForeachNesting++;
+        lastParentLoopFlags = parentListAndForeachFlags;
+        parentListAndForeachFlags = PARENT_LIST_AND_FOREACH_FLAG_IS_FOREACH;
+
+        breakableDirectiveNesting++;        
     }
+    
     block = OptionalBlock()
+    
     end = <END_FOREACH>
     {
-        lastParentLoopFlags = parentLoopFlags;
-        --loopNesting;
+        breakableDirectiveNesting--;
+    
+        listAndForeachNesting--;
+        lastParentLoopFlags = parentListAndForeachFlags;
         
         IteratorBlock result = new IteratorBlock(exp, index.image, block, true);
         result.setLocation(template, start, end);
@@ -2261,30 +2292,33 @@ Items Items() :
 {
     start = <ITEMS>
     {
-        if (loopNesting == 0) {
+        if (listAndForeachNesting == 0) {
             throw new ParseException("#item must be inside a #list block.", template, start);
         }
-        if ((parentLoopFlags & PARENT_LOOP_FLAG_SUPPORTS_ITEMS) == 0) {
+        if ((parentListAndForeachFlags & PARENT_LIST_AND_FOREACH_FLAG_SUPPORTS_ITEMS) == 0) {
             throw new ParseException(
-                    (parentLoopFlags & PARENT_LOOP_FLAG_FOREACH) == 0
+                    (parentListAndForeachFlags & PARENT_LIST_AND_FOREACH_FLAG_IS_FOREACH) == 0
                             ? "The parent #list of the #item must not have \"as loopVar\" parameter."
-                            : "#for"
-                                    // [2.4] Use camel case as the default
-                                    + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
-                                            ? "E" : "e")
-                                    + "ach doesn't support nested #item",
+                            : forEachDirectiveSymbol() + " doesn't support nested #item",
                     template, start);
         }
     }
     loopVar = <ID>
     <DIRECTIVE_END>
+    {
+        breakableDirectiveNesting++;
+    }
+    
     block = OptionalBlock()
+    
     end = <END_ITEMS>
     {
+        breakableDirectiveNesting--;
+        
         Items result = new Items(loopVar.image, block);
         result.setLocation(template, start, end);
         
-        parentLoopFlags |= PARENT_LOOP_FLAG_HAD_ITEMS;
+        parentListAndForeachFlags |= PARENT_LIST_AND_FOREACH_FLAG_HAD_ITEMS;
         return result;
     }
 }
@@ -2380,9 +2414,10 @@ BreakInstruction Break() :
 {
     start = <BREAK>
     {
-        if (loopNesting < 1 && switchNesting < 1)
-        {
-            throw new ParseException(start.image + " occurred outside a loop or a switch block.", template, start);
+        if (breakableDirectiveNesting < 1) {
+            throw new ParseException(start.image + " must be nested inside a directive that supports it: " 
+                    + " #list with \"as\", #items, #switch (or the deprecated " + forEachDirectiveSymbol() + ")",
+                    template, start);
         }
         BreakInstruction result = new BreakInstruction();
         result.setLocation(template, start, start);
@@ -2401,7 +2436,7 @@ ReturnInstruction Return() :
 }
 {
     (
-        start = <SIMPLE_RETURN>{end = start; }
+        start = <SIMPLE_RETURN> { end = start; }
         |
         start = <RETURN> exp = Expression() end = LooseDirectiveEnd()
     )
@@ -3034,7 +3069,7 @@ SwitchBlock Switch() :
     switchExp = Expression()
     <DIRECTIVE_END>
     {
-        ++switchNesting;
+        breakableDirectiveNesting++;
         switchBlock = new SwitchBlock(switchExp);
     }
     (
@@ -3054,7 +3089,7 @@ SwitchBlock Switch() :
     [<STATIC_TEXT_WS>]
     end = <END_SWITCH>
     {
-        --switchNesting;
+        breakableDirectiveNesting--;
         switchBlock.setLocation(template, start, end);
         return switchBlock;
     }

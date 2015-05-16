@@ -558,10 +558,6 @@ public final class Environment extends Configurable {
         try {
             return ictxt.accept(this);
         }
-        catch (BreakInstruction.Break br) {
-            // No op: Exits loop silently
-            return true;
-        }
         catch (TemplateException te) {
             handleTemplateException(te);
             return true;
