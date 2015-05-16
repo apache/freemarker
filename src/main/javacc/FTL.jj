@@ -47,6 +47,8 @@ public class FMParser {
     /** Necessary for adding macros and setting location info. */
     private Template template;
 
+    private boolean stripWhitespace, stripText;
+
     /** Keeps track of #list and #foreach nesting depth. */
     private int listAndForeachNesting;
     
@@ -60,7 +62,7 @@ public class FMParser {
      */
     private int parentListAndForeachFlags;
     
-    private boolean inMacro, inFunction, stripWhitespace, stripText;
+    private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
     private int incompatibleImprovements;
