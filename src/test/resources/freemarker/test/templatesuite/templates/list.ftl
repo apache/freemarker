@@ -1,28 +1,24 @@
-<#assign animals = ["aardvark", "bear", "cat", "dog"]>
-<#assign animal = ["aardvark"]>
-<#assign nothing = []>
+<@testList ["aardvark", "bear", "cat", "dog"] />
 
-<@testList animals />
+<@testList ["aardvark"] />
 
-<@testList animal />
+<@testList [] />
 
-<@testList nothing />
+<@testList listables.list />
 
-<@testList arrayList />
+<@testList listables.linkedList />
 
-<@testList linkedList />
+<@testList listables.set />
 
-<@testList set />
+<@testList listables.iterator />
 
-<@testList iterator />
+<@testList listables.emptyList />
 
-<@testList emptyArrayList />
+<@testList listables.emptyLinkedList />
 
-<@testList emptyLinkedList />
+<@testList listables.emptySet />
 
-<@testList emptySet />
-
-<@testList emptyIterator />
+<@testList listables.emptyIterator />
 
 <#macro testList seq>
 Size: <#attempt>${seq?size}<#recover>failed</#attempt>

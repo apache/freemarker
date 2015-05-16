@@ -18,37 +18,68 @@ package freemarker.test.templatesuite.models;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class ListableValueFactory {
+@SuppressWarnings("boxing")
+public class Listables {
+    
+    private static final List<Integer> LIST;
+    static {
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(11);
+        list.add(22);
+        list.add(33);
+        LIST = list;
+    }
+
+    private static final List<Integer> LINKED_LIST;
+    static {
+        List<Integer> list = new LinkedList<Integer>();
+        list.add(11);
+        list.add(22);
+        list.add(33);
+        LINKED_LIST = list;
+    }
+
+    private static final List<Integer> EMPTY_LINKED_LIST;
+    static {
+        List<Integer> list = new LinkedList<Integer>();
+        EMPTY_LINKED_LIST = list;
+    }
+    
+    private static final Set<Integer> SET;
+    static {
+        Set<Integer> set = new TreeSet<Integer>();
+        set.add(11);
+        set.add(22);
+        set.add(33);
+        SET = set;
+    }
     
     public List<Integer> getList() {
-        ArrayList<Integer> arrayList = new ArrayList<Integer>();
-        arrayList.add(11);
-        arrayList.add(22);
-        arrayList.add(33);
-        return arrayList;
+        return LIST;
+    }
+    
+    public List<Integer> getLinkedList() {
+        return LINKED_LIST;
     }
     
     public Set<Integer> getSet() {
-        Set<Integer> set = new TreeSet<Integer>();
-        set.add(11);
-        set.add(22);
-        set.add(33);
-        return set;
+        return SET;
     }
 
     public Iterator<Integer> getIterator() {
-        Set<Integer> set = new TreeSet<Integer>();
-        set.add(11);
-        set.add(22);
-        set.add(33);
-        return set.iterator();
+        return SET.iterator();
     }
 
     public List<Integer> getEmptyList() {
+        return Collections.emptyList();
+    }
+    
+    public List<Integer> getEmptyLinkedList() {
         return Collections.emptyList();
     }
     

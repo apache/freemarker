@@ -792,7 +792,8 @@ TOKEN:
                 // unknown directive:
                 if (_CoreAPI.BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                     throw new TokenMgrError(
-                            "#" + dn + " is an existing directive, but the tag is malformed.",
+                            "#" + dn + " is an existing directive, but the tag is malformed. " 
+                            + " (See FreeMarker Manual / Directive Reference.)",
                             TokenMgrError.LEXICAL_ERROR,
                             matchedToken.beginLine, matchedToken.beginColumn + 1,
                             matchedToken.endLine, matchedToken.endColumn);
@@ -816,6 +817,10 @@ TOKEN:
                     tip = "You may meant #list (http://freemarker.org/docs/ref_directive_list.html).";
                 } else if (dn.equals("prefix")) {
                     tip = "You may meant #import. " + PLANNED_DIRECTIVE_HINT;
+                } else if (dn.equals("item") | dn.equals("row") | dn.equals("rows")) {
+                    tip = "You may meant #items.";
+                } else if (dn.equals("separator") | dn.equals("separate") | dn.equals("separ")) {
+                    tip = "You may meant #sep.";
                 } else {
                     tip = "Help (latest version): http://freemarker.org/docs/ref_directive_alphaidx.html; "
                             + "you're using FreeMarker " + Configuration.getVersion() + ".";

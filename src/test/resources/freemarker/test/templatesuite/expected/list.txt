@@ -1,4 +1,3 @@
-
 Size: 4
 Items: @0 aardvark, @1 bear, @2 cat, @3 dog.
 

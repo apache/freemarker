@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -80,7 +79,7 @@ import freemarker.test.templatesuite.models.BooleanList1;
 import freemarker.test.templatesuite.models.BooleanList2;
 import freemarker.test.templatesuite.models.BooleanVsStringMethods;
 import freemarker.test.templatesuite.models.JavaObjectInfo;
-import freemarker.test.templatesuite.models.ListableValueFactory;
+import freemarker.test.templatesuite.models.Listables;
 import freemarker.test.templatesuite.models.MultiModel1;
 import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.OverloadedMethods2;
@@ -278,41 +277,9 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
 
-        else if (templateName.equals("list.ftl")) {
-            List<Integer> arrayList = new ArrayList<Integer>();
-            arrayList.add(11);
-            arrayList.add(22);
-            arrayList.add(33);
-            dataModel.put("arrayList", arrayList);
-            
-            List<Integer> linkedList = new LinkedList<Integer>();
-            linkedList.add(11);
-            linkedList.add(22);
-            linkedList.add(33);
-            dataModel.put("linkedList", linkedList);
-            
-            Set<Integer> set = new TreeSet<Integer>();
-            set.add(11);
-            set.add(22);
-            set.add(33);
-            dataModel.put("set", set);
-            
-            dataModel.put("iterator", linkedList.iterator());
-            
-            List<Integer> emptyArrayList = new ArrayList<Integer>();
-            dataModel.put("emptyArrayList", emptyArrayList);
-            
-            List<Integer> emptyLinkedList = new LinkedList<Integer>();
-            dataModel.put("emptyLinkedList", emptyLinkedList);
-            
-            Set<Integer> emptySet = new TreeSet<Integer>();
-            dataModel.put("emptySet", emptySet);
-            
-            dataModel.put("emptyIterator", emptyLinkedList.iterator());
-        }
-
-        else if (templateName.equals("list2.ftl")) {
-            dataModel.put("factory", new ListableValueFactory());
+        else if (templateName.equals("list.ftl")
+                || templateName.equals("list2.ftl") || templateName.equals("list3.ftl")) {
+            dataModel.put("listables", new Listables());
         }
         
         else if (simpleTestName.startsWith("number-format")) {

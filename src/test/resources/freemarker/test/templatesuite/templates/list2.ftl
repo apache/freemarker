@@ -1,24 +1,20 @@
-<#assign animals = ["aardvark", "bear", "cat", "dog"]>
-<#assign animal = ["aardvark"]>
-<#assign nothing = []>
+<@testList ["aardvark", "bear", "cat", "dog"] />
 
-<@testList animals />
+<@testList ["aardvark"] />
 
-<@testList animal />
+<@testList [] />
 
-<@testList nothing />
+<@testList listables.list />
 
-<@testList factory.list />
+<@testList listables.set />
 
-<@testList factory.set />
+<@testList listables.getIterator />
 
-<@testList factory.getIterator />
+<@testList listables.emptyList />
 
-<@testList factory.emptyList />
+<@testList listables.emptySet />
 
-<@testList factory.emptySet />
-
-<@testList factory.getEmptyIterator />
+<@testList listables.getEmptyIterator />
 
 <#macro testList xs>
 === [${resolve(xs)?join(", ")}] ===

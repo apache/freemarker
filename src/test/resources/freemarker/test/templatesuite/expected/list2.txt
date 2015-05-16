@@ -1,4 +1,3 @@
-
 === [aardvark, bear, cat, dog] ===
 
 -- List+sep:
