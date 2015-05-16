@@ -32,7 +32,7 @@ final class AttemptBlock extends TemplateElement {
     AttemptBlock(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) {
         this.attemptBlock = attemptBlock;
         this.recoveryBlock = recoveryBlock;
-        nestedElements = new ArrayList();
+        nestedElements = new ArrayList(2);
         nestedElements.add(attemptBlock);
         nestedElements.add(recoveryBlock);
     }

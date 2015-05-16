@@ -47,6 +47,8 @@ public class TheadInterruptingSupportTest {
         assertCanBeInterrupted("<#list 1.. as x>${x}</#list>");
         assertCanBeInterrupted("<#list 1.. as x>t${x}</#list>");
         assertCanBeInterrupted("<#list 1.. as x><#list 1.. as y>${y}</#list></#list>");
+        assertCanBeInterrupted("<#list 1.. as x>${x}<#else>nope</#list>");
+        assertCanBeInterrupted("<#list 1..>[<#items as x>${x}</#items>]<#else>nope</#list>");
         assertCanBeInterrupted("<@customLoopDirective />");
         assertCanBeInterrupted("<@customLoopDirective>x</@>");
         assertCanBeInterrupted("<@customLoopDirective><#if true>x</#if></@>");

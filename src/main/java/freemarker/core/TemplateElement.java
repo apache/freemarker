@@ -44,15 +44,15 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     TemplateElement parent;
 
     /**
-     * Used by elements that has a fixed schema for its child elements. For example, {@code #switch} can only have
-     * {@code #case} and {@code #default} child elements. Only one of {@link #nestedBlock} and {@link #nestedBlock} can
-     * be non-{@code null} (or both).
+     * Used by elements that has no fixed schema for its child elements. For example, a {@code #case} can enclose any
+     * kind of elements. Only one of {@link #nestedBlock} and {@link #nestedElements} can be non-{@code null} (or both).
      */
     TemplateElement nestedBlock;
     
     /**
-     * Used by elements that has no fixed schema for its child elements. For example, an {@code #if} can enclose any
-     * kind of elements. Only one of {@link #nestedBlock} and {@link #nestedBlock} can be non-{@code null} (or both).
+     * Used by elements that has a fixed schema for its child elements. For example, {@code #switch} can only have
+     * {@code #case} and {@code #default} child elements. Only one of {@link #nestedBlock} and {@link #nestedElements}
+     * can be non-{@code null} (or both).
      */
     List nestedElements; 
 
