@@ -2327,16 +2327,22 @@ Items Items() :
 
 Sep Sep() :
 {
-    Token loopVar, start, end;
+    Token loopVar, start, end = null;
     TemplateElement block;
 }
 {
     start = <SEP>
     block = OptionalBlock()
-    end = <END_SEP>
+    [
+        end = <END_SEP>
+    ]
     {
         Sep result = new Sep(block);
-        result.setLocation(template, start, end);
+        if (end != null) {
+            result.setLocation(template, start, end); // Template, Token, Token
+        } else {
+            result.setLocation(template, start, block); // Template, Token, TemplateObject
+        }
         return result;
     }
 }
