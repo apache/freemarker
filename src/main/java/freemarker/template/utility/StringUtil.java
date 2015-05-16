@@ -1982,8 +1982,26 @@ public class StringUtil {
      * @since 2.3.22
      */
     public static boolean isTrimmableToEmpty(char[] text) {
-        int ln = text.length;
-        for (int i = 0; i < ln; i++) {
+        return isTrimmableToEmpty(text, 0, text.length);
+    }
+
+    /**
+     * Like {@link #isTrimmableToEmpty(char[])}, but acts on a sub-array that starts at {@code start} (inclusive index).
+     * 
+     * @since 2.3.23
+     */
+    public static boolean isTrimmableToEmpty(char[] text, int start) {
+        return isTrimmableToEmpty(text, start, text.length);
+    }
+    
+    /**
+     * Like {@link #isTrimmableToEmpty(char[])}, but acts on a sub-array that starts at {@code start} (inclusive index)
+     * and ends at {@code end} (exclusive index).
+     * 
+     * @since 2.3.23
+     */
+    public static boolean isTrimmableToEmpty(char[] text, int start, int end) {
+        for (int i = start; i < end; i++) {
             // We follow Java's String.trim() here, which simply states that c <= ' ' is whitespace.
             if (text[i] > ' ') {
                 return false;

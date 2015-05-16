@@ -70,6 +70,7 @@ public class _CoreAPI {
         names.add("if");
         names.add("import");
         names.add("include");
+        names.add("items");
         names.add("list");
         names.add("local");
         names.add("lt");
@@ -84,6 +85,7 @@ public class _CoreAPI {
         names.add("recurse");
         names.add("return");
         names.add("rt");
+        names.add("sep");
         names.add("setting");
         names.add("stop");
         names.add("switch");

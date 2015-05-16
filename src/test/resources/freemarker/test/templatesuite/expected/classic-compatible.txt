@@ -11,3 +11,8 @@ null1 null2
 [Ljava.lang.String
 [Lcofe.lang.String
 1
+
+ab
+a
+a
+a
