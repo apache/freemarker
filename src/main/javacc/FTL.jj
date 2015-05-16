@@ -2332,6 +2332,13 @@ Sep Sep() :
 }
 {
     start = <SEP>
+    {
+        if (listAndForeachNesting == 0) {
+            throw new ParseException(
+                    "#sep must be inside a #list (or " + forEachDirectiveSymbol() + ") block.",
+                    template, start);
+        }
+    }
     block = OptionalBlock()
     [
         end = <END_SEP>
