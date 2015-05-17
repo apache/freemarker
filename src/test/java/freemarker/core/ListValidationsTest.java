@@ -66,7 +66,9 @@ public class ListValidationsTest extends TemplateTest {
     @Test
     public void testInvalidItemsRuntime() throws IOException, TemplateException {
         assertErrorContains("<#list 1..1><#items as x></#items><#items as x></#items></#list>",
-                "#items", "already executed");
+                "#items", "already entered earlier");
+        assertErrorContains("<#list 1..1><#items as x><#items as y>${x}/${y}</#items></#items></#list>",
+                "#items", "Can't nest #items into each other");
     }
     
     @Test

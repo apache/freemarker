@@ -172,12 +172,12 @@ final class IteratorBlock extends TemplateElement {
         
         private static final String LOOP_STATE_HAS_NEXT = "_has_next"; // lenght: 9
         private static final String LOOP_STATE_INDEX = "_index"; // length 6
-        private static final int ITEMS_ELEMENT_EXECUTED_MARKER = -1;
         
         private TemplateModelIterator openedIteratorModel;
         private boolean hasNext;
         private TemplateModel loopVar;
         private int index;
+        private boolean alreadyEntered;
         private Collection localVarNames = null;
         
         /** If the {@code #list} has nested {@code #items}, it's {@code null} outside the {@code #items}. */
@@ -198,15 +198,15 @@ final class IteratorBlock extends TemplateElement {
                     throws NonSequenceOrCollectionException, TemplateModelException, InvalidReferenceException,
                     TemplateException, IOException {
             try {
-                if (index == ITEMS_ELEMENT_EXECUTED_MARKER) {
+                if (alreadyEntered) {
                     throw new _MiscTemplateException(env,
-                            "The #items directive was already executed for this listing.");
+                            "The #items directive was already entered earlier for this listing.");
                 }
+                alreadyEntered = true;
                 this.loopVarName = loopVarName;
                 executeNestedBlock(env, nestedBlock);
             } finally {
                 this.loopVarName = null;
-                index = ITEMS_ELEMENT_EXECUTED_MARKER;
             }
         }
 

@@ -37,10 +37,13 @@ import java.util.*;
  */
 public class FMParser {
 
+    private static final int ITERATOR_BLOCK_KIND_LIST = 0; 
+    private static final int ITERATOR_BLOCK_KIND_FOREACH = 1; 
+    private static final int ITERATOR_BLOCK_KIND_ITEMS = 2; 
+
     private static class ParserIteratorBlockContext {
         private String loopVarName;
-        private boolean hadItems;
-        private boolean isForEach;
+        private int kind;
     }
 
     /** Necessary for adding macros and setting location info. */
@@ -2247,7 +2250,7 @@ TemplateElement List() :
     {
         if (loopVar != null) {
             breakableDirectiveNesting--;
-        } else if (!iterCtx.hadItems) {
+        } else if (iterCtx.kind != ITERATOR_BLOCK_KIND_ITEMS) {
             throw new ParseException(
                     "#list must have either \"as loopVar\" parameter or nested #items that belongs to it.",
                     template, start);
@@ -2305,7 +2308,7 @@ IteratorBlock ForEach() :
     {
         ParserIteratorBlockContext iterCtx = pushIteratorBlockContext();
         iterCtx.loopVarName = loopVar.image;
-        iterCtx.isForEach = true;
+        iterCtx.kind = ITERATOR_BLOCK_KIND_FOREACH;
         breakableDirectiveNesting++;
     }
     
@@ -2338,17 +2341,17 @@ Items Items() :
             throw new ParseException("#items must be inside a #list block.", template, start);
         }
         if (iterCtx.loopVarName != null) {
-	        if (iterCtx.isForEach) {
-	            throw new ParseException(
-	                    forEachDirectiveSymbol() + " doesn't support nested #items.",
-	                    template, start);
-	        }
-            throw new ParseException(
-                    "The parent #list of the #items must not have \"as loopVar\" parameter.",
-                    template, start);
+            String msg;
+	        if (iterCtx.kind == ITERATOR_BLOCK_KIND_FOREACH) {
+	            msg = forEachDirectiveSymbol() + " doesn't support nested #items.";
+	        } else if (iterCtx.kind == ITERATOR_BLOCK_KIND_ITEMS) {
+                msg = "Can't nest #items into each other that belong to the same #list.";
+	        } else {
+	            msg = "The parent #list of the #items must not have \"as loopVar\" parameter.";
+            }
+            throw new ParseException(msg, template, start);
         }
-        iterCtx.hadItems = true;
-        // TODO
+        iterCtx.kind = ITERATOR_BLOCK_KIND_ITEMS;
         iterCtx.loopVarName = loopVar.image;
     
         breakableDirectiveNesting++;
