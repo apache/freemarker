@@ -47,5 +47,21 @@ class BuiltInsForLoopVariables {
         }
         
     }
+
+    static class is_lastBI extends BuiltInForLoopVariable {
+
+        TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
+            return !iterCtx.hasNext() ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+        
+    }
+
+    static class is_firstBI extends BuiltInForLoopVariable {
+
+        TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
+            return (iterCtx.getIndex() == 0) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+        
+    }
     
 }

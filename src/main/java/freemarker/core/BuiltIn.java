@@ -71,7 +71,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 236;
+    static final int NUMBER_OF_BIS = 240;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -120,6 +120,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("is_date", "isDate", bi);  // misnomer
         putBI("is_date_like", "isDateLike", bi);
         putBI("is_date_only", "isDateOnly", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE));
+        putBI("is_first", "isFirst", new BuiltInsForLoopVariables.is_firstBI());
+        putBI("is_last", "isLast", new BuiltInsForLoopVariables.is_lastBI());
         putBI("is_unknown_date_like", "isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
         putBI("is_datetime", "isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
         putBI("is_directive", "isDirective", new BuiltInsForMultipleTypes.is_directiveBI());

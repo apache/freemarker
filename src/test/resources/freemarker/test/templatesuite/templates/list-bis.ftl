@@ -11,3 +11,5 @@
 
 <#list ['a', 'b', 'c'] as x>${x}<#if x?hasNext>, </#if></#list>
 <#list ['a', 'b', 'c'] as x\-y>${x\-y}<#if x\-y?hasNext>, </#if></#list>
+
+<#list ['a', 'b', 'c'] as x><#if x?isFirst>${x?capFirst}<#else>${x}</#if><#sep>, </#sep><#if x?isLast>.</#if></#list>
