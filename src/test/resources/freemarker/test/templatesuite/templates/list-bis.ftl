@@ -10,3 +10,4 @@
 <#list ['a', 'b', 'c']><#items as x>${x?counter}. ${x};<#sep> </#items></#list>
 
 <#list ['a', 'b', 'c'] as x>${x}<#if x?hasNext>, </#if></#list>
+<#list ['a', 'b', 'c'] as x\-y>${x\-y}<#if x\-y?hasNext>, </#if></#list>
