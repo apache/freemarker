@@ -17,6 +17,7 @@ package freemarker.core;
 
 import java.io.IOException;
 
+import freemarker.core.IteratorBlock.IterationContext;
 import freemarker.template.TemplateException;
 
 /**
@@ -32,7 +33,14 @@ public class Items extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        IteratorBlock.findEnclosingIterationContext(env, this).loopForItemsElement(env, nestedBlock, loopVarName);
+        final IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, null);
+        if (iterCtx == null) {
+            // The parser should prevent this situation
+            throw new _MiscTemplateException(env,
+                    new Object[] { getNodeTypeSymbol(), " without iteraton in context" });
+        }
+        
+        iterCtx.loopForItemsElement(env, nestedBlock, loopVarName);
     }
 
     boolean isNestedBlockRepeater() {
