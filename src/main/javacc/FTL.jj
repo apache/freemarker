@@ -2360,6 +2360,7 @@ Sep Sep() :
     }
     block = OptionalBlock()
     [
+        LOOKAHEAD(1)
         end = <END_SEP>
     ]
     {
