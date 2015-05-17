@@ -40,3 +40,13 @@
 
 <#list listables.list as i><#if i_index gt 1>...<#break></#if>${i}<#sep>, </#sep></#list>
 <#list listables.list>[<#items as i><#if i_index gt 1>...<#break></#if>${i}<#sep>, </#sep></#items>]</#list>
+
+<@testAutoClosedSep 1..3 />
+<@testAutoClosedSep [1] />
+<@testAutoClosedSep [] />
+
+<#macro testAutoClosedSep xs>
+<#list xs as x>${x}<#sep>, <#else>Empty</#list>
+<#list xs as x>${x}<#sep><#if x_index == 0> /*first*/, <#else>, </#if><#else>Empty</#list>
+<#list xs>[<#items as x>${x}<#sep>, </#items>]<#else>Empty</#list>
+</#macro>

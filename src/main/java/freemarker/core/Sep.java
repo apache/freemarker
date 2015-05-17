@@ -17,10 +17,11 @@ package freemarker.core;
 
 import java.io.IOException;
 
+import freemarker.core.IteratorBlock.IterationContext;
 import freemarker.template.TemplateException;
 
 /**
- * An #items element.
+ * A #sep element.
  */
 class Sep extends TemplateElement {
 
@@ -29,13 +30,20 @@ class Sep extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        if (IteratorBlock.findEnclosingIterationContext(env, this).hasNext()) {
-            env.visit(nestedBlock);
+        final IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, null);
+        if (iterCtx == null) {
+            // The parser should prevent this situation
+            throw new _MiscTemplateException(env,
+                    new Object[] { getNodeTypeSymbol(), " without iteraton in context" });
+        }
+        
+        if (iterCtx.hasNext()) {
+            env.visitByHiddingParent(nestedBlock);
         }
     }
 
     boolean isNestedBlockRepeater() {
-        return true;
+        return false;
     }
 
     protected String dump(boolean canonical) {
