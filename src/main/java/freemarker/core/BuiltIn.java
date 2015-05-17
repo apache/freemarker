@@ -71,7 +71,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 232;
+    static final int NUMBER_OF_BIS = 236;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -103,10 +103,13 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("float", new floatBI());
         putBI("floor", new floorBI());
         putBI("chunk", new chunkBI());
+        putBI("counter", new BuiltInsForLoopVariables.counterBI());
         putBI("has_api", "hasApi", new BuiltInsForMultipleTypes.has_apiBI());
         putBI("has_content", "hasContent", new ExistenceBuiltins.has_contentBI());
+        putBI("has_next", "hasNext", new BuiltInsForLoopVariables.has_nextBI());
         putBI("html", new BuiltInsForStringsEncoding.htmlBI());
         putBI("if_exists", "ifExists", new ExistenceBuiltins.if_existsBI());
+        putBI("index", new BuiltInsForLoopVariables.indexBI());
         putBI("index_of", "indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
         putBI("int", new intBI());
         putBI("interpret", new Interpret());
@@ -337,8 +340,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         catch (CloneNotSupportedException e) {
             throw new InternalError();
         }
-        bi.target = target;
         bi.key = key;
+        bi.target = target;
         return bi;
     }
 

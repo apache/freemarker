@@ -69,4 +69,12 @@ public class ListValidationsTest extends TemplateTest {
                 "#items", "already executed");
     }
     
+    @Test
+    public void testInvalidLoopVarBuiltinLHO() {
+        assertErrorContains("<#list xs>${foo?index}</#list>",
+                "?index", "foo");
+        assertErrorContains("<#list xs as x>${foo?index}</#list>",
+                "?index", "foo");
+    }
+    
 }

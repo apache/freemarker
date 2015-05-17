@@ -78,32 +78,28 @@ final class IteratorBlock extends TemplateElement {
         return env.visitIteratorBlock(new IterationContext(listValue, loopVarName));
     }
 
-    static IterationContext findEnclosingIterationContext(Environment env, TemplateElement nestedElement)
+    /**
+     * @param loopVariableName
+     *            Then name of the loop variable whose context we are looking for, or {@code null} if we simply look for
+     *            the innermost context.
+     * @return The matching context or {@code null} if no such context exists.
+     */
+    static IterationContext findEnclosingIterationContext(Environment env, String loopVariableName)
             throws _MiscTemplateException {
-        IterationContext iterCtx;
         ArrayList ctxStack = env.getLocalContextStack();
         if (ctxStack != null) {
-            iterCtx = null;
-            findIterCtx: for (int i = ctxStack.size() - 1; i >= 0; i--) {
+            for (int i = ctxStack.size() - 1; i >= 0; i--) {
                 Object ctx = ctxStack.get(i);
-                if (ctx instanceof IterationContext) {
-                    iterCtx = (IterationContext) ctx;
-                    break findIterCtx;
+                if (ctx instanceof IterationContext
+                        && (loopVariableName == null
+                            || loopVariableName.equals(((IterationContext) ctx).getLoopVariableName()))) {
+                    return (IterationContext) ctx;
                 }
             }
-        } else {
-            iterCtx = null;
         }
-    
-        if (iterCtx == null) {
-            // The parser should prevent this situation
-            throw new _MiscTemplateException(env,
-                    new Object[] { nestedElement.getNodeTypeSymbol(), " without iteraton in context" });
-        }
-    
-        return iterCtx;
+        return null;
     }
-
+    
     protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
         if (canonical) buf.append('<');
@@ -300,6 +296,10 @@ final class IteratorBlock extends TemplateElement {
             }
             
             return listNotEmpty;
+        }
+
+        String getLoopVariableName() {
+            return this.loopVarName;
         }
 
         public TemplateModel getLocalVariable(String name) {
