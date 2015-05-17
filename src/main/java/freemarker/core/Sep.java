@@ -20,7 +20,7 @@ import java.io.IOException;
 import freemarker.template.TemplateException;
 
 /**
- * An #items element.
+ * A #sep element.
  */
 class Sep extends TemplateElement {
 
@@ -35,7 +35,7 @@ class Sep extends TemplateElement {
     }
 
     boolean isNestedBlockRepeater() {
-        return true;
+        return false;
     }
 
     protected String dump(boolean canonical) {
