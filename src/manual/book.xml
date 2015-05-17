@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.22</subtitle>
+  <subtitle>For FreeMarker 2.3.23-RC</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -22554,6 +22554,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               template language. (Note that it's also possible to enforce a
               naming convention on all templates from Java, via
               <literal>Configuration.getNamingConvention(int)</literal>.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed, activated with
+              <literal>incompatible_improvements</literal> 2.3.23: There's a
+              long existing parse-time rule that says that
+              <literal>#break</literal>, in the FTL source code itself, must
+              occur nested inside a breakable directive, such as
+              <literal>#list</literal> or <literal>#switch</literal>. This
+              check could be circumvented with <literal>#macro</literal> or
+              <literal>#function</literal>, like this: <literal>&lt;#list 1..1
+              as x&gt;&lt;#macro
+              callMeLater&gt;&lt;#break&gt;&lt;/#macro&gt;&lt;/#list&gt;&lt;@callMeLater
+              /&gt;</literal>. After activating this fix, this will be a parse
+              time error.</para>
             </listitem>
           </itemizedlist>
         </section>

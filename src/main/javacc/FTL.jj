@@ -2755,6 +2755,7 @@ Macro Macro() :
     HashMap args = new HashMap();
     ArrayList defNames = new ArrayList();
     Expression defValue = null;
+    int lastListAndForeachNesting, lastBreakableDirectiveNesting;
     TemplateElement block;
     boolean isFunction = false, hasDefaults = false;
     boolean isCatchAll = false;
@@ -2820,6 +2821,17 @@ Macro Macro() :
     )*
     [<CLOSE_PAREN>]
     <DIRECTIVE_END>
+    {
+        // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
+        lastListAndForeachNesting = listAndForeachNesting;
+        listAndForeachNesting = 0;
+        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
+	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
+	        breakableDirectiveNesting = 0; 
+        } else {
+            lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
+        }
+    }
     block = OptionalBlock()
     (
         end = <END_MACRO>
@@ -2833,6 +2845,11 @@ Macro Macro() :
     	}
     )
     {
+        listAndForeachNesting = lastListAndForeachNesting;
+        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
+            breakableDirectiveNesting = lastBreakableDirectiveNesting;
+        }
+        
         inMacro = inFunction = false;
         Macro result = new Macro(name, argNames, args, catchAll, isFunction, block);
         result.setLocation(template, start, end);
