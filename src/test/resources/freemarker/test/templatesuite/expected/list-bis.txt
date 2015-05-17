@@ -13,3 +13,21 @@ a, b, c
 a, b, c
 
 A, b, c.
+
+true/false false/true true/false
+
+    <td class="oddRow">a</td>
+    <td class="evenRow">b</td>
+    <td class="oddRow">c</td>
+
+    <td class="rowOdd">a</td>
+    <td class="rowEven">b</td>
+    <td class="rowOdd">c</td>
+
+    <td class="R">a</td>
+    <td class="G">b</td>
+    <td class="B">c</td>
+    <td class="R">d</td>
+    <td class="G">e</td>
+    <td class="B">f</td>
+    <td class="R">g</td>
