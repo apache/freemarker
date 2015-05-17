@@ -136,21 +136,27 @@ final class IteratorBlock extends TemplateElement {
     }
     
     int getParameterCount() {
-        return 2;
+        return loopVarName != null ? 2 : 1;
     }
 
     Object getParameterValue(int idx) {
         switch (idx) {
-        case 0: return listExp;
-        case 1: return loopVarName;
+        case 0:
+            return listExp;
+        case 1:
+            if (loopVarName == null) throw new IndexOutOfBoundsException();
+            return loopVarName;
         default: throw new IndexOutOfBoundsException();
         }
     }
 
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
-        case 0: return ParameterRole.LIST_SOURCE;
-        case 1: return ParameterRole.TARGET_LOOP_VARIABLE;
+        case 0:
+            return ParameterRole.LIST_SOURCE;
+        case 1:
+            if (loopVarName == null) throw new IndexOutOfBoundsException();
+            return ParameterRole.TARGET_LOOP_VARIABLE;
         default: throw new IndexOutOfBoundsException();
         }
     }    

@@ -20,7 +20,7 @@ import java.io.IOException;
 import freemarker.template.TemplateException;
 
 /**
- * An #items element.
+ * A #sep element.
  */
 class Sep extends TemplateElement {
 
@@ -30,12 +30,12 @@ class Sep extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         if (IteratorBlock.findEnclosingIterationContext(env, this).hasNext()) {
-            env.visit(nestedBlock);
+            env.visitByHiddingParent(nestedBlock);
         }
     }
 
     boolean isNestedBlockRepeater() {
-        return true;
+        return false;
     }
 
     protected String dump(boolean canonical) {

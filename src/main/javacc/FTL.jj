@@ -37,11 +37,11 @@ import java.util.*;
  */
 public class FMParser {
     
-    /** Used for the {@link #parentListAndForeachFlags} field to indicate that the enclosing loop supports an #item child. */
+    /** Used for {@link #parentListAndForeachFlags} to indicate that the enclosing loop supports an #items child. */
     private static final int PARENT_LIST_AND_FOREACH_FLAG_SUPPORTS_ITEMS = 0x01;
-    /** Used for the {@link #parentListAndForeachFlags} field to indicate that the enclosing loop already have an #item child. */
+    /** Used for {@link #parentListAndForeachFlags} to indicate that the enclosing loop already have an #items child. */
     private static final int PARENT_LIST_AND_FOREACH_FLAG_HAD_ITEMS = 0x02;
-    /** Used for the {@link #parentListAndForeachFlags} field to indicate that the enclosing loop is a #foreach. */
+    /** Used for {@link #parentListAndForeachFlags} to indicate that the enclosing loop is a #foreach. */
     private static final int PARENT_LIST_AND_FOREACH_FLAG_IS_FOREACH = 0x04;
 
     /** Necessary for adding macros and setting location info. */
@@ -2179,7 +2179,7 @@ TemplateElement List() :
     {
         if (loopVar == null && (parentListAndForeachFlags & PARENT_LIST_AND_FOREACH_FLAG_HAD_ITEMS) == 0) {
             throw new ParseException(
-                    "#list must have either \"as loopVar\" parameter or nested #item that belongs to it.",
+                    "#list must have either \"as loopVar\" parameter or nested #items that belongs to it.",
                     unboundTemplate, start);
         }
         
@@ -2269,13 +2269,13 @@ Items Items() :
     start = <ITEMS>
     {
         if (listAndForeachNesting == 0) {
-            throw new ParseException("#item must be inside a #list block.", unboundTemplate, start);
+            throw new ParseException("#items must be inside a #list block.", unboundTemplate, start);
         }
         if ((parentListAndForeachFlags & PARENT_LIST_AND_FOREACH_FLAG_SUPPORTS_ITEMS) == 0) {
             throw new ParseException(
                     (parentListAndForeachFlags & PARENT_LIST_AND_FOREACH_FLAG_IS_FOREACH) == 0
-                            ? "The parent #list of the #item must not have \"as loopVar\" parameter."
-                            : forEachDirectiveSymbol() + " doesn't support nested #item",
+                            ? "The parent #list of the #items must not have \"as loopVar\" parameter."
+                            : forEachDirectiveSymbol() + " doesn't support nested #items.",
                     unboundTemplate, start);
         }
     }
@@ -2301,16 +2301,29 @@ Items Items() :
 
 Sep Sep() :
 {
-    Token loopVar, start, end;
+    Token loopVar, start, end = null;
     TemplateElement block;
 }
 {
     start = <SEP>
+    {
+        if (listAndForeachNesting == 0) {
+            throw new ParseException(
+                    "#sep must be inside a #list (or " + forEachDirectiveSymbol() + ") block.",
+                    unboundTemplate, start);
+        }
+    }
     block = OptionalBlock()
-    end = <END_SEP>
+    [
+        end = <END_SEP>
+    ]
     {
         Sep result = new Sep(block);
-        result.setLocation(unboundTemplate, start, end);
+        if (end != null) {
+            result.setLocation(unboundTemplate, start, end); // Template, Token, Token
+        } else {
+            result.setLocation(unboundTemplate, start, block); // Template, Token, TemplateObject
+        }
         return result;
     }
 }
@@ -2716,6 +2729,7 @@ Macro Macro() :
     HashMap args = new HashMap();
     ArrayList defNames = new ArrayList();
     Expression defValue = null;
+    int lastListAndForeachNesting, lastBreakableDirectiveNesting;
     TemplateElement block;
     boolean isFunction = false, hasDefaults = false;
     boolean isCatchAll = false;
@@ -2781,6 +2795,17 @@ Macro Macro() :
     )*
     [<CLOSE_PAREN>]
     <DIRECTIVE_END>
+    {
+        // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
+        lastListAndForeachNesting = listAndForeachNesting;
+        listAndForeachNesting = 0;
+        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
+	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
+	        breakableDirectiveNesting = 0; 
+        } else {
+            lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
+        }
+    }
     block = OptionalBlock()
     (
         end = <END_MACRO>
@@ -2794,6 +2819,11 @@ Macro Macro() :
     	}
     )
     {
+        listAndForeachNesting = lastListAndForeachNesting;
+        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
+            breakableDirectiveNesting = lastBreakableDirectiveNesting;
+        }
+        
         inMacro = inFunction = false;
         UnboundCallable result = new UnboundCallable(name, argNames, args, catchAll, isFunction, block);
         result.setLocation(unboundTemplate, start, end);

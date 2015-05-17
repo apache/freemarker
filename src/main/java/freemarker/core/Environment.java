@@ -327,7 +327,7 @@ public final class Environment extends Configurable {
     /**
      * Instead of pushing into the element stack, we replace the top element for the time the parameter element is
      * visited, and then we restore the top element. The main purpose of this is to get rid of elements in the error
-     * stack trace that from user perspective shouldn't have a stack frame. These typical example is
+     * stack trace that from user perspective shouldn't have a stack frame. The typical example is
      * {@code [#if foo]...[@failsHere/]...[/#if]}, where the #if call shouldn't be in the stack trace. (Simply marking
      * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)    
      */

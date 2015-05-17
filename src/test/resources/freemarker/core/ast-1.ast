@@ -134,5 +134,24 @@
         - target loop variable: "x"  // String
     #text  // f.c.TextBlock
         - content: "\n9 "  // String
+    #list-#else-container  // f.c.ListElseContainer
+        #list  // f.c.IteratorBlock
+            - list source: xs  // f.c.Identifier
+            #text  // f.c.TextBlock
+                - content: "["  // String
+            #items  // f.c.Items
+                - target loop variable: "x"  // String
+                ${...}  // f.c.DollarVariable
+                    - content: x  // f.c.Identifier
+                #sep  // f.c.Sep
+                    #text  // f.c.TextBlock
+                        - content: ", "  // String
+            #text  // f.c.TextBlock
+                - content: "]"  // String
+        #else  // f.c.ElseOfList
+            #text  // f.c.TextBlock
+                - content: "None"  // String
+    #text  // f.c.TextBlock
+        - content: "\n10 "  // String
     #--...--  // f.c.Comment
         - content: " A comment "  // String

@@ -39,7 +39,8 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_3_20 = Configuration.VERSION_2_3_20.intValue();
     public static final int VERSION_INT_2_3_21 = Configuration.VERSION_2_3_21.intValue();
     public static final int VERSION_INT_2_3_22 = Configuration.VERSION_2_3_22.intValue();
-    public static final int VERSION_INT_2_4_0 = Configuration.VERSION_2_4_0.intValue();
+    public static final int VERSION_INT_2_3_23 = Configuration.VERSION_2_3_23.intValue();
+    public static final int VERSION_INT_2_4_0 = Configuration.VERSION_2_4_0.intValue();   
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
@@ -49,7 +50,7 @@ public class _TemplateAPI {
                     + incompatibleImprovements + ", but the installed FreeMarker version is only "
                     + Configuration.getVersion() + ". You may need to upgrade FreeMarker in your project.");
         }
-        if (iciV > Configuration.VERSION_2_3_22.intValue() && iciV < Configuration.VERSION_2_4_0.intValue()) {
+        if (iciV > Configuration.VERSION_2_3_23.intValue() && iciV < Configuration.VERSION_2_4_0.intValue()) {
             throw new IllegalArgumentException("The FreeMarker version requested by \"incompatibleImprovements\" was "
                     + incompatibleImprovements + ", but the installed FreeMarker version ("
                     + Configuration.getVersion() + ") doesn't know a such high 2.3.x version. "
