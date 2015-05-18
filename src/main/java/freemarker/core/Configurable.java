@@ -19,6 +19,7 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +40,6 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
@@ -68,30 +68,199 @@ public class Configurable
     static final String C_TRUE_FALSE = "true,false";
     
     private static final String DEFAULT = "default";
+    private static final String DEFAULT_2_3_0 = "default_2_3_0";
     private static final String JVM_DEFAULT = "JVM default";
     
-    public static final String LOCALE_KEY = "locale";
-    public static final String NUMBER_FORMAT_KEY = "number_format";
-    public static final String TIME_FORMAT_KEY = "time_format";
-    public static final String DATE_FORMAT_KEY = "date_format";
-    public static final String DATETIME_FORMAT_KEY = "datetime_format";
-    public static final String TIME_ZONE_KEY = "time_zone";
-    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY
-            = "sql_date_and_time_time_zone";
-    public static final String CLASSIC_COMPATIBLE_KEY = "classic_compatible";
-    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = "template_exception_handler";
-    public static final String ARITHMETIC_ENGINE_KEY = "arithmetic_engine";
-    public static final String OBJECT_WRAPPER_KEY = "object_wrapper";
-    public static final String BOOLEAN_FORMAT_KEY = "boolean_format";
-    public static final String OUTPUT_ENCODING_KEY = "output_encoding";
-    public static final String URL_ESCAPING_CHARSET_KEY = "url_escaping_charset";
-    public static final String STRICT_BEAN_MODELS = "strict_bean_models";
-    /** @since 2.3.17 */
-    public static final String AUTO_FLUSH_KEY = "auto_flush";
-    /** @since 2.3.17 */
-    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
-    /** @since 2.3.21 */
-    public static final String SHOW_ERROR_TIPS_KEY = "show_error_tips";
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String LOCALE_KEY_SNAKE_CASE = "locale";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String LOCALE_KEY_CAMEL_CASE = "locale";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String LOCALE_KEY = LOCALE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String NUMBER_FORMAT_KEY_SNAKE_CASE = "number_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String NUMBER_FORMAT_KEY_CAMEL_CASE = "numberFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String NUMBER_FORMAT_KEY = NUMBER_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_FORMAT_KEY_SNAKE_CASE = "time_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_FORMAT_KEY_CAMEL_CASE = "timeFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TIME_FORMAT_KEY = TIME_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String DATE_FORMAT_KEY_SNAKE_CASE = "date_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String DATE_FORMAT_KEY_CAMEL_CASE = "dateFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String DATE_FORMAT_KEY = DATE_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String DATETIME_FORMAT_KEY_SNAKE_CASE = "datetime_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String DATETIME_FORMAT_KEY_CAMEL_CASE = "datetimeFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String DATETIME_FORMAT_KEY = DATETIME_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_ZONE_KEY_SNAKE_CASE = "time_zone";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String TIME_ZONE_KEY_CAMEL_CASE = "timeZone";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TIME_ZONE_KEY = TIME_ZONE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE = "sql_date_and_time_time_zone";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE = "sqlDateAndTimeTimeZone";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY = SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String CLASSIC_COMPATIBLE_KEY_SNAKE_CASE = "classic_compatible";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String CLASSIC_COMPATIBLE_KEY_CAMEL_CASE = "classicCompatible";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String CLASSIC_COMPATIBLE_KEY = CLASSIC_COMPATIBLE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE = "template_exception_handler";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE = "templateExceptionHandler";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String ARITHMETIC_ENGINE_KEY_SNAKE_CASE = "arithmetic_engine";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String ARITHMETIC_ENGINE_KEY_CAMEL_CASE = "arithmeticEngine";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String ARITHMETIC_ENGINE_KEY = ARITHMETIC_ENGINE_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String OBJECT_WRAPPER_KEY_SNAKE_CASE = "object_wrapper";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String OBJECT_WRAPPER_KEY_CAMEL_CASE = "objectWrapper";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String OBJECT_WRAPPER_KEY = OBJECT_WRAPPER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String BOOLEAN_FORMAT_KEY_SNAKE_CASE = "boolean_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String BOOLEAN_FORMAT_KEY_CAMEL_CASE = "booleanFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String BOOLEAN_FORMAT_KEY = BOOLEAN_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String OUTPUT_ENCODING_KEY_SNAKE_CASE = "output_encoding";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String OUTPUT_ENCODING_KEY_CAMEL_CASE = "outputEncoding";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String OUTPUT_ENCODING_KEY = OUTPUT_ENCODING_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String URL_ESCAPING_CHARSET_KEY_SNAKE_CASE = "url_escaping_charset";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String URL_ESCAPING_CHARSET_KEY_CAMEL_CASE = "urlEscapingCharset";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String URL_ESCAPING_CHARSET_KEY = URL_ESCAPING_CHARSET_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String STRICT_BEAN_MODELS_KEY_SNAKE_CASE = "strict_bean_models";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String STRICT_BEAN_MODELS_KEY_CAMEL_CASE = "strictBeanModels";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
+    public static final String STRICT_BEAN_MODELS_KEY = STRICT_BEAN_MODELS_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String AUTO_FLUSH_KEY_SNAKE_CASE = "auto_flush";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String AUTO_FLUSH_KEY_CAMEL_CASE = "autoFlush";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.17 */
+    public static final String AUTO_FLUSH_KEY = AUTO_FLUSH_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE = "new_builtin_class_resolver";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE = "newBuiltinClassResolver";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.17 */
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String SHOW_ERROR_TIPS_KEY_SNAKE_CASE = "show_error_tips";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String SHOW_ERROR_TIPS_KEY_CAMEL_CASE = "showErrorTips";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.21 */
+    public static final String SHOW_ERROR_TIPS_KEY = SHOW_ERROR_TIPS_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String API_BUILTIN_ENABLED_KEY_SNAKE_CASE = "api_builtin_enabled";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String API_BUILTIN_ENABLED_KEY_CAMEL_CASE = "apiBuiltinEnabled";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
+    public static final String API_BUILTIN_ENABLED_KEY = API_BUILTIN_ENABLED_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE = "log_template_exceptions";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE = "logTemplateExceptions";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE;
+    
+    /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
+    public static final String STRICT_BEAN_MODELS = STRICT_BEAN_MODELS_KEY;
+    
+    private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
+        // Must be sorted alphabetically!
+        API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
+        ARITHMETIC_ENGINE_KEY_SNAKE_CASE,
+        AUTO_FLUSH_KEY_SNAKE_CASE,
+        BOOLEAN_FORMAT_KEY_SNAKE_CASE,
+        CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
+        DATE_FORMAT_KEY_SNAKE_CASE,
+        DATETIME_FORMAT_KEY_SNAKE_CASE,
+        LOCALE_KEY_SNAKE_CASE,
+        LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE,
+        NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
+        NUMBER_FORMAT_KEY_SNAKE_CASE,
+        OBJECT_WRAPPER_KEY_SNAKE_CASE,
+        OUTPUT_ENCODING_KEY_SNAKE_CASE,
+        SHOW_ERROR_TIPS_KEY_SNAKE_CASE,
+        SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
+        STRICT_BEAN_MODELS_KEY,
+        TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE,
+        TIME_FORMAT_KEY_SNAKE_CASE,
+        TIME_ZONE_KEY_SNAKE_CASE,
+        URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
+    };
+    
+    private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
+        // Must be sorted alphabetically!
+        API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
+        ARITHMETIC_ENGINE_KEY_CAMEL_CASE,
+        AUTO_FLUSH_KEY_CAMEL_CASE,
+        BOOLEAN_FORMAT_KEY_CAMEL_CASE,
+        CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
+        DATE_FORMAT_KEY_CAMEL_CASE,
+        DATETIME_FORMAT_KEY_CAMEL_CASE,
+        LOCALE_KEY_CAMEL_CASE,
+        LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE,
+        NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
+        NUMBER_FORMAT_KEY_CAMEL_CASE,
+        OBJECT_WRAPPER_KEY_CAMEL_CASE,
+        OUTPUT_ENCODING_KEY_CAMEL_CASE,
+        SHOW_ERROR_TIPS_KEY_CAMEL_CASE,
+        SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
+        STRICT_BEAN_MODELS_KEY_CAMEL_CASE,
+        TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE,
+        TIME_FORMAT_KEY_CAMEL_CASE,
+        TIME_ZONE_KEY_CAMEL_CASE,
+        URL_ESCAPING_CHARSET_KEY_CAMEL_CASE
+    };
 
     private Configurable parent;
     private Properties properties;
@@ -119,6 +288,8 @@ public class Configurable
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
     private Boolean showErrorTips;
+    private Boolean apiBuiltinEnabled;
+    private Boolean logTemplateExceptions;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -138,39 +309,60 @@ public class Configurable
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
         parent = null;
+        properties = new Properties();
+        
         locale = Locale.getDefault();
+        properties.setProperty(LOCALE_KEY, locale.toString());
+        
         timeZone = TimeZone.getDefault();
+        properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
+        
         sqlDataAndTimeTimeZone = null;
+        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(sqlDataAndTimeTimeZone));
+        
         numberFormat = "number";
+        properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
+        
         timeFormat = "";
+        properties.setProperty(TIME_FORMAT_KEY, timeFormat);
+        
         dateFormat = "";
+        properties.setProperty(DATE_FORMAT_KEY, dateFormat);
+        
         dateTimeFormat = "";
+        properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
+        
         classicCompatible = new Integer(0);
-        templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
+        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
+        
+        templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
+                incompatibleImprovements);
+        properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
+        
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
+        properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
+        
         objectWrapper = Configuration.getDefaultObjectWrapper(incompatibleImprovements);
+        // bug: setProperty missing
+        
         autoFlush = Boolean.TRUE;
+        properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
+        
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
+        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
+        
         showErrorTips = Boolean.TRUE;
+        properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
+        
+        apiBuiltinEnabled = Boolean.FALSE;
+        properties.setProperty(API_BUILTIN_ENABLED_KEY, apiBuiltinEnabled.toString());
+        
+        logTemplateExceptions = Boolean.valueOf(
+                _TemplateAPI.getDefaultLogTemplateExceptions(incompatibleImprovements));
+        properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, logTemplateExceptions.toString());
+        
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
-        
-        properties = new Properties();
-        properties.setProperty(LOCALE_KEY, locale.toString());
-        properties.setProperty(TIME_FORMAT_KEY, timeFormat);
-        properties.setProperty(DATE_FORMAT_KEY, dateFormat);
-        properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
-        properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
-        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(sqlDataAndTimeTimeZone));
-        properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
-        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
-        properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
-        properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
-        properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
-        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
-        properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
-        // as outputEncoding and urlEscapingCharset defaults to null, 
-        // they are not set
 
         setBooleanFormat(C_TRUE_FALSE);
         
@@ -190,7 +382,7 @@ public class Configurable
         properties = new Properties(parent.properties);
         customAttributes = new HashMap();
     }
-
+    
     protected Object clone() throws CloneNotSupportedException {
         Configurable copy = (Configurable)super.clone();
         copy.properties = new Properties(properties);
@@ -199,14 +391,22 @@ public class Configurable
     }
     
     /**
-     * Returns the parent <tt>Configurable</tt> object of this object.
-     * The parent stores the default values for this configurable. For example,
-     * the parent of the {@link freemarker.template.Template} object is the
-     * {@link freemarker.template.Configuration} object, so setting values not
-     * specified on template level are specified by the confuration object.
+     * Returns the parent {@link Configurable} object of this object. The parent stores the default setting values for
+     * this {@link Configurable}. For example, the parent of a {@link freemarker.template.Template} object is a
+     * {@link Configuration} object, so values not specified on {@link Template}-level are get from the
+     * {@link Configuration} object.
+     * 
+     * <p>
+     * Note on the parent of {@link Environment}: If you set {@link Configuration#setIncompatibleImprovements(Version)
+     * incompatible_improvements} to at least 2.3.22, it will be always the "main" {@link Template}, that is, the
+     * template for whose processing the {@link Environment} was created. With lower {@code incompatible_improvements},
+     * the current parent can temporary change <em>during template execution</em>, for example when your are inside an
+     * {@code #include}-d template (among others). Thus, don't build on which {@link Template} the parent of
+     * {@link Environment} is during template execution, unless you set {@code incompatible_improvements} to 2.3.22 or
+     * higher.
      *
-     * @return the parent <tt>Configurable</tt> object, or null, if this is
-     *    the root <tt>Configurable</tt> object.
+     * @return The parent {@link Configurable} object, or {@code null} if this is the root {@link Configurable} object
+     *         (i.e, if it's the {@link Configuration} object).
      */
     public final Configurable getParent() {
         return parent;
@@ -264,7 +464,7 @@ public class Configurable
      *   "expr" evaluates to null:
      *   <ul>
      *     <li>
-     *       in <tt>&lt;assign varname=expr></tt> directive, 
+     *       in <tt>&lt;assign varname=expr&gt;</tt> directive, 
      *       or in <tt>${expr}</tt> directive,
      *       or in <tt>otherexpr == expr</tt>,
      *       or in <tt>otherexpr != expr</tt>, 
@@ -273,16 +473,16 @@ public class Configurable
      *       or in <tt>expr.key</tt> (since 2.3.20),
      *       then it's treated as empty string.
      *     </li>
-     *     <li>as argument of <tt>&lt;list expr as item></tt> or 
-     *       <tt>&lt;foreach item in expr></tt>, the loop body is not executed
+     *     <li>as argument of <tt>&lt;list expr as item&gt;</tt> or 
+     *       <tt>&lt;foreach item in expr&gt;</tt>, the loop body is not executed
      *       (as if it were a 0-length list)
      *     </li>
-     *     <li>as argument of <tt>&lt;if></tt> directive, or on other places where a
+     *     <li>as argument of <tt>&lt;if&gt;</tt> directive, or on other places where a
      *       boolean expression is expected, it's treated as false
      *     </li>
      *   </ul>
      * </li>
-     * <li>Non-boolean models are accepted in <tt>&lt;if></tt> directive,
+     * <li>Non-boolean models are accepted in <tt>&lt;if&gt;</tt> directive,
      *   or as operands of logical operators. "Empty" models (zero-length string,
      * empty sequence or hash) are evaluated as false, all others are evaluated as
      * true.</li>
@@ -293,11 +493,11 @@ public class Configurable
      * formatted according the <tt>boolean_format</tt> setting, just like in
      * 2.3.20 and later.
      * </li>
-     * <li>Scalar models supplied to <tt>&lt;list></tt> and 
-     *   <tt>&lt;foreach></tt> are treated as a one-element list consisting
+     * <li>Scalar models supplied to <tt>&lt;list&gt;</tt> and 
+     *   <tt>&lt;foreach&gt;</tt> are treated as a one-element list consisting
      *   of the passed model.
      * </li>
-     * <li>Paths parameter of <tt>&lt;include></tt> will be interpreted as
+     * <li>Paths parameter of <tt>&lt;include&gt;</tt> will be interpreted as
      * absolute path.
      * </li>
      * </ul>
@@ -439,7 +639,15 @@ public class Configurable
     }
 
     /**
-     * Sets the number format used to convert numbers to strings.
+     * Sets the default number format used to convert numbers to strings. Currently, this is either a
+     * {@link java.text.DecimalFormat} pattern (like {@code "0.##"}), or one of the following special values:
+     * <ul>
+     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
+     *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
+     *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
+     *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
+     * </ul>
+     * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
         NullArgumentException.check("numberFormat", numberFormat);
@@ -448,8 +656,7 @@ public class Configurable
     }
 
     /**
-     * Returns the default number format used to convert numbers to strings.
-     * Defaults to <tt>"number"</tt>
+     * Getter pair of {@link #setNumberFormat(String)}. 
      */
     public String getNumberFormat() {
         return numberFormat != null ? numberFormat : parent.getNumberFormat();
@@ -572,7 +779,7 @@ public class Configurable
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
      */
     public void setTimeFormat(String timeFormat) {
         NullArgumentException.check("timeFormat", timeFormat);
@@ -593,7 +800,7 @@ public class Configurable
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
      */
     public void setDateFormat(String dateFormat) {
         NullArgumentException.check("dateFormat", dateFormat);
@@ -625,32 +832,32 @@ public class Configurable
      *       {@code lastModified?string.iso_m_nz}). The options and their meanings are:
      *       
      *       <ul>
-     *         <li><p>Accuracy options:<br/>
+     *         <li><p>Accuracy options:<br>
      *             {@code ms} = Milliseconds, always shown with all 3 digits, even if it's all 0-s.
-     *                     Example: {@code 13:45:05.800}<br/>
-     *             {@code s} = Seconds (fraction seconds are dropped even if non-0), like {@code 13:45:05}<br/>
-     *             {@code m} = Minutes, like {@code 13:45}. This isn't allowed for "xs".<br/>
-     *             {@code h} = Hours, like {@code 13}. This isn't allowed for "xs".<br/>
+     *                     Example: {@code 13:45:05.800}<br>
+     *             {@code s} = Seconds (fraction seconds are dropped even if non-0), like {@code 13:45:05}<br>
+     *             {@code m} = Minutes, like {@code 13:45}. This isn't allowed for "xs".<br>
+     *             {@code h} = Hours, like {@code 13}. This isn't allowed for "xs".<br>
      *             Neither = Up to millisecond accuracy, but trailing millisecond 0-s are removed, also the whole
      *                     milliseconds part if it would be 0 otherwise. Example: {@code 13:45:05.8}
      *                     
-     *         <li><p>Time zone offset visibility options:<br/>
+     *         <li><p>Time zone offset visibility options:<br>
      *             {@code fz} = "Force Zone", always show time zone offset (even for for
      *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values).
      *                     But, because ISO 8601 doesn't allow for dates (means date without time of the day) to
      *                     show the zone offset, this option will have no effect in the case of {@code "iso"} with
-     *                     dates.<br/>
-     *             {@code nz} = "No Zone", never show time zone offset<br/>
+     *                     dates.<br>
+     *             {@code nz} = "No Zone", never show time zone offset<br>
      *             Neither = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
      *                     and {@link java.sql.Time java.sql.Time}, and for {@code "iso"} date values.
      *                     
-     *         <li><p>Time zone options:<br/>
+     *         <li><p>Time zone options:<br>
      *             {@code u} = Use UTC instead of what the {@code time_zone} setting suggests. However,
      *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't affected
-     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why)<br/>
+     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why)<br>
      *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code time_zone} or the
      *                     {@code sql_date_and_time_time_zone} setting suggests. This also effects
-     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values<br/>
+     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values<br>
      *             Neither = Use the time zone suggested by the {@code time_zone} or the
      *                     {@code sql_date_and_time_time_zone} configuration setting ({@link #setTimeZone(TimeZone)} and
      *                     {@link #setSQLDateAndTimeTimeZone(TimeZone)}).
@@ -684,7 +891,7 @@ public class Configurable
      *       {@code "medium_medium"} for date-time values.)
      * </ul> 
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
@@ -902,6 +1109,55 @@ public class Configurable
             : (parent != null ? parent.getShowErrorTips() : true);
     }
     
+    /**
+     * Specifies if {@code ?api} can be used in templates. Defaults to {@code false} so that updating FreeMarker won't
+     * decrease the security of existing applications.
+     * 
+     * @since 2.3.22
+     */
+    public void setAPIBuiltinEnabled(boolean value) {
+        apiBuiltinEnabled = Boolean.valueOf(value);
+        properties.setProperty(API_BUILTIN_ENABLED_KEY, String.valueOf(value));
+    }
+
+    /**
+     * See {@link #setAPIBuiltinEnabled(boolean)}
+     * 
+     * @since 2.3.22
+     */
+    public boolean isAPIBuiltinEnabled() {
+        return apiBuiltinEnabled != null 
+                ? apiBuiltinEnabled.booleanValue()
+                : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+    }
+    
+    /**
+     * Specifies if {@link TemplateException}-s thrown by template processing are logged by FreeMarker or not. The
+     * default is {@code true} for backward compatibility, but that results in logging the exception twice in properly
+     * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
+     * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
+     * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
+     * caught by {@code #attempt}; those are always logged, no mater what (because those exceptions won't bubble up
+     * until the API caller).
+     * 
+     * @since 2.3.22
+     */
+    public void setLogTemplateExceptions(boolean value) {
+        logTemplateExceptions = Boolean.valueOf(value);
+        properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, String.valueOf(value));
+    }
+
+    /**
+     * See {@link #setLogTemplateExceptions(boolean)}
+     * 
+     * @since 2.3.22
+     */
+    public boolean getLogTemplateExceptions() {
+        return logTemplateExceptions != null 
+                ? logTemplateExceptions.booleanValue()
+                : (parent != null ? parent.getLogTemplateExceptions() : true);
+    }
+    
     private static final String ALLOWED_CLASSES = "allowed_classes";
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
@@ -931,7 +1187,8 @@ public class Configurable
      *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
      *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
      *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
-     *       {@code "ignore"}  (means {@link TemplateExceptionHandler#IGNORE_HANDLER}).
+     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE_HANDLER}),
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default.
      *       
      *   <li><p>{@code "arithmetic_engine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
@@ -949,10 +1206,12 @@ public class Configurable
      *       values: {@code "DefaultObjectWrapper(2.3.21)"},
      *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
-     *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
-     *       or {@link DefaultObjectWrapperBuilder#build()}),
-     *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
-     *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
+     *       {@code "default"} means the default of {@link Configuration} (the default depends on the
+     *       {@code Configuration#Configuration(Version) incompatible_improvements}, but a bug existed in 2.3.21 where
+     *       that was ignored),
+     *       {@code "default_2_3_0"} (means the deprecated {@link ObjectWrapper#DEFAULT_WRAPPER})
+     *       {@code "simple"} (means the deprecated {@link ObjectWrapper#SIMPLE_WRAPPER}),
+     *       {@code "beans"} (means the deprecated {@link BeansWrapper#BEANS_WRAPPER}
      *       or {@link BeansWrapperBuilder#build()}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
@@ -994,8 +1253,7 @@ public class Configurable
      *   <li><p>{@code "new_builtin_class_resolver"}:
      *       See {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
      *       Since 2.3.17.
-     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
-     *       expression</a>. Otherwise the value must be one of these (ignore the quotation marks):
+     *       The value must be one of these (ignore the quotation marks):
      *       <ol>
      *         <li><p>{@code "unrestricted"}:
      *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
@@ -1009,7 +1267,8 @@ public class Configurable
      *             with {@code "allowed_classes:"} and/or
      *             {@code "trusted_templates:"}. Examples of valid values:
      *             
-     *             <table style="width: auto; border-collapse: collapse" border="1">
+     *             <table style="width: auto; border-collapse: collapse" border="1"
+     *                  summary="trusted_template value examples">
      *               <tr>
      *                 <th>Setting value
      *                 <th>Meaning
@@ -1042,14 +1301,18 @@ public class Configurable
      *             
      *             <p>For more details see {@link OptInTemplateClassResolver}.
      *             
-     *         <li><p>Otherwise if the value contains dot, it's interpreted as
-     *             a full-qualified class name, and the object will be created
-     *             with its parameterless constructor.
+     *         <li><p>Otherwise if the value contains dot, it's interpreted as an <a href="#fm_obe">object builder
+     *             expression</a>.
      *       </ol>
      *       
      *   <li><p>{@code "show_error_tips"}:
      *       See {@link #setShowErrorTips(boolean)}.
      *       Since 2.3.21.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
+     *       
+     *   <li><p>{@code api_builtin_enabled}:
+     *       See {@link #setAPIBuiltinEnabled(boolean)}.
+     *       Since 2.3.22.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
      *       
      * </ul>
@@ -1094,7 +1357,7 @@ public class Configurable
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
-     *       <table style="width: auto; border-collapse: collapse" border="1">
+     *       <table style="width: auto; border-collapse: collapse" border="1" summary="cache_storage value examples">
      *         <tr><th>Setting value<th>max. strong size<th>max. soft size
      *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
      *         <tr><td>{@code "strong:100, soft"}<td>100<td>{@code Integer.MAX_VALUE}
@@ -1108,13 +1371,22 @@ public class Configurable
      *       entries is not significant.
      *       
      *   <li><p>{@code "template_update_delay"}:
-     *       See {@link Configuration#setTemplateUpdateDelay}.
-     *       <br>String value: Valid positive integer, the update delay measured in seconds.
+     *       Template update delay in <b>seconds</b> (not in milliseconds) if no unit is specified; see
+     *       {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} for more.
+     *       <br>String value: Valid positive integer, optionally followed by a time unit (recommended). The default
+     *       unit is seconds. It's strongly recommended to specify the unit for clarity, like in "500 ms" or "30 s".
+     *       Supported units are: "s" (seconds), "ms" (milliseconds), "m" (minutes), "h" (hours). The whitespace between
+     *       the unit and the number is optional. Units are only supported since 2.3.23.
      *       
      *   <li><p>{@code "tag_syntax"}:
      *       See {@link Configuration#setTagSyntax(int)}.
      *       <br>String value: Must be one of
      *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}. 
+     *       
+     *   <li><p>{@code "naming_convention"}:
+     *       See {@link Configuration#setNamingConvention(int)}.
+     *       <br>String value: Must be one of
+     *       {@code "auto_detect"}, {@code "legacy"}, and {@code "camel_case"}. 
      *       
      *   <li><p>{@code "incompatible_improvements"}:
      *       See {@link Configuration#setIncompatibleImprovements(Version)}.
@@ -1126,7 +1398,19 @@ public class Configurable
      *       
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
-     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
+     *       <a href="#fm_obe">object builder expression</a>.
+     *       
+     *   <li><p>{@code "template_lookup_strategy"}:
+     *       See: {@link Configuration#setTemplateLookupStrategy(freemarker.cache.TemplateLookupStrategy)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
+     *       <a href="#fm_obe">object builder expression</a>.
+     *       
+     *   <li><p>{@code "template_name_format"}:
+     *       See: {@link Configuration#setTemplateNameFormat(freemarker.cache.TemplateNameFormat)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, {@code "default_2_3_0"}
+     *       for {@link freemarker.cache.TemplateNameFormat#DEFAULT_2_3_0}, {@code "default_2_4_0"} for
+     *       {@link freemarker.cache.TemplateNameFormat#DEFAULT_2_4_0}.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
@@ -1152,8 +1436,9 @@ public class Configurable
      *   </li>
      *   <li>
      *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
-     *      a public static <tt>INSTANCE</tt> field, the value of that filed will be the value of the expression, and
-     *      the constructor won't be called.
+     *      a public static {@code INSTANCE} field, the value of that filed will be the value of the expression, and
+     *      the constructor won't be called. Note that if you use the backward compatible
+     *      syntax, where these's no parenthesis after the class name, then it will not look for {@code INSTANCE}.
      *   </li>
      *   <li>
      *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
@@ -1197,19 +1482,21 @@ public class Configurable
         try {
             if (LOCALE_KEY.equals(name)) {
                 setLocale(StringUtil.deduceLocale(value));
-            } else if (NUMBER_FORMAT_KEY.equals(name)) {
+            } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setNumberFormat(value);
-            } else if (TIME_FORMAT_KEY.equals(name)) {
+            } else if (TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setTimeFormat(value);
-            } else if (DATE_FORMAT_KEY.equals(name)) {
+            } else if (DATE_FORMAT_KEY_SNAKE_CASE.equals(name) || DATE_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateFormat(value);
-            } else if (DATETIME_FORMAT_KEY.equals(name)) {
+            } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
-            } else if (TIME_ZONE_KEY.equals(name)) {
+            } else if (TIME_ZONE_KEY_SNAKE_CASE.equals(name) || TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setTimeZone(parseTimeZoneSettingValue(value));
-            } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY.equals(name)) {
+            } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE.equals(name)
+                    || SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setSQLDateAndTimeTimeZone(value.equals("null") ? null : parseTimeZoneSettingValue(value));
-            } else if (CLASSIC_COMPATIBLE_KEY.equals(name)) {
+            } else if (CLASSIC_COMPATIBLE_KEY_SNAKE_CASE.equals(name)
+                    || CLASSIC_COMPATIBLE_KEY_CAMEL_CASE.equals(name)) {
                 char firstChar;
                 if (value != null && value.length() > 0) {
                     firstChar =  value.charAt(0);
@@ -1221,12 +1508,13 @@ public class Configurable
                 } else {
                     setClassicCompatible(value != null ? StringUtil.getYesNo(value) : false);
                 }
-            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY.equals(name)) {
+            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE.equals(name)
+                    || TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) {
                     if ("debug".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.DEBUG_HANDLER);
-                    } else if ("html_debug".equalsIgnoreCase(value)) {
+                    } else if ("html_debug".equalsIgnoreCase(value) || "htmlDebug".equals(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.HTML_DEBUG_HANDLER);
                     } else if ("ignore".equalsIgnoreCase(value)) {
@@ -1235,6 +1523,8 @@ public class Configurable
                     } else if ("rethrow".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.RETHROW_HANDLER);
+                    } else if (DEFAULT.equalsIgnoreCase(value) && this instanceof Configuration) {
+                        ((Configuration) this).unsetTemplateExceptionHandler();
                     } else {
                         throw invalidSettingValueException(name, value);
                     }
@@ -1242,7 +1532,7 @@ public class Configurable
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
                             value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (ARITHMETIC_ENGINE_KEY.equals(name)) {
+            } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) { 
                     if ("bigdecimal".equalsIgnoreCase(value)) {
                         setArithmeticEngine(ArithmeticEngine.BIGDECIMAL_ENGINE);
@@ -1255,9 +1545,15 @@ public class Configurable
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
                             value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (OBJECT_WRAPPER_KEY.equals(name)) {
+            } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name) || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
                 if (DEFAULT.equalsIgnoreCase(value)) {
-                    setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
+                    if (this instanceof Configuration) {
+                        ((Configuration) this).unsetObjectWrapper();
+                    } else {
+                        setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_2_3_0));
+                    }
+                } else if (DEFAULT_2_3_0.equalsIgnoreCase(value)) {
+                    setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_2_3_0));
                 } else if ("simple".equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
                 } else if ("beans".equalsIgnoreCase(value)) {
@@ -1271,24 +1567,30 @@ public class Configurable
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
                                     value, ObjectWrapper.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
+            } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setBooleanFormat(value);
-            } else if (OUTPUT_ENCODING_KEY.equals(name)) {
+            } else if (OUTPUT_ENCODING_KEY_SNAKE_CASE.equals(name) || OUTPUT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
                 setOutputEncoding(value);
-            } else if (URL_ESCAPING_CHARSET_KEY.equals(name)) {
+            } else if (URL_ESCAPING_CHARSET_KEY_SNAKE_CASE.equals(name)
+                    || URL_ESCAPING_CHARSET_KEY_CAMEL_CASE.equals(name)) {
                 setURLEscapingCharset(value);
-            } else if (STRICT_BEAN_MODELS.equals(name)) {
+            } else if (STRICT_BEAN_MODELS_KEY_SNAKE_CASE.equals(name)
+                    || STRICT_BEAN_MODELS_KEY_CAMEL_CASE.equals(name)) {
                 setStrictBeanModels(StringUtil.getYesNo(value));
-            } else if (AUTO_FLUSH_KEY.equals(name)) {
+            } else if (AUTO_FLUSH_KEY_SNAKE_CASE.equals(name) || AUTO_FLUSH_KEY_CAMEL_CASE.equals(name)) {
                 setAutoFlush(StringUtil.getYesNo(value));
-            } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
+            } else if (SHOW_ERROR_TIPS_KEY_SNAKE_CASE.equals(name) || SHOW_ERROR_TIPS_KEY_CAMEL_CASE.equals(name)) {
                 setShowErrorTips(StringUtil.getYesNo(value));
-            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
+            } else if (API_BUILTIN_ENABLED_KEY_SNAKE_CASE.equals(name)
+                    || API_BUILTIN_ENABLED_KEY_CAMEL_CASE.equals(name)) {
+                setAPIBuiltinEnabled(StringUtil.getYesNo(value));
+            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE.equals(name)
+                    || NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);
                 } else if ("safer".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
-                } else if ("allows_nothing".equals(value)) {
+                } else if ("allows_nothing".equals(value) || "allowsNothing".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
                 } else if (value.indexOf(":") != -1) {
                     List segments = parseAsSegmentedList(value);
@@ -1317,6 +1619,9 @@ public class Configurable
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
+            } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
+                    || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
+                setLogTemplateExceptions(StringUtil.getYesNo(value));
             } else {
                 unknown = true;
             }
@@ -1326,6 +1631,12 @@ public class Configurable
         if (unknown) {
             throw unknownSettingException(name);
         }
+    }
+    
+    /** Returns the possible setting names. */
+    // [Java 5] Add type param. [FM 2.4] Add public parameterless version the returns the camelCase names.
+    Set/*<String>*/ getSettingNames(boolean camelCase) {
+        return new _SortedArraySet(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE); 
     }
 
     private TimeZone parseTimeZoneSettingValue(String value) {
@@ -1380,8 +1691,12 @@ public class Configurable
             : Environment.getCurrentEnvironment();
     }
     
+    /**
+     * Creates the exception that should be thrown when a setting name isn't recognized.
+     */
     protected TemplateException unknownSettingException(String name) {
-        return new UnknownSettingException(getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
+        return new UnknownSettingException(
+                getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
     }
 
     /**
@@ -1410,10 +1725,10 @@ public class Configurable
      * The setting name was not recognized. 
      */
     public static class UnknownSettingException extends _MiscTemplateException {
-        
+
         private UnknownSettingException(Environment env, String name, String correctedName) {
             super(env, new Object[] {
-                    "Unknown setting: ", new _DelayedJQuote(name),
+                    "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     correctedName == null
                             ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }
@@ -1430,7 +1745,7 @@ public class Configurable
         
         private SettingValueAssignmentException(Environment env, String name, String value, Throwable cause) {
             super(cause, env, new Object[] {
-                    "Failed to set setting ", new _DelayedJQuote(name),
+                    "Failed to set FreeMarker configuration setting ", new _DelayedJQuote(name),
                     " to value ", new _DelayedJQuote(value), "; see cause exception." });
         }
         
@@ -1552,7 +1867,7 @@ public class Configurable
      * @param name the name of the custom attribute
      *
      * @return the value of the custom attribute. Note that if the custom attribute
-     * was created with <tt>&lt;#ftl&nbsp;attributes={...}></tt>, then this value is already
+     * was created with <tt>&lt;#ftl&nbsp;attributes={...}&gt;</tt>, then this value is already
      * unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a
      * <code>Map</code>, ...etc., not a FreeMarker specific class).
      */

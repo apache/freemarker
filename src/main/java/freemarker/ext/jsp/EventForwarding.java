@@ -34,7 +34,7 @@ import javax.servlet.http.HttpSessionListener;
 import freemarker.log.Logger;
 
 /**
- * An instance of this class should be registered as a <tt>&lt;listener></tt> in
+ * An instance of this class should be registered as a <tt>&lt;listener&gt;</tt> in
  * the <tt>web.xml</tt> descriptor in order to correctly dispatch events to
  * event listeners that are specified in TLD files.
  */
@@ -45,7 +45,7 @@ public class EventForwarding
         HttpSessionListener,
         HttpSessionAttributeListener
 {
-    private static final Logger logger = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
     
     private static final String ATTR_NAME = EventForwarding.class.getName();
     
@@ -86,7 +86,7 @@ public class EventForwarding
             added = true;
         }
         if(!added) {
-            logger.warn(
+            LOG.warn(
                 "Listener of class " + listener.getClass().getName() +
                 "wasn't registered as it doesn't implement any of the " +
                 "recognized listener interfaces.");

@@ -16,6 +16,12 @@
 
 package freemarker.template;
 
+import java.util.Set;
+
+import freemarker.cache.CacheStorage;
+import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupStrategy;
+import freemarker.cache.TemplateNameFormat;
 import freemarker.core.TemplateObject;
 import freemarker.template.utility.NullArgumentException;
 
@@ -30,6 +36,8 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_3_19 = Configuration.VERSION_2_3_19.intValue();
     public static final int VERSION_INT_2_3_20 = Configuration.VERSION_2_3_20.intValue();
     public static final int VERSION_INT_2_3_21 = Configuration.VERSION_2_3_21.intValue();
+    public static final int VERSION_INT_2_3_22 = Configuration.VERSION_2_3_22.intValue();
+    public static final int VERSION_INT_2_4_0 = Version.intValueFor(2, 4, 0);
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
@@ -39,7 +47,7 @@ public class _TemplateAPI {
                     + incompatibleImprovements + ", but the installed FreeMarker version is only "
                     + Configuration.getVersion() + ". You may need to upgrade FreeMarker in your project.");
         }
-        if (iciV < 200300) {
+        if (iciV < VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("\"incompatibleImprovements\" must be at least 2.3.0.");
         }
     }
@@ -55,6 +63,38 @@ public class _TemplateAPI {
     /** For unit testing only */
     public static void DefaultObjectWrapperFactory_clearInstanceCache() {
         DefaultObjectWrapperBuilder.clearInstanceCache();
+    }
+    
+    public static TemplateExceptionHandler getDefaultTemplateExceptionHandler(
+            Version incompatibleImprovements) {
+        return Configuration.getDefaultTemplateExceptionHandler(incompatibleImprovements);
+    }
+
+    public static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
+        return Configuration.getDefaultLogTemplateExceptions(incompatibleImprovements);
+    }
+
+    public static TemplateLoader createDefaultTemplateLoader(Version incompatibleImprovements) {
+        return Configuration.createDefaultTemplateLoader(incompatibleImprovements);
+    }
+
+    public static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements) {
+        return Configuration.createDefaultCacheStorage(incompatibleImprovements);
+    }
+    
+    public static TemplateLookupStrategy getDefaultTemplateLookupStrategy(Version incompatibleImprovements) {
+        return Configuration.getDefaultTemplateLookupStrategy(incompatibleImprovements);
+    }
+    
+    public static TemplateNameFormat getDefaultTemplateNameFormat(Version incompatibleImprovements) {
+        return Configuration.getDefaultTemplateNameFormat(incompatibleImprovements);
+    }
+    
+    /**
+     * [FM 2.4] getSettingNames() becomes to public; remove this.
+     */
+    public static Set/*<String>*/ getConfigurationSettingNames(Configuration cfg, boolean camelCase) {
+        return cfg.getSettingNames(camelCase);
     }
     
 }

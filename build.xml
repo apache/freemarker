@@ -4,7 +4,6 @@
   xmlns:ivy="antlib:org.apache.ivy.ant"
   xmlns:javacc="http://javacc.dev.java.net/"
   xmlns:docgen="http://freemarker.org/docgen"
-  xmlns:emma="http://emma.sourceforge.net/emma"
   xmlns:bnd="http://www.aqute.biz/bnd"
   xmlns:u="http://freemarker.org/util"
 >
@@ -34,6 +33,7 @@
       <isset property="has.explicit.boot.classpath.j2se1.5"/>
     </and>
   </condition>
+  <available property="atLeastJDK8" classname="java.util.function.Predicate"/>
 
   <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
   <!-- Note: Target "dist" doesn't allow using these. -->
@@ -71,7 +71,7 @@
   </tstamp>
   <filter token="timestampInVersion" value="${timestampInVersion}" />
   <filter token="timestampNice" value="${timestampNice}" />
-  <mkdir dir="build "/>
+  <mkdir dir="build"/>
   <!-- Copying is needed to substitute the timestamps. -->
   <copy
       file="src/main/resources/freemarker/version.properties"
@@ -106,7 +106,7 @@
   </condition>
   
   <target name="init" depends="_autoget-deps"
-    description="fetch dependencies if any are missing and create the build directory if necessary"
+    description="Fetch dependencies if any are missing and create the build directory if necessary"
   >
     <mkdir dir="build"/>
   </target>
@@ -198,9 +198,8 @@
 
     <mkdir dir="build/classes" />
     
-    <!-- Note: the "build" conf includes the JSP 2.0 and Servlet 2.4 API-s. -->
-    <!-- But it doesn't include other API-s that has multiple versions to compile against. -->
-    <ivy:cachepath conf="build" pathid="ivy.dep" />
+    <!-- Note: the "build.base" conf doesn't include optional FreeMarker dependencies. -->
+    <ivy:cachepath conf="build.base" pathid="ivy.dep" />
     <javac destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.4" source="1.4" encoding="utf-8"
       includeantruntime="false"
@@ -210,12 +209,10 @@
         freemarker/ext/beans/_EnumModels.java,
         freemarker/ext/dom/SunInternalXalanXPathSupport.java,
         
-        freemarker/ext/jsp/TaglibFactory.java,
-        freemarker/ext/jsp/_FreeMarkerPageContext1.java,
-        freemarker/ext/jsp/_FreeMarkerPageContext21.java,
-        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
-        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java,
-        
+        freemarker/ext/jsp/**,
+        freemarker/ext/servlet/**,
+        freemarker/cache/WebappTemplateLoader.java,
+      
         freemarker/ext/jython/**,
         freemarker/template/utility/JythonRuntime.java,
         freemarker/ext/ant/**"
@@ -241,6 +238,24 @@
       includes="
         freemarker/ext/beans/_EnumModels.java,
         freemarker/ext/dom/SunInternalXalanXPathSupport.java"
+    />
+
+    <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp1.2" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.4" source="1.4" encoding="utf-8"
+      includeantruntime="false"
+      classpathref="ivy.dep.jsp1.2"
+      bootclasspath="${boot.classpath.j2se1.4}"
+      includes="
+        freemarker/ext/jsp/**,
+        freemarker/ext/servlet/**,
+        freemarker/cache/WebappTemplateLoader.java"
+      excludes="
+        freemarker/ext/jsp/TaglibFactory.java,
+        freemarker/ext/jsp/_FreeMarkerPageContext1.java,
+        freemarker/ext/jsp/_FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
+        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
     />
     
     <ivy:cachepath conf="build.jsp1.2" pathid="ivy.dep.jsp1.2" />
@@ -339,12 +354,12 @@
   <target name="compileTest" depends="compile">
     <mkdir dir="build/test-classes" />
   
-    <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
+    <ivy:cachepath conf="build.test" pathid="ivy.dep.build.test" />
     <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
-      classpathref="ivy.dep.test"
+      classpathref="ivy.dep.build.test"
       bootclasspath="${boot.classpath.j2se1.5}"
     />
     <copy toDir="build/test-classes">
@@ -388,37 +403,13 @@
   <!-- ================================================================= -->
 
   <target name="test" depends="compileTest" description="Run test cases">
-    <ivy:cachepath conf="emma" pathid="ivy.dep.emma" />
-    <taskdef
-      resource="emma_ant.properties" classpathref="ivy.dep.emma"
-      uri="http://emma.sourceforge.net/emma" 
-    />
-    
-    <property name="coverage.dir" location="build/coverage" />
-    <property name="coverage.classes.dir" location="build/coverage/classes" />
-    <mkdir dir="${coverage.classes.dir}" />
-    <property name="coverage.instrumentationfile" location="${coverage.dir}/instrumentation" />
-    <emma:emma enabled="true">
-      <instr 
-        instrpath="build/classes" outdir="${coverage.classes.dir}" 
-        outfile="${coverage.instrumentationfile}" mode="copy">
-        <filter excludes="*_Stub" />
-      </instr>
-    </emma:emma>
-    <copy todir="${coverage.classes.dir}" overwrite="false">
-      <fileset dir="build/classes" />
-      <fileset dir="build/test-classes" />
-    </copy>
-    <property name="coverage.outfile" location="${coverage.dir}/coverage" />
-   
     <mkdir dir="build/junit-reports" />
-    <ivy:cachepath conf="test" pathid="ivy.dep.test" />
+    <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
     <junit haltonfailure="on" fork="true" forkmode="once">
-      <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
       <classpath>
-        <pathelement path="${coverage.classes.dir}" />
-        <path refid="ivy.dep.emma" />
-        <path refid="ivy.dep.test" />
+        <pathelement path="build/test-classes" />
+        <pathelement path="build/classes" />
+        <path refid="ivy.dep.run.test" />
       </classpath>
       <formatter type="plain" />
       <formatter type="xml" />
@@ -430,35 +421,13 @@
         </fileset>
       </batchtest>
     </junit>
-    
-    <property name="coverage.report.dir" location="build/coverage/report" />
-    <mkdir dir="${coverage.report.dir}" />
-    <delete dir="${coverage.report.dir}" />
-    <mkdir dir="${coverage.report.dir}" />
-    <echo message="${coverage.outfile}" />
-    <echo message="${coverage.instrumentationfile}" />
-    <emma:emma enabled="true">
-      <report>
-        <fileset dir="${basedir}">
-          <include name="build/coverage/instrumentation" />
-          <include name="build/coverage/coverage" />
-        </fileset>
-        <sourcepath>
-          <dirset dir="${basedir}">
-            <include name="src/main/java" />
-          </dirset>
-        </sourcepath>
-        <html outfile="${coverage.report.dir}/index.html" />
-        <xml outfile="${coverage.report.dir}/report.xml" />
-      </report>
-    </emma:emma>
   </target>
   
   <!-- ================================================================= -->
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
 
-  <target depends="javacc" name="javadoc" description="Build the JavaDocs" >
+  <target depends="javacc" name="_rawJavadoc">
     <!-- depends="javacc" is needed as its output is referred in the docs. -->
     <mkdir dir="build/api" />
     <delete includeEmptyDirs="yes">
@@ -489,6 +458,7 @@
         <exclude name="**/log/CommonsLoggingLoggerFactory.java" />
       </fileset>
     </copy>
+    
     <!-- conf="IDE": as that has to contain all depedencies -->
     <ivy:cachepath conf="IDE" pathid="ivy.dep" />
     <javadoc
@@ -505,18 +475,86 @@
       windowtitle="FreeMarker ${version} API"
       classpath="build/classes"
       classpathref="ivy.dep"
-    />
+      failonerror="true"
+      charset="UTF-8"
+      docencoding="UTF-8"
+      locale="en_US"
+    >
+      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+    </javadoc>
     <delete dir="build/javadoc-sources" />
-    
-    <available file="build/api/resources/titlebar.gif" property="titlebar.found"/>
-    <fail unless="titlebar.found"><!--
-    -->build/api/resources/titlebar.gif doesn't exist, which probably means <!--
-    -->that the API documentaton was generated with JDK 6 or earlier. Ensure <!--
-    -->that Ant uses JDK 7 or later (you may need to set JAVA_HOME), as the <!--
-    -->HTML output was significantly improved with JDK 7.<!--
-    --></fail>
   </target>
 
+  <target name="javadoc" depends="_rawJavadoc, _fixJDK8JavadocCSS" description="Build the JavaDocs" />
+  
+  <target name="_fixJDK8JavadocCSS" depends="_rawJavadoc" if="atLeastJDK8">
+    <property name="file" value="build/api/stylesheet.css" />
+        
+    <available file="${file}" property="stylesheet.available"/>
+    <fail unless="stylesheet.available">CSS file not found: ${file}</fail>
+    <echo>Fixing JDK 8 CSS in ${file}</echo>
+    
+    <!-- Tell that it's modified: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="/\* (Javadoc style sheet) \*/" replace="/\* \1 - JDK 8 usability fix regexp substitutions applied \*/"
+    />
+
+    <!-- Remove broken link: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="@import url\('resources/fonts/dejavu.css'\);\s*" replace=""
+    />
+    
+    <!-- Font family fixes: -->
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]DejaVu Sans['&quot;]" replace="Arial"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]DejaVu Sans Mono['&quot;]" replace="'Courier New'"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]DejaVu Serif['&quot;]" replace="Arial"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])serif\b" replace="sans-serif"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])Georgia,\s*" replace=""
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]Times New Roman['&quot;],\s*" replace=""
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])Times,\s*" replace=""
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])Arial\s*,\s*Arial\b" replace="Arial"
+    />
+    
+    <!-- "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes: -->
+    <property name="ddSelectorStart" value="(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b" />
+    <property name="ddPropertyEnd" value="\b.+?;" />
+    <!-- - Put back description (dd) indentation: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="(${ddSelectorStart})margin${ddPropertyEnd}" replace="\1margin: 5px 0 10px 20px;"
+    />
+    <!-- - No monospace font for the description (dd) part: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="(${ddSelectorStart})font-family${ddPropertyEnd}" replace="\1"
+    />
+  </target>
+  
   <!-- ====================== -->
   <!-- Manual                 -->
   <!-- ====================== -->
@@ -541,7 +579,7 @@
     <u:manual offline="true" />
   </target>
 
-  <target name="manualOnline" depends="init" description="Build the Manual for online use" >
+  <target name="manualFreemarkerOrg" depends="init" description="Build the Manual to be upload to freemarker.org" >
     <u:manual offline="false" />
   </target>
 
@@ -580,15 +618,15 @@
     </sequential>
   </macrodef>
   
-  <target name="example-webapp1" depends="jar">
+  <target name="example-webapp1" depends="jar" description="Build example webapp 1">
     <u:buildExampleWebapp examplename="webapp1" />
   </target>
 
-  <target name="example-webapp2" depends="jar">
+  <target name="example-webapp2" depends="jar" description="Build example webapp 2">
     <u:buildExampleWebapp examplename="webapp2" />
   </target>
 
-  <target name="example-struts-webapp" depends="jar">
+  <target name="example-struts-webapp" depends="jar" description="Build example Struts 1 webapp">
     <fail unless="struts.available"><!--
       -->You have to copy the Struts 1.1 jar-s to <!--
       -->&lt;freemarker_project>/lib/struts to build this example!<!--
@@ -599,7 +637,7 @@
     <u:buildExampleWebapp examplename="struts-webapp" />
   </target>
   
-  <target name="example-ant" depends="jar">
+  <target name="example-ant" depends="jar" description="Build Ant example">
     <mkdir dir="build/examples/ant" />
     <copy toDir="build/examples/ant">
       <fileset dir="src/examples/ant" />
@@ -620,13 +658,13 @@
       unless="has.all.explicit.boot.classpaths"
       message="All boot.classpath properties must be set in build.properties for dist!"
     />
+    <fail unless="atLeastJDK8" message="The release should be built with JDK 8+ (you may need to set JAVA_HOME)" />
     <antcall target="clean" />  <!-- To improve the reliability -->
     <antcall target="_dist" />
   </target>
 
   <target name="_dist"
     depends="jar, javadoc, manualOffline"
-    description="(Used internally; don't call it)"
   >
     <!-- Copy jars and sources and such into the distro -->
     <delete dir="${dist.dir}" />
@@ -683,14 +721,8 @@
     <gzip zipfile="${freemarker.gzip}" src="${freemarker.tar}" />
     <delete file="${freemarker.tar}" />
   </target>
-  
-  <!--
-    Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
-    to a Maven repository (snapshot or central).
-    Use this after "dist" (without interleaving "clean").
-  -->
-  <target name="maven-dist"
-      description="Releases the already built distro to a Maven repository">
+
+  <target name="maven-pom">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -700,7 +732,7 @@
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <version>9</version>
   </parent>
   
   <groupId>org.freemarker</groupId>
@@ -744,7 +776,15 @@
   </dependencies>
 </project>
 ]]></echo>
-    
+  </target>
+  
+  <!--
+    Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
+    to a Maven repository (snapshot or central).
+    Use this after "dist" (without interleaving "clean").
+  -->
+  <target name="maven-dist" depends="maven-pom"
+      description="Releases the already built distro to a Maven repository">
     <jar destfile="build/maven-source-attachment.jar">
       <fileset dir="${dist.dir}/source/src/main/java" />
       <fileset dir="${dist.dir}/source/src/main/resources" />
@@ -811,10 +851,8 @@ Proceed? </input>
     
     <echo>*****************************************************************</echo>
     <echo>Check the above lines for any Maven errors!</echo>
-    <echo>If it was a final release, now you have to release the staged</echo>
-    <echo>repo on https://oss.sonatype.org/.</echo>
-    <echo>If it was an unstable release, you may check the content of</echo>
-    <echo>https://oss.sonatype.org/content/repositories/snapshots/org/.</echo>
+    <echo>Now you have to release the staged repo on</echo>
+    <echo>https://oss.sonatype.org/.</echo>
     <echo>*****************************************************************</echo>
   </target>
   

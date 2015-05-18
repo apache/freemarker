@@ -16,11 +16,11 @@
 
 package freemarker.template;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -40,6 +40,9 @@ import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupContext;
+import freemarker.cache.TemplateLookupResult;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.WebappTemplateLoader;
 
 public class TemplateNotFoundMessageTest {
@@ -49,25 +52,25 @@ public class TemplateNotFoundMessageTest {
         final File baseDir = new File(System.getProperty("user.home"));
         final String errMsg = failWith(new FileTemplateLoader(baseDir));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains(baseDir.toString()));
-        assertTrue(errMsg.contains("FileTemplateLoader"));
+        assertThat(errMsg, containsString(baseDir.toString()));
+        assertThat(errMsg, containsString("FileTemplateLoader"));
     }
 
     @Test
     public void testClassTemplateLoader() throws IOException {
         final String errMsg = failWith(new ClassTemplateLoader(this.getClass(), "foo/bar"));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("ClassTemplateLoader"));
-        assertTrue(errMsg.contains("foo/bar"));
+        assertThat(errMsg, containsString("ClassTemplateLoader"));
+        assertThat(errMsg, containsString("foo/bar"));
     }
 
     @Test
     public void testWebappTemplateLoader() throws IOException {
         final String errMsg = failWith(new WebappTemplateLoader(new MockServletContext(), "WEB-INF/templates"));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("WebappTemplateLoader"));
-        assertTrue(errMsg.contains("MyApp"));
-        assertTrue(errMsg.contains("WEB-INF/templates"));
+        assertThat(errMsg, containsString("WebappTemplateLoader"));
+        assertThat(errMsg, containsString("MyApp"));
+        assertThat(errMsg, containsString("WEB-INF/templates"));
     }
 
     @Test
@@ -78,10 +81,10 @@ public class TemplateNotFoundMessageTest {
         tl.putTemplate("ccc", "C");
         final String errMsg = failWith(tl);
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("StringTemplateLoader"));
-        assertTrue(errMsg.contains("aaa"));
-        assertTrue(errMsg.contains("bbb"));
-        assertTrue(errMsg.contains("ccc"));
+        assertThat(errMsg, containsString("StringTemplateLoader"));
+        assertThat(errMsg, containsString("aaa"));
+        assertThat(errMsg, containsString("bbb"));
+        assertThat(errMsg, containsString("ccc"));
     }
     
     @Test
@@ -91,30 +94,121 @@ public class TemplateNotFoundMessageTest {
                 new ClassTemplateLoader(this.getClass(), "foo/bar")
         }));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("MultiTemplateLoader"));
-        assertTrue(errMsg.contains("WebappTemplateLoader"));
-        assertTrue(errMsg.contains("MyApp"));
-        assertTrue(errMsg.contains("WEB-INF/templates"));
-        assertTrue(errMsg.contains("ClassTemplateLoader"));
-        assertTrue(errMsg.contains("foo/bar"));
+        assertThat(errMsg, containsString("MultiTemplateLoader"));
+        assertThat(errMsg, containsString("WebappTemplateLoader"));
+        assertThat(errMsg, containsString("MyApp"));
+        assertThat(errMsg, containsString("WEB-INF/templates"));
+        assertThat(errMsg, containsString("ClassTemplateLoader"));
+        assertThat(errMsg, containsString("foo/bar"));
+    }
+
+    @Test
+    public void testDefaultTemplateLoader() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        {
+            String errMsg = failWith(cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg, allOf(containsString("setTemplateLoader"), containsString("dangerous")));
+        }
+        {
+            cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21);
+            String errMsg = failWith(cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg, allOf(containsString("setTemplateLoader"), containsString("null")));
+        }
+    }
+    
+    @Test
+    public void testOtherMessageDetails() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        cfg.setTemplateLoader(new StringTemplateLoader());
+        
+        {
+            String errMsg = failWith("../x", cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg,
+                    allOf(containsStringIgnoringCase("reason"), containsStringIgnoringCase("root directory")));
+        }
+        {
+            String errMsg = failWith("x\u0000y", cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg,
+                    allOf(containsStringIgnoringCase("reason"), containsStringIgnoringCase("null character")));
+        }
+        {
+            String errMsg = failWith("x\\y", cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg,
+                    allOf(containsStringIgnoringCase("warning"), containsStringIgnoringCase("backslash")));
+        }
+        {
+            String errMsg = failWith("x/./y", cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg,
+                    allOf(containsStringIgnoringCase("normalized"), containsStringIgnoringCase("x/y")));
+        }
+        {
+            String errMsg = failWith("/x/y", cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg, not(containsStringIgnoringCase("normalized")));
+        }
+        {
+            String errMsg = failWith("x/y", cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg, not(containsStringIgnoringCase("normalized")));
+            assertThat(errMsg, not(containsStringIgnoringCase("lookup strategy")));
+        }
+        
+        cfg.setTemplateLookupStrategy(new TemplateLookupStrategy() {
+            @Override
+            public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+                return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
+            }
+        });
+        {
+            String errMsg = failWith("x/y", cfg);
+            showErrorMessage(errMsg);
+            assertThat(errMsg, containsStringIgnoringCase("lookup strategy"));
+        }
+        
+        try {
+            cfg.getTemplate("./missing", null, "example.com", null, true, false);
+            fail();
+        } catch (TemplateNotFoundException e) {
+            showErrorMessage(e.getMessage());
+            assertThat(e.getMessage(), containsStringIgnoringCase("example.com"));
+        }
     }
 
     private void showErrorMessage(String errMsg) {
-        //System.out.println(errMsg);
+        // System.out.println(errMsg);
     }
 
-    private String failWith(TemplateLoader tl) {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
-        cfg.setTemplateLoader(tl);
+    private String failWith(TemplateLoader tl, String name, Configuration cfg) {
+        if (tl != null) {
+            cfg.setTemplateLoader(tl);
+        }
         try {
-            cfg.getTemplate("missing.ftl");
+            cfg.getTemplate(name);
             fail();
-        } catch (FileNotFoundException e) {
+        } catch (TemplateNotFoundException e) {
             return e.getMessage();
         } catch (IOException e) {
             fail();
         }
         return null;
+    }
+    
+    private String failWith(TemplateLoader tl) {
+        return failWith(tl, "missing.ftl", new Configuration(Configuration.VERSION_2_3_21));
+    }
+
+    private String failWith(Configuration cfg) {
+        return failWith(null, "missing.ftl", cfg);
+    }
+
+    private String failWith(String name, Configuration cfg) {
+        return failWith(null, name, cfg);
     }
     
     private static class MockServletContext implements ServletContext {

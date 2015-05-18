@@ -51,15 +51,11 @@ public class IdentityHashMap
     /**
      * The table is rehashed when its size exceeds this threshold.  (The
      * value of this field is (int)(capacity * loadFactor).)
-     *
-     * @serial
      */
     private int threshold;
 
     /**
      * The load factor for the hashtable.
-     *
-     * @serial
      */
     private float loadFactor;
 

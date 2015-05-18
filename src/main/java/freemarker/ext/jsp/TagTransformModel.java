@@ -41,14 +41,14 @@ import freemarker.template.TransformControl;
  */
 class TagTransformModel extends JspTagModelBase implements TemplateTransformModel
 {
-    private static final Logger logger = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
     
     private final boolean isBodyTag;
     private final boolean isIterationTag;
     private final boolean isTryCatchFinally;
             
-    public TagTransformModel(Class tagClass) throws IntrospectionException {
-        super(tagClass);
+    public TagTransformModel(String tagName, Class tagClass) throws IntrospectionException {
+        super(tagName, tagClass);
         isIterationTag = IterationTag.class.isAssignableFrom(tagClass);
         isBodyTag = isIterationTag && BodyTag.class.isAssignableFrom(tagClass);
         isTryCatchFinally = TryCatchFinally.class.isAssignableFrom(tagClass);
@@ -86,15 +86,8 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
             pageContext.pushTopTag(tag);
             pageContext.pushWriter(w);
             return w;
-        }
-        catch(TemplateModelException e) {
-            throw e;
-        }
-        catch(RuntimeException e) {
-            throw e;
-        }
-        catch(Exception e) {
-            throw new TemplateModelException(e);
+        } catch (Exception e) {
+            throw toTemplateModelExceptionOrRethrow(e);
         }
     }
 
@@ -350,9 +343,8 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                         throw new RuntimeException("Illegal return value " + dst + " from " + tag.getClass().getName() + ".doStartTag()");
                     }
                 }
-            }
-            catch(JspException e) {
-                throw new TemplateModelException(e.getMessage(), e);
+            } catch (Exception e) {
+                throw toTemplateModelExceptionOrRethrow(e);
             }
         }
         
@@ -364,23 +356,19 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 if(isIterationTag) {
                     int dab = ((IterationTag)tag).doAfterBody();
                     switch(dab) {
-                        case Tag.SKIP_BODY: {
+                        case Tag.SKIP_BODY:
                             endEvaluation();
                             return END_EVALUATION;
-                        }
-                        case IterationTag.EVAL_BODY_AGAIN: {
+                        case IterationTag.EVAL_BODY_AGAIN:
                             return REPEAT_EVALUATION;
-                        }
-                        default: {
+                        default:
                             throw new TemplateModelException("Unexpected return value " + dab + "from " + tag.getClass().getName() + ".doAfterBody()");
-                        }
                     }
                 }
                 endEvaluation();
                 return END_EVALUATION;
-            }
-            catch(JspException e) {
-                throw new TemplateModelException(e);
+            } catch (Exception e) {
+                throw toTemplateModelExceptionOrRethrow(e);
             }
         }
         
@@ -390,7 +378,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 needPop = false;
             }
             if(tag.doEndTag() == Tag.SKIP_PAGE) {
-                logger.warn("Tag.SKIP_PAGE was ignored from a " + tag.getClass().getName() + " tag.");
+                LOG.warn("Tag.SKIP_PAGE was ignored from a " + tag.getClass().getName() + " tag.");
             }
         }
         

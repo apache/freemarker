@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-package freemarker.ext.dom;
 
+package freemarker.ext.dom;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,18 +30,19 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
- * A class that contains a main() method for command-line invocation
- * of a FreeMarker XML transformation.
+ * A class that contains a main() method for command-line invocation of a FreeMarker XML transformation.
+ * 
+ * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
  */
 public class Transform {
-    
+
     private File inputFile, ftlFile, outputFile;
     private String encoding;
     private Locale locale;
-    private Configuration cfg; 
-    
+    private Configuration cfg;
+
     /**
-     * A convenient main() method for command-line invocation.
+     * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
      */
     static public void main(String[] args) {
         try {
@@ -55,20 +55,24 @@ public class Transform {
             e.printStackTrace();
         }
     }
-    
+
     /**
-     * @param inputFile The file from which to read the XML input
-     * @param ftlFile  The file containing the template
-     * @param outputFile The file to which to output. If this is null, we use stdout.
-     * @param locale The locale to use. If this is null, we use the platform default.
-     * @param encoding The character encoding to use for output, if this is null, we use the platform default
+     * @param inputFile
+     *            The file from which to read the XML input
+     * @param ftlFile
+     *            The file containing the template
+     * @param outputFile
+     *            The file to which to output. If this is null, we use stdout.
+     * @param locale
+     *            The locale to use. If this is null, we use the platform default.
+     * @param encoding
+     *            The character encoding to use for output, if this is null, we use the platform default
      */
-    
     Transform(File inputFile, File ftlFile, File outputFile, Locale locale, String encoding) throws IOException {
         if (encoding == null) {
             encoding = System.getProperty("file.encoding");
         }
-        if (locale ==  null) {
+        if (locale == null) {
             locale = Locale.getDefault();
         }
         this.encoding = encoding;
@@ -80,7 +84,7 @@ public class Transform {
         cfg = new Configuration();
         cfg.setDirectoryForTemplateLoading(ftlDirectory);
     }
-    
+
     /**
      * Performs the transformation.
      */
@@ -100,13 +104,13 @@ public class Transform {
                 outputWriter.close();
         }
     }
-    
+
     static Transform transformFromArgs(String[] args) throws IOException {
-        int i=0;
-        String input = null, output=null, ftl = null, loc = null, enc = null; 
-        while (i<args.length) {
+        int i = 0;
+        String input = null, output = null, ftl = null, loc = null, enc = null;
+        while (i < args.length) {
             String dashArg = args[i++];
-            if (i>=args.length) {
+            if (i >= args.length) {
                 throw new IllegalArgumentException("");
             }
             String arg = args[i++];
@@ -164,7 +168,8 @@ public class Transform {
             outputFile = new File(output).getAbsoluteFile();
             File outputDirectory = outputFile.getParentFile();
             if (!outputDirectory.exists() || !outputDirectory.canWrite()) {
-                throw new IllegalArgumentException("The output directory must exist and be writable: " + outputDirectory);
+                throw new IllegalArgumentException("The output directory must exist and be writable: "
+                        + outputDirectory);
             }
         }
         Locale locale = Locale.getDefault();
@@ -173,10 +178,10 @@ public class Transform {
         }
         return new Transform(inputFile, ftlFile, outputFile, locale, enc);
     }
-    
+
     static Locale localeFromString(String ls) {
         if (ls == null) ls = "";
-        String lang="", country="", variant="";
+        String lang = "", country = "", variant = "";
         StringTokenizer st = new StringTokenizer(ls, "_-,");
         if (st.hasMoreTokens()) {
             lang = st.nextToken();
@@ -191,9 +196,10 @@ public class Transform {
             return Locale.getDefault();
         }
     }
-    
+
     static void usage() {
-        System.err.println("Usage: java freemarker.ext.dom.Transform -in <xmlfile> -ftl <ftlfile> [-out <outfile>] [-locale <locale>] [-encoding <encoding>]");
+        System.err
+                .println("Usage: java freemarker.ext.dom.Transform -in <xmlfile> -ftl <ftlfile> [-out <outfile>] [-locale <locale>] [-encoding <encoding>]");
         // Security: prevents shutting down the container from a template:
         if (Environment.getCurrentEnvironment() == null) {
             System.exit(-1);

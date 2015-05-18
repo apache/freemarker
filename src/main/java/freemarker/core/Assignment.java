@@ -19,7 +19,6 @@ package freemarker.core;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.utility.StringUtil;
 
 /**
  * An instruction that makes a single assignment, like [#local x=1].
@@ -105,25 +104,7 @@ final class Assignment extends TemplateElement {
             buf.append(' ');
         }
         
-        final boolean mustBeQuoted;
-        if (variableName.length() > 0) {
-            if (Character.isJavaIdentifierStart(variableName.charAt(0))) {
-                int i = 1;
-                while (i < variableName.length() && Character.isJavaIdentifierPart(variableName.charAt(i))) i++;
-                mustBeQuoted = i < variableName.length();
-            } else {
-                mustBeQuoted = true;
-            }
-        } else {
-            mustBeQuoted = true;
-        }
-        if (mustBeQuoted) {
-            buf.append('"');
-            buf.append(StringUtil.FTLStringLiteralEnc(variableName));
-            buf.append('"');
-        } else {
-            buf.append (variableName);
-        }
+        buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(variableName));
         
         buf.append(" = ");
         buf.append(value.getCanonicalForm());
@@ -176,6 +157,10 @@ final class Assignment extends TemplateElement {
         case 3: return ParameterRole.NAMESPACE;
         default: throw new IndexOutOfBoundsException();
         }
+    }
+
+    boolean isNestedBlockRepeater() {
+        return false;
     }
     
 }

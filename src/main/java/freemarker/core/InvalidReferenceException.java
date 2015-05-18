@@ -34,10 +34,10 @@ public class InvalidReferenceException extends TemplateException {
         + "default value like myOptionalVar!myDefault, or use ",
         "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
         ". (These only cover the last step of the expression; to cover the whole expression, "
-        + "use parenthessis: (myOptionalVar.foo)!myDefault, (myOptionalVar.foo)??"
+        + "use parenthesis: (myOptionalVar.foo)!myDefault, (myOptionalVar.foo)??"
     };
 
-    private static final String TIP_NO_DOLAR =
+    private static final String TIP_NO_DOLLAR =
             "Variable references must not start with \"$\", unless the \"$\" is really part of the variable name.";
 
     private static final String TIP_LAST_STEP_DOT =
@@ -45,6 +45,11 @@ public class InvalidReferenceException extends TemplateException {
 
     private static final String TIP_LAST_STEP_SQUARE_BRACKET =
             "It's the final [] step that caused this error, not those before it.";
+    
+    private static final String TIP_JSP_TAGLIBS =
+            "The \"JspTaglibs\" variable isn't a core FreeMarker feature; "
+            + "it's only available when templates are invoked through freemarker.ext.servlet.FreemarkerServlet"
+            + " (or other custom FreeMarker-JSP integration solution).";
     
     /**
      * Creates and invalid reference exception that contains no information about what was missing or null.
@@ -87,7 +92,7 @@ public class InvalidReferenceException extends TemplateException {
                 final _ErrorDescriptionBuilder errDescBuilder
                         = new _ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(blamed);
                 if (endsWithDollarVariable(blamed)) {
-                    errDescBuilder.tips(new Object[] { TIP_NO_DOLAR, TIP });
+                    errDescBuilder.tips(new Object[] { TIP_NO_DOLLAR, TIP });
                 } else if (blamed instanceof Dot) {
                     final String rho = ((Dot) blamed).getRHO();
                     String nameFixTip = null;
@@ -102,6 +107,9 @@ public class InvalidReferenceException extends TemplateException {
                                     : new Object[] { TIP_LAST_STEP_DOT, nameFixTip, TIP });
                 } else if (blamed instanceof DynamicKeyName) {
                     errDescBuilder.tips(new Object[] { TIP_LAST_STEP_SQUARE_BRACKET, TIP });
+                } else if (blamed instanceof Identifier
+                        && ((Identifier) blamed).getName().equals("JspTaglibs")) {
+                    errDescBuilder.tips(new Object[] { TIP_JSP_TAGLIBS, TIP });
                 } else {
                     errDescBuilder.tip(TIP);
                 }

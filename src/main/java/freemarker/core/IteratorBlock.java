@@ -33,38 +33,38 @@ import freemarker.template.TemplateSequenceModel;
  */
 final class IteratorBlock extends TemplateElement {
 
-    private Expression listSource;
+    private Expression listExpression;
     private String loopVariableName;
     private boolean isForEach;
 
     /**
      * @param listExpression a variable referring to a sequence or collection
-     * @param indexName an arbitrary index variable name
+     * @param loopVariableName an arbitrary index variable name
      * @param nestedBlock the nestedBlock to iterate over
      */
     IteratorBlock(Expression listExpression,
-                  String indexName,
+                  String loopVariableName,
                   TemplateElement nestedBlock,
                   boolean isForEach) 
     {
-        this.listSource = listExpression;
-        this.loopVariableName = indexName;
-        this.isForEach = isForEach;
+        this.listExpression = listExpression;
+        this.loopVariableName = loopVariableName;
         this.nestedBlock = nestedBlock;
+        this.isForEach = isForEach;
     }
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        TemplateModel baseModel = listSource.eval(env);
-        if (baseModel == null) {
+        TemplateModel listValue = listExpression.eval(env);
+        if (listValue == null) {
             if (env.isClassicCompatible()) {
                 // Classic behavior of simply ignoring null references.
                 return;
             }
-            listSource.assertNonNull(null, env);
+            listExpression.assertNonNull(null, env);
         }
 
-        env.visitIteratorBlock(new Context(baseModel));
+        env.visitIteratorBlock(new Context(listValue));
     }
 
     protected String dump(boolean canonical) {
@@ -73,14 +73,14 @@ final class IteratorBlock extends TemplateElement {
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
         if (isForEach) {
-            buf.append(loopVariableName);
+            buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVariableName));
             buf.append(" in ");
-            buf.append(listSource.getCanonicalForm());
+            buf.append(listExpression.getCanonicalForm());
         }
         else {
-            buf.append(listSource.getCanonicalForm());
+            buf.append(listExpression.getCanonicalForm());
             buf.append(" as ");
-            buf.append(loopVariableName);
+            buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVariableName));
         }
         if (canonical) {
             buf.append(">");
@@ -100,7 +100,7 @@ final class IteratorBlock extends TemplateElement {
 
     Object getParameterValue(int idx) {
         switch (idx) {
-        case 0: return listSource;
+        case 0: return listExpression;
         case 1: return loopVariableName;
         default: throw new IndexOutOfBoundsException();
         }
@@ -122,51 +122,51 @@ final class IteratorBlock extends TemplateElement {
      * A helper class that holds the context of the loop.
      */
     class Context implements LocalContext {
+        
+        private static final String LOOP_STATE_HAS_NEXT = "_has_next"; // lenght: 9
+        private static final String LOOP_STATE_INDEX = "_index"; // length 6 
+        
         private boolean hasNext;
         private TemplateModel loopVar;
         private int index;
         private Collection variableNames = null;
-        private TemplateModel list;
+        private TemplateModel listValue;
         
-        Context(TemplateModel list) {
-            this.list = list;
+        Context(TemplateModel listValue) {
+            this.listValue = listValue;
         }
         
-        
         void runLoop(Environment env) throws TemplateException, IOException {
-            if (list instanceof TemplateCollectionModel) {
-                TemplateCollectionModel baseListModel = (TemplateCollectionModel)list;
-                TemplateModelIterator it = baseListModel.iterator();
+            if (listValue instanceof TemplateCollectionModel) {
+                final TemplateCollectionModel tcm = (TemplateCollectionModel)listValue;
+                final TemplateModelIterator it = tcm.iterator();
                 hasNext = it.hasNext();
                 while (hasNext) {
                     loopVar = it.next();
                     hasNext = it.hasNext();
                     if (nestedBlock != null) {
-                        env.visit(nestedBlock);
+                        env.visitByHiddingParent(nestedBlock);  // TODO why not visitByHiddingParent?
                     }
                     index++;
                 }
-            }
-            else if (list instanceof TemplateSequenceModel) {
-                TemplateSequenceModel tsm = (TemplateSequenceModel) list;
-                int size = tsm.size();
-                for (index =0; index <size; index++) {
+            } else if (listValue instanceof TemplateSequenceModel) {
+                final TemplateSequenceModel tsm = (TemplateSequenceModel) listValue;
+                final int size = tsm.size();
+                for (index = 0; index < size; index++) {
                     loopVar = tsm.get(index);
-                    hasNext = (size > index +1);
+                    hasNext = (size > index + 1);
                     if (nestedBlock != null) {
                         env.visitByHiddingParent(nestedBlock);
                     }
                 }
-            }
-            else if (env.isClassicCompatible()) {
-                loopVar = list;
+            } else if (env.isClassicCompatible()) {
+                loopVar = listValue;
                 if (nestedBlock != null) {
                     env.visitByHiddingParent(nestedBlock);
                 }
-            }
-            else {
+            } else {
                 throw new NonSequenceOrCollectionException(
-                        listSource, list, env);
+                        listExpression, listValue, env);
             }
         }
 
@@ -176,12 +176,12 @@ final class IteratorBlock extends TemplateElement {
                     case 0: 
                         return loopVar;
                     case 6: 
-                        if(name.endsWith("_index")) {
+                        if(name.endsWith(LOOP_STATE_INDEX)) {
                             return new SimpleNumber(index);
                         }
                         break;
                     case 9: 
-                        if(name.endsWith("_has_next")) {
+                        if(name.endsWith(LOOP_STATE_HAS_NEXT)) {
                             return hasNext ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
                         }
                         break;
@@ -191,13 +191,18 @@ final class IteratorBlock extends TemplateElement {
         }
         
         public Collection getLocalVariableNames() {
-            if(variableNames == null) {
+            if (variableNames == null) {
                 variableNames = new ArrayList(3);
                 variableNames.add(loopVariableName);
-                variableNames.add(loopVariableName + "_index");
-                variableNames.add(loopVariableName + "_has_next");
+                variableNames.add(loopVariableName + LOOP_STATE_INDEX);
+                variableNames.add(loopVariableName + LOOP_STATE_HAS_NEXT);
             }
             return variableNames;
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return true;
+    }
+    
 }

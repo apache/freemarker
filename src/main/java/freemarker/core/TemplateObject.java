@@ -19,9 +19,14 @@ package freemarker.core;
 import freemarker.template.Template;
 
 /**
- * Objects that represent instructions or expressions
- * in the compiled tree representation of the template
- * all descend from this abstract base class.
+ * <b>Internal API - subject to change:</b> Represent a node in the parsed template (either a {@link Expression} or a
+ * {@link TemplateElement}).
+ * 
+ * @see TemplateElement
+ * @see Expression
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 public abstract class TemplateObject {
     
@@ -159,8 +164,10 @@ public abstract class TemplateObject {
         return true;
     }
 
-    public Template getTemplate()
-    {
+    /**
+     * @deprecated This method will be removed in FreeMarker 2.4 because of architectural changes!
+     */
+    public Template getTemplate() {
         return template;
     }
     

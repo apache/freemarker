@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import freemarker.core.Environment;
+import freemarker.core._CoreAPI;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
@@ -50,7 +51,7 @@ public class AssertDirective implements TemplateDirectiveModel {
         if (test == null) {
             throw new MissingRequiredParameterException(TEST_PARAM, env);
         }
-        if (body != null) throw new NestedContentNotSupportedException(env);
+        _CoreAPI.checkHasNoNestedContent(body);
         
         if (!(test instanceof TemplateBooleanModel)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"

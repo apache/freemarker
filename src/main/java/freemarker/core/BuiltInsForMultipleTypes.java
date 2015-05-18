@@ -29,6 +29,7 @@ import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -37,6 +38,7 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
@@ -227,6 +229,31 @@ class BuiltInsForMultipleTypes {
 
     }
 
+    static class apiBI extends BuiltIn {
+        TemplateModel _eval(Environment env) throws TemplateException {
+            if (!env.isAPIBuiltinEnabled()) {
+                throw new _MiscTemplateException(this, new Object[] {
+                        "Can't use ?api, because the \"", Configurable.API_BUILTIN_ENABLED_KEY,
+                        "\" configuration setting is false. Think twice before you set it to true though. Especially, "
+                        + "it shouldn't abussed for modifying Map-s and Collection-s." });
+            }
+            final TemplateModel tm = target.eval(env);
+            if (!(tm instanceof TemplateModelWithAPISupport)) {
+                target.assertNonNull(tm, env);
+                throw new APINotSupportedTemplateException(env, target, tm);
+            }
+            return ((TemplateModelWithAPISupport) tm).getAPI();
+        }
+    }
+
+    static class has_apiBI extends BuiltIn {
+        TemplateModel _eval(Environment env) throws TemplateException {
+            final TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return tm instanceof TemplateModelWithAPISupport ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+    
     static class is_booleanBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
@@ -241,6 +268,14 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateCollectionModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
+    static class is_collection_exBI extends BuiltIn {
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return (tm instanceof TemplateCollectionModelEx) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
@@ -393,22 +428,28 @@ class BuiltInsForMultipleTypes {
     }
 
     static class sizeBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
+        TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
+
+            final int size;
             if (model instanceof TemplateSequenceModel) {
-                int size = ((TemplateSequenceModel) model).size();
-                return new SimpleNumber(size);
+                size = ((TemplateSequenceModel) model).size();
+            } else if (model instanceof TemplateCollectionModelEx) {
+                size = ((TemplateCollectionModelEx) model).size();
+            } else if (model instanceof TemplateHashModelEx) {
+                size = ((TemplateHashModelEx) model).size();
+            } else {
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "extended-hash or sequence or extended collection",
+                        new Class[] {
+                                TemplateHashModelEx.class,
+                                TemplateSequenceModel.class,
+                                TemplateCollectionModelEx.class
+                        },
+                        env);
             }
-            if (model instanceof TemplateHashModelEx) {
-                int size = ((TemplateHashModelEx) model).size();
-                return new SimpleNumber(size);
-            }
-            throw new UnexpectedTypeException(
-                    target, model,
-                    "extended-hash or sequence", new Class[] { TemplateHashModelEx.class, TemplateSequenceModel.class },
-                    env);
+            return new SimpleNumber(size);
         }
     }
     

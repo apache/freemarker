@@ -73,7 +73,7 @@ import freemarker.template.utility.SecurityUtilities;
  * templates using the <tt>models</tt> attribute.</li>
  * </ul>
  * <p>It supports the following attributes:</p>
- * <table style="width: auto; border-collapse: collapse" border="1">
+ * <table style="width: auto; border-collapse: collapse" border="1" summary="FreeMarker XML ant task attributes">
  *   <tr>
  *     <th valign="top" align="left">Attribute</th>
  *     <th valign="top" align="left">Description</th>
@@ -180,7 +180,7 @@ import freemarker.template.utility.SecurityUtilities;
  * 
  * <p>It supports the following nesed elements:</p>
  * 
- * <table style="width: auto; border-collapse: collapse" border="1">
+ * <table style="width: auto; border-collapse: collapse" border="1" summary="FreeMarker XML ant task nested elements">
  *   <tr>
  *     <th valign="top" align="left">Element</th>
  *     <th valign="top" align="left">Description</th>
@@ -277,7 +277,7 @@ extends
     /** the default output extension is .html */
     private String extension = ".html";
 
-    private String encoding = SecurityUtilities.getSystemProperty("file.encoding");
+    private String encoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
     private String templateEncoding = encoding;
     private boolean validation = false;
 

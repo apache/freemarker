@@ -32,7 +32,7 @@ import freemarker.template.utility.SecurityUtilities;
 /**
  * A {@link TemplateLoader} that uses files in a specified directory as the
  * source of templates. If contains security checks that will prevent it
- * serving templates outside the template directory (like <code>&lt;include /etc/passwd></code>.
+ * serving templates outside the template directory (like <code>&lt;include /etc/passwd&gt;</code>.
  * It compares canonical paths for this, so templates that are symbolically
  * linked into the template directory from outside of it won't work either.
  */
@@ -43,11 +43,12 @@ public class FileTemplateLoader implements TemplateLoader
     private final String canonicalPath;
 
     /**
-     * Creates a new file template cache that will use the current directory
-     * (the value of the system property <code>user.dir</code> as the base
-     * directory for loading templates. It will not allow access to template
-     * files that are accessible through symlinks that point outside the
-     * base directory.
+     * Creates a new file template cache that will use the current directory (the value of the system property
+     * <code>user.dir</code> as the base directory for loading templates. It will not allow access to template files
+     * that are accessible through symlinks that point outside the base directory.
+     * 
+     * @deprecated Relying on what the current directory is is a bad practice; use
+     *             {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
      */
     public FileTemplateLoader()
     throws
@@ -213,7 +214,7 @@ public class FileTemplateLoader implements TemplateLoader
     public String toString() {
         // We don't StringUtil.jQuote paths here, because on Windows there will be \\-s then that some may find
         // confusing.
-        return "FileTemplateLoader(baseDir=\"" + baseDir
+        return TemplateLoaderUtils.getClassNameForToString(this) + "(baseDir=\"" + baseDir
                 + "\", canonicalPath=\"" + canonicalPath + "\")";
     }
     

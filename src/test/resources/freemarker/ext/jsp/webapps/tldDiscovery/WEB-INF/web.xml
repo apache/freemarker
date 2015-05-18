@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+    "http://java.sun.com/j2ee/dtds/web-app_2.2.dtd"
+>
+<web-app>
+  <servlet>
+    <servlet-name>tester</servlet-name>
+    <servlet-class>freemarker.test.servlet.Model2TesterServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>freemarker</servlet-name>
+    <servlet-class>freemarker.ext.jsp.JspTestFreemarkerServlet</servlet-class>
+
+    <!-- FreemarkerServlet settings: -->
+    <init-param>
+      <param-name>TemplatePath</param-name>
+      <param-value>/</param-value>
+    </init-param>
+    <init-param>
+      <param-name>NoCache</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ContentType</param-name>
+      <param-value>text/html; charset=UTF-8</param-value> <!-- Forces UTF-8 output encoding! -->
+    </init-param>
+    <init-param>
+      <param-name>MetaInfTldSources</param-name>
+      <param-value>webInfPerLibJars, classpath:.*displaytag.*\.jar$, classpath</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ClasspathTlds</param-name>
+      <param-value>
+        /freemarker/ext/jsp/tldDiscovery-ClassPathTlds-1.tld,
+        freemarker/ext/jsp/tldDiscovery-ClassPathTlds-2.tld,
+      </param-value>
+    </init-param>
+
+    <!-- FreeMarker settings: -->
+    <init-param>
+      <param-name>incompatible_improvements</param-name>
+      <param-value>2.3.21</param-value>
+    </init-param>
+    <init-param>
+      <param-name>template_exception_handler</param-name>
+      <!-- Some may prefer "html_debug" for development. -->
+      <param-value>rethrow</param-value>
+    </init-param>
+    <init-param>
+      <param-name>template_update_delay</param-name>
+      <param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
+    </init-param>
+    <init-param>
+      <param-name>default_encoding</param-name>
+      <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
+    </init-param>
+    <init-param>
+      <param-name>locale</param-name>
+      <param-value>en_US</param-value>
+    </init-param>
+    <init-param>
+      <param-name>number_format</param-name>
+      <param-value>0.##########</param-value>
+    </init-param>
+
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet>
+    <servlet-name>freemarker-defaultOverride</servlet-name>
+    <servlet-class>freemarker.ext.jsp.JspTestFreemarkerServletWithDefaultOverride</servlet-class>
+
+    <!-- FreemarkerServlet settings: -->
+    <init-param>
+      <param-name>TemplatePath</param-name>
+      <param-value>/</param-value>
+    </init-param>
+    <init-param>
+      <param-name>NoCache</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ContentType</param-name>
+      <param-value>text/html; charset=UTF-8</param-value> <!-- Forces UTF-8 output encoding! -->
+    </init-param>
+    <init-param>
+      <param-name>ClasspathTlds</param-name>
+      <param-value>
+        freemarker/ext/jsp/tldDiscovery-ClassPathTlds-2.tld,
+      </param-value>
+    </init-param>
+
+    <!-- FreeMarker settings: -->
+    <init-param>
+      <param-name>incompatible_improvements</param-name>
+      <param-value>2.3.22</param-value>
+    </init-param>
+    <init-param>
+      <param-name>template_exception_handler</param-name>
+      <!-- Some may prefer "html_debug" for development. -->
+      <param-value>rethrow</param-value>
+    </init-param>
+    <init-param>
+      <param-name>template_update_delay</param-name>
+      <param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
+    </init-param>
+    <init-param>
+      <param-name>default_encoding</param-name>
+      <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
+    </init-param>
+    <init-param>
+      <param-name>locale</param-name>
+      <param-value>en_US</param-value>
+    </init-param>
+    <init-param>
+      <param-name>number_format</param-name>
+      <param-value>0.##########</param-value>
+    </init-param>
+
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>tester</servlet-name>
+    <url-pattern>/tester</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>freemarker</servlet-name>
+    <url-pattern>*.ftl</url-pattern>
+  </servlet-mapping>
+
+  <taglib>
+    <taglib-uri>http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2</taglib-uri>
+    <taglib-location>/not-auto-scanned/fmtesttag.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-2</taglib-uri>
+    <taglib-location>/WEB-INF/taglib 2.jar</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>/subdir/taglib</taglib-uri>
+    <taglib-location>/WEB-INF/fmtesttag4.tld</taglib-location>
+  </taglib>
+
+  <!-- Prevent the visiting of MVC Views from outside the servlet container. RequestDispatcher.forward/include should and 
+    will still work. Removing this may open security holes! -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>FreeMarker MVC Views</web-resource-name>
+      <url-pattern>*.ftl</url-pattern>
+      <url-pattern>*.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <!-- Nobody is allowed to visit these -->
+    </auth-constraint>
+  </security-constraint>
+
+</web-app>

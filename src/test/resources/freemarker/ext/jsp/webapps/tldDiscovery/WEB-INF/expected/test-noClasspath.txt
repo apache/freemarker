@@ -1,0 +1,14 @@
+<!-- Test loading from web.xml-mapped JAR -->
+TestTag2.doStartTag() called here
+TestTag2.doEndTag() called here
+<!-- Test loading from autodeployed WEB-INF/lib/*.jar -->
+TestTag3.doStartTag() called here
+TestTag3.doEndTag() called here
+<!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
+Executed TestSimpleTag2
+Executed TestSimpleTag3
+missing
+<!-- Test loading from "MetaInfTldSources", inherited from Jetty -->
+a+b
+<!-- Test loading from "MetaInfTldSources", set via init-param -->
+missing

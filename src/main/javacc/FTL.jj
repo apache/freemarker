@@ -49,6 +49,8 @@ public class FMParser {
 
     /**
      * Create an FM expression parser using a string.
+     *
+     * @Deprecated This is an internal API of FreeMarker; can be removed any time.
      */
     static public FMParser createExpressionParser(String s) {
         SimpleCharStream scs = new SimpleCharStream(new StringReader(s), 1, 1, s.length());
@@ -68,6 +70,8 @@ public class FMParser {
      *            The character stream to use as input
      * @param strictEscapeSyntax
      *            Whether FreeMarker directives must start with a #
+     *
+     * @Deprecated This is an internal API of FreeMarker; will be removed in 2.4.
      */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
         this(reader);
@@ -77,14 +81,30 @@ public class FMParser {
         this.stripWhitespace = stripWhitespace;
     }
 
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
         this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax,
                 Configuration.PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS);
     }
 
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
             int tagSyntax, int incompatibleImprovements) {
+        this(template, reader, strictEscapeSyntax, stripWhitespace,
+                tagSyntax, Configuration.AUTO_DETECT_NAMING_CONVENTION, incompatibleImprovements);
+    }
+
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
+    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
+            int tagSyntax, int namingConvention, int incompatibleImprovements) {
         this(template, reader, strictEscapeSyntax, stripWhitespace);
+        
         switch (tagSyntax) {
         case Configuration.AUTO_DETECT_TAG_SYNTAX:
             token_source.autodetectTagSyntax = true;
@@ -98,10 +118,25 @@ public class FMParser {
         default:
             throw new IllegalArgumentException("Illegal argument for tagSyntax");
         }
+        
+        switch (namingConvention) {
+        case Configuration.AUTO_DETECT_NAMING_CONVENTION:
+        case Configuration.CAMEL_CASE_NAMING_CONVENTION:
+        case Configuration.LEGACY_NAMING_CONVENTION:
+            token_source.initialNamingConvention = namingConvention;
+            token_source.namingConvention = namingConvention;
+            break;
+        default:
+            throw new IllegalArgumentException("Illegal argument for namingConvention");
+        }
+        
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
     }
 
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(String template) {
         this(null, new StringReader(template), true, true);
     }
@@ -119,11 +154,19 @@ public class FMParser {
     /**
      * Don't use it, unless you are developing FreeMarker itself.
      */
-    public int _getLastTagSyntax()
-    {
+    public int _getLastTagSyntax() {
         return token_source.squBracTagSyntax
                 ? Configuration.SQUARE_BRACKET_TAG_SYNTAX
                 : Configuration.ANGLE_BRACKET_TAG_SYNTAX;
+    }
+    
+    /**
+     * Don't use it, unless you are developing FreeMarker itself.
+     * The naming convention used by this template; if it couldn't be detected so far, it will be the most probable one.
+     * This could be used for formatting error messages, but not for anything serious.
+     */
+    public int _getLastNamingConvention() {
+        return token_source.namingConvention;
     }
 
     /**
@@ -247,6 +290,8 @@ public class FMParser {
         }
         throw new ParseException("Expecting boolean (true/false) parameter", exp);
     }
+    
+    
 }
 
 PARSER_END(FMParser)
@@ -285,6 +330,10 @@ PARSER_END(FMParser)
 TOKEN_MGR_DECLS:
 {
 
+    private static final String PLANNED_DIRECTIVE_HINT
+            = "(If you have seen this directive in use elsewhere, this was a planned directive, "
+                + "so maybe you need to upgrade FreeMarker.)";
+
     /**
      * The noparseTag is set when we enter a block of text that the parser more or less ignores. These are <noparse> and
      * <comment>. This variable tells us what the closing tag should be, and when we hit that, we resume parsing. Note
@@ -308,6 +357,9 @@ TOKEN_MGR_DECLS:
             autodetectTagSyntax,
             directiveSyntaxEstablished,
             inInvocation;
+    int initialNamingConvention;
+    int namingConvention;
+    Token namingConventionEstabilisher;
     int incompatibleImprovements;
 
     void setParser(FMParser parser) {
@@ -322,12 +374,24 @@ TOKEN_MGR_DECLS:
     // FreeMarker directives must start with <#. It also handles
     // tag syntax detection. If you update this logic, take a look
     // at the UNKNOWN_DIRECTIVE token too.
-    private void strictSyntaxCheck(Token tok, int newLexState) {
+    private void strictSyntaxCheck(Token tok, int tokenNamingConvention, int newLexState) {
         if (onlyTextOutput) {
             tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
-        char firstChar = tok.image.charAt(0);
+
+        final String image = tok.image;
+        
+        // Non-strict syntax (deprecated) only supports legacy naming convention.
+        // We didn't push this on the tokenizer because it made it slow, so we filter here.
+        if (!strictEscapeSyntax
+                && (tokenNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION)
+                && !isStrictTag(image)) {
+            tok.kind = STATIC_TEXT_NON_WS;
+            return;
+        }
+        
+        char firstChar = image.charAt(0);
         if (autodetectTagSyntax && !directiveSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
         }
@@ -335,18 +399,108 @@ TOKEN_MGR_DECLS:
             tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
+        
         if (!strictEscapeSyntax) {
+            // Legacy feature (or bug?): Tag syntax never gets estabilished in non-strict mode.
+            // We do establilish the naming convention though.
+            checkNamingConvention(tok, tokenNamingConvention);
             SwitchTo(newLexState);
             return;
         }
-        if (!squBracTagSyntax) {
-            if (!tok.image.startsWith("<#") && !tok.image.startsWith("</#")) {
-                tok.kind = STATIC_TEXT_NON_WS;
-                return;
-            }
+        
+        // For square bracket tags there's no non-strict token, so we are sure that it's an FTL tag.
+        // But if it's an angle bracket tag, we have to check if it's just static text or and FTL tag, because the
+        // tokenizer will emit the same kind of token for both.
+        if (!squBracTagSyntax && !isStrictTag(image)) {
+            tok.kind = STATIC_TEXT_NON_WS;
+            return;
         }
+        
+        // We only get here if this is a strict FTL tag.
         directiveSyntaxEstablished = true;
+        
+        checkNamingConvention(tok, tokenNamingConvention);
+        
         SwitchTo(newLexState);
+    }
+
+    void checkNamingConvention(Token tok) {
+        checkNamingConvention(tok, _CoreStringUtils.getIdentifierNamingConvention(tok.image)); 
+    }
+    
+    void checkNamingConvention(Token tok, int tokenNamingConvention) {
+        if (tokenNamingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION) {
+	        if (namingConvention == Configuration.AUTO_DETECT_NAMING_CONVENTION) {
+	            namingConvention = tokenNamingConvention;
+	            namingConventionEstabilisher = tok;
+	        } else if (namingConvention != tokenNamingConvention) {
+                throw newNameConventionMismatchException(tok);
+	        }
+        }
+    }
+    
+    private TokenMgrError newNameConventionMismatchException(Token tok) {
+        return new TokenMgrError(
+                "Naming convention mismatch. "
+                + "Identifiers that are part of the template language (not the user specified ones) "
+                + (initialNamingConvention == Configuration.AUTO_DETECT_NAMING_CONVENTION
+                    ? "must consistently use the same naming convention within the same template. This template uses "
+                    : "must use the configured naming convention, which is the ")
+                + (namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                            ? "camel case naming convention (like: exampleName) "
+                            : (namingConvention == Configuration.LEGACY_NAMING_CONVENTION
+                                    ? "legacy naming convention (directive (tag) names are like examplename, " 
+                                      + "everything else is like example_name) "
+                                    : "??? (internal error)"
+                                    ))
+                + (namingConventionEstabilisher != null
+                        ? "estabilished by auto-detection at "
+                            + MessageUtil.formatPosition(
+                                    namingConventionEstabilisher.beginLine, namingConventionEstabilisher.beginColumn)
+                            + " by token " + StringUtil.jQuote(namingConventionEstabilisher.image.trim())
+                        : "")
+                + ", but the problematic token, " + StringUtil.jQuote(tok.image.trim())
+                + ", uses a different convention.",
+                TokenMgrError.LEXICAL_ERROR,
+                tok.beginLine, tok.beginColumn, tok.endLine, tok.endColumn);
+    }
+
+    /**
+     * Used for tags whose name isn't affected by naming convention.
+     */
+    private void strictSyntaxCheck(Token tok, int newLexState) {
+        strictSyntaxCheck(tok, Configuration.AUTO_DETECT_NAMING_CONVENTION, newLexState);
+    }
+    
+    private boolean isStrictTag(String image) {
+        return image.length() > 2 && (image.charAt(1) == '#' || image.charAt(2) == '#');
+    }
+    
+    /**
+     * Detects the naming convention used, both in start- and end-tag tokens.
+     *
+     * @param charIdxInName
+     *         The index of the deciding character relatively to the first letter of the name.
+     */
+    private static int getTagNamingConvention(Token tok, int charIdxInName) {
+        return _CoreStringUtils.isUpperUSASCII(getTagNameCharAt(tok, charIdxInName))
+                ? Configuration.CAMEL_CASE_NAMING_CONVENTION : Configuration.LEGACY_NAMING_CONVENTION;
+    }
+
+    static char getTagNameCharAt(Token tok, int charIdxInName) {
+        final String image = tok.image;
+        
+        // Skip tag delimiter:
+        int idx = 0;
+        for (;;) {
+            final char c = image.charAt(idx);
+            if (c != '<' && c != '[' && c != '/' && c != '#') {
+                break;
+            }
+            idx++;
+        }
+
+        return image.charAt(idx + charIdxInName);
     }
 
     private void unifiedCall(Token tok) {
@@ -460,11 +614,15 @@ TOKEN:
     |
     <IF : <START_TAG> "if" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
-    <ELSE_IF : <START_TAG> "elseif" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <ELSE_IF : <START_TAG> "else" ("i" | "I") "f" <BLANK>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 4), FM_EXPRESSION);
+    }
     |
     <LIST : <START_TAG> "list" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
-    <FOREACH : <START_TAG> "foreach" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <FOREACH : <START_TAG> "for" ("e" | "E") "ach" <BLANK>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 3), FM_EXPRESSION);
+    }
     |
     <SWITCH : <START_TAG> "switch" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
@@ -498,11 +656,17 @@ TOKEN:
     |
     <COMPRESS : <START_TAG> "compress" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
-    <COMMENT : <START_TAG> "comment" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, NO_PARSE); noparseTag = "comment"; }
+    <COMMENT : <START_TAG> "comment" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, NO_PARSE); noparseTag = "comment";
+    }
     |
     <TERSE_COMMENT : ("<" | "[") "#--" > { noparseTag = "-->"; strictSyntaxCheck(matchedToken, NO_PARSE); }
     |
-    <NOPARSE : <START_TAG> "noparse" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, NO_PARSE); noparseTag = "noparse"; }
+    <NOPARSE: <START_TAG> "no" ("p" | "P") "arse" <CLOSE_TAG1>> {
+        int tagNamingConvention = getTagNamingConvention(matchedToken, 2);
+        strictSyntaxCheck(matchedToken, tagNamingConvention, NO_PARSE);
+        noparseTag = tagNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "noParse" : "noparse";
+    }
     |
     <END_IF : <END_TAG> "if" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -512,7 +676,9 @@ TOKEN:
     |
     <END_ATTEMPT : <END_TAG> "attempt" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
-    <END_FOREACH : <END_TAG> "foreach" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_FOREACH : <END_TAG> "for" ("e" | "E") "ach" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 3), DEFAULT);
+    }
     |
     <END_LOCAL : <END_TAG> "local" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -564,9 +730,13 @@ TOKEN:
     |
     <END_ESCAPE : <END_TAG> "escape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
-    <NOESCAPE : <START_TAG> "noescape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <NOESCAPE : <START_TAG> "no" ("e" | "E") "scape" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+    }
     |
-    <END_NOESCAPE : <END_TAG> "noescape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_NOESCAPE : <END_TAG> "no" ("e" | "E") "scape" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+    }
     |
     <UNIFIED_CALL : "<@" | "[@" > { unifiedCall(matchedToken); }
     |
@@ -613,11 +783,10 @@ TOKEN:
                 }
 
                 String tip = null;
-                if (!dn.toLowerCase().equals(dn)) {
-                    tip = "Directive names are all-lower-case.";
-                } else if (dn.equals("set")) {
-                    tip = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
-                } else if (dn.equals("else_if")) {
+                if (dn.equals("set") || dn.equals("var")) {
+                    tip = "Use #assign or #local or #global, depending on the intented scope "
+                          + "(#assign is template-scope). " + PLANNED_DIRECTIVE_HINT;
+                } else if (dn.equals("else_if") || dn.equals("elif")) {
                 	tip = "Use #elseif.";
                 } else if (dn.equals("no_escape")) {
                 	tip = "Use #noescape instead.";
@@ -629,6 +798,10 @@ TOKEN:
                 	tip = "You may meant #attempt.";
                 } else if (dn.equals("for") || dn.equals("each") || dn.equals("iterate") || dn.equals("iterator")) {
                     tip = "You may meant #list (http://freemarker.org/docs/ref_directive_list.html).";
+                } else if (dn.equals("item") || dn.equals("sep")) {
+                    tip = PLANNED_DIRECTIVE_HINT;
+                } else if (dn.equals("prefix")) {
+                    tip = "You may meant #import. " + PLANNED_DIRECTIVE_HINT;
                 } else {
                     tip = "Help (latest version): http://freemarker.org/docs/ref_directive_alphaidx.html; "
                             + "you're using FreeMarker " + Configuration.getVersion() + ".";
@@ -810,7 +983,22 @@ TOKEN:
     |
     <USING : "using">
     |
-    <ID: <NAME_START_CHAR> (<NAME_START_CHAR>|<ASCII_DIGIT>)*>
+    <ID: <ID_START_CHAR> (<ID_START_CHAR>|<ASCII_DIGIT>)*> {
+        // Remove backslashes from Token.image:
+        final String s = matchedToken.image;
+        if (s.indexOf('\\') != -1) {
+            final int srcLn = s.length(); 
+            final char[] newS = new char[srcLn - 1];
+            int dstIdx = 0;
+            for (int srcIdx = 0; srcIdx < srcLn; srcIdx++) {
+                final char c = s.charAt(srcIdx);
+                if (c != '\\') {
+                    newS[dstIdx++] = c;
+                }
+            }
+            matchedToken.image = new String(newS, 0, dstIdx);
+        }
+    }
     |
     <OPEN_MISPLACED_INTERPOLATION : "${" | "#{">
     {
@@ -827,22 +1015,145 @@ TOKEN:
         }
     }
     |
-    <#NAME_START_CHAR:
+    <#NON_ESCAPED_ID_START_CHAR:
         [
-            "$",
-            "@" - "Z",
-            "_",
-            "a" - "z",
-            "\u00c0" - "\u00d6",
-            "\u00d8" - "\u00f6",
-            "\u00f8" - "\u1fff",
-            "\u3040" - "\u318f",
-            "\u3300" - "\u337f",
-            "\u3400" - "\u3d2d",
-            "\u4e00" - "\u9fff",
-            "\uf900" - "\ufaff"
+            // This was generated on JDK 1.8.0_20 Win64 with src/main/misc/identifierChars/IdentifierCharGenerator.java
+			"$", 
+			"@" - "Z", 
+			"_", 
+			"a" - "z", 
+			"\u00AA", 
+			"\u00B5", 
+			"\u00BA", 
+			"\u00C0" - "\u00D6", 
+			"\u00D8" - "\u00F6", 
+			"\u00F8" - "\u1FFF", 
+			"\u2071", 
+			"\u207F", 
+			"\u2090" - "\u209C", 
+			"\u2102", 
+			"\u2107", 
+			"\u210A" - "\u2113", 
+			"\u2115", 
+			"\u2119" - "\u211D", 
+			"\u2124", 
+			"\u2126", 
+			"\u2128", 
+			"\u212A" - "\u212D", 
+			"\u212F" - "\u2139", 
+			"\u213C" - "\u213F", 
+			"\u2145" - "\u2149", 
+			"\u214E", 
+			"\u2183" - "\u2184", 
+			"\u2C00" - "\u2C2E", 
+			"\u2C30" - "\u2C5E", 
+			"\u2C60" - "\u2CE4", 
+			"\u2CEB" - "\u2CEE", 
+			"\u2CF2" - "\u2CF3", 
+			"\u2D00" - "\u2D25", 
+			"\u2D27", 
+			"\u2D2D", 
+			"\u2D30" - "\u2D67", 
+			"\u2D6F", 
+			"\u2D80" - "\u2D96", 
+			"\u2DA0" - "\u2DA6", 
+			"\u2DA8" - "\u2DAE", 
+			"\u2DB0" - "\u2DB6", 
+			"\u2DB8" - "\u2DBE", 
+			"\u2DC0" - "\u2DC6", 
+			"\u2DC8" - "\u2DCE", 
+			"\u2DD0" - "\u2DD6", 
+			"\u2DD8" - "\u2DDE", 
+			"\u2E2F", 
+			"\u3005" - "\u3006", 
+			"\u3031" - "\u3035", 
+			"\u303B" - "\u303C", 
+			"\u3040" - "\u318F", 
+			"\u31A0" - "\u31BA", 
+			"\u31F0" - "\u31FF", 
+			"\u3300" - "\u337F", 
+			"\u3400" - "\u4DB5", 
+			"\u4E00" - "\uA48C", 
+			"\uA4D0" - "\uA4FD", 
+			"\uA500" - "\uA60C", 
+			"\uA610" - "\uA62B", 
+			"\uA640" - "\uA66E", 
+			"\uA67F" - "\uA697", 
+			"\uA6A0" - "\uA6E5", 
+			"\uA717" - "\uA71F", 
+			"\uA722" - "\uA788", 
+			"\uA78B" - "\uA78E", 
+			"\uA790" - "\uA793", 
+			"\uA7A0" - "\uA7AA", 
+			"\uA7F8" - "\uA801", 
+			"\uA803" - "\uA805", 
+			"\uA807" - "\uA80A", 
+			"\uA80C" - "\uA822", 
+			"\uA840" - "\uA873", 
+			"\uA882" - "\uA8B3", 
+			"\uA8D0" - "\uA8D9", 
+			"\uA8F2" - "\uA8F7", 
+			"\uA8FB", 
+			"\uA900" - "\uA925", 
+			"\uA930" - "\uA946", 
+			"\uA960" - "\uA97C", 
+			"\uA984" - "\uA9B2", 
+			"\uA9CF" - "\uA9D9", 
+			"\uAA00" - "\uAA28", 
+			"\uAA40" - "\uAA42", 
+			"\uAA44" - "\uAA4B", 
+			"\uAA50" - "\uAA59", 
+			"\uAA60" - "\uAA76", 
+			"\uAA7A", 
+			"\uAA80" - "\uAAAF", 
+			"\uAAB1", 
+			"\uAAB5" - "\uAAB6", 
+			"\uAAB9" - "\uAABD", 
+			"\uAAC0", 
+			"\uAAC2", 
+			"\uAADB" - "\uAADD", 
+			"\uAAE0" - "\uAAEA", 
+			"\uAAF2" - "\uAAF4", 
+			"\uAB01" - "\uAB06", 
+			"\uAB09" - "\uAB0E", 
+			"\uAB11" - "\uAB16", 
+			"\uAB20" - "\uAB26", 
+			"\uAB28" - "\uAB2E", 
+			"\uABC0" - "\uABE2", 
+			"\uABF0" - "\uABF9", 
+			"\uAC00" - "\uD7A3", 
+			"\uD7B0" - "\uD7C6", 
+			"\uD7CB" - "\uD7FB", 
+			"\uF900" - "\uFB06", 
+			"\uFB13" - "\uFB17", 
+			"\uFB1D", 
+			"\uFB1F" - "\uFB28", 
+			"\uFB2A" - "\uFB36", 
+			"\uFB38" - "\uFB3C", 
+			"\uFB3E", 
+			"\uFB40" - "\uFB41", 
+			"\uFB43" - "\uFB44", 
+			"\uFB46" - "\uFBB1", 
+			"\uFBD3" - "\uFD3D", 
+			"\uFD50" - "\uFD8F", 
+			"\uFD92" - "\uFDC7", 
+			"\uFDF0" - "\uFDFB", 
+			"\uFE70" - "\uFE74", 
+			"\uFE76" - "\uFEFC", 
+			"\uFF10" - "\uFF19", 
+			"\uFF21" - "\uFF3A", 
+			"\uFF41" - "\uFF5A", 
+			"\uFF66" - "\uFFBE", 
+			"\uFFC2" - "\uFFC7", 
+			"\uFFCA" - "\uFFCF", 
+			"\uFFD2" - "\uFFD7", 
+			"\uFFDA" - "\uFFDC" 
         ]
     >
+    |
+    <#ESCAPED_ID_CHAR: "\\" ["-", ".", ":"] >
+    |
+    <#ID_START_CHAR: <NON_ESCAPED_ID_START_CHAR>|<ESCAPED_ID_CHAR>>
     |
     <#ASCII_DIGIT: ["0" - "9"] >
 }
@@ -1372,15 +1683,8 @@ BuiltinVariable BuiltinVariable() :
     name = <ID>
     {
         BuiltinVariable result = null;
-        try {
-            result = new BuiltinVariable(name.image);
-        } catch (ParseException pe) {
-            pe.lineNumber = dot.beginLine;
-            pe.columnNumber = dot.beginColumn;
-            pe.endLineNumber = name.endLine;
-            pe.endColumnNumber = name.endColumn;
-            throw pe;
-        }
+        token_source.checkNamingConvention(name);
+        result = new BuiltinVariable(name, token_source);
         result.setLocation(template, dot, name);
         return result;
     }
@@ -1464,15 +1768,8 @@ Expression BuiltIn(Expression exp) :
     t = <ID>
     {
         BuiltIn result = null;
-        try {
-            result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t.image);
-        } catch (ParseException pe) {
-            pe.lineNumber = t.beginLine;
-            pe.columnNumber = t.beginColumn;
-            pe.endLineNumber = t.endLine;
-            pe.endColumnNumber = t.endColumn;
-            throw pe;
-        }
+        token_source.checkNamingConvention(t);
+        result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t, token_source);
         result.setLocation(template, exp, t);
         return result;
     }
@@ -1597,7 +1894,7 @@ StringLiteral StringLiteral(boolean interpolate) :
         StringLiteral result = new StringLiteral(s);
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.checkInterpolation();
+            result.parseValue(token_source);
         }
         return result;
     }
@@ -2121,7 +2418,9 @@ TemplateElement Assign() :
     )
     nameExp = IdentifierOrStringLiteral()
     {
-        varName = (nameExp instanceof StringLiteral) ? ((StringLiteral) nameExp).getAsString() : nameExp.toString();
+        varName = (nameExp instanceof StringLiteral)
+                ? ((StringLiteral) nameExp).getAsString()
+                : ((Identifier) nameExp).getName();
     }
     (
     	(
@@ -2139,7 +2438,7 @@ TemplateElement Assign() :
 	            {
 	                varName = (nameExp instanceof StringLiteral)
 	                		? ((StringLiteral) nameExp).getAsString()
-	                		: nameExp.toString();
+	                		: ((Identifier) nameExp).getName();
 	            }
 	            <EQUALS>
 	            exp = Expression()
@@ -2235,9 +2534,15 @@ Include Include() :
             } else if (attString.equalsIgnoreCase("ignore_missing")) {
             	ignoreMissingExp = exp;
             } else {
+                String correctedName = attString.equals("ignoreMissing") ? "ignore_missing" : null;
                 throw new ParseException(
                 		"Unsupported named #include parameter: \"" + attString + "\". Supported parameters are: "
-                		+ "\"parse\", \"encoding\", \"ignore_missing\".",
+                		+ "\"parse\", \"encoding\", \"ignore_missing\"."
+                		+ (correctedName == null
+                		      ? ""
+                		      : " Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
+	                              + "check if an update is available, and if it indeed supports camel "
+	                              + "case."),
                 		template, att);
             }
         }
@@ -2297,7 +2602,9 @@ Macro Macro() :
     }
     nameExp = IdentifierOrStringLiteral()
     {
-        name = (nameExp instanceof StringLiteral) ? ((StringLiteral) nameExp).getAsString() : nameExp.toString();
+        name = (nameExp instanceof StringLiteral)
+                ? ((StringLiteral) nameExp).getAsString()
+                : ((Identifier) nameExp).getName();
     }
     [<OPEN_PAREN>]
     (
@@ -2355,9 +2662,7 @@ Macro Macro() :
     )
     {
         inMacro = inFunction = false;
-        Macro result = new Macro(name, argNames, args, block);
-        result.setCatchAll(catchAll);
-        result.isFunction = isFunction;
+        Macro result = new Macro(name, argNames, args, catchAll, isFunction, block);
         result.setLocation(template, start, end);
         template.addMacro(result);
         return result;
@@ -2691,7 +2996,7 @@ NoEscapeBlock NoEscape() :
     start = <NOESCAPE>
     {
         if (escapes.isEmpty()) {
-            throw new ParseException("noescape with no matching escape encountered.", template, start);
+            throw new ParseException("#noescape with no matching #escape encountered.", template, start);
         }
         Object escape = escapes.removeFirst();
     }
@@ -2735,7 +3040,8 @@ PropertySetting Setting() :
     value = Expression()
     end = LooseDirectiveEnd()
     {
-        PropertySetting result = new PropertySetting(key.image, value);
+        token_source.checkNamingConvention(key);
+        PropertySetting result = new PropertySetting(key, token_source, value, template.getConfiguration());
         result.setLocation(template, start, end);
         return result;
     }
@@ -2994,7 +3300,7 @@ void HeaderElement() :
                             }
                             String encoding = template.getEncoding();
                             if (encoding != null && !encoding.equalsIgnoreCase(vs)) {
-                                throw new Template.WrongEncodingException(vs);
+                                throw new Template.WrongEncodingException(vs, encoding);
                             }
                         } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE")) {
                             this.stripWhitespace = getBoolean(exp);
@@ -3039,7 +3345,26 @@ void HeaderElement() :
                             } catch (TemplateModelException tme) {
                             }
                         } else {
-                            throw new ParseException("Unknown FTL header parameter: " + key.image, template, key);
+                            String correctName;
+	                        if (ks.equals("stripWhitespace")) {
+	                            correctName = "strip_whitespace";
+	                        } else if (ks.equals("stripText")) {
+	                            correctName = "strip_text";
+	                        } else if (ks.equals("strictSyntax")) {
+	                            correctName = "strict_syntax"; 
+	                        } else if (ks.equals("nsPrefixes")) {
+	                           correctName = "ns_prefixes";
+	                        } else {
+	                           correctName = null;
+	                        }
+                            throw new ParseException(
+                                    "Unknown FTL header parameter: " + key.image
+                                    + (correctName == null
+                                            ? ""
+                                            : ". Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
+                                              + "check if an update is available, and if it indeed supports camel "
+                                              + "case. Until that, use " + correctName + " instead."),
+                                    template, key);
                         }
                     }
                 }

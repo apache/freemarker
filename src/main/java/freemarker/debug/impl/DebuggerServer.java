@@ -37,7 +37,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 class DebuggerServer
 {
-    private static final Logger logger = Logger.getLogger("freemarker.debug.server");
+    private static final Logger LOG = Logger.getLogger("freemarker.debug.server");
     // TODO: Eventually replace with Yarrow    
     private static final Random R = new SecureRandom();
     
@@ -85,7 +85,7 @@ class DebuggerServer
         }
         catch(IOException e)
         {
-            logger.error("Debugger server shut down.", e);
+            LOG.error("Debugger server shut down.", e);
         }
     }
     
@@ -123,7 +123,7 @@ class DebuggerServer
             }
             catch(Exception e)
             {
-                logger.warn("Connection to " + s.getInetAddress().getHostAddress() + " abruply broke", e);
+                LOG.warn("Connection to " + s.getInetAddress().getHostAddress() + " abruply broke", e);
             }
         }
 
@@ -140,7 +140,7 @@ class DebuggerServer
             }
             catch(IOException e)
             {
-                logger.error("Unable to close server socket.", e);
+                LOG.error("Unable to close server socket.", e);
             }
         }
     }

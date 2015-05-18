@@ -32,7 +32,6 @@ public interface Debugger extends Remote
     /**
      * Adds a breakpoint
      * @param breakpoint the breakpoint to add
-     * @throws RemoteException
      */
     public void addBreakpoint(Breakpoint breakpoint)
     throws
@@ -41,7 +40,6 @@ public interface Debugger extends Remote
     /**
      * Removes a single breakpoint
      * @param breakpoint the breakpoint to remove
-     * @throws RemoteException
      */
     public void removeBreakpoint(Breakpoint breakpoint)
     throws
@@ -49,8 +47,6 @@ public interface Debugger extends Remote
 
     /**
      * Removes all breakpoints for a specific template
-     * @param templateName
-     * @throws RemoteException
      */
     public void removeBreakpoints(String templateName)
     throws
@@ -58,7 +54,6 @@ public interface Debugger extends Remote
 
     /**
      * Removes all breakpoints
-     * @throws RemoteException
      */
     public void removeBreakpoints()
     throws
@@ -66,7 +61,6 @@ public interface Debugger extends Remote
 
     /**
      * Retrieves a list of all {@link Breakpoint} objects.
-     * @throws RemoteException
      */
     public List getBreakpoints()
     throws
@@ -75,7 +69,6 @@ public interface Debugger extends Remote
     /**
      * Retrieves a list of all {@link Breakpoint} objects for the specified
      * template.
-     * @throws RemoteException
      */
     public List getBreakpoints(String templateName)
     throws
@@ -84,7 +77,6 @@ public interface Debugger extends Remote
     /**
      * Retrieves a collection of all {@link DebuggedEnvironment} objects that 
      * are currently suspended.
-     * @throws RemoteException
      */
     public Collection getSuspendedEnvironments()
     throws
@@ -94,7 +86,6 @@ public interface Debugger extends Remote
      * Adds a listener for debugger events.
      * @return an identification token that should be passed to 
      * {@link #removeDebuggerListener(Object)} to remove this listener.
-     * @throws RemoteException
      */
     public Object addDebuggerListener(DebuggerListener listener)
     throws
@@ -104,7 +95,6 @@ public interface Debugger extends Remote
      * Removes a previously added debugger listener.
      * @param id the identification token for the listener that was returned
      * from a prior call to {@link #addDebuggerListener(DebuggerListener)}.
-     * @throws RemoteException
      */
     public void removeDebuggerListener(Object id)
     throws

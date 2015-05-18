@@ -30,7 +30,9 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.WrappingTemplateModel;
+import freemarker.template.utility.RichObjectWrapper;
 
 /**
  * Model used by {@link BeansWrapper} when <tt>simpleMapWrapper</tt>
@@ -40,7 +42,7 @@ import freemarker.template.WrappingTemplateModel;
  */
 public class SimpleMapModel extends WrappingTemplateModel 
 implements TemplateHashModelEx, TemplateMethodModelEx, AdapterTemplateModel, 
-WrapperTemplateModel 
+WrapperTemplateModel, TemplateModelWithAPISupport 
 {
     static final ModelFactory FACTORY =
         new ModelFactory()
@@ -108,5 +110,9 @@ WrapperTemplateModel
     
     public Object getWrappedObject() {
         return map;
+    }
+
+    public TemplateModel getAPI() throws TemplateModelException {
+        return ((RichObjectWrapper) getObjectWrapper()).wrapAsAPI(map);
     }
 }

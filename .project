@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>FreeMarker-master</name>
+	<name>FreeMarker-2.3-gae</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -27,4 +27,15 @@
 		<nature>org.apache.ivyde.eclipse.ivynature</nature>
 		<nature>edu.umd.cs.findbugs.plugin.eclipse.findbugsNature</nature>
 	</natures>
+	<filteredResources>
+		<filter>
+			<id>0</id>
+			<name></name>
+			<type>26</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-projectRelativePath-matches-false-true-build/(?!generated-sources)[\w-]+</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>

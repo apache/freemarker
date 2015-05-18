@@ -34,7 +34,7 @@ import freemarker.template.TemplateTransformModel;
  * model are also converted. Legacy behavior was to leave newlines in the
  * data model unaltered.</p>
  *
- * <p>Usage:<br />
+ * <p>Usage:<br>
  * From java:</p>
  * <pre>
  * SimpleHash root = new SimpleHash();

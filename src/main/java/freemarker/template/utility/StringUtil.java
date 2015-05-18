@@ -150,7 +150,7 @@ public class StringUtil {
     }
 
     /**
-     *  XML encoding for attributes valies quoted with <tt>"</tt> (not with <tt>'</tt>!).
+     *  XML encoding for attributes values quoted with <tt>"</tt> (not with <tt>'</tt>!).
      *  Also can be used for HTML attributes that are quoted with <tt>"</tt>.
      *  @see #XMLEnc(String)
      */
@@ -293,7 +293,10 @@ public class StringUtil {
     /**
      * Like {@link #URLEnc(String, String)} but doesn't escape the slash character ({@code /}).
      * This can be used to encode a path only if you know that no folder or file name will contain {@code /}
-     * character.
+     * character (not in the path, but in the name itself), which usually stands, as the commonly used OS-es don't
+     * allow that.
+     * 
+     * @since 2.3.21
      */
     public static String URLPathEnc(String s, String charset) throws UnsupportedEncodingException {
         return URLEnc(s, charset, true);
@@ -385,17 +388,58 @@ public class StringUtil {
         return escapes;
     }
 
-    public static String FTLStringLiteralEnc(String s)
+    /**
+     * Escapes a string according the FTL string literal escaping rules, assuming the literal is quoted with
+     * {@code quotation}; it doesn't add the quotation marks itself.
+     * 
+     * @param quotation
+     *            Either {@code '"'} or {@code '\''}. It's assumed that the string literal whose part we calculate is
+     *            enclosed within this kind of quotation mark. Thus, the other kind of quotation character will not be
+     *            escaped in the result.
+     *
+     * @since 2.3.22
+     */
+    public static String FTLStringLiteralEnc(String s, char quotation) {
+        return FTLStringLiteralEnc(s, quotation, false);
+    }
+    
+    /**
+     * Escapes a string according the FTL string literal escaping rules; it doesn't add the quotation marks. As this
+     * method doesn't know if the string literal is quoted with reuglar quotation marks or apostrophe quute, it will
+     * escape both.
+     * 
+     * @see #FTLStringLiteralEnc(String, char)
+     */
+    public static String FTLStringLiteralEnc(String s) {
+        return FTLStringLiteralEnc(s, (char) 0, false);
+    }
+
+    private static String FTLStringLiteralEnc(String s, char quotation, boolean addQuotation)
     {
+        final int ln = s.length();
+        final int escLn = ESCAPES.length;
+        
+        final char otherQuotation;
+        if (quotation == 0) {
+            otherQuotation = 0;
+        } else if (quotation == '"') {
+            otherQuotation = '\'';
+        } else if (quotation == '\'') {
+            otherQuotation = '"';
+        } else {
+            throw new IllegalArgumentException("Unsupported quotation character: " + quotation);
+        }
+        
         StringBuffer buf = null;
-        int l = s.length();
-        int el = ESCAPES.length;
-        for(int i = 0; i < l; i++)
+        for(int i = 0; i < ln; i++)
         {
             char c = s.charAt(i);
-            if(c < el)
+            if(c < escLn)
             {
                 char escape = ESCAPES[c];
+                if (escape == otherQuotation) {
+                    escape = 0;
+                }
                 switch(escape)
                 {
                     case 0:
@@ -408,7 +452,10 @@ public class StringUtil {
                     case 1:
                     {
                         if (buf == null) {
-                            buf = new StringBuffer(s.length() + 3);
+                            buf = new StringBuffer(s.length() + 3 + (addQuotation ? 2 : 0));
+                            if (addQuotation) {
+                                buf.append(quotation);
+                            }
                             buf.append(s.substring(0, i));
                         }
                         // hex encoding for characters below 0x20
@@ -423,7 +470,10 @@ public class StringUtil {
                     default:
                     {
                         if (buf == null) {
-                            buf = new StringBuffer(s.length() + 2);
+                            buf = new StringBuffer(s.length() + 2 + (addQuotation ? 2 : 0));
+                            if (addQuotation) {
+                                buf.append(quotation);
+                            }
                             buf.append(s.substring(0, i));
                         }
                         buf.append('\\');
@@ -436,7 +486,15 @@ public class StringUtil {
                 }
             }
         }
-        return buf == null ? s : buf.toString();
+        
+        if (buf == null) {
+            return addQuotation ? quotation + s + quotation : s;
+        } else {
+            if (addQuotation) {
+                buf.append(quotation);
+            }
+            return buf.toString();
+        }
     }
 
     /**
@@ -444,7 +502,7 @@ public class StringUtil {
      *
      * \\, \", \', \n, \t, \r, \b and \f will be replaced according to
      * Java rules. In additional, it knows \g, \l, \a and \{ which are
-     * replaced with &lt;, >, &amp; and { respectively.
+     * replaced with &lt;, &gt;, &amp; and { respectively.
      * \x works as hexadecimal character code escape. The character
      * codes are interpreted according to UCS basic plane (Unicode).
      * "f\x006Fo", "f\x06Fo" and "f\x6Fo" will be "foo".
@@ -820,7 +878,7 @@ public class StringUtil {
     
     /**
      * Same as {@link #jQuoteNoXSS(String)} but also escapes <code>'&lt;'</code>
-     * as <code>\u003C</code>. This is used for log messages to prevent XSS
+     * as <code>\</code><code>u003C</code>. This is used for log messages to prevent XSS
      * on poorly written Web-based log viewers. 
      */
     public static String jQuoteNoXSS(String s) {
@@ -862,6 +920,307 @@ public class StringUtil {
         } // for each characters
         b.append('"');
         return b.toString();
+    }
+    
+    /**
+     * Creates a <em>quoted</em> FTL string literal from a string, using escaping where necessary. The result either
+     * uses regular quotation marks (UCS 0x22) or apostrophe-quotes (UCS 0x27), depending on the string content.
+     * (Currently, apostrophe-quotes will be chosen exactly when the string contains regular quotation character and
+     * doesn't contain apostrophe-quote character.)
+     *
+     * @param s
+     *            The value that should be converted to an FTL string literal whose evaluated value equals to {@code s}
+     *
+     * @since 2.3.22
+     */
+    public static String ftlQuote(String s) {
+        char quotation;
+        if (s.indexOf('"') != -1 && s.indexOf('\'') == -1) {
+            quotation = '\'';
+        } else {
+            quotation = '\"';
+        }
+        return FTLStringLiteralEnc(s, quotation, true);
+    }
+    
+    /**
+     * Tells if a character can occur on the beginning of an FTL identifier expression (without escaping). 
+     * 
+     * @since 2.3.22
+     */
+    public static boolean isFTLIdentifierStart(final char c) {
+        // This code was generated on JDK 1.8.0_20 Win64 with src/main/misc/identifierChars/IdentifierCharGenerator.java
+        if (c < 0xAA) { // This branch was edited for speed.
+            if (c >= 'a' && c <= 'z' || c >= '@' && c <= 'Z') {
+                return true;
+            } else {
+                return c == '$' || c == '_'; 
+            }
+        } else { // c >= 0xAA
+            if (c < 0xA7F8) {
+                if (c < 0x2D6F) {
+                    if (c < 0x2128) {
+                        if (c < 0x2090) {
+                            if (c < 0xD8) {
+                                if (c < 0xBA) {
+                                    return c == 0xAA || c == 0xB5;
+                                } else { // c >= 0xBA
+                                    return c == 0xBA || c >= 0xC0 && c <= 0xD6;
+                                }
+                            } else { // c >= 0xD8
+                                if (c < 0x2071) {
+                                    return c >= 0xD8 && c <= 0xF6 || c >= 0xF8 && c <= 0x1FFF;
+                                } else { // c >= 0x2071
+                                    return c == 0x2071 || c == 0x207F;
+                                }
+                            }
+                        } else { // c >= 0x2090
+                            if (c < 0x2115) {
+                                if (c < 0x2107) {
+                                    return c >= 0x2090 && c <= 0x209C || c == 0x2102;
+                                } else { // c >= 0x2107
+                                    return c == 0x2107 || c >= 0x210A && c <= 0x2113;
+                                }
+                            } else { // c >= 0x2115
+                                if (c < 0x2124) {
+                                    return c == 0x2115 || c >= 0x2119 && c <= 0x211D;
+                                } else { // c >= 0x2124
+                                    return c == 0x2124 || c == 0x2126;
+                                }
+                            }
+                        }
+                    } else { // c >= 0x2128
+                        if (c < 0x2C30) {
+                            if (c < 0x2145) {
+                                if (c < 0x212F) {
+                                    return c == 0x2128 || c >= 0x212A && c <= 0x212D;
+                                } else { // c >= 0x212F
+                                    return c >= 0x212F && c <= 0x2139 || c >= 0x213C && c <= 0x213F;
+                                }
+                            } else { // c >= 0x2145
+                                if (c < 0x2183) {
+                                    return c >= 0x2145 && c <= 0x2149 || c == 0x214E;
+                                } else { // c >= 0x2183
+                                    return c >= 0x2183 && c <= 0x2184 || c >= 0x2C00 && c <= 0x2C2E;
+                                }
+                            }
+                        } else { // c >= 0x2C30
+                            if (c < 0x2D00) {
+                                if (c < 0x2CEB) {
+                                    return c >= 0x2C30 && c <= 0x2C5E || c >= 0x2C60 && c <= 0x2CE4;
+                                } else { // c >= 0x2CEB
+                                    return c >= 0x2CEB && c <= 0x2CEE || c >= 0x2CF2 && c <= 0x2CF3;
+                                }
+                            } else { // c >= 0x2D00
+                                if (c < 0x2D2D) {
+                                    return c >= 0x2D00 && c <= 0x2D25 || c == 0x2D27;
+                                } else { // c >= 0x2D2D
+                                    return c == 0x2D2D || c >= 0x2D30 && c <= 0x2D67;
+                                }
+                            }
+                        }
+                    }
+                } else { // c >= 0x2D6F
+                    if (c < 0x31F0) {
+                        if (c < 0x2DD0) {
+                            if (c < 0x2DB0) {
+                                if (c < 0x2DA0) {
+                                    return c == 0x2D6F || c >= 0x2D80 && c <= 0x2D96;
+                                } else { // c >= 0x2DA0
+                                    return c >= 0x2DA0 && c <= 0x2DA6 || c >= 0x2DA8 && c <= 0x2DAE;
+                                }
+                            } else { // c >= 0x2DB0
+                                if (c < 0x2DC0) {
+                                    return c >= 0x2DB0 && c <= 0x2DB6 || c >= 0x2DB8 && c <= 0x2DBE;
+                                } else { // c >= 0x2DC0
+                                    return c >= 0x2DC0 && c <= 0x2DC6 || c >= 0x2DC8 && c <= 0x2DCE;
+                                }
+                            }
+                        } else { // c >= 0x2DD0
+                            if (c < 0x3031) {
+                                if (c < 0x2E2F) {
+                                    return c >= 0x2DD0 && c <= 0x2DD6 || c >= 0x2DD8 && c <= 0x2DDE;
+                                } else { // c >= 0x2E2F
+                                    return c == 0x2E2F || c >= 0x3005 && c <= 0x3006;
+                                }
+                            } else { // c >= 0x3031
+                                if (c < 0x3040) {
+                                    return c >= 0x3031 && c <= 0x3035 || c >= 0x303B && c <= 0x303C;
+                                } else { // c >= 0x3040
+                                    return c >= 0x3040 && c <= 0x318F || c >= 0x31A0 && c <= 0x31BA;
+                                }
+                            }
+                        }
+                    } else { // c >= 0x31F0
+                        if (c < 0xA67F) {
+                            if (c < 0xA4D0) {
+                                if (c < 0x3400) {
+                                    return c >= 0x31F0 && c <= 0x31FF || c >= 0x3300 && c <= 0x337F;
+                                } else { // c >= 0x3400
+                                    return c >= 0x3400 && c <= 0x4DB5 || c >= 0x4E00 && c <= 0xA48C;
+                                }
+                            } else { // c >= 0xA4D0
+                                if (c < 0xA610) {
+                                    return c >= 0xA4D0 && c <= 0xA4FD || c >= 0xA500 && c <= 0xA60C;
+                                } else { // c >= 0xA610
+                                    return c >= 0xA610 && c <= 0xA62B || c >= 0xA640 && c <= 0xA66E;
+                                }
+                            }
+                        } else { // c >= 0xA67F
+                            if (c < 0xA78B) {
+                                if (c < 0xA717) {
+                                    return c >= 0xA67F && c <= 0xA697 || c >= 0xA6A0 && c <= 0xA6E5;
+                                } else { // c >= 0xA717
+                                    return c >= 0xA717 && c <= 0xA71F || c >= 0xA722 && c <= 0xA788;
+                                }
+                            } else { // c >= 0xA78B
+                                if (c < 0xA7A0) {
+                                    return c >= 0xA78B && c <= 0xA78E || c >= 0xA790 && c <= 0xA793;
+                                } else { // c >= 0xA7A0
+                                    return c >= 0xA7A0 && c <= 0xA7AA;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else { // c >= 0xA7F8
+                if (c < 0xAB20) {
+                    if (c < 0xAA44) {
+                        if (c < 0xA8FB) {
+                            if (c < 0xA840) {
+                                if (c < 0xA807) {
+                                    return c >= 0xA7F8 && c <= 0xA801 || c >= 0xA803 && c <= 0xA805;
+                                } else { // c >= 0xA807
+                                    return c >= 0xA807 && c <= 0xA80A || c >= 0xA80C && c <= 0xA822;
+                                }
+                            } else { // c >= 0xA840
+                                if (c < 0xA8D0) {
+                                    return c >= 0xA840 && c <= 0xA873 || c >= 0xA882 && c <= 0xA8B3;
+                                } else { // c >= 0xA8D0
+                                    return c >= 0xA8D0 && c <= 0xA8D9 || c >= 0xA8F2 && c <= 0xA8F7;
+                                }
+                            }
+                        } else { // c >= 0xA8FB
+                            if (c < 0xA984) {
+                                if (c < 0xA930) {
+                                    return c == 0xA8FB || c >= 0xA900 && c <= 0xA925;
+                                } else { // c >= 0xA930
+                                    return c >= 0xA930 && c <= 0xA946 || c >= 0xA960 && c <= 0xA97C;
+                                }
+                            } else { // c >= 0xA984
+                                if (c < 0xAA00) {
+                                    return c >= 0xA984 && c <= 0xA9B2 || c >= 0xA9CF && c <= 0xA9D9;
+                                } else { // c >= 0xAA00
+                                    return c >= 0xAA00 && c <= 0xAA28 || c >= 0xAA40 && c <= 0xAA42;
+                                }
+                            }
+                        }
+                    } else { // c >= 0xAA44
+                        if (c < 0xAAC0) {
+                            if (c < 0xAA80) {
+                                if (c < 0xAA60) {
+                                    return c >= 0xAA44 && c <= 0xAA4B || c >= 0xAA50 && c <= 0xAA59;
+                                } else { // c >= 0xAA60
+                                    return c >= 0xAA60 && c <= 0xAA76 || c == 0xAA7A;
+                                }
+                            } else { // c >= 0xAA80
+                                if (c < 0xAAB5) {
+                                    return c >= 0xAA80 && c <= 0xAAAF || c == 0xAAB1;
+                                } else { // c >= 0xAAB5
+                                    return c >= 0xAAB5 && c <= 0xAAB6 || c >= 0xAAB9 && c <= 0xAABD;
+                                }
+                            }
+                        } else { // c >= 0xAAC0
+                            if (c < 0xAAF2) {
+                                if (c < 0xAADB) {
+                                    return c == 0xAAC0 || c == 0xAAC2;
+                                } else { // c >= 0xAADB
+                                    return c >= 0xAADB && c <= 0xAADD || c >= 0xAAE0 && c <= 0xAAEA;
+                                }
+                            } else { // c >= 0xAAF2
+                                if (c < 0xAB09) {
+                                    return c >= 0xAAF2 && c <= 0xAAF4 || c >= 0xAB01 && c <= 0xAB06;
+                                } else { // c >= 0xAB09
+                                    return c >= 0xAB09 && c <= 0xAB0E || c >= 0xAB11 && c <= 0xAB16;
+                                }
+                            }
+                        }
+                    }
+                } else { // c >= 0xAB20
+                    if (c < 0xFB46) {
+                        if (c < 0xFB13) {
+                            if (c < 0xAC00) {
+                                if (c < 0xABC0) {
+                                    return c >= 0xAB20 && c <= 0xAB26 || c >= 0xAB28 && c <= 0xAB2E;
+                                } else { // c >= 0xABC0
+                                    return c >= 0xABC0 && c <= 0xABE2 || c >= 0xABF0 && c <= 0xABF9;
+                                }
+                            } else { // c >= 0xAC00
+                                if (c < 0xD7CB) {
+                                    return c >= 0xAC00 && c <= 0xD7A3 || c >= 0xD7B0 && c <= 0xD7C6;
+                                } else { // c >= 0xD7CB
+                                    return c >= 0xD7CB && c <= 0xD7FB || c >= 0xF900 && c <= 0xFB06;
+                                }
+                            }
+                        } else { // c >= 0xFB13
+                            if (c < 0xFB38) {
+                                if (c < 0xFB1F) {
+                                    return c >= 0xFB13 && c <= 0xFB17 || c == 0xFB1D;
+                                } else { // c >= 0xFB1F
+                                    return c >= 0xFB1F && c <= 0xFB28 || c >= 0xFB2A && c <= 0xFB36;
+                                }
+                            } else { // c >= 0xFB38
+                                if (c < 0xFB40) {
+                                    return c >= 0xFB38 && c <= 0xFB3C || c == 0xFB3E;
+                                } else { // c >= 0xFB40
+                                    return c >= 0xFB40 && c <= 0xFB41 || c >= 0xFB43 && c <= 0xFB44;
+                                }
+                            }
+                        }
+                    } else { // c >= 0xFB46
+                        if (c < 0xFF21) {
+                            if (c < 0xFDF0) {
+                                if (c < 0xFD50) {
+                                    return c >= 0xFB46 && c <= 0xFBB1 || c >= 0xFBD3 && c <= 0xFD3D;
+                                } else { // c >= 0xFD50
+                                    return c >= 0xFD50 && c <= 0xFD8F || c >= 0xFD92 && c <= 0xFDC7;
+                                }
+                            } else { // c >= 0xFDF0
+                                if (c < 0xFE76) {
+                                    return c >= 0xFDF0 && c <= 0xFDFB || c >= 0xFE70 && c <= 0xFE74;
+                                } else { // c >= 0xFE76
+                                    return c >= 0xFE76 && c <= 0xFEFC || c >= 0xFF10 && c <= 0xFF19;
+                                }
+                            }
+                        } else { // c >= 0xFF21
+                            if (c < 0xFFCA) {
+                                if (c < 0xFF66) {
+                                    return c >= 0xFF21 && c <= 0xFF3A || c >= 0xFF41 && c <= 0xFF5A;
+                                } else { // c >= 0xFF66
+                                    return c >= 0xFF66 && c <= 0xFFBE || c >= 0xFFC2 && c <= 0xFFC7;
+                                }
+                            } else { // c >= 0xFFCA
+                                if (c < 0xFFDA) {
+                                    return c >= 0xFFCA && c <= 0xFFCF || c >= 0xFFD2 && c <= 0xFFD7;
+                                } else { // c >= 0xFFDA
+                                    return c >= 0xFFDA && c <= 0xFFDC;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Tells if a character can occur in an FTL identifier expression (without escaping) as other than the first
+     * character. 
+     * 
+     * @since 2.3.22
+     */
+    public static boolean isFTLIdentifierPart(final char c) {
+        return isFTLIdentifierStart(c) || (c >= '0' && c <= '9');  
     }
     
     /**
@@ -956,7 +1315,7 @@ public class StringUtil {
      * 
      * The escaped characters are:
      * 
-     * <table style="width: auto; border-collapse: collapse" border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1" summary="Characters escaped by jsStringEnc">
      * <tr>
      *   <th>Input
      *   <th>Output
@@ -973,8 +1332,8 @@ public class StringUtil {
      *   <td><tt>/</tt> if the method can't know that it won't be directly after <tt>&lt;</tt>
      *   <td><tt>\/</tt>
      * <tr>
-     *   <td><tt>></tt> if the method can't know that it won't be directly after <tt>]]</tt> or <tt>--</tt>
-     *   <td>JavaScript: <tt>\></tt>; JSON: <tt>\<tt>u</tt>003E</tt>
+     *   <td><tt>&gt;</tt> if the method can't know that it won't be directly after <tt>]]</tt> or <tt>--</tt>
+     *   <td>JavaScript: <tt>\&gt;</tt>; JSON: <tt>\</tt><tt>u003E</tt>
      * <tr>
      *   <td><tt>&lt;</tt> if the method can't know that it won't be directly followed by <tt>!</tt> or <tt>?</tt> 
      *   <td><tt><tt>\</tt>u003C</tt>
@@ -1492,8 +1851,9 @@ public class StringUtil {
     }
 
     /**
-     * Tries to run toString(), but if that fails, returns a {@code "[toString failed: " + e + "]"} instead.
-     * Also, it returns {@code null} for {@code null} parameter.
+     * Tries to run {@code toString()}, but if that fails, returns a
+     * {@code "[com.example.SomeClass.toString() failed: " + e + "]"} instead. Also, it returns {@code null} for
+     * {@code null} parameter.
      * 
      * @since 2.3.20
      */
@@ -1503,18 +1863,133 @@ public class StringUtil {
         try {
             return object.toString();
         } catch (Throwable e) {
-            return failedToStringSubstitute(e);
+            return failedToStringSubstitute(object, e);
         }
     }
 
-    private static String failedToStringSubstitute(Throwable e) {
+    private static String failedToStringSubstitute(Object object, Throwable e) {
         String eStr;
         try {
             eStr = e.toString();
         } catch (Throwable e2) {
             eStr = ClassUtil.getShortClassNameOfObject(e);
         }
-        return "[toString() failed: " + eStr + "]";
+        return "[" + ClassUtil.getShortClassNameOfObject(object) +".toString() failed: " + eStr + "]";
+    }
+    
+    /**
+     * Converts {@code 1}, {@code 2}, {@code 3} and so forth to {@code "A"}, {@code "B"}, {@code "C"} and so fort. When
+     * reaching {@code "Z"}, it continues like {@code "AA"}, {@code "AB"}, etc. The lowest supported number is 1, but
+     * there's no upper limit.
+     * 
+     * @throws IllegalArgumentException
+     *             If the argument is 0 or less.
+     * 
+     * @since 2.3.22
+     */
+    public static String toUpperABC(int n) {
+        return toABC(n, 'A');
+    }
+
+    /**
+     * Same as {@link #toUpperABC(int)}, but produces lower case result, like {@code "ab"}.
+     * 
+     * @since 2.3.22
+     */
+    public static String toLowerABC(int n) {
+        return toABC(n, 'a');
+    }
+
+    /**
+     * @param oneDigit
+     *            The character that stands for the value 1.
+     */
+    private static String toABC(final int n, char oneDigit) {
+        if (n < 1) {
+            throw new IllegalArgumentException("Can't convert 0 or negative "
+                    + "numbers to latin-number: " + n);
+        }
+        
+        // First find out how many "digits" will we need. We start from A, then
+        // try AA, then AAA, etc. (Note that the smallest digit is "A", which is
+        // 1, not 0. Hence this isn't like a usual 26-based number-system):
+        int reached = 1;
+        int weight = 1;
+        while (true) {
+            int nextWeight = weight * 26;
+            int nextReached = reached + nextWeight;
+            if (nextReached <= n) {
+                // So we will have one more digit
+                weight = nextWeight;
+                reached = nextReached;
+            } else {
+                // No more digits
+                break;
+            }
+        }
+        
+        // Increase the digits of the place values until we get as close
+        // to n as possible (but don't step over it).
+        StringBuffer sb = new StringBuffer();
+        while (weight != 0) {
+            // digitIncrease: how many we increase the digit which is already 1
+            final int digitIncrease = (n - reached) / weight;
+            sb.append((char) (oneDigit + digitIncrease));
+            reached += digitIncrease * weight;
+            
+            weight /= 26;
+        }
+        
+        return sb.toString();
+    }
+
+    /**
+     * Behaves exactly like {@link String#trim()}, but works on arrays. If the resulting array would have the same
+     * content after trimming, it returns the original array instance. Otherwise it returns a new array instance (or
+     * {@link CollectionUtils#EMPTY_CHAR_ARRAY}).
+     * 
+     * @since 2.3.22
+     */
+    public static char[] trim(final char[] cs) {
+        if (cs.length == 0) {
+            return cs;
+        }
+        
+        int start = 0;
+        int end = cs.length;
+        while (start < end && cs[start] <= ' ') {
+            start++;
+        }
+        while (start < end && cs[end - 1] <= ' ') {
+            end--;
+        }
+        
+        if (start == 0 && end == cs.length) {
+            return cs;
+        }
+        if (start == end) {
+            return CollectionUtils.EMPTY_CHAR_ARRAY;
+        }
+        
+        char[] newCs = new char[end - start];
+        System.arraycopy(cs, start, newCs, 0, end - start);
+        return newCs;
+    }
+
+    /**
+     * Tells if {@link String#trim()} will return a 0-length string for the {@link String} equivalent of the argument.
+     * 
+     * @since 2.3.22
+     */
+    public static boolean isTrimmableToEmpty(char[] text) {
+        int ln = text.length;
+        for (int i = 0; i < ln; i++) {
+            // We follow Java's String.trim() here, which simply states that c <= ' ' is whitespace.
+            if (text[i] > ' ') {
+                return false;
+            }
+        }
+        return true;
     }
     
 }

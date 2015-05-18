@@ -68,7 +68,7 @@ implements
     TemplateSequenceModel,
     TemplateNodeModel
 {
-    private static final Logger logger = Logger.getLogger("freemarker.xml");
+    private static final Logger LOG = Logger.getLogger("freemarker.xml");
     
     private static final Class DOM_NODE_CLASS = getClass("org.w3c.dom.Node");
     private static final Class DOM4J_NODE_CLASS = getClass("org.dom4j.Node");
@@ -209,7 +209,7 @@ implements
      * Returns a new NodeListModel containing the nodes that result from applying
      * an operator to this model's nodes.
      * @param key the operator to apply to nodes. Available operators are:
-     * <table style="width: auto; border-collapse: collapse" border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1" summary="XML node hash keys">
      *   <thead>
      *     <tr>
      *       <th align="left">Key name</th>
@@ -497,8 +497,8 @@ implements
             return ClassUtil.forName(className);
         }
         catch(Exception e) {
-            if(logger.isDebugEnabled()) {
-                logger.debug("Couldn't load class " + className, e);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Couldn't load class " + className, e);
             }
             return null;
         }
@@ -510,8 +510,8 @@ implements
                     navType + "Navigator").newInstance();
         }
         catch(Throwable t) {
-            if(logger.isDebugEnabled()) {
-                logger.debug("Could not load navigator for " + navType, t);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Could not load navigator for " + navType, t);
             }
             return null;
         }

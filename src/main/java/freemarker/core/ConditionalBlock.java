@@ -101,5 +101,9 @@ final class ConditionalBlock extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

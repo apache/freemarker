@@ -56,7 +56,9 @@ class EscapeBlock extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol()).append(' ').append(variable).append(" as ").append(expr.getCanonicalForm());
+        sb.append(getNodeTypeSymbol())
+                .append(' ').append(_CoreStringUtils.toFTLTopLevelIdentifierReference(variable))
+                .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>').append(nestedBlock.getCanonicalForm()).append("</").append(getNodeTypeSymbol()).append('>');
         }
@@ -90,5 +92,13 @@ class EscapeBlock extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }    
+
+    boolean isOutputCacheable() {
+        return true;
+    }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

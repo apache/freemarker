@@ -36,4 +36,13 @@ public class NullArgumentException extends IllegalArgumentException {
         }
     }
 
+    /**
+     * @since 2.3.22
+     */
+    public static void check(Object argumentValue) {
+        if (argumentValue == null) {
+            throw new NullArgumentException("Argument can't be null");
+        }
+    }
+    
 }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+
+    <servlet>
+        <servlet-name>tester</servlet-name>
+        <servlet-class>freemarker.test.servlet.Model2TesterServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>tester</servlet-name>
+        <url-pattern>/tester</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>freemarker-default-dev</servlet-name>
+		<servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+
+		<init-param>
+			<param-name>TemplatePath</param-name>
+			<param-value>/</param-value>
+		</init-param>
+
+        <!-- This is the default anyway:
+		<init-param>
+			<param-name>template_exception_handler</param-name>
+			<param-value>html_debug</param-value>
+		</init-param>
+        -->
+
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+    <servlet>
+        <servlet-name>freemarker-default-prod</servlet-name>
+        <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>/</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>template_exception_handler</param-name>
+            <param-value>rethrow</param-value>
+        </init-param>
+
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>freemarker-future-prod</servlet-name>
+        <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>/</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ExceptionOnMissingTemplate</param-name>
+            <param-value>true</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>template_exception_handler</param-name>
+            <param-value>rethrow</param-value>
+        </init-param>
+
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+</web-app>

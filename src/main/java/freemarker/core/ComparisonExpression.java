@@ -21,7 +21,6 @@ import freemarker.template.TemplateException;
 /**
  * A class that handles comparisons.
  */
-
 final class ComparisonExpression extends BooleanExpression {
 
     private final Expression left;

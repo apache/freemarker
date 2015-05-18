@@ -16,6 +16,7 @@
 
 package freemarker.core;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -38,7 +39,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @see TokenMgrError
  */
-public class ParseException extends java.io.IOException implements FMParserConstants {
+public class ParseException extends IOException implements FMParserConstants {
 
     /**
      * This is the last token that has been consumed successfully.  If
@@ -88,7 +89,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      * This constructor calls its super class with the empty string
      * to force the "toString" method of parent class "Throwable" to
      * print the error message in the form:
-     *     ParseException: <result of getMessage>
+     *     ParseException: &lt;result of getMessage&gt;
      */
     public ParseException(Token currentTokenVal,
             int[][] expectedTokenSequencesVal,
@@ -115,7 +116,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      * relevant information.  The JavaCC generated code does not use
      * these constructors.
      * 
-     * @deprecated
+     * @deprecated Use a constructor to which you pass description, template, and positions.
      */
     protected ParseException() {
         super();
@@ -143,7 +144,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
             Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         lineNumber, columnNumber,
                         endLineNumber, endColumnNumber,
                         cause);      
@@ -165,7 +166,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         lineNumber, columnNumber,
                         0, 0,
                         cause);      
@@ -183,7 +184,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, Template template, Token tk, Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         tk.beginLine, tk.beginColumn,
                         tk.endLine, tk.endColumn,
                         cause);
@@ -201,7 +202,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, TemplateObject tobj, Throwable cause) {
         this(description,
-                tobj.getTemplate() == null ? null : tobj.getTemplate().getName(),
+                tobj.getTemplate() == null ? null : tobj.getTemplate().getSourceName(),
                         tobj.beginLine, tobj.beginColumn,
                         tobj.endLine, tobj.endColumn,
                         cause);
@@ -296,6 +297,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
 
     /**
      * 1-based line number of the last line that contains the failing section, or 0 if the information is not available.
+     * 
      * @since 2.3.21
      */
     public int getEndLineNumber() {
@@ -305,6 +307,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
     /**
      * 1-based column number of the last character of the failing section, or 0 if the information is not available.
      * Note that unlike with Java string API-s, this column number is inclusive.
+     * 
      * @since 2.3.21
      */
     public int getEndColumnNumber() {

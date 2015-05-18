@@ -306,62 +306,67 @@ class ClassIntrospector {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
 
         PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
-        int pdaLength = pda != null ? pda.length : 0;
-        for (int i = pdaLength - 1; i >= 0; --i) {
-            addPropertyDescriptorToClassIntrospectionData(
-                    introspData, pda[i], clazz,
-                    accessibleMethods);
+        if (pda != null) {
+            int pdaLength = pda.length;
+            for (int i = pdaLength - 1; i >= 0; --i) {
+                addPropertyDescriptorToClassIntrospectionData(
+                        introspData, pda[i], clazz,
+                        accessibleMethods);
+            }
         }
 
         if (exposureLevel < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
             final MethodAppearanceDecision decision = new MethodAppearanceDecision();
             MethodAppearanceDecisionInput decisionInput = null;
             final MethodDescriptor[] mda = sortMethodDescriptors(beanInfo.getMethodDescriptors());
-            int mdaLength = mda != null ? mda.length : 0;
-            for (int i = mdaLength - 1; i >= 0; --i) {
-                final MethodDescriptor md = mda[i];
-                final Method method = getMatchingAccessibleMethod(md.getMethod(), accessibleMethods);
-                if (method != null && isAllowedToExpose(method)) {
-                    decision.setDefaults(method);
-                    if (methodAppearanceFineTuner != null) {
-                        if (decisionInput == null) {
-                            decisionInput = new MethodAppearanceDecisionInput();
+            if (mda != null) {
+                int mdaLength = mda.length;
+                for (int i = mdaLength - 1; i >= 0; --i) {
+                    final MethodDescriptor md = mda[i];
+                    final Method method = getMatchingAccessibleMethod(md.getMethod(), accessibleMethods);
+                    if (method != null && isAllowedToExpose(method)) {
+                        decision.setDefaults(method);
+                        if (methodAppearanceFineTuner != null) {
+                            if (decisionInput == null) {
+                                decisionInput = new MethodAppearanceDecisionInput();
+                            }
+                            decisionInput.setContainingClass(clazz);
+                            decisionInput.setMethod(method);
+    
+                            methodAppearanceFineTuner.process(decisionInput, decision);
                         }
-                        decisionInput.setContainingClass(clazz);
-                        decisionInput.setMethod(method);
-
-                        methodAppearanceFineTuner.process(decisionInput, decision);
-                    }
-
-                    PropertyDescriptor propDesc = decision.getExposeAsProperty();
-                    if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof PropertyDescriptor)) {
-                        addPropertyDescriptorToClassIntrospectionData(introspData, propDesc, clazz, accessibleMethods);
-                    }
-
-                    String methodKey = decision.getExposeMethodAs();
-                    if (methodKey != null) {
-                        Object previous = introspData.get(methodKey);
-                        if (previous instanceof Method) {
-                            // Overloaded method - replace Method with a OverloadedMethods
-                            OverloadedMethods overloadedMethods = new OverloadedMethods(bugfixed);
-                            overloadedMethods.addMethod((Method) previous);
-                            overloadedMethods.addMethod(method);
-                            introspData.put(methodKey, overloadedMethods);
-                            // Remove parameter type information
-                            getArgTypes(introspData).remove(previous);
-                        } else if (previous instanceof OverloadedMethods) {
-                            // Already overloaded method - add new overload
-                            ((OverloadedMethods) previous).addMethod(method);
-                        } else if (decision.getMethodShadowsProperty()
-                                || !(previous instanceof PropertyDescriptor)) {
-                            // Simple method (this far)
-                            introspData.put(methodKey, method);
-                            getArgTypes(introspData).put(method,
-                                    method.getParameterTypes());
+    
+                        PropertyDescriptor propDesc = decision.getExposeAsProperty();
+                        if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof PropertyDescriptor)) {
+                            addPropertyDescriptorToClassIntrospectionData(
+                                    introspData, propDesc, clazz, accessibleMethods);
+                        }
+    
+                        String methodKey = decision.getExposeMethodAs();
+                        if (methodKey != null) {
+                            Object previous = introspData.get(methodKey);
+                            if (previous instanceof Method) {
+                                // Overloaded method - replace Method with a OverloadedMethods
+                                OverloadedMethods overloadedMethods = new OverloadedMethods(bugfixed);
+                                overloadedMethods.addMethod((Method) previous);
+                                overloadedMethods.addMethod(method);
+                                introspData.put(methodKey, overloadedMethods);
+                                // Remove parameter type information
+                                getArgTypes(introspData).remove(previous);
+                            } else if (previous instanceof OverloadedMethods) {
+                                // Already overloaded method - add new overload
+                                ((OverloadedMethods) previous).addMethod(method);
+                            } else if (decision.getMethodShadowsProperty()
+                                    || !(previous instanceof PropertyDescriptor)) {
+                                // Simple method (this far)
+                                introspData.put(methodKey, method);
+                                getArgTypes(introspData).put(method,
+                                        method.getParameterTypes());
+                            }
                         }
                     }
-                }
-            }
+                } // for each in mda
+            } // if mda != null
         } // end if (exposureLevel < EXPOSE_PROPERTIES_ONLY)
     }
 
@@ -787,8 +792,8 @@ class ClassIntrospector {
     }
 
     /**
-     * Almost always, you want to use {@link BeansWrapper#getSharedInrospectionLock()}, not this! The only exception is
-     * when you get this to set the field returned by {@link BeansWrapper#getSharedInrospectionLock()}.
+     * Almost always, you want to use {@link BeansWrapper#getSharedIntrospectionLock()}, not this! The only exception is
+     * when you get this to set the field returned by {@link BeansWrapper#getSharedIntrospectionLock()}.
      */
     Object getSharedLock() {
         return sharedLock;

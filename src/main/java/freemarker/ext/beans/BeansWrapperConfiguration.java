@@ -32,12 +32,14 @@ import freemarker.template._TemplateAPI;
  * {@link BeansWrapper} itself. (Because, the default values influence the lookup key, and the singleton needs to be
  * looked up without creating a {@link BeansWrapper} instance.) However, because instances are mutable, you should
  * deep-clone it with {@link #clone(boolean)} before using it as cache key.
+ * 
+ * @since 2.3.21
  */
 public abstract class BeansWrapperConfiguration implements Cloneable {
 
     private final Version incompatibleImprovements;
     
-    ClassIntrospectorBuilder classIntrospectorFactory;
+    protected ClassIntrospectorBuilder classIntrospectorFactory;
     
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;
@@ -52,19 +54,38 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
     // - If you add a new field, review all methods in this class
     
     /**
-     * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
-     *     Not {@code null}.
-     *     Note that the version will be normalized to the lowest version where the same incompatible
-     *     {@link BeansWrapper} improvements were already present, so for the returned instance
-     *     {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
+     * @param incompatibleImprovements
+     *            See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}. Not {@code null}. Note
+     *            that the version will be normalized to the lowest version where the same incompatible
+     *            {@link BeansWrapper} improvements were already present, so for the returned instance
+     *            {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified
+     *            here.
+     * @param isIncompImprsAlreadyNormalized
+     *            Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em> value.
+     *            This parameter meant to be {@code true} when the class that extends {@link BeansWrapper} needs to add
+     *            additional breaking versions over those of {@link BeansWrapper}. Thus, if this parameter is
+     *            {@code true}, the versions where {@link BeansWrapper} had breaking changes must be already factored
+     *            into the {@code incompatibleImprovements} parameter value, as no more normalization will happen. (You
+     *            can use {@link BeansWrapper#normalizeIncompatibleImprovementsVersion(Version)} to discover those.)
+     * 
+     * @since 2.3.22
      */
-    protected BeansWrapperConfiguration(Version incompatibleImprovements) {
+    protected BeansWrapperConfiguration(Version incompatibleImprovements, boolean isIncompImprsAlreadyNormalized) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
-        incompatibleImprovements = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+        incompatibleImprovements = isIncompImprsAlreadyNormalized
+                ? incompatibleImprovements
+                : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
         classIntrospectorFactory = new ClassIntrospectorBuilder(incompatibleImprovements);
+    }
+    
+    /**
+     * Same as {@link #BeansWrapperConfiguration(Version, boolean) BeansWrapperConfiguration(Version, false)}.
+     */
+    protected BeansWrapperConfiguration(Version incompatibleImprovements) {
+        this(incompatibleImprovements, false);
     }
 
     public int hashCode() {
@@ -80,6 +101,10 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         return result;
     }
 
+    /**
+     * Two {@link BeansWrapperConfiguration}-s are equal exactly if their classes are identical ({@code ==}), and their
+     * field values are equal.
+     */
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;

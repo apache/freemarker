@@ -31,8 +31,10 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * An abstract class for nodes in the parse tree 
- * that represent a FreeMarker expression.
+ * <b>Internal API - subject to change:</b> Represent expression nodes in the parsed template.
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 abstract public class Expression extends TemplateObject {
 

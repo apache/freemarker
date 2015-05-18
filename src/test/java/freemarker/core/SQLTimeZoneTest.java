@@ -16,8 +16,7 @@
 
 package freemarker.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -31,10 +30,10 @@ import java.util.TimeZone;
 import org.junit.Test;
 
 import freemarker.template.Configuration;
-import freemarker.template.Version;
 import freemarker.template.utility.DateUtil;
+import freemarker.test.TemplateTest;
 
-public class SQLTimeZoneTest extends TemplateOutputTest {
+public class SQLTimeZoneTest extends TemplateTest {
 
     private final static TimeZone GMT_P02 = TimeZone.getTimeZone("GMT+02");
     
@@ -133,10 +132,12 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         TimeZone.setDefault(GMT_P02);
         try {
             Configuration cfg = createConfiguration();
+            setConfiguration(cfg);
+            
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
             
-            assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME, cfg);
+            assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
         } finally {
             TimeZone.setDefault(prevSysDefTz);
         }
@@ -149,8 +150,9 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         try {
             Configuration cfg = createConfiguration();
             cfg.setSQLDateAndTimeTimeZone(GMT_P02);
+            setConfiguration(cfg);
             
-            assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT, cfg);
+            assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
         } finally {
             TimeZone.setDefault(prevSysDefTz);
         }
@@ -161,8 +163,9 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         Configuration cfg = createConfiguration();
         assertNull(cfg.getSQLDateAndTimeTimeZone());
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
+        setConfiguration(cfg);
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_SAME + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_SAME + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
     }
 
     @Test
@@ -170,8 +173,9 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         Configuration cfg = createConfiguration();
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
+        setConfiguration(cfg);
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_DIFFERENT + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_DIFFERENT + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
     }
 
     @Test
@@ -179,8 +183,9 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         Configuration cfg = createConfiguration();
         assertNull(cfg.getSQLDateAndTimeTimeZone());
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+02"));
+        setConfiguration(cfg);
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
     }
 
     @Test
@@ -188,8 +193,9 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         Configuration cfg = createConfiguration();
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+02"));
+        setConfiguration(cfg);
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
     }
     
     @Test
@@ -199,35 +205,32 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         cfg.setDateFormat("yyyy-MM-dd E");
         cfg.setTimeFormat("HH:mm:ss E");
         cfg.setDateTimeFormat("yyyy-MM-dd'T'HH:mm:ss E");
+        setConfiguration(cfg);
         
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='de'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-11 Fr, 10:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n",
-                cfg);
+                + "2014-07-11 Fr, 10:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting date_format='yyyy-MM-dd'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-11, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12, 10:30:05 Sat\n",
-                cfg);
+                + "2014-07-11, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12, 10:30:05 Sat\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting time_format='HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-11 Fri, 10:30:05, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05\n",
-                cfg);
+                + "2014-07-11 Fri, 10:30:05, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting datetime_format='yyyy-MM-dd\\'T\\'HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n",
-                cfg);
+                + "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
         
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         assertOutput(
@@ -235,29 +238,25 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
                 + "<#setting locale='de'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-12 Sa, 12:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n",
-                cfg);
+                + "2014-07-12 Sa, 12:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting date_format='yyyy-MM-dd'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-12, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12, 10:30:05 Sat\n",
-                cfg);
+                + "2014-07-12, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12, 10:30:05 Sat\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting time_format='HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-12 Sat, 12:30:05, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05\n",
-                cfg);
+                + "2014-07-12 Sat, 12:30:05, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting datetime_format='yyyy-MM-dd\\'T\\'HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n",
-                cfg);
+                + "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
     }
 
     @Test
@@ -265,6 +264,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         Configuration cfg = createConfiguration();
         cfg.setTimeZone(DateUtil.UTC);
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
+        setConfiguration(cfg);
         assertOutput(
                 "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
                 + "${sqlDate?date} ${sqlTime?time}\n"
@@ -276,14 +276,15 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
                 + "${sqlDate?date} ${sqlTime?time}\n",
                 "2014-07-11 22:00:00 2014-07-12 10:30:05 2014-07-12 12:30:05\n"
                 + "2014-07-12 00:00:00 2014-07-12 12:30:05 2014-07-12 12:30:05\n"
-                + "2014-07-11 11:00:00 2014-07-11 23:30:05 2014-07-12 12:30:05\n",
-                cfg);
+                + "2014-07-11 11:00:00 2014-07-11 23:30:05 2014-07-12 12:30:05\n");
     }
 
     @Test
     public void testChangeSettingInTemplate() throws Exception {
         Configuration cfg = createConfiguration();
         cfg.setTimeZone(DateUtil.UTC);
+        setConfiguration(cfg);
+        
         assertNull(cfg.getSQLDateAndTimeTimeZone());
 
         assertOutput(
@@ -312,8 +313,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
                 + "2014-07-11, 23:30:05, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
                 + "2014-07-11-11:00, 23:30:05, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
                 + "2014-07-11-11:00, 23:30:05-11:00, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
-                + "2014-07-11-11:00, 23:30:05-11:00, 2014-07-12T13:30+03:00, 2014-07-12T13:30+03:00\n",
-                cfg);
+                + "2014-07-11-11:00, 23:30:05-11:00, 2014-07-12T13:30+03:00, 2014-07-12T13:30+03:00\n");
     }
     
     @Test
@@ -321,6 +321,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         Configuration cfg = createConfiguration();
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT-01"));
+        setConfiguration(cfg);
         
         assertOutput(
                 "<#setting date_format='xs fz'><#setting time_format='xs fz'>\n"
@@ -340,8 +341,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
                 + "2014-07-12+03:00, 13:30:05+03:00, 10:30:05Z\n"
                 + "2014-07-11-01:00, 09:30:05-01:00, 10:30:05Z\n"
                 + "2014-07-11-01:00, 09:30:05-01:00, 09:30:05-01:00\n"
-                + "2014-07-11Z, 10:30:05Z, 10:30:05Z\n",
-                cfg);
+                + "2014-07-11Z, 10:30:05Z, 10:30:05Z\n");
     }
     
     private Configuration createConfiguration() {

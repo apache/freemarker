@@ -44,14 +44,13 @@ final class Identifier extends Expression {
         }
     }
 
-    public String toString() {
-        return name;
-    }
-
     public String getCanonicalForm() {
-        return name;
+        return _CoreStringUtils.toFTLTopLevelIdentifierReference(name);
     }
     
+    /**
+     * The name of the identifier without any escaping or other syntactical distortions. 
+     */
     String getName() {
         return name;
     }

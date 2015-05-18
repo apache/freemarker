@@ -17,7 +17,7 @@ trim4:      ${"foo bar "?trim}
 upper_case: ${x?upper_case}
 xml:        ${x?xml}
 xhtml:      ${"\"Blah's is > 1 & < 2\""?xhtml}
-<@assertEquals actual="'"?html expected="'" />
+<@assertEquals actual="'"?html expected=(iciIntValue gte 2003020)?string("&#39;", "'") />
 <@assertEquals actual="'"?xhtml expected="&#39;" />
 <@assertEquals actual="'"?xml expected="&apos;" />
 <#-- ?substring: -->

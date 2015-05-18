@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import freemarker.core.BugException;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
@@ -163,11 +164,11 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             Iterator it = tmArgs.iterator();
             for(int i = 0; i < argsLen; ++i) {
                 int paramIdx = i < paramCount ? i : paramCount - 1;
-                Object pojo = unwrapper.tryUnwrap(
+                Object pojo = unwrapper.tryUnwrapTo(
                         (TemplateModel)it.next(),
                         unwarappingHints[paramIdx],
                         typesFlags != null ? typesFlags[paramIdx] : 0);
-                if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
+                if(pojo == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                     continue outer;
                 }
                 pojoArgs[i] = pojo;
@@ -222,8 +223,8 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             System.arraycopy(args, 0, packedArgs, 0, fixArgCount);
             Object varargs = Array.newInstance(varArgsCompType, totalArgCount - fixArgCount);
             for (int i = fixArgCount; i < totalArgCount; ++i) {
-                Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
-                if (val == BeansWrapper.CAN_NOT_UNWRAP) {
+                Object val = unwrapper.tryUnwrapTo((TemplateModel)modelArgs.get(i), varArgsCompType);
+                if (val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                     return new Integer(i + 1);
                 }
                 Array.set(varargs, i - fixArgCount, val);
@@ -231,8 +232,8 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             packedArgs[fixArgCount] = varargs;
             return packedArgs;
         } else {
-            Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
-            if (val == BeansWrapper.CAN_NOT_UNWRAP) {
+            Object val = unwrapper.tryUnwrapTo((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
+            if (val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                 return new Integer(fixArgCount + 1);
             }
             Object array = Array.newInstance(varArgsCompType, 1);

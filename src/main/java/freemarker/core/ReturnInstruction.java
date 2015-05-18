@@ -78,5 +78,9 @@ public final class ReturnInstruction extends TemplateElement {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.VALUE;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

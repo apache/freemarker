@@ -16,30 +16,41 @@
 
 package freemarker.core;
 
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
- * A class that allows one to associate custom data with a configuration, 
- * a template, or environment. It works pretty much like {@link ThreadLocal}, a
- * class that allows one to associate custom data with a thread.
+ * A class that allows one to associate custom data with a {@link Configuration}, a {@link Template}, or
+ * {@link Environment}.
+ * 
+ * <p>This API has similar approach to that of {@link ThreadLocal} (which allows one to associate
+ * custom data with a thread). With an example:</p>
+ * 
+ * <pre>
+ * // The object identity itself will serve as the attribute identifier; there's no attribute name String:
+ * public static final CustomAttribute MY_ATTR = new CustomAttribute(CustomAttribute.SCOPE_CONFIGURATION);
+ * ...
+ *     // Set the attribute in this particular Configuration object:
+ *     MY_ATTR.set(myAttrValue, cfg);
+ *     ...
+ *     // Read the attribute from this particular Configuration object:
+ *     myAttrValue = MY_ATTR.get(cfg);
+ * </pre>
  */
-public class CustomAttribute
-{
+public class CustomAttribute {
+    
     /**
-     * Constant used in the constructor specifying that this attribute is
-     * scoped by the environment.
+     * Constant used in the constructor specifying that this attribute is {@link Environment}-scoped.
      */
     public static final int SCOPE_ENVIRONMENT = 0;
         
     /**
-     * Constant used in the constructor specifying that this attribute is
-     * scoped by the template.
+     * Constant used in the constructor specifying that this attribute is {@link Template}-scoped.
      */
     public static final int SCOPE_TEMPLATE = 1;
         
     /**
-     * Constant used in the constructor specifying that this attribute is
-     * scoped by the configuration.
+     * Constant used in the constructor specifying that this attribute is {@link Configuration}-scoped.
      */
     public static final int SCOPE_CONFIGURATION = 2;
 
@@ -73,74 +84,155 @@ public class CustomAttribute
     }
     
     /**
-     * @return the value of the attribute in the context of the current environment.
-     * @throws IllegalStateException if there is no current environment (and
-     * hence also no current template and configuration), therefore the
-     * attribute's current scope object can't be resolved.
+     * Gets the attribute from the appropriate scope that's accessible through the specified {@link Environment}. If
+     * the attribute has {@link #SCOPE_ENVIRONMENT} scope, it will be get from the given {@link Environment} directly.
+     * If the attribute has {@link #SCOPE_TEMPLATE} scope, it will be get from the parent of the given
+     * {@link Environment} (that is, in {@link Environment#getParent()}) directly). If the attribute has
+     * {@link #SCOPE_CONFIGURATION} scope, it will be get from {@link Environment#getConfiguration()}.
+     * 
+     * @throws NullPointerException
+     *             If {@code env} is null
+     * 
+     * @return The new value of the attribute (possibly {@code null}), or {@code null} if the attribute doesn't exist.
+     * 
+     * @since 2.3.22
+     */
+    public final Object get(Environment env) {
+        return getScopeConfigurable(env).getCustomAttribute(key, this);
+    }
+
+    /**
+     * Same as {@link #get(Environment)}, but uses {@link Environment#getCurrentEnvironment()} to fill the 2nd argument.
+     * 
+     * @throws IllegalStateException
+     *             If there is no current {@link Environment}, which is usually the case when the current thread isn't
+     *             processing a template.
      */
     public final Object get() {
-        return getScopeConfigurable().getCustomAttribute(key, this);
+        return getScopeConfigurable(getRequiredCurrentEnvironment()).getCustomAttribute(key, this);
     }
     
     /**
-     * @return the value of a template-scope attribute in the context of a 
-     * given template.
-     * @throws UnsupportedOperationException if this custom attribute is not a
-     * template-scope attribute
-     * @throws NullPointerException if t is null
+     * Gets the value of a {@link Template}-scope attribute from the given {@link Template}.
+     * 
+     * @throws UnsupportedOperationException
+     *             If this custom attribute has different scope than {@link #SCOPE_TEMPLATE}.
+     * @throws NullPointerException
+     *             If {@code template} is null
      */
-    public final Object get(Template t) {
+    public final Object get(Template template) {
         if(scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        return ((Configurable)t).getCustomAttribute(key, this);
+        return ((Configurable)template).getCustomAttribute(key, this);
     }
     
     /**
-     * Sets the value of the attribute in the context of the current environment.
-     * @param value the new value of the attribute
-     * @throws IllegalStateException if there is no current environment (and
-     * hence also no current template and configuration), therefore the
-     * attribute's current scope object can't be resolved.
+     * Gets the value of a {@link Configuration}-scope attribute from the given {@link Configuration}.
+     * 
+     * @throws UnsupportedOperationException
+     *             If this custom attribute has different scope than {@link #SCOPE_CONFIGURATION}.
+     * @throws NullPointerException
+     *             If {@code cfg} is null
+     * 
+     * @since 2.3.22
+     */
+    public final Object get(Configuration cfg) {
+        if(scope != SCOPE_CONFIGURATION) {
+            throw new UnsupportedOperationException("This is not a template-scope attribute");
+        }
+        return ((Configurable) cfg).getCustomAttribute(key, this);
+    }
+    
+    
+    /**
+     * Sets the attribute inside the appropriate scope that's accessible through the specified {@link Environment}. If
+     * the attribute has {@link #SCOPE_ENVIRONMENT} scope, it will be set in the given {@link Environment} directly. If
+     * the attribute has {@link #SCOPE_TEMPLATE} scope, it will be set in the parent of the given {@link Environment}
+     * (that is, in {@link Environment#getParent()}) directly). If the attribute has {@link #SCOPE_CONFIGURATION} scope,
+     * it will be set in {@link Environment#getConfiguration()}.
+     * 
+     * @param value
+     *            The new value of the attribute. Can be {@code null}.
+     * 
+     * @throws NullPointerException
+     *             If {@code env} is null
+     * 
+     * @since 2.3.22
+     */
+    public final void set(Object value, Environment env) {
+        getScopeConfigurable(env).setCustomAttribute(key, value);
+    }
+
+    /**
+     * Same as {@link #set(Object, Environment)}, but uses {@link Environment#getCurrentEnvironment()} to fill the 2nd
+     * argument.
+     * 
+     * @throws IllegalStateException
+     *             If there is no current {@link Environment}, which is usually the case when the current thread isn't
+     *             processing a template.
      */
     public final void set(Object value) {
-        getScopeConfigurable().setCustomAttribute(key, value);
+        getScopeConfigurable(getRequiredCurrentEnvironment()).setCustomAttribute(key, value);
     }
 
     /**
-     * Sets the value of a template-scope attribute in the context of the given
-     * template.
-     * @param value the new value of the attribute
-     * @param t the template 
-     * @throws UnsupportedOperationException if this custom attribute is not a
-     * template-scope attribute
-     * @throws NullPointerException if t is null
+     * Sets the value of a {@link Template}-scope attribute in the given {@link Template}.
+     * 
+     * @param value
+     *            The new value of the attribute. Can be {@code null}.
+     * 
+     * @throws UnsupportedOperationException
+     *             If this custom attribute has different scope than {@link #SCOPE_TEMPLATE}.
+     * @throws NullPointerException
+     *             If {@code template} is null
      */
-    public final void set(Object value, Template t) {
+    public final void set(Object value, Template template) {
         if(scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        ((Configurable)t).setCustomAttribute(key, value);
+        ((Configurable) template).setCustomAttribute(key, value);
     }
 
-    private Configurable getScopeConfigurable() {
-        Configurable c = Environment.getCurrentEnvironment();
+    /**
+     * Sets the value of a {@link Configuration}-scope attribute in the given {@link Configuration}.
+     * 
+     * @param value
+     *            The new value of the attribute. Can be {@code null}.
+     * 
+     * @throws UnsupportedOperationException
+     *             If this custom attribute has different scope than {@link #SCOPE_CONFIGURATION}.
+     * @throws NullPointerException
+     *             If {@code cfg} is null
+     * 
+     * @since 2.3.22
+     */
+    public final void set(Object value, Configuration cfg) {
+        if(scope != SCOPE_CONFIGURATION) {
+            throw new UnsupportedOperationException("This is not a configuration-scope attribute");
+        }
+        ((Configurable) cfg).setCustomAttribute(key, value);
+    }
+    
+    private Environment getRequiredCurrentEnvironment() {
+        Environment c = Environment.getCurrentEnvironment();
         if(c == null) {
             throw new IllegalStateException("No current environment");
         }
-        switch(scope) {
-            case SCOPE_ENVIRONMENT: {
-                return c;
-            }
-            case SCOPE_TEMPLATE: {
-                return c.getParent();
-            }
-            case SCOPE_CONFIGURATION: {
-                return c.getParent().getParent();
-            }
-            default: {
-                throw new Error();
-            }
+        return c;
+    }
+
+    private Configurable getScopeConfigurable(Environment env) throws Error {
+        switch (scope) {
+        case SCOPE_ENVIRONMENT:
+            return env;
+        case SCOPE_TEMPLATE:
+            return env.getParent();
+        case SCOPE_CONFIGURATION:
+            return env.getParent().getParent();
+        default:
+            throw new BugException();
         }
     }
+    
 }

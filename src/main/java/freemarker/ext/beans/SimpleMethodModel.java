@@ -46,9 +46,10 @@ public final class SimpleMethodModel extends SimpleMethod
 
     /**
      * Creates a model for a specific method on a specific object.
-     * @param object the object to call the method on. Can be
-     * <tt>null</tt> for static methods.
+     * @param object the object to call the method on, or {@code null} for a static method.
      * @param method the method that will be invoked.
+     * @param argTypes Either pass in {@code Method#getParameterTypes() method.getParameterTypes()} here,
+     *          or reuse an earlier result of that call (for speed). Not {@code null}.
      */
     SimpleMethodModel(Object object, Method method, Class[] argTypes, 
             BeansWrapper wrapper)
@@ -76,7 +77,6 @@ public final class SimpleMethodModel extends SimpleMethod
         }
         catch(Exception e)
         {
-            if (e instanceof TemplateModelException) throw (TemplateModelException) e;
             throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
         }
     }

@@ -35,7 +35,7 @@ import freemarker.template.utility.StringUtil;
  */
 public class _ErrorDescriptionBuilder {
 
-    private static final Logger logger = Logger.getLogger("freemarker.runtime");
+    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
     private final String description;
     private final Object[] descriptionParts;
@@ -82,7 +82,7 @@ public class _ErrorDescriptionBuilder {
             } catch (Throwable e) {
                 // Should not happen. But we rather give a not-so-good error message than replace it with another...
                 // So we ignore this.
-                logger.error("Error when searching blamer for better error message.", e);
+                LOG.error("Error when searching blamer for better error message.", e);
             }
         }
         
@@ -147,6 +147,7 @@ public class _ErrorDescriptionBuilder {
                 sb.append("\n\n");
                 for (int i = 0; i < allTips.length; i++) {
                     if (i != 0) sb.append('\n');
+                    sb.append(_CoreAPI.ERROR_MESSAGE_HR).append('\n');
                     sb.append("Tip: ");
                     Object tip = allTips[i];
                     if (!(tip instanceof Object[])) {
@@ -155,6 +156,7 @@ public class _ErrorDescriptionBuilder {
                         appendParts(sb, (Object[]) tip);
                     }
                 }
+                sb.append('\n').append(_CoreAPI.ERROR_MESSAGE_HR);
             }
         }
         

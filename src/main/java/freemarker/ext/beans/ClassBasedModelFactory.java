@@ -62,7 +62,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
 
         final ClassIntrospector classIntrospector;
         int classIntrospectorClearingCounter;
-        final Object sharedLock = wrapper.getSharedInrospectionLock();
+        final Object sharedLock = wrapper.getSharedIntrospectionLock();
         synchronized (sharedLock) {
             TemplateModel model = (TemplateModel) cache.get(key);
             if (model != null) return model;
@@ -121,13 +121,13 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     }
     
     void clearCache() {
-        synchronized(wrapper.getSharedInrospectionLock()) {
+        synchronized(wrapper.getSharedIntrospectionLock()) {
             cache.clear();
         }
     }
     
     void removeFromCache(Class clazz) {
-        synchronized(wrapper.getSharedInrospectionLock()) {
+        synchronized(wrapper.getSharedIntrospectionLock()) {
             cache.remove(clazz.getName());
         }
     }

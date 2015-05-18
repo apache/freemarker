@@ -19,7 +19,6 @@ package freemarker.ext.beans;
 import static org.junit.Assert.*;
 
 import java.lang.ref.Reference;
-import java.lang.reflect.Method;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

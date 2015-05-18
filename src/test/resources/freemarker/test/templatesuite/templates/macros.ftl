@@ -73,6 +73,11 @@ foo=${foo} baz=[<#list bar?keys?sort as key>${key}=${bar[key]}<#if key_has_next>
   ${pattern}<#lt>
 </#macro>
 
+<#macro m a=1 b=2>
+</#macro>
+<@assertFails message='"c"'><@m c=3 /></@>
+<@assertFails message='3'><@m 9 8 7 /></@>
+
 <call fmt("Hello {0}! Today is {1}.", "World", "Monday")>
 
 </body>

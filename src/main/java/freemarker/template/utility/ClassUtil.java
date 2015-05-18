@@ -36,6 +36,7 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateHashModel;
@@ -205,7 +206,8 @@ public class ClassUtil
         if (TemplateSequenceModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "sequence");
         } else if (TemplateCollectionModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "collection");
+            appendTypeName(sb, typeNamesAppended,
+                    TemplateCollectionModelEx.class.isAssignableFrom(cl) ? "extended_collection" : "collection");
         } else if (TemplateModelIterator.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "iterator");
         }
@@ -213,7 +215,6 @@ public class ClassUtil
         if (TemplateMethodModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "method");
         }
-        
         
         if (Environment.Namespace.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "namespace");

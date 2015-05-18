@@ -51,10 +51,10 @@ final class HashLiteral extends Expression {
             Expression key = (Expression) keys.get(i);
             Expression value = (Expression) values.get(i);
             buf.append(key.getCanonicalForm());
-            buf.append(" : ");
+            buf.append(": ");
             buf.append(value.getCanonicalForm());
             if (i != size-1) {
-                buf.append(",");
+                buf.append(", ");
             }
         }
         buf.append("}");
@@ -163,6 +163,11 @@ final class HashLiteral extends Expression {
         public boolean isEmpty() {
             return size == 0;
         }
+        
+        public String toString() {
+            return getCanonicalForm();
+        }
+        
     }
 
     int getParameterCount() {

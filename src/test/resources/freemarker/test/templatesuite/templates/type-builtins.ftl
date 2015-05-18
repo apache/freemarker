@@ -1,9 +1,10 @@
 <#setting boolean_format="1,0">
-StNuBoMeTaMaHaHxSeCoEnInDiNo
+StNuBoMeTaMaHaHxSeCoCxEnInDiNo
 <#foreach x in [
   "a", 1, false,
   testmethod, testmacro, html_escape,
-  {"a":1}, [1], testcollection, testnode,
+  {"a":1}, [1], testcollection, testcollectionEx,
+  testnode,
   bean, bean.m, bean.mOverloaded
 ]>
   ${x?is_string} <#t>
@@ -16,6 +17,7 @@ StNuBoMeTaMaHaHxSeCoEnInDiNo
   ${x?is_hash_ex} <#t>
   ${x?is_sequence} <#t>
   ${x?is_collection} <#t>
+  ${x?is_collection_ex} <#t>
   ${x?is_enumerable} <#t>
   ${x?is_indexable} <#t>
   ${x?is_directive} <#t>

@@ -74,7 +74,7 @@ ${({} + { "a" : "foo" }).a}, ${({ "a" : "bar" } + {}).a}
 <@noOutput>
 
 <#assign m = { 'a': 1, 'b', 2, 'a': 3 }>
-<#if testName?ends_with('2.3.21')>
+<#if iciIntValue gte 2003021>
 	<@assertEquals expected="a, b" actual=m?keys?join(', ') />
 	<@assertEquals expected="3, 2" actual=m?values?join(', ') />
 	<@assertEquals expected=3 actual=m['a'] />

@@ -1,0 +1,55 @@
+<!-- Test loading from web.xml-mapped JAR -->
+enter TestSimpleTag simpletag1
+invoking body i=0
+foo
+exit TestSimpleTag simpletag1
+TestTag2.doStartTag() called here
+TestTag2.doEndTag() called here
+
+<!-- Test loading from autodeployed WEB-INF/lib/*.jar -->
+TestTag3.doStartTag() called here
+TestTag3.doEndTag() called here
+
+<!-- Test loading from root-relative URL -->
+TestTag2.doStartTag() called here
+TestTag2.doEndTag() called here
+
+<!-- Test loading from non-root-relative URL -->
+TestTag2.doStartTag() called here
+TestTag2.doEndTag() called here
+
+<!-- Test loading from autodeployed .tld -->
+Executed TestSimpleTag2
+Executed TestSimpleTag3
+
+<!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
+Executed TestSimpleTag2
+Executed TestSimpleTag3
+
+<!-- Test loading from "MetaInfTldSources", inherited from Jetty -->
+a+b
+
+<!-- Test loading from "MetaInfTldSources", set via init-param -->
+Executed TestSimpleTag3
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Age</th>
+<th>Maried</th></tr></thead>
+<tbody>
+<tr class="odd">
+<td>Joe</td>
+<td>30</td>
+<td>true</td></tr>
+<tr class="even">
+<td>Fred</td>
+<td>25</td>
+<td>false</td></tr>
+<tr class="odd">
+<td>Emma</td>
+<td>28</td>
+<td>true</td></tr></tbody></table>
+
+<!-- Test loading from mapped relative URL -->
+Executed TestSimpleTag2

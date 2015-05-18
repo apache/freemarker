@@ -99,7 +99,7 @@ class OverloadedNumberUtil {
             BigDecimal n = (BigDecimal) num; 
             if ((typeFlags & TypeFlags.MASK_KNOWN_INTEGERS) != 0
                     && (typeFlags & TypeFlags.MASK_KNOWN_NONINTEGERS) != 0
-                    && NumberUtil.isBigDecimalInteger(n) /* <- can be expensive */) {
+                    && NumberUtil.isIntegerBigDecimal(n) /* <- can be expensive */) {
                 return new IntegerBigDecimal(n);
             } else {
                 // Either it was a non-integer, or it didn't mater what it was, as we don't have both integer and

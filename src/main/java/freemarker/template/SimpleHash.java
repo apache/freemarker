@@ -24,27 +24,53 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.beans.BeansWrapper;
 
 /**
- * <p>A simple implementation of the <tt>TemplateHashModelEx</tt>
- * interface, using an underlying {@link Map} or {@link SortedMap}.</p>
+ * A simple implementation of the {@link TemplateHashModelEx} interface, using its own underlying {@link Map} or
+ * {@link SortedMap} for storing the hash entries. If you are wrapping an already existing {@link Map}, you should
+ * certainly use {@link DefaultMapAdapter} instead (see comparison below).
  *
- * <p>This class is thread-safe if you don't call the <tt>put</tt> or <tt>remove</tt> methods
- * after you have made the object available for multiple threads. Those methods aren't called by FreeMarker, so it's
- * usually not a concern.
+ * <p>
+ * This class is thread-safe if you don't call modifying methods (like {@link #put(String, Object)},
+ * {@link #remove(String)}, etc.) after you have made the object available for multiple threads (assuming you have
+ * published it safely to the other threads; see JSR-133 Java Memory Model). These methods aren't called by FreeMarker,
+ * so it's usually not a concern.
+ * 
+ * <p>
+ * <b>{@link SimpleHash} VS {@link DefaultMapAdapter} - Which to use when?</b>
+ * 
+ * <p>
+ * For a {@link Map} that exists regardless of FreeMarker, only you need to access it from templates,
+ * {@link DefaultMapAdapter} should be the default choice, as it reflects the exact behavior of the underlying
+ * {@link Map} (no surprises), can be unwrapped to the originally wrapped object (important when passing it to Java
+ * methods from the template), and has more predictable performance (no spikes).
+ * 
+ * <p>
+ * For a hash that's made specifically to be used from templates, creating an empty {@link SimpleHash} then filling it
+ * with {@link SimpleHash#put(String, Object)} is usually the way to go, as the resulting hash is significantly faster
+ * to read from templates than a {@link DefaultMapAdapter} (though it's somewhat slower to read from a plain Java method
+ * to which it had to be passed adapted to a {@link Map}).
+ * 
+ * <p>
+ * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the hash from a
+ * {@link Map} (via {@link SimpleHash#SimpleHash(Map, ObjectWrapper)} or
+ * {@link SimpleHash#SimpleHash(Map, ObjectWrapper)}), which will be the faster depends on how many times will the
+ * <em>same</em> {@link Map} entry be read from the template(s) later, on average. If, on average, you read each entry
+ * for more than 4 times, {@link SimpleHash} will be most certainly faster, but if for 2 times or less (and especially
+ * if not at all) then {@link DefaultMapAdapter} will be. Before choosing based on performance though, pay attention to
+ * the behavioral differences; {@link SimpleHash} will shallow-copy the original {@link Map} at construction time, so
+ * key order will be lost in some cases, and it won't reflect {@link Map} content changes after the {@link SimpleHash}
+ * construction, also {@link SimpleHash} can't be unwrapped to the original {@link Map} instance.
  *
- * <p><b>Note:</b><br />
- * As of 2.0, this class is unsynchronized by default.
- * To obtain a synchronized wrapper, call the {@link #synchronizedWrapper} method.</p>
- *
- * @see SimpleSequence
- * @see SimpleScalar
+ * @see DefaultMapAdapter
+ * @see TemplateHashModelEx
  */
-public class SimpleHash extends WrappingTemplateModel 
-implements TemplateHashModelEx, Serializable {
+public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx, Serializable {
 
-    private Map map;
+    private final Map map;
     private boolean putFailed;
     private Map unwrappedMap;
 
@@ -86,22 +112,22 @@ implements TemplateHashModelEx, Serializable {
     }
 
     /**
-     * Creates a new simple hash with the copy of the underlying map and 
-     * either the default wrapper set in 
-     * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}, or
-     * the {@link freemarker.ext.beans.BeansWrapper JavaBeans wrapper}.
-     * @param map The Map to use for the key/value pairs. It makes a copy for 
-     * internal use. If the map implements the {@link SortedMap} interface, the
-     * internal copy will be a {@link TreeMap}, otherwise it will be a 
-     * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If null, the default wrapper set in 
-     * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)} is
-     * used.
+     * Creates a new hash by shallow-coping (possibly cloning) the underlying map; in many applications you should use
+     * {@link DefaultMapAdapter} instead.
+     *
+     * @param map
+     *            The Map to use for the key/value pairs. It makes a copy for internal use. If the map implements the
+     *            {@link SortedMap} interface, the internal copy will be a {@link TreeMap}, otherwise it will be a
+     * @param wrapper
+     *            The object wrapper to use to wrap contained objects into {@link TemplateModel} instances. Using
+     *            {@code null} is deprecated but allowed, in which case the deprecated default wrapper set in
+     *            {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)} is used.
      */
     public SimpleHash(Map map, ObjectWrapper wrapper) {
         super(wrapper);
+        Map mapCopy;
         try {
-            this.map = copyMap(map);
+            mapCopy = copyMap(map);
         } catch (ConcurrentModificationException cme) {
             //This will occur extremely rarely.
             //If it does, we just wait 5 ms and try again. If 
@@ -113,9 +139,10 @@ implements TemplateHashModelEx, Serializable {
             } catch (InterruptedException ie) {
             }
             synchronized (map) {
-                this.map = copyMap(map);
+                mapCopy = copyMap(map);
             }
         }
+        this.map = mapCopy;
     }
 
     protected Map copyMap(Map map) {
@@ -134,14 +161,16 @@ implements TemplateHashModelEx, Serializable {
     }
 
     /**
-     * Adds a key-value entry to the map.
+     * Adds a key-value entry to this hash.
      *
-     * @param key the name by which the object is
-     * identified in the template.
-     * @param obj the object to store.
+     * @param key
+     *            The name by which the object is identified in the template.
+     * @param value
+     *            The value to which the name will be associated. This will only be wrapped to {@link TemplateModel}
+     *            lazily when it's first read.
      */
-    public void put(String key, Object obj) {
-        map.put(key, obj);
+    public void put(String key, Object value) {
+        map.put(key, value);
         unwrappedMap = null;
     }
 
@@ -157,7 +186,22 @@ implements TemplateHashModelEx, Serializable {
     }
 
     public TemplateModel get(String key) throws TemplateModelException {
-        Object result = map.get(key);
+        Object result;
+        try {
+            result = map.get(key);
+        } catch (ClassCastException e) {
+            throw new _TemplateModelException(
+                    e, new Object[] {
+                            "ClassCastException while getting Map entry with String key ",
+                            new _DelayedJQuote(key)
+                    });
+        } catch (NullPointerException e) {
+            throw new _TemplateModelException(
+                    e, new Object[] {
+                            "NullPointerException while getting Map entry with String key ",
+                            new _DelayedJQuote(key)
+                    });
+        }
         // The key to use for putting -- it's the key that already exists in
         // the map (either key or charKey below). This way, we'll never put a 
         // new key in the map, avoiding spurious ConcurrentModificationException
@@ -165,12 +209,27 @@ implements TemplateHashModelEx, Serializable {
         // SourceForge tracker.
         Object putKey = null;
         if (result == null) {
-            if (key.length() == 1) {
-                // just check for Character key if this is a single-character string
+            // Check for Character key if this is a single-character string.
+            // In SortedMap-s, however, we can't do that safely, as it can cause ClassCastException.
+            if (key.length() == 1 && !(map instanceof SortedMap)) {
                 Character charKey = new Character(key.charAt(0));
-                result = map.get(charKey);
-                if (result != null || map.containsKey(charKey)) {
-                    putKey = charKey;
+                try {
+                    result = map.get(charKey);
+                    if (result != null || map.containsKey(charKey)) {
+                        putKey = charKey;
+                    }
+                } catch (ClassCastException e) {
+                    throw new _TemplateModelException(
+                            e, new Object[] {
+                                    "ClassCastException while getting Map entry with Character key ",
+                                    new _DelayedJQuote(key)
+                            });
+                } catch (NullPointerException e) {
+                    throw new _TemplateModelException(
+                            e, new Object[] {
+                                    "NullPointerException while getting Map entry with Character key ",
+                                    new _DelayedJQuote(key)
+                            });
                 }
             }
             if (putKey == null) {
@@ -263,8 +322,7 @@ implements TemplateHashModelEx, Serializable {
     }
 
     /**
-     * Convenience method for returning the <tt>String</tt> value of the
-     * underlying map.
+     * Returns the {@code toString()} of the underlying {@link Map}.
      */
     public String toString() {
         return map.toString();
@@ -289,7 +347,6 @@ implements TemplateHashModelEx, Serializable {
     public SimpleHash synchronizedWrapper() {
         return new SynchronizedHash();
     }
-    
     
     private class SynchronizedHash extends SimpleHash {
 

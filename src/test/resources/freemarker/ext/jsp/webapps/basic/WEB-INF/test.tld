@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" version="2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+  <tlib-version>3.0</tlib-version>
+  <short-name>FreeMarker-test-taglib</short-name>
+  <uri>http://freemarker.org/test/taglibs/test</uri>
+
+  <tag>
+    <name>testtag</name>
+    <tag-class>freemarker.ext.jsp.taglibmembers.TestTag</tag-class>
+    <body-content>JSP</body-content>
+  </tag>
+
+  <tag>
+    <name>simpletag</name>
+    <tag-class>freemarker.ext.jsp.taglibmembers.TestSimpleTag</tag-class>
+    <body-content>JSP</body-content>
+  </tag>
+
+  <tag>
+    <name>getAndSet</name>
+    <tag-class>freemarker.ext.jsp.taglibmembers.GetAndSetTag</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+        <name>name</name>
+        <required>true</required>
+        <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+        <name>value</name>
+        <required>true</required>
+        <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+        <name>scope</name>
+        <required>false</required>
+        <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>attributeInfo</name>
+    <tag-class>freemarker.ext.jsp.taglibmembers.AttributeInfoTag</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+        <name>name</name>
+        <required>true</required>
+        <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+        <name>scope</name>
+        <required>false</required>
+        <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  
+</taglib>

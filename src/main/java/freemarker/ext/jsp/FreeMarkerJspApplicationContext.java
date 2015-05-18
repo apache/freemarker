@@ -44,7 +44,7 @@ import freemarker.template.utility.ClassUtil;
  */
 class FreeMarkerJspApplicationContext implements JspApplicationContext
 {
-    private static final Logger logger = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
     private static final ExpressionFactory expressionFactoryImpl = findExpressionFactoryImplementation();
     
     private final LinkedList listeners = new LinkedList();
@@ -72,7 +72,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext
         if(ef == null) {
             ef = tryExpressionFactoryImplementation("org.apache");
             if(ef == null) {
-                logger.warn("Could not find any implementation for " + 
+                LOG.warn("Could not find any implementation for " + 
                         ExpressionFactory.class.getName());
             }
         }
@@ -84,17 +84,17 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext
         try {
             Class cl = ClassUtil.forName(className);
             if(ExpressionFactory.class.isAssignableFrom(cl)) {
-                logger.info("Using " + className + " as implementation of " + 
+                LOG.info("Using " + className + " as implementation of " + 
                         ExpressionFactory.class.getName());
                 return (ExpressionFactory)cl.newInstance();
             }
-            logger.warn("Class " + className + " does not implement " + 
+            LOG.warn("Class " + className + " does not implement " + 
                     ExpressionFactory.class.getName());
         }
         catch(ClassNotFoundException e) {
         }
         catch(Exception e) {
-            logger.error("Failed to instantiate " + className, e);
+            LOG.error("Failed to instantiate " + className, e);
         }
         return null;
     }

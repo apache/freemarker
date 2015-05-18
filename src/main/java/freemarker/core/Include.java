@@ -18,7 +18,7 @@ package freemarker.core;
 
 import java.io.IOException;
 
-import freemarker.cache.TemplateCache;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -32,11 +32,10 @@ import freemarker.template.utility.StringUtil;
  */
 final class Include extends TemplateElement {
 
-    private final Expression includedTemplatePathExp, encodingExp, parseExp, ignoreMissingExp;
+    private final Expression includedTemplateNameExp, encodingExp, parseExp, ignoreMissingExp;
     private final String encoding;
     private final Boolean parse;
     private final Boolean ignoreMissing;
-    private final String baseDirectoryPath;
 
     /**
      * @param template the template that this <tt>#include</tt> is a part of.
@@ -47,8 +46,7 @@ final class Include extends TemplateElement {
     Include(Template template,
             Expression includedTemplatePathExp,
             Expression encodingExp, Expression parseExp, Expression ignoreMissingExp) throws ParseException {
-        this.baseDirectoryPath = getBaseDirectoryPath(template);
-        this.includedTemplatePathExp = includedTemplatePathExp;
+        this.includedTemplateNameExp = includedTemplatePathExp;
         
         this.encodingExp = encodingExp;
         if (encodingExp == null) {
@@ -120,18 +118,16 @@ final class Include extends TemplateElement {
         }
     }
 
-    private String getBaseDirectoryPath(Template template) {
-        String s = template.getName();
-        if (s == null) {
-            // Possible if the template wasn't created through Configuration.getTemplate. 
-            return "";
-        }
-        int lastSlash = s.lastIndexOf('/');
-        return lastSlash == -1 ? "" : s.substring(0, lastSlash + 1);
-    }
-
     void accept(Environment env) throws TemplateException, IOException {
-        final String includedTemplatePath = includedTemplatePathExp.evalAndCoerceToString(env);
+        final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToString(env);
+        final String fullIncludedTemplateName;
+        try {
+            fullIncludedTemplateName = env.toFullTemplateName(getTemplate().getName(), includedTemplateName);
+        } catch (MalformedTemplateNameException e) {
+            throw new _MiscTemplateException(e, env, new Object[] {
+                    "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",
+                    e.getMalformednessDescription() });
+        }
         
         final String encoding = this.encoding != null
                 ? this.encoding
@@ -157,19 +153,13 @@ final class Include extends TemplateElement {
                 : ignoreMissingExp.evalToBoolean(env);
         
         final Template includedTemplate;
-        final String fullIncludedTemplatePath = TemplateCache.getFullTemplatePath(
-                env, baseDirectoryPath, includedTemplatePath);
         try {
-            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplatePath, encoding, parse, ignoreMissing);
-        } catch (ParseException e) {
-            throw new _MiscTemplateException(e, env, new Object[] {
-                    "Error parsing included template ",
-                    new _DelayedJQuote(fullIncludedTemplatePath), ":\n",
-                    new _DelayedGetMessage(e) });
+            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplateName, encoding, parse, ignoreMissing);
         } catch (IOException e) {
             throw new _MiscTemplateException(e, env, new Object[] {
-                    "Error reading included file ", new _DelayedJQuote(fullIncludedTemplatePath), ":\n",
-                    new _DelayedGetMessage(e) });
+                    "Template inclusion failed (for parameter value ",
+                    new _DelayedJQuote(includedTemplateName),
+                    "):\n", new _DelayedGetMessage(e) });
         }
         if (includedTemplate != null) {
             env.include(includedTemplate);
@@ -181,7 +171,7 @@ final class Include extends TemplateElement {
         if (canonical) buf.append('<');
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
-        buf.append(includedTemplatePathExp.getCanonicalForm());
+        buf.append(includedTemplateNameExp.getCanonicalForm());
         if (encodingExp != null) {
             buf.append(" encoding=").append(encodingExp.getCanonicalForm());
         }
@@ -217,7 +207,7 @@ final class Include extends TemplateElement {
 
     Object getParameterValue(int idx) {
         switch (idx) {
-        case 0: return includedTemplatePathExp;
+        case 0: return includedTemplateNameExp;
         case 1: return parseExp;
         case 2: return encodingExp;
         case 3: return ignoreMissingExp;
@@ -233,6 +223,10 @@ final class Include extends TemplateElement {
         case 3: return ParameterRole.IGNORE_MISSING_PARAMETER;
         default: throw new IndexOutOfBoundsException();
         }
+    }
+
+    boolean isNestedBlockRepeater() {
+        return false;
     }
 
 /*

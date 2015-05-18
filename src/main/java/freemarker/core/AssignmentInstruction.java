@@ -111,4 +111,9 @@ final class AssignmentInstruction extends TemplateElement {
         } 
         return this;
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
+    
 }

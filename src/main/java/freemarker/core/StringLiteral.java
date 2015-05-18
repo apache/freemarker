@@ -35,21 +35,36 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         this.value = value;
     }
     
-    void checkInterpolation() throws ParseException {
+    /**
+     * @param parentTokenSource
+     *            The token source of the template that contains this string literal. As of this writing, we only need
+     *            this to share the {@code namingConvetion} with that.
+     */
+    // TODO This should be the part of the "parent" parsing; now it contains hacks like those with namingConvention.  
+    void parseValue(FMParserTokenManager parentTokenSource) throws ParseException {
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
             SimpleCharStream scs = new SimpleCharStream(new StringReader(value), beginLine, beginColumn+1, value.length());
+            
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
             token_source.onlyTextOutput = true;
+            token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
+            token_source.namingConvention = parentTokenSource.namingConvention;
+            token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
+            
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getTemplate());
             try {
                 dynamicValue = parser.FreeMarkerText();
             }
             catch(ParseException e) {
-                e.setTemplateName(getTemplate().getName());
+                e.setTemplateName(getTemplate().getSourceName());
                 throw e;
             }
             this.constantValue = null;
+            
+            // We participate in detecting the namingConvention.
+            parentTokenSource.namingConvention = token_source.namingConvention;
+            parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
         }
     }
     
@@ -89,7 +104,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
 
     public String getCanonicalForm() {
-        return "\"" + StringUtil.FTLStringLiteralEnc(value) + "\""; 
+        return StringUtil.ftlQuote(value); 
     }
     
     String getNodeTypeSymbol() {

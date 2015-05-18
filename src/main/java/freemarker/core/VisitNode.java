@@ -66,7 +66,7 @@ final class VisitNode extends TemplateElement {
                 }
             }
         }
-        env.visit((TemplateNodeModel) node, (TemplateSequenceModel) nss);
+        env.invokeNodeHandlerFor((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
     protected String dump(boolean canonical) {
@@ -105,6 +105,10 @@ final class VisitNode extends TemplateElement {
         case 1: return ParameterRole.NAMESPACE;
         default: throw new IndexOutOfBoundsException();
         }
+    }
+
+    boolean isNestedBlockRepeater() {
+        return true;
     }
     
 }

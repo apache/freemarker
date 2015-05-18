@@ -1,0 +1,1 @@
+from /WEB-INF/templates

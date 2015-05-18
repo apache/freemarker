@@ -22,6 +22,10 @@ import freemarker.debug.impl.DebuggerService;
 import freemarker.template.TemplateException;
 
 /**
+ * <b>Internal API - subject to change: A debug breakpoint inserted into the template</b> 
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 public class DebugBreak extends TemplateElement
 {
@@ -34,7 +38,7 @@ public class DebugBreak extends TemplateElement
     
     protected void accept(Environment env) throws TemplateException, IOException
     {
-        if(!DebuggerService.suspendEnvironment(env, this.getTemplate().getName(), nestedBlock.getBeginLine()))
+        if(!DebuggerService.suspendEnvironment(env, this.getTemplate().getSourceName(), nestedBlock.getBeginLine()))
         {
             nestedBlock.accept(env);
         }
@@ -76,6 +80,10 @@ public class DebugBreak extends TemplateElement
 
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
+    }
+
+    boolean isNestedBlockRepeater() {
+        return false;
     }
         
 }

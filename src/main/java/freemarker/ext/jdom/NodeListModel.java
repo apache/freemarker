@@ -66,7 +66,7 @@ import freemarker.template.TemplateSequenceModel;
  * See individual method documentation for exact details on how the class works. In
  * short:
  * <ul>
- * <li>{@link #getAsString()} will render all contained nodes as XML fragment,</tt>
+ * <li>{@link #getAsString()} will render all contained nodes as XML fragment,
  * <li>{@link #exec(List)} provides full XPath functionality implemented on top of
  * the <a href="http://www.jaxen.org">Jaxen</a> library,</li>
  * <li>{@link #get(String)} provides node traversal, copying and filtering - somewhat
@@ -1202,6 +1202,8 @@ implements
      * document from the standard input, passes it to the template as variable
      * <tt>document</tt> and writes the result of template processing to
      * standard output.
+     * 
+     * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
      */
     public static void main(String[] args)
     throws

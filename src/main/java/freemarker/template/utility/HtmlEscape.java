@@ -26,7 +26,7 @@ import freemarker.template.TemplateTransformModel;
  * Performs an HTML escape of a given template fragment. Specifically,
  * &lt; &gt; &quot; and &amp; are all turned into entities.
  *
- * <p>Usage:<br />
+ * <p>Usage:<br>
  * From java:</p>
  * <pre>
  * SimpleHash root = new SimpleHash();

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import freemarker.template.ObjectWrapper;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.SimpleCollection;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
@@ -38,6 +39,11 @@ public final class HttpRequestHashModel implements TemplateHashModelEx
     private final HttpServletResponse response;
     private final ObjectWrapper wrapper;
 
+    /**
+     * @param wrapper
+     *            Should be an {@link ObjectWrapperAndUnwrapper}, or else some features might won't work properly. (It's
+     *            declared as {@link ObjectWrapper} only for backward compatibility.)
+     */
     public HttpRequestHashModel(
         HttpServletRequest request, ObjectWrapper wrapper)
     {

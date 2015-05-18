@@ -35,12 +35,12 @@ public class TokenMgrError extends Error
     */
 
    /**
-    * Lexical error occured.
+    * Lexical error occurred.
     */
    static final int LEXICAL_ERROR = 0;
 
    /**
-    * An attempt wass made to create a second instance of a static token manager.
+    * An attempt was made to create a second instance of a static token manager.
     */
    static final int STATIC_LEXER_ERROR = 1;
 
@@ -118,10 +118,10 @@ public class TokenMgrError extends Error
     * token manager to indicate a lexical error.
     * Parameters : 
     *    EOFSeen     : indicates if EOF caused the lexicl error
-    *    curLexState : lexical state in which this error occured
-    *    errorLine   : line number when the error occured
-    *    errorColumn : column number when the error occured
-    *    errorAfter  : prefix that was seen before this error occured
+    *    curLexState : lexical state in which this error occurred
+    *    errorLine   : line number when the error occurred
+    *    errorColumn : column number when the error occurred
+    *    errorAfter  : prefix that was seen before this error occurred
     *    curchar     : the offending character
     * Note: You can customize the lexical error message by modifying this method.
     */
@@ -159,6 +159,17 @@ public class TokenMgrError extends Error
 
    /**
     * @since 2.3.20
+    * 
+    * @deprecated If you know the end position, use {@link #TokenMgrError(String, int, int, int, int, int)} instead.
+    */
+   public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) {
+       this(detail, reason, errorLine, errorColumn, 0, 0);
+       this.endLineNumber = null; 
+       this.endColumnNumber = null; 
+    }
+   
+   /**
+    * @since 2.3.21
     */
    public TokenMgrError(String detail, int reason,
            int errorLine, int errorColumn,

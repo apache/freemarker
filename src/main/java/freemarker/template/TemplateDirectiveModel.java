@@ -54,11 +54,12 @@ public interface TemplateDirectiveModel extends TemplateModel
      * Never <code>null</code>, but can be a zero-length array.
      * @param body an object that can be used to render the nested content (body) of
      * the directive call. If the directive call has no nested content (i.e., it's like
-     * [@myDirective /] or [@myDirective][/@myDirective]), then this will be
+     * &lt;@myDirective /&gt; or &lt;@myDirective&gt;&lt;/@myDirective&gt;), then this will be
      * <code>null</code>.
      *
-     * @throws TemplateException
-     * @throws IOException
+     * @throws TemplateException If any problem occurs that's not an {@link IOException} during writing the template
+     *          output.
+     * @throws IOException When writing the template output fails.
      */
    public void execute(Environment env, Map params, TemplateModel[] loopVars, 
             TemplateDirectiveBody body) throws TemplateException, IOException;

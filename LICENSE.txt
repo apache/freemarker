@@ -27,12 +27,8 @@ Apache Software Foundation. These files are:
   
     freemarker/ext/jsp/web-app_2_2.dtd
     freemarker/ext/jsp/web-app_2_3.dtd
-    freemarker/ext/jsp/web-app_2_4.xsd
-    freemarker/ext/jsp/web-app_2_5.xsd
     freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
     freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
-    freemarker/ext/jsp/web-jsptaglibrary_2_0.xsd
-    freemarker/ext/jsp/web-jsptaglibrary_2_1.xsd
 
 
 Historical notes
@@ -45,5 +41,5 @@ relinquished the copyright in behalf of Visigoth Software Society.
 
 With FreeMarker 2.3.21 the license has changed to Apache License,
 Version 2.0, and the owner has changed from Visigoth Software Society
-to three of the FreeMarker 2.X developers, Attila Szegedi, Daniel
+to three of the FreeMarker 2.x developers, Attila Szegedi, Daniel
 Dekany, and Jonathan Revusky.

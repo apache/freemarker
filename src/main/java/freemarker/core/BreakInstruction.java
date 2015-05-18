@@ -50,6 +50,10 @@ final class BreakInstruction extends TemplateElement {
         private Break() {
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }
 

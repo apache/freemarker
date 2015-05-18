@@ -44,6 +44,7 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
 
@@ -59,9 +60,9 @@ import freemarker.template.utility.StringUtil;
 
 public class BeanModel
 implements
-    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel
+    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport
 {
-    private static final Logger logger = Logger.getLogger("freemarker.beans");
+    private static final Logger LOG = Logger.getLogger("freemarker.beans");
     protected final Object object;
     protected final BeansWrapper wrapper;
     
@@ -97,7 +98,7 @@ implements
      */
     public BeanModel(Object object, BeansWrapper wrapper)
     {
-        // TODO 2.4: All models were introspected here, then the results was discareded, and get() will just do the
+        // [2.4]: All models were introspected here, then the results was discareded, and get() will just do the
         // introspection again. So is this necessary? (The inrospectNow parameter was added in 2.3.21 to allow
         // lazy-introspecting BeansWrapper.trueModel|falseModel.)
         this(object, wrapper, true);
@@ -109,7 +110,7 @@ implements
         this.object = object;
         this.wrapper = wrapper;
         if (inrospectNow && object != null) {
-            // TODO: Could this be removed? [FM 2.4]
+            // [2.4]: Could this be removed?
             wrapper.getClassIntrospector().get(object.getClass());
         }
     }
@@ -150,7 +151,7 @@ implements
         
         try
         {
-            if(wrapper.isMethodsShadowItems())
+            if (wrapper.isMethodsShadowItems())
             {
                 Object fd = classInfo.get(key);
                 if(fd != null)
@@ -182,7 +183,7 @@ implements
             if (retval == UNKNOWN) {
                 if (wrapper.isStrict()) {
                     throw new InvalidPropertyException("No such bean property: " + key);
-                } else if (logger.isDebugEnabled()) {
+                } else if (LOG.isDebugEnabled()) {
                     logNoSuchKey(key, classInfo);
                 }
                 retval = wrapper.wrap(null);
@@ -196,7 +197,7 @@ implements
         catch(Exception e)
         {
             throw new _TemplateModelException(e, new Object [] {
-                    "An error has occured when reading existing sub-variable ", new _DelayedJQuote(key),
+                    "An error has occurred when reading existing sub-variable ", new _DelayedJQuote(key),
                     "; see cause exception! The type of the containing value was: ",
                     new _DelayedFTLTypeDescription(this)
             });
@@ -205,7 +206,7 @@ implements
 
     private void logNoSuchKey(String key, Map keyMap)
     {
-        logger.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
+        LOG.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
             object.getClass().getName() + ". Introspection information for " +
             "the class is: " + keyMap);
     }
@@ -389,5 +390,10 @@ implements
     protected Set keySet()
     {
         return wrapper.getClassIntrospector().keySet(object.getClass());
-    }    
+    }
+
+    public TemplateModel getAPI() throws TemplateModelException {
+        return wrapper.wrapAsAPI(object);
+    }
+    
 }

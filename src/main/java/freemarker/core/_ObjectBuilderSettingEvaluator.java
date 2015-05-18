@@ -531,12 +531,6 @@ public class _ObjectBuilderSettingEvaluator {
             }
             
             return result;
-            
-            /*
-            // !!T
-            return "class=" + className + ", v2321Mode=" + v2321Mode
-                    + ", positional=" + positionalParamValues + ", named=" + namedParamNames + namedParamValues;
-            */
         }
         
         private Object callConstructor(Class cl)
@@ -547,7 +541,7 @@ public class _ObjectBuilderSettingEvaluator {
                     return cl.newInstance();
                 } catch (Exception e) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "Failed to call " + cl.getName() + " constructor", e);
+                            "Failed to call " + cl.getName() + " 0-argument constructor", e);
                 }
             } else {
                 BeansWrapper ow = env.getObjectWrapper();

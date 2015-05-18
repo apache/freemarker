@@ -1,0 +1,379 @@
+Sorting scalars:
+----------------
+
+String order:
+- aardvark
+- Barbara
+- beetroot
+- whale
+- zeppelin
+
+First: aardvark
+Last: zeppelin
+Size 5
+
+Numerical order:
+- -324
+- -34
+- 0
+- 0.1
+- 0.11
+- 1
+- 5
+- 111
+- 123
+- 543
+
+First: -324
+Last: 543
+Size 10
+
+Date/time order:
+- 06:05
+- 08:05
+- 08:15
+- 18:00
+
+Boolean order:
+- false
+- false
+- true
+- true
+
+
+Sorting hashes:
+---------------
+
+Order by name:
+- aardvark: 30
+- Barbara: 53
+- beetroot: 0.3
+- whale: 2000
+- zeppelin: -200
+
+Order by weight:
+- zeppelin: -200
+- beetroot: 0.3
+- aardvark: 30
+- Barbara: 53
+- whale: 2000
+
+Order by a.x.v:
+- aqweqw
+- dfgdf
+- qweqw
+- utyu
+
+Order by a.y, which is a date:
+- 1998-02-20
+- 1999-01-20
+- 1999-04-19
+- 1999-04-20
+
+Reverse:
+--------
+
+Order by weight desc:
+- whale: 2000
+- Barbara: 53
+- aardvark: 30
+- beetroot: 0.3
+- zeppelin: -200
+
+Order by weight desc desc:
+- zeppelin: -200
+- beetroot: 0.3
+- aardvark: 30
+- Barbara: 53
+- whale: 2000
+
+Order by weight desc desc desc:
+- whale: 2000
+- Barbara: 53
+- aardvark: 30
+- beetroot: 0.3
+- zeppelin: -200
+
+Contains:
+---------
+
+True:
+true
+true
+true
+true
+true
+true
+true
+
+False:
+false
+false
+false
+false
+false
+false
+false
+
+False: false
+
+Index_of:
+---------
+
+0 = 0
+1 = 1
+2 = 2
+6 = 6
+0 = 0
+1 = 1
+2 = 2
+
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+
+-1 = -1
+
+Last_index_of:
+--------------
+
+6 = 6
+1 = 1
+2 = 2
+7 = 7
+-1 = -1
+0 = 0
+1 = 1
+2 = 2
+-1 = -1
+
+Index_of and last_index_of with starting indices
+------------------------------------------------
+
+seq_index_of "Joe":
+0 = 0
+0 = 0
+0 = 0
+2 = 2
+2 = 2
+-1 = -1
+-1 = -1
+ 
+seq_last_index_of "Joe":
+-1 = -1
+-1 = -1
+0 = 0
+0 = 0
+2 = 2
+2 = 2
+2 = 2
+ 
+seq_index_of "Susan":
+3 = 3
+3 = 3
+3 = 3
+3 = 3
+3 = 3
+3 = 3
+-1 = -1
+ 
+seq_last_index_of "Susan":
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+3 = 3
+3 = 3
+
+seq_index_of "a":
+0 = 0
+0 = 0
+0 = 0
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+
+seq_index_of "b":
+1 = 1
+1 = 1
+1 = 1
+1 = 1
+-1 = -1
+-1 = -1
+
+seq_index_of "c":
+2 = 2
+2 = 2
+2 = 2
+2 = 2
+2 = 2
+-1 = -1
+ 
+seq_last_index_of "a":
+-1 = -1
+-1 = -1
+0 = 0
+0 = 0
+0 = 0
+0 = 0
+0 = 0
+
+seq_last_index_of "b":
+-1 = -1
+-1 = -1
+-1 = -1
+1 = 1
+1 = 1
+1 = 1
+
+seq_last_index_of "c":
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+2 = 2
+2 = 2
+
+Sequence builtins ignoring nulls
+--------------------------------
+
+true = true
+2 = 2
+0 = 0
+
+These should throw exception, but for BC they don't:
+false = false
+-1 = -1
+-1 = -1
+
+Sequence built-ins failing on date-type mismatch
+------------------------------------------------
+
+
+Chunk
+-----
+
+columns = 1, fill = NULL:
+  Rows: 7
+    a   <-- Columns: 1
+    b   <-- Columns: 1
+    c   <-- Columns: 1
+    d   <-- Columns: 1
+    e   <-- Columns: 1
+    f   <-- Columns: 1
+    g   <-- Columns: 1
+  
+columns = 2, fill = NULL:
+  Rows: 4
+    a b   <-- Columns: 2
+    c d   <-- Columns: 2
+    e f   <-- Columns: 2
+    g   <-- Columns: 1
+  
+columns = 3, fill = NULL:
+  Rows: 3
+    a b c   <-- Columns: 3
+    d e f   <-- Columns: 3
+    g   <-- Columns: 1
+  
+columns = 4, fill = NULL:
+  Rows: 2
+    a b c d   <-- Columns: 4
+    e f g   <-- Columns: 3
+  
+columns = 5, fill = NULL:
+  Rows: 2
+    a b c d e   <-- Columns: 5
+    f g   <-- Columns: 2
+  
+columns = 10, fill = NULL:
+  Rows: 1
+    a b c d e f g   <-- Columns: 7
+  
+columns = 1, fill = -:
+  Rows: 7
+    a   <-- Columns: 1
+    b   <-- Columns: 1
+    c   <-- Columns: 1
+    d   <-- Columns: 1
+    e   <-- Columns: 1
+    f   <-- Columns: 1
+    g   <-- Columns: 1
+  
+columns = 2, fill = -:
+  Rows: 4
+    a b   <-- Columns: 2
+    c d   <-- Columns: 2
+    e f   <-- Columns: 2
+    g -   <-- Columns: 2
+  
+columns = 3, fill = -:
+  Rows: 3
+    a b c   <-- Columns: 3
+    d e f   <-- Columns: 3
+    g - -   <-- Columns: 3
+  
+columns = 4, fill = -:
+  Rows: 2
+    a b c d   <-- Columns: 4
+    e f g -   <-- Columns: 4
+  
+columns = 5, fill = -:
+  Rows: 2
+    a b c d e   <-- Columns: 5
+    f g - - -   <-- Columns: 5
+  
+columns = 10, fill = -:
+  Rows: 1
+    a b c d e f g - - -   <-- Columns: 10
+  
+columns = 3, fill = NULL:
+  Rows: 3
+    1 2 3   <-- Columns: 3
+    4 5 6   <-- Columns: 3
+    7 8 9   <-- Columns: 3
+  
+columns = 3, fill = -:
+  Rows: 3
+    1 2 3   <-- Columns: 3
+    4 5 6   <-- Columns: 3
+    7 8 9   <-- Columns: 3
+  
+columns = 3, fill = NULL:
+  Rows: 1
+    1   <-- Columns: 1
+  
+columns = 3, fill = -:
+  Rows: 1
+    1 - -   <-- Columns: 3
+  
+columns = 3, fill = NULL:
+  Rows: 0
+  
+columns = 3, fill = -:
+  Rows: 0
+  
+
+
+
+Join
+----
+
+- 1, two, three, 4
+- 
+- 1, two, three, 4.
+- (empty)
+- a, c
+- a, c
+- a, c.
+- 
+- (empty)
+- (empty)
+- a, b, c.
+- a, b, c.

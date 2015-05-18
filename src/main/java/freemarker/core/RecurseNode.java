@@ -110,5 +110,9 @@ final class RecurseNode extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
     
 }

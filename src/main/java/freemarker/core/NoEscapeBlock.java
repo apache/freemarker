@@ -57,5 +57,13 @@ class NoEscapeBlock extends TemplateElement {
     String getNodeTypeSymbol() {
         return "#noescape";
     }
-        
+
+    boolean isOutputCacheable() {
+        return true;
+    }
+
+    boolean isNestedBlockRepeater() {
+        return false;
+    }
+    
 }

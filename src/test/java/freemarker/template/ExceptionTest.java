@@ -16,6 +16,9 @@
 
 package freemarker.template;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,10 +27,12 @@ import java.io.ObjectOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.Locale;
 
 import junit.framework.TestCase;
+import freemarker.cache.StringTemplateLoader;
 import freemarker.core.ParseException;
-
+import freemarker.template.utility.NullWriter;
 public class ExceptionTest extends TestCase {
     
     public ExceptionTest(String name) {
@@ -56,6 +61,53 @@ public class ExceptionTest extends TestCase {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             new ObjectOutputStream(out).writeObject(e);
             new ObjectInputStream(new ByteArrayInputStream(out.toByteArray())).readObject();
+        }
+    }
+    
+    @SuppressWarnings("boxing")
+    public void testTemplateExceptionLocationInformation() throws IOException {
+        Configuration cfg = new Configuration();
+        
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("foo_en.ftl", "\n\nxxx${noSuchVariable}");
+        cfg.setTemplateLoader(tl);
+        
+        Template t = cfg.getTemplate("foo.ftl", Locale.US);
+        try {
+            t.process(null, NullWriter.INSTANCE);
+            fail();
+        } catch (TemplateException e) {
+            assertEquals("foo.ftl", e.getTemplateName());
+            assertEquals("foo_en.ftl", e.getTemplateSourceName());
+            assertEquals(3, (int) e.getLineNumber());
+            assertEquals(6, (int) e.getColumnNumber());
+            assertEquals(3, (int) e.getEndLineNumber());
+            assertEquals(19, (int) e.getEndColumnNumber());
+            assertThat(e.getMessage(), containsString("foo_en.ftl"));
+            assertThat(e.getMessage(), containsString("noSuchVariable"));
+        }
+    }
+
+    @SuppressWarnings("cast")
+    public void testParseExceptionLocationInformation() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+        
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("foo_en.ftl", "\n\nxxx<#noSuchDirective>");
+        cfg.setTemplateLoader(tl);
+        
+        try {
+            cfg.getTemplate("foo.ftl", Locale.US);
+            fail();
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            assertEquals("foo_en.ftl", e.getTemplateName());
+            assertEquals(3, (int) e.getLineNumber());
+            assertEquals(5, (int) e.getColumnNumber());
+            assertEquals(3, (int) e.getEndLineNumber());
+            assertEquals(20, (int) e.getEndColumnNumber());
+            assertThat(e.getMessage(), containsString("foo_en.ftl"));
+            assertThat(e.getMessage(), containsString("noSuchDirective"));
         }
     }
     

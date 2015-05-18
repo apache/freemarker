@@ -25,6 +25,11 @@ package freemarker.cache;
  * @since 2.3.17
  */
 public class NullCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize {
+    
+    /**
+     * @since 2.3.22
+     */
+    public static final NullCacheStorage INSTANCE = new NullCacheStorage();
 
     public boolean isConcurrent() {
         return true;

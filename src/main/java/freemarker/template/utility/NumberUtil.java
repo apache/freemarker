@@ -26,6 +26,11 @@ import java.math.BigInteger;
  */
 public class NumberUtil {
 
+    private static final BigDecimal BIG_DECIMAL_INT_MIN = BigDecimal.valueOf(Integer.MIN_VALUE);
+    private static final BigDecimal BIG_DECIMAL_INT_MAX = BigDecimal.valueOf(Integer.MAX_VALUE);
+    private static final BigInteger BIG_INTEGER_INT_MIN = BIG_DECIMAL_INT_MIN.toBigInteger();
+    private static final BigInteger BIG_INTEGER_INT_MAX = BIG_DECIMAL_INT_MAX.toBigInteger();
+
     private NumberUtil() { }
     
     public static boolean isInfinite(Number num) {
@@ -95,18 +100,68 @@ public class NumberUtil {
     /**
      * Tells if a {@link BigDecimal} stores a whole number. For example, it returns {@code true} for {@code 1.0000},
      * but {@code false} for {@code 1.0001}.
+     * 
      * @since 2.3.21
      */
-    static public boolean isBigDecimalInteger(BigDecimal bd) {
-            return bd.scale() <= 0  // A fast check that whole numbers usually (not always) match
-                   || bd.setScale(0, BigDecimal.ROUND_DOWN).compareTo(bd) == 0;  // This is rather slow
-            // Note that `bd.signum() == 0 || bd.stripTrailingZeros().scale() <= 0` was also tried for the last
-            // condition, but stripTrailingZeros was slower than setScale + compareTo.
+    static public boolean isIntegerBigDecimal(BigDecimal bd) {
+        // [Java 1.5] Try to utilize BigDecimal.toXxxExact methods
+        return bd.scale() <= 0  // A fast check that whole numbers usually (not always) match
+               || bd.setScale(0, BigDecimal.ROUND_DOWN).compareTo(bd) == 0;  // This is rather slow
+        // Note that `bd.signum() == 0 || bd.stripTrailingZeros().scale() <= 0` was also tried for the last
+        // condition, but stripTrailingZeros was slower than setScale + compareTo.
     }
     
     private static boolean isNonFPNumberOfSupportedClass(Number num) {
         return num instanceof Integer || num instanceof BigDecimal || num instanceof Long
                 || num instanceof Short || num instanceof Byte || num instanceof BigInteger;
+    }
+
+    /**
+     * Converts a {@link Number} to {@code int} whose mathematical value is exactly the same as of the original number.
+     * 
+     * @throws ArithmeticException
+     *             if the conversion to {@code int} is not possible without losing precision or overflow/underflow.
+     * 
+     * @since 2.3.22
+     */
+    public static int toIntExact(Number num) {
+        if (num instanceof Integer || num instanceof Short || num instanceof Byte) {
+            return num.intValue();
+        } else if (num instanceof Long) {
+            final long n = num.longValue();
+            final int result = (int) n;
+            if (n != result) {
+                throw newLossyConverionException(num, Integer.class);
+            }
+            return result;
+        } else if (num instanceof Double || num instanceof Float) {
+            final double n = num.doubleValue();
+            if (n % 1 != 0 || n < Integer.MIN_VALUE || n > Integer.MAX_VALUE) {
+                throw newLossyConverionException(num, Integer.class);
+            }
+            return (int) n;
+        } else if (num instanceof BigDecimal) {
+            // [Java 1.5] Use BigDecimal.toIntegerExact()
+            BigDecimal n = (BigDecimal) num;
+            if (!isIntegerBigDecimal(n)
+                    || n.compareTo(BIG_DECIMAL_INT_MAX) > 0 || n.compareTo(BIG_DECIMAL_INT_MIN) < 0) {
+                throw newLossyConverionException(num, Integer.class);
+            }
+            return n.intValue();
+        } else if (num instanceof BigInteger) {
+            BigInteger n = (BigInteger) num;
+            if (n.compareTo(BIG_INTEGER_INT_MAX) > 0 || n.compareTo(BIG_INTEGER_INT_MIN) < 0) {
+                throw newLossyConverionException(num, Integer.class);
+            }
+            return n.intValue();
+        } else {
+            throw new UnsupportedNumberClassException(num.getClass());
+        }
+    }
+
+    private static ArithmeticException newLossyConverionException(Number fromValue, Class/*<Number>*/ toType) {
+        return new ArithmeticException(
+                "Can't convert " + fromValue + " to type " + ClassUtil.getShortClassName(toType) + " without loss.");
     }
     
 }
