@@ -288,6 +288,9 @@ public class Configuration extends Configurable implements Cloneable {
     /** FreeMarker version 2.3.22 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_22 = new Version(2, 3, 22);
 
+    /** FreeMarker version 2.3.23 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_23 = new Version(2, 3, 23);
+
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -595,6 +598,19 @@ public class Configuration extends Configurable implements Cloneable {
      *               thus will throw exception.
      *             </li>
      *          </ul>
+     *       </li>
+     *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.23 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          Fixed a loophole in the implementation of the long existing parse-time rule that says that
+     *          {@code #break}, in the FTL source code itself, must occur nested inside a breakable directive, such as
+     *          {@code #list} or {@code #switch}. This check could be circumvented with {@code #macro} or
+     *          {@code #function}, like this:
+     *          {@code <#list 1..1 as x><#macro callMeLater><#break></#macro></#list><@callMeLater />}.
+     *          After activating this fix, this will be a parse time error.
      *       </li>
      *     </ul>
      *   </li>

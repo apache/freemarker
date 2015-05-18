@@ -101,6 +101,18 @@
    <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
       <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
    </testCase>
+   <testCase name="list2" />
+   <testCase name="list2[#endTN]-collectionAdapter" expected="list2.txt">
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+   </testCase>
+   <testCase name="list3" />
+   <testCase name="list3[#endTN]-collectionAdapter" expected="list3.txt">
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+   </testCase>
+   <testCase name="list-bis" />
+   <testCase name="list-bis[#endTN]-collectionAdapter" expected="list-bis.txt">
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+   </testCase>
    <testCase name="listliteral" />
    <testCase name="localization" >
       <setting locale="en_AU"/>

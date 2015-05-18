@@ -1,0 +1,39 @@
+[
+    [(11@0, 11@0), (11@0, 22@1), (11@0, 33@2)],
+    [(22@1, 11@0), (22@1, 22@1), (22@1, 33@2)],
+    [(33@2, 11@0), (33@2, 22@1), (33@2, 33@2)]
+]
+
+
+        <p>2 hits:
+        <div class="hits">
+                        <div class="hit">a</div>
+                        <div class="hit">b</div>
+        </div>
+
+        <p>2 hits:
+        <div class="hits">
+                        <div class="hitOther">a</div>
+                        <div class="hitOther">b</div>
+        </div>
+
+        <p>2 hits:
+        <div class="hits">
+                    ...
+        </div>
+
+        <p>Nothing.
+
+11, 22, ...
+[11, 22, ...]
+
+1, 2, 3
+1 /*first*/, 2, 3
+[1, 2, 3]
+1
+1
+[1]
+Empty
+Empty
+Empty
+

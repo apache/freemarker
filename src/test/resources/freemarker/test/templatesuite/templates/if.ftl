@@ -79,7 +79,7 @@
 </#list></#list>
 
 <#-- parsing errors -->
-<@assertFails message="valid #if-#elseif-#else structure"><@"<#if t><#else><#elseif t2></#if>"?interpret /></@>
-<@assertFails message="valid #if-#elseif-#else structure"><@"<#if t><#else><#else></#if>"?interpret /></@>
-<@assertFails message="valid #if-#elseif-#else structure"><@"<#else></#else>"?interpret /></@>
-<@assertFails message="valid #if-#elseif-#else structure"><@"<#elseif t></#elseif>"?interpret /></@>
+<@assertFails message="valid #if-#elseif-#else"><@"<#if t><#else><#elseif t2></#if>"?interpret /></@>
+<@assertFails message="valid #if-#elseif-#else"><@"<#if t><#else><#else></#if>"?interpret /></@>
+<@assertFails message="valid #if-#elseif-#else"><@"<#else></#else>"?interpret /></@>
+<@assertFails message="valid #if-#elseif-#else"><@"<#elseif t></#elseif>"?interpret /></@>

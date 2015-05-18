@@ -1,0 +1,193 @@
+=== [aardvark, bear, cat, dog] ===
+
+-- List+sep:
+    aardvark,
+    bear,
+    cat,
+    dog
+-- List+else:
+    aardvark
+    bear
+    cat
+    dog
+-- List+items:
+    [
+        aardvark
+        bear
+        cat
+        dog
+    ]
+-- List+items+else:
+    [
+        aardvark
+        bear
+        cat
+        dog
+    ]
+-- List+items+sep+else:
+    [
+        aardvark,
+        bear,
+        cat,
+        dog
+    ]
+--
+
+=== [aardvark] ===
+
+-- List+sep:
+    aardvark
+-- List+else:
+    aardvark
+-- List+items:
+    [
+        aardvark
+    ]
+-- List+items+else:
+    [
+        aardvark
+    ]
+-- List+items+sep+else:
+    [
+        aardvark
+    ]
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+
+=== [11, 22, 33] ===
+
+-- List+sep:
+    11,
+    22,
+    33
+-- List+else:
+    11
+    22
+    33
+-- List+items:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+else:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+sep+else:
+    [
+        11,
+        22,
+        33
+    ]
+--
+
+=== [11, 22, 33] ===
+
+-- List+sep:
+    11,
+    22,
+    33
+-- List+else:
+    11
+    22
+    33
+-- List+items:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+else:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+sep+else:
+    [
+        11,
+        22,
+        33
+    ]
+--
+
+=== [11, 22, 33] ===
+
+-- List+sep:
+    11,
+    22,
+    33
+-- List+else:
+    11
+    22
+    33
+-- List+items:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+else:
+    [
+        11
+        22
+        33
+    ]
+-- List+items+sep+else:
+    [
+        11,
+        22,
+        33
+    ]
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+
+=== [] ===
+
+-- List+sep:
+-- List+else:
+    Empty!
+-- List+items:
+-- List+items+else:
+    Empty!
+-- List+items+sep+else:
+    Empty!
+--
+

@@ -15,3 +15,8 @@ ${beansArray?substring(0, 18)}  <- All BeanModel-s were strings; not anymore
 ${beansArray?string?substring(0, 18)}
 ${beansArray?replace('j.v.', 'cofe', 'r')?substring(0, 18)}
 ${beansArray?seq_index_of("b")}
+
+<#list ['a', 'b'] as x>${x}</#list>
+<#list ['a'] as x>${x}</#list>
+<#list 'a' as x>${x}</#list>
+<#list 'a' as x>${x}<#break>b</#list>

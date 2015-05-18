@@ -1,0 +1,33 @@
+    0: a [0:A, 1:B, 2:C]
+    1: b [0:A, 1:B, 2:C]
+    2: c [0:A, 1:B, 2:C]
+
+    0: a 0a/0A, 0a/1B, 0a/2C
+    1: b 1b/0A, 1b/1B, 1b/2C
+    2: c 2c/0A, 2c/1B, 2c/2C
+
+0:a, 1:b, 2:c
+1. a; 2. b; 3. c;
+
+a, b, c
+a, b, c
+
+A, b, c.
+
+true/false false/true true/false
+
+    <td class="oddRow">a</td>
+    <td class="evenRow">b</td>
+    <td class="oddRow">c</td>
+
+    <td class="rowOdd">a</td>
+    <td class="rowEven">b</td>
+    <td class="rowOdd">c</td>
+
+    <td class="R">a</td>
+    <td class="G">b</td>
+    <td class="B">c</td>
+    <td class="R">d</td>
+    <td class="G">e</td>
+    <td class="B">f</td>
+    <td class="R">g</td>

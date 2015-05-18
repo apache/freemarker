@@ -37,12 +37,34 @@ import java.util.*;
  */
 public class FMParser {
 
-    // Necessary for adding macros and setting location info.
+    private static final int ITERATOR_BLOCK_KIND_LIST = 0; 
+    private static final int ITERATOR_BLOCK_KIND_FOREACH = 1; 
+    private static final int ITERATOR_BLOCK_KIND_ITEMS = 2; 
+
+    private static class ParserIteratorBlockContext {
+        private String loopVarName;
+        private int kind;
+    }
+
+    /** Necessary for adding macros and setting location info. */
     private Template template;
 
-    // variables that keep track of whether we are in a loop or a switch.
-    private int loopNesting, switchNesting;
-    private boolean inMacro, inFunction, stripWhitespace, stripText;
+    private boolean stripWhitespace, stripText;
+
+    /** Keeps track of #list and #foreach nesting. */
+    private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
+    
+    /**
+     * Keeps track of the nesting depth of directives that support #break.
+     */
+    private int breakableDirectiveNesting;
+    
+    /**
+     * Keeps track of the flags of the innermost parent #list or #foreach directive.
+     */
+    private int parentListAndForeachFlags;
+    
+    private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
     private int incompatibleImprovements;
@@ -291,6 +313,40 @@ public class FMParser {
         throw new ParseException("Expecting boolean (true/false) parameter", exp);
     }
     
+    private ParserIteratorBlockContext pushIteratorBlockContext() {
+        if (iteratorBlockContexts == null) {
+            iteratorBlockContexts = new ArrayList(4);
+        }
+        ParserIteratorBlockContext newCtx = new ParserIteratorBlockContext();
+        iteratorBlockContexts.add(newCtx);
+        return newCtx;
+    }
+    
+    private void popIteratorBlockContext() {
+        iteratorBlockContexts.remove(iteratorBlockContexts.size() - 1);
+    }
+    
+    private ParserIteratorBlockContext peekIteratorBlockContext() {
+        int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
+        return size != 0 ? (ParserIteratorBlockContext) iteratorBlockContexts.get(size - 1) : null; 
+    }
+    
+    private boolean iteratorBlockContextExists(String loopVarName) {
+        int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
+        for (int i = size - 1; i >= 0; i--) {
+            if (loopVarName.equals(((ParserIteratorBlockContext) iteratorBlockContexts.get(i)).loopVarName)) {
+                return true;
+            }
+        }
+        return false; 
+    }
+    
+	private String forEachDirectiveSymbol() {    
+	    // [2.4] Use camel case as the default
+	    return "#for"
+	            + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "E" : "e")
+	            + "ach";
+	}
     
 }
 
@@ -620,6 +676,10 @@ TOKEN:
     |
     <LIST : <START_TAG> "list" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
+    <ITEMS : <START_TAG> "items" (<BLANK>)+ <AS> <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    |
+    <SEP : <START_TAG> "sep" <CLOSE_TAG1>>
+    |
     <FOREACH : <START_TAG> "for" ("e" | "E") "ach" <BLANK>> {
         strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 3), FM_EXPRESSION);
     }
@@ -671,6 +731,10 @@ TOKEN:
     <END_IF : <END_TAG> "if" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <END_LIST : <END_TAG> "list" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    |
+    <END_ITEMS : <END_TAG> "items" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    |
+    <END_SEP : <END_TAG> "sep" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <END_RECOVER : <END_TAG> "recover" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -776,7 +840,8 @@ TOKEN:
                 // unknown directive:
                 if (_CoreAPI.BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                     throw new TokenMgrError(
-                            "#" + dn + " is an existing directive, but the tag is malformed.",
+                            "#" + dn + " is an existing directive, but the tag is malformed. " 
+                            + " (See FreeMarker Manual / Directive Reference.)",
                             TokenMgrError.LEXICAL_ERROR,
                             matchedToken.beginLine, matchedToken.beginColumn + 1,
                             matchedToken.endLine, matchedToken.endColumn);
@@ -798,10 +863,12 @@ TOKEN:
                 	tip = "You may meant #attempt.";
                 } else if (dn.equals("for") || dn.equals("each") || dn.equals("iterate") || dn.equals("iterator")) {
                     tip = "You may meant #list (http://freemarker.org/docs/ref_directive_list.html).";
-                } else if (dn.equals("item") || dn.equals("sep")) {
-                    tip = PLANNED_DIRECTIVE_HINT;
                 } else if (dn.equals("prefix")) {
                     tip = "You may meant #import. " + PLANNED_DIRECTIVE_HINT;
+                } else if (dn.equals("item") | dn.equals("row") | dn.equals("rows")) {
+                    tip = "You may meant #items.";
+                } else if (dn.equals("separator") | dn.equals("separate") | dn.equals("separ")) {
+                    tip = "You may meant #sep.";
                 } else {
                     tip = "Help (latest version): http://freemarker.org/docs/ref_directive_alphaidx.html; "
                             + "you're using FreeMarker " + Configuration.getVersion() + ".";
@@ -1423,7 +1490,7 @@ Expression MultiplicativeExpression() :
                 |
                 <DIVIDE> { operation = ArithmeticExpression.TYPE_DIVISION; }
                 |
-                <PERCENT>{operation = ArithmeticExpression.TYPE_MODULO; }
+                <PERCENT> {operation = ArithmeticExpression.TYPE_MODULO; }
             )
         )
         rhs = UnaryExpression()
@@ -1759,7 +1826,7 @@ Expression Exists(Expression exp) :
     }
 }
 
-Expression BuiltIn(Expression exp) :
+Expression BuiltIn(Expression lhoExp) :
 {
     Token t = null;
 }
@@ -1769,8 +1836,23 @@ Expression BuiltIn(Expression exp) :
     {
         BuiltIn result = null;
         token_source.checkNamingConvention(t);
-        result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t, token_source);
-        result.setLocation(template, exp, t);
+        result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
+        if (result instanceof BuiltInForLoopVariable) {
+            if (!(lhoExp instanceof Identifier)) {
+                throw new ParseException(
+                        "Expression used as the left hand operand of ?" + t.image
+                        + " must be a simple loop variable name.", lhoExp);
+            }
+            String loopVarName = ((Identifier) lhoExp).getName();
+            if (!iteratorBlockContextExists(loopVarName)) {
+                throw new ParseException(
+                        "Expression used as the left hand operand of ?" + t.image + " must be a loop variable name, "
+                        + "but there's no iteration in the context that uses this loop variable: " + loopVarName,
+                        lhoExp);
+            }
+            ((BuiltInForLoopVariable) result).bindToLoopVariable(loopVarName);
+        }
+        result.setLocation(template, lhoExp, t);
         return result;
     }
 }
@@ -1894,7 +1976,8 @@ StringLiteral StringLiteral(boolean interpolate) :
         StringLiteral result = new StringLiteral(s);
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
-            result.parseValue(token_source);
+            // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source);
         }
         return result;
     }
@@ -2139,46 +2222,180 @@ RecoveryBlock Recover() :
     }
 }
 
-IteratorBlock List() :
+TemplateElement List() :
 {
     Expression exp;
-    Token index, start, end;
+    Token loopVar = null, start, end;
+    TemplateElement mainBlock;
+    ElseOfList elseOfList = null;
+    ParserIteratorBlockContext iterCtx;
+}
+{
+    start = <LIST>
+    exp = Expression()
+    [
+        <AS>
+        loopVar = <ID>
+    ]
+    <DIRECTIVE_END>
+    {
+        iterCtx = pushIteratorBlockContext();
+        if (loopVar != null) {
+            iterCtx.loopVarName = loopVar.image;
+            breakableDirectiveNesting++;
+        }
+    }
+    
+    mainBlock = OptionalBlock()
+    {
+        if (loopVar != null) {
+            breakableDirectiveNesting--;
+        } else if (iterCtx.kind != ITERATOR_BLOCK_KIND_ITEMS) {
+            throw new ParseException(
+                    "#list must have either \"as loopVar\" parameter or nested #items that belongs to it.",
+                    template, start);
+        }
+        popIteratorBlockContext();
+    }
+    
+    [
+        elseOfList = ElseOfList()
+    ]
+    
+    end = <END_LIST>
+    {
+        IteratorBlock list = new IteratorBlock(exp, loopVar != null ? loopVar.image : null, mainBlock, false);
+        list.setLocation(template, start, end);
+
+        TemplateElement result;
+        if (elseOfList == null) {
+            result = list;
+        } else {
+            result = new ListElseContainer(list, elseOfList);
+            result.setLocation(template, start, end);
+        }
+        return result;
+    }
+}
+
+ElseOfList ElseOfList() :
+{
+    Token start;
     TemplateElement block;
 }
 {
-    start = <LIST> {++loopNesting; }
+        start = <ELSE>
+        block = OptionalBlock()
+        {
+            ElseOfList result = new ElseOfList(block);
+	        result.setLocation(template, start, block);
+	        return result;
+        }
+}
+
+IteratorBlock ForEach() :
+{
+    Expression exp;
+    Token loopVar, start, end;
+    TemplateElement block;
+}
+{
+    start = <FOREACH>
+    loopVar = <ID>
+    <IN>
     exp = Expression()
-    <AS>
-    index = <ID>
     <DIRECTIVE_END>
-    block = OptionalBlock()
-    end = <END_LIST>
     {
-        --loopNesting;
-        IteratorBlock result = new IteratorBlock(exp, index.image, block, false);
+        ParserIteratorBlockContext iterCtx = pushIteratorBlockContext();
+        iterCtx.loopVarName = loopVar.image;
+        iterCtx.kind = ITERATOR_BLOCK_KIND_FOREACH;
+        breakableDirectiveNesting++;
+    }
+    
+    block = OptionalBlock()
+    
+    end = <END_FOREACH>
+    {
+        breakableDirectiveNesting--;
+        popIteratorBlockContext();
+                
+        IteratorBlock result = new IteratorBlock(exp, loopVar.image, block, true);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-IteratorBlock ForEach() :
+Items Items() :
 {
-        Expression exp;
-        Token index, start, end;
-        TemplateElement block;
+    Token loopVar, start, end;
+    TemplateElement block;
+    ParserIteratorBlockContext iterCtx;
 }
 {
-    start = <FOREACH> {++loopNesting; }
-    index = <ID>
-    <IN>
-    exp = Expression()
+    start = <ITEMS>
+    loopVar = <ID>
     <DIRECTIVE_END>
-    block = OptionalBlock()
-    end = <END_FOREACH>
     {
-        --loopNesting;
-        IteratorBlock result = new IteratorBlock(exp, index.image, block, true);
+        iterCtx = peekIteratorBlockContext();
+        if (iterCtx == null) {
+            throw new ParseException("#items must be inside a #list block.", template, start);
+        }
+        if (iterCtx.loopVarName != null) {
+            String msg;
+	        if (iterCtx.kind == ITERATOR_BLOCK_KIND_FOREACH) {
+	            msg = forEachDirectiveSymbol() + " doesn't support nested #items.";
+	        } else if (iterCtx.kind == ITERATOR_BLOCK_KIND_ITEMS) {
+                msg = "Can't nest #items into each other that belong to the same #list.";
+	        } else {
+	            msg = "The parent #list of the #items must not have \"as loopVar\" parameter.";
+            }
+            throw new ParseException(msg, template, start);
+        }
+        iterCtx.kind = ITERATOR_BLOCK_KIND_ITEMS;
+        iterCtx.loopVarName = loopVar.image;
+    
+        breakableDirectiveNesting++;
+    }
+    
+    block = OptionalBlock()
+    
+    end = <END_ITEMS>
+    {
+        breakableDirectiveNesting--;
+        iterCtx.loopVarName = null;
+        
+        Items result = new Items(loopVar.image, block);
         result.setLocation(template, start, end);
+        return result;
+    }
+}
+
+Sep Sep() :
+{
+    Token loopVar, start, end = null;
+    TemplateElement block;
+}
+{
+    start = <SEP>
+    {
+        if (peekIteratorBlockContext() == null) {
+            throw new ParseException(
+                    "#sep must be inside a #list (or " + forEachDirectiveSymbol() + ") block.",
+                    template, start);
+        }
+    }
+    block = OptionalBlock()
+    [
+        LOOKAHEAD(1)
+        end = <END_SEP>
+    ]
+    {
+        Sep result = new Sep(block);
+        if (end != null) {
+            result.setLocation(template, start, end); // Template, Token, Token
+        } else {
+            result.setLocation(template, start, block); // Template, Token, TemplateObject
+        }
         return result;
     }
 }
@@ -2258,9 +2475,10 @@ BreakInstruction Break() :
 {
     start = <BREAK>
     {
-        if (loopNesting < 1 && switchNesting < 1)
-        {
-            throw new ParseException(start.image + " occurred outside a loop or a switch block.", template, start);
+        if (breakableDirectiveNesting < 1) {
+            throw new ParseException(start.image + " must be nested inside a directive that supports it: " 
+                    + " #list with \"as\", #items, #switch (or the deprecated " + forEachDirectiveSymbol() + ")",
+                    template, start);
         }
         BreakInstruction result = new BreakInstruction();
         result.setLocation(template, start, start);
@@ -2279,7 +2497,7 @@ ReturnInstruction Return() :
 }
 {
     (
-        start = <SIMPLE_RETURN>{end = start; }
+        start = <SIMPLE_RETURN> { end = start; }
         |
         start = <RETURN> exp = Expression() end = LooseDirectiveEnd()
     )
@@ -2583,6 +2801,8 @@ Macro Macro() :
     HashMap args = new HashMap();
     ArrayList defNames = new ArrayList();
     Expression defValue = null;
+    List lastIteratorBlockContexts;
+    int lastBreakableDirectiveNesting;
     TemplateElement block;
     boolean isFunction = false, hasDefaults = false;
     boolean isCatchAll = false;
@@ -2648,6 +2868,17 @@ Macro Macro() :
     )*
     [<CLOSE_PAREN>]
     <DIRECTIVE_END>
+    {
+        // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
+        lastIteratorBlockContexts = iteratorBlockContexts;
+        iteratorBlockContexts = null;
+        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
+	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
+	        breakableDirectiveNesting = 0; 
+        } else {
+            lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
+        }
+    }
     block = OptionalBlock()
     (
         end = <END_MACRO>
@@ -2661,6 +2892,11 @@ Macro Macro() :
     	}
     )
     {
+        iteratorBlockContexts = lastIteratorBlockContexts;
+        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
+            breakableDirectiveNesting = lastBreakableDirectiveNesting;
+        }
+        
         inMacro = inFunction = false;
         Macro result = new Macro(name, argNames, args, catchAll, isFunction, block);
         result.setLocation(template, start, end);
@@ -2912,7 +3148,7 @@ SwitchBlock Switch() :
     switchExp = Expression()
     <DIRECTIVE_END>
     {
-        ++switchNesting;
+        breakableDirectiveNesting++;
         switchBlock = new SwitchBlock(switchExp);
     }
     (
@@ -2932,7 +3168,7 @@ SwitchBlock Switch() :
     [<STATIC_TEXT_WS>]
     end = <END_SWITCH>
     {
-        --switchNesting;
+        breakableDirectiveNesting--;
         switchBlock.setLocation(template, start, end);
         return switchBlock;
     }
@@ -3055,6 +3291,8 @@ TemplateElement FreemarkerDirective() :
     TemplateElement tp;
 }
 {
+    // Note that this doesn't include elements like "else", "recover", etc., because those indicate the end
+    // of the OptionalBlock() of "if", "attempt", etc.
     (
         tp = If()
         |
@@ -3073,6 +3311,10 @@ TemplateElement FreemarkerDirective() :
         tp = Compress()
         |
         tp = UnifiedMacroTransform()
+        |
+        tp = Items()
+        |
+        tp = Sep()
         |
         tp = Call()
         |

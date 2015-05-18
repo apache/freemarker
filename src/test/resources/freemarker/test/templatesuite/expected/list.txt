@@ -1,6 +1,11 @@
+Size: 4
+Items: @0 aardvark, @1 bear, @2 cat, @3 dog.
 
-Size: 5
-Items: @0 aardvark, @1 bear, @2 cat, @3 dog, @4 elephant.
+Size: 1
+Items: @0 aardvark.
+
+Size: 0
+Items: 
 
 Size: 3
 Items: @0 11, @1 22, @2 33.
@@ -13,4 +18,16 @@ Items: @0 11, @1 22, @2 33.
 
 Size: failed
 Items: @0 11, @1 22, @2 33.
+
+Size: 0
+Items: 
+
+Size: 0
+Items: 
+
+Size: 0
+Items: 
+
+Size: failed
+Items: 
 

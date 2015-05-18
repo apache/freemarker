@@ -71,7 +71,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 232;
+    static final int NUMBER_OF_BIS = 250;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -103,10 +103,14 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("float", new floatBI());
         putBI("floor", new floorBI());
         putBI("chunk", new chunkBI());
+        putBI("counter", new BuiltInsForLoopVariables.counterBI());
+        putBI("item_cycle", "itemCycle", new BuiltInsForLoopVariables.item_cycleBI());
         putBI("has_api", "hasApi", new BuiltInsForMultipleTypes.has_apiBI());
         putBI("has_content", "hasContent", new ExistenceBuiltins.has_contentBI());
+        putBI("has_next", "hasNext", new BuiltInsForLoopVariables.has_nextBI());
         putBI("html", new BuiltInsForStringsEncoding.htmlBI());
         putBI("if_exists", "ifExists", new ExistenceBuiltins.if_existsBI());
+        putBI("index", new BuiltInsForLoopVariables.indexBI());
         putBI("index_of", "indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
         putBI("int", new intBI());
         putBI("interpret", new Interpret());
@@ -117,6 +121,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("is_date", "isDate", bi);  // misnomer
         putBI("is_date_like", "isDateLike", bi);
         putBI("is_date_only", "isDateOnly", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE));
+        putBI("is_even_item", "isEvenItem", new BuiltInsForLoopVariables.is_even_itemBI());
+        putBI("is_first", "isFirst", new BuiltInsForLoopVariables.is_firstBI());
+        putBI("is_last", "isLast", new BuiltInsForLoopVariables.is_lastBI());
         putBI("is_unknown_date_like", "isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
         putBI("is_datetime", "isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
         putBI("is_directive", "isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
@@ -130,6 +137,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("is_nan", "isNan", new is_nanBI());
         putBI("is_node", "isNode", new BuiltInsForMultipleTypes.is_nodeBI());
         putBI("is_number", "isNumber", new BuiltInsForMultipleTypes.is_numberBI());
+        putBI("is_odd_item", "isOddItem", new BuiltInsForLoopVariables.is_odd_itemBI());
         putBI("is_sequence", "isSequence", new BuiltInsForMultipleTypes.is_sequenceBI());
         putBI("is_string", "isString", new BuiltInsForMultipleTypes.is_stringBI());
         putBI("is_time", "isTime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
@@ -223,6 +231,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
         putBI("number_to_datetime", "numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
         putBI("parent", new parentBI());
+        putBI("item_parity", "itemParity", new BuiltInsForLoopVariables.item_parityBI());
+        putBI("item_parity_cap", "itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
         putBI("reverse", new reverseBI());
         putBI("right_pad", "rightPad", new BuiltInsForStringsBasic.padBI(false));
         putBI("root", new rootBI());
@@ -337,8 +347,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         catch (CloneNotSupportedException e) {
             throw new InternalError();
         }
-        bi.target = target;
         bi.key = key;
+        bi.target = target;
         return bi;
     }
 
