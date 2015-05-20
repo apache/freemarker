@@ -14456,6 +14456,11 @@ Sorted by name.last:
       <section xml:id="ref_builtins_loop_var">
         <title>Loop variable built-ins</title>
 
+        <note>
+          <para>Loop variable built-ins only exists since FreeMarker
+          2.3.23.</para>
+        </note>
+
         <para>These built-ins you can only use with the loop variable of the
         <link linkend="ref_directive_list"><literal>list</literal> and
         <literal>items</literal> directives</link> (and of the deprecated
@@ -14512,6 +14517,10 @@ Sorted by name.last:
             <primary>counter built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Returns the 1-based index where the iteration (which is
           identified by the loop variable name) currently stands.</para>
 
@@ -14536,6 +14545,10 @@ Sorted by name.last:
           <indexterm>
             <primary>has_next built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands is not the last
@@ -14571,6 +14584,10 @@ Sorted by name.last:
             <primary>index built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Returns the 0-based index where the iteration (which is
           identified by the loop variable name) currently stands. </para>
 
@@ -14595,6 +14612,10 @@ Sorted by name.last:
           <indexterm>
             <primary>is_even_item built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands has an even 1-based
@@ -14621,6 +14642,10 @@ Sorted by name.last:
             <primary>is_first built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands is the first item.</para>
 
@@ -14635,6 +14660,10 @@ Sorted by name.last:
           <indexterm>
             <primary>is_last built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands is the last item.</para>
@@ -14669,6 +14698,10 @@ Sorted by name.last:
             <primary>is_odd_item built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands has an odd 1-based
           index.</para>
@@ -14693,6 +14726,10 @@ Sorted by name.last:
           <indexterm>
             <primary>item_cycle built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>This is a more generic version of the <link
           linkend="ref_builtin_item_parity"><literal>item_parity</literal>
@@ -14741,6 +14778,10 @@ Sorted by name.last:
             <primary>item_parity built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Returns <literal>"odd"</literal> or <literal>"even"</literal>
           string value, depending on the parity of the 1-based index where the
           iteration (which is identified by the loop variable name) currently
@@ -14773,6 +14814,10 @@ Sorted by name.last:
           <indexterm>
             <primary>item_parity_cap built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Returns <literal>"Odd"</literal> or <literal>"Even"</literal>
           string value (note the capitalization), depending on the parity of
