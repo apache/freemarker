@@ -214,16 +214,16 @@
   |       |   
   |       +- price = 4999
   |
-  +- test = "It is a test"
+  +- message = "It is a test"
   |
-  +- whatnot
+  +- misc
       |
-      +- because = "don't know"</programlisting>
+      +- foo = "Something"</programlisting>
 
         <para>The variables that act as directories (the root,
         <literal>animals</literal>, <literal>mouse</literal>,
         <literal>elephant</literal>, <literal>python</literal>,
-        <literal>whatnot</literal>) are called <emphasis
+        <literal>misc</literal>) are called <emphasis
         role="term">hashes</emphasis>. Hashes store other variables (the so
         called <anchor
         xml:id="topic.dataModel.subVar"/><emphasis>subvariables</emphasis>) by
@@ -231,7 +231,7 @@
 
         <para>The variables that store a single value
         (<literal>size</literal>, <literal>price</literal>,
-        <literal>test</literal> and <literal>because</literal>) are called
+        <literal>message</literal> and <literal>foo</literal>) are called
         <emphasis role="term">scalars</emphasis>.</para>
 
         <para><anchor xml:id="topic.qStart.accessVariables"/>When you want to
@@ -250,7 +250,7 @@
         don't store names for the variables they contain. Instead, they store
         the subvariables sequentially, and you can access them with a
         numerical index. For example, in this data-model,
-        <literal>animals</literal> and <literal>whatnot.fruits</literal> are
+        <literal>animals</literal> and <literal>misc.fruits</literal> are
         sequences:</para>
 
         <programlisting role="dataModel"
@@ -282,7 +282,7 @@
   |       |
   |       +- price = 4999
   |
-  +- whatnot
+  +- misc
       |
       +- fruits
           |
@@ -295,9 +295,9 @@
         to start with 0), thus the index of the first item is 0, the index of
         the second item is 1, and so on. So to get the name of the first
         animal you write <literal>animals[0].name</literal>. To get the second
-        item in <literal>whatnot.fruits</literal> (which is the string
+        item in <literal>misc.fruits</literal> (which is the string
         <literal>"banana"</literal>) you write
-        <literal>whatnot.fruits[1]</literal>.</para>
+        <literal>misc.fruits[1]</literal>.</para>
 
         <para>Scalars can be further divided into these categories:</para>
 
@@ -408,11 +408,11 @@
         "directive" as synonyms.)</para>
 
         <section>
-          <title>Examples of directives</title>
+          <title>Some basic directives</title>
 
-          <para>Though FreeMarker has far more directives, in this quick
-          overview we will only look at three of the most commonly used
-          ones.</para>
+          <para>Though FreeMarker <link linkend="ref_directives">has far more
+          directives</link>, in this quick overview we will only look at the
+          most commonly used ones.</para>
 
           <section>
             <title>The if directive</title>
@@ -421,7 +421,7 @@
             conditionally skip a section of the template. For example, assume
             that in the <link linkend="example.first">very first
             example</link> you want to greet your boss, Big Joe, differently
-            from other users:</para>
+            than other users:</para>
 
             <programlisting role="template">&lt;html&gt;
 &lt;head&gt;
@@ -436,8 +436,8 @@
 &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
-            <para>Here you have told FreeMarker that the '', our beloved
-            leader'' should be there only if the value of the variable
+            <para>Here you have told FreeMarker that the <quote>, our beloved
+            leader</quote> should be there only if the value of the variable
             <literal>user</literal> is equal to the string <literal>"Big
             Joe"</literal>. In general, things between <literal>&lt;#if
             <replaceable>condition</replaceable>&gt;</literal> and
@@ -459,8 +459,8 @@
             literal string. Literal strings in templates must
             <emphasis>always</emphasis> be put inside quotation marks.</para>
 
-            <para>This will print "Pythons are free today!" if their price is
-            0:</para>
+            <para>This will print <quote>Pythons are free today!</quote> if
+            their price is 0:</para>
 
             <programlisting role="template">&lt;#if animals.python.price == <emphasis>0</emphasis>&gt;
   Pythons are free today!
@@ -499,9 +499,19 @@
   Pythons are not cheaper than elephants today.
 &lt;/#if&gt;</programlisting>
 
-            <para>This prints ''Pythons are cheaper than elephants today.'' if
-            the price of python is less than the price of elephant, or else it
-            prints ''Pythons are not cheaper than elephants today.''</para>
+            <para>This prints <quote>Pythons are cheaper than elephants
+            today.</quote> if the price of python is less than the price of
+            elephant, or else it prints <quote>Pythons are not cheaper than
+            elephants today.</quote> You can refine this further by using
+            <literal>elseif</literal>:</para>
+
+            <programlisting role="template">&lt;#if animals.python.price &lt; animals.elephant.price&gt;
+  Pythons are cheaper than elephants today.
+<emphasis>&lt;#elseif animals.elephant.price &lt; animals.python.price&gt;</emphasis>
+  Elephants are cheaper than pythons today.
+&lt;#else&gt;
+  Elephants and pythons cost the same today.
+&lt;/#if&gt;</programlisting>
 
             <para>If you have a variable with boolean value (a true/false
             thing) then you can use it directly as the
@@ -509,23 +519,22 @@
             <literal>if</literal>:</para>
 
             <programlisting role="template">&lt;#if animals.python.protected&gt;
-  Warning! Pythons are protected animals!
+  Pythons are protected animals!
 &lt;/#if&gt;</programlisting>
           </section>
 
           <section>
             <title>The list directive</title>
 
-            <para>This is useful when you want to list something. For example
+            <para>This is needed when you want to list something. For example
             if you merge this template with the <link
-            linkend="example.qStart.dataModelWithSequences">data-model I used
+            linkend="example.qStart.dataModelWithSequences">data-model used
             earlier to demonstrate sequences</link>:</para>
 
             <programlisting role="template">&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
-  &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
   <emphasis>&lt;#list animals as animal&gt;</emphasis>
-  &lt;tr&gt;&lt;td&gt;${<emphasis>animal</emphasis>.name}&lt;td&gt;${<emphasis>animal</emphasis>.price} Euros
+    &lt;tr&gt;&lt;td&gt;${<emphasis>animal</emphasis>.name}&lt;td&gt;${<emphasis>animal</emphasis>.price} Euros
   <emphasis>&lt;/#list&gt;</emphasis>
 &lt;/table&gt;</programlisting>
 
@@ -533,42 +542,110 @@
 
             <programlisting role="output">&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
-  &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>&lt;tr&gt;&lt;td&gt;mouse&lt;td&gt;50 Euros
-  &lt;tr&gt;&lt;td&gt;elephant&lt;td&gt;5000 Euros
-  &lt;tr&gt;&lt;td&gt;python&lt;td&gt;4999 Euros</emphasis>
+    <emphasis>&lt;tr&gt;&lt;td&gt;mouse&lt;td&gt;50 Euros
+    &lt;tr&gt;&lt;td&gt;elephant&lt;td&gt;5000 Euros
+    &lt;tr&gt;&lt;td&gt;python&lt;td&gt;4999 Euros</emphasis>
 &lt;/table&gt;</programlisting>
 
-            <para>The generic format of the <literal>list</literal> directive
-            is:</para>
-
-            <para><literal>&lt;#list <replaceable>sequence</replaceable> as
-            <replaceable>loopVariable</replaceable>&gt;<replaceable>repeatThis</replaceable>&lt;/#list&gt;</literal></para>
-
-            <para>The <literal><replaceable>repeatThis</replaceable></literal>
-            part will be repeated for each item in the sequence that you have
-            given with <literal><replaceable>sequence</replaceable></literal>,
-            one after the other, starting from the first item. In all
-            repetitions
+            <para>The generic form of the <literal>list</literal> directive
+            is:<literal> &lt;#list <replaceable>sequence</replaceable> as
+            <replaceable>loopVariable</replaceable>&gt;<replaceable>repeatThis</replaceable>&lt;/#list&gt;</literal>.
+            The <literal><replaceable>repeatThis</replaceable></literal> part
+            will be repeated for each item in the sequence that you have
+            specified with
+            <literal><replaceable>sequence</replaceable></literal>, one after
+            the other, starting from the first item. In all repetitions
             <literal><replaceable>loopVariable</replaceable></literal> will
             hold the value of the current item. This variable exists only
-            between the <literal>&lt;#list ...&gt;</literal> and
+            between the <literal>&lt;#list
+            <replaceable>...</replaceable>&gt;</literal> and
             <literal>&lt;/#list&gt;</literal> tags.</para>
 
-            <para>As another example, we list the fruits of that example data
-            model:</para>
+            <para>The <literal><replaceable>sequence</replaceable></literal>
+            can be any kind of expression, like we could list the fruits of
+            the example data model like this:</para>
 
-            <programlisting role="template">&lt;p&gt;And BTW we have these fruits:
-&lt;ul&gt;
-<emphasis>&lt;#list whatnot.fruits as fruit&gt;</emphasis>
- &lt;li&gt;${fruit}
+            <programlisting role="template">&lt;ul&gt;
+<emphasis>&lt;#list misc.fruits as fruit&gt;</emphasis>
+  &lt;li&gt;${fruit}
 <emphasis>&lt;/#list&gt;</emphasis>
-&lt;ul&gt;</programlisting>
+&lt;/ul&gt;</programlisting>
 
-            <para>The <literal>whatnot.fruits</literal> expression should be
+            <para>The <literal>misc.fruits</literal> expression should be
             familiar to you; it <link
             linkend="topic.qStart.accessVariables">references a variable in
             the data-model</link>.</para>
+
+            <para>A problem with the above example is that if we happen to
+            have 0 fruits, it will still print an empty
+            <literal>&lt;ul&gt;&lt;/ul&gt;</literal> instead of just nothing.
+            To avoid that, you can use this form of
+            <literal>list</literal>:</para>
+
+            <programlisting role="template">&lt;#list misc.fruits&gt;
+  &lt;ul&gt;
+   <emphasis> &lt;#items as fruit&gt;</emphasis>
+      &lt;li&gt;${fruit}
+ <emphasis>   &lt;/#items&gt;</emphasis>
+  &lt;/ul&gt;
+&lt;/#list&gt;</programlisting>
+
+            <para>Here, the <literal>list</literal> directive represents the
+            listing as a whole, and only the part inside the
+            <literal>items</literal> directive is repeated for each fruit. If
+            we have 0 fruits, everything inside <literal>list</literal> is
+            skipped, hence we wouldn't have <literal>ul</literal> tags in
+            case.</para>
+
+            <para>Another frequent listing-related task: let's list the fruits
+            separating them with something, like, comma:</para>
+
+            <programlisting role="template">&lt;p&gt;Fruits: &lt;#list misc.fruits as fruit&gt;${fruit}<emphasis>&lt;#sep&gt;, </emphasis>&lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">&lt;p&gt;Fruits: orange, banana</programlisting>
+
+            <para>The section covered by <literal>sep</literal> (which we have
+            written like this too:
+            <literal><replaceable>...</replaceable>&lt;#sep&gt;,
+            &lt;/#sep&gt;&lt;/#list&gt;</literal>) will be only executed when
+            there will be a next item. Hence there's no comma after the last
+            fruit.</para>
+
+            <para>Here again, what's if we have 0 fruits? Just printing
+            <quote>Fruits:</quote> and then nothing is awkward. A
+            <literal>list</literal>, just like an <literal>if</literal>, can
+            have an <literal>else</literal>, which is executed if there were 0
+            list items:</para>
+
+            <programlisting role="template">&lt;p&gt;Fruits: &lt;#list misc.fruits as fruit&gt;${fruit}&lt;#sep&gt;, <emphasis>&lt;#else&gt;None</emphasis>&lt;/#list&gt;</programlisting>
+
+            <note>
+              <para>As a matter of fact, this simplistic example could be
+              written like this, but it uses language devices that are off
+              topic here:</para>
+
+              <programlisting role="template">&lt;p&gt;Fruits: ${fruits?join(", ", "None")}</programlisting>
+            </note>
+
+            <para>All these directives (<literal>list</literal>,
+            <literal>items</literal>, <literal>sep</literal>,
+            <literal>else</literal>) can be used together:</para>
+
+            <programlisting role="template">&lt;#list misc.fruits&gt;
+  &lt;p&gt;Frutis:
+  &lt;ul&gt;
+    &lt;#items as fruit&gt;
+      &lt;li&gt;${fruit}&lt;#sep&gt; and&lt;/#sep&gt;
+    &lt;/#items&gt;
+  &lt;/ul&gt;
+&lt;#else&gt;
+  &lt;p&gt;We have no fruits.
+&lt;/#list&gt;</programlisting>
+
+            <note>
+              <para>You can read more about these directives <link
+              linkend="ref_directive_list">in the Reference</link>.</para>
+            </note>
           </section>
 
           <section>
@@ -600,7 +677,7 @@ All Rights Reserved.
 &lt;body&gt;
   &lt;h1&gt;Test page&lt;/h1&gt;
   &lt;p&gt;Blah blah...
-<emphasis>&lt;#include "/copyright_footer.html"&gt;</emphasis>
+<emphasis>  &lt;#include "/copyright_footer.html"&gt;</emphasis>
 &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
@@ -640,18 +717,18 @@ All Rights Reserved.
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
   <emphasis>&lt;#list animals as animal&gt;</emphasis>
-  &lt;tr&gt;
-    &lt;td&gt;
-      <emphasis>&lt;#if animal.size == "large"&gt;</emphasis>&lt;font size="+1"&gt;<emphasis>&lt;/#if&gt;</emphasis>
-      ${animal.name}
-      <emphasis>&lt;#if animal.size == "large"&gt;</emphasis>&lt;/font&gt;<emphasis>&lt;/#if&gt;</emphasis>
+    &lt;tr&gt;
+      &lt;td&gt;
+        &lt;span class="<emphasis>&lt;#if animal.size == "large"&gt;</emphasis>bigText<emphasis>&lt;#else&gt;</emphasis>normalText<emphasis>&lt;/#if&gt;</emphasis>"&gt;
+        ${animal.name}
+      <emphasis>  </emphasis>&lt;/span&gt;
     &lt;td&gt;${animal.price} Euros
   <emphasis>&lt;/#list&gt;</emphasis>
 &lt;/table&gt;</programlisting>
 
           <para>Note that since FreeMarker does not interpret text outside FTL
-          tags, interpolations and comments, it doesn't see the above
-          <literal>font</literal> tags as badly nested ones.</para>
+          tags, interpolations and comments, you could use the FTL tags inside
+          a HTML attributes without problem.</para>
         </section>
 
         <section>
@@ -2143,10 +2220,10 @@ autumn
  </programlisting>
 
             <para>The items in the list are expressions, so you can do this
-            for example: <literal>[2 + 2, [1, 2, 3, 4], "whatnot"]</literal>.
-            Here the first subvariable will be the number 4, the second will
-            be another sequence, and the third subvariable will be the string
-            "whatnot".</para>
+            for example: <literal>[2 + 2, [1, 2, 3, 4], "foo"]</literal>. Here
+            the first subvariable will be the number 4, the second will be
+            another sequence, and the third subvariable will be the string
+            <quote>foo</quote>.</para>
           </section>
 
           <section xml:id="dgui_template_exp_direct_ranges">
@@ -10360,6 +10437,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_counter">counter</link></para>
+          </listitem>
+
+          <listitem>
             <para>date <link linkend="ref_builtin_date_datetype">for
             dates</link>, <link linkend="ref_builtin_string_date">for
             strings</link></para>
@@ -10431,7 +10512,15 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_has_next">has_next</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_html">html</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_index">index</link></para>
           </listitem>
 
           <listitem>
@@ -10449,11 +10538,44 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_item_cycle">item_cycle</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_item_parity">item_parity</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_item_parity_cap">item_parity_cap</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_is_even_item">is_even_item</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_first">is_first</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_is_infinite">is_infinite</link></para>
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_is_last">is_last</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_is_nan">is_nan</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_is_odd_item">is_odd_item</link></para>
           </listitem>
 
           <listitem>
@@ -14331,6 +14453,350 @@ Sorted by name.last:
         </section>
       </section>
 
+      <section xml:id="ref_builtins_loop_var">
+        <title>Loop variable built-ins</title>
+
+        <para>These built-ins you can only use with the loop variable of the
+        <link linkend="ref_directive_list"><literal>list</literal> and
+        <literal>items</literal> directives</link> (and of the deprecated
+        <literal>foreach</literal> directive). Some explanation of that
+        follows (<literal><replaceable>loopVar</replaceable>?index</literal>
+        returns the 0-based index in the listable value we iterate
+        through):</para>
+
+        <programlisting role="template">&lt;#-- Note: x is a loop variable --&gt;
+&lt;#list ['a', 'b', 'c'] as x&gt;
+  ${x?index}
+&lt;/#list&gt;</programlisting>
+
+        <programlisting role="output">0
+1
+2</programlisting>
+
+        <para>When the <literal>list</literal> directive doesn't specify the
+        loop variable, these built-ins are used with the loop variable of the
+        <literal>items</literal> directive:</para>
+
+        <programlisting role="template">&lt;#list ['a', 'b', 'c']&gt;
+  &lt;ul&gt;
+   &lt;#items as x&gt;
+     &lt;li&gt;${x?index}&lt;/li&gt;
+   &lt;/#items&gt;
+  &lt;/ul&gt;
+&lt;/#list&gt;</programlisting>
+
+        <para>Loop variable built-ins only use the <emphasis>name</emphasis>
+        of loop variable, so that they can identify the related ongoing
+        iteration. They don't read the <emphasis>value</emphasis> of the loop
+        variable. Hence, this is a parsing error:</para>
+
+        <programlisting role="template">&lt;#-- FAILS, as y isn't a loop variable, just holds the value of x: --&gt;
+&lt;#list ['a', 'b', 'c'] as x&gt;
+  &lt;#assign y = x&gt;
+  ${y?index}
+&lt;/#list&gt;</programlisting>
+
+        <para>while this works despite that the value of <literal>x</literal>
+        was overwritten:</para>
+
+        <programlisting role="template">&lt;#-- Works; x is still the loop variable: --&gt;
+&lt;#list ['a', 'b', 'c'] as x&gt;
+  &lt;#assign x = 'foo'&gt;
+  ${x?index}
+&lt;/#list&gt;</programlisting>
+
+        <section xml:id="ref_builtin_counter">
+          <title>counter</title>
+
+          <indexterm>
+            <primary>counter built-in</primary>
+          </indexterm>
+
+          <para>Returns the 1-based index where the iteration (which is
+          identified by the loop variable name) currently stands.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c'] as i&gt;
+  ${i?counter}: ${i}
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  1: a
+  2: b
+  3: c</programlisting>
+
+          <note>
+            <para>For the 0-based index, use the <link
+            linkend="ref_builtin_index"><literal>index</literal>
+            built-in</link>.</para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_has_next">
+          <title>has_next</title>
+
+          <indexterm>
+            <primary>has_next built-in</primary>
+          </indexterm>
+
+          <para>Tells if the item where the iteration (which is identified by
+          the loop variable name) currently stands is not the last
+          item.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c'] as i&gt;${i?has_next?c} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">true true false </programlisting>
+
+          <note>
+            <para>For separating items with commas and such, use
+            <literal>&lt;#sep&gt;<replaceable>separator</replaceable>&lt;/#sep&gt;</literal>
+            instead of <literal>&lt;#if
+            <replaceable>var</replaceable>?has_next&gt;<replaceable>separator</replaceable>&lt;/#if&gt;</literal>,
+            as it's more readable. (Furthermore the
+            <literal>&lt;/#sep&gt;</literal> can be often omitted, like in
+            <literal>&lt;#list <replaceable>...</replaceable> as
+            <replaceable>var</replaceable>&gt;<replaceable>...</replaceable>${<replaceable>var</replaceable>}<replaceable>...</replaceable>&lt;#sep&gt;<replaceable>separator</replaceable>&lt;/#list&gt;</literal>)</para>
+          </note>
+
+          <note>
+            <para>If you need the inverse of this built-in, use
+            <literal><replaceable>var</replaceable>?is_last</literal> instead
+            of <literal>!<replaceable>var</replaceable>?has_next</literal>,
+            because it's more readable.</para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_index">
+          <title>index</title>
+
+          <indexterm>
+            <primary>index built-in</primary>
+          </indexterm>
+
+          <para>Returns the 0-based index where the iteration (which is
+          identified by the loop variable name) currently stands. </para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c'] as i&gt;
+  ${i?index}: ${i}
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  0: a
+  1: b
+  2: c</programlisting>
+
+          <note>
+            <para>For the 1-based index, use the <link
+            linkend="ref_builtin_counter"><literal>counter</literal>
+            built-in</link>.</para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_is_even_item">
+          <title>is_even_item</title>
+
+          <indexterm>
+            <primary>is_even_item built-in</primary>
+          </indexterm>
+
+          <para>Tells if the item where the iteration (which is identified by
+          the loop variable name) currently stands has an even 1-based
+          index.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c', 'd'] as i&gt;${i?is_even_item?c} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">false true false true</programlisting>
+
+          <note>
+            <para>To make tables with alternating row colors and such, use
+            <link
+            linkend="ref_builtin_item_parity"><literal><replaceable>var</replaceable>?item_parity</literal></link>
+            or <link
+            linkend="ref_builtin_item_cycle"><literal><replaceable>var</replaceable>?item_cycle(...)</literal></link>
+            instead.</para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_is_first">
+          <title>is_first</title>
+
+          <indexterm>
+            <primary>is_first built-in</primary>
+          </indexterm>
+
+          <para>Tells if the item where the iteration (which is identified by
+          the loop variable name) currently stands is the first item.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c'] as i&gt;${i?is_first?c} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">true false false </programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_is_last">
+          <title>is_last</title>
+
+          <indexterm>
+            <primary>is_last built-in</primary>
+          </indexterm>
+
+          <para>Tells if the item where the iteration (which is identified by
+          the loop variable name) currently stands is the last item.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c'] as i&gt;${i?is_last?c} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">false false true</programlisting>
+
+          <note>
+            <para>If you need the inverse of this built-in, use
+            <literal><replaceable>var</replaceable>?has_next</literal> instead
+            of <literal>!<replaceable>var</replaceable>?is_last</literal>,
+            because it's more readable.</para>
+          </note>
+
+          <note>
+            <para>For separating items with commas and such, use
+            <literal>&lt;#sep&gt;<replaceable>separator</replaceable>&lt;/#sep&gt;</literal>
+            instead of <literal>&lt;#if
+            <replaceable>var</replaceable>?has_next&gt;<replaceable>separator</replaceable>&lt;/#if&gt;</literal>,
+            as it's more readable. (Furthermore the
+            <literal>&lt;/#sep&gt;</literal> can be often omitted, like in
+            <literal>&lt;#list <replaceable>...</replaceable> as
+            <replaceable>var</replaceable>&gt;<replaceable>...</replaceable>${<replaceable>var</replaceable>}<replaceable>...</replaceable>&lt;#sep&gt;<replaceable>separator</replaceable>&lt;/#list&gt;</literal>)</para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_is_odd_item">
+          <title>is_odd_item</title>
+
+          <indexterm>
+            <primary>is_odd_item built-in</primary>
+          </indexterm>
+
+          <para>Tells if the item where the iteration (which is identified by
+          the loop variable name) currently stands has an odd 1-based
+          index.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c', 'd'] as i&gt;${i?is_odd_item?c} &lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">true false true false </programlisting>
+
+          <note>
+            <para>To make tables with alternating row colors and such, use
+            <link
+            linkend="ref_builtin_item_parity"><literal><replaceable>var</replaceable>?item_parity</literal></link>
+            or <link
+            linkend="ref_builtin_item_cycle"><literal><replaceable>var</replaceable>?item_cycle(...)</literal></link>
+            instead.</para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_item_cycle">
+          <title>item_cycle</title>
+
+          <indexterm>
+            <primary>item_cycle built-in</primary>
+          </indexterm>
+
+          <para>This is a more generic version of the <link
+          linkend="ref_builtin_item_parity"><literal>item_parity</literal>
+          built-in</link>, where you can specify what value to use instead of
+          <literal>"odd"</literal> and <literal>"even"</literal>. It also
+          allows more than 2 values that it will cycle through.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c', 'd', 'e', 'f', 'g'] as i&gt;
+  &lt;tr class="${i?item_cycle('row1', 'row2', 'row3')}"&gt;${i}&lt;/tr&gt;
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  &lt;tr class="row1"&gt;a&lt;/tr&gt;
+  &lt;tr class="row2"&gt;b&lt;/tr&gt;
+  &lt;tr class="row3"&gt;c&lt;/tr&gt;
+  &lt;tr class="row1"&gt;d&lt;/tr&gt;
+  &lt;tr class="row2"&gt;e&lt;/tr&gt;
+  &lt;tr class="row3"&gt;f&lt;/tr&gt;
+  &lt;tr class="row1"&gt;g&lt;/tr&gt;</programlisting>
+
+          <para>Some details:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The number of arguments must be at least 1, and has no
+              upper limit.</para>
+            </listitem>
+
+            <listitem>
+              <para>The type of the arguments can be anything, they doesn't
+              have to be strings.</para>
+            </listitem>
+          </itemizedlist>
+
+          <note>
+            <para>Use the <link
+            linkend="ref_builtin_item_parity"><literal>item_parity</literal>
+            built-in</link> instead if the values you need are
+            <literal>"odd"</literal> and <literal>"even"</literal>.</para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_item_parity">
+          <title>item_parity</title>
+
+          <indexterm>
+            <primary>item_parity built-in</primary>
+          </indexterm>
+
+          <para>Returns <literal>"odd"</literal> or <literal>"even"</literal>
+          string value, depending on the parity of the 1-based index where the
+          iteration (which is identified by the loop variable name) currently
+          stands. This is commonly used for alternating color for table
+          rows:</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c', 'd'] as i&gt;
+  &lt;tr class="${i?item_parity}Row"&gt;${i}&lt;/tr&gt;
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  &lt;tr class="oddRow"&gt;a&lt;/tr&gt;
+  &lt;tr class="evenRow"&gt;b&lt;/tr&gt;
+  &lt;tr class="oddRow"&gt;c&lt;/tr&gt;
+  &lt;tr class="evenRow"&gt;d&lt;/tr&gt;</programlisting>
+
+          <note>
+            <para>Use the <link
+            linkend="ref_builtin_item_parity"><literal>item_parity_cap</literal>
+            built-in</link> for capitalized <literal>"Odd"</literal> and
+            <literal>"Even"</literal>. Use the <link
+            linkend="ref_builtin_item_cycle"><literal>item_cycle</literal>
+            built-in</link> to specify custom values, or more then two values.
+            </para>
+          </note>
+        </section>
+
+        <section xml:id="ref_builtin_item_parity_cap">
+          <title>item_parity_cap</title>
+
+          <indexterm>
+            <primary>item_parity_cap built-in</primary>
+          </indexterm>
+
+          <para>Returns <literal>"Odd"</literal> or <literal>"Even"</literal>
+          string value (note the capitalization), depending on the parity of
+          the 1-based index where the iteration (which is identified by the
+          loop variable name) currently stands.</para>
+
+          <programlisting role="template">&lt;#list ['a', 'b', 'c', 'd'] as i&gt;
+  &lt;tr class="row${i?item_parity_cap}"&gt;${i}&lt;/tr&gt;
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  &lt;tr class="rowOdd"&gt;a&lt;/tr&gt;
+  &lt;tr class="rowEven"&gt;b&lt;/tr&gt;
+  &lt;tr class="rowOdd"&gt;c&lt;/tr&gt;
+  &lt;tr class="rowEven"&gt;d&lt;/tr&gt;</programlisting>
+
+          <note>
+            <para>Use the <link
+            linkend="ref_builtin_item_parity"><literal>item_parity</literal>
+            built-in</link> for lower case <literal>"odd"</literal> and
+            <literal>"even"</literal>.</para>
+          </note>
+        </section>
+      </section>
+
       <section xml:id="ref_builtins_expert">
         <title>Seldom used and expert built-ins</title>
 
@@ -14341,6 +14807,14 @@ Sorted by name.last:
 
         <section xml:id="ref_buitin_api_and_has_api">
           <title>api, has_api</title>
+
+          <indexterm>
+            <primary>api built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>has_api built-in</primary>
+          </indexterm>
 
           <note>
             <para>These built-ins exists since FreeMarker 2.3.22</para>
@@ -15427,7 +15901,7 @@ I said, test only)</programlisting>
           <programlisting role="metaTemplate">
 <literal>&lt;#escape <replaceable>identifier</replaceable> as <replaceable>expression</replaceable>&gt;
   <replaceable>...</replaceable>
-  &lt;#noescape&gt;...&lt;/#noescape&gt;
+  &lt;#noescape&gt;<replaceable>...</replaceable>&lt;/#noescape&gt;
   <replaceable>...</replaceable>
 &lt;/#escape&gt;</literal>
 </programlisting>
@@ -16065,6 +16539,9 @@ or
               ...etc.: Expression evaluates to a boolean value.</para>
             </listitem>
           </itemizedlist>
+
+          <para>The <literal>elseif</literal>-s and the
+          <literal>else</literal> are optional.</para>
         </section>
 
         <section>
@@ -16622,7 +17099,7 @@ All rights reserved.</emphasis></programlisting>
       </section>
 
       <section xml:id="ref_directive_list">
-        <title>list, break</title>
+        <title>list, else, items, break</title>
 
         <anchor xml:id="ref.directive.list"/>
 
@@ -16643,11 +17120,23 @@ All rights reserved.</emphasis></programlisting>
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#list <replaceable>sequence</replaceable> as <replaceable>item</replaceable>&gt;
-    <replaceable>...</replaceable>
-&lt;/#list&gt;</literal>
-</programlisting>
+          <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable> as <replaceable>item</replaceable>&gt;
+    <replaceable>repeated for each item</replaceable>
+&lt;#else&gt;
+    <replaceable>when sequence had 0 items</replaceable>
+&lt;/#list&gt;</literal></programlisting>
+
+          <para>or</para>
+
+          <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable>&gt;
+    <replaceable>before the items, if have items</replaceable>
+    &lt;#items as <replaceable>item</replaceable>&gt;
+    <replaceable>    repeated for each item</replaceable>
+    &lt;/#items&gt;
+    <replaceable>after the items, if have items</replaceable>
+&lt;#else&gt;
+    <replaceable>when sequence had 0 items</replaceable>
+&lt;/#list&gt;</literal></programlisting>
 
           <para>Where:</para>
 
@@ -16662,11 +17151,22 @@ All rights reserved.</emphasis></programlisting>
               of the <link linkend="dgui_misc_var">loop variable</link> (not
               an expression)</para>
             </listitem>
+
+            <listitem>
+              <para>Parts between the tags with description: can contain
+              arbitrary FTL</para>
+            </listitem>
           </itemizedlist>
+
+          <para>The <literal>else</literal> is optional.</para>
         </section>
 
         <section>
           <title>Description</title>
+
+          <para>TODO: <literal>else</literal>, <literal>items</literal>,
+          deprecate special loop variables, show loop variable
+          built-ins.</para>
 
           <para>You can use the <literal>list</literal> directive to process a
           section of template for each variable contained within a sequence.
@@ -17802,12 +18302,15 @@ or
               Expressions evaluates to scalars of the same type.</para>
             </listitem>
           </itemizedlist>
+
+          <para>The <literal>break</literal>-s and <literal>default</literal>
+          are optional.</para>
         </section>
 
         <section>
           <title>Description</title>
 
-          <para>The usage of this directive is not recommended, as it is
+          <para>The usage of this directive is not recommended, as it's
           error-prone because of the fall-through behavior. Use <link
           linkend="ref.directive.elseif"><literal>elseif</literal></link>-s
           instead unless you want to exploit the fall-through behavior.</para>
@@ -22425,6 +22928,88 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added advanced <literal>list</literal> directive child
+              directives: <literal>else</literal>, <literal>items</literal>,
+              <literal>sep</literal>. Some examples:</para>
+
+              <para>Using <literal>sep</literal> for separating items:</para>
+
+              <programlisting role="template">&lt;#list 1..3 as x&gt;${x}&lt;#sep&gt;, &lt;/#list&gt;</programlisting>
+
+              <programlisting role="output">1, 2, 3</programlisting>
+
+              <para>Using <literal>else</literal> to handle the special case
+              when there are 0 items:</para>
+
+              <programlisting role="template">&lt;#list xs as x&gt;
+  ${x}
+&lt;#else&gt;
+  No items
+&lt;/#list&gt;</programlisting>
+
+              <para>Using <literal>items</literal> when some output before and
+              after the listing is only needed when there are more than 0
+              items:</para>
+
+              <programlisting role="template">&lt;#list xs&gt;
+  &lt;ul&gt;
+    &lt;#items as x&gt;
+      &lt;li&gt;${x}&lt;/li&gt;
+    &lt;/#items&gt;
+  &lt;/ul&gt;
+&lt;/#list&gt;</programlisting>
+
+              <para>which if <literal>xs</literal> above is
+              <literal>1..3</literal> prints:</para>
+
+              <programlisting role="output">  &lt;ul&gt;
+      &lt;li&gt;1&lt;/li&gt;
+      &lt;li&gt;2&lt;/li&gt;
+      &lt;li&gt;3&lt;/li&gt;
+  &lt;/ul&gt;</programlisting>
+
+              <para>but if <literal>xs</literal> is an empty sequence then it
+              prints nothing, avoiding an empty
+              <literal>&lt;ul&gt;&lt;/ul&gt;</literal>.</para>
+
+              <para>Of course these all can be combined together:</para>
+
+              <programlisting role="template">&lt;#list xs&gt;
+  &lt;ul&gt;
+    &lt;#items as x&gt;
+      &lt;li&gt;${x}&lt;#sep&gt;,&lt;/#sep&gt;&lt;/li&gt;
+    &lt;/#items&gt;
+  &lt;/ul&gt;
+&lt;#else&gt;
+  &lt;p&gt;No items&lt;/p&gt;
+&lt;/#list&gt;</programlisting>
+
+              <para>For more details, see the <link
+              linkend="ref_directive_list"><literal>list</literal> directive
+              in the Reference</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <link linkend="ref_builtins_loop_var">new built-ins
+              that act on loop variables</link>:
+              <literal><replaceable>var</replaceable>?index</literal>
+              (deprecates
+              <literal><replaceable>var</replaceable>_index</literal>),
+              <literal><replaceable>var</replaceable>?counter</literal>
+              (1-based index),
+              <literal><replaceable>var</replaceable>?has_next</literal>
+              (deprecates
+              <literal><replaceable>var</replaceable>_has_next</literal>),
+              <literal><replaceable>var</replaceable>?is_first</literal>,
+              <literal><replaceable>var</replaceable>?is_last</literal>,
+              <literal><replaceable>var</replaceable>?item_parity</literal>
+              (returns <literal>"odd"</literal> or <literal>"even"</literal>),
+              <literal><replaceable>var</replaceable>?item_parity_cap</literal>,
+              <literal><replaceable>var</replaceable>?item_cycle</literal><literal>(<replaceable>...</replaceable>)</literal>,
+              etc.</para>
+            </listitem>
+
             <listitem>
               <para>Added camel case support for the identifiers that are part
               of the template language (user defined names aren't affected).
