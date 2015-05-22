@@ -14456,6 +14456,11 @@ Sorted by name.last:
       <section xml:id="ref_builtins_loop_var">
         <title>Loop variable built-ins</title>
 
+        <note>
+          <para>Loop variable built-ins only exists since FreeMarker
+          2.3.23.</para>
+        </note>
+
         <para>These built-ins you can only use with the loop variable of the
         <link linkend="ref_directive_list"><literal>list</literal> and
         <literal>items</literal> directives</link> (and of the deprecated
@@ -14490,19 +14495,9 @@ Sorted by name.last:
         iteration. They don't read the <emphasis>value</emphasis> of the loop
         variable. Hence, this is a parsing error:</para>
 
-        <programlisting role="template">&lt;#-- FAILS, as y isn't a loop variable, just holds the value of x: --&gt;
-&lt;#list ['a', 'b', 'c'] as x&gt;
+        <programlisting role="template">&lt;#list ['a', 'b', 'c'] as x&gt;
   &lt;#assign y = x&gt;
-  ${y?index}
-&lt;/#list&gt;</programlisting>
-
-        <para>while this works despite that the value of <literal>x</literal>
-        was overwritten:</para>
-
-        <programlisting role="template">&lt;#-- Works; x is still the loop variable: --&gt;
-&lt;#list ['a', 'b', 'c'] as x&gt;
-  &lt;#assign x = 'foo'&gt;
-  ${x?index}
+  ${y?index} &lt;#-- ERROR: y isn't a loop variable --&gt;
 &lt;/#list&gt;</programlisting>
 
         <section xml:id="ref_builtin_counter">
@@ -14511,6 +14506,10 @@ Sorted by name.last:
           <indexterm>
             <primary>counter built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Returns the 1-based index where the iteration (which is
           identified by the loop variable name) currently stands.</para>
@@ -14536,6 +14535,10 @@ Sorted by name.last:
           <indexterm>
             <primary>has_next built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands is not the last
@@ -14571,8 +14574,12 @@ Sorted by name.last:
             <primary>index built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Returns the 0-based index where the iteration (which is
-          identified by the loop variable name) currently stands. </para>
+          identified by the loop variable name) currently stands.</para>
 
           <programlisting role="template">&lt;#list ['a', 'b', 'c'] as i&gt;
   ${i?index}: ${i}
@@ -14595,6 +14602,10 @@ Sorted by name.last:
           <indexterm>
             <primary>is_even_item built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands has an even 1-based
@@ -14621,6 +14632,10 @@ Sorted by name.last:
             <primary>is_first built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands is the first item.</para>
 
@@ -14635,6 +14650,10 @@ Sorted by name.last:
           <indexterm>
             <primary>is_last built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands is the last item.</para>
@@ -14669,6 +14688,10 @@ Sorted by name.last:
             <primary>is_odd_item built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Tells if the item where the iteration (which is identified by
           the loop variable name) currently stands has an odd 1-based
           index.</para>
@@ -14693,6 +14716,10 @@ Sorted by name.last:
           <indexterm>
             <primary>item_cycle built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>This is a more generic version of the <link
           linkend="ref_builtin_item_parity"><literal>item_parity</literal>
@@ -14741,6 +14768,10 @@ Sorted by name.last:
             <primary>item_parity built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
+
           <para>Returns <literal>"odd"</literal> or <literal>"even"</literal>
           string value, depending on the parity of the 1-based index where the
           iteration (which is identified by the loop variable name) currently
@@ -14762,8 +14793,8 @@ Sorted by name.last:
             built-in</link> for capitalized <literal>"Odd"</literal> and
             <literal>"Even"</literal>. Use the <link
             linkend="ref_builtin_item_cycle"><literal>item_cycle</literal>
-            built-in</link> to specify custom values, or more then two values.
-            </para>
+            built-in</link> to specify custom values, or more then two
+            values.</para>
           </note>
         </section>
 
@@ -14773,6 +14804,10 @@ Sorted by name.last:
           <indexterm>
             <primary>item_parity_cap built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>Returns <literal>"Odd"</literal> or <literal>"Even"</literal>
           string value (note the capitalization), depending on the parity of
@@ -15403,7 +15438,8 @@ May 16, 2011
           </listitem>
 
           <listitem>
-            <para><link linkend="ref.directive.else">else</link></para>
+            <para>else: <link linkend="ref.directive.else">in if</link>, <link
+            linkend="ref.directive.list.else">in list</link></para>
           </listitem>
 
           <listitem>
@@ -15446,6 +15482,10 @@ May 16, 2011
 
           <listitem>
             <para><link linkend="ref.directive.include">include</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref.directive.items">items</link></para>
           </listitem>
 
           <listitem>
@@ -15497,6 +15537,10 @@ May 16, 2011
 
           <listitem>
             <para><link linkend="ref.directive.rt">rt</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref.directive.sep">sep</link></para>
           </listitem>
 
           <listitem>
@@ -17099,16 +17143,12 @@ All rights reserved.</emphasis></programlisting>
       </section>
 
       <section xml:id="ref_directive_list">
-        <title>list, else, items, break</title>
+        <title>list, else, items, sep, break</title>
 
         <anchor xml:id="ref.directive.list"/>
 
         <indexterm>
           <primary>list directive</primary>
-        </indexterm>
-
-        <indexterm>
-          <primary>break directive</primary>
         </indexterm>
 
         <indexterm>
@@ -17120,27 +17160,22 @@ All rights reserved.</emphasis></programlisting>
         <section>
           <title>Synopsis</title>
 
+          <para>Form 1:</para>
+
           <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable> as <replaceable>item</replaceable>&gt;
     <replaceable>repeated for each item</replaceable>
 &lt;#else&gt;
-    <replaceable>when sequence had 0 items</replaceable>
-&lt;/#list&gt;</literal></programlisting>
-
-          <para>or</para>
-
-          <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable>&gt;
-    <replaceable>before the items, if have items</replaceable>
-    &lt;#items as <replaceable>item</replaceable>&gt;
-    <replaceable>    repeated for each item</replaceable>
-    &lt;/#items&gt;
-    <replaceable>after the items, if have items</replaceable>
-&lt;#else&gt;
-    <replaceable>when sequence had 0 items</replaceable>
+    <replaceable>when there are 0 items</replaceable>
 &lt;/#list&gt;</literal></programlisting>
 
           <para>Where:</para>
 
           <itemizedlist spacing="compact">
+            <listitem>
+              <para>The <literal>else</literal> part is optional, and exists
+              since FreeMarker 2.3.23 only.</para>
+            </listitem>
+
             <listitem>
               <para><literal><replaceable>sequence</replaceable></literal>:
               Expressions evaluates to a sequence or collection</para>
@@ -17153,109 +17188,400 @@ All rights reserved.</emphasis></programlisting>
             </listitem>
 
             <listitem>
-              <para>Parts between the tags with description: can contain
+              <para>Parts between the tags with description can contain
               arbitrary FTL</para>
             </listitem>
           </itemizedlist>
 
-          <para>The <literal>else</literal> is optional.</para>
+          <para>Form 2 (since FreeMarker 2.3.23):</para>
+
+          <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable>&gt;
+    <replaceable>before the items, if have items</replaceable>
+    &lt;#items as <replaceable>item</replaceable>&gt;
+    <replaceable>    repeated for each item</replaceable>
+    &lt;/#items&gt;
+    <replaceable>after the items, if have items</replaceable>
+&lt;#else&gt;
+    <replaceable>when there are 0 items</replaceable>
+&lt;/#list&gt;</literal></programlisting>
+
+          <para>Where: Same as the <quote>Where</quote> section for Form 1
+          above.</para>
         </section>
 
         <section>
           <title>Description</title>
 
-          <para>TODO: <literal>else</literal>, <literal>items</literal>,
-          deprecate special loop variables, show loop variable
-          built-ins.</para>
+          <section>
+            <title>Simplest form</title>
 
-          <para>You can use the <literal>list</literal> directive to process a
-          section of template for each variable contained within a sequence.
-          The code between the start-tag and end-tag will be processed for the
-          1st subvariable, then for the 2nd subvariable, then for the 3rd
-          subvariable, etc until it passes the last one. For each such
-          iteration the loop variable will contain the current
-          subvariable.</para>
+            <para>A simple example; assuming <literal>users</literal> contains
+            the <literal>['Joe', 'Kate', 'Fred']</literal> sequence:</para>
 
-          <para>There are two special loop variables available inside the list
-          loop:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para><literal><replaceable>item</replaceable>_index</literal>:
-              The index (0-based number) of the current item in the
-              loop.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal><replaceable>item</replaceable>_has_next</literal>:
-              Boolean value that tells if the current item is the last in the
-              sequence or not.</para>
-            </listitem>
-          </itemizedlist>
-
-          <para>Example 1:</para>
-
-          <programlisting role="template">&lt;#assign seq = ["winter", "spring", "summer", "autumn"]&gt;
-&lt;#list seq as x&gt;
-  ${<emphasis>x_index</emphasis> + 1}. ${x}&lt;#if <emphasis>x_has_next</emphasis>&gt;,&lt;/#if&gt;
+            <programlisting role="template">&lt;#list users as user&gt;
+  &lt;p&gt;${user}
 &lt;/#list&gt;</programlisting>
 
-          <para>will output:</para>
+            <programlisting role="output">  &lt;p&gt;Joe
+  &lt;p&gt;Kate
+  &lt;p&gt;Fred</programlisting>
 
-          <programlisting role="output">  1. winter,
-  2. spring,
-  3. summer,
-  4. autumn</programlisting>
+            <para>The <literal>list</literal> directive to process a section
+            of template for each value contained within a sequence (or
+            collection). The code between the start-tag and end-tag (the body
+            of <literal>list</literal> from now on) will be processed for the
+            1st value, then for the 2nd value, and so on until all values were
+            processed. For each such iteration the loop variable
+            (<literal>user</literal> in this example) will contain the value
+            of the current item.</para>
 
-          <para>Example 2: You can use <literal>list</literal> to count
-          between two numbers, using a <link
-          linkend="dgui_template_exp_direct_seuqence">numerical range sequence
-          expression</link>:</para>
+            <para>The loop variable (<literal>user</literal>) only exists
+            inside the <literal>list</literal> body. Also, macros/functions
+            called from within the loop won't see it (as if it were a local
+            variable).</para>
+          </section>
 
-          <programlisting role="template">&lt;#assign x=3&gt;
-&lt;#list 1..x as i&gt;
-  ${i}
+          <section>
+            <title>else directive</title>
+
+            <anchor xml:id="ref.directive.list.else"/>
+
+            <indexterm>
+              <primary>else directive inside list</primary>
+            </indexterm>
+
+            <note>
+              <para><literal>else</literal> inside <literal>list</literal> is
+              only supported since FreeMarker 2.3.23</para>
+            </note>
+
+            <para><literal>else</literal> is used if when there are 0 items,
+            you have to print something special instead of just printing
+            nothing:</para>
+
+            <programlisting role="template">&lt;#list users as user&gt;
+  &lt;p&gt;${user}
+&lt;#else&gt;
+  &lt;p&gt;No users
 &lt;/#list&gt;</programlisting>
 
-          <para>The output will be:</para>
+            <para>This outputs the same as the earlier example, except if
+            <literal>users</literal> contains 0 items:</para>
 
-          <programlisting role="output">  1
-  2
-  3
- </programlisting>
+            <programlisting role="output">  &lt;p&gt;No users</programlisting>
 
-          <para>Note that the above example will not work as you may expected
-          if <literal>x</literal> is 0, as then it will print 0 and -1.</para>
+            <para>Note that the loop variable (<literal>user</literal>)
+            doesn't exist between the <literal>else</literal> tag and the
+            <literal>list</literal> end-tag.</para>
+          </section>
 
-          <anchor xml:id="ref.directive.list.break"/>
+          <section>
+            <title>items directive</title>
 
-          <para>You can leave the <literal>list</literal> loop before it
-          passes the last subvariable of the sequence with the
-          <literal>break</literal> directive. For example this will print
-          ``winter'' and ``spring'' only:</para>
+            <anchor xml:id="ref.directive.items"/>
 
-          <programlisting role="template">&lt;#list seq as x&gt;
+            <indexterm>
+              <primary>items directive</primary>
+            </indexterm>
+
+            <note>
+              <para><literal>items</literal> exists since FreeMarker
+              2.3.23</para>
+            </note>
+
+            <para><literal>items</literal> is used if you have to print (or
+            do) something before the first list item, and after the last list
+            item, as far as there's at least 1 item. For example:</para>
+
+            <programlisting role="template">&lt;#list users&gt;
+  &lt;ul&gt;
+    &lt;#items as user&gt;
+      &lt;li&gt;${user}&lt;/li&gt;
+    &lt;/#items&gt;
+  &lt;/ul&gt;
+&lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">  &lt;ul&gt;
+      &lt;li&gt;Joe&lt;/li&gt;
+      &lt;li&gt;Kate&lt;/li&gt;
+      &lt;li&gt;Fred&lt;/li&gt;
+  &lt;/ul&gt;</programlisting>
+
+            <para>If there are 0 items, the above won't print anything, thus
+            you don't end up with an empty
+            <literal>&lt;ul&gt;&lt;/ul&gt;</literal>.</para>
+
+            <para>That is, when the <literal>list</literal> directive has no
+            <literal>as <replaceable>item</replaceable></literal> parameter,
+            the body of it is executed exactly once if there's at least one
+            item, or not at all otherwise. It's the body of the mandatory
+            nested <literal>items</literal> directive that will be run for
+            each item, and hence it's also the <literal>items</literal>
+            directive that defines the loop variable, not
+            <literal>list</literal>.</para>
+
+            <para>A <literal>list</literal> directive with
+            <literal>items</literal> also can have an <literal>else</literal>
+            directive:</para>
+
+            <programlisting role="template">&lt;#list users&gt;
+  &lt;ul&gt;
+    &lt;#items as user&gt;
+      &lt;li&gt;${user}&lt;/li&gt;
+    &lt;/#items&gt;
+  &lt;/ul&gt;
+&lt;#else&gt;
+  &lt;p&gt;No users
+&lt;/#list&gt;</programlisting>
+
+            <para>Some further details:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>The parser will check that a <literal>list</literal>
+                without <literal>as <replaceable>item</replaceable></literal>
+                parameter always has a nested <literal>items</literal>
+                directive, and that an <literal>items</literal> directive
+                always has an enclosing <literal>list</literal> which has no
+                <literal>as <replaceable>item</replaceable></literal>
+                parameter. This is checked when the template is parsed, not
+                when the template is running. Thus, these rules apply on the
+                FTL source code itself; you can't move
+                <literal>items</literal> out into a macro or included
+                template.</para>
+              </listitem>
+
+              <listitem>
+                <para>You can have multiple <literal>items</literal>
+                directives inside the same <literal>list</literal>, but only
+                one of them will be allowed to run (as far as you don't leave
+                and re-enter the enclosing <literal>list</literal> directive);
+                and further attempts will cause error.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal>items</literal> directive can't have its own
+                nested <literal>else</literal> directive, only the enclosing
+                <literal>list</literal> can have</para>
+              </listitem>
+
+              <listitem>
+                <para>The loop variable (<literal>user</literal>) only exists
+                inside the body of the <literal>items</literal>
+                directive.</para>
+              </listitem>
+            </itemizedlist>
+          </section>
+
+          <section>
+            <title>sep directive</title>
+
+            <anchor xml:id="ref.directive.sep"/>
+
+            <indexterm>
+              <primary>sep directive</primary>
+            </indexterm>
+
+            <note>
+              <para><literal>sep</literal> exists since FreeMarker
+              2.3.23</para>
+            </note>
+
+            <para><literal>sep</literal> is used when you have to display
+            something between each item (but before the first item or after
+            the last item). For example:</para>
+
+            <programlisting role="template">&lt;#list users as user&gt;${user}&lt;#sep&gt;, &lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">Joe, Kate, Fred</programlisting>
+
+            <para>Above, <literal>&lt;#sep&gt;, &lt;/#list&gt;</literal> is a
+            shorthand for <literal>&lt;#sep&gt;,
+            &lt;/#sep&gt;&lt;/#list&gt;</literal>; the <literal>sep</literal>
+            end-tag can be omitted if you would put it where the enclosing
+            directive is closed. For example here, we couldn't use such
+            abbreviation (HTML tags close nothing; they are just plain text
+            for FreeMarker):</para>
+
+            <programlisting role="template">&lt;#list users as user&gt;&lt;div&gt;${user}&lt;#sep&gt;, &lt;#sep&gt;&lt;/div&gt;&lt;/#list&gt;</programlisting>
+
+            <para>As <literal>sep</literal> is just a convenient way of
+            writing <literal>&lt;#if
+            <replaceable>item</replaceable>?has_next&gt;...&lt;/#if&gt;</literal>,
+            hence it can be used anywhere where there's a
+            <literal>list</literal> or <literal>items</literal> loop variable
+            available.</para>
+
+            <para>The parser will check if <literal>sep</literal> is used
+            inside <literal>list <replaceable>...</replaceable> as
+            item</literal> or an <literal>items</literal> directive. Thus you
+            can't move <literal>sep</literal> out from the repeated part into
+            a macro.</para>
+          </section>
+
+          <section>
+            <title>break directive</title>
+
+            <anchor xml:id="ref.directive.list.break"/>
+
+            <indexterm>
+              <primary>break directive</primary>
+            </indexterm>
+
+            <para>You can exit the iteration before passing the last item with
+            the <literal>break</literal> directive. For example:</para>
+
+            <programlisting role="template">&lt;#list 1..10 as x&gt;
   ${x}
-  &lt;#if x = "spring"&gt;<emphasis>&lt;#break&gt;</emphasis>&lt;/#if&gt;
+  &lt;#if x == 3&gt;
+    &lt;#break&gt;
+  &lt;/#if&gt;
 &lt;/#list&gt;</programlisting>
 
-          <para><phrase role="forProgrammers">Note that if you turn on the
-          classic compatible mode, then the <literal>list</literal> accepts a
-          scalar as well and treats it as a single-element
-          sequence.</phrase></para>
+            <programlisting role="output">  1
+  2
+  3</programlisting>
 
-          <para><phrase role="forProgrammers">In general, it is best to avoid
-          using collection that wraps an <literal>Iterator</literal> as
-          parameters to <literal>list</literal> and use collection that wraps
-          <literal>java.util.Collection</literal> or sequence whenever
-          possible. There are situations however, when you only have an
-          <literal>Iterator</literal> at your disposal. Note that if you pass
-          an collection that wraps an <literal>Iterator</literal> to the
-          <literal>list</literal>, you can iterate over its elements only once
-          since <literal>Iterator</literal>s are by their nature one-off
-          objects. When you try to list a such collection variable for the
-          second time, an error will abort template
-          processing.</phrase></para>
+            <para>The <literal>break</literal> directives can be placed
+            anywhere inside <literal>list</literal> as far as it has
+            <literal>as <replaceable>item</replaceable></literal> parameter,
+            otherwise inside the <literal>items</literal> directive. If the
+            <literal>break</literal> is inside <literal>items</literal>, it
+            will only <literal>break</literal> out of
+            <literal>items</literal>, not of <literal>list</literal>. (In
+            general, <literal>break</literal> will only exit from the
+            directive whose body is called for each item.)</para>
+          </section>
+
+          <section>
+            <title>Accessing iteration state</title>
+
+            <indexterm>
+              <primary>iteration state</primary>
+            </indexterm>
+
+            <indexterm>
+              <primary>listing state</primary>
+            </indexterm>
+
+            <para>Starting from 2.3.23, <link
+            linkend="ref_builtins_loop_var">loop variable built-ins</link> can
+            be used to query the current state of the loop. For example, here
+            we use the <literal>counter</literal> and
+            <literal>item_parity</literal> loop variable built-ins (see all of
+            them <link linkend="ref_builtins_loop_var">in the
+            Reference</link>):</para>
+
+            <programlisting role="template">&lt;#list users&gt;
+  &lt;table&gt;
+    &lt;#items as user&gt;
+      &lt;tr class="${user<emphasis>?item_parity</emphasis>}Row"&gt;
+        &lt;td&gt;${user<emphasis>?counter</emphasis>}
+        &lt;td&gt;${user}
+    &lt;/#items&gt;
+  &lt;/table&gt;
+&lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">  &lt;table&gt;
+      &lt;tr class="<emphasis>odd</emphasis>Row"&gt;
+        &lt;td&gt;<emphasis>1</emphasis>
+        &lt;td&gt;Joe
+      &lt;tr class="<emphasis>even</emphasis>Row"&gt;
+        &lt;td&gt;<emphasis>2</emphasis>
+        &lt;td&gt;Kate
+      &lt;tr class="<emphasis>odd</emphasis>Row"&gt;
+        &lt;td&gt;<emphasis>3</emphasis>
+        &lt;td&gt;Fred
+  &lt;/table&gt;</programlisting>
+
+            <para>Before 2.3.23 (and for backward compatibility after that
+            too), there are two extra loop variables to retrieve state:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><literal><replaceable>item</replaceable>_index</literal>
+                (<emphasis>deprecated</emphasis> by
+                <literal><replaceable>item</replaceable>?index</literal>): The
+                index (0-based number) of the current item in the loop.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal><replaceable>item</replaceable>_has_next</literal>
+                (<emphasis>deprecated</emphasis> by
+                <literal><replaceable>item</replaceable>?has_next</literal>):
+                Boolean value that tells if the current item is the last in
+                the sequence or not.</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>so in the above example, you could replace
+            <literal>${user?counter}</literal> with <literal>${user_index +
+            1}</literal>.</para>
+          </section>
+
+          <section>
+            <title>Nesting loops into each other</title>
+
+            <para>Naturally, a <literal>list</literal> or
+            <literal>items</literal> can contain further
+            <literal>list</literal>-s:</para>
+
+            <programlisting role="template">&lt;#list 1..2 as i&gt;
+  &lt;#list 1..3 as j&gt;
+    i = ${i}, j = ${j}
+  &lt;/#list&gt;
+&lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">    i = 1, j = 1
+    i = 1, j = 2
+    i = 1, j = 3
+    i = 2, j = 1
+    i = 2, j = 2
+    i = 2, j = 3</programlisting>
+
+            <para>It's also allowed to use clashing loop variable names
+            like:</para>
+
+            <programlisting role="template">&lt;#list 1..2 as i&gt;
+  Outer: ${i}
+  &lt;#list 10..12 as i&gt;
+    Inner: ${i}
+  &lt;/#list&gt;
+  Outer again: ${i}
+&lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">  Outer: 1
+    Inner: 10
+    Inner: 11
+    Inner: 12
+  Outer again: 1
+  Outer: 2
+    Inner: 10
+    Inner: 11
+    Inner: 12
+  Outer again: 2</programlisting>
+          </section>
+
+          <section>
+            <title>Notes for Java programmers</title>
+
+            <para><phrase role="forProgrammers">If classic compatible mode
+            <literal>list</literal> accepts a scalar too and treats it as a
+            single-element sequence.</phrase></para>
+
+            <para><phrase role="forProgrammers">In general, it is best to
+            avoid using collection that wraps an <literal>Iterator</literal>
+            as parameters to <literal>list</literal> and use collection that
+            wraps <literal>java.util.Collection</literal> or sequence whenever
+            possible. There are situations however, when you only have an
+            <literal>Iterator</literal> at your disposal. Note that if you
+            pass an collection that wraps an <literal>Iterator</literal> to
+            the <literal>list</literal>, you can iterate over its elements
+            only once since <literal>Iterator</literal>s are by their nature
+            one-off objects. When you try to list a such collection variable
+            for the second time, an error will abort template
+            processing.</phrase></para>
+          </section>
         </section>
       </section>
 
@@ -17550,7 +17876,7 @@ or
   b = ${b}
   &lt;#if ext?is_sequence&gt;
     &lt;#list ext as e&gt;
-      ${e_index} = ${e}
+      ${e?index} = ${e}
     &lt;/#list&gt;
   &lt;#else&gt;
     &lt;#list ext?keys as k&gt;
@@ -22929,85 +23255,39 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Added advanced <literal>list</literal> directive child
-              directives: <literal>else</literal>, <literal>items</literal>,
-              <literal>sep</literal>. Some examples:</para>
+              <para>Advanced listing:</para>
 
-              <para>Using <literal>sep</literal> for separating items:</para>
+              <itemizedlist>
+                <listitem>
+                  <para>Added new <literal>list</literal> directive child
+                  directives: <literal>else</literal>,
+                  <literal>items</literal> and <literal>sep</literal>. For
+                  more details, see the <link
+                  linkend="ref_directive_list"><literal>list</literal>
+                  directive in the Reference</link>.</para>
+                </listitem>
 
-              <programlisting role="template">&lt;#list 1..3 as x&gt;${x}&lt;#sep&gt;, &lt;/#list&gt;</programlisting>
-
-              <programlisting role="output">1, 2, 3</programlisting>
-
-              <para>Using <literal>else</literal> to handle the special case
-              when there are 0 items:</para>
-
-              <programlisting role="template">&lt;#list xs as x&gt;
-  ${x}
-&lt;#else&gt;
-  No items
-&lt;/#list&gt;</programlisting>
-
-              <para>Using <literal>items</literal> when some output before and
-              after the listing is only needed when there are more than 0
-              items:</para>
-
-              <programlisting role="template">&lt;#list xs&gt;
-  &lt;ul&gt;
-    &lt;#items as x&gt;
-      &lt;li&gt;${x}&lt;/li&gt;
-    &lt;/#items&gt;
-  &lt;/ul&gt;
-&lt;/#list&gt;</programlisting>
-
-              <para>which if <literal>xs</literal> above is
-              <literal>1..3</literal> prints:</para>
-
-              <programlisting role="output">  &lt;ul&gt;
-      &lt;li&gt;1&lt;/li&gt;
-      &lt;li&gt;2&lt;/li&gt;
-      &lt;li&gt;3&lt;/li&gt;
-  &lt;/ul&gt;</programlisting>
-
-              <para>but if <literal>xs</literal> is an empty sequence then it
-              prints nothing, avoiding an empty
-              <literal>&lt;ul&gt;&lt;/ul&gt;</literal>.</para>
-
-              <para>Of course these all can be combined together:</para>
-
-              <programlisting role="template">&lt;#list xs&gt;
-  &lt;ul&gt;
-    &lt;#items as x&gt;
-      &lt;li&gt;${x}&lt;#sep&gt;,&lt;/#sep&gt;&lt;/li&gt;
-    &lt;/#items&gt;
-  &lt;/ul&gt;
-&lt;#else&gt;
-  &lt;p&gt;No items&lt;/p&gt;
-&lt;/#list&gt;</programlisting>
-
-              <para>For more details, see the <link
-              linkend="ref_directive_list"><literal>list</literal> directive
-              in the Reference</link>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Added <link linkend="ref_builtins_loop_var">new built-ins
-              that act on loop variables</link>:
-              <literal><replaceable>var</replaceable>?index</literal>
-              (deprecates
-              <literal><replaceable>var</replaceable>_index</literal>),
-              <literal><replaceable>var</replaceable>?counter</literal>
-              (1-based index),
-              <literal><replaceable>var</replaceable>?has_next</literal>
-              (deprecates
-              <literal><replaceable>var</replaceable>_has_next</literal>),
-              <literal><replaceable>var</replaceable>?is_first</literal>,
-              <literal><replaceable>var</replaceable>?is_last</literal>,
-              <literal><replaceable>var</replaceable>?item_parity</literal>
-              (returns <literal>"odd"</literal> or <literal>"even"</literal>),
-              <literal><replaceable>var</replaceable>?item_parity_cap</literal>,
-              <literal><replaceable>var</replaceable>?item_cycle</literal><literal>(<replaceable>...</replaceable>)</literal>,
-              etc.</para>
+                <listitem>
+                  <para>Added <link linkend="ref_builtins_loop_var">new
+                  built-ins that act on loop variables</link>:
+                  <literal><replaceable>var</replaceable>?index</literal>
+                  (deprecates
+                  <literal><replaceable>var</replaceable>_index</literal>),
+                  <literal><replaceable>var</replaceable>?counter</literal>
+                  (1-based index),
+                  <literal><replaceable>var</replaceable>?has_next</literal>
+                  (deprecates
+                  <literal><replaceable>var</replaceable>_has_next</literal>),
+                  <literal><replaceable>var</replaceable>?is_first</literal>,
+                  <literal><replaceable>var</replaceable>?is_last</literal>,
+                  <literal><replaceable>var</replaceable>?item_parity</literal>
+                  (returns <literal>"odd"</literal> or
+                  <literal>"even"</literal>),
+                  <literal><replaceable>var</replaceable>?item_parity_cap</literal>,
+                  <literal><replaceable>var</replaceable>?item_cycle</literal><literal>(<replaceable>...</replaceable>)</literal>,
+                  etc.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
