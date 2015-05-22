@@ -17876,7 +17876,7 @@ or
   b = ${b}
   &lt;#if ext?is_sequence&gt;
     &lt;#list ext as e&gt;
-      ${e_index} = ${e}
+      ${e?index} = ${e}
     &lt;/#list&gt;
   &lt;#else&gt;
     &lt;#list ext?keys as k&gt;
