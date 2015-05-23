@@ -65,7 +65,7 @@
       <section xml:id="dgui_quickstart_basics">
         <title>Template + data-model = output</title>
 
-        <para>Assume you need a HTML page in an e-shop application, similar to
+        <para>Let's assume that you need a HTML page in a Web shop, similar to
         this:</para>
 
         <programlisting role="output">&lt;html&gt;
@@ -73,22 +73,20 @@
   &lt;title&gt;Welcome!&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;h1&gt;Welcome <emphasis>Big Joe</emphasis>!&lt;/h1&gt;
+  &lt;h1&gt;Welcome <emphasis>John Doe</emphasis>!&lt;/h1&gt;
   &lt;p&gt;Our latest product:
   &lt;a href="<emphasis>products/greenmouse.html</emphasis>"&gt;<emphasis>green mouse</emphasis>&lt;/a&gt;!
 &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
-        <para>Let's say that the user name ("Big Joe" above) should depend on
-        who the logged in Web page visitor is, and the latest product should
-        come from a database and thus it potentially changes at any moment. In
-        this situation you can't just enter the user name nor the URL and name
-        of the latest product into the HTML, you can't use static HTML.</para>
-
-        <para>FreeMarker's solution for this problem is using a <emphasis
-        role="term">template</emphasis> instead of the static HTML. The
-        template is the same as the static HTML, except that it contains some
-        instructions to FreeMarker that makes it dynamic:</para>
+        <para>But the user name ("John Doe" above) should depend on who the
+        logged in Web page visitor is, and the latest product should come from
+        a database and thus it potentially changes too. Thus you can't enter
+        these into the HTML directly, you can't use static HTML. Instead, you
+        can use a <emphasis role="term">template</emphasis> of the desired
+        output. The template is the same as the static HTML would be, except
+        that it contains some instructions to FreeMarker that makes it
+        dynamic:</para>
 
         <programlisting role="template" xml:id="example.first">&lt;html&gt;
 &lt;head&gt;
@@ -106,46 +104,36 @@
         FreeMarker will step in and transform the template on-the-fly to plain
         HTML by replacing the
         <literal>${<replaceable>...</replaceable>}</literal>-s with up-to-date
-        content (e.g., replacing <literal>${user}</literal> with Big Joe or
-        whoever the visitor is) and send the result to the visitor's Web
-        browser. So the visitor's Web browser will receive something like the
-        first example HTML (i.e., plain HTML without FreeMarker instructions),
-        and it will not perceive that FreeMarker is used on the server. The
-        template file itself (which is, again, stored on the Web server) is
-        not changed during this, so the transformation will happen again and
-        again for each visiting. This ensures that the displayed information
-        is always up-to-date.</para>
+        content, and send the result to the visitor's Web browser. So the
+        visitor's Web browser will receive something like the first example
+        HTML (i.e., plain HTML without FreeMarker instructions), and it will
+        not perceive that FreeMarker is used on the server. (Of course, the
+        template file stored on the Web server is not changed by this; the
+        substitutions only appear in the Web server's response.)</para>
 
-        <para>As you see above, the template contains no instructions
-        regarding how to find out who the current visitor is, or how to query
-        the database to find out what the latest product is. It seems it just
-        already know these values. And indeed that's the case. An important
-        idea behind FreeMarker (actually, behind Web MVC) is that presentation
-        logic and "business logic" should be separated. In the template you
-        only deal with presentation issues, that is, visual design issues,
-        formatting issues. The data that will be displayed (such as the user
-        name and so on) is prepared outside FreeMarker, usually by routines
-        written in Java language or other general purpose language. So the
-        template author doesn't have to know how these values are calculated.
-        In fact, the way these values are calculated can be completely changed
-        while the templates can remain the same, and also, the look of the
-        page can be completely changed without touching anything but the
-        template. This separation can be especially useful when the template
-        authors (designers) and the programmers are different individuals, but
-        also helps managing application complexity even if the template author
-        and the programmer is the same person.</para>
+        <para>Note that the template doesn't contain the programming logic to
+        find out who the current visitor is, or to query the database to get
+        the latest product. The data to be displayed is prepared outside
+        FreeMarker, usually by parts written in some <quote>real</quote>
+        programming language like Java. The template author needn't know how
+        these values were calculated. In fact, the way these values are
+        calculated can be completely changed while the templates can remain
+        exactly the same, and also, the look of the page can be completely
+        changed without touching anything but the template. This separation of
+        presentation logic and business logic can be especially useful when
+        the template authors (designers) and the programmers are different
+        individuals, but also helps managing application complexity if they
+        are the same person. Keeping templates focused on presentation issues
+        (visual design, layout and formatting) is a key for using template
+        engines like FreeMarker efficiently.</para>
 
         <para><indexterm>
             <primary>data-model</primary>
-          </indexterm>While for FreeMarker (and for the template author) it's
-        not interesting <emphasis>how</emphasis> the data was calculated,
-        FreeMarker still have to know <emphasis>what</emphasis> the actual
-        data is. All the data that the template can use is packed into the so
-        called <emphasis role="term">data-model</emphasis>. It's created by
-        the already mentioned routines that calculate the data. As far as the
-        template author is concerned, the data-model is a tree-like structure
-        (like folders and files on your hard disk), that in this case could be
-        visualized as:</para>
+          </indexterm>The totality of data that was prepared for the template
+        is called the <emphasis role="term">data-model</emphasis>. As far as
+        the template author is concerned, the data-model is a tree-like
+        structure (like folders and files on your hard disk), which, in this
+        case, could be visualized as:</para>
 
         <programlisting role="dataModel">(root)
   |
@@ -157,25 +145,29 @@
       |
       +- <emphasis>name</emphasis> = "green mouse"</programlisting>
 
-        <para>(To prevent misunderstandings: The data-model is not a text
-        file, the above is just a visualization of a data-model for you. It's
-        from Java objects, such as JavaBeans, <literal>Map</literal>-s,
-        <literal>List</literal>-s, etc., but let that be the problem of the
-        Java programmers.)</para>
+        <note>
+          <para>The above is just a visualization; the data-model is not in a
+          textual format, it's from Java objects. For the Java programmers,
+          the root is perhaps a Java object with <literal>getUser()</literal>
+          and <literal>getLatestProduct()</literal> methods, or maybe a Java
+          <literal>Map</literal> with <literal>"user"</literal> and
+          <literal>"latestProducts"</literal> keys. Similarly,
+          <literal>latestProduct</literal> is perhaps a Java Object with
+          <literal>getUrl()</literal> and <literal>getName()</literal>
+          methods.</para>
+        </note>
 
-        <para>Compare this with what you saw in the template earlier:
-        <literal>${user}</literal> and
-        <literal>${latestProduct.name}</literal>. As an analogy, the data
-        model is something like the file system of computers: the root and
-        <literal>latestProduct</literal> correspond to directories (folders)
-        and the <literal>user</literal>, <literal>url</literal> and
-        <literal>name</literal> correspond to files. <literal>url</literal>
-        and <literal>name</literal> are in the
-        <literal>latestProduct</literal> directory. So
-        <literal>latestProduct.name</literal> is like saying
-        <literal>name</literal> in the <literal>latestProduct</literal>
-        directory. But as I said, it's just an analogy; there are no files or
-        directories here.</para>
+        <para>Earlier, you have picked values from this data-model, with the
+        <literal>user</literal> and <literal>latestProduct.name</literal>
+        expressions. If we go on with the analogy that the data model is like
+        a file system, then <quote>(root)</quote> and
+        <literal>latestProduct</literal> correspond to directories (folders),
+        and <literal>user</literal>, <literal>url</literal> and
+        <literal>name</literal> are files in those directories. So
+        <literal>latestProduct.name</literal> is the path to
+        <literal>name</literal> from the root, only this syntax uses
+        <literal>.</literal> (dot) instead of <literal>/</literal> or
+        <literal>\</literal> usual on file systems.</para>
 
         <para>To recapitulate, a template and a data-model is needed for
         FreeMarker to generate the output (like the HTML shown first):</para>
@@ -240,10 +232,7 @@
         <literal>price</literal> of a <literal>mouse</literal>, you start from
         the root and go into <literal>animals</literal>, and then go into
         <literal>mouse</literal> then go into <literal>price</literal>. So you
-        write <literal>animals.mouse.price</literal>. When you put the special
-        <literal>${<replaceable>...</replaceable>}</literal> codes around an
-        expression like this, you are telling FreeMarker to output the
-        corresponding text at that point.</para>
+        write <literal>animals.mouse.price</literal>.</para>
 
         <para>There is one more important kind of variable: <emphasis
         role="term">sequences</emphasis>. They are similar to hashes, but they
@@ -292,10 +281,10 @@
 
         <para>To access a subvariable of a sequence you use a numerical index
         in square brackets. Indexes start from 0 (it's a programmer tradition
-        to start with 0), thus the index of the first item is 0, the index of
-        the second item is 1, and so on. So to get the name of the first
-        animal you write <literal>animals[0].name</literal>. To get the second
-        item in <literal>misc.fruits</literal> (which is the string
+        to start with 0), thus the index of the 1st item is 0, the index of
+        the 2nd item is 1, and so on. So to get the name of the first animal
+        you write <literal>animals[0].name</literal>. To get the second item
+        in <literal>misc.fruits</literal> (which is the string
         <literal>"banana"</literal>) you write
         <literal>misc.fruits[1]</literal>.</para>
 
@@ -316,7 +305,7 @@
             two totally different things in FreeMarker. The former is just a
             sequence of two characters (which happens to be readable as a
             number for humans), while the latter is a numerical value that you
-            can use, say, in arithmetical calculations.</para>
+            can use in arithmetical calculations.</para>
           </listitem>
 
           <listitem>
@@ -355,24 +344,28 @@
             numerical index, starting from 0.</para>
           </listitem>
         </itemizedlist>
+
+        <note>
+          <para>There are other, more advanced value types that we don't cover
+          here, such as methods and directives.</para>
+        </note>
       </section>
 
       <section xml:id="dgui_quickstart_template">
         <title>The template at a glance</title>
 
         <para>The simplest template is a plain HTML file (or whatever text
-        file -- FreeMarker is not confined to HTML). When the client visits
-        that page, FreeMarker will send that HTML to the client as is. However
-        if you want that page to be more dynamic then you begin to put special
+        file; FreeMarker is not confined to HTML). When the client visits that
+        page, FreeMarker will send that HTML to the client as is. However if
+        you want that page to be more dynamic then you begin to put special
         parts into the HTML which will be understood by FreeMarker:</para>
 
         <itemizedlist>
           <listitem>
             <para><literal>${<replaceable>...</replaceable>}</literal>:
             FreeMarker will replace it in the output with the actual value of
-            the thing inside the curly brackets. They are called <emphasis
-            role="term">interpolation</emphasis>s. As an example see <link
-            linkend="example.first">the very first example</link>.</para>
+            the expression inside the curly brackets. They are called
+            <emphasis role="term">interpolation</emphasis>s.</para>
           </listitem>
 
           <listitem>
@@ -388,9 +381,10 @@
           <listitem>
             <para><emphasis role="term">Comments:</emphasis> Comments are
             similar to HTML comments, but they are delimited by
-            <literal>&lt;#--</literal> and <literal>--&gt;</literal>. Anything
-            between these delimiters and the delimiter itself will be ignored
-            by FreeMarker, and will not be written to the output.</para>
+            <literal>&lt;#--</literal> and <literal>--&gt;</literal>. Unlike
+            HTML comments, FTL comments won't get into the output (won't be
+            visible in the page source for the visitor), because FreeMarker
+            skips them.</para>
           </listitem>
         </itemizedlist>
 
@@ -410,9 +404,9 @@
         <section>
           <title>Some basic directives</title>
 
-          <para>Though FreeMarker <link linkend="ref_directives">has far more
-          directives</link>, in this quick overview we will only look at the
-          most commonly used ones.</para>
+          <para>Here we will look at some of the most commonly used directives
+          (<link linkend="ref_directives">but there are much
+          more</link>).</para>
 
           <section>
             <title>The if directive</title>
@@ -445,11 +439,11 @@
             <literal><replaceable>condition</replaceable></literal> is false
             (the boolean value).</para>
 
-            <para>Let's detail the
-            <literal><replaceable>condition</replaceable></literal> used here:
-            The <literal>==</literal> is an operator that tests if the values
-            at its left and right side are equivalent, and the results is a
-            boolean value, true or false accordingly. On the left side of
+            <para>Let's look at
+            <literal><replaceable>condition</replaceable></literal> more
+            closely: <literal>==</literal> is an operator that tests if the
+            values at its left and right side are equivalent, and the results
+            is a boolean value, true or false accordingly. On the left side of
             <literal>==</literal> I have <link
             linkend="topic.qStart.accessVariables">referenced a
             variable</link> with the syntax that should be already familiar;
@@ -470,7 +464,8 @@
             here a number is specified directly (<literal>0</literal>). Note
             that the number is <emphasis>not</emphasis> quoted. If you quoted
             it (<literal>"0"</literal>), FreeMarker were misinterpret it as a
-            string literal.</para>
+            string literal, and because the price to compare it to is number,
+            you get an error.</para>
 
             <para>This will print "Pythons are not free today!" if their price
             is not 0:</para>
@@ -479,8 +474,8 @@
   Pythons are not free today!
 &lt;/#if&gt;</programlisting>
 
-            <para>As you may have guessed, <literal>!=</literal> means not
-            equivalent.</para>
+            <para>As you probably guessed, <literal>!=</literal> means
+            <quote>not equals</quote>.</para>
 
             <para>You can write things like this too (using <link
             linkend="example.qStart.dataModelWithHashes">the data-model used
@@ -702,6 +697,12 @@ All Rights Reserved.
             <para>If you change the <literal>copyright_footer.html</literal>,
             then the visitor will see the new copyright notice on all
             pages.</para>
+
+            <note>
+              <para>A much more powerful way of reusing snippets is using
+              macros, but that's an advanced topic <link
+              linkend="dgui_misc_userdefdir">discussed later</link>.</para>
+            </note>
           </section>
         </section>
 
@@ -709,37 +710,127 @@ All Rights Reserved.
           <title>Using directives together</title>
 
           <para>You can use directives as many times on a page as you want,
-          and you can nest directives into each other similarly as you can
-          nest HTML elements into each other. For example this will list the
-          animals and print the name of large animals with bigger font:</para>
+          and you can nest directives into each other freely. For example,
+          here you nest <literal>if</literal> directive inside a
+          <literal>list</literal> directive:</para>
 
-          <programlisting role="template">&lt;p&gt;We have these animals:
-&lt;table border=1&gt;
-  &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>&lt;#list animals as animal&gt;</emphasis>
-    &lt;tr&gt;
-      &lt;td&gt;
-        &lt;span class="<emphasis>&lt;#if animal.size == "large"&gt;</emphasis>bigText<emphasis>&lt;#else&gt;</emphasis>normalText<emphasis>&lt;/#if&gt;</emphasis>"&gt;
-        ${animal.name}
-      <emphasis>  </emphasis>&lt;/span&gt;
-    &lt;td&gt;${animal.price} Euros
-  <emphasis>&lt;/#list&gt;</emphasis>
-&lt;/table&gt;</programlisting>
+          <programlisting role="template"><emphasis>&lt;#list animals as animal&gt;</emphasis>
+      &lt;div<emphasis>&lt;#if animal.protected&gt;</emphasis><emphasis> </emphasis>class="protected"<emphasis>&lt;/#if&gt;</emphasis>&gt;
+        ${animal.name} for ${animal.price} Euros
+      &lt;/div&gt;
+<emphasis>&lt;/#list&gt;</emphasis></programlisting>
 
           <para>Note that since FreeMarker does not interpret text outside FTL
-          tags, interpolations and comments, you could use the FTL tags inside
-          a HTML attributes without problem.</para>
+          tags, interpolations and FTL comments, above you could use the FTL
+          tags inside a HTML attributes without problem.</para>
+        </section>
+
+        <section>
+          <title>Using built-ins</title>
+
+          <para>The so called built-ins are like subvariables that aren't
+          coming coming from the data-model, but added by FreeMarker. Only to
+          make it unambiguous where the subvarable comes from, to access these
+          subvariables you have to use <literal>?</literal> (question mark)
+          instead of <literal>.</literal> (dot). Some examples:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>user?html</literal> gives the HTML-escaped
+              version of <literal>user</literal>, like
+              <literal>&amp;</literal> will be replaced with
+              <literal>&amp;amp;</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>user?upper_case</literal> gives the upper case
+              version of the value of <literal>user</literal> (like JOHN
+              DOE)</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>user?length</literal> gives the number of
+              characters in the value of <literal>user</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>animals?size</literal> gives the number of items
+              in the <literal>animals</literal> sequence</para>
+            </listitem>
+
+            <listitem>
+              <para>If you are between <literal>&lt;#list animals as
+              animal&gt;</literal> and the corresponding
+              <literal>&lt;/#list&gt;</literal> tag:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>animal?index</literal> gives the 0-based
+                  index of <literal>animal</literal> inside
+                  <literal>animals</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>animal?counter</literal> is like
+                  <literal>index</literal>, but gives the 1-based index</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>animal?item_parity</literal> gives the
+                  strings <quote>odd</quote> or <quote>even</quote>, depending
+                  on the current counter parity. This is commonly used for
+                  coloring rows with alternating colors, like in
+                  <literal>&lt;td
+                  class="${animal?item_parity}Row"&gt;</literal>.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Just like you can chain multiple steps with
+          <literal>.</literal> (dot), you can do the same with
+          <literal>?</literal>. For example,
+          <literal>user?upper_case?html</literal> will first convert the user
+          name to upper case, then HTML-escapes it. An of course you can mix
+          <literal>.</literal> (dot) steps with <literal>?</literal> steps
+          too, like in <literal>animal.name?html</literal>.</para>
+
+          <para>Some built-ins require parameters to specify the behavior
+          more, for example:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>user?starts_with("J")</literal> gives boolean
+              true of false depending on if user starts with the letter
+              <quote>J</quote> or not.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>animal.protected?string("Y", "N")</literal>
+              return the string <quote>Y</quote> or <quote>N</quote> depending
+              on the boolean value of
+              <literal>animal.protected</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>animal?item_cycle('lightRow',
+              'darkRow')</literal> is the more generic variant of
+              <literal>item_parity</literal> from earlier.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>You can find the full set of <link
+          linkend="ref_builtins">built-ins in the Reference</link>.</para>
         </section>
 
         <section>
           <title>Dealing with missing variables</title>
 
-          <para>In practice the data-model often has variables that are
-          optional (i.e., sometimes missing). To spot some typical human
-          mistakes, FreeMarker doesn't tolerate the referring to missing
-          variables unless you tell them explicitly what to do if the variable
-          is missing. Here we will show the two most typical ways of doing
-          that.</para>
+          <para>The data-model often has variables that are optional (i.e.,
+          sometimes missing). To spot some typical human mistakes, FreeMarker
+          doesn't tolerate the referring to missing variables, unless you tell
+          explicitly what to do if the variable is missing. Here we will show
+          the two most typical ways of doing that.</para>
 
           <para><phrase role="forProgrammers">Note for programmers: A
           non-existent variable and a variable with <literal>null</literal>
@@ -752,11 +843,11 @@ All Rights Reserved.
           Like in the following example, when <literal>user</literal> is
           missing from data model, the template will behave like if
           <literal>user</literal>'s value were the string
-          <literal>"Anonymous"</literal>. (When <literal>user</literal> isn't
-          missing, this template behaves exactly like if
-          <literal>!"Anonymous"</literal> were not there):</para>
+          <literal>"visitor"</literal>. (When <literal>user</literal> isn't
+          missing, this template behaves exactly like with
+          <literal>${user}</literal>):</para>
 
-          <programlisting role="template">&lt;h1&gt;Welcome ${user<emphasis>!"Anonymous"</emphasis>}!&lt;/h1&gt;</programlisting>
+          <programlisting role="template">&lt;h1&gt;Welcome ${user<emphasis>!"visitor"</emphasis>}!&lt;/h1&gt;</programlisting>
 
           <para>You can ask whether a variable isn't missing by putting
           <literal>??</literal> after its name. Combining this with the
