@@ -40,7 +40,7 @@ import freemarker.template.Version;
  *    // Create the builder:
  *    BeansWrapperBuilder builder = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
  *    // Set desired BeansWrapper configuration properties:
- *    builder.setUseMoldeCache(true);
+ *    builder.setUseModelCache(true);
  *    builder.setExposeFields(true);
  *    
  *    // Get the singleton:
