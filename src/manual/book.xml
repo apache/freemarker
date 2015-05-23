@@ -17163,22 +17163,23 @@ All rights reserved.</emphasis></programlisting>
           <para>Form 1:</para>
 
           <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable> as <replaceable>item</replaceable>&gt;
-    <replaceable>repeated for each item</replaceable>
+    <replaceable>Part repeated for each item</replaceable>
 &lt;#else&gt;
-    <replaceable>when there are 0 items</replaceable>
+    <replaceable>Part executed when there are 0 items</replaceable>
 &lt;/#list&gt;</literal></programlisting>
 
           <para>Where:</para>
 
           <itemizedlist spacing="compact">
             <listitem>
-              <para>The <literal>else</literal> part is optional, and exists
-              since FreeMarker 2.3.23 only.</para>
+              <para>The <literal>else</literal> part is optional, and is only
+              supported since FreeMarker 2.3.23.</para>
             </listitem>
 
             <listitem>
               <para><literal><replaceable>sequence</replaceable></literal>:
-              Expressions evaluates to a sequence or collection</para>
+              Expressions evaluates to a sequence or collection of the items
+              we want to iterate through</para>
             </listitem>
 
             <listitem>
@@ -17188,24 +17189,25 @@ All rights reserved.</emphasis></programlisting>
             </listitem>
 
             <listitem>
-              <para>Parts between the tags with description can contain
-              arbitrary FTL</para>
+              <para>The various <quote>parts</quote> between the tags can
+              contain arbitrary FTL (including nested
+              <literal>list</literal>-s)</para>
             </listitem>
           </itemizedlist>
 
           <para>Form 2 (since FreeMarker 2.3.23):</para>
 
           <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable>&gt;
-    <replaceable>before the items, if have items</replaceable>
+    <replaceable>Part executed once if we have more than 0 items</replaceable>
     &lt;#items as <replaceable>item</replaceable>&gt;
-    <replaceable>    repeated for each item</replaceable>
+    <replaceable>    Part repeated for each item</replaceable>
     &lt;/#items&gt;
-    <replaceable>after the items, if have items</replaceable>
+    <replaceable>Part executed once if we have more than 0 items</replaceable>
 &lt;#else&gt;
-    <replaceable>when there are 0 items</replaceable>
+    <replaceable>Part executed when there are 0 items</replaceable>
 &lt;/#list&gt;</literal></programlisting>
 
-          <para>Where: Same as the <quote>Where</quote> section for Form 1
+          <para>Where: Same as the <quote>Where</quote> section of Form 1
           above.</para>
         </section>
 
@@ -17215,8 +17217,8 @@ All rights reserved.</emphasis></programlisting>
           <section>
             <title>Simplest form</title>
 
-            <para>A simple example; assuming <literal>users</literal> contains
-            the <literal>['Joe', 'Kate', 'Fred']</literal> sequence:</para>
+            <para>Assuming <literal>users</literal> contains the
+            <literal>['Joe', 'Kate', 'Fred']</literal> sequence:</para>
 
             <programlisting role="template">&lt;#list users as user&gt;
   &lt;p&gt;${user}
@@ -17226,14 +17228,13 @@ All rights reserved.</emphasis></programlisting>
   &lt;p&gt;Kate
   &lt;p&gt;Fred</programlisting>
 
-            <para>The <literal>list</literal> directive to process a section
-            of template for each value contained within a sequence (or
-            collection). The code between the start-tag and end-tag (the body
-            of <literal>list</literal> from now on) will be processed for the
-            1st value, then for the 2nd value, and so on until all values were
-            processed. For each such iteration the loop variable
-            (<literal>user</literal> in this example) will contain the value
-            of the current item.</para>
+            <para>The <literal>list</literal> directive executes the code
+            between the <literal>list</literal> start-tag and
+            <literal>list</literal> end-tag (the body of
+            <literal>list</literal> from now on) for each value in the
+            sequence (or collection) specified as its first parameter. For
+            each such iteration the loop variable (<literal>user</literal> in
+            this example) will store the value of the current item.</para>
 
             <para>The loop variable (<literal>user</literal>) only exists
             inside the <literal>list</literal> body. Also, macros/functions
@@ -17255,9 +17256,9 @@ All rights reserved.</emphasis></programlisting>
               only supported since FreeMarker 2.3.23</para>
             </note>
 
-            <para><literal>else</literal> is used if when there are 0 items,
-            you have to print something special instead of just printing
-            nothing:</para>
+            <para>The <literal>else</literal> directive is used if when there
+            are 0 items, you have to print something special instead of just
+            printing nothing:</para>
 
             <programlisting role="template">&lt;#list users as user&gt;
   &lt;p&gt;${user}
@@ -17265,14 +17266,20 @@ All rights reserved.</emphasis></programlisting>
   &lt;p&gt;No users
 &lt;/#list&gt;</programlisting>
 
-            <para>This outputs the same as the earlier example, except if
+            <para>This outputs the same as the earlier example, except when
             <literal>users</literal> contains 0 items:</para>
 
             <programlisting role="output">  &lt;p&gt;No users</programlisting>
 
             <para>Note that the loop variable (<literal>user</literal>)
             doesn't exist between the <literal>else</literal> tag and the
-            <literal>list</literal> end-tag.</para>
+            <literal>list</literal> end-tag, since that part is not part of
+            the loop.</para>
+
+            <para><literal>else</literal> must be literally (means, in the
+            source code) inside the body of the <literal>list</literal>
+            directive. That is, you can't moved it out into a macro or
+            included template.</para>
           </section>
 
           <section>
@@ -17289,9 +17296,10 @@ All rights reserved.</emphasis></programlisting>
               2.3.23</para>
             </note>
 
-            <para><literal>items</literal> is used if you have to print (or
-            do) something before the first list item, and after the last list
-            item, as far as there's at least 1 item. For example:</para>
+            <para>The <literal>items</literal> directive is used if you have
+            to print (or do) something before the first list item, and after
+            the last list item, as far as there's at least 1 item. A typical
+            example:</para>
 
             <programlisting role="template">&lt;#list users&gt;
   &lt;ul&gt;
@@ -17313,11 +17321,12 @@ All rights reserved.</emphasis></programlisting>
 
             <para>That is, when the <literal>list</literal> directive has no
             <literal>as <replaceable>item</replaceable></literal> parameter,
-            the body of it is executed exactly once if there's at least one
+            the body of its is executed exactly once if there's at least one
             item, or not at all otherwise. It's the body of the mandatory
             nested <literal>items</literal> directive that will be run for
             each item, and hence it's also the <literal>items</literal>
-            directive that defines the loop variable, not
+            directive that defines the loop variable with <literal>as
+            <replaceable>item</replaceable></literal>, not
             <literal>list</literal>.</para>
 
             <para>A <literal>list</literal> directive with
@@ -17345,18 +17354,21 @@ All rights reserved.</emphasis></programlisting>
                 always has an enclosing <literal>list</literal> which has no
                 <literal>as <replaceable>item</replaceable></literal>
                 parameter. This is checked when the template is parsed, not
-                when the template is running. Thus, these rules apply on the
-                FTL source code itself; you can't move
+                when the template is executed. Thus, these rules apply on the
+                FTL source code itself, so you can't move
                 <literal>items</literal> out into a macro or included
                 template.</para>
               </listitem>
 
               <listitem>
-                <para>You can have multiple <literal>items</literal>
-                directives inside the same <literal>list</literal>, but only
-                one of them will be allowed to run (as far as you don't leave
-                and re-enter the enclosing <literal>list</literal> directive);
-                and further attempts will cause error.</para>
+                <para>A <literal>list</literal> can have multiple
+                <literal>items</literal> directives, but only one of them will
+                be allowed to run (as far as you don't leave and re-enter the
+                enclosing <literal>list</literal> directive); and further
+                attempts to call <literal>items</literal> will cause error. So
+                multiple <literal>items</literal> can be utilized on different
+                <literal>if</literal>-<literal>else</literal> branches for
+                example, but not for iterating twice.</para>
               </listitem>
 
               <listitem>
@@ -17388,10 +17400,10 @@ All rights reserved.</emphasis></programlisting>
             </note>
 
             <para><literal>sep</literal> is used when you have to display
-            something between each item (but before the first item or after
-            the last item). For example:</para>
+            something between each item (but not before the first item or
+            after the last item). For example:</para>
 
-            <programlisting role="template">&lt;#list users as user&gt;${user}&lt;#sep&gt;, &lt;/#list&gt;</programlisting>
+            <programlisting role="template">&lt;#list users as user&gt;${user}<emphasis>&lt;#sep&gt;, </emphasis>&lt;/#list&gt;</programlisting>
 
             <programlisting role="output">Joe, Kate, Fred</programlisting>
 
@@ -17399,24 +17411,29 @@ All rights reserved.</emphasis></programlisting>
             shorthand for <literal>&lt;#sep&gt;,
             &lt;/#sep&gt;&lt;/#list&gt;</literal>; the <literal>sep</literal>
             end-tag can be omitted if you would put it where the enclosing
-            directive is closed. For example here, we couldn't use such
-            abbreviation (HTML tags close nothing; they are just plain text
-            for FreeMarker):</para>
+            directive is closed anyway. In the next example, you couldn't use
+            such abbreviation (HTML tags close nothing, as they are just raw
+            text to output for FreeMarker):</para>
 
-            <programlisting role="template">&lt;#list users as user&gt;&lt;div&gt;${user}&lt;#sep&gt;, &lt;#sep&gt;&lt;/div&gt;&lt;/#list&gt;</programlisting>
+            <programlisting role="template">&lt;#list users as user&gt;
+  &lt;div&gt;
+    ${user}&lt;#sep&gt;, <emphasis>&lt;/#sep&gt;</emphasis>
+  &lt;/div&gt;
+&lt;/#list&gt;</programlisting>
 
             <para>As <literal>sep</literal> is just a convenient way of
             writing <literal>&lt;#if
             <replaceable>item</replaceable>?has_next&gt;...&lt;/#if&gt;</literal>,
-            hence it can be used anywhere where there's a
-            <literal>list</literal> or <literal>items</literal> loop variable
-            available.</para>
+            it can be used anywhere where there's a <literal>list</literal> or
+            <literal>items</literal> loop variable is available, and for
+            unlimited times. Also, it can have arbitrary FTL as nested
+            content.</para>
 
-            <para>The parser will check if <literal>sep</literal> is used
+            <para>The parser will check that <literal>sep</literal> is used
             inside <literal>list <replaceable>...</replaceable> as
-            item</literal> or an <literal>items</literal> directive. Thus you
+            item</literal> or an <literal>items</literal> directive, so you
             can't move <literal>sep</literal> out from the repeated part into
-            a macro.</para>
+            a macro or included template.</para>
           </section>
 
           <section>
@@ -17428,13 +17445,13 @@ All rights reserved.</emphasis></programlisting>
               <primary>break directive</primary>
             </indexterm>
 
-            <para>You can exit the iteration before passing the last item with
-            the <literal>break</literal> directive. For example:</para>
+            <para>You can exit the iteration at any point with the
+            <literal>break</literal> directive. For example:</para>
 
             <programlisting role="template">&lt;#list 1..10 as x&gt;
   ${x}
   &lt;#if x == 3&gt;
-    &lt;#break&gt;
+    <emphasis>&lt;#break&gt;</emphasis>
   &lt;/#if&gt;
 &lt;/#list&gt;</programlisting>
 
@@ -17445,12 +17462,22 @@ All rights reserved.</emphasis></programlisting>
             <para>The <literal>break</literal> directives can be placed
             anywhere inside <literal>list</literal> as far as it has
             <literal>as <replaceable>item</replaceable></literal> parameter,
-            otherwise inside the <literal>items</literal> directive. If the
+            otherwise it can be placed anywhere inside the
+            <literal>items</literal> directive. If the
             <literal>break</literal> is inside <literal>items</literal>, it
-            will only <literal>break</literal> out of
-            <literal>items</literal>, not of <literal>list</literal>. (In
-            general, <literal>break</literal> will only exit from the
-            directive whose body is called for each item.)</para>
+            will only exit from <literal>items</literal>, not from
+            <literal>list</literal>. In general, <literal>break</literal> will
+            only exit from the directive whose body is called for each item,
+            and can only be placed inside such directive. So for example can't
+            use <literal>break</literal> inside <literal>list</literal>'s
+            <literal>else</literal> section, unless there's the
+            <literal>list</literal> is nested into another
+            <literal>break</literal>-able directive.</para>
+
+            <para>Just like <literal>else</literal> and
+            <literal>items</literal>, <literal>break</literal> must be
+            literally inside body of the directive to break out from, and
+            can't be moved out into a macro or included template.</para>
           </section>
 
           <section>
@@ -17465,9 +17492,9 @@ All rights reserved.</emphasis></programlisting>
             </indexterm>
 
             <para>Starting from 2.3.23, <link
-            linkend="ref_builtins_loop_var">loop variable built-ins</link> can
-            be used to query the current state of the loop. For example, here
-            we use the <literal>counter</literal> and
+            linkend="ref_builtins_loop_var">loop variable built-ins</link> is
+            the preferred way of accessing current state of the iteration. For
+            example, here we use the <literal>counter</literal> and
             <literal>item_parity</literal> loop variable built-ins (see all of
             them <link linkend="ref_builtins_loop_var">in the
             Reference</link>):</para>
@@ -17494,8 +17521,9 @@ All rights reserved.</emphasis></programlisting>
         &lt;td&gt;Fred
   &lt;/table&gt;</programlisting>
 
-            <para>Before 2.3.23 (and for backward compatibility after that
-            too), there are two extra loop variables to retrieve state:</para>
+            <para>In 2.3.22 and earlier, there were two extra loop variables
+            to retrieve the iteration state instead (and they still exist for
+            backward compatibility):</para>
 
             <itemizedlist>
               <listitem>
@@ -17522,7 +17550,7 @@ All rights reserved.</emphasis></programlisting>
           <section>
             <title>Nesting loops into each other</title>
 
-            <para>Naturally, a <literal>list</literal> or
+            <para>Naturally, <literal>list</literal> or
             <literal>items</literal> can contain further
             <literal>list</literal>-s:</para>
 
@@ -17569,15 +17597,10 @@ All rights reserved.</emphasis></programlisting>
             <literal>list</literal> accepts a scalar too and treats it as a
             single-element sequence.</phrase></para>
 
-            <para><phrase role="forProgrammers">In general, it is best to
-            avoid using collection that wraps an <literal>Iterator</literal>
-            as parameters to <literal>list</literal> and use collection that
-            wraps <literal>java.util.Collection</literal> or sequence whenever
-            possible. There are situations however, when you only have an
-            <literal>Iterator</literal> at your disposal. Note that if you
-            pass an collection that wraps an <literal>Iterator</literal> to
-            the <literal>list</literal>, you can iterate over its elements
-            only once since <literal>Iterator</literal>s are by their nature
+            <para><phrase role="forProgrammers">If you pass an collection that
+            wraps an <literal>java.util.Iterator</literal> to the
+            <literal>list</literal>, you can iterate over its elements only
+            once, since <literal>Iterator</literal>s are by their nature
             one-off objects. When you try to list a such collection variable
             for the second time, an error will abort template
             processing.</phrase></para>
