@@ -29,6 +29,16 @@ public class ListValidationsTest extends TemplateTest {
     public void testValid() throws IOException, TemplateException {
         assertOutput("<#list 1..2 as x><#list 3..4>${x}:<#items as x>${x}</#items></#list>;</#list>", "1:34;2:34;");
         assertOutput("<#list [] as x>${x}<#else><#list 1..2 as x>${x}<#sep>, </#list></#list>", "1, 2");
+        assertOutput("<#macro m>[<#nested 3>]</#macro>"
+                + "<#list 1..2 as x>"
+                + "${x}@${x?index}"
+                + "<@m ; x>"
+                + "${x},"
+                + "<#list 4..4 as x>${x}@${x?index}</#list>"
+                + "</@>"
+                + "${x}@${x?index}; "
+                + "</#list>",
+                "1@0[3,4@0]1@0; 2@1[3,4@0]2@1; ");
     }
 
     @Test
@@ -73,10 +83,22 @@ public class ListValidationsTest extends TemplateTest {
     
     @Test
     public void testInvalidLoopVarBuiltinLHO() {
-        assertErrorContains("<#list xs>${foo?index}</#list>",
-                "?index", "foo");
+        assertErrorContains("<#list foos>${foo?index}</#list>",
+                "?index", "foo", "no loop variable");
+        assertErrorContains("<#list foos as foo></#list>${foo?index}",
+                "?index", "foo" , "no loop variable");
         assertErrorContains("<#list xs as x>${foo?index}</#list>",
-                "?index", "foo");
+                "?index", "foo" , "no loop variable");
+        assertErrorContains("<#list foos as foo><@m; foo>${foo?index}</@></#list>",
+                "?index", "foo" , "user defined directive");
+        assertErrorContains(
+                "<#list foos as foo><@m; foo><@m; foo>${foo?index}</@></@></#list>",
+                "?index", "foo" , "user defined directive");
+        assertErrorContains(
+                "<#list foos as foo><@m; foo>"
+                + "<#list foos as foo><@m; foo>${foo?index}</@></#list>"
+                + "</@></#list>",
+                "?index", "foo" , "user defined directive");
     }
     
 }

@@ -40,7 +40,7 @@ public class FMParser {
     private static final int ITERATOR_BLOCK_KIND_LIST = 0; 
     private static final int ITERATOR_BLOCK_KIND_FOREACH = 1; 
     private static final int ITERATOR_BLOCK_KIND_ITEMS = 2; 
-    private static final int ITERATOR_BLOCK_KIND_CUSTOM = 3; 
+    private static final int ITERATOR_BLOCK_KIND_USER_DIRECTIVE = 3; 
 
     private static class ParserIteratorBlockContext {
         private String loopVarName;
@@ -332,14 +332,26 @@ public class FMParser {
         return size != 0 ? (ParserIteratorBlockContext) iteratorBlockContexts.get(size - 1) : null; 
     }
     
-    private boolean iteratorBlockContextExists(String loopVarName) {
+    private void checkLoopVariableBuiltInLHO(String loopVarName, Expression lhoExp, Token biName)
+            throws ParseException {
         int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
         for (int i = size - 1; i >= 0; i--) {
-            if (loopVarName.equals(((ParserIteratorBlockContext) iteratorBlockContexts.get(i)).loopVarName)) {
-                return true;
+            ParserIteratorBlockContext ctx = (ParserIteratorBlockContext) iteratorBlockContexts.get(i);
+            if (loopVarName.equals(ctx.loopVarName)) {
+                if (ctx.kind == ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
+			        throw new ParseException(
+			                "The left hand operand of ?" + biName.image
+			                + " can't be the loop variable of an user defined directive: "
+			                +  loopVarName,
+			                lhoExp);
+                }
+                return;  // success
             }
         }
-        return false; 
+        throw new ParseException(
+                "The left hand operand of ?" + biName.image + " must be a loop variable, "
+                + "but there's no loop variable in scope with this name: " + loopVarName,
+                lhoExp);
     }
     
 	private String forEachDirectiveSymbol() {    
@@ -1835,9 +1847,8 @@ Expression BuiltIn(Expression lhoExp) :
     <BUILT_IN>
     t = <ID>
     {
-        BuiltIn result = null;
         token_source.checkNamingConvention(t);
-        result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
+        BuiltIn result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
         if (result instanceof BuiltInForLoopVariable) {
             if (!(lhoExp instanceof Identifier)) {
                 throw new ParseException(
@@ -1845,12 +1856,7 @@ Expression BuiltIn(Expression lhoExp) :
                         + " must be a simple loop variable name.", lhoExp);
             }
             String loopVarName = ((Identifier) lhoExp).getName();
-            if (!iteratorBlockContextExists(loopVarName)) {
-                throw new ParseException(
-                        "Expression used as the left hand operand of ?" + t.image + " must be a loop variable name, "
-                        + "but there's no iteration in the context that uses this loop variable: " + loopVarName,
-                        lhoExp);
-            }
+            checkLoopVariableBuiltInLHO(loopVarName, lhoExp, t);
             ((BuiltInForLoopVariable) result).bindToLoopVariable(loopVarName);
         }
         result.setLocation(template, lhoExp, t);
@@ -2930,6 +2936,7 @@ TemplateElement UnifiedMacroTransform() :
     Expression startTagNameExp;
     TemplateElement nestedBlock = null;
     Expression exp;
+    int pushedCtxCount = 0;
 }
 {
     start = <UNIFIED_CALL>
@@ -2962,10 +2969,37 @@ TemplateElement UnifiedMacroTransform() :
         end = <EMPTY_DIRECTIVE_END>
         |
         (
-            <DIRECTIVE_END>
+            <DIRECTIVE_END> {
+                if (bodyParameters != null && iteratorBlockContexts != null && !iteratorBlockContexts.isEmpty()) {
+                    // It's possible that we shadow a #list/#items loop variable, in which case that must be noted.
+                    int ctxsLen = iteratorBlockContexts.size();
+                    int bodyParsLen = bodyParameters.size();
+	                for (int bodyParIdx = 0; bodyParIdx < bodyParsLen; bodyParIdx++) {
+                        String bodyParName = (String) bodyParameters.get(bodyParIdx);
+                        walkCtxSack: for (int ctxIdx = ctxsLen - 1; ctxIdx >= 0; ctxIdx--) {
+                            ParserIteratorBlockContext ctx
+                                    = (ParserIteratorBlockContext) iteratorBlockContexts.get(ctxIdx);
+                            if (ctx.loopVarName != null && ctx.loopVarName.equals(bodyParName)) {
+                                // If it wasn't already shadowed, shadow it:
+                                if (ctx.kind != ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
+                                    ParserIteratorBlockContext shadowingCtx = pushIteratorBlockContext();
+                                    shadowingCtx.loopVarName = bodyParName;
+                                    shadowingCtx.kind = ITERATOR_BLOCK_KIND_USER_DIRECTIVE;
+                                    pushedCtxCount++;
+                                }
+                                break walkCtxSack;
+                            }
+                        }
+                   }
+                }
+            }
             nestedBlock = OptionalBlock()
             end = <UNIFIED_CALL_END>
             {
+                for (int i = 0; i < pushedCtxCount; i++) {
+                    popIteratorBlockContext();
+                }
+            
                 String endTagName = end.image.substring(3, end.image.length() - 1).trim();
                 if (endTagName.length() > 0) {
                     if (startTagNameExp == null) {
