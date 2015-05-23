@@ -163,11 +163,7 @@
         a file system, then <quote>(root)</quote> and
         <literal>latestProduct</literal> correspond to directories (folders),
         and <literal>user</literal>, <literal>url</literal> and
-        <literal>name</literal> are files in those directories. So
-        <literal>latestProduct.name</literal> is the path to
-        <literal>name</literal> from the root, only this syntax uses
-        <literal>.</literal> (dot) instead of <literal>/</literal> or
-        <literal>\</literal> usual on file systems.</para>
+        <literal>name</literal> are files in those directories.</para>
 
         <para>To recapitulate, a template and a data-model is needed for
         FreeMarker to generate the output (like the HTML shown first):</para>
@@ -212,14 +208,14 @@
       |
       +- foo = "Something"</programlisting>
 
-        <para>The variables that act as directories (the root,
+        <para>The variables that act like directories (the root,
         <literal>animals</literal>, <literal>mouse</literal>,
         <literal>elephant</literal>, <literal>python</literal>,
         <literal>misc</literal>) are called <emphasis
         role="term">hashes</emphasis>. Hashes store other variables (the so
-        called <anchor
-        xml:id="topic.dataModel.subVar"/><emphasis>subvariables</emphasis>) by
-        a lookup name (e.g., "animals", "mouse" or "price").</para>
+        called <anchor xml:id="topic.dataModel.subVar"/><emphasis>sub
+        variables</emphasis>) by a lookup name (e.g., <quote>animals</quote>,
+        <quote>mouse</quote> or <quote>price</quote>).</para>
 
         <para>The variables that store a single value
         (<literal>size</literal>, <literal>price</literal>,
@@ -234,13 +230,11 @@
         <literal>mouse</literal> then go into <literal>price</literal>. So you
         write <literal>animals.mouse.price</literal>.</para>
 
-        <para>There is one more important kind of variable: <emphasis
-        role="term">sequences</emphasis>. They are similar to hashes, but they
-        don't store names for the variables they contain. Instead, they store
-        the subvariables sequentially, and you can access them with a
-        numerical index. For example, in this data-model,
-        <literal>animals</literal> and <literal>misc.fruits</literal> are
-        sequences:</para>
+        <para>Another important kind of variables are <emphasis
+        role="term">sequences</emphasis>. They store subvariables like hashes,
+        but here subvariables doesn't have a name, they are just items in a
+        list. For example, in this data-model, <literal>animals</literal> and
+        <literal>misc.fruits</literal> are sequences:</para>
 
         <programlisting role="dataModel"
                         xml:id="example.qStart.dataModelWithSequences">(root)
@@ -284,9 +278,11 @@
         to start with 0), thus the index of the 1st item is 0, the index of
         the 2nd item is 1, and so on. So to get the name of the first animal
         you write <literal>animals[0].name</literal>. To get the second item
-        in <literal>misc.fruits</literal> (which is the string
+        in <literal>misc.fruits</literal> (the string
         <literal>"banana"</literal>) you write
-        <literal>misc.fruits[1]</literal>.</para>
+        <literal>misc.fruits[1]</literal>. (In practice, you usually just walk
+        through sequences in order, not caring about the index, but that will
+        be <link linkend="topic.tutorial.list">shown later</link>.)</para>
 
         <para>Scalars can be further divided into these categories:</para>
 
@@ -400,6 +396,11 @@
         <literal>table</literal> element) to which you refer to with the HTML
         tags. (If you don't feel this difference then just take "FTL tag" and
         "directive" as synonyms.)</para>
+
+        <note>
+          <para>You can easily try writing templates on <link
+          xlink:href="http://freemarker-online.kenshoo.com/">http://freemarker-online.kenshoo.com/</link></para>
+        </note>
 
         <section>
           <title>Some basic directives</title>
@@ -521,6 +522,8 @@
           <section>
             <title>The list directive</title>
 
+            <anchor xml:id="topic.tutorial.list"/>
+
             <para>This is needed when you want to list something. For example
             if you merge this template with the <link
             linkend="example.qStart.dataModelWithSequences">data-model used
@@ -589,18 +592,18 @@
             listing as a whole, and only the part inside the
             <literal>items</literal> directive is repeated for each fruit. If
             we have 0 fruits, everything inside <literal>list</literal> is
-            skipped, hence we wouldn't have <literal>ul</literal> tags in
+            skipped, hence we will not have <literal>ul</literal> tags in
             case.</para>
 
             <para>Another frequent listing-related task: let's list the fruits
-            separating them with something, like, comma:</para>
+            separating them with something, like comma:</para>
 
             <programlisting role="template">&lt;p&gt;Fruits: &lt;#list misc.fruits as fruit&gt;${fruit}<emphasis>&lt;#sep&gt;, </emphasis>&lt;/#list&gt;</programlisting>
 
             <programlisting role="output">&lt;p&gt;Fruits: orange, banana</programlisting>
 
-            <para>The section covered by <literal>sep</literal> (which we have
-            written like this too:
+            <para>The section covered by <literal>sep</literal> (which we
+            could be written like this too:
             <literal><replaceable>...</replaceable>&lt;#sep&gt;,
             &lt;/#sep&gt;&lt;/#list&gt;</literal>) will be only executed when
             there will be a next item. Hence there's no comma after the last
@@ -627,7 +630,7 @@
             <literal>else</literal>) can be used together:</para>
 
             <programlisting role="template">&lt;#list misc.fruits&gt;
-  &lt;p&gt;Frutis:
+  &lt;p&gt;Fruits:
   &lt;ul&gt;
     &lt;#items as fruit&gt;
       &lt;li&gt;${fruit}&lt;#sep&gt; and&lt;/#sep&gt;
@@ -728,10 +731,10 @@ All Rights Reserved.
         <section>
           <title>Using built-ins</title>
 
-          <para>The so called built-ins are like subvariables that aren't
+          <para>The so called built-ins are like sub variables that aren't
           coming coming from the data-model, but added by FreeMarker. Only to
           make it unambiguous where the subvarable comes from, to access these
-          subvariables you have to use <literal>?</literal> (question mark)
+          sub variables you have to use <literal>?</literal> (question mark)
           instead of <literal>.</literal> (dot). Some examples:</para>
 
           <itemizedlist>
@@ -801,8 +804,8 @@ All Rights Reserved.
           <itemizedlist>
             <listitem>
               <para><literal>user?starts_with("J")</literal> gives boolean
-              true of false depending on if user starts with the letter
-              <quote>J</quote> or not.</para>
+              true of false depending on if <literal>user</literal> starts
+              with the letter <quote>J</quote> or not.</para>
             </listitem>
 
             <listitem>
@@ -1247,7 +1250,7 @@ brown</programlisting>
 
           <para>These are the values whose purpose is to contain other
           variables; they are just containers. The contained variables are
-          often referred as <emphasis>subvariables</emphasis>. The container
+          often referred as <emphasis>sub variables</emphasis>. The container
           types are:</para>
 
           <itemizedlist>
@@ -1257,9 +1260,9 @@ brown</programlisting>
 
                   <secondary>the FTL value type</secondary>
                 </indexterm>Hash: Associates a unique lookup name with each of
-              its subvariables. The name is an unrestricted string. A hash
-              <emphasis>doesn't define an ordering</emphasis> for the
-              subvariables in it. That is, there is no such thing as the first
+              its sub variables. The name is an unrestricted string. A hash
+              <emphasis>doesn't define an ordering</emphasis> for the sub
+              variables in it. That is, there is no such thing as the first
               subvariable, and the second subvariable, etc.; the variables are
               just accessed by name.</para>
             </listitem>
@@ -1270,10 +1273,10 @@ brown</programlisting>
 
                   <secondary>the FTL value type</secondary>
                 </indexterm>Sequence: Associates an integer number with each
-              of its subvariables. The first subvariable is associated with 0,
-              the second with 1, the third to 2, and so on; the subvariables
-              are ordered. These numbers are often called the
-              <emphasis>indexes</emphasis> of the subvariables. Sequences are
+              of its sub variables. The first subvariable is associated with
+              0, the second with 1, the third to 2, and so on; the sub
+              variables are ordered. These numbers are often called the
+              <emphasis>indexes</emphasis> of the sub variables. Sequences are
               usually dense, i.e., all indexes up to the index of the last
               subvariable have an associated subvariable, but it's not
               strictly necessary. The type of the subvariable values need not
@@ -1287,7 +1290,7 @@ brown</programlisting>
                   <secondary>the FTL value type</secondary>
                 </indexterm>Collection: A collection, from the viewpoint of
               the template author, is a restricted sequence. You cannot access
-              its size or retrieve its subvariables by index, but they can be
+              its size or retrieve its sub variables by index, but they can be
               still listed with the <link
               linkend="ref.directive.list"><literal>list</literal>
               directive</link>.</para>
@@ -2294,7 +2297,7 @@ C:\foo\bar</programlisting>
             </indexterm>
 
             <para>To specify a literal sequence, you list the <link
-            linkend="topic.dataModel.subVar">subvariables</link> separated by
+            linkend="topic.dataModel.subVar">sub variables</link> separated by
             commas, and put the whole list into square brackets. For
             example:</para>
 
@@ -2757,9 +2760,10 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
             linkend="dgui_template_exp_var_sequence">read the subvariable of a
             sequence</link>, e.g. <literal>user[0]</literal>. The result will
             be a string whose length is 1; FTL doesn't have a separate
-            character type. As with sequence subvariables, the index must be a
-            number that is at least 0 and less than the length of the string,
-            or else an error will abort the template processing.</para>
+            character type. As with sequence sub variables, the index must be
+            a number that is at least 0 and less than the length of the
+            string, or else an error will abort the template
+            processing.</para>
 
             <para>Since the sequence subvariable syntax and the character
             getter syntax clashes, you can use the character getter syntax
@@ -3688,7 +3692,7 @@ Jerry</programlisting>
             undefined.</para>
 
             <para>Of course, the default value operator can be used with
-            sequence subvariables as well:</para>
+            sequence sub variables as well:</para>
 
             <programlisting role="template">&lt;#assign seq = ['a', 'b']&gt;
 ${seq[0]!'-'}
@@ -6151,18 +6155,18 @@ public class Test {
           <literal>TemplateHashModel</literal>. It adds methods by which <link
           linkend="ref_builtin_values">values</link> and <link
           linkend="ref_builtin_keys">keys</link> built-ins can enumerate the
-          subvariables of the hash.</para>
+          sub variables of the hash.</para>
 
           <para>The commonly used implementation is
           <literal>SimpleHash</literal>, which implements
           <literal>TemplateHashModelEx</literal>. Internally it uses a
-          <literal>java.util.Hash</literal> to store the subvariables.
+          <literal>java.util.Hash</literal> to store the sub variables.
           <literal>SimpleHash</literal> has methods by which you can add and
           remove subvariable. These methods should be used to initialize the
           variable directly after its creation.</para>
 
           <para>Containers are immutable within FTL. That is, you can't add,
-          replace or remove the subvariables they contain.</para>
+          replace or remove the sub variables they contain.</para>
         </section>
 
         <section>
@@ -6181,9 +6185,9 @@ public class Test {
 
           <para>The commonly used implementation is
           <literal>SimpleSequence</literal>. It uses internally a
-          <literal>java.util.List</literal> to store its subvariables.
+          <literal>java.util.List</literal> to store its sub variables.
           <literal>SimpleSequence</literal> has methods by which you can add
-          subvariables. These methods should be used to populate the sequence
+          sub variables. These methods should be used to populate the sequence
           directly after its creation.</para>
         </section>
 
@@ -14205,9 +14209,9 @@ No 2nd param: ${names?seq_last_index_of("Joe")}
             <primary>size built-in</primary>
           </indexterm>
 
-          <para>The number of subvariables in sequence (as a numerical value).
-          The highest possible index in sequence <literal>s</literal> is
-          <literal>s?size - 1</literal> (since the index of the first
+          <para>The number of sub variables in sequence (as a numerical
+          value). The highest possible index in sequence <literal>s</literal>
+          is <literal>s?size - 1</literal> (since the index of the first
           subvariable is 0) assuming that the sequence has at least one
           subvariable.</para>
         </section>
@@ -14228,10 +14232,10 @@ No 2nd param: ${names?seq_last_index_of("Joe")}
           <para>Returns the sequence sorted in ascending order. (For
           descending order use this and then the <link
           linkend="ref_builtin_reverse"><literal>reverse</literal> built
-          in</link>.) This will work only if all subvariables are strings, or
-          if all subvariables are numbers, or if all subvariables are date
-          values (date, time, or date+time), or if all subvariables are
-          booleans (since 2.3.17). If the subvariables are strings, it uses
+          in</link>.) This will work only if all sub variables are strings, or
+          if all sub variables are numbers, or if all sub variables are date
+          values (date, time, or date+time), or if all sub variables are
+          booleans (since 2.3.17). If the sub variables are strings, it uses
           locale (language) specific lexical sorting (which is usually not
           case sensitive). For example:</para>
 
@@ -14262,8 +14266,8 @@ No 2nd param: ${names?seq_last_index_of("Joe")}
           linkend="ref_builtin_reverse"><literal>reverse</literal> built
           in</link>.) The rules are the same as with the <link
           linkend="ref_builtin_sort"><literal>sort</literal> built-in</link>,
-          except that the subvariables of the sequence must be hashes, and you
-          have to give the name of a hash subvariable that will decide the
+          except that the sub variables of the sequence must be hashes, and
+          you have to give the name of a hash subvariable that will decide the
           order. For example:</para>
 
           <programlisting role="template">&lt;#assign ls = [
@@ -14302,8 +14306,8 @@ Order by weight:
           <para>If the subvariable that you want to use for the sorting is on
           a deeper level (that is, if it is a subvariable of a subvariable and
           so on), then you can use a sequence as parameter, that specifies the
-          names of the subvariables that lead down to the desired subvariable.
-          For example:</para>
+          names of the sub variables that lead down to the desired
+          subvariable. For example:</para>
 
           <programlisting role="template">&lt;#assign members = [
     {"name": {"first": "Joe", "last": "Smith"}, "age": 40},
@@ -14351,13 +14355,13 @@ Sorted by name.last:
 
           <programlisting role="output">name = mouse; price = 50;</programlisting>
 
-          <para>Since hashes do not define an order for their subvariables in
+          <para>Since hashes do not define an order for their sub variables in
           general, the order in which key names are returned can be arbitrary.
           However, some hashes maintain a meaningful order (ask the programmer
           if a certain hash does that or not). For example, hashes created
           with the above <literal>{<replaceable>...</replaceable>}</literal>
-          syntax preserve the same order as you have specified the
-          subvariables.</para>
+          syntax preserve the same order as you have specified the sub
+          variables.</para>
         </section>
 
         <section xml:id="ref_builtin_values">
@@ -15143,7 +15147,7 @@ Sorted by name.last:
           it is <literal>false</literal>. The meaning of ``empty'' depends on
           the concrete case. This follows intuitive common-sense ideas. The
           following are empty: a string with 0 length, sequence or hash with
-          no subvariables, a collection which has passed the last element. If
+          no sub variables, a collection which has passed the last element. If
           the value is not a string or sequence or hash or collection, then it
           counts as non-empty if it's a number or a date or a boolean (e.g.
           <literal>0</literal> and <literal>false</literal> are not empty),
@@ -19619,8 +19623,8 @@ There was no specific handler for node y
           <para><literal>vars</literal>: Expression
           <literal>.vars.foo</literal> returns the same variable as expression
           <literal>foo</literal>. It's useful if for some reasons you have to
-          use square bracket syntax, since that works only for hash
-          subvariables, so you need an artificial parent hash. For example, to
+          use square bracket syntax, since that works only for hash sub
+          variables, so you need an artificial parent hash. For example, to
           read a top-level variable that has a strange name that would confuse
           FreeMarker, you can write
           <literal>.vars["A strange name!"]</literal>. Or, to access a
@@ -20536,9 +20540,9 @@ root.put(
 
           <para>As you see, both <literal>doc</literal> and
           <literal>book</literal> can be used as hashes; you get their child
-          nodes as subvariables. Basically, you describe the path by which you
-          reach the target (element <literal>title</literal>) in the DOM tree.
-          You may notice that there was some swindle above: with
+          nodes as sub variables. Basically, you describe the path by which
+          you reach the target (element <literal>title</literal>) in the DOM
+          tree. You may notice that there was some swindle above: with
           <literal>${doc.book.title}</literal>, it seems that we instruct
           FreeMarker to print the <literal>title</literal> element itself, but
           we should print its child text node (check the <link
@@ -20660,7 +20664,7 @@ root.put(
   &lt;p&gt;p2.2
   </programlisting>
 
-          <para>This example shows that hash subvariables select the children
+          <para>This example shows that hash sub variables select the children
           of a sequence of notes (just in the earlier examples that sequence
           happened to be of size 1). In this concrete case, subvariable
           <literal>chapter</literal> returns a sequence of size 2 (since there
@@ -22615,7 +22619,7 @@ End book</programlisting>
             <para>The <quote>hash</quote> type of the FreeMarker Template
             Language (FTL) is not the same as Java's <literal>Map</literal>.
             FTL's hash is an associative array too, but it uses string keys
-            exclusively. This is because it was introduced for subvariables
+            exclusively. This is because it was introduced for sub variables
             (as <literal>password</literal> in
             <literal>user.password</literal>, which is the same as
             <literal>user["password"]</literal>), and variable names are
@@ -29112,7 +29116,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>The <literal>?keys</literal> and
               <literal>?values</literal> hash built-ins now return sequences.
               In practical terms this means you can access their sizes or
-              retrieve their subvariables by index, and use all of the <link
+              retrieve their sub variables by index, and use all of the <link
               linkend="ref_builtins_sequence">sequence built-ins</link>. (Note
               for the programmers: The <literal>TemplateHashModelEx</literal>
               interface has not been changed. Your old code will work. See the
@@ -29122,7 +29126,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Existence built-ins (<literal>?default</literal>,
               <literal>?exists</literal>, etc.) are now working with sequence
-              subvariables as well. Read the documentation of the
+              sub variables as well. Read the documentation of the
               <literal>default</literal> built-in for more information.</para>
             </listitem>
 
@@ -30146,8 +30150,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <itemizedlist>
               <listitem>
                 <para>Existence built-ins (<literal>?default</literal>,
-                <literal>?exists</literal>, etc.) now work with sequence
-                subvariables as well. Read the <link
+                <literal>?exists</literal>, etc.) now work with sequence sub
+                variables as well. Read the <link
                 linkend="ref.directive.default">documentation of the
                 <literal>default</literal> built-in</link> for more
                 information.</para>
@@ -33426,7 +33430,7 @@ Dekany, and Jonathan Revusky.</programlisting>
       <glossterm>Hash</glossterm>
 
       <glossdef>
-        <para>A variable that acts as a container that stores subvariables
+        <para>A variable that acts as a container that stores sub variables
         that can be retrieved via a string that is a lookup name.</para>
 
         <glossseealso otherterm="gloss.sequenceVariable"/>
@@ -33548,8 +33552,8 @@ Dekany, and Jonathan Revusky.</programlisting>
       <glossterm>Sequence</glossterm>
 
       <glossdef>
-        <para>A sequence is a variable that contains a sequence of
-        subvariables. The sequence's subvariables are accessible via numerical
+        <para>A sequence is a variable that contains a sequence of sub
+        variables. The sequence's sub variables are accessible via numerical
         index, where the index of the very first object is 0, the index of the
         second objects is 1, the index of the third object is 2, etc.</para>
 
