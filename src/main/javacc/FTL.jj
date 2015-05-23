@@ -40,6 +40,7 @@ public class FMParser {
     private static final int ITERATOR_BLOCK_KIND_LIST = 0; 
     private static final int ITERATOR_BLOCK_KIND_FOREACH = 1; 
     private static final int ITERATOR_BLOCK_KIND_ITEMS = 2; 
+    private static final int ITERATOR_BLOCK_KIND_CUSTOM = 3; 
 
     private static class ParserIteratorBlockContext {
         private String loopVarName;
@@ -2926,7 +2927,7 @@ TemplateElement UnifiedMacroTransform() :
     Token start = null, end, t;
     HashMap namedArgs = null;
     ArrayList positionalArgs = null, bodyParameters = null;
-    String directiveName = null;
+    Expression startTagNameExp;
     TemplateElement nestedBlock = null;
     Expression exp;
 }
@@ -2935,7 +2936,9 @@ TemplateElement UnifiedMacroTransform() :
     exp = Expression()
     {
         if (exp instanceof Identifier || (exp instanceof Dot && ((Dot) exp).onlyHasIdentifiers())) {
-            directiveName = exp.getCanonicalForm();
+            startTagNameExp = exp;
+        } else {
+            startTagNameExp = null;
         }
     }
     [<TERMINATING_WHITESPACE>]
@@ -2946,12 +2949,12 @@ TemplateElement UnifiedMacroTransform() :
         positionalArgs = PositionalArgs()
     )
     [
-        <SEMICOLON>{bodyParameters = new ArrayList(); }
+        <SEMICOLON>{bodyParameters = new ArrayList(4); }
         [
-            [<TERMINATING_WHITESPACE>]t = <ID> { bodyParameters.add(t.image); }
+            [<TERMINATING_WHITESPACE>] t = <ID> { bodyParameters.add(t.image); }
             (
-                [<TERMINATING_WHITESPACE>]<COMMA>
-                [<TERMINATING_WHITESPACE>]t = <ID>{bodyParameters.add(t.image); }
+                [<TERMINATING_WHITESPACE>] <COMMA>
+                [<TERMINATING_WHITESPACE>] t = <ID>{bodyParameters.add(t.image); }
             )*
         ]
     ]
@@ -2963,13 +2966,15 @@ TemplateElement UnifiedMacroTransform() :
             nestedBlock = OptionalBlock()
             end = <UNIFIED_CALL_END>
             {
-                String s = end.image.substring(3);
-                s = s.substring(0, s.length() -1).trim();
-                if (s.length() >0 && !s.equals(directiveName)) {
-                    if (directiveName == null) {
+                String endTagName = end.image.substring(3, end.image.length() - 1).trim();
+                if (endTagName.length() > 0) {
+                    if (startTagNameExp == null) {
                         throw new ParseException("Expecting </@>", template, end);
                     } else {
-                        throw new ParseException("Expecting </@> or </@" + directiveName + ">", template, end);
+                        String startTagName = startTagNameExp.getCanonicalForm();
+                        if (!endTagName.equals(startTagName)) {
+                            throw new ParseException("Expecting </@> or </@" + startTagName + ">", template, end);
+                        }
                     }
                 }
             }
