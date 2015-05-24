@@ -87,6 +87,10 @@ public class ListValidationsTest extends TemplateTest {
                 "?index", "foo", "no loop variable");
         assertErrorContains("<#list foos as foo></#list>${foo?index}",
                 "?index", "foo" , "no loop variable");
+        assertErrorContains("<#list foos as foo><#macro m>${foo?index}</#macro></#list>",
+                "?index", "foo" , "no loop variable");
+        assertErrorContains("<#list foos as foo><#function f>${foo?index}</#function></#list>",
+                "?index", "foo" , "no loop variable");
         assertErrorContains("<#list xs as x>${foo?index}</#list>",
                 "?index", "foo" , "no loop variable");
         assertErrorContains("<#list foos as foo><@m; foo>${foo?index}</@></#list>",
