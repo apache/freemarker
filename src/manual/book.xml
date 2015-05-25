@@ -10,12 +10,6 @@
 
   <subtitle>For FreeMarker 2.3.23-RC</subtitle>
 
-  <info>
-    <productnumber>2.3.23-RC</productnumber>
-
-    <productname/>
-  </info>
-
   <preface xml:id="preface">
     <title>What's FreeMarker?</title>
 
