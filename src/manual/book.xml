@@ -10443,6 +10443,15 @@ grant codeBase "file:/path/to/freemarker.jar"
       <section xml:id="ref_builtins_alphaidx">
         <title>Alphabetical index</title>
 
+        <note>
+          <para>As of FreeMarker 2.3.23, you can use camel case instead of
+          snake case for directive names, like <literal>startsWith</literal>
+          instead of <literal>starts_with</literal>. But know that then
+          withing the same template, FreeMarker will enforce the usage of
+          camel case for all identifiers that are part of the template
+          language (user defined names are not affected).</para>
+        </note>
+
         <indexterm>
           <primary>built-in</primary>
         </indexterm>
@@ -15474,6 +15483,15 @@ May 16, 2011
       <section xml:id="ref_directive_alphaidx">
         <title>Alphabetical index</title>
 
+        <note>
+          <para>As of FreeMarker 2.3.23, you can use camel case instead of
+          all-lower-case for directive names, like <literal>noParse</literal>
+          instead of <literal>noparse</literal>. But know that then withing
+          the same template, FreeMarker will enforce the usage of camel case
+          for all identifiers that are part of the template language (user
+          defined names are not affected).</para>
+        </note>
+
         <indexterm>
           <primary>directive</primary>
         </indexterm>
@@ -19447,6 +19465,15 @@ There was no specific handler for node y
       <literal>.<replaceable>variable_name</replaceable></literal> syntax. For
       example, you can't write simply <literal>version</literal>; you have to
       write <literal>.version</literal>.</para>
+
+      <note>
+        <para>As of FreeMarker 2.3.23, you can use camel case instead of snake
+        case for special variable names, like <literal>dataModel</literal>
+        instead of <literal>data_model</literal>. But know that then withing
+        the same template, FreeMarker will enforce the usage of camel case for
+        all identifiers that are part of the template language (user defined
+        names are not affected).</para>
+      </note>
 
       <para>The supported special variables are:</para>
 
