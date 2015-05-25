@@ -731,11 +731,14 @@ All Rights Reserved.
         <section>
           <title>Using built-ins</title>
 
-          <para>The so called built-ins are like sub variables that aren't
-          coming coming from the data-model, but added by FreeMarker. Only to
-          make it unambiguous where the subvarable comes from, to access these
-          sub variables you have to use <literal>?</literal> (question mark)
-          instead of <literal>.</literal> (dot). Some examples:</para>
+          <para>The so called built-ins are like subvariables (or rather like
+          methods, if you know that Java term) that aren't coming coming from
+          the data-model, but added by FreeMarker to the values. To make it
+          unambiguous where the subvarable comes from, to access them you have
+          to use <literal>?</literal> (question mark) instead of
+          <literal>.</literal> (dot). <anchor
+          xml:id="topic.commonlyUsedBuiltIns"/>Examples with some of the most
+          commonly used built-ins:</para>
 
           <itemizedlist>
             <listitem>
@@ -747,18 +750,28 @@ All Rights Reserved.
 
             <listitem>
               <para><literal>user?upper_case</literal> gives the upper case
-              version of the value of <literal>user</literal> (like JOHN
-              DOE)</para>
+              version of the value of <literal>user</literal> (like
+              <quote>JOHN DOE</quote> instead of <quote>John
+              Doe</quote>)</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>animal.name?cap_first</literal> give the
+              <literal>animal.name</literal> with its first letter converted
+              to upper case (like <quote>Mouse</quote> instead of
+              <quote>mouse</quote>)</para>
             </listitem>
 
             <listitem>
               <para><literal>user?length</literal> gives the number of
-              characters in the value of <literal>user</literal></para>
+              <emphasis>characters</emphasis> in the value of
+              <literal>user</literal> (8 for <quote>John Doe</quote>)</para>
             </listitem>
 
             <listitem>
-              <para><literal>animals?size</literal> gives the number of items
-              in the <literal>animals</literal> sequence</para>
+              <para><literal>animals?size</literal> gives the number of
+              <emphasis>items</emphasis> in the <literal>animals</literal>
+              sequence (3 in our example data-model)</para>
             </listitem>
 
             <listitem>
@@ -790,24 +803,10 @@ All Rights Reserved.
             </listitem>
           </itemizedlist>
 
-          <para>Just like you can chain multiple steps with
-          <literal>.</literal> (dot), you can do the same with
-          <literal>?</literal>. For example,
-          <literal>user?upper_case?html</literal> will first convert the user
-          name to upper case, then HTML-escapes it. An of course you can mix
-          <literal>.</literal> (dot) steps with <literal>?</literal> steps
-          too, like in <literal>animal.name?html</literal>.</para>
-
           <para>Some built-ins require parameters to specify the behavior
           more, for example:</para>
 
           <itemizedlist>
-            <listitem>
-              <para><literal>user?starts_with("J")</literal> gives boolean
-              true of false depending on if <literal>user</literal> starts
-              with the letter <quote>J</quote> or not.</para>
-            </listitem>
-
             <listitem>
               <para><literal>animal.protected?string("Y", "N")</literal>
               return the string <quote>Y</quote> or <quote>N</quote> depending
@@ -820,10 +819,28 @@ All Rights Reserved.
               'darkRow')</literal> is the more generic variant of
               <literal>item_parity</literal> from earlier.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>fruits?join(", ")</literal>: converts the list to
+              a string by concatenating items, and inserting the parameter
+              separator between each items (like <quote>orange,
+              banana</quote>)</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>user?starts_with("J")</literal> gives boolean
+              true of false depending on if <literal>user</literal> starts
+              with the letter <quote>J</quote> or not.</para>
+            </listitem>
           </itemizedlist>
 
-          <para>You can find the full set of <link
-          linkend="ref_builtins">built-ins in the Reference</link>.</para>
+          <para>Built-in applications can be chained, like
+          <literal>user?upper_case?html</literal> will first convert the user
+          name to upper case, then HTML-escapes it. (This is just like you can
+          chain <literal>.</literal>-s (dots) too.)</para>
+
+          <para>You can find the <link linkend="ref_builtins">full set of
+          built-ins in the Reference</link>.</para>
         </section>
 
         <section>
@@ -2301,16 +2318,15 @@ C:\foo\bar</programlisting>
             commas, and put the whole list into square brackets. For
             example:</para>
 
-            <programlisting role="template">&lt;#list <emphasis>["winter", "spring", "summer", "autumn"]</emphasis> as x&gt;
+            <programlisting role="template">&lt;#list <emphasis>["foo", "bar", "baz"]</emphasis> as x&gt;
 ${x}
 &lt;/#list&gt;</programlisting>
 
             <para>will print:</para>
 
-            <programlisting role="output">winter
-spring
-summer
-autumn
+            <programlisting role="output">foo
+bar
+baz
  </programlisting>
 
             <para>The items in the list are expressions, so you can do this
@@ -3371,109 +3387,66 @@ ${-1.999?int}</programlisting>
           Java object behind <literal>path</literal> (a
           <literal>String</literal> most certainly) doesn't have such method,
           FreeMarker adds it. For brevity, if the method has no parameters,
-          you must omit the <literal>()</literal>, like, to get the length of
-          <literal>path</literal>, you have to write
+          you <emphasis>must</emphasis> omit the <literal>()</literal>, like,
+          to get the length of <literal>path</literal>, you have to write
           <literal>path?length</literal>, <emphasis>not</emphasis>
-          <literal>path?length()</literal>. The other reason why built-ins are
-          crucial is that normally (though it depends on configuration
-          settings), FreeMarker doesn't expose the Java API of the objects. So
-          despite that Java's <literal>String</literal> has a
-          <literal>length()</literal> method, it's hidden from the template,
-          you <emphasis>have to</emphasis> use <literal>path?length</literal>
-          instead. The advantage of that is that thus the template doesn't
-          depend on the exactly type of the underlying Java objects. (Like
-          <literal>path</literal> it's maybe a
+          <literal>path?length()</literal>.</para>
+
+          <para>The other reason why built-ins are crucial is that normally
+          (though it depends on configuration settings), FreeMarker doesn't
+          expose the Java API of the objects. So despite that Java's
+          <literal>String</literal> has a <literal>length()</literal> method,
+          it's hidden from the template, you <emphasis>have to</emphasis> use
+          <literal>path?length</literal> instead. The advantage of that is
+          that thus the template doesn't depend on the exactly type of the
+          underlying Java objects. (Like <literal>path</literal> is maybe a
           <literal>java.nio.Path</literal> behind the scenes, but if the
           programmers has configure FreeMarker to expose
           <literal>Path</literal> objects as FTL strings, the template won't
           be aware of that, and <literal>?length</literal> will work, despite
           that <literal>java.nio.Path</literal> has no similar method.)</para>
 
-          <para>You can find the complete <link linkend="ref_builtins">list of
-          built-ins in the Reference</link>. For now, just a few of the more
-          important ones:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Built-ins to use with strings:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>html</literal>: The string with all special
-                  HTML characters replaced with entity references (E.g.
-                  <literal>&lt;</literal> with
-                  <literal>&amp;lt;</literal>).</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>cap_first</literal>: The string with the
-                  first letter converted to upper case</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>lower_case</literal>: The lowercase version
-                  of the string</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>upper_case</literal>: The uppercase version
-                  of the string</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>trim</literal>: The string without leading
-                  and trailing <link
-                  linkend="gloss.whiteSpace">white-spaces</link></para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>length</literal>: The length of the
-                  string</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Built-ins to use with sequences:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>size</literal>: The number of elements in the
-                  sequence</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-          </itemizedlist>
+          <para>You can find some of the <link
+          linkend="topic.commonlyUsedBuiltIns">most commonly used built-ins
+          mentioned here</link>, and the <link linkend="ref_builtins">complete
+          list of built-ins in the Reference</link>. For now, just a few of
+          the more important ones:</para>
 
           <para>Example:</para>
 
-          <programlisting role="template">${test?html}
-${test?upper_case?html}</programlisting>
+          <programlisting role="template">${testString?upper_case}
+${testString?html}
+${testString?upper_case?html}
 
-          <para>Assuming that <literal>test</literal> stores the string ``Tom
-          &amp; Jerry'', the output will be:</para>
+${testSequence?size}
+${testSequence?join(", ")}</programlisting>
 
-          <programlisting role="output">Tom &amp;amp; Jerry
-TOM &amp;amp; JERRY</programlisting>
+          <para>Assuming that <literal>testString</literal> stores the string
+          ``Tom &amp; Jerry'', and testSequnce stores the strings
+          <quote>foo</quote>, <quote>bar</quote> and <quote>baz</quote>, the
+          output will be:</para>
 
-          <para>Note the <literal>test?upper_case?html</literal>. Since the
-          result of <literal>test?upper_case</literal> is a string, you can
-          use the <literal>html</literal> built-in with it.</para>
+          <programlisting role="output">TOM &amp; JERRY
+Tom &amp;amp; Jerry
+TOM &amp;amp; JERRY
 
-          <para>Another example:</para>
+3
+foo, bar, baz</programlisting>
 
-          <programlisting role="template">${seasons?size}
-${seasons[1]?cap_first} &lt;#-- left side can by any expression --&gt;
-${"horse"?cap_first}</programlisting>
+          <para>Note the <literal>test?upper_case?html</literal> above. Since
+          the result of <literal>test?upper_case</literal> is a string, you
+          can apply the <literal>html</literal> built-in on it.</para>
 
-          <para>Assuming that <literal>seasons</literal> stores the sequence
-          <literal>"winter"</literal>, <literal>"spring"</literal>,
-          <literal>"summer"</literal>, <literal>"autumn"</literal>, the output
-          will be:</para>
+          <para>Naturally, the left side of the built-in can be arbitrary
+          expression, not just a variable name:</para>
 
-          <programlisting role="output">4
-Spring
-Horse</programlisting>
+          <programlisting role="template">${testSeqence[1]?cap_first}
+${"horse"?cap_first}
+${(testString + " &amp; Duck")?html}</programlisting>
+
+          <programlisting role="output">Bar
+Horse
+Tom &amp;amp; Jerry &amp;amp; Duck</programlisting>
         </section>
 
         <section xml:id="dgui_template_exp_methodcall">
@@ -7355,9 +7328,9 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_22);
-myCfg.setLocale(java.util.Locale.ITALY);
-myCfg.setNumberFormat("0.####");</programlisting>
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_23);
+myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+myCfg.setDefaultEncoding("UTF-8");</programlisting>
 
             <para>You do it before you start to actually use the
             <literal>Configuration</literal> object (typically, when you
@@ -7365,23 +7338,24 @@ myCfg.setNumberFormat("0.####");</programlisting>
             read-only after that.</para>
 
             <para>In practice, in most Web application frameworks you have to
-            specify the setting in a framework-specific configuration file
+            specify the settings in a framework-specific configuration file
             that require specifying setting as <literal>String</literal>
             name-value pairs (like in a <literal>.properties</literal> file).
             In that case the authors of the frameworks most probably use the
             <literal>setSetting(String name, String value)</literal> method of
             <literal>Configuration</literal>; see available setting names and
-            the format of the values in the API doc of
-            <literal>setSetting</literal>. Example for Spring
+            the format of the values in the <link
+            xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">API
+            doc of <literal>setSetting</literal></link>. Example for Spring
             Framework:</para>
 
             <programlisting role="unspecified">&lt;bean id="freemarkerConfig"
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
   &lt;property name="freemarkerSettings"&gt;
     &lt;props&gt;
-      &lt;prop key="incompatible_improvements"&gt;2.3.22&lt;/prop&gt;
-      &lt;prop key="locale"&gt;it_IT&lt;/prop&gt;
-      &lt;prop key="number_format"&gt;0.####&lt;/prop&gt;
+      &lt;prop key="incompatible_improvements"&gt;2.3.23&lt;/prop&gt;
+      &lt;prop key="template_exception_handler"&gt;rethrow&lt;/prop&gt;
+      &lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
     &lt;/props&gt;
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
@@ -15737,23 +15711,23 @@ or
           <para>For more information about variables, read this: <xref
           linkend="dgui_misc_var"/></para>
 
-          <para>Example: variable <literal>seasons</literal> will store a
+          <para>Example: variable <literal>seq</literal> will store a
           sequence:</para>
 
-          <programlisting role="template">&lt;#assign seasons = ["winter", "spring", "summer", "autumn"]&gt;</programlisting>
+          <programlisting role="template">&lt;#assign seq = ["foo", "bar", "baz"]&gt;</programlisting>
 
           <para>Example: Increments the numerical value stored in variable
-          <literal>test</literal>:</para>
+          <literal>x</literal>:</para>
 
-          <programlisting role="template">&lt;#assign test = test + 1&gt;</programlisting>
+          <programlisting role="template">&lt;#assign x = x + 1&gt;</programlisting>
 
           <para>As a convenience feature, you can do more assignments with one
           <literal>assign</literal> tag. For example this will do the same as
           the two previous examples:</para>
 
           <programlisting role="template">&lt;#assign
-  seasons = ["winter", "spring", "summer", "autumn"]
-  test = test + 1
+  seq = ["foo", "bar", "baz"]
+  x = x + 1
 &gt;</programlisting>
 
           <para>If you know what namespaces are: <literal>assign</literal>
