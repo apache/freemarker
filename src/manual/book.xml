@@ -731,11 +731,14 @@ All Rights Reserved.
         <section>
           <title>Using built-ins</title>
 
-          <para>The so called built-ins are like sub variables that aren't
-          coming coming from the data-model, but added by FreeMarker. Only to
-          make it unambiguous where the subvarable comes from, to access these
-          sub variables you have to use <literal>?</literal> (question mark)
-          instead of <literal>.</literal> (dot). Some examples:</para>
+          <para>The so called built-ins are like subvariables (or rather like
+          methods, if you know that Java term) that aren't coming coming from
+          the data-model, but added by FreeMarker to the values. To make it
+          unambiguous where the subvarable comes from, to access them you have
+          to use <literal>?</literal> (question mark) instead of
+          <literal>.</literal> (dot). <anchor
+          xml:id="topic.commonlyUsedBuiltIns"/>Examples with some of the most
+          commonly used built-ins:</para>
 
           <itemizedlist>
             <listitem>
@@ -747,18 +750,28 @@ All Rights Reserved.
 
             <listitem>
               <para><literal>user?upper_case</literal> gives the upper case
-              version of the value of <literal>user</literal> (like JOHN
-              DOE)</para>
+              version of the value of <literal>user</literal> (like
+              <quote>JOHN DOE</quote> instead of <quote>John
+              Doe</quote>)</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>animal.name?cap_first</literal> give the
+              <literal>animal.name</literal> with its first letter converted
+              to upper case (like <quote>Mouse</quote> instead of
+              <quote>mouse</quote>)</para>
             </listitem>
 
             <listitem>
               <para><literal>user?length</literal> gives the number of
-              characters in the value of <literal>user</literal></para>
+              <emphasis>characters</emphasis> in the value of
+              <literal>user</literal> (8 for <quote>John Doe</quote>)</para>
             </listitem>
 
             <listitem>
-              <para><literal>animals?size</literal> gives the number of items
-              in the <literal>animals</literal> sequence</para>
+              <para><literal>animals?size</literal> gives the number of
+              <emphasis>items</emphasis> in the <literal>animals</literal>
+              sequence (3 in our example data-model)</para>
             </listitem>
 
             <listitem>
@@ -790,24 +803,10 @@ All Rights Reserved.
             </listitem>
           </itemizedlist>
 
-          <para>Just like you can chain multiple steps with
-          <literal>.</literal> (dot), you can do the same with
-          <literal>?</literal>. For example,
-          <literal>user?upper_case?html</literal> will first convert the user
-          name to upper case, then HTML-escapes it. An of course you can mix
-          <literal>.</literal> (dot) steps with <literal>?</literal> steps
-          too, like in <literal>animal.name?html</literal>.</para>
-
           <para>Some built-ins require parameters to specify the behavior
           more, for example:</para>
 
           <itemizedlist>
-            <listitem>
-              <para><literal>user?starts_with("J")</literal> gives boolean
-              true of false depending on if <literal>user</literal> starts
-              with the letter <quote>J</quote> or not.</para>
-            </listitem>
-
             <listitem>
               <para><literal>animal.protected?string("Y", "N")</literal>
               return the string <quote>Y</quote> or <quote>N</quote> depending
@@ -820,10 +819,28 @@ All Rights Reserved.
               'darkRow')</literal> is the more generic variant of
               <literal>item_parity</literal> from earlier.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>fruits?join(", ")</literal>: converts the list to
+              a string by concatenating items, and inserting the parameter
+              separator between each items (like <quote>orange,
+              banana</quote>)</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>user?starts_with("J")</literal> gives boolean
+              true of false depending on if <literal>user</literal> starts
+              with the letter <quote>J</quote> or not.</para>
+            </listitem>
           </itemizedlist>
 
-          <para>You can find the full set of <link
-          linkend="ref_builtins">built-ins in the Reference</link>.</para>
+          <para>Built-in applications can be chained, like
+          <literal>user?upper_case?html</literal> will first convert the user
+          name to upper case, then HTML-escapes it. (This is just like you can
+          chain <literal>.</literal>-s (dots) too.)</para>
+
+          <para>You can find the <link linkend="ref_builtins">full set of
+          built-ins in the Reference</link>.</para>
         </section>
 
         <section>
@@ -3389,63 +3406,16 @@ ${-1.999?int}</programlisting>
           be aware of that, and <literal>?length</literal> will work, despite
           that <literal>java.nio.Path</literal> has no similar method.)</para>
 
-          <para>You can find the complete <link linkend="ref_builtins">list of
-          built-ins in the Reference</link>. For now, just a few of the more
-          important ones:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Some built-ins to use with strings:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>html</literal>: The string with all special
-                  HTML characters replaced with entity references (E.g.
-                  <literal>&lt;</literal> with
-                  <literal>&amp;lt;</literal>).</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>cap_first</literal>: The string with the
-                  first letter converted to upper case</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>upper_case</literal>: The uppercase version
-                  of the string</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>length</literal>: The length of the
-                  string</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Some built-ins to use with sequences:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>size</literal>: The number of elements in the
-                  sequence</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>join(<replaceable>separator</replaceable>)</literal>:
-                  Converts the list to a string by concatenating items, and
-                  inserting the parameter separator between each items (see
-                  more <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">here
-                  in the Reference</link>).</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-          </itemizedlist>
+          <para>You can find some of the <link
+          linkend="topic.commonlyUsedBuiltIns">most commonly used built-ins
+          mentioned here</link>, and the <link linkend="ref_builtins">complete
+          list of built-ins in the Reference</link>. For now, just a few of
+          the more important ones:</para>
 
           <para>Example:</para>
 
-          <programlisting role="template">${testString?html}
+          <programlisting role="template">${testString?upper_case}
+${testString?html}
 ${testString?upper_case?html}
 
 ${testSequence?size}
@@ -3456,7 +3426,8 @@ ${testSequence?join(", ")}</programlisting>
           <quote>foo</quote>, <quote>bar</quote> and <quote>baz</quote>, the
           output will be:</para>
 
-          <programlisting role="output">Tom &amp;amp; Jerry
+          <programlisting role="output">TOM &amp; JERRY
+Tom &amp;amp; Jerry
 TOM &amp;amp; JERRY
 
 3
@@ -3464,7 +3435,7 @@ foo, bar, baz</programlisting>
 
           <para>Note the <literal>test?upper_case?html</literal> above. Since
           the result of <literal>test?upper_case</literal> is a string, you
-          can use the <literal>html</literal> built-in with it.</para>
+          can apply the <literal>html</literal> built-in on it.</para>
 
           <para>Naturally, the left side of the built-in can be arbitrary
           expression, not just a variable name:</para>
