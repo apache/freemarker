@@ -356,9 +356,7 @@ public class FMParser {
     
 	private String forEachDirectiveSymbol() {    
 	    // [2.4] Use camel case as the default
-	    return "#for"
-	            + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "E" : "e")
-	            + "ach";
+	    return token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "#forEach" : "#foreach";
 	}
     
 }
@@ -3558,6 +3556,8 @@ void HeaderElement() :
                 <EQUALS>
                 exp = Expression()
                 {
+                    token_source.checkNamingConvention(key);
+                
                     String ks = key.image;
                     TemplateModel value = null;
                     try {
@@ -3583,13 +3583,13 @@ void HeaderElement() :
                             if (encoding != null && !encoding.equalsIgnoreCase(vs)) {
                                 throw new Template.WrongEncodingException(vs, encoding);
                             }
-                        } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE")) {
+                        } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE") || ks.equals("stripWhitespace")) {
                             this.stripWhitespace = getBoolean(exp);
-                        } else if (ks.equalsIgnoreCase("STRIP_TEXT")) {
+                        } else if (ks.equalsIgnoreCase("STRIP_TEXT") || ks.equals("stripText")) {
                             this.stripText = getBoolean(exp);
-                        } else if (ks.equalsIgnoreCase("STRICT_SYNTAX")) {
+                        } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
                             this.token_source.strictEscapeSyntax = getBoolean(exp);
-                        } else if (ks.equalsIgnoreCase("ns_prefixes")) {
+                        } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);
                             }
@@ -3627,24 +3627,19 @@ void HeaderElement() :
                             }
                         } else {
                             String correctName;
-	                        if (ks.equals("stripWhitespace")) {
-	                            correctName = "strip_whitespace";
-	                        } else if (ks.equals("stripText")) {
-	                            correctName = "strip_text";
-	                        } else if (ks.equals("strictSyntax")) {
-	                            correctName = "strict_syntax"; 
-	                        } else if (ks.equals("nsPrefixes")) {
-	                           correctName = "ns_prefixes";
+	                        if (ks.equals("charset")) {
+	                            correctName = "encoding";
+	                        } else if (ks.equals("xmlns")) {
+	                            // [2.4] If came case will be the default, update this
+                                correctName
+                                        = token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                                                ? "nsPrefixes" : "ns_prefixes";
 	                        } else {
 	                           correctName = null;
 	                        }
                             throw new ParseException(
                                     "Unknown FTL header parameter: " + key.image
-                                    + (correctName == null
-                                            ? ""
-                                            : ". Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
-                                              + "check if an update is available, and if it indeed supports camel "
-                                              + "case. Until that, use " + correctName + " instead."),
+                                    + (correctName == null ? "" : ". Did you mean " + correctName + "?"),
                                     template, key);
                         }
                     }
