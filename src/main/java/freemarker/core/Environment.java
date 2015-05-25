@@ -1449,7 +1449,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the variable that is visible in this context.
+     * Returns the variable that is visible in this context, or {@code null} if the variable is not found.
      * This is the correspondent to an FTL top-level variable reading expression.
      * That is, it tries to find the the variable in this order:
      * <ol>
