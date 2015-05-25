@@ -10,6 +10,12 @@
 
   <subtitle>For FreeMarker 2.3.23-RC</subtitle>
 
+  <info>
+    <productnumber>2.3.23-RC</productnumber>
+
+    <productname/>
+  </info>
+
   <preface xml:id="preface">
     <title>What's FreeMarker?</title>
 
@@ -23347,21 +23353,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Advanced listing:</para>
+              <para>Listing (<literal>#list</literal>) has received some
+              specialized convenience features that target typical tasks
+              people do again and again in templates.</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>Added new <literal>list</literal> directive child
-                  directives: <literal>else</literal>,
-                  <literal>items</literal> and <literal>sep</literal>. For
-                  more details, see the <link
+                  <para>New <literal>list</literal> directive child
+                  directives. There are <literal>else</literal> and
+                  <literal>items</literal> to deal with special cases with
+                  0-length lists, and <literal>sep</literal> for inserting
+                  separators between items. For more details, see the <link
                   linkend="ref_directive_list"><literal>list</literal>
                   directive in the Reference</link>.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Added <link linkend="ref_builtins_loop_var">new
-                  built-ins that act on loop variables</link>:
+                  <para><link linkend="ref_builtins_loop_var">New built-ins
+                  that act on loop variables</link>:
                   <literal><replaceable>var</replaceable>?index</literal>
                   (deprecates
                   <literal><replaceable>var</replaceable>_index</literal>),
@@ -23387,13 +23396,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               of the template language (user defined names aren't affected).
               For example, now
               <literal>&lt;#noEscape&gt;${x?upperCase}&lt;/#noEscape&gt;</literal>
-              is valid, and also <literal>&lt;#setting
-              numberFormat="0.0"&gt;</literal>. However, within the same
-              template, FreeMarker will require you to use the same naming
-              convention consistently for all identifiers that are part of the
-              template language. (Note that it's also possible to enforce a
-              naming convention on all templates from Java, via
-              <literal>Configuration.getNamingConvention(int)</literal>.)</para>
+              or <literal>&lt;#setting numberFormat="0.0"&gt;</literal> or
+              <literal>&lt;#ftl stripText=true&gt;</literal> are valid.
+              However, within the same template, FreeMarker will require you
+              to use the same naming convention consistently for all
+              identifiers that are part of the template language. It's also
+              possible to enforce the same naming convention on all templates
+              from Java via
+              <literal>Configuration.setNamingConvention(int)</literal>. It's
+              certain that camel case will be recommended convention starting
+              from some future version, because the Java API-s called from
+              templates use that too.</para>
             </listitem>
 
             <listitem>
@@ -23407,8 +23420,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>#function</literal>, like this: <literal>&lt;#list 1..1
               as x&gt;&lt;#macro
               callMeLater&gt;&lt;#break&gt;&lt;/#macro&gt;&lt;/#list&gt;&lt;@callMeLater
-              /&gt;</literal>. After activating this fix, this will be a parse
-              time error.</para>
+              /&gt;</literal>. After activating this fix, this will be caught
+              as parse time error.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -23463,8 +23476,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               was ended there, and the exception was suppressed. It's actually
               JavaCC that does this, and this quirk of it was never fixed. But
               now FreeMarker has added a workaround in the
-              <literal>Template</literal> constructor, and so the exceptions
-              will be now thrown by it as expected.</para>
+              <literal>Template</literal> constructor, and so now an exception
+              will be thrown as expected.</para>
             </listitem>
 
             <listitem>
