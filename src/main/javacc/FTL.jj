@@ -985,6 +985,16 @@ TOKEN:
     |
     <NOT_EQUALS : "!=">
     |
+    <PLUS_EQUALS : "+=">
+    |
+    <MINUS_EQUALS : "-=">
+    |
+    <TIMES_EQUALS : "*=">
+    |
+    <DIV_EQUALS : "/=">
+    |
+    <MOD_EQUALS : "%=">
+    |
     <LESS_THAN : "lt" | "\\lt" | "<" | "&lt;">
     |
     <LESS_THAN_EQUALS : "lte" | "\\lte" | "<=" | "&lt;=">
@@ -2619,6 +2629,7 @@ TemplateElement Assign() :
     Token start, end;
     int scope;
     Token id = null;
+    Token equalsOp;
     Expression nameExp, exp, nsExp = null;
     String varName;
     ArrayList assignments = new ArrayList();
@@ -2647,15 +2658,22 @@ TemplateElement Assign() :
     }
     (
     	(
-	        <EQUALS>
+	        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	        {
+	           equalsOp = token;
+	        }
 	        exp = Expression()
 	        {
-	            ass = new Assignment(varName, exp, scope);
+	            ass = new Assignment(varName, equalsOp.kind, exp, scope);
 	            ass.setLocation(template, nameExp, exp);
 	            assignments.add(ass);
 	        }
 	        (
-	            LOOKAHEAD([<COMMA>](<ID>|<STRING_LITERAL>)<EQUALS>)
+	            LOOKAHEAD(
+	               [<COMMA>]
+	               (<ID>|<STRING_LITERAL>)
+	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	            )
 	            [<COMMA>]
 	            nameExp = IdentifierOrStringLiteral()
 	            {
@@ -2663,10 +2681,13 @@ TemplateElement Assign() :
 	                		? ((StringLiteral) nameExp).getAsString()
 	                		: ((Identifier) nameExp).getName();
 	            }
-	            <EQUALS>
+	            (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	            {
+	               equalsOp = token;
+	            }
 	            exp = Expression()
 	            {
-	                ass = new Assignment(varName, exp, scope);
+	                ass = new Assignment(varName, equalsOp.kind, exp, scope);
 	                ass.setLocation(template, nameExp, exp);
 	                assignments.add(ass);
 	            } 
@@ -2682,13 +2703,20 @@ TemplateElement Assign() :
 	        ]
 	        end = LooseDirectiveEnd()
 	        {
-	            AssignmentInstruction ai = new AssignmentInstruction(scope);
-	            for (int i = 0; i< assignments.size(); i++) {
-	                ai.addAssignment((Assignment) assignments.get(i));
+                if (assignments.size() == 1) {
+                    Assignment a = (Assignment) assignments.get(0);
+                    a.setNamespaceExp(nsExp);
+                    a.setLocation(template, start, end);
+                    return a;
+                } else {
+		            AssignmentInstruction ai = new AssignmentInstruction(scope);
+		            for (int i = 0; i< assignments.size(); i++) {
+		                ai.addAssignment((Assignment) assignments.get(i));
+		            }
+		            ai.setNamespaceExp(nsExp);
+		            ai.setLocation(template, start, end);
+		            return ai;
 	            }
-	            ai.setNamespaceExp(nsExp);
-	            ai.setLocation(template, start, end);
-	            return ai;
 	        }
 	    )
 	    |

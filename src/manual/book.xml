@@ -15673,9 +15673,7 @@ May 16, 2011
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate"><literal>&lt;#assign <replaceable>name</replaceable>=<replaceable>value</replaceable>&gt;</literal>
-or
-<literal>&lt;#assign <replaceable>name1</replaceable>=<replaceable>value1</replaceable> <replaceable>name2</replaceable>=<replaceable>value2</replaceable> <replaceable>... nameN</replaceable>=<replaceable>valueN</replaceable>&gt;</literal>
+          <programlisting role="metaTemplate"><literal>&lt;#assign <replaceable>name1</replaceable>=<replaceable>value1</replaceable> <replaceable>name2</replaceable>=<replaceable>value2</replaceable> <replaceable>... nameN</replaceable>=<replaceable>valueN</replaceable>&gt;</literal>
 or
 <literal>&lt;#assign <replaceable>same as above...</replaceable> in <replaceable>namespacehash</replaceable>&gt;</literal>
 or
@@ -15701,6 +15699,16 @@ or
               dynamically constructed name, the you have to use <link
               linkend="faq_assign_to_dynamic_variable_name">this
               trick</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>=</literal>: Assignment operator; it can also be
+              <literal>+=</literal>, <literal>-=</literal>,
+              <literal>*=</literal>, <literal>/=</literal> or
+              <literal>%=</literal>. Like <literal>&lt;#assign x +=
+              1&gt;</literal> is the same as <literal>&lt;#assign x = x
+              +1&gt;</literal>. This is supported since FreeMarker
+              2.3.23.</para>
             </listitem>
 
             <listitem>
@@ -23410,6 +23418,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   etc.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>+=</literal>, <literal>-=</literal>,
+              <literal>*=</literal>, <literal>/=</literal> and
+              <literal>*=</literal> assignment operators, which can be used
+              for <literal>#assign</literal>, <literal>#global</literal> and
+              <literal>#local</literal>. For example, <literal>&lt;#assign
+              counter += 1&gt;</literal> is equivalent to <literal>&lt;#assign
+              counter = counter + 1&gt;</literal>.</para>
             </listitem>
 
             <listitem>

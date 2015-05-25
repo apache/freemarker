@@ -30,13 +30,19 @@ public class InvalidReferenceException extends TemplateException {
             null);
     
     private static final String[] TIP = new String[] {
-        "If the failing expression is known to be legally refer to something that's null or missing, either specify a "
-        + "default value like myOptionalVar!myDefault, or use ",
+        "If the failing expression is known to be legally refer to something that's sometimes null or missing, "
+        + "either specify a default value like myOptionalVar!myDefault, or use ",
         "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
         ". (These only cover the last step of the expression; to cover the whole expression, "
         + "use parenthesis: (myOptionalVar.foo)!myDefault, (myOptionalVar.foo)??"
     };
 
+    private static final String[] TIP_MISSING_ASSIGNMENT_TARGET = {
+            "If the target variable is known to be legally null or missing sometimes, instead of something like ",
+            "<#assign x += 1>", ", you could write ", "<#if x??>", "<#assign x += 1>", "</#if>",
+            " or ", "<#assign x = (x!0) + 1>"
+    };
+    
     private static final String TIP_NO_DOLLAR =
             "Variable references must not start with \"$\", unless the \"$\" is really part of the variable name.";
 
@@ -117,6 +123,29 @@ public class InvalidReferenceException extends TemplateException {
             } else {
                 return new InvalidReferenceException(env);
             }
+        }
+    }
+    
+    /**
+     * Used for assignments that use operators like {@code +=}, when the target variable was null/missing. 
+     */
+    static InvalidReferenceException getInstance(String missingAssignedVarName, String assignmentOperator,
+            Environment env) {
+        if (env != null && env.getFastInvalidReferenceExceptions()) {
+            return FAST_INSTANCE;
+        } else {
+            final _ErrorDescriptionBuilder errDescBuilder = new _ErrorDescriptionBuilder(new Object[] {
+                            "The target variable of the assignment, ",
+                            new _DelayedJQuote(missingAssignedVarName),
+                            ", was null or missing, but the \"",
+                            assignmentOperator, "\" operator needs to get its value before assigning to it."
+                    });
+            if (missingAssignedVarName.startsWith("$")) {
+                errDescBuilder.tips(new Object[] { TIP_NO_DOLLAR, TIP_MISSING_ASSIGNMENT_TARGET });
+            } else {
+                errDescBuilder.tip(TIP_MISSING_ASSIGNMENT_TARGET);
+            }
+            return new InvalidReferenceException(errDescBuilder, env, null);
         }
     }
 

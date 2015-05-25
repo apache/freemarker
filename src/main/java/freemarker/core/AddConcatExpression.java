@@ -48,19 +48,29 @@ final class AddConcatExpression extends Expression {
         this.right = right;
     }
 
-    TemplateModel _eval(Environment env)
-            throws TemplateException
-    {
-        TemplateModel leftModel = left.eval(env);
-        TemplateModel rightModel = right.eval(env);
+    TemplateModel _eval(Environment env) throws TemplateException {
+        return _eval(env, this, left, left.eval(env), right, right.eval(env));
+    }
+
+    /**
+     * @param leftExp
+     *            Used for error messages only; can be {@code null}
+     * @param rightExp
+     *            Used for error messages only; can be {@code null}
+     */
+    static TemplateModel _eval(Environment env,
+            TemplateObject parent,
+            Expression leftExp, TemplateModel leftModel,
+            Expression rightExp, TemplateModel rightModel)
+            throws TemplateModelException, TemplateException, NonStringException {
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel)
         {
-            Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, left);
-            Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, right);
+            Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
+            Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, rightExp);
             ArithmeticEngine ae =
                 env != null
                     ? env.getArithmeticEngine()
-                    : getTemplate().getArithmeticEngine();
+                    : parent.getTemplate().getArithmeticEngine();
             return new SimpleNumber(ae.add(first, second));
         }
         else if(leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel)
@@ -70,9 +80,9 @@ final class AddConcatExpression extends Expression {
         else
         {
             try {
-                String s1 = Expression.coerceModelToString(leftModel, left, env);
+                String s1 = Expression.coerceModelToString(leftModel, leftExp, env);
                 if(s1 == null) s1 = "null";
-                String s2 = Expression.coerceModelToString(rightModel, right, env);
+                String s2 = Expression.coerceModelToString(rightModel, rightExp, env);
                 if(s2 == null) s2 = "null";
                 return new SimpleScalar(s1.concat(s2));
             } catch (NonStringException e) {
@@ -259,4 +269,5 @@ final class AddConcatExpression extends Expression {
             }
         }
     }
+    
 }

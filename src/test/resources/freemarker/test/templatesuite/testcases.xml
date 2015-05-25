@@ -48,6 +48,7 @@
       />
    </testCase>
    <testCase name="arithmetic" />
+   <testCase name="assignments" noOutput="true" />
    <testCase name="bean-maps"/>
    <testCase name="beans">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapper"/>

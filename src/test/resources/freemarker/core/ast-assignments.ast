@@ -1,0 +1,95 @@
+#mixed_content  // f.c.MixedContent
+    #text  // f.c.TextBlock
+        - content: "1 "  // String
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 1  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n2 "  // String
+    #assign  // f.c.AssignmentInstruction
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "x"  // String
+            - assignment source: 1  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "y"  // String
+            - assignment source: 2  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n3 "  // String
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 1  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: ns  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n4 "  // String
+    #assign  // f.c.AssignmentInstruction
+        - variable scope: "1"  // Integer
+        - namespace: ns  // f.c.Identifier
+        #assign  // f.c.Assignment
+            - assignment target: "x"  // String
+            - assignment source: 1  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: ns  // f.c.Identifier
+        #assign  // f.c.Assignment
+            - assignment target: "y"  // String
+            - assignment source: 2  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: ns  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n5 "  // String
+    #global  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 1  // f.c.NumberLiteral
+        - variable scope: "3"  // Integer
+        - namespace: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n6 "  // String
+    #global  // f.c.AssignmentInstruction
+        - variable scope: "3"  // Integer
+        - namespace: null  // Null
+        #global  // f.c.Assignment
+            - assignment target: "x"  // String
+            - assignment source: 1  // f.c.NumberLiteral
+            - variable scope: "3"  // Integer
+            - namespace: null  // Null
+        #global  // f.c.Assignment
+            - assignment target: "y"  // String
+            - assignment source: 2  // f.c.NumberLiteral
+            - variable scope: "3"  // Integer
+            - namespace: null  // Null
+    #macro  // f.c.Macro
+        - assignment target: "m"  // String
+        - catch-all parameter name: null  // Null
+        - AST-node subtype: "0"  // Integer
+        #text  // f.c.TextBlock
+            - content: "  7 "  // String
+        #local  // f.c.Assignment
+            - assignment target: "x"  // String
+            - assignment source: 1  // f.c.NumberLiteral
+            - variable scope: "2"  // Integer
+            - namespace: null  // Null
+        #text  // f.c.TextBlock
+            - content: "\n  8 "  // String
+        #local  // f.c.AssignmentInstruction
+            - variable scope: "2"  // Integer
+            - namespace: null  // Null
+            #local  // f.c.Assignment
+                - assignment target: "x"  // String
+                - assignment source: 1  // f.c.NumberLiteral
+                - variable scope: "2"  // Integer
+                - namespace: null  // Null
+            #local  // f.c.Assignment
+                - assignment target: "y"  // String
+                - assignment source: 2  // f.c.NumberLiteral
+                - variable scope: "2"  // Integer
+                - namespace: null  // Null
+        #text  // f.c.TextBlock
+            - content: "\n"  // String
