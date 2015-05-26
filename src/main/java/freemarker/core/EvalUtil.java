@@ -86,7 +86,7 @@ class EvalUtil
         return value;
     }
     
-    /** Signals the buggy case where we have a non-null model, but its wraps a null. */
+    /** Signals the buggy case where we have a non-null model, but it wraps a null. */
     private static TemplateModelException newModelHasStoredNullException(
             Class expected, TemplateModel model, Expression expr) {
         return new _TemplateModelException(expr, _TemplateModelException.modelHasStoredNullDescription(expected, model));

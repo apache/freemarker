@@ -21,8 +21,8 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
 /**
- * An operator for arithmetic operations. Note that the + operator
- * also does string concatenation for backward compatibility.
+ * An operator for arithmetic operations. Note that the + operator is in {@link AddConcatExpression}, because its
+ * overloaded (does string concatenation and more).
  */
 final class ArithmeticExpression extends Expression {
 
@@ -43,15 +43,16 @@ final class ArithmeticExpression extends Expression {
         this.operator = operator;
     }
 
-    TemplateModel _eval(Environment env) throws TemplateException 
-    {
-        Number lhoNumber = lho.evalToNumber(env);
-        Number rhoNumber = rho.evalToNumber(env);
-        
+    TemplateModel _eval(Environment env) throws TemplateException {
+        return _eval(env, this, lho.evalToNumber(env), operator, rho.evalToNumber(env));
+    }
+
+    static TemplateModel _eval(Environment env, TemplateObject parent, Number lhoNumber, int operator, Number rhoNumber)
+            throws TemplateException, _MiscTemplateException {
         ArithmeticEngine ae = 
             env != null 
                 ? env.getArithmeticEngine()
-                : getUnboundTemplate().getConfiguration().getArithmeticEngine();
+                : parent.getUnboundTemplate().getConfiguration().getArithmeticEngine();
         switch (operator) {
             case TYPE_SUBSTRACTION : 
                 return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));
@@ -62,8 +63,13 @@ final class ArithmeticExpression extends Expression {
             case TYPE_MODULO :
                 return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
             default:
-                throw new _MiscTemplateException(this, new Object[] {
-                        "Unknown operation: ", new Integer(operator) });
+                if (parent instanceof Expression) {
+                    throw new _MiscTemplateException((Expression) parent, new Object[] {
+                            "Unknown operation: ", new Integer(operator) });
+                } else {
+                    throw new _MiscTemplateException(new Object[] {
+                            "Unknown operation: ", new Integer(operator) });
+                }
         }
     }
 

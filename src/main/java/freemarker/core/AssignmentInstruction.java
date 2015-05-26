@@ -104,11 +104,6 @@ final class AssignmentInstruction extends TemplateElement {
 
     public TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
         super.postParseCleanup(stripWhitespace);
-        if (nestedElements.size() == 1) {
-            Assignment ass = (Assignment) nestedElements.get(0);
-            ass.setLocation(getUnboundTemplate(), this, this);
-            return ass;
-        } 
         return this;
     }
 

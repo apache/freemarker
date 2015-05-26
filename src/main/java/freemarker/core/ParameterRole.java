@@ -35,6 +35,7 @@ final class ParameterRole {
     static final ParameterRole ITEM_VALUE = new ParameterRole("item value"); 
     static final ParameterRole ITEM_KEY = new ParameterRole("item key");
     static final ParameterRole ASSIGNMENT_TARGET = new ParameterRole("assignment target");
+    static final ParameterRole ASSIGNMENT_OPERATOR = new ParameterRole("assignment operator");
     static final ParameterRole ASSIGNMENT_SOURCE = new ParameterRole("assignment source");
     static final ParameterRole VARIABLE_SCOPE = new ParameterRole("variable scope");
     static final ParameterRole NAMESPACE = new ParameterRole("namespace");

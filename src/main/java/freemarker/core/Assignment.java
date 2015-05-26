@@ -18,6 +18,7 @@ package freemarker.core;
 
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 
 /**
@@ -27,9 +28,11 @@ import freemarker.template.TemplateScalarModel;
  */
 final class Assignment extends TemplateElement {
 
-    private String variableName;
-    private Expression value, namespaceExp;
-    private int/*enum*/ scope;
+    private final int/*enum*/ scope;
+    private final String variableName;
+    private final int operator;
+    private final Expression valueExp;
+    private Expression namespaceExp;
 
     static final int NAMESPACE = 1;
     static final int LOCAL = 2;
@@ -37,16 +40,17 @@ final class Assignment extends TemplateElement {
 
     /**
      * @param variableName the variable name to assign to.
-     * @param value the expression to assign.
+     * @param valueExp the expression to assign.
      * @param scope the scope of the assignment, one of NAMESPACE, LOCAL, or GLOBAL
      */
-    Assignment(String variableName, 
-               Expression value, 
-               int scope)
-    {
-        this.variableName = variableName;
-        this.value = value;
+    Assignment(String variableName,
+            int operator,
+            Expression valueExp,
+            int scope) {
         this.scope = scope;
+        this.variableName = variableName;
+        this.operator = operator;
+        this.valueExp = valueExp;
     }
     
     void setNamespaceExp(Expression namespaceExp) {
@@ -54,8 +58,22 @@ final class Assignment extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException {
-        Environment.Namespace namespace = null;
-        if (namespaceExp != null) {
+        final Environment.Namespace namespace;
+        if (namespaceExp == null) {
+            switch (scope) {
+            case LOCAL:
+                namespace = null;
+                break;
+            case GLOBAL:
+                namespace = env.getGlobalNamespace();
+                break;
+            case NAMESPACE:
+                namespace = env.getCurrentNamespace();
+                break;
+            default:
+                throw new BugException("Unexpected scope type: " + scope);
+            }
+        } else {
             TemplateModel namespaceTM = namespaceExp.eval(env);
             try {
                 namespace = (Environment.Namespace) namespaceTM;
@@ -67,31 +85,79 @@ final class Assignment extends TemplateElement {
             }
         }
         
-        TemplateModel tm = value.eval(env);
-        if (tm == null) {
-            if (env.isClassicCompatible()) {
-                tm = TemplateScalarModel.EMPTY_STRING;
+        TemplateModel value;
+        if (operator == FMParserTokenManager.EQUALS) {
+            value = valueExp.eval(env);
+            if (value == null) {
+                if (env.isClassicCompatible()) {
+                    value = TemplateScalarModel.EMPTY_STRING;
+                } else {
+                    throw InvalidReferenceException.getInstance(valueExp, env);
+                }
             }
-            else {
-                throw InvalidReferenceException.getInstance(value, env);
-            }
-        }
-        if (scope == LOCAL) {
-            env.setLocalVariable(variableName, tm);
-        }
-        else {
+        } else {
+            TemplateModel lhoValue;
             if (namespace == null) {
-                if (scope == GLOBAL) {
-                    namespace = env.getGlobalNamespace();
-                }
-                else if (scope == NAMESPACE) {
-                    namespace = env.getCurrentNamespace();
-                }
-                else {
-                    throw new BugException("Unexpected scope type: " + scope);
+                lhoValue = env.getLocalVariable(variableName);
+            } else {
+                lhoValue = namespace.get(variableName);
+            }
+            
+            if (lhoValue == null) {
+                if (env.isClassicCompatible()) {
+                    lhoValue = TemplateScalarModel.EMPTY_STRING;
+                } else {
+                    throw InvalidReferenceException.getInstance(
+                            variableName, assignmentOperatorToString(operator), env);
                 }
             }
-            namespace.put(variableName, tm);
+            
+            if (operator == FMParserTokenManager.PLUS_EQUALS) {
+                value = valueExp.eval(env);
+                if (value == null) {
+                    if (env.isClassicCompatible()) {
+                        value = TemplateScalarModel.EMPTY_STRING;
+                    } else {
+                        throw InvalidReferenceException.getInstance(valueExp, env);
+                    }
+                }
+                value = AddConcatExpression._eval(env, namespaceExp, null, lhoValue, valueExp, value);
+            } else {
+                Number lhoNumber;
+                if (lhoValue instanceof TemplateNumberModel) {
+                    lhoNumber = EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
+                } else {
+                    throw new NonNumericalException(variableName, lhoValue, null, env);
+                }
+
+                Number rhoNumber = valueExp.evalToNumber(env);
+                
+                int arithExpType;
+                switch (operator) {
+                case FMParserTokenManager.MINUS_EQUALS:
+                    arithExpType = ArithmeticExpression.TYPE_SUBSTRACTION;
+                    break;
+                case FMParserTokenManager.TIMES_EQUALS:
+                    arithExpType = ArithmeticExpression.TYPE_MULTIPLICATION;
+                    break;
+                case FMParserTokenManager.DIV_EQUALS:
+                    arithExpType = ArithmeticExpression.TYPE_DIVISION;
+                    break;
+                case FMParserTokenManager.MOD_EQUALS:
+                    arithExpType = ArithmeticExpression.TYPE_MODULO;
+                    break;
+                default:
+                    throw new BugException();
+                }
+                
+                value = ArithmeticExpression._eval(env, this, lhoNumber, arithExpType, rhoNumber);
+            }
+        }
+        
+        if (namespace == null) {
+            env.setLocalVariable(variableName, value);
+        } else {
+            namespace.put(variableName, value);
         }
     }
 
@@ -106,8 +172,10 @@ final class Assignment extends TemplateElement {
         
         buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(variableName));
         
-        buf.append(" = ");
-        buf.append(value.getCanonicalForm());
+        buf.append(' ');
+        buf.append(assignmentOperatorToString(operator));
+        buf.append(' ');
+        buf.append(valueExp.getCanonicalForm());
         if (dn != null) {
             if (namespaceExp != null) {
                 buf.append(" in ");
@@ -142,7 +210,7 @@ final class Assignment extends TemplateElement {
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return variableName;
-        case 1: return value;
+        case 1: return valueExp;
         case 2: return new Integer(scope);
         case 3: return namespaceExp;
         default: throw new IndexOutOfBoundsException();
@@ -161,6 +229,18 @@ final class Assignment extends TemplateElement {
 
     boolean isNestedBlockRepeater() {
         return false;
+    }
+    
+    private String assignmentOperatorToString(int op) {
+        switch (op) {
+        case FMParserTokenManager.PLUS_EQUALS: return "+=";
+        case FMParserTokenManager.MINUS_EQUALS: return "-=";
+        case FMParserTokenManager.TIMES_EQUALS: return "*=";
+        case FMParserTokenManager.DIV_EQUALS: return "/=";
+        case FMParserTokenManager.MOD_EQUALS: return "%=";
+        case FMParserTokenManager.EQUALS: return "=";
+        default: return "{unrecognized operator}=";
+        }
     }
     
 }
