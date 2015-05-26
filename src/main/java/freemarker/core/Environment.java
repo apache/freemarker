@@ -178,15 +178,14 @@ public final class Environment extends Configurable {
     private boolean fastInvalidReferenceExceptions;
     
     /**
-     * Retrieves the environment object associated with the current
-     * thread. Data model implementations that need access to the
-     * environment can call this method to obtain the environment object
-     * that represents the template processing that is currently running
-     * on the current thread.
+     * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
+     * processing going on in this thread. Data model implementations that need access to the environment can call this
+     * method to obtain the environment object that represents the template processing that is currently running on the
+     * current thread.
      */
     public static Environment getCurrentEnvironment()
     {
-        return (Environment)threadEnv.get();
+        return (Environment) threadEnv.get();
     }
 
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out)
@@ -1450,7 +1449,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the variable that is visible in this context.
+     * Returns the variable that is visible in this context, or {@code null} if the variable is not found.
      * This is the correspondent to an FTL top-level variable reading expression.
      * That is, it tries to find the the variable in this order:
      * <ol>

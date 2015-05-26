@@ -74,6 +74,52 @@ public class CamelCaseTest extends TemplateTest {
         // Still works inside ?interpret
         assertOutput("<@r\"<#setting booleanFormat='Y,N'>${true}\"?interpret />", "Y");
     }
+
+    @Test
+    public void camelCaseFtlHeaderParameters() throws IOException, TemplateException {
+        getConfiguration().setOutputEncoding("utf-8");
+        
+        assertOutput(
+                "<#ftl "
+                + "stripWhitespace=false "
+                + "stripText=true "
+                + "strictSyntax=true "
+                + "nsPrefixes={} "
+                + ">\nx\n<#if true>\ny\n</#if>\n",
+                "\ny\n");
+
+        assertOutput(
+                "<#ftl "
+                + "strip_whitespace=false "
+                + "strip_text=true "
+                + "strict_syntax=true "
+                + "ns_prefixes={} "
+                + ">\nx\n<#if true>\ny\n</#if>\n",
+                "\ny\n");
+
+        assertErrorContains("<#ftl strip_text=true xmlns={}>", "ns_prefixes", "\\!nsPrefixes");
+        assertErrorContains("<#ftl stripText=true xmlns={}>", "nsPrefixes");
+        
+        assertErrorContains("<#ftl stripWhitespace=true strip_text=true>", "naming convention");
+        assertErrorContains("<#ftl strip_whitespace=true stripText=true>", "naming convention");
+        assertErrorContains("<#ftl stripWhitespace=true>${.foo_bar}", "naming convention");
+        assertErrorContains("<#ftl strip_whitespace=true>${.fooBar}", "naming convention");
+        
+        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        assertErrorContains("<#ftl strip_whitespace=true>", "naming convention");
+        assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", "utf-8");
+        
+        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        assertErrorContains("<#ftl stripWhitespace=true>", "naming convention");
+        assertOutput("<#ftl strip_whitespace=true>${.output_encoding}", "utf-8");
+        
+        getConfiguration().setNamingConvention(Configuration.AUTO_DETECT_NAMING_CONVENTION);
+        assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", "utf-8");
+        assertOutput("<#ftl encoding='iso-8859-1' stripWhitespace=true>${.outputEncoding}", "utf-8");
+        assertOutput("<#ftl stripWhitespace=true encoding='iso-8859-1'>${.outputEncoding}", "utf-8");
+        assertOutput("<#ftl encoding='iso-8859-1' strip_whitespace=true>${.output_encoding}", "utf-8");
+        assertOutput("<#ftl strip_whitespace=true encoding='iso-8859-1'>${.output_encoding}", "utf-8");
+    }
     
     @Test
     public void camelCaseSettingNamesInErrorMessages() throws IOException, TemplateException {
@@ -84,7 +130,7 @@ public class CamelCaseTest extends TemplateTest {
 
         assertErrorContains("<#if x><#elseIf y></#if><#setting foo=1>", "booleanFormat", "\\!boolean_format");
         assertErrorContains("<#if x><#elseif y></#if><#setting foo=1>", "boolean_format", "\\!booleanFormat");
-        
+
         getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
         assertErrorContains("<#setting foo=1>", "booleanFormat", "\\!boolean_format");
         getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
