@@ -23423,7 +23423,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Added <literal>+=</literal>, <literal>-=</literal>,
               <literal>*=</literal>, <literal>/=</literal> and
-              <literal>*=</literal> assignment operators, which can be used
+              <literal>%=</literal> assignment operators, which can be used
               for <literal>#assign</literal>, <literal>#global</literal> and
               <literal>#local</literal>. For example, <literal>&lt;#assign
               counter += 1&gt;</literal> is equivalent to <literal>&lt;#assign
