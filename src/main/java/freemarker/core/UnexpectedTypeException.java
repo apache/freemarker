@@ -77,7 +77,7 @@ public class UnexpectedTypeException extends TemplateException {
         if (model == null) throw InvalidReferenceException.getInstance(blamed, env);
 
         _ErrorDescriptionBuilder errorDescBuilder = new _ErrorDescriptionBuilder(
-                unexpectedTypeErrorDescription(expectedTypesDesc, blamedAssignmentTargetVarName, model))
+                unexpectedTypeErrorDescription(expectedTypesDesc, blamed, blamedAssignmentTargetVarName, model))
                 .blame(blamed).showBlamer(true);
         if (model instanceof _UnexpectedTypeErrorExplainerTemplateModel) {
             Object[] tip = ((_UnexpectedTypeErrorExplainerTemplateModel) model).explainTypeError(expectedTypes);
@@ -90,12 +90,12 @@ public class UnexpectedTypeException extends TemplateException {
 
     private static Object[] unexpectedTypeErrorDescription(
             String expectedTypesDesc,
-            String blamedAssignmentTargetVarName,
+            Expression blamed, String blamedAssignmentTargetVarName,
             TemplateModel model) {
         return new Object[] {
                 "Expected ", new _DelayedAOrAn(expectedTypesDesc), ", but ",
                 (blamedAssignmentTargetVarName == null
-                        ? (Object) "this"
+                        ? (Object) (blamed != null ? "this" : "the expression")
                         : new Object[] {
                                 "assignment target variable ",
                                 new _DelayedJQuote(blamedAssignmentTargetVarName) }), 
