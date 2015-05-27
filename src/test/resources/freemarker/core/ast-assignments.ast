@@ -3,6 +3,7 @@
         - content: "1 "  // String
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: 1  // f.c.NumberLiteral
         - variable scope: "1"  // Integer
         - namespace: null  // Null
@@ -13,11 +14,13 @@
         - namespace: null  // Null
         #assign  // f.c.Assignment
             - assignment target: "x"  // String
+            - assignment operator: "="  // String
             - assignment source: 1  // f.c.NumberLiteral
             - variable scope: "1"  // Integer
             - namespace: null  // Null
         #assign  // f.c.Assignment
             - assignment target: "y"  // String
+            - assignment operator: "="  // String
             - assignment source: 2  // f.c.NumberLiteral
             - variable scope: "1"  // Integer
             - namespace: null  // Null
@@ -25,6 +28,7 @@
         - content: "\n3 "  // String
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: 1  // f.c.NumberLiteral
         - variable scope: "1"  // Integer
         - namespace: ns  // f.c.Identifier
@@ -35,11 +39,13 @@
         - namespace: ns  // f.c.Identifier
         #assign  // f.c.Assignment
             - assignment target: "x"  // String
+            - assignment operator: "="  // String
             - assignment source: 1  // f.c.NumberLiteral
             - variable scope: "1"  // Integer
             - namespace: ns  // f.c.Identifier
         #assign  // f.c.Assignment
             - assignment target: "y"  // String
+            - assignment operator: "="  // String
             - assignment source: 2  // f.c.NumberLiteral
             - variable scope: "1"  // Integer
             - namespace: ns  // f.c.Identifier
@@ -47,6 +53,7 @@
         - content: "\n5 "  // String
     #global  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: 1  // f.c.NumberLiteral
         - variable scope: "3"  // Integer
         - namespace: null  // Null
@@ -57,11 +64,13 @@
         - namespace: null  // Null
         #global  // f.c.Assignment
             - assignment target: "x"  // String
+            - assignment operator: "="  // String
             - assignment source: 1  // f.c.NumberLiteral
             - variable scope: "3"  // Integer
             - namespace: null  // Null
         #global  // f.c.Assignment
             - assignment target: "y"  // String
+            - assignment operator: "="  // String
             - assignment source: 2  // f.c.NumberLiteral
             - variable scope: "3"  // Integer
             - namespace: null  // Null
@@ -73,6 +82,7 @@
             - content: "  7 "  // String
         #local  // f.c.Assignment
             - assignment target: "x"  // String
+            - assignment operator: "="  // String
             - assignment source: 1  // f.c.NumberLiteral
             - variable scope: "2"  // Integer
             - namespace: null  // Null
@@ -83,13 +93,50 @@
             - namespace: null  // Null
             #local  // f.c.Assignment
                 - assignment target: "x"  // String
+                - assignment operator: "="  // String
                 - assignment source: 1  // f.c.NumberLiteral
                 - variable scope: "2"  // Integer
                 - namespace: null  // Null
             #local  // f.c.Assignment
                 - assignment target: "y"  // String
+                - assignment operator: "="  // String
                 - assignment source: 2  // f.c.NumberLiteral
                 - variable scope: "2"  // Integer
                 - namespace: null  // Null
         #text  // f.c.TextBlock
             - content: "\n"  // String
+    #text  // f.c.TextBlock
+        - content: "9 "  // String
+    #assign  // f.c.AssignmentInstruction
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "a"  // String
+            - assignment operator: "+="  // String
+            - assignment source: 1  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "b"  // String
+            - assignment operator: "-="  // String
+            - assignment source: 2  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "c"  // String
+            - assignment operator: "*="  // String
+            - assignment source: 3  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "d"  // String
+            - assignment operator: "/="  // String
+            - assignment source: 4  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "e"  // String
+            - assignment operator: "%="  // String
+            - assignment source: 5  // f.c.NumberLiteral
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
