@@ -106,15 +106,15 @@ class UnboundCallable extends Macro {
         sb.append(getNodeTypeSymbol());
         sb.append(' ');
         sb.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(name));
-        sb.append(function ? '(' : ' ');
+        if (function) sb.append('(');
         int argCnt = paramNames.length;
         for (int i = 0; i < argCnt; i++) {
-            if (i != 0) {
-                if (function) {
+            if (function) {
+                if (i != 0) {
                     sb.append(", ");
-                } else {
-                    sb.append(' ');
                 }
+            } else {
+                sb.append(' ');
             }
             String argName = paramNames[i];
             sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(argName));
@@ -129,7 +129,13 @@ class UnboundCallable extends Macro {
             }
         }
         if (catchAllParamName != null) {
-            if (argCnt != 0) sb.append(", ");
+            if (function) {
+                if (argCnt != 0) {
+                    sb.append(", ");
+                }
+            } else {
+                sb.append(' ');
+            }
             sb.append(catchAllParamName);
             sb.append("...");
         }

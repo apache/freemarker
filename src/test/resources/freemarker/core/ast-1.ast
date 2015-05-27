@@ -27,16 +27,19 @@
         - content: "\n3 "  // String
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: 123  // f.c.NumberLiteral
         - variable scope: "1"  // Integer
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: 123  // f.c.NumberLiteral
         - variable scope: "1"  // Integer
         - namespace: ns  // f.c.Identifier
     #global  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: 123  // f.c.NumberLiteral
         - variable scope: "3"  // Integer
         - namespace: null  // Null
@@ -122,6 +125,7 @@
         - AST-node subtype: "1"  // Integer
         #local  // f.c.Assignment
             - assignment target: "x"  // String
+            - assignment operator: "="  // String
             - assignment source: 123  // f.c.NumberLiteral
             - variable scope: "2"  // Integer
             - namespace: null  // Null

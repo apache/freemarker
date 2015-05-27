@@ -74,11 +74,15 @@ final class ArithmeticExpression extends Expression {
     }
 
     public String getCanonicalForm() {
-        return lho.getCanonicalForm() + ' ' + OPERATOR_IMAGES[operator] + ' ' + rho.getCanonicalForm();
+        return lho.getCanonicalForm() + ' ' + getOperatorSymbol(operator) + ' ' + rho.getCanonicalForm();
     }
     
     String getNodeTypeSymbol() {
-        return String.valueOf(OPERATOR_IMAGES[operator]);
+        return String.valueOf(getOperatorSymbol(operator));
+    }
+
+    static char getOperatorSymbol(int operator) {
+        return OPERATOR_IMAGES[operator];
     }
     
     boolean isLiteral() {

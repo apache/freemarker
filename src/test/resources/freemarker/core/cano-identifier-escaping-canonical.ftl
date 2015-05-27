@@ -1,4 +1,4 @@
-<#macro m\-a data\-color><#local \.namespace = 123><a-b>${data\-color}<#nested \.namespace></a-b></#macro><#macro m\-b2 ></#macro><#macro "m/b2" ></#macro>
+<#macro m\-a data\-color><#local \.namespace = 123><a-b>${data\-color}<#nested \.namespace></a-b></#macro><#macro m\-b2></#macro><#macro "m/b2"></#macro>
 <@m\-a data\-color="red"; loop\-var, loopVar2>${loop\-var}</@m\-a>
 
 <#function f\-a(p\-a)><#return p\-a + " works"/></#function>${f\-a("f-a")}
@@ -22,5 +22,5 @@ ${hash["--moz-prop"]}
 <#assign "as'c" = "as4">${.vars["as'c"]}
 <#assign 'as"d' = "as5">${.vars['as"d']}
 
-<#global g\-a = 1 g\-b = 2 g\-c = 3/><#macro dumpNS ><#list .namespace?keys?sort as k>${k} = <#local v = .namespace[k]><#if v?is_string>${v}<#else>...</#if>
+<#global g\-a = 1, g\-b = 2, g\-c = 3><#macro dumpNS><#list .namespace?keys?sort as k>${k} = <#local v = .namespace[k]><#if v?is_string>${v}<#else>...</#if>
 </#list></#macro><@dumpNS/>

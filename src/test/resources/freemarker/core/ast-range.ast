@@ -1,6 +1,7 @@
 #mixed_content  // f.c.MixedContent
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: 0  // f.c.NumberLiteral
             - right-hand operand: null  // Null
@@ -8,6 +9,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: 0  // f.c.NumberLiteral
             - right-hand operand: 1  // f.c.NumberLiteral
@@ -15,6 +17,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..<  // f.c.Range
             - left-hand operand: 0  // f.c.NumberLiteral
             - right-hand operand: 1  // f.c.NumberLiteral
@@ -22,6 +25,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..<  // f.c.Range
             - left-hand operand: 0  // f.c.NumberLiteral
             - right-hand operand: 1  // f.c.NumberLiteral
@@ -29,6 +33,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: +  // f.c.AddConcatExpression
                 - left-hand operand: n  // f.c.Identifier
@@ -40,6 +45,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..<  // f.c.Range
             - left-hand operand: +  // f.c.AddConcatExpression
                 - left-hand operand: n  // f.c.Identifier
@@ -51,6 +57,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..<  // f.c.Range
             - left-hand operand: +  // f.c.AddConcatExpression
                 - left-hand operand: n  // f.c.Identifier
@@ -62,6 +69,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: *  // f.c.ArithmeticExpression
                 - left-hand operand: n  // f.c.Identifier
@@ -75,6 +83,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: ?abs  // f.c.BuiltInsForNumbers$absBI
                 - left-hand operand: n  // f.c.Identifier
@@ -86,6 +95,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: ...(...)  // f.c.MethodCall
                 - callee: ?index_of  // f.c.BuiltInsForStringsBasic$index_ofBI
@@ -103,6 +113,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ==  // f.c.ComparisonExpression
             - left-hand operand: ..  // f.c.Range
                 - left-hand operand: n  // f.c.Identifier
@@ -114,6 +125,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ==  // f.c.ComparisonExpression
             - left-hand operand: ..  // f.c.Range
                 - left-hand operand: +  // f.c.AddConcatExpression
@@ -145,6 +157,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: +  // f.c.AddConcatExpression
                 - left-hand operand: 1  // f.c.NumberLiteral
@@ -156,6 +169,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: -  // f.c.ArithmeticExpression
                 - left-hand operand: 1  // f.c.NumberLiteral
@@ -168,6 +182,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ..*  // f.c.Range
             - left-hand operand: *  // f.c.ArithmeticExpression
                 - left-hand operand: 1  // f.c.NumberLiteral
@@ -178,6 +193,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ||  // f.c.OrExpression
             - left-hand operand: &&  // f.c.AndExpression
                 - left-hand operand: a  // f.c.Identifier
@@ -189,6 +205,7 @@
         - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
+        - assignment operator: "="  // String
         - assignment source: ||  // f.c.OrExpression
             - left-hand operand: &&  // f.c.AndExpression
                 - left-hand operand: ..  // f.c.Range
