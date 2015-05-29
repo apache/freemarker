@@ -10502,6 +10502,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_choose">choose</link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_chop_linebreak">chop_linebreak</link></para>
           </listitem>
@@ -13770,6 +13774,64 @@ Tue, Apr 8, '03
           works on strings</link>.</para>
         </section>
 
+        <section xml:id="ref_builtin_choose">
+          <title>choose</title>
+
+          <indexterm>
+            <primary>choose built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ternary operator</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format; boolean</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.23.</para>
+          </note>
+
+          <para>Used like
+          <literal><replaceable>booleanExp</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+          <replaceable>whenFalse</replaceable>)</literal>, fills the same role
+          as the ternary operator in C-like languages (i.e.,
+          <literal><replaceable>booleanExp</replaceable> ?
+          <replaceable>whenTrue</replaceable> :
+          <replaceable>whenFalse</replaceable></literal>). If
+          <literal><replaceable>booleanExp</replaceable></literal> evaluates
+          to boolean true then it evaluates and returns its first argument, or
+          else if <literal><replaceable>booleanExp</replaceable></literal>
+          evaluates to boolean false then it evaluates and return its second
+          argument. Off course, all three expression can be arbitrary complex.
+          The argument expressions can have any type, even different
+          types.</para>
+
+          <para>An important special property of this built-in is that only
+          one of the argument expressions will be evaluated. This is unlike
+          with normal method calls, where all argument expressions are
+          evaluated, regardless if the method will need them. This also means
+          that the argument that's not needed can even refer to missing
+          variables without causing error. (It still can't be syntactically
+          invalid of course.)</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">${true?choose('Y', 'N')}
+${false?choose('Y', 'N')}
+
+&lt;#assign x = 10&gt;
+&lt;#assign y = 20&gt;
+&lt;#-- Prints 100 plus the maximum of x and y: --&gt;
+${100 + (x &gt; y)?choose(x, y)}</programlisting>
+
+          <programlisting role="output">Y
+N
+
+120</programlisting>
+        </section>
+
         <section xml:id="ref_builtin_string_for_boolean">
           <title>string (when used with a boolean value)</title>
 
@@ -13797,17 +13859,25 @@ Tue, Apr 8, '03
             <secondary>boolean</secondary>
           </indexterm>
 
+          <para><emphasis>All usages of this built-in has been deprecated; see
+          below.</emphasis></para>
+
           <para>Converts a boolean to a string. You can use it in two
           ways:</para>
 
           <itemizedlist>
             <listitem>
-              <para>As <literal>foo?string("yes", "no")</literal>: This will
-              return the first parameter (here: <literal>"yes"</literal>) if
-              the boolean is true, otherwise the second parameter (here:
+              <para>As <literal>foo?string("yes", "no")</literal>:
+              <emphasis>Deprecated starting from FreeMarker 2.3.23: use <link
+              linkend="ref_builtin_choose"><literal>?choose("yes",
+              "no")</literal></link> instead. </emphasis>This will return the
+              first parameter (here: <literal>"yes"</literal>) if the boolean
+              is true, otherwise the second parameter (here:
               <literal>"no"</literal>). Note that the return value is always a
               string; if the parameters were numbers, they would be converted
-              to strings first.</para>
+              to strings first. Also note that both parameters are evaluated,
+              despite that only one of them will be used; this might have
+              negative impact if the parameters aren't just literals.</para>
             </listitem>
 
             <listitem>
@@ -23428,6 +23498,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>#local</literal>. For example, <literal>&lt;#assign
               counter += 1&gt;</literal> is equivalent to <literal>&lt;#assign
               counter = counter + 1&gt;</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added the <literal>choose</literal> built-in, which can be
+              used like a ternary operator:
+              <literal><replaceable>someBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+              <replaceable>whenFalse</replaceable>)</literal>. Just like with
+              the ternary operator of most other languages, only one of the
+              parameter expressions will be evaluated. <link
+              linkend="ref_builtin_choose">More details...</link></para>
             </listitem>
 
             <listitem>

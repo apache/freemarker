@@ -71,7 +71,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 250;
+    static final int NUMBER_OF_BIS = 251;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -86,6 +86,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("capitalize", new BuiltInsForStringsBasic.capitalizeBI());
         putBI("ceiling", new ceilingBI());
         putBI("children", new childrenBI());
+        putBI("choose", new BuiltInsWithParseTimeParameters.chooseBI());
         putBI("chop_linebreak", "chopLinebreak", new BuiltInsForStringsBasic.chop_linebreakBI());
         putBI("contains", new BuiltInsForStringsBasic.containsBI());        
         putBI("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));
@@ -353,7 +354,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + getNodeTypeSymbol();
+        return target.getCanonicalForm() + "?" + key;
     }
     
     String getNodeTypeSymbol() {

@@ -1,0 +1,33 @@
+#mixed_content  // f.c.MixedContent
+    ${...}  // f.c.DollarVariable
+        - content: ?trim  // f.c.BuiltInsForStringsBasic$trimBI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "trim"  // String
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    ${...}  // f.c.DollarVariable
+        - content: ...(...)  // f.c.MethodCall
+            - callee: ?left_pad  // f.c.BuiltInsForStringsBasic$padBI
+                - left-hand operand: x  // f.c.Identifier
+                - right-hand operand: "left_pad"  // String
+            - argument value: 5  // f.c.NumberLiteral
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    ${...}  // f.c.DollarVariable
+        - content: ...(...)  // f.c.MethodCall
+            - callee: ?left_pad  // f.c.BuiltInsForStringsBasic$padBI
+                - left-hand operand: x  // f.c.Identifier
+                - right-hand operand: "left_pad"  // String
+            - argument value: 5  // f.c.NumberLiteral
+            - argument value: "-"  // f.c.StringLiteral
+                - embedded template: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    ${...}  // f.c.DollarVariable
+        - content: ?choose(...)  // f.c.BuiltInsWithParseTimeParameters$chooseBI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "choose"  // String
+            - argument value: "y"  // f.c.StringLiteral
+                - embedded template: null  // Null
+            - argument value: "n"  // f.c.StringLiteral
+                - embedded template: null  // Null

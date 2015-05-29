@@ -60,6 +60,7 @@
    <testCase name="comment" />
    <testCase name="comparisons" />
    <testCase name="compress" />
+   <testCase name="choose-builtin" noOutput="true" />
    <testCase name="dateformat-java" />
    <testCase name="dateformat-iso-like" noOutput="true" />
    <testCase name="dateformat-iso-bi" noOutput="true">
