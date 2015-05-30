@@ -1852,7 +1852,8 @@ Expression BuiltIn(Expression lhoExp) :
     Token t = null;
     BuiltIn result;
     ArrayList/*<Expression>*/ args = null;
-    Token end = null;
+    Token openParen;
+    Token closeParen;
 }
 {
     <BUILT_IN>
@@ -1881,11 +1882,11 @@ Expression BuiltIn(Expression lhoExp) :
     }
     [
         LOOKAHEAD({ result instanceof BuiltInWithParseTimeParameters  })
-        <OPEN_PAREN>
+        openParen = <OPEN_PAREN>
         args = PositionalArgs()
-        end = <CLOSE_PAREN> {
-            ((BuiltInWithParseTimeParameters) result).bindToParameters(args);
-            result.setLocation(template, lhoExp, end);
+        closeParen = <CLOSE_PAREN> {
+            result.setLocation(template, lhoExp, closeParen);
+            ((BuiltInWithParseTimeParameters) result).bindToParameters(args, openParen, closeParen);
             return result;
         }
     ]

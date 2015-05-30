@@ -113,7 +113,7 @@ class EvalUtil
                 ltm, leftExp,
                 operator, operatorString,
                 rtm, rightExp,
-                defaultBlamed,
+                defaultBlamed, false,
                 false, false, false,
                 env);
     }
@@ -135,7 +135,7 @@ class EvalUtil
                 leftValue, null,
                 operator, null,
                 rightValue, null,
-                null,
+                null, false,
                 false, false, false,
                 env);
     }
@@ -152,7 +152,7 @@ class EvalUtil
                 leftValue, null,
                 operator, null,
                 rightValue, null,
-                null,
+                null, false,
                 true, false, false,
                 env);
     }
@@ -167,7 +167,7 @@ class EvalUtil
      * @param operator one of the {@code COMP_OP_...} constants, like {@link #CMP_OP_EQUALS}.
      * @param operatorString can be null {@code null}; the actual operator used, used for more accurate error message.
      * @param rightExp {@code null} is allowed, but may results in less helpful error messages
-     * @param defaultBlamed {@code null} allowed; the expression who to which error will point to if something goes
+     * @param defaultBlamed {@code null} allowed; the expression to which the error will point to if something goes
      *        wrong that is not specific to the left or right side expression, or if that expression is {@code null}.
      * @param typeMismatchMeansNotEqual If the two types are incompatible, they are treated as non-equal instead
      *     of throwing an exception. Comparing dates of different types will still throw an exception, however. 
@@ -180,7 +180,7 @@ class EvalUtil
             TemplateModel leftValue, Expression leftExp,
             int operator, String operatorString,
             TemplateModel rightValue, Expression rightExp,
-            Expression defaultBlamed,
+            Expression defaultBlamed, boolean quoteOperandsInErrors,
             boolean typeMismatchMeansNotEqual,
             boolean leftNullReturnsFalse, boolean rightNullReturnsFalse,
             Environment env) throws TemplateException {
@@ -300,8 +300,17 @@ class EvalUtil
             throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
                             "Can't compare values of these types. ",
                             "Allowed comparisons are between two numbers, two strings, two dates, or two booleans.\n",
-                            "Left hand operand is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
-                            "Right hand operand is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)), "." });
+                            "Left hand operand ",
+                            (quoteOperandsInErrors && leftExp != null
+                                    ? new Object[] { "(", new _DelayedGetCanonicalForm(leftExp), ") value " }
+                                    : (Object) ""),
+                            "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
+                            "Right hand operand ",
+                            (quoteOperandsInErrors && rightExp != null
+                                    ? new Object[] { "(", new _DelayedGetCanonicalForm(rightExp), ") value " }
+                                    : (Object) ""),
+                            "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)),
+                            "." });
         }
 
         switch (operator) {

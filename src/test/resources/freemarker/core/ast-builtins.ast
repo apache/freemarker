@@ -24,10 +24,21 @@
     #text  // f.c.TextBlock
         - content: "\n"  // String
     ${...}  // f.c.DollarVariable
-        - content: ?choose(...)  // f.c.BuiltInsWithParseTimeParameters$chooseBI
+        - content: ?choose(...)  // f.c.BuiltInsWithParseTimeParameters$choose_BI
             - left-hand operand: x  // f.c.Identifier
             - right-hand operand: "choose"  // String
             - argument value: "y"  // f.c.StringLiteral
                 - embedded template: null  // Null
             - argument value: "n"  // f.c.StringLiteral
                 - embedded template: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    ${...}  // f.c.DollarVariable
+        - content: ?switch(...)  // f.c.BuiltInsWithParseTimeParameters$switch_BI
+            - left-hand operand: x  // f.c.Identifier
+            - right-hand operand: "switch"  // String
+            - argument value: 1  // f.c.NumberLiteral
+            - argument value: 11  // f.c.NumberLiteral
+            - argument value: 2  // f.c.NumberLiteral
+            - argument value: 22  // f.c.NumberLiteral
+            - argument value: 33  // f.c.NumberLiteral

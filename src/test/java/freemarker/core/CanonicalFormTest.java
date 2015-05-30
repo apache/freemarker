@@ -41,6 +41,10 @@ public class CanonicalFormTest extends FileTestCase {
     public void testAssignmentCanonicalForm() throws Exception {
         assertCanonicalFormOf("cano-assignments.ftl");
     }
+
+    public void testBuiltInCanonicalForm() throws Exception {
+        assertCanonicalFormOf("cano-builtins.ftl");
+    }
     
     private void assertCanonicalFormOf(String ftlFileName)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {

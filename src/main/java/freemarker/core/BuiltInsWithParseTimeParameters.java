@@ -27,22 +27,19 @@ final class BuiltInsWithParseTimeParameters {
     /**
      * Behaves similarly to the ternary operator of Java.
      */
-    static class chooseBI extends BuiltInWithParseTimeParameters {
+    static class choose_BI extends BuiltInWithParseTimeParameters {
         
         private Expression whenTrueExp;
         private Expression whenFalseExp;
 
         TemplateModel _eval(Environment env) throws TemplateException {
             boolean lho = target.evalToBoolean(env);
-            final Expression expToEval = lho ? whenTrueExp : whenFalseExp;
-            final TemplateModel result = expToEval.eval(env);
-            expToEval.assertNonNull(result, env);
-            return result;
+            return (lho ? whenTrueExp : whenFalseExp).evalToNonMissing(env);
         }
 
-        void bindToParameters(List parameters) throws ParseException {
+        void bindToParameters(List parameters, Token openParen, Token closeParen) throws ParseException {
             if (parameters.size() != 2) {
-                throw new ParseException("The ?" + key + " built-in must have exactly 2 parameters.", this);
+                throw newArgumentCountException("requires exactly 2", openParen, closeParen);
             }
             whenTrueExp = (Expression) parameters.get(0);
             whenFalseExp = (Expression) parameters.get(1);
@@ -69,7 +66,7 @@ final class BuiltInsWithParseTimeParameters {
         
         protected void cloneArguments(Expression cloneExp, String replacedIdentifier,
                 Expression replacement, ReplacemenetState replacementState) {
-            chooseBI clone = (chooseBI) cloneExp;
+            choose_BI clone = (choose_BI) cloneExp;
             clone.whenTrueExp = whenTrueExp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
             clone.whenFalseExp = whenFalseExp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
         }
@@ -78,6 +75,68 @@ final class BuiltInsWithParseTimeParameters {
     
     private BuiltInsWithParseTimeParameters() {
         // Not to be instantiated
+    }
+
+    static class switch_BI extends BuiltInWithParseTimeParameters {
+        
+        private List/*<Expression>*/ parameters;
+
+        void bindToParameters(List parameters, Token openParen, Token closeParen) throws ParseException {
+            if (parameters.size() < 2) {
+                throw newArgumentCountException("must have at least 2", openParen, closeParen);
+            }
+            this.parameters = parameters;
+        }
+
+        protected List getArgumentsAsList() {
+            return parameters;
+        }
+
+        protected int getArgumentsCount() {
+            return parameters.size();
+        }
+
+        protected Expression getArgumentParameterValue(int argIdx) {
+            return (Expression) parameters.get(argIdx);
+        }
+
+        protected void cloneArguments(Expression clone, String replacedIdentifier, Expression replacement,
+                ReplacemenetState replacementState) {
+            ArrayList parametersClone = new ArrayList(parameters.size());
+            for (int i = 0; i < parameters.size(); i++) {
+                parametersClone.add(((Expression) parameters.get(i))
+                        .deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+            }
+            ((switch_BI) clone).parameters = parametersClone;
+        }
+
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel targetValue = target.evalToNonMissing(env);
+            
+            List parameters = this.parameters;
+            int paramCnt = parameters.size();
+            for (int i = 0; i + 1 < paramCnt; i += 2) {
+                Expression caseExp = (Expression) parameters.get(i);
+                TemplateModel caseValue = caseExp.evalToNonMissing(env);
+                if (EvalUtil.compare(
+                        targetValue, target,
+                        EvalUtil.CMP_OP_EQUALS, "==",
+                        caseValue, caseExp,
+                        this, true,
+                        false, false, false,
+                        env)) {
+                    return ((Expression) parameters.get(i + 1)).evalToNonMissing(env);
+                }
+            }
+            
+            if (paramCnt % 2 == 0) {
+                throw new _MiscTemplateException(target, new Object[] { "The value before ?", key,
+                        "(case1, value1, case2, value2, ...) didn't match any of the case parameters, and there "
+                        + "was no default value parameter (an additional last parameter) eihter. "});
+            }
+            return ((Expression) parameters.get(paramCnt - 1)).evalToNonMissing(env);
+        }
+        
     }
     
 }

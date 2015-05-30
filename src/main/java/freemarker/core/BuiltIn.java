@@ -71,7 +71,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 251;
+    static final int NUMBER_OF_BIS = 252;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -86,7 +86,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("capitalize", new BuiltInsForStringsBasic.capitalizeBI());
         putBI("ceiling", new ceilingBI());
         putBI("children", new childrenBI());
-        putBI("choose", new BuiltInsWithParseTimeParameters.chooseBI());
+        putBI("choose", new BuiltInsWithParseTimeParameters.choose_BI());
         putBI("chop_linebreak", "chopLinebreak", new BuiltInsForStringsBasic.chop_linebreakBI());
         putBI("contains", new BuiltInsForStringsBasic.containsBI());        
         putBI("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));
@@ -249,6 +249,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("sort_by", "sortBy", new sort_byBI());
         putBI("sort", new sortBI());
         putBI("split", new BuiltInsForStringsBasic.split_BI());
+        putBI("switch", new BuiltInsWithParseTimeParameters.switch_BI());
         putBI("starts_with", "startsWith", new BuiltInsForStringsBasic.starts_withBI());
         putBI("string", new BuiltInsForMultipleTypes.stringBI());
         putBI("substring", new BuiltInsForStringsBasic.substringBI());

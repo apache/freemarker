@@ -13830,6 +13830,18 @@ ${100 + (x &gt; y)?choose(x, y)}</programlisting>
 N
 
 120</programlisting>
+
+          <note>
+            <para>If you need to choose based on a non-boolean value, you
+            should use the <link
+            linkend="ref_builtin_switch"><literal>switch</literal>
+            built-in</link> instead of nesting multiple
+            <literal>choose</literal>-s into each other, like
+            <literal>priority?choose(1, "high", 2, "medium", 3,
+            "low")</literal>, or even <literal>true?switch(priority &lt;= 1,
+            "low", priority == 2, "medium", priority &gt;= 3,
+            "high")</literal>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_string_for_boolean">
@@ -14976,6 +14988,147 @@ Sorted by name.last:
             linkend="ref_builtin_item_parity"><literal>item_parity</literal>
             built-in</link> for lower case <literal>"odd"</literal> and
             <literal>"even"</literal>.</para>
+          </note>
+        </section>
+      </section>
+
+      <section xml:id="ref_builtins_type_independent">
+        <title>Type independent built-ins</title>
+
+        <para>These are the built-ins that don't care (much) about the type of
+        their left hand argument.</para>
+
+        <section xml:id="ref_builtin_switch">
+          <title>switch</title>
+
+          <indexterm>
+            <primary>switch built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>switch expression</primary>
+          </indexterm>
+
+          <para>This is basically the in-line (expression) version of the
+          <link
+          linkend="ref_directive_switch"><literal>switch</literal>-<literal>case</literal>-<literal>default</literal>
+          directives</link>. Its generic format is like
+          <literal><replaceable>matchedValue</replaceable>?switch(<replaceable>case1</replaceable>,
+          <replaceable>result1</replaceable>,
+          <replaceable>case2</replaceable>,
+          <replaceable>result2</replaceable>, ...
+          <replaceable>caseN</replaceable>,
+          <replaceable>resultN</replaceable>,
+          <replaceable>defaultResult</replaceable>)</literal>, where
+          <literal><replaceable>defaultResult</replaceable></literal> can be
+          omitted. Example:</para>
+
+          <programlisting role="template">&lt;#list ['r', 'w', 'x', 's'] as flag&gt;
+  ${flag<emphasis>?switch('r', 'readable', 'w' 'writable', 'x', 'executable', 'unknown flag: ' + flag)</emphasis>}
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  readable
+  writable
+  executable
+  unknown flag: s
+</programlisting>
+
+          <para>That is, <literal>switch</literal> will find the first
+          <literal><replaceable>case</replaceable></literal> parameter (left
+          to right) whose value equals to
+          <literal><replaceable>matchedValue</replaceable></literal>, then it
+          returns the value of the
+          <literal><replaceable>result</replaceable></literal> parameter
+          that's directly after that
+          <literal><replaceable>case</replaceable></literal> parameter. If it
+          doesn't find an equal
+          <literal><replaceable>case</replaceable></literal>, then it will
+          return the value of the
+          <literal><replaceable>defaultResult</replaceable></literal>, or if
+          there's no
+          <literal><replaceable>defaultResult</replaceable></literal>
+          parameter (i.e., if the number of parameters is even) then it stops
+          the template processing with error.</para>
+
+          <para>Further details:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The comparison of
+              <literal><replaceable>matchedValue</replaceable></literal> to
+              the <literal><replaceable>case</replaceable></literal> parameter
+              value behaves exactly like <link
+              linkend="dgui_template_exp_comparison">the <literal>==</literal>
+              operator</link>. Hence it only compares scalars and only
+              same-type values. Thus, something like <literal>x?switch(1,
+              "r1", "c2", "r2")</literal> doesn't make sense, as if
+              <literal>x</literal> is non-numerical then the first case will
+              cause error, and if <literal>x</literal> is numerical then the
+              second case will cause error (unless <literal>x</literal> is
+              <literal>1</literal>, as then we won't do further comparisons
+              after the first one).</para>
+            </listitem>
+
+            <listitem>
+              <para>Unlike with normal method calls, only those parameters of
+              <literal>switch(<replaceable>...</replaceable>)</literal> are
+              evaluated that are indeed needed. For example, in
+              <literal>two()?switch(c1(), r1(), c2(), r2(), c3(),
+              r3())</literal>, if <literal>two()</literal> returns
+              <literal>2</literal>, <literal>c1()</literal> returns
+              <literal>1</literal>, and <literal>c2()</literal> returns
+              <literal>2</literal>, then only the following functions will be
+              called, and in this order: <literal>m()</literal>,
+              <literal>c1()</literal>, <literal>c2()</literal>,
+              <literal>r2()</literal>. (Naturally, arguments that aren't
+              evaluated can refer to missing variables without causing
+              error.)</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal><replaceable>case</replaceable></literal>
+              parameter expressions need not be constant values, they can be
+              arbitrary complex expressions. Of course, the same goes for and
+              the <literal><replaceable>result</replaceable></literal>,
+              <literal><replaceable>defaultResult</replaceable></literal>, and
+              <literal><replaceable>matchedValue</replaceable></literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>There's no restriction regarding the type of the
+              <literal><replaceable>case</replaceable></literal> parameter
+              values, like they can be strings, or numbers, or dates, etc.
+              However, because of how the <literal>==</literal> operator
+              works, it doesn't make sense to use
+              <literal><replaceable>case</replaceable></literal> parameters of
+              different types inside the <replaceable>same</replaceable>
+              <literal>switch</literal> (see earlier why).</para>
+            </listitem>
+
+            <listitem>
+              <para>Unlike with the <link
+              linkend="ref_directive_switch"><literal>case</literal>
+              directive</link>, there's no fall-through behavior there, that
+              is, there's no need for an equivalent of the
+              <literal>break</literal> directive.</para>
+            </listitem>
+          </itemizedlist>
+
+          <note>
+            <para>If you need to switch by a boolean value, you should use the
+            <link linkend="ref_builtin_choose"><literal>choose</literal>
+            built-in</link> instead, like
+            <literal><replaceable>matchedBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+            <replaceable>whenFalse</replaceable>)</literal>.</para>
+          </note>
+
+          <note>
+            <para>If you need to do arbitrary logical tests instead of simple
+            equality comparisons at the
+            <literal><replaceable>case</replaceable></literal> parameters, you
+            can do something like this (here we tests for ranges):
+            <literal>true?switch(priority &lt;= 1, "low", priority == 2,
+            "medium", priority &gt;= 3, "high")</literal></para>
           </note>
         </section>
       </section>
@@ -23508,6 +23661,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               the ternary operator of most other languages, only one of the
               parameter expressions will be evaluated. <link
               linkend="ref_builtin_choose">More details...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added the <literal>switch</literal> built-in, which can be
+              used like an in-line (expression) switch-case-default statement:
+              <literal><replaceable>someValue</replaceable>?switch(<replaceable>case1</replaceable>,
+              <replaceable>result1</replaceable>,
+              <replaceable>case2</replaceable>,
+              <replaceable>result2</replaceable>, ...
+              <replaceable>caseN</replaceable>,
+              <replaceable>resultN</replaceable>,
+              <replaceable>defaultResult</replaceable>)</literal>, where
+              <literal><replaceable>defaultResult</replaceable></literal> can
+              be omitted (then it will be error if none of the cases matches).
+              <link linkend="ref_builtin_switch">More details...</link></para>
             </listitem>
 
             <listitem>

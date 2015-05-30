@@ -20,7 +20,8 @@ import java.util.List;
 
 abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
 
-    abstract void bindToParameters(List/*<Expression>*/ parameters) throws ParseException;
+    abstract void bindToParameters(List/*<Expression>*/ parameters, Token openParen, Token closeParen)
+            throws ParseException;
 
     public String getCanonicalForm() {
         StringBuffer buf = new StringBuffer();
@@ -71,6 +72,13 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         } else {
             throw new IndexOutOfBoundsException();
         }
+    }
+
+    protected ParseException newArgumentCountException(String ordinalityDesc, Token openParen, Token closeParen) {
+        return new ParseException(
+                "?" + key + "(...) " + ordinalityDesc + " parameters", this.getTemplate(),
+                openParen.beginLine, openParen.beginColumn,
+                closeParen.endLine, closeParen.endColumn);
     }
 
     protected Expression deepCloneWithIdentifierReplaced_inner(

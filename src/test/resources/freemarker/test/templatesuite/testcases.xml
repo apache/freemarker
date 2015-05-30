@@ -179,6 +179,7 @@
    <testCase name="stringliteral"/>
    <testCase name="if" />
    <testCase name="switch" />
+   <testCase name="switch-builtin" noOutput="true" />
    <testCase name="transforms"/>
    <testCase name="type-builtins">
       <setting incompatible_improvements="min, 2.3.20"/>
