@@ -121,20 +121,20 @@ class BuiltInsForLoopVariables {
 
         private class BIMethod implements TemplateMethodModelEx {
             
-            private final int index;
+            private final IterationContext iterCtx;
     
-            private BIMethod(int index) {
-                this.index = index;
+            private BIMethod(IterationContext iterCtx) {
+                this.iterCtx = iterCtx;
             }
     
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1, Integer.MAX_VALUE);
-                return args.get(index % args.size());
+                return args.get(iterCtx.getIndex() % args.size());
             }
         }
         
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
-            return new BIMethod(iterCtx.getIndex());
+            return new BIMethod(iterCtx);
         }
         
     }

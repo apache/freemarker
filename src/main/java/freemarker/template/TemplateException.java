@@ -146,7 +146,7 @@ public class TemplateException extends Exception {
     private TemplateException(
             String renderedDescription,
             Throwable cause,            
-            Environment env, Expression expression,
+            Environment env, Expression blamedExpression,
             _ErrorDescriptionBuilder descriptionBuilder) {
         // Note: Keep this constructor lightweight.
         
@@ -155,7 +155,7 @@ public class TemplateException extends Exception {
         if (env == null) env = Environment.getCurrentEnvironment();
         this.env = env;
         
-        this.blamedExpression = expression;
+        this.blamedExpression = blamedExpression;
         
         this.descriptionBuilder = descriptionBuilder;
         description = renderedDescription;

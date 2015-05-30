@@ -28,9 +28,13 @@ import freemarker.template.TemplateScalarModel;
  */
 final class Assignment extends TemplateElement {
 
+    // These must not clash with ArithmeticExpression.TYPE_... constants: 
+    private static final int OPERATOR_TYPE_EQUALS = 0x10000;
+    private static final int OPERATOR_TYPE_PLUS = 0x10001;
+    
     private final int/*enum*/ scope;
     private final String variableName;
-    private final int operator;
+    private final int operatorType;
     private final Expression valueExp;
     private Expression namespaceExp;
 
@@ -48,12 +52,37 @@ final class Assignment extends TemplateElement {
             Expression valueExp,
             int scope) {
         this.scope = scope;
+        
         this.variableName = variableName;
-        this.operator = operator;
+        
+        if (operator == FMParserTokenManager.EQUALS) {
+            operatorType = OPERATOR_TYPE_EQUALS;
+        } else if (operator == FMParserTokenManager.PLUS_EQUALS) {
+            operatorType = OPERATOR_TYPE_PLUS;
+        } else {
+            switch (operator) {
+            case FMParserTokenManager.MINUS_EQUALS:
+                operatorType = ArithmeticExpression.TYPE_SUBSTRACTION;
+                break;
+            case FMParserTokenManager.TIMES_EQUALS:
+                operatorType = ArithmeticExpression.TYPE_MULTIPLICATION;
+                break;
+            case FMParserTokenManager.DIV_EQUALS:
+                operatorType = ArithmeticExpression.TYPE_DIVISION;
+                break;
+            case FMParserTokenManager.MOD_EQUALS:
+                operatorType = ArithmeticExpression.TYPE_MODULO;
+                break;
+            default:
+                throw new BugException();
+            }
+        }
+        
         this.valueExp = valueExp;
     }
     
     void setNamespaceExp(Expression namespaceExp) {
+        if (scope != NAMESPACE && namespaceExp != null) throw new BugException();
         this.namespaceExp =  namespaceExp;
     }
 
@@ -86,7 +115,7 @@ final class Assignment extends TemplateElement {
         }
         
         TemplateModel value;
-        if (operator == FMParserTokenManager.EQUALS) {
+        if (operatorType == OPERATOR_TYPE_EQUALS) {
             value = valueExp.eval(env);
             if (value == null) {
                 if (env.isClassicCompatible()) {
@@ -108,11 +137,11 @@ final class Assignment extends TemplateElement {
                     lhoValue = TemplateScalarModel.EMPTY_STRING;
                 } else {
                     throw InvalidReferenceException.getInstance(
-                            variableName, assignmentOperatorToString(operator), env);
+                            variableName, getOperatorTypeAsString(), env);
                 }
             }
             
-            if (operator == FMParserTokenManager.PLUS_EQUALS) {
+            if (operatorType == OPERATOR_TYPE_PLUS) {
                 value = valueExp.eval(env);
                 if (value == null) {
                     if (env.isClassicCompatible()) {
@@ -122,7 +151,7 @@ final class Assignment extends TemplateElement {
                     }
                 }
                 value = AddConcatExpression._eval(env, namespaceExp, null, lhoValue, valueExp, value);
-            } else {
+            } else {  // operatorType == ArithmeticExpression.TYPE_...
                 Number lhoNumber;
                 if (lhoValue instanceof TemplateNumberModel) {
                     lhoNumber = EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
@@ -132,25 +161,7 @@ final class Assignment extends TemplateElement {
 
                 Number rhoNumber = valueExp.evalToNumber(env);
                 
-                int arithExpType;
-                switch (operator) {
-                case FMParserTokenManager.MINUS_EQUALS:
-                    arithExpType = ArithmeticExpression.TYPE_SUBSTRACTION;
-                    break;
-                case FMParserTokenManager.TIMES_EQUALS:
-                    arithExpType = ArithmeticExpression.TYPE_MULTIPLICATION;
-                    break;
-                case FMParserTokenManager.DIV_EQUALS:
-                    arithExpType = ArithmeticExpression.TYPE_DIVISION;
-                    break;
-                case FMParserTokenManager.MOD_EQUALS:
-                    arithExpType = ArithmeticExpression.TYPE_MODULO;
-                    break;
-                default:
-                    throw new BugException();
-                }
-                
-                value = ArithmeticExpression._eval(env, this, lhoNumber, arithExpType, rhoNumber);
+                value = ArithmeticExpression._eval(env, this, lhoNumber, operatorType, rhoNumber);
             }
         }
         
@@ -173,7 +184,7 @@ final class Assignment extends TemplateElement {
         buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(variableName));
         
         buf.append(' ');
-        buf.append(assignmentOperatorToString(operator));
+        buf.append(getOperatorTypeAsString());
         buf.append(' ');
         buf.append(valueExp.getCanonicalForm());
         if (dn != null) {
@@ -204,15 +215,16 @@ final class Assignment extends TemplateElement {
     }
     
     int getParameterCount() {
-        return 4;
+        return 5;
     }
 
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return variableName;
-        case 1: return valueExp;
-        case 2: return new Integer(scope);
-        case 3: return namespaceExp;
+        case 1: return getOperatorTypeAsString();
+        case 2: return valueExp;
+        case 3: return new Integer(scope);
+        case 4: return namespaceExp;
         default: throw new IndexOutOfBoundsException();
         }
     }
@@ -220,9 +232,10 @@ final class Assignment extends TemplateElement {
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.ASSIGNMENT_TARGET;
-        case 1: return ParameterRole.ASSIGNMENT_SOURCE;
-        case 2: return ParameterRole.VARIABLE_SCOPE;
-        case 3: return ParameterRole.NAMESPACE;
+        case 1: return ParameterRole.ASSIGNMENT_OPERATOR;
+        case 2: return ParameterRole.ASSIGNMENT_SOURCE;
+        case 3: return ParameterRole.VARIABLE_SCOPE;
+        case 4: return ParameterRole.NAMESPACE;
         default: throw new IndexOutOfBoundsException();
         }
     }
@@ -231,15 +244,13 @@ final class Assignment extends TemplateElement {
         return false;
     }
     
-    private String assignmentOperatorToString(int op) {
-        switch (op) {
-        case FMParserTokenManager.PLUS_EQUALS: return "+=";
-        case FMParserTokenManager.MINUS_EQUALS: return "-=";
-        case FMParserTokenManager.TIMES_EQUALS: return "*=";
-        case FMParserTokenManager.DIV_EQUALS: return "/=";
-        case FMParserTokenManager.MOD_EQUALS: return "%=";
-        case FMParserTokenManager.EQUALS: return "=";
-        default: return "{unrecognized operator}=";
+    private String getOperatorTypeAsString() {
+        if (operatorType == OPERATOR_TYPE_EQUALS) {
+            return "=";
+        } else if (operatorType == OPERATOR_TYPE_PLUS) {
+            return "+=";
+        } else {
+            return ArithmeticExpression.getOperatorSymbol(operatorType) + "=";
         }
     }
     

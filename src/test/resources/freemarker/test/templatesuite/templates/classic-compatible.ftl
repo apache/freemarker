@@ -20,3 +20,11 @@ ${beansArray?seq_index_of("b")}
 <#list ['a'] as x>${x}</#list>
 <#list 'a' as x>${x}</#list>
 <#list 'a' as x>${x}<#break>b</#list>
+
+<#assign x = 1>
+<#assign x = x + 1>
+${x}
+<#assign x = x + noSuchVar>
+${x}
+<#assign x += noSuchVar>
+${x}

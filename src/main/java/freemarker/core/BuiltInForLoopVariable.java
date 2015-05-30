@@ -20,7 +20,7 @@ import freemarker.core.IteratorBlock.IterationContext;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
-abstract class BuiltInForLoopVariable extends BuiltIn {
+abstract class BuiltInForLoopVariable extends SpecialBuiltIn {
     
     private String loopVarName;
     
