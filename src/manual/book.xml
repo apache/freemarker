@@ -10868,6 +10868,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_switch">switch</link></para>
+          </listitem>
+
+          <listitem>
             <para>time <link linkend="ref_builtin_date_datetype">for
             date/time/date-time</link>, <link
             linkend="ref_builtin_string_date">for strings</link></para>
@@ -13837,8 +13841,8 @@ N
             linkend="ref_builtin_switch"><literal>switch</literal>
             built-in</link> instead of nesting multiple
             <literal>choose</literal>-s into each other, like
-            <literal>priority?choose(1, "high", 2, "medium", 3,
-            "low")</literal>, or even <literal>true?switch(priority &lt;= 1,
+            <literal>priority?choose(1, "low", 2, "medium", 3,
+            "high")</literal>, or even <literal>true?switch(priority &lt;= 1,
             "low", priority == 2, "medium", priority &gt;= 3,
             "high")</literal>.</para>
           </note>
@@ -15008,6 +15012,10 @@ Sorted by name.last:
           <indexterm>
             <primary>switch expression</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.23.</para>
+          </note>
 
           <para>This is basically the in-line (expression) version of the
           <link
