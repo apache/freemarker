@@ -15089,8 +15089,19 @@ Sorted by name.last:
               called, and in this order: <literal>m()</literal>,
               <literal>c1()</literal>, <literal>c2()</literal>,
               <literal>r2()</literal>. (Naturally, arguments that aren't
-              evaluated can refer to missing variables without causing
-              error.)</para>
+              evaluated can refer to missing variables without causing error.)
+              It's guaranteed that the
+              <literal><replaceable>case</replaceable></literal> parameter
+              expressions are evaluated left to right, and only until the
+              first match was found. It's also guaranteed that only the
+              <literal><replaceable>result</replaceable></literal> expression
+              that belongs to the first matching
+              <literal><replaceable>case</replaceable></literal> will be
+              evaluated. It's also guaranteed that the
+              <literal><replaceable>defaultResult</replaceable></literal>
+              expression will only be evaluated if there was no matching
+              <literal><replaceable>case</replaceable></literal>
+              parameter.</para>
             </listitem>
 
             <listitem>
@@ -23780,6 +23791,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting (added in 2.3.22) couldn't be set through the
               <literal>Configurable.setSetting(String, String)</literal>
               API.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed some expression canonical form bugs (they are mostly
+              used in error messages).</para>
             </listitem>
           </itemizedlist>
         </section>
