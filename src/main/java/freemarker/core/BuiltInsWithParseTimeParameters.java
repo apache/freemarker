@@ -67,6 +67,13 @@ final class BuiltInsWithParseTimeParameters {
             return args;
         }
         
+        protected void cloneArguments(Expression cloneExp, String replacedIdentifier,
+                Expression replacement, ReplacemenetState replacementState) {
+            chooseBI clone = (chooseBI) cloneExp;
+            clone.whenTrueExp = whenTrueExp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
+            clone.whenFalseExp = whenFalseExp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
+        }
+        
     }
     
     private BuiltInsWithParseTimeParameters() {

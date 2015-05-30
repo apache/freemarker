@@ -58,10 +58,20 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         }
     }
 
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        final Expression clone = super.deepCloneWithIdentifierReplaced_inner(replacedIdentifier, replacement, replacementState);
+        cloneArguments(clone, replacedIdentifier, replacement, replacementState);
+        return clone;
+    }
+
     protected abstract List getArgumentsAsList();
     
     protected abstract int getArgumentsCount();
 
     protected abstract Expression getArgumentParameterValue(int argIdx);
+    
+    protected abstract void cloneArguments(Expression clone, String replacedIdentifier,
+            Expression replacement, ReplacemenetState replacementState);
     
 }

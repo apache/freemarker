@@ -428,7 +428,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         return MessageUtil.newMethodArgsInvalidValueException("?" + key, details);
     }
     
-    protected final Expression deepCloneWithIdentifierReplaced_inner(
+    protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	try {
 	    	BuiltIn clone = (BuiltIn)clone();

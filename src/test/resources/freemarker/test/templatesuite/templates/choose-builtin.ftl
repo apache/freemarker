@@ -27,3 +27,9 @@
 <@assertFails message="noSuchVar1">${true?choose(noSuchVar1, noSuchVar2)}</@>
 <@assertFails message="noSuchVar2">${false?choose(noSuchVar1, noSuchVar2)}</@>
 <@assertFails message="noSuchVar3">${noSuchVar3?choose(noSuchVar1, noSuchVar2)}</@>
+
+<#assign out><#escape x as x?choose(1, 0)>${false} ${true}</#escape></#assign>
+<@assertEquals expected="0 1" actual=out />
+
+<#assign out><#escape x as (x < 0)?choose(-x * 3, x * 2)>${-1} ${1}</#escape></#assign>
+<@assertEquals expected="3 2" actual=out />
