@@ -817,7 +817,7 @@ class BuiltInsForSequences {
                     seqItem, null,
                     EvalUtil.CMP_OP_EQUALS, null,
                     searchedItem, null,
-                    null,
+                    null, false,
                     true, true, true, // The last one is true to emulate an old bug for BC 
                     env);
         } catch (TemplateException ex) {

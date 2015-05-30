@@ -1824,13 +1824,23 @@ Expression Exists(Expression exp) :
 Expression BuiltIn(Expression lhoExp) :
 {
     Token t = null;
+    BuiltIn result;
+    ArrayList/*<Expression>*/ args = null;
+    Token openParen;
+    Token closeParen;
 }
 {
     <BUILT_IN>
     t = <ID>
     {
         token_source.checkNamingConvention(t);
-        BuiltIn result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
+        result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
+        result.setLocation(unboundTemplate, lhoExp, t);
+        
+        if (!(result instanceof SpecialBuiltIn)) {
+            return result;
+        }
+        
         if (result instanceof BuiltInForLoopVariable) {
             if (!(lhoExp instanceof Identifier)) {
                 throw new ParseException(
@@ -1840,9 +1850,23 @@ Expression BuiltIn(Expression lhoExp) :
             String loopVarName = ((Identifier) lhoExp).getName();
             checkLoopVariableBuiltInLHO(loopVarName, lhoExp, t);
             ((BuiltInForLoopVariable) result).bindToLoopVariable(loopVarName);
+            
+            return result;
         }
-        result.setLocation(unboundTemplate, lhoExp, t);
-        return result;
+    }
+    [
+        LOOKAHEAD({ result instanceof BuiltInWithParseTimeParameters  })
+        openParen = <OPEN_PAREN>
+        args = PositionalArgs()
+        closeParen = <CLOSE_PAREN> {
+            result.setLocation(unboundTemplate, lhoExp, closeParen);
+            ((BuiltInWithParseTimeParameters) result).bindToParameters(args, openParen, closeParen);
+            return result;
+        }
+    ]
+    {
+        // Should have already return-ed
+        throw new AssertionError("Unhandled " + SpecialBuiltIn.class.getName() + " subclass: " + result.getClass());
     }
 }
 

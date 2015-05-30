@@ -2434,7 +2434,7 @@ baz
               <listitem>
                 <para>Range expressions themselves don't have square brackets,
                 for example, you write <literal>&lt;#assign myRange =
-                0..&lt;x&gt;</literal>, NOT <literal>&lt;#assign myRange =
+                0..&lt;x</literal>, NOT <literal>&lt;#assign myRange =
                 [0..&lt;x]&gt;</literal>. The last would create a sequence
                 that contains an item that's a range. The square brackets are
                 part of the slicing syntax, like
@@ -3239,34 +3239,34 @@ ${-1.999?int}</programlisting>
           begin and end-tag will be processed, otherwise they will be
           skipped.</para>
 
-          <para>To test two values for equality you use <literal>=</literal>
-          (or <literal>==</literal> as in Java or C; the two are absolutely
-          equivalent.) To test two values for inequality you use
+          <para>To test two values for equality you use <literal>==</literal>
+          (or <literal>=</literal> as a <emphasis>deprecated</emphasis>
+          alternative) To test two values for inequality you use
           <literal>!=</literal>. For example, assume that
           <literal>user</literal> is ``Big Joe'':</para>
 
-          <programlisting role="template">&lt;#if <emphasis>user = "Big Joe"</emphasis>&gt;
+          <programlisting role="template">&lt;#if <emphasis>user == "Big Joe"</emphasis>&gt;
   It is Big Joe
 &lt;/#if&gt;
 &lt;#if <emphasis>user != "Big Joe"</emphasis>&gt;
   It is not Big Joe
 &lt;/#if&gt;</programlisting>
 
-          <para>The <literal>user = "Big Joe"</literal> expression in the
+          <para>The <literal>user == "Big Joe"</literal> expression in the
           <literal>&lt;#if ...&gt;</literal> will evaluate to the boolean
           <literal>true</literal>, so the above will say ``It is Big
           Joe''.</para>
 
-          <para>The expressions on both sides of the <literal>=</literal> or
-          <literal>!=</literal> must evaluate to a scalar. Furthermore, the
-          two scalars must have the same type (i.e. strings can only be
-          compared to strings and numbers can only be compared to numbers,
-          etc.) or else an error will abort template processing. For example
-          <literal>&lt;#if 1 = "1"&gt;</literal> will cause an error. Note
-          that FreeMarker does exact comparison, so string comparisons are
-          case and white-space sensitive: <literal>"x"</literal> and
-          <literal>"x "</literal> and <literal>"X"</literal> are not equal
-          values.</para>
+          <para>The expressions on both sides of the <literal>==</literal> or
+          <literal>!=</literal> must evaluate to a scalar (not a sequence or
+          hash). Furthermore, the two scalars must have the same type (i.e.
+          strings can only be compared to strings and numbers can only be
+          compared to numbers, etc.) or else an error will abort template
+          processing. For example <literal>&lt;#if 1 == "1"&gt;</literal> will
+          cause an error. Note that FreeMarker does exact comparison, so
+          string comparisons are case and white-space sensitive:
+          <literal>"x"</literal> and <literal>"x "</literal> and
+          <literal>"X"</literal> are not equal values.</para>
 
           <para>For numerical and date, time and date-time values you can also
           use <literal>&lt;</literal>, <literal>&lt;=</literal>,
@@ -3362,7 +3362,7 @@ ${-1.999?int}</programlisting>
 
           <para>Example:</para>
 
-          <programlisting role="template">&lt;#if x &lt; 12 <emphasis>&amp;&amp;</emphasis> color = "green"&gt;
+          <programlisting role="template">&lt;#if x &lt; 12 <emphasis>&amp;&amp;</emphasis> color == "green"&gt;
   We have less than 12 things, and they are green.
 &lt;/#if&gt;
 &lt;#if <emphasis>!</emphasis>hot&gt; &lt;#-- here hot must be a boolean --&gt;
@@ -5480,9 +5480,9 @@ That's all.</programlisting>
   <emphasis>[#list animals as animal]</emphasis>
   &lt;tr&gt;
     &lt;td&gt;
-      <emphasis>[#if animal.size = "large"]</emphasis>&lt;b&gt;<emphasis>[/#if]</emphasis>
+      <emphasis>[#if animal.size == "large"]</emphasis>&lt;b&gt;<emphasis>[/#if]</emphasis>
       ${animal.name}
-      <emphasis>[#if animal.size = "large"]</emphasis>&lt;/b&gt;<emphasis>[/#if]</emphasis>
+      <emphasis>[#if animal.size == "large"]</emphasis>&lt;/b&gt;<emphasis>[/#if]</emphasis>
     &lt;td&gt;${animal.price} Euros
   <emphasis>[/#list]</emphasis>
 &lt;/table&gt;</programlisting>
@@ -9953,7 +9953,7 @@ grant codeBase "file:/path/to/freemarker.jar"
           <literal>&lt;book&gt;</literal> element, you'd use the following
           (note indexes are zero-based):</para>
 
-          <programlisting role="template">&lt;#assign 3rdChapter = xmldoc.book.chapter[2]&gt;</programlisting>
+          <programlisting role="template">&lt;#assign thirdChapter = xmldoc.book.chapter[2]&gt;</programlisting>
         </section>
 
         <section>
@@ -10502,6 +10502,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_choose">choose</link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_chop_linebreak">chop_linebreak</link></para>
           </listitem>
@@ -10861,6 +10865,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           <listitem>
             <para><link linkend="ref_builtin_substring">substring</link>
             (deprecated)</para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_switch">switch</link></para>
           </listitem>
 
           <listitem>
@@ -13770,6 +13778,76 @@ Tue, Apr 8, '03
           works on strings</link>.</para>
         </section>
 
+        <section xml:id="ref_builtin_choose">
+          <title>choose</title>
+
+          <indexterm>
+            <primary>choose built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ternary operator</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format; boolean</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.23.</para>
+          </note>
+
+          <para>Used like
+          <literal><replaceable>booleanExp</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+          <replaceable>whenFalse</replaceable>)</literal>, fills the same role
+          as the ternary operator in C-like languages (i.e.,
+          <literal><replaceable>booleanExp</replaceable> ?
+          <replaceable>whenTrue</replaceable> :
+          <replaceable>whenFalse</replaceable></literal>). If
+          <literal><replaceable>booleanExp</replaceable></literal> evaluates
+          to boolean true then it evaluates and returns its first argument, or
+          else if <literal><replaceable>booleanExp</replaceable></literal>
+          evaluates to boolean false then it evaluates and return its second
+          argument. Off course, all three expression can be arbitrary complex.
+          The argument expressions can have any type, even different
+          types.</para>
+
+          <para>An important special property of this built-in is that only
+          one of the argument expressions will be evaluated. This is unlike
+          with normal method calls, where all argument expressions are
+          evaluated, regardless if the method will need them. This also means
+          that the argument that's not needed can even refer to missing
+          variables without causing error. (It still can't be syntactically
+          invalid of course.)</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">${true?choose('Y', 'N')}
+${false?choose('Y', 'N')}
+
+&lt;#assign x = 10&gt;
+&lt;#assign y = 20&gt;
+&lt;#-- Prints 100 plus the maximum of x and y: --&gt;
+${100 + (x &gt; y)?choose(x, y)}</programlisting>
+
+          <programlisting role="output">Y
+N
+
+120</programlisting>
+
+          <note>
+            <para>If you need to choose based on a non-boolean value, you
+            should use the <link
+            linkend="ref_builtin_switch"><literal>switch</literal>
+            built-in</link> instead of nesting multiple
+            <literal>choose</literal>-s into each other, like
+            <literal>priority?choose(1, "low", 2, "medium", 3,
+            "high")</literal>, or even <literal>true?switch(priority &lt;= 1,
+            "low", priority == 2, "medium", priority &gt;= 3,
+            "high")</literal>.</para>
+          </note>
+        </section>
+
         <section xml:id="ref_builtin_string_for_boolean">
           <title>string (when used with a boolean value)</title>
 
@@ -13797,17 +13875,25 @@ Tue, Apr 8, '03
             <secondary>boolean</secondary>
           </indexterm>
 
+          <para><emphasis>All usages of this built-in has been deprecated; see
+          below.</emphasis></para>
+
           <para>Converts a boolean to a string. You can use it in two
           ways:</para>
 
           <itemizedlist>
             <listitem>
-              <para>As <literal>foo?string("yes", "no")</literal>: This will
-              return the first parameter (here: <literal>"yes"</literal>) if
-              the boolean is true, otherwise the second parameter (here:
+              <para>As <literal>foo?string("yes", "no")</literal>:
+              <emphasis>Deprecated starting from FreeMarker 2.3.23: use <link
+              linkend="ref_builtin_choose"><literal>?choose("yes",
+              "no")</literal></link> instead. </emphasis>This will return the
+              first parameter (here: <literal>"yes"</literal>) if the boolean
+              is true, otherwise the second parameter (here:
               <literal>"no"</literal>). Note that the return value is always a
               string; if the parameters were numbers, they would be converted
-              to strings first.</para>
+              to strings first. Also note that both parameters are evaluated,
+              despite that only one of them will be used; this might have
+              negative impact if the parameters aren't just literals.</para>
             </listitem>
 
             <listitem>
@@ -14906,6 +14992,151 @@ Sorted by name.last:
             linkend="ref_builtin_item_parity"><literal>item_parity</literal>
             built-in</link> for lower case <literal>"odd"</literal> and
             <literal>"even"</literal>.</para>
+          </note>
+        </section>
+      </section>
+
+      <section xml:id="ref_builtins_type_independent">
+        <title>Type independent built-ins</title>
+
+        <para>These are the built-ins that don't care (much) about the type of
+        their left hand argument.</para>
+
+        <section xml:id="ref_builtin_switch">
+          <title>switch</title>
+
+          <indexterm>
+            <primary>switch built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>switch expression</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.23.</para>
+          </note>
+
+          <para>This is basically the in-line (expression) version of the
+          <link
+          linkend="ref_directive_switch"><literal>switch</literal>-<literal>case</literal>-<literal>default</literal>
+          directives</link>. Its generic format is like
+          <literal><replaceable>matchedValue</replaceable>?switch(<replaceable>case1</replaceable>,
+          <replaceable>result1</replaceable>,
+          <replaceable>case2</replaceable>,
+          <replaceable>result2</replaceable>, ...
+          <replaceable>caseN</replaceable>,
+          <replaceable>resultN</replaceable>,
+          <replaceable>defaultResult</replaceable>)</literal>, where
+          <literal><replaceable>defaultResult</replaceable></literal> can be
+          omitted. Example:</para>
+
+          <programlisting role="template">&lt;#list ['r', 'w', 'x', 's'] as flag&gt;
+  ${flag<emphasis>?switch('r', 'readable', 'w' 'writable', 'x', 'executable', 'unknown flag: ' + flag)</emphasis>}
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  readable
+  writable
+  executable
+  unknown flag: s
+</programlisting>
+
+          <para>That is, <literal>switch</literal> will find the first
+          <literal><replaceable>case</replaceable></literal> parameter (left
+          to right) whose value equals to
+          <literal><replaceable>matchedValue</replaceable></literal>, then it
+          returns the value of the
+          <literal><replaceable>result</replaceable></literal> parameter
+          that's directly after that
+          <literal><replaceable>case</replaceable></literal> parameter. If it
+          doesn't find an equal
+          <literal><replaceable>case</replaceable></literal>, then it will
+          return the value of the
+          <literal><replaceable>defaultResult</replaceable></literal>, or if
+          there's no
+          <literal><replaceable>defaultResult</replaceable></literal>
+          parameter (i.e., if the number of parameters is even) then it stops
+          the template processing with error.</para>
+
+          <para>Further details:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The comparison of
+              <literal><replaceable>matchedValue</replaceable></literal> to
+              the <literal><replaceable>case</replaceable></literal> parameter
+              value behaves exactly like <link
+              linkend="dgui_template_exp_comparison">the <literal>==</literal>
+              operator</link>. Hence it only compares scalars and only
+              same-type values. Thus, something like <literal>x?switch(1,
+              "r1", "c2", "r2")</literal> doesn't make sense, as if
+              <literal>x</literal> is non-numerical then the first case will
+              cause error, and if <literal>x</literal> is numerical then the
+              second case will cause error (unless <literal>x</literal> is
+              <literal>1</literal>, as then we won't do further comparisons
+              after the first one).</para>
+            </listitem>
+
+            <listitem>
+              <para>Unlike with normal method calls, only those parameters of
+              <literal>switch(<replaceable>...</replaceable>)</literal> are
+              evaluated that are indeed needed. For example, in
+              <literal>two()?switch(c1(), r1(), c2(), r2(), c3(),
+              r3())</literal>, if <literal>two()</literal> returns
+              <literal>2</literal>, <literal>c1()</literal> returns
+              <literal>1</literal>, and <literal>c2()</literal> returns
+              <literal>2</literal>, then only the following functions will be
+              called, and in this order: <literal>m()</literal>,
+              <literal>c1()</literal>, <literal>c2()</literal>,
+              <literal>r2()</literal>. (Naturally, arguments that aren't
+              evaluated can refer to missing variables without causing
+              error.)</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal><replaceable>case</replaceable></literal>
+              parameter expressions need not be constant values, they can be
+              arbitrary complex expressions. Of course, the same goes for and
+              the <literal><replaceable>result</replaceable></literal>,
+              <literal><replaceable>defaultResult</replaceable></literal>, and
+              <literal><replaceable>matchedValue</replaceable></literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>There's no restriction regarding the type of the
+              <literal><replaceable>case</replaceable></literal> parameter
+              values, like they can be strings, or numbers, or dates, etc.
+              However, because of how the <literal>==</literal> operator
+              works, it doesn't make sense to use
+              <literal><replaceable>case</replaceable></literal> parameters of
+              different types inside the <replaceable>same</replaceable>
+              <literal>switch</literal> (see earlier why).</para>
+            </listitem>
+
+            <listitem>
+              <para>Unlike with the <link
+              linkend="ref_directive_switch"><literal>case</literal>
+              directive</link>, there's no fall-through behavior there, that
+              is, there's no need for an equivalent of the
+              <literal>break</literal> directive.</para>
+            </listitem>
+          </itemizedlist>
+
+          <note>
+            <para>If you need to switch by a boolean value, you should use the
+            <link linkend="ref_builtin_choose"><literal>choose</literal>
+            built-in</link> instead, like
+            <literal><replaceable>matchedBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+            <replaceable>whenFalse</replaceable>)</literal>.</para>
+          </note>
+
+          <note>
+            <para>If you need to do arbitrary logical tests instead of simple
+            equality comparisons at the
+            <literal><replaceable>case</replaceable></literal> parameters, you
+            can do something like this (here we tests for ranges):
+            <literal>true?switch(priority &lt;= 1, "low", priority == 2,
+            "medium", priority &gt;= 3, "high")</literal></para>
           </note>
         </section>
       </section>
@@ -20753,7 +20984,7 @@ root.put(
           element:</para>
 
           <programlisting role="template">&lt;#list doc.book?children as c&gt;
-- ${c?node_type} &lt;#if c?node_type = 'element'&gt;${c?node_name}&lt;/#if&gt;
+- ${c?node_type} &lt;#if c?node_type == 'element'&gt;${c?node_name}&lt;/#if&gt;
 &lt;/#list&gt;</programlisting>
 
           <para>this will print:</para>
@@ -23428,6 +23659,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>#local</literal>. For example, <literal>&lt;#assign
               counter += 1&gt;</literal> is equivalent to <literal>&lt;#assign
               counter = counter + 1&gt;</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added the <literal>choose</literal> built-in, which can be
+              used like a ternary operator:
+              <literal><replaceable>someBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+              <replaceable>whenFalse</replaceable>)</literal>. Just like with
+              the ternary operator of most other languages, only one of the
+              parameter expressions will be evaluated. <link
+              linkend="ref_builtin_choose">More details...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added the <literal>switch</literal> built-in, which can be
+              used like an in-line (expression) switch-case-default statement:
+              <literal><replaceable>someValue</replaceable>?switch(<replaceable>case1</replaceable>,
+              <replaceable>result1</replaceable>,
+              <replaceable>case2</replaceable>,
+              <replaceable>result2</replaceable>, ...
+              <replaceable>caseN</replaceable>,
+              <replaceable>resultN</replaceable>,
+              <replaceable>defaultResult</replaceable>)</literal>, where
+              <literal><replaceable>defaultResult</replaceable></literal> can
+              be omitted (then it will be error if none of the cases matches).
+              <link linkend="ref_builtin_switch">More details...</link></para>
             </listitem>
 
             <listitem>
