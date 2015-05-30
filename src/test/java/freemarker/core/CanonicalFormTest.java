@@ -30,10 +30,22 @@ public class CanonicalFormTest extends FileTestCase {
         super(name);
     }
 
+    public void testMacrosCanonicalForm() throws Exception {
+        assertCanonicalFormOf("cano-macros.ftl");
+    }
+    
     public void testIdentifierEscapingCanonicalForm() throws Exception {
-        assertCanonicalFormOf("identifier-escaping.ftl");
+        assertCanonicalFormOf("cano-identifier-escaping.ftl");
     }
 
+    public void testAssignmentCanonicalForm() throws Exception {
+        assertCanonicalFormOf("cano-assignments.ftl");
+    }
+
+    public void testBuiltInCanonicalForm() throws Exception {
+        assertCanonicalFormOf("cano-builtins.ftl");
+    }
+    
     private void assertCanonicalFormOf(String ftlFileName)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);

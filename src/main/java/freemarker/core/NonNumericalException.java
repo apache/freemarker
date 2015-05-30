@@ -56,7 +56,11 @@ public class NonNumericalException extends UnexpectedTypeException {
         super(blamed, model, "number", EXPECTED_TYPES, tips, env);
     }
 
-    
+    NonNumericalException(
+            String assignmentTargetVarName, TemplateModel model, String[] tips, Environment env)
+            throws InvalidReferenceException {
+        super(assignmentTargetVarName, model, "number", EXPECTED_TYPES, tips, env);
+    }
     static NonNumericalException newMalformedNumberException(Expression blamed, String text, Environment env) {
         return new NonNumericalException(
                 new _ErrorDescriptionBuilder(new Object[] {

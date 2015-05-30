@@ -113,6 +113,12 @@ abstract public class Expression extends TemplateObject {
     boolean evalToBoolean(Configuration cfg) throws TemplateException {
         return evalToBoolean(null, cfg);
     }
+
+    TemplateModel evalToNonMissing(Environment env) throws TemplateException {
+        TemplateModel result = this.eval(env);
+        assertNonNull(result, env);
+        return result;
+    }
     
     private boolean evalToBoolean(Environment env, Configuration cfg) throws TemplateException {
         TemplateModel model = eval(env);
@@ -155,7 +161,7 @@ abstract public class Expression extends TemplateObject {
 
     /**
      * This should return an equivalent new expression object (or an identifier replacement expression).
-     * The position need not be filled, unless it will be different from the position of what were cloning. 
+     * The position need not be filled, unless it will be different from the position of what we were cloning. 
      */
     protected abstract Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState);

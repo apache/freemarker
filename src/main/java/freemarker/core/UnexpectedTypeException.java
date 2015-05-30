@@ -37,30 +37,47 @@ public class UnexpectedTypeException extends TemplateException {
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env));
+        super(null, env, blamed, newDesciptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env));
     }
 
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tip(tip));
+        super(null, env, blamed, newDesciptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env)
+                .tip(tip));
     }
 
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String[] tips,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tips(tips));
+        super(null, env, blamed, newDesciptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env)
+                .tips(tips));
+    }
+
+    UnexpectedTypeException(
+            String blamedAssignmentTargetVarName, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes,
+            String[] tips,
+            Environment env)
+            throws InvalidReferenceException {
+        super(null, env, null, newDesciptionBuilder(
+                null, blamedAssignmentTargetVarName, model, expectedTypesDesc, expectedTypes, env).tips(tips));
     }
     
+    /**
+     * @param blamedAssignmentTargetVarName
+     *            Used for assignments that use {@code +=} and such, in which case the {@code blamed} expression
+     *            parameter will be null {@code null} and this parameter will be non-{null}.
+     */
     private static _ErrorDescriptionBuilder newDesciptionBuilder(
-            Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
+            Expression blamed, String blamedAssignmentTargetVarName,
+            TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
         if (model == null) throw InvalidReferenceException.getInstance(blamed, env);
 
         _ErrorDescriptionBuilder errorDescBuilder = new _ErrorDescriptionBuilder(
-                unexpectedTypeErrorDescription(expectedTypesDesc, model))
+                unexpectedTypeErrorDescription(expectedTypesDesc, blamed, blamedAssignmentTargetVarName, model))
                 .blame(blamed).showBlamer(true);
         if (model instanceof _UnexpectedTypeErrorExplainerTemplateModel) {
             Object[] tip = ((_UnexpectedTypeErrorExplainerTemplateModel) model).explainTypeError(expectedTypes);
@@ -71,10 +88,20 @@ public class UnexpectedTypeException extends TemplateException {
         return errorDescBuilder;
     }
 
-    private static Object[] unexpectedTypeErrorDescription(String expectedTypesDesc, TemplateModel model) {
+    private static Object[] unexpectedTypeErrorDescription(
+            String expectedTypesDesc,
+            Expression blamed, String blamedAssignmentTargetVarName,
+            TemplateModel model) {
         return new Object[] {
-                "Expected ", new _DelayedAOrAn(expectedTypesDesc), ", but this evaluated to ",
-                new _DelayedAOrAn(new _DelayedFTLTypeDescription(model)), ":"};
+                "Expected ", new _DelayedAOrAn(expectedTypesDesc), ", but ",
+                (blamedAssignmentTargetVarName == null
+                        ? (Object) (blamed != null ? "this" : "the expression")
+                        : new Object[] {
+                                "assignment target variable ",
+                                new _DelayedJQuote(blamedAssignmentTargetVarName) }), 
+                " has evaluated to ",
+                new _DelayedAOrAn(new _DelayedFTLTypeDescription(model)),
+                (blamedAssignmentTargetVarName == null ? ":" : ".")};
     }
     
 }

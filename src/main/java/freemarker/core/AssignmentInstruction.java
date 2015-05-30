@@ -64,7 +64,7 @@ final class AssignmentInstruction extends TemplateElement {
                 Assignment ass = (Assignment) nestedElements.get(i);
                 buf.append(ass.getCanonicalForm());
                 if (i < nestedElements.size() -1) {
-                    buf.append(" ");
+                    buf.append(", ");
                 }
             }
         } else {
@@ -74,7 +74,7 @@ final class AssignmentInstruction extends TemplateElement {
             buf.append(" in ");
             buf.append(namespaceExp.getCanonicalForm());
         }
-        if (canonical) buf.append("/>");
+        if (canonical) buf.append(">");
         return buf.toString();
     }
     
@@ -104,11 +104,6 @@ final class AssignmentInstruction extends TemplateElement {
 
     public TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
         super.postParseCleanup(stripWhitespace);
-        if (nestedElements.size() == 1) {
-            Assignment ass = (Assignment) nestedElements.get(0);
-            ass.setLocation(getTemplate(), this, this);
-            return ass;
-        } 
         return this;
     }
 

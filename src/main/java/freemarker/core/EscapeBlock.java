@@ -60,7 +60,11 @@ class EscapeBlock extends TemplateElement {
                 .append(' ').append(_CoreStringUtils.toFTLTopLevelIdentifierReference(variable))
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
-            sb.append('>').append(nestedBlock.getCanonicalForm()).append("</").append(getNodeTypeSymbol()).append('>');
+            sb.append('>');
+            if (nestedBlock != null) {
+                sb.append(nestedBlock.getCanonicalForm());
+            }
+            sb.append("</").append(getNodeTypeSymbol()).append('>');
         }
         return sb.toString();
     }

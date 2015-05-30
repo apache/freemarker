@@ -48,6 +48,7 @@
       />
    </testCase>
    <testCase name="arithmetic" />
+   <testCase name="assignments" noOutput="true" />
    <testCase name="bean-maps"/>
    <testCase name="beans">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapper"/>
@@ -59,6 +60,7 @@
    <testCase name="comment" />
    <testCase name="comparisons" />
    <testCase name="compress" />
+   <testCase name="choose-builtin" noOutput="true" />
    <testCase name="dateformat-java" />
    <testCase name="dateformat-iso-like" noOutput="true" />
    <testCase name="dateformat-iso-bi" noOutput="true">
@@ -177,6 +179,7 @@
    <testCase name="stringliteral"/>
    <testCase name="if" />
    <testCase name="switch" />
+   <testCase name="switch-builtin" noOutput="true" />
    <testCase name="transforms"/>
    <testCase name="type-builtins">
       <setting incompatible_improvements="min, 2.3.20"/>

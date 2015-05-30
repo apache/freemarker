@@ -356,9 +356,7 @@ public class FMParser {
     
 	private String forEachDirectiveSymbol() {    
 	    // [2.4] Use camel case as the default
-	    return "#for"
-	            + (token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "E" : "e")
-	            + "ach";
+	    return token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "#forEach" : "#foreach";
 	}
     
 }
@@ -986,6 +984,16 @@ TOKEN:
     <DOUBLE_EQUALS : "==">
     |
     <NOT_EQUALS : "!=">
+    |
+    <PLUS_EQUALS : "+=">
+    |
+    <MINUS_EQUALS : "-=">
+    |
+    <TIMES_EQUALS : "*=">
+    |
+    <DIV_EQUALS : "/=">
+    |
+    <MOD_EQUALS : "%=">
     |
     <LESS_THAN : "lt" | "\\lt" | "<" | "&lt;">
     |
@@ -1842,13 +1850,23 @@ Expression Exists(Expression exp) :
 Expression BuiltIn(Expression lhoExp) :
 {
     Token t = null;
+    BuiltIn result;
+    ArrayList/*<Expression>*/ args = null;
+    Token openParen;
+    Token closeParen;
 }
 {
     <BUILT_IN>
     t = <ID>
     {
         token_source.checkNamingConvention(t);
-        BuiltIn result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
+        result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
+        result.setLocation(template, lhoExp, t);
+        
+        if (!(result instanceof SpecialBuiltIn)) {
+            return result;
+        }
+        
         if (result instanceof BuiltInForLoopVariable) {
             if (!(lhoExp instanceof Identifier)) {
                 throw new ParseException(
@@ -1858,9 +1876,23 @@ Expression BuiltIn(Expression lhoExp) :
             String loopVarName = ((Identifier) lhoExp).getName();
             checkLoopVariableBuiltInLHO(loopVarName, lhoExp, t);
             ((BuiltInForLoopVariable) result).bindToLoopVariable(loopVarName);
+            
+            return result;
         }
-        result.setLocation(template, lhoExp, t);
-        return result;
+    }
+    [
+        LOOKAHEAD({ result instanceof BuiltInWithParseTimeParameters  })
+        openParen = <OPEN_PAREN>
+        args = PositionalArgs()
+        closeParen = <CLOSE_PAREN> {
+            result.setLocation(template, lhoExp, closeParen);
+            ((BuiltInWithParseTimeParameters) result).bindToParameters(args, openParen, closeParen);
+            return result;
+        }
+    ]
+    {
+        // Should have already return-ed
+        throw new AssertionError("Unhandled " + SpecialBuiltIn.class.getName() + " subclass: " + result.getClass());
     }
 }
 
@@ -2621,6 +2653,7 @@ TemplateElement Assign() :
     Token start, end;
     int scope;
     Token id = null;
+    Token equalsOp;
     Expression nameExp, exp, nsExp = null;
     String varName;
     ArrayList assignments = new ArrayList();
@@ -2649,15 +2682,22 @@ TemplateElement Assign() :
     }
     (
     	(
-	        <EQUALS>
+	        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	        {
+	           equalsOp = token;
+	        }
 	        exp = Expression()
 	        {
-	            ass = new Assignment(varName, exp, scope);
+	            ass = new Assignment(varName, equalsOp.kind, exp, scope);
 	            ass.setLocation(template, nameExp, exp);
 	            assignments.add(ass);
 	        }
 	        (
-	            LOOKAHEAD([<COMMA>](<ID>|<STRING_LITERAL>)<EQUALS>)
+	            LOOKAHEAD(
+	               [<COMMA>]
+	               (<ID>|<STRING_LITERAL>)
+	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	            )
 	            [<COMMA>]
 	            nameExp = IdentifierOrStringLiteral()
 	            {
@@ -2665,10 +2705,13 @@ TemplateElement Assign() :
 	                		? ((StringLiteral) nameExp).getAsString()
 	                		: ((Identifier) nameExp).getName();
 	            }
-	            <EQUALS>
+	            (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	            {
+	               equalsOp = token;
+	            }
 	            exp = Expression()
 	            {
-	                ass = new Assignment(varName, exp, scope);
+	                ass = new Assignment(varName, equalsOp.kind, exp, scope);
 	                ass.setLocation(template, nameExp, exp);
 	                assignments.add(ass);
 	            } 
@@ -2684,13 +2727,20 @@ TemplateElement Assign() :
 	        ]
 	        end = LooseDirectiveEnd()
 	        {
-	            AssignmentInstruction ai = new AssignmentInstruction(scope);
-	            for (int i = 0; i< assignments.size(); i++) {
-	                ai.addAssignment((Assignment) assignments.get(i));
+                if (assignments.size() == 1) {
+                    Assignment a = (Assignment) assignments.get(0);
+                    a.setNamespaceExp(nsExp);
+                    a.setLocation(template, start, end);
+                    return a;
+                } else {
+		            AssignmentInstruction ai = new AssignmentInstruction(scope);
+		            for (int i = 0; i< assignments.size(); i++) {
+		                ai.addAssignment((Assignment) assignments.get(i));
+		            }
+		            ai.setNamespaceExp(nsExp);
+		            ai.setLocation(template, start, end);
+		            return ai;
 	            }
-	            ai.setNamespaceExp(nsExp);
-	            ai.setLocation(template, start, end);
-	            return ai;
 	        }
 	    )
 	    |
@@ -3558,6 +3608,8 @@ void HeaderElement() :
                 <EQUALS>
                 exp = Expression()
                 {
+                    token_source.checkNamingConvention(key);
+                
                     String ks = key.image;
                     TemplateModel value = null;
                     try {
@@ -3583,13 +3635,13 @@ void HeaderElement() :
                             if (encoding != null && !encoding.equalsIgnoreCase(vs)) {
                                 throw new Template.WrongEncodingException(vs, encoding);
                             }
-                        } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE")) {
+                        } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE") || ks.equals("stripWhitespace")) {
                             this.stripWhitespace = getBoolean(exp);
-                        } else if (ks.equalsIgnoreCase("STRIP_TEXT")) {
+                        } else if (ks.equalsIgnoreCase("STRIP_TEXT") || ks.equals("stripText")) {
                             this.stripText = getBoolean(exp);
-                        } else if (ks.equalsIgnoreCase("STRICT_SYNTAX")) {
+                        } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
                             this.token_source.strictEscapeSyntax = getBoolean(exp);
-                        } else if (ks.equalsIgnoreCase("ns_prefixes")) {
+                        } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);
                             }
@@ -3627,24 +3679,19 @@ void HeaderElement() :
                             }
                         } else {
                             String correctName;
-	                        if (ks.equals("stripWhitespace")) {
-	                            correctName = "strip_whitespace";
-	                        } else if (ks.equals("stripText")) {
-	                            correctName = "strip_text";
-	                        } else if (ks.equals("strictSyntax")) {
-	                            correctName = "strict_syntax"; 
-	                        } else if (ks.equals("nsPrefixes")) {
-	                           correctName = "ns_prefixes";
+	                        if (ks.equals("charset")) {
+	                            correctName = "encoding";
+	                        } else if (ks.equals("xmlns")) {
+	                            // [2.4] If came case will be the default, update this
+                                correctName
+                                        = token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                                                ? "nsPrefixes" : "ns_prefixes";
 	                        } else {
 	                           correctName = null;
 	                        }
                             throw new ParseException(
                                     "Unknown FTL header parameter: " + key.image
-                                    + (correctName == null
-                                            ? ""
-                                            : ". Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
-                                              + "check if an update is available, and if it indeed supports camel "
-                                              + "case. Until that, use " + correctName + " instead."),
+                                    + (correctName == null ? "" : ". Did you mean " + correctName + "?"),
                                     template, key);
                         }
                     }
