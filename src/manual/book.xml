@@ -23814,6 +23814,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added <literal>Environment.getCurrentTemplate()</literal>
+              method, which return the currently executed template (as opposed
+              to the main template).</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: If a template <quote>file</quote> was
               successfully opened for reading, but then there was an
               <literal>IOException</literal> during reading its content, the
