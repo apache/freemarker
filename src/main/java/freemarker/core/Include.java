@@ -35,7 +35,7 @@ final class Include extends TemplateElement {
     private final Expression includedTemplateNameExp, encodingExp, parseExp, ignoreMissingExp;
     private final String encoding;
     private final Boolean parse;
-    private final Boolean ignoreMissing;
+    private final Boolean ignoreMissingExpPrecalcedValue;
 
     /**
      * @param template the template that this <tt>#include</tt> is a part of.
@@ -96,28 +96,24 @@ final class Include extends TemplateElement {
         }
         
         this.ignoreMissingExp = ignoreMissingExp;
-        if (ignoreMissingExp == null) {
-            ignoreMissing = Boolean.FALSE;
-        } else {
-            if (ignoreMissingExp.isLiteral()) {
+        if (ignoreMissingExp != null && ignoreMissingExp.isLiteral()) {
+            try {
                 try {
-                    try {
-                        ignoreMissing = Boolean.valueOf(
-                                ignoreMissingExp.evalToBoolean(template.getConfiguration()));
-                    } catch(NonBooleanException e) {
-                        throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
-                                ignoreMissingExp, e);
-                    }
-                } catch(TemplateException e) {
-                    // evaluation of literals must not throw a TemplateException
-                    throw new BugException(e);
+                    ignoreMissingExpPrecalcedValue = Boolean.valueOf(
+                            ignoreMissingExp.evalToBoolean(template.getConfiguration()));
+                } catch(NonBooleanException e) {
+                    throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
+                            ignoreMissingExp, e);
                 }
-            } else {
-                ignoreMissing = null;
+            } catch (TemplateException e) {
+                // evaluation of literals must not throw a TemplateException
+                throw new BugException(e);
             }
+        } else {
+            ignoreMissingExpPrecalcedValue = null;
         }
     }
-
+    
     void accept(Environment env) throws TemplateException, IOException {
         final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToString(env);
         final String fullIncludedTemplateName;
@@ -148,9 +144,14 @@ final class Include extends TemplateElement {
             }
         }
         
-        final boolean ignoreMissing = this.ignoreMissing != null
-                ? this.ignoreMissing.booleanValue()
-                : ignoreMissingExp.evalToBoolean(env);
+        final boolean ignoreMissing;
+        if (this.ignoreMissingExpPrecalcedValue != null) {
+            ignoreMissing = this.ignoreMissingExpPrecalcedValue.booleanValue();
+        } else if (ignoreMissingExp != null) {
+            ignoreMissing = ignoreMissingExp.evalToBoolean(env);
+        } else {
+            ignoreMissing = false;
+        }
         
         final Template includedTemplate;
         try {
@@ -161,6 +162,7 @@ final class Include extends TemplateElement {
                     new _DelayedJQuote(includedTemplateName),
                     "):\n", new _DelayedGetMessage(e) });
         }
+        
         if (includedTemplate != null) {
             env.include(includedTemplate);
         }
@@ -189,18 +191,6 @@ final class Include extends TemplateElement {
         return "#include";
     }
     
-    private boolean getYesNo(Expression exp, String s) throws TemplateException {
-        try {
-           return StringUtil.getYesNo(s);
-        }
-        catch (IllegalArgumentException iae) {
-            throw new _MiscTemplateException(exp, new Object[] {
-                     "Value must be boolean (or one of these strings: "
-                     + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",
-                     new _DelayedJQuote(s), "." });
-        }
-    }
-
     int getParameterCount() {
         return 3;
     }
@@ -227,6 +217,18 @@ final class Include extends TemplateElement {
 
     boolean isNestedBlockRepeater() {
         return false;
+    }
+
+    private boolean getYesNo(Expression exp, String s) throws TemplateException {
+        try {
+           return StringUtil.getYesNo(s);
+        }
+        catch (IllegalArgumentException iae) {
+            throw new _MiscTemplateException(exp, new Object[] {
+                     "Value must be boolean (or one of these strings: "
+                     + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",
+                     new _DelayedJQuote(s), "." });
+        }
     }
 
 /*
