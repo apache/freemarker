@@ -27,6 +27,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -36,6 +37,10 @@ final class BuiltinVariable extends Expression {
 
     static final String TEMPLATE_NAME_CC = "templateName";
     static final String TEMPLATE_NAME = "template_name";
+    static final String MAIN_TEMPLATE_NAME_CC = "mainTemplateName";
+    static final String MAIN_TEMPLATE_NAME = "main_template_name";
+    static final String CURRENT_TEMPLATE_NAME_CC = "currentTemplateName";
+    static final String CURRENT_TEMPLATE_NAME = "current_template_name";
     static final String NAMESPACE = "namespace";
     static final String MAIN = "main";
     static final String GLOBALS = "globals";
@@ -61,7 +66,9 @@ final class BuiltinVariable extends Expression {
     
     static final String[] SPEC_VAR_NAMES = new String[] {
         CURRENT_NODE_CC,
+        CURRENT_TEMPLATE_NAME_CC,
         CURRENT_NODE,
+        CURRENT_TEMPLATE_NAME,
         DATA_MODEL_CC,
         DATA_MODEL,
         ERROR,
@@ -72,6 +79,8 @@ final class BuiltinVariable extends Expression {
         LOCALE_OBJECT,
         LOCALS,
         MAIN,
+        MAIN_TEMPLATE_NAME_CC,
+        MAIN_TEMPLATE_NAME,
         NAMESPACE,
         NODE,
         NOW,
@@ -157,7 +166,18 @@ final class BuiltinVariable extends Expression {
             return env.getCurrentVisitorNode();
         }
         if (name == TEMPLATE_NAME || name == TEMPLATE_NAME_CC) {
-            return new SimpleScalar(env.getTemplate().getName());
+            // The behavior of env.getTemplate() was changed with IcI 2.3.22, but there was an unintende side effect
+            // of changing the behavior of .template_name, which was fixed with IcI 2.3.23. IcI 2.3.22 deliberately
+            // remains broken.
+            return (env.getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_23)
+                    ? new SimpleScalar(env.getTemplate230().getName())
+                    : new SimpleScalar(env.getTemplate().getName());
+        }
+        if (name == MAIN_TEMPLATE_NAME || name == MAIN_TEMPLATE_NAME_CC) {
+            return new SimpleScalar(env.getMainTemplate().getName());
+        }
+        if (name == CURRENT_TEMPLATE_NAME || name == CURRENT_TEMPLATE_NAME_CC) {
+            return new SimpleScalar(env.getCurrentTemplate().getName());
         }
         if (name == PASS) {
             return Macro.DO_NOTHING_MACRO;

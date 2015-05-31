@@ -74,7 +74,7 @@ public class CamelCaseTest extends TemplateTest {
         // Still works inside ?interpret
         assertOutput("<@r\"<#setting booleanFormat='Y,N'>${true}\"?interpret />", "Y");
     }
-
+    
     @Test
     public void camelCaseFtlHeaderParameters() throws IOException, TemplateException {
         getConfiguration().setOutputEncoding("utf-8");
@@ -135,6 +135,16 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains("<#setting foo=1>", "booleanFormat", "\\!boolean_format");
         getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
         assertErrorContains("<#setting foo=1>", "boolean_format", "\\!booleanFormat");
+    }
+    
+    @Test
+    public void camelCaseIncludeParameters() throws IOException, TemplateException {
+        assertOutput("<#ftl stripWhitespace=true>[<#include 'noSuchTemplate' ignoreMissing=true>]", "[]");
+        assertOutput("<#ftl strip_whitespace=true>[<#include 'noSuchTemplate' ignore_missing=true>]", "[]");
+        assertErrorContains("<#ftl stripWhitespace=true>[<#include 'noSuchTemplate' ignore_missing=true>]",
+                "naming convention", "ignore_missing");
+        assertErrorContains("<#ftl strip_whitespace=true>[<#include 'noSuchTemplate' ignoreMissing=true>]",
+                "naming convention", "ignoreMissing");
     }
     
     @Test

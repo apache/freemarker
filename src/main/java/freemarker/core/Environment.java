@@ -159,6 +159,7 @@ public final class Environment extends Configurable {
     private final Namespace mainNamespace;
     private Namespace currentNamespace, globalNamespace;
     private HashMap loadedLibs;
+    private Configurable legacyParent;
 
     private boolean inAttemptBlock;
     private Throwable lastThrowable;
@@ -211,6 +212,12 @@ public final class Environment extends Configurable {
     public Template getTemplate() {
         return (Template)getParent();
     }
+    
+    /** Returns the same value as pre-IcI 2.3.22 getTemplate() did. */
+    Template getTemplate230() {
+        Template legacyParent = (Template) this.legacyParent;
+        return legacyParent != null ? legacyParent : getTemplate(); 
+    }
 
     /**
      * Returns the topmost {@link Template}, with other words, the one for which this {@link Environment} was created.
@@ -225,24 +232,26 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * Used only internally as of yet, no backward compatibility - Returns the {@link Template} that we are "lexically"
-     * inside at moment. This template will change when entering an {@code #include} or calling a macro or function in
-     * another template, or returning to yet another template with {@code #nested}. As such, it's useful in
-     * {@link TemplateDirectiveModel} to find out if from where the directive was called.
+     * Returns the {@link Template} that we are "lexically" inside at moment. This template will change when entering an
+     * {@code #include} or calling a macro or function in another template, or returning to yet another template with
+     * {@code #nested}. As such, it's useful in {@link TemplateDirectiveModel} to find out if from where the directive
+     * was called.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
+     * 
+     * @since 2.3.23
      */
-    Template getCurrentTemplate() {
+    public Template getCurrentTemplate() {
         int ln = instructionStack.size();
         return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
 
     /**
      * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
-     * executing custom directive. This method currently only works calls made from templates with the {@code <@...>}
+     * executing custom directive. This currently only works for calls made from templates with the {@code <@...>}
      * syntax. This should only be called from the {@link TemplateDirectiveModel} that was invoked with {@code <@...>},
-     * otherwise it's return value is not defined by this API (it's usually {@code null}).
+     * otherwise its return value is not defined by this API (it's usually {@code null}).
      * 
      * @since 2.3.22
      */
@@ -517,13 +526,12 @@ public final class Environment extends Configurable {
             currentNamespace = invokingMacroContext.nestedContentNamespace;
             
             final Configurable prevParent;
-            final boolean parentReplacementOn
-                    = isIcI2322OrLater();
+            final boolean parentReplacementOn = isIcI2322OrLater();
+            prevParent = getParent();
             if (parentReplacementOn) {
-                prevParent = getParent();
                 setParent(currentNamespace.getTemplate());
             } else {
-                prevParent = null;
+                legacyParent = currentNamespace.getTemplate();
             }
             
             this.localContextStack = invokingMacroContext.prevLocalContextStack;
@@ -541,6 +549,8 @@ public final class Environment extends Configurable {
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
                 if (parentReplacementOn) {
                     setParent(prevParent);
+                } else {
+                    legacyParent = prevParent;
                 }
                 this.localContextStack = prevLocalContextStack;
             }
@@ -683,17 +693,6 @@ public final class Environment extends Configurable {
             final Namespace prevNamespace = currentNamespace;
             currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
             
-            final Configurable prevParent;
-            final boolean parentReplacementOn
-                    = isIcI2322OrLater();
-            if (parentReplacementOn) {
-                prevParent = getParent();
-                // This line is historically missing from here (a bug), but for BC we leave it so:
-                //setParent(currentNamespace.getTemplate());
-            } else {
-                prevParent = null;
-            }
-            
             try {
                 macroCtx.runMacro(this);
             } catch (ReturnInstruction.Return re) {
@@ -704,9 +703,6 @@ public final class Environment extends Configurable {
                 currentMacroContext = prevMacroCtx;
                 localContextStack = prevLocalContextStack;
                 currentNamespace = prevNamespace;
-                if (parentReplacementOn) {
-                    setParent(prevParent);
-                }
             }
         } finally {
             popElement();
@@ -2060,11 +2056,11 @@ public final class Environment extends Configurable {
     {
         final Template prevTemplate;
         final boolean parentReplacementOn = isIcI2322OrLater();
+        prevTemplate = getTemplate();
         if (parentReplacementOn) {
-            prevTemplate = getTemplate();
             setParent(includedTemplate);
         } else {
-            prevTemplate = null;
+            legacyParent = includedTemplate;
         }
         
         importMacros(includedTemplate);
@@ -2074,6 +2070,8 @@ public final class Environment extends Configurable {
         finally {
             if (parentReplacementOn) {
                 setParent(prevTemplate);
+            } else {
+                legacyParent = prevTemplate;
             }
         }
     }
