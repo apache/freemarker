@@ -66,8 +66,8 @@ final class BuiltinVariable extends Expression {
     
     static final String[] SPEC_VAR_NAMES = new String[] {
         CURRENT_NODE_CC,
-        CURRENT_NODE,
         CURRENT_TEMPLATE_NAME_CC,
+        CURRENT_NODE,
         CURRENT_TEMPLATE_NAME,
         DATA_MODEL_CC,
         DATA_MODEL,
