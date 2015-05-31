@@ -2806,7 +2806,8 @@ Include Include() :
         	    parseExp = exp;
             } else if (attString.equalsIgnoreCase("encoding")) {
             	encodingExp = exp;
-            } else if (attString.equalsIgnoreCase("ignore_missing")) {
+            } else if (attString.equalsIgnoreCase("ignore_missing") || attString.equals("ignoreMissing")) {
+                token_source.checkNamingConvention(att);
             	ignoreMissingExp = exp;
             } else {
                 String correctedName = attString.equals("ignoreMissing") ? "ignore_missing" : null;
