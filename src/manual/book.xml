@@ -15089,8 +15089,19 @@ Sorted by name.last:
               called, and in this order: <literal>m()</literal>,
               <literal>c1()</literal>, <literal>c2()</literal>,
               <literal>r2()</literal>. (Naturally, arguments that aren't
-              evaluated can refer to missing variables without causing
-              error.)</para>
+              evaluated can refer to missing variables without causing error.)
+              It's guaranteed that the
+              <literal><replaceable>case</replaceable></literal> parameter
+              expressions are evaluated left to right, and only until the
+              first match was found. It's also guaranteed that only the
+              <literal><replaceable>result</replaceable></literal> expression
+              that belongs to the first matching
+              <literal><replaceable>case</replaceable></literal> will be
+              evaluated. It's also guaranteed that the
+              <literal><replaceable>defaultResult</replaceable></literal>
+              expression will only be evaluated if there was no matching
+              <literal><replaceable>case</replaceable></literal>
+              parameter.</para>
             </listitem>
 
             <listitem>
@@ -19718,6 +19729,14 @@ There was no specific handler for node y
 
       <itemizedlist spacing="compact">
         <listitem>
+          <para><indexterm>
+              <primary>current_template_name</primary>
+            </indexterm><literal>current_template_name</literal>: The name of
+          the template where we are now (available since FreeMarker
+          2.3.23).</para>
+        </listitem>
+
+        <listitem>
           <para><literal>data_model</literal>: A hash that you can use to
           access the data-model directly. That is, variables you did with
           <literal>global</literal> directive are not visible here.</para>
@@ -19794,6 +19813,15 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
+          <para><indexterm>
+              <primary>main_template_name</primary>
+            </indexterm><literal>main_template_name</literal>: The name of the
+          top level template (available since FreeMarker 2.3.23). <phrase
+          role="forProgrammers">(In Java, this is the template for which
+          <literal>Template.process</literal> was called.)</phrase></para>
+        </listitem>
+
+        <listitem>
           <para><literal>namespace</literal>: A hash that you can use to
           access the current <link
           linkend="dgui_misc_namespace">namespace</link>. Note that global
@@ -19837,8 +19865,18 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
-          <para><literal>template_name</literal>: The name of the current
-          template (available since FreeMarker 2.3.14).</para>
+          <para><indexterm>
+              <primary>template_name</primary>
+            </indexterm><literal>template_name</literal>: <emphasis>Don't use
+          it, because its behavior is strange when macros are used; use
+          <literal>current_template_name</literal> or
+          <literal>main_template_name</literal> instead.</emphasis> Gives the
+          name of the main template, or if we are running an included or
+          imported template, the name of that template. When calling macros,
+          it becomes rather confusing: the macro call won't change the value
+          of this special variable, but when <literal>nested</literal> is
+          called, it changes it to the name of the template that belongs to
+          the current namespace. (Available since FreeMarker 2.3.14.)</para>
         </listitem>
 
         <listitem>
@@ -23705,6 +23743,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added new <link linkend="ref_specvar">special
+              variables</link>, <literal>.current_template_name</literal> and
+              <literal>.main_template_name</literal>. These deprecate
+              <literal>.template_name</literal>, which was always broken when
+              it comes to macro calls. The new
+              <literal>.current_template_name</literal> always returns the
+              name of the template that contains the reference to the special
+              variable, and <literal>.main_template_name</literal> always
+              returns the name of the topmost template.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed, activated with
               <literal>incompatible_improvements</literal> 2.3.23: There's a
               long existing parse-time rule that says that
@@ -23764,6 +23814,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added <literal>Environment.getCurrentTemplate()</literal>
+              method, which return the currently executed template (as opposed
+              to the main template).</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: If a template <quote>file</quote> was
               successfully opened for reading, but then there was an
               <literal>IOException</literal> during reading its content, the
@@ -23776,10 +23832,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/426/">426</link>]:
+              When setting <literal>incompatible_improvements</literal> to
+              2.3.22, the special variable reference
+              <literal>.template_name</literal> in templates always returns
+              the name of the main (topmost) template, due to an oversight in
+              2.3.22. Setting <literal>incompatible_improvements</literal> to
+              2.3.23 restores the old, backward compatible behavior. (Note
+              that the old behavior that we emulate is itself broken; you
+              should use <literal>.current_template_name</literal> or
+              <literal>.main_template_name</literal> instead.)</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: The <literal>log_template_exceptions</literal>
               setting (added in 2.3.22) couldn't be set through the
               <literal>Configurable.setSetting(String, String)</literal>
               API.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed some expression canonical form bugs (they are mostly
+              used in error messages).</para>
             </listitem>
           </itemizedlist>
         </section>

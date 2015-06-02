@@ -538,18 +538,19 @@ public class Configuration extends Configurable implements Cloneable {
      *       </li>
      *       <li><p>
      *          In templates, {@code .template_name} will <em>always</em> return the main (top level) template's name.
-     *          It won't be affected by {@code #include} and {@code #nested} anymore (something like
-     *          {@code .local_template_name} is expected in the future for that, which will actually work, unlike
-     *          {@code .template_name}, which didn't work correctly with macro calls). This is the consequence of the
-     *          lower level fixing described in the next point.
+     *          It won't be affected by {@code #include} and {@code #nested} anymore. This is unintended, a bug with
+     *          {@code incompatible_improvement} 2.3.22 (a consequence of the lower level fixing described in the next
+     *          point). The old behavior of {@code .template_name} is restored if you set
+     *          {@code incompatible_improvement} to 2.3.23 (while {@link Configurable#getParent()}) of
+     *          {@link Environment} keeps the changed behavior shown in the next point). 
      *       </li>
      *       <li><p>
      *          {@code #include} and {@code #nested} doesn't change the parent {@link Template} (see
      *          {@link Configurable#getParent()}) of the {@link Environment} anymore to the {@link Template} that's
-     *          included or where {@code #nested} "returns" to. Thus, the parent of {@link Environment} will be now
-     *          always the main {@link Template}. (The main {@link Template} is the {@link Template} whose
+     *          included or whose namespace {@code #nested} "returns" to. Thus, the parent of {@link Environment} will
+     *          be now always the main {@link Template}. (The main {@link Template} is the {@link Template} whose
      *          {@code process} or {@code createProcessingEnvironment} method was called to initiate the output
-     *          generation.) Note that apart from the effect on FTL's {@code .local_template_name} (see
+     *          generation.) Note that apart from the effect on FTL's {@code .template_name} (see
      *          previous point), this should only matter if you have set settings directly on {@link Template} objects,
      *          and almost nobody does that. Also note that macro calls have never changed the {@link Environment}
      *          parent to the {@link Template} that contains the macro definition, so this mechanism was always broken.
@@ -614,6 +615,13 @@ public class Configuration extends Configurable implements Cloneable {
      *          {@code #function}, like this:
      *          {@code <#list 1..1 as x><#macro callMeLater><#break></#macro></#list><@callMeLater />}.
      *          After activating this fix, this will be a parse time error.
+     *       </li>
+     *       <li><p>
+     *          If you have used {@code incompatible_improvements} 2.3.22 earlier, know that there the behavior of the
+     *          {@code .template_name} special variable used in templates was accidentally altered, but now it's
+     *          restored to be backward compatible with 2.3.0. (Ironically, the restored legacy behavior itself is
+     *          broken when it comes to macro invocations, we just keep it for backward compatibility. If you need fixed
+     *          behavior, use {@code .current_template_name} or {@code .main_template_name} instead.)
      *       </li>
      *     </ul>
      *   </li>

@@ -36,7 +36,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.test.TemplateTest;
 
-public class TestEnvironmentGetTemplateVariants extends TemplateTest {
+public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
 
     private static final StringTemplateLoader TEMPLATES = new StringTemplateLoader();
     static {
@@ -217,8 +217,8 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
                 + "ns: main\n");
     }
     
-    private Configuration createConfiguration(Version version2321) {
-        Configuration cfg = new Configuration(version2321);
+    private Configuration createConfiguration(Version iciVersion) {
+        Configuration cfg = new Configuration(iciVersion);
         cfg.setTemplateLoader(TEMPLATES);
         cfg.setWhitespaceStripping(false);
         return cfg;

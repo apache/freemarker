@@ -99,11 +99,24 @@ final class Include extends TemplateElement {
         if (ignoreMissingExp != null && ignoreMissingExp.isLiteral()) {
             try {
                 try {
+<<<<<<< HEAD
+                    try {
+                        ignoreMissing = Boolean.valueOf(
+                                ignoreMissingExp.evalToBoolean(unboundTemplate.getConfiguration()));
+                    } catch(NonBooleanException e) {
+                        throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
+                                ignoreMissingExp, e);
+                    }
+                } catch(TemplateException e) {
+                    // evaluation of literals must not throw a TemplateException
+                    throw new BugException(e);
+=======
                     ignoreMissingExpPrecalcedValue = Boolean.valueOf(
-                            ignoreMissingExp.evalToBoolean(unboundTemplate.getConfiguration()));
+                            ignoreMissingExp.evalToBoolean(template.getConfiguration()));
                 } catch(NonBooleanException e) {
                     throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
                             ignoreMissingExp, e);
+>>>>>>> origin/2.3-gae
                 }
             } catch (TemplateException e) {
                 // evaluation of literals must not throw a TemplateException

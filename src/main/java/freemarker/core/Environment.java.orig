@@ -237,17 +237,29 @@ public final class Environment extends Configurable {
     
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
+<<<<<<< HEAD
+     * entering an {@code #include} or calling a macro or function in another template, or returning into another
+=======
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
+>>>>>>> origin/2.3-gae
      * template with {@code #nested}. As such, it's useful in {@link TemplateDirectiveModel} to find out if from where
      * the directive was called from.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
      * 
-     * @since 2.3.23
+<<<<<<< HEAD
+     * @since 2.4.0
      */
     public Template getCurrentTemplate() {
         return currentTemplate;
+=======
+     * @since 2.3.23
+     */
+    public Template getCurrentTemplate() {
+        int ln = instructionStack.size();
+        return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
+>>>>>>> origin/2.3-gae
     }
 
     /**
@@ -535,7 +547,10 @@ public final class Environment extends Configurable {
             
             final Configurable prevParent;
             final boolean parentReplacementOn = isIcI2322OrLater();
+<<<<<<< HEAD
+=======
             prevParent = getParent();
+>>>>>>> origin/2.3-gae
             if (parentReplacementOn) {
                 setParent(currentNamespace.getTemplate());
             } else {
@@ -715,8 +730,15 @@ public final class Environment extends Configurable {
             } finally {
                 currentMacroContext = prevMacroCtx;
                 localContextStack = prevLocalContextStack;
+<<<<<<< HEAD
                 currentNamespace = prevCurrentNamespace;
                 currentTemplate = prevCurrentTemplate;
+                if (parentReplacementOn) {
+                    setParent(prevParent);
+                }
+=======
+                currentNamespace = prevNamespace;
+>>>>>>> origin/2.3-gae
             }
         } finally {
             popElement();
@@ -2076,6 +2098,7 @@ public final class Environment extends Configurable {
         
         final Template prevCurrentTemplate = currentTemplate;
         try {
+<<<<<<< HEAD
             currentTemplate = includedTemplate;
             predefineCallables(includedTemplate);
             try {
@@ -2083,9 +2106,16 @@ public final class Environment extends Configurable {
             } finally {
                 if (parentReplacementOn) {
                     setParent(prevTemplate);
+                }
+=======
+            visit(includedTemplate.getRootTreeNode());
+        }
+        finally {
+            if (parentReplacementOn) {
+                setParent(prevTemplate);
             } else {
                 legacyParent = prevTemplate;
-                }
+>>>>>>> origin/2.3-gae
             }
         } finally {
             currentTemplate = prevCurrentTemplate;
