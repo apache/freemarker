@@ -615,10 +615,10 @@ public class Configuration extends Configurable implements Cloneable {
      *       </li>
      *       <li><p>
      *          If you have used {@code incompatible_improvements} 2.3.22 earlier, know that there the behavior of the
-     *          {@code .template_name} special variable (used in template) was accidentally altered, but now it's
+     *          {@code .template_name} special variable used in templates was accidentally altered, but now it's
      *          restored to be backward compatible with 2.3.0. (Ironically, the restored legacy behavior itself is
-     *          broken, but for better backward compatibility, now we emulate the legacy bug, which was accidentally
-     *          fixed.) 
+     *          broken when it comes to macro invocations, we just keep it for backward compatibility. If you need fixed
+     *          behavior, use {@code .current_template_name} or {@code .main_template_name} instead.)
      *       </li>
      *     </ul>
      *   </li>
