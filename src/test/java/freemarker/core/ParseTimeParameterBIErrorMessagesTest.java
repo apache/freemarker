@@ -23,13 +23,13 @@ import freemarker.test.TemplateTest;
 public class ParseTimeParameterBIErrorMessagesTest extends TemplateTest {
 
     @Test
-    public void testChoose() throws Exception {
-        assertErrorContains("${true?choose}", "expecting", "\"(\"");
-        assertErrorContains("${true?choose + 1}", "expecting", "\"(\"");
-        assertErrorContains("${true?choose()}", "?choose", "2 parameters");
-        assertErrorContains("${true?choose(1)}", "?choose", "2 parameters");
-        assertOutput("${true?choose(1, 2)}", "1");
-        assertErrorContains("${true?choose(1, 2, 3)}", "?choose", "2 parameters");
+    public void testThen() throws Exception {
+        assertErrorContains("${true?then}", "expecting", "\"(\"");
+        assertErrorContains("${true?then + 1}", "expecting", "\"(\"");
+        assertErrorContains("${true?then()}", "?then", "2 parameters");
+        assertErrorContains("${true?then(1)}", "?then", "2 parameters");
+        assertOutput("${true?then(1, 2)}", "1");
+        assertErrorContains("${true?then(1, 2, 3)}", "?then", "2 parameters");
     }
 
     @Test
