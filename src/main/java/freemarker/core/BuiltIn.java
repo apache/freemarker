@@ -86,7 +86,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("capitalize", new BuiltInsForStringsBasic.capitalizeBI());
         putBI("ceiling", new ceilingBI());
         putBI("children", new childrenBI());
-        putBI("choose", new BuiltInsWithParseTimeParameters.choose_BI());
+        putBI("then", new BuiltInsWithParseTimeParameters.then_BI());
         putBI("chop_linebreak", "chopLinebreak", new BuiltInsForStringsBasic.chop_linebreakBI());
         putBI("contains", new BuiltInsForStringsBasic.containsBI());        
         putBI("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));

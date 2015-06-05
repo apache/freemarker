@@ -24,9 +24,9 @@
     #text  // f.c.TextBlock
         - content: "\n"  // String
     ${...}  // f.c.DollarVariable
-        - content: ?choose(...)  // f.c.BuiltInsWithParseTimeParameters$choose_BI
+        - content: ?then(...)  // f.c.BuiltInsWithParseTimeParameters$then_BI
             - left-hand operand: x  // f.c.Identifier
-            - right-hand operand: "choose"  // String
+            - right-hand operand: "then"  // String
             - argument value: "y"  // f.c.StringLiteral
                 - embedded template: null  // Null
             - argument value: "n"  // f.c.StringLiteral

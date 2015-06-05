@@ -10502,10 +10502,6 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
-            <para><link linkend="ref_builtin_choose">choose</link></para>
-          </listitem>
-
-          <listitem>
             <para><link
             linkend="ref_builtin_chop_linebreak">chop_linebreak</link></para>
           </listitem>
@@ -10869,6 +10865,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_switch">switch</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_then">then</link></para>
           </listitem>
 
           <listitem>
@@ -13778,76 +13778,6 @@ Tue, Apr 8, '03
           works on strings</link>.</para>
         </section>
 
-        <section xml:id="ref_builtin_choose">
-          <title>choose</title>
-
-          <indexterm>
-            <primary>choose built-in</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>ternary operator</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>format; boolean</primary>
-          </indexterm>
-
-          <note>
-            <para>This built-in exists since FreeMarker 2.3.23.</para>
-          </note>
-
-          <para>Used like
-          <literal><replaceable>booleanExp</replaceable>?choose(<replaceable>whenTrue</replaceable>,
-          <replaceable>whenFalse</replaceable>)</literal>, fills the same role
-          as the ternary operator in C-like languages (i.e.,
-          <literal><replaceable>booleanExp</replaceable> ?
-          <replaceable>whenTrue</replaceable> :
-          <replaceable>whenFalse</replaceable></literal>). If
-          <literal><replaceable>booleanExp</replaceable></literal> evaluates
-          to boolean true then it evaluates and returns its first argument, or
-          else if <literal><replaceable>booleanExp</replaceable></literal>
-          evaluates to boolean false then it evaluates and return its second
-          argument. Off course, all three expression can be arbitrary complex.
-          The argument expressions can have any type, even different
-          types.</para>
-
-          <para>An important special property of this built-in is that only
-          one of the argument expressions will be evaluated. This is unlike
-          with normal method calls, where all argument expressions are
-          evaluated, regardless if the method will need them. This also means
-          that the argument that's not needed can even refer to missing
-          variables without causing error. (It still can't be syntactically
-          invalid of course.)</para>
-
-          <para>Example:</para>
-
-          <programlisting role="template">${true?choose('Y', 'N')}
-${false?choose('Y', 'N')}
-
-&lt;#assign x = 10&gt;
-&lt;#assign y = 20&gt;
-&lt;#-- Prints 100 plus the maximum of x and y: --&gt;
-${100 + (x &gt; y)?choose(x, y)}</programlisting>
-
-          <programlisting role="output">Y
-N
-
-120</programlisting>
-
-          <note>
-            <para>If you need to choose based on a non-boolean value, you
-            should use the <link
-            linkend="ref_builtin_switch"><literal>switch</literal>
-            built-in</link> instead of nesting multiple
-            <literal>choose</literal>-s into each other, like
-            <literal>priority?choose(1, "low", 2, "medium", 3,
-            "high")</literal>, or even <literal>true?switch(priority &lt;= 1,
-            "low", priority == 2, "medium", priority &gt;= 3,
-            "high")</literal>.</para>
-          </note>
-        </section>
-
         <section xml:id="ref_builtin_string_for_boolean">
           <title>string (when used with a boolean value)</title>
 
@@ -13885,7 +13815,7 @@ N
             <listitem>
               <para>As <literal>foo?string("yes", "no")</literal>:
               <emphasis>Deprecated starting from FreeMarker 2.3.23: use <link
-              linkend="ref_builtin_choose"><literal>?choose("yes",
+              linkend="ref_builtin_then"><literal>?then("yes",
               "no")</literal></link> instead. </emphasis>This will return the
               first parameter (here: <literal>"yes"</literal>) if the boolean
               is true, otherwise the second parameter (here:
@@ -13922,6 +13852,80 @@ N
               effect.</para>
             </listitem>
           </itemizedlist>
+        </section>
+
+        <section xml:id="ref_builtin_then">
+          <title>then</title>
+
+          <indexterm>
+            <primary>then built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ternary operator</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format; boolean</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.23.</para>
+          </note>
+
+          <para>Used like
+          <literal><replaceable>booleanExp</replaceable>?then(<replaceable>whenTrue</replaceable>,
+          <replaceable>whenFalse</replaceable>)</literal>, fills the same role
+          as the ternary operator in C-like languages (i.e.,
+          <literal><replaceable>booleanExp</replaceable> ?
+          <replaceable>whenTrue</replaceable> :
+          <replaceable>whenFalse</replaceable></literal>). If
+          <literal><replaceable>booleanExp</replaceable></literal> evaluates
+          to boolean true then it evaluates and returns its first argument, or
+          else if <literal><replaceable>booleanExp</replaceable></literal>
+          evaluates to boolean false then it evaluates and return its second
+          argument. Off course, all three expression can be arbitrary complex.
+          The argument expressions can have any type, even different
+          types.</para>
+
+          <para>An important special property of this built-in is that only
+          one of the argument expressions will be evaluated. This is unlike
+          with normal method calls, where all argument expressions are
+          evaluated, regardless if the method will need them. This also means
+          that the argument that's not needed can even refer to missing
+          variables without causing error. (It still can't be syntactically
+          invalid of course.)</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#assign foo = true&gt;
+${foo?then('Y', 'N')}
+
+&lt;#assign foo = false&gt;
+${foo?then('Y', 'N')}
+
+&lt;#assign x = 10&gt;
+&lt;#assign y = 20&gt;
+&lt;#-- Prints 100 plus the maximum of x and y: --&gt;
+${100 + (x &gt; y)?then(x, y)}</programlisting>
+
+          <programlisting role="output">Y
+
+N
+
+120</programlisting>
+
+          <note>
+            <para>If you need to choose based on a non-boolean value, you
+            should use the <link
+            linkend="ref_builtin_switch"><literal>switch</literal>
+            built-in</link> instead of nesting multiple
+            <literal>then</literal>-s into each other, like
+            <literal>priority?switch(1, "low", 2, "medium", 3,
+            "high")</literal>, or even <literal>true?switch(priority &lt;= 1,
+            "low", priority == 2, "medium", priority &gt;= 3,
+            "high")</literal>.</para>
+          </note>
         </section>
       </section>
 
@@ -15135,9 +15139,9 @@ Sorted by name.last:
 
           <note>
             <para>If you need to switch by a boolean value, you should use the
-            <link linkend="ref_builtin_choose"><literal>choose</literal>
+            <link linkend="ref_builtin_then"><literal>then</literal>
             built-in</link> instead, like
-            <literal><replaceable>matchedBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+            <literal><replaceable>matchedBoolean</replaceable>?then(<replaceable>whenTrue</replaceable>,
             <replaceable>whenFalse</replaceable>)</literal>.</para>
           </note>
 
@@ -23700,13 +23704,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added the <literal>choose</literal> built-in, which can be
+              <para>Added the <literal>then</literal> built-in, which can be
               used like a ternary operator:
-              <literal><replaceable>someBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+              <literal><replaceable>someBoolean</replaceable>?then(<replaceable>whenTrue</replaceable>,
               <replaceable>whenFalse</replaceable>)</literal>. Just like with
               the ternary operator of most other languages, only one of the
               parameter expressions will be evaluated. <link
-              linkend="ref_builtin_choose">More details...</link></para>
+              linkend="ref_builtin_then">More details...</link></para>
             </listitem>
 
             <listitem>
