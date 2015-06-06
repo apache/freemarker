@@ -47,15 +47,14 @@ final class AttemptBlock extends TemplateElement {
             return getNodeTypeSymbol();
         } else {
             StringBuffer buf = new StringBuffer();
-            buf.append("<");
-            buf.append(getNodeTypeSymbol());
-            buf.append(">");
+            buf.append("<").append(getNodeTypeSymbol()).append(">");
             if (attemptBlock != null) {
                 buf.append(attemptBlock.getCanonicalForm());            
             }
             if (recoveryBlock != null) {
                 buf.append(recoveryBlock.getCanonicalForm());
             }
+            buf.append("</").append(getNodeTypeSymbol()).append(">");
             return buf.toString();
         }
     }
