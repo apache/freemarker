@@ -15362,6 +15362,21 @@ Sorted by name.last:
 
           <para>This built-in evaluates a string as an FTL expression. For
           example <literal>"1+2"?eval</literal> returns number 3.</para>
+
+          <para>The evaluated expression sees the same variables (such as
+          locals) that are visible at the place of the invocation of
+          <literal>eval</literal>. That is, it behaves similarly as if in
+          place of <literal><replaceable>s</replaceable>?eval</literal> you
+          had the <emphasis>value of</emphasis>
+          <literal><replaceable>s</replaceable></literal> there. Except, it
+          can't use <link linkend="ref_builtins_loop_var">loop variable
+          built-ins</link> that refer to a loop variable that was created
+          outside <literal><replaceable>s</replaceable></literal>.</para>
+
+          <para>The configuration settings that affect the expression parsing
+          (like syntax) are coming from the <literal>Configuration</literal>
+          object, not from template that invokes
+          <literal>eval</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_has_content">
@@ -15403,10 +15418,9 @@ Sorted by name.last:
             <primary>interpret built-in</primary>
           </indexterm>
 
-          <para>This built-in interprets a string as a FTL template, and
-          returns an user-defined directive that - when applied to any block -
-          executes the template just as if it was included at that point.
-          Example:</para>
+          <para>This built-in interprets a string as an FTL template, and
+          returns an user-defined directive that executes the template just as
+          if it was included at that point. Example:</para>
 
           <programlisting role="template">&lt;#assign x=["a", "b", "c"]&gt;
 &lt;#assign templateSource = r"&lt;#list x as y&gt;${y}&lt;/#list&gt;"&gt;
@@ -15427,13 +15441,18 @@ Sorted by name.last:
           this case the first element of the sequence is the template source,
           and the second element is a name for the inline template. It can be
           useful to give an explicit name to the inline template for debugging
-          purposes. So, you could have written:</para>
+          purposes:</para>
 
           <programlisting role="template">&lt;#assign inlineTemplate = [templateSource, "myInlineTemplate"]?interpret&gt;</programlisting>
 
-          <para>as well in the above template. Note that giving the inline
-          template a name has no immediate effect - it is only useful as an
-          extra bit of information if you get an error report.</para>
+          <para>Note that giving the inline template a name has no immediate
+          effect - it is only useful as an extra bit of information if you get
+          an error report.</para>
+
+          <para>The configuration settings that affect the parsing (like tag
+          syntax and naming convention) are coming from the
+          <literal>Configuration</literal> object, not from template that
+          invokes <literal>eval</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_isType">
