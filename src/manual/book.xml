@@ -15418,9 +15418,11 @@ Sorted by name.last:
             <primary>interpret built-in</primary>
           </indexterm>
 
-          <para>This built-in interprets a string as an FTL template, and
-          returns an user-defined directive that executes the template just as
-          if it was included at that point. Example:</para>
+          <para>This built-in parser a string as an FTL template, and returns
+          an user-defined directive that executes that template, just as if a
+          template with that content were <link
+          linkend="ref_directive_include"><literal>include</literal>-d</link>
+          at that point. Example:</para>
 
           <programlisting role="template">&lt;#assign x=["a", "b", "c"]&gt;
 &lt;#assign templateSource = r"&lt;#list x as y&gt;${y}&lt;/#list&gt;"&gt;
@@ -15433,26 +15435,45 @@ Sorted by name.last:
           <programlisting role="output">abc</programlisting>
 
           <para>As you can see, <literal>inlineTemplate</literal> is a
-          user-defined directive that, when executed, runs the template that
-          was generated on-the-fly using the
-          <literal>interpret</literal>.</para>
-
-          <para>You can also apply this built-in to a two-element sequence. In
-          this case the first element of the sequence is the template source,
-          and the second element is a name for the inline template. It can be
-          useful to give an explicit name to the inline template for debugging
-          purposes:</para>
-
-          <programlisting role="template">&lt;#assign inlineTemplate = [templateSource, "myInlineTemplate"]?interpret&gt;</programlisting>
-
-          <para>Note that giving the inline template a name has no immediate
-          effect - it is only useful as an extra bit of information if you get
-          an error report.</para>
+          user-defined directive that, when executed, runs the template whose
+          content is the value of <literal>templateSource</literal>.</para>
 
           <para>The configuration settings that affect the parsing (like tag
           syntax and naming convention) are coming from the
           <literal>Configuration</literal> object, not from template that
-          invokes <literal>eval</literal>.</para>
+          calls <literal>interpret</literal>. This also means that the
+          previously auto-detected tag syntax or auto-detected naming
+          convention don't effect the parsing of the interpreted template.
+          This is consistent with how the <link
+          linkend="ref_directive_include"><literal>include</literal>
+          directive</link> works.</para>
+
+          <para>The name of the template created by
+          <literal>interpret</literal> is the name of the template that calls
+          <literal>interpret</literal>, plus
+          <literal>"-&gt;anonymous_interpreted"</literal>. For example, if the
+          template that calls the built-in is
+          <literal>"foo/bar.ftl"</literal>, then the name of the resulting
+          template is
+          <literal>"foo/bar.ftl-&gt;anonymous_interpreted"</literal>. Thus,
+          relative paths inside the interpreted template are relative to this
+          path (i.e., the base directory will be <literal>"foo"</literal>),
+          and errors inside the interpreted template will point to this
+          generated template name. </para>
+
+          <para>For more helpful error messages, you can override the template
+          name part after the <literal>"-&gt;"</literal>. For example, let's
+          say <literal>mailTemplateSource</literal> comes from the
+          <literal>mail_template</literal> database table, and in the case of
+          error, you want the error log to contain the database ID of the
+          failing template:</para>
+
+          <programlisting role="template">&lt;#assign inlineTemplate = [mailTemplateSource, "mail_templates id=${mailTemplateId}"]?interpret&gt;</programlisting>
+
+          <para>As you can see, interpret can be applied on a sequence of two
+          items, in which case the first item is the FTL string to interpret,
+          and the second items is the template name used after the
+          <literal>"-&gt;"</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_isType">
