@@ -40,7 +40,6 @@ final class RecoveryBlock extends TemplateElement {
             if (nestedBlock != null) {
                 buf.append(nestedBlock.getCanonicalForm());            
             }
-            buf.append("</").append(getNodeTypeSymbol()).append('>');
             return buf.toString();
         } else {
             return getNodeTypeSymbol();
