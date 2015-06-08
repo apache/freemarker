@@ -15459,7 +15459,7 @@ Sorted by name.last:
           relative paths inside the interpreted template are relative to this
           path (i.e., the base directory will be <literal>"foo"</literal>),
           and errors inside the interpreted template will point to this
-          generated template name. </para>
+          generated template name.</para>
 
           <para>For more helpful error messages, you can override the template
           name part after the <literal>"-&gt;"</literal>. For example, let's
@@ -23894,6 +23894,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting (added in 2.3.22) couldn't be set through the
               <literal>Configurable.setSetting(String, String)</literal>
               API.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed:
+              <literal>InvalidReferenceException.FAST_INSTANCE</literal> could
+              accidentally store reference to an
+              <literal>Environment</literal> instance, which hence was never
+              garbage collected.</para>
             </listitem>
 
             <listitem>
