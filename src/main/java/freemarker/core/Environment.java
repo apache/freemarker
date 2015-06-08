@@ -191,6 +191,10 @@ public final class Environment extends Configurable {
     {
         return (Environment) threadEnv.get();
     }
+    
+    static void setCurrentEnvironment(Environment env) {
+        threadEnv.set(env);
+    }
 
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out)
     {
