@@ -23870,6 +23870,30 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>[UNFINISHED] In the <literal>FreemarkerServlet</literal>
+              <literal>TemplatePath</literal> init-param, paths (like
+              <literal>/templates</literal>) can have a
+              <literal>?set(<replaceable>...</replaceable>)</literal> postfix,
+              where you can set the JavaBean properties of the resulting
+              <literal>TemplateLoader</literal>. For example:
+              <literal>&lt;param-value&gt;/templates?set(attemptFileAccess=false,
+              URLConnectionUsesCaches=false)&lt;/param-value&gt;</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/424">424</link>]:
+              <literal>WebappTemplateLoader</literal> didn't find templates
+              that are stored in jar-s under
+              <literal>META-INF/resources</literal>. Files under that
+              directory are visible as <literal>ServletContext</literal>
+              resources since Servlet 3.0, but because of a trick in
+              <literal>WebappTemplateLoader</literal> where it tries to access
+              resources directly as <literal>File</literal>-s when possible
+              has broken it.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: If a template <quote>file</quote> was
               successfully opened for reading, but then there was an
               <literal>IOException</literal> during reading its content, the

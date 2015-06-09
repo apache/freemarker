@@ -42,6 +42,8 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
+import freemarker.core._ObjectBuilderSettingEvaluator;
+import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.jsp.TaglibFactory;
 import freemarker.ext.jsp.TaglibFactory.ClasspathMetaInfTldSource;
 import freemarker.ext.jsp.TaglibFactory.ClearMetaInfTldSource;
@@ -241,6 +243,7 @@ public class FreemarkerServlet extends HttpServlet
     private static final String TEMPLATE_PATH_PREFIX_CLASS = "class://";
     private static final String TEMPLATE_PATH_PREFIX_FILE = "file://";
     
+    private static final String TEMPLATE_PATH_POSTFIX_SET = "?set(";
     public static final long serialVersionUID = -2440216393145762479L;
 
     /**
@@ -676,9 +679,24 @@ public class FreemarkerServlet extends HttpServlet
             return new MultiTemplateLoader(templateLoaders);
         } else if (templatePath.startsWith("{")
                 && getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
-            throw new RuntimeException("Template paths startin with \"{\" are reseved for future purposes");
+            throw new RuntimeException("Template paths starting with \"{\" are reseved for future purposes");
         } else {
-            return new WebappTemplateLoader(this.getServletContext(), templatePath);
+            int setIdx = templatePath.indexOf(TEMPLATE_PATH_POSTFIX_SET);
+            String pureTemplatePath = setIdx == - 1 ? templatePath : templatePath.substring(0, setIdx); 
+            final WebappTemplateLoader webappTL = new WebappTemplateLoader(this.getServletContext(), pureTemplatePath);
+            if (setIdx != -1) {
+                try {
+                    int nextPos = _ObjectBuilderSettingEvaluator.configureBean(
+                            templatePath, setIdx + TEMPLATE_PATH_POSTFIX_SET.length(), webappTL,
+                            _SettingEvaluationEnvironment.getCurrent());
+                    if (nextPos != templatePath.length()) {
+                        throw new RuntimeException("Template path should end after the setting list");
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to set properties in: " + templatePath, e);
+                }
+            }
+            return webappTL;
         }
     }
 
