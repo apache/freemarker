@@ -7213,7 +7213,13 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 
         <para><emphasis role="term">Settings</emphasis> are named values that
         influence the behavior of FreeMarker. Examples of settings are:
-        <literal>locale</literal>, <literal>number_format</literal></para>
+        <literal>locale</literal>, <literal>number_format</literal>,
+        <literal>default_encoding</literal>,
+        <literal>template_exception_handler</literal>. The full list of
+        settings can be found in the <link
+        xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">Java
+        API documentation of
+        <literal>Configuration.setSetting(...)</literal></link>.</para>
 
         <para>Settings stored in <literal>Configuration</literal> instance can
         be overridden in a <literal>Template</literal> instance. For example
