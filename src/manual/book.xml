@@ -23870,13 +23870,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>[UNFINISHED] In the <literal>FreemarkerServlet</literal>
+              <para>In the <literal>FreemarkerServlet</literal>
               <literal>TemplatePath</literal> init-param, paths (like
               <literal>/templates</literal>) can have a
-              <literal>?set(<replaceable>...</replaceable>)</literal> postfix,
-              where you can set the JavaBean properties of the resulting
-              <literal>TemplateLoader</literal>. For example:
-              <literal>&lt;param-value&gt;/templates?set(attemptFileAccess=false,
+              <literal>?settings(<replaceable>...</replaceable>)</literal>
+              postfix, where you can set the JavaBean properties of the
+              resulting <literal>TemplateLoader</literal>. For example:
+              <literal>&lt;param-value&gt;/templates?settings(attemptFileAccess=false,
               URLConnectionUsesCaches=false)&lt;/param-value&gt;</literal></para>
             </listitem>
 
