@@ -38,7 +38,7 @@ final class InitParamParser {
     static TemplateLoader createTemplateLoader(
             String templatePath, Configuration cfg, Class classLoaderClass, ServletContext srvCtx)
             throws IOException {
-        int settingAssignmentsStart = findTemplatePathSettingAssignmentsStart(templatePath);
+        final int settingAssignmentsStart = findTemplatePathSettingAssignmentsStart(templatePath);
         String pureTemplatePath = (settingAssignmentsStart == -1 ? templatePath : templatePath.substring(0, settingAssignmentsStart))
                 .trim();
         
@@ -69,16 +69,11 @@ final class InitParamParser {
                 // B.C. constraint: Can't throw any checked exceptions.
                 throw new TemplatePathParsingException("Failed to parse template path; closing \"]\" is missing.");
             }
-            List pathItems;
-            try {
-                pathItems = parseCommaSeparatedList(pureTemplatePath.substring(1, pureTemplatePath.length() - 1));
-            } catch (ParseException e) {
-                // B.C. constraint: Can't throw any checked exceptions.
-                throw new TemplatePathParsingException("Failed to parse template path; see cause exception.", e);
-            }
-            TemplateLoader[] templateLoaders = new TemplateLoader[pathItems.size()];
-            for (int i = 0; i < pathItems.size(); i++) {
-                String pathItem = (String) pathItems.get(i);
+            String commaSepItems = pureTemplatePath.substring(1, pureTemplatePath.length() - 1).trim();
+            List listItems = parseCommaSeparatedTemplatePaths(commaSepItems);
+            TemplateLoader[] templateLoaders = new TemplateLoader[listItems.size()];
+            for (int i = 0; i < listItems.size(); i++) {
+                String pathItem = (String) listItems.get(i);
                 templateLoaders[i] = createTemplateLoader(pathItem, cfg, classLoaderClass, srvCtx);
             }
             templateLoader = new MultiTemplateLoader(templateLoaders);
@@ -121,7 +116,7 @@ final class InitParamParser {
             if (s.length() != 0) {
                 valuesList.add(s);
             } else if (i != values.length - 1) {
-                throw new ParseException("Missing list item after a comma", -1);
+                throw new ParseException("Missing list item berfore a comma", -1);
             }
         }
         return valuesList;
@@ -136,6 +131,29 @@ final class InitParamParser {
         return patterns;
     }
     
+    /**
+     * This is like {@link #parseCommaSeparatedList(String)}, but is not confused by commas inside
+     * {@code ?settings(...)} parts at the end of the items.
+     */
+    static List parseCommaSeparatedTemplatePaths(String commaSepItems) {
+        List listItems;
+        listItems = new ArrayList();
+        while (commaSepItems.length() != 0) {
+            int itemSettingAssignmentsStart = findTemplatePathSettingAssignmentsStart(commaSepItems);
+            int pureItemEnd = itemSettingAssignmentsStart != -1 ? itemSettingAssignmentsStart : commaSepItems.length(); 
+            int prevComaIdx = commaSepItems.lastIndexOf(',', pureItemEnd - 1);
+            int itemStart = prevComaIdx != -1 ? prevComaIdx + 1 : 0;
+            final String item = commaSepItems.substring(itemStart).trim();
+            if (item.length() != 0) {
+                listItems.add(0, item);
+            } else if (listItems.size() > 0) {
+                throw new TemplatePathParsingException("Missing list item before a comma");
+            }
+            commaSepItems = prevComaIdx != -1 ? commaSepItems.substring(0, prevComaIdx).trim() : "";
+        }
+        return listItems;
+    }
+
     /**
      * @return -1 if there's no setting assignment.
      */

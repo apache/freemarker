@@ -23870,11 +23870,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>WebappTemplateLoader.setAttemptFileAccess(boolean)</literal>,
+              which can be used to disable the legacy trick where we try to
+              load templates through direct file access, so that template
+              updating works without restarting. Disabling URL connection
+              caches
+              (<literal>someURLBasedTemplateLoader.setURLConnectionUsesCaches(false)</literal>,
+              which is also the default since
+              <literal>incompatible_improvements</literal> 2.3.21) probably
+              solves that on most modern Servlet containers.</para>
+            </listitem>
+
+            <listitem>
               <para>In the <literal>FreemarkerServlet</literal>
               <literal>TemplatePath</literal> init-param, paths (like
               <literal>/templates</literal>) can have a
               <literal>?settings(<replaceable>...</replaceable>)</literal>
-              postfix, where you can set the JavaBean properties of the
+              postfix, with which you can set the JavaBean properties of the
               resulting <literal>TemplateLoader</literal>. For example:
               <literal>&lt;param-value&gt;/templates?settings(attemptFileAccess=false,
               URLConnectionUsesCaches=false)&lt;/param-value&gt;</literal></para>
@@ -23884,13 +23897,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/424">424</link>]:
               <literal>WebappTemplateLoader</literal> didn't find templates
-              that are stored in jar-s under
-              <literal>META-INF/resources</literal>. Files under that
-              directory are visible as <literal>ServletContext</literal>
-              resources since Servlet 3.0, but because of a trick in
-              <literal>WebappTemplateLoader</literal> where it tries to access
-              resources directly as <literal>File</literal>-s when possible
-              has broken it.</para>
+              that are stored in
+              <literal>WEB-INF/lib/*.jar/META-INF/resources</literal>. Files
+              under that directory are visible as
+              <literal>ServletContext</literal> resources since Servlet 3.0,
+              yet <literal>WebappTemplateLoader</literal> has usually failed
+              to see them because of some internal tricks.</para>
             </listitem>
 
             <listitem>

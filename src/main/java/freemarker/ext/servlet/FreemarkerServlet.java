@@ -103,7 +103,9 @@ import freemarker.template.utility.StringUtil;
  * <ul>
  * 
  * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the templates. By default, this is
- * interpreted as web application directory relative URI.<br>
+ * interpreted as a {@link ServletContext} reasource path, which practically means a web application directory relative
+ * path, or a {@code WEB-INF/lib/*.jar/META-INF/resources}-relative path (note that this last didn't work properly
+ * before FreeMarker 2.3.23).<br>
  * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
  * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
  * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
@@ -113,7 +115,12 @@ import freemarker.template.utility.StringUtil;
  * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}.
  * This internally creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't
  * set to at least 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
- * For backward compatibility (not recommended!), you can also use the {@code class://} prefix, like in
+ * Any of the above can have a {@code ?setting(name=value, ...)} postfix to set the JavaBeans properties of the
+ * {@link TemplateLoader} created. For example,
+ * {@code /templates?settings(attemptFileAccess=false, URLConnectionUsesCaches=true)}
+ * calls {@link WebappTemplateLoader#setAttemptFileAccess(boolean)}
+ * and {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. 
+ * For backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
  * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
  * defining class loader of this servlet's class. This can cause template not found errors, if that class (in
  * {@code freemarer.jar} usually) is not local to the web application, while the templates are.<br>

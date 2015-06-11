@@ -4,13 +4,17 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.URLTemplateLoader;
+import freemarker.cache.WebappTemplateLoader;
 import freemarker.template.Configuration;
+import freemarker.template.MockServletContext;
 
 public class InitParamParserTest {
 
@@ -63,14 +67,85 @@ public class InitParamParserTest {
         {
             MultiTemplateLoader mtl = (MultiTemplateLoader) InitParamParser.createTemplateLoader(
                     "["
-                            + "classpath:templates?settings(URLConnectionUsesCaches=false), "
-                            + "classpath:foo/templates?settings(URLConnectionUsesCaches=true)"
-                            + "]",
-                    cfg, this.getClass(), null);
-            assertEquals(Boolean.FALSE, ((URLTemplateLoader) mtl.getTemplateLoader(0)).getURLConnectionUsesCaches());
-            assertEquals(Boolean.TRUE, ((URLTemplateLoader) mtl.getTemplateLoader(1)).getURLConnectionUsesCaches());
-        }
+                    + "templates?settings(URLConnectionUsesCaches=false, attemptFileAccess=false), "
+                    + "foo/templates?settings(URLConnectionUsesCaches=true), "
+                    + "classpath:templates, "
+                    + "classpath:foo/templates?settings(URLConnectionUsesCaches=true)"
+                    + "]",
+                    cfg, this.getClass(), new MockServletContext());
 
+            assertEquals(4, mtl.getTemplateLoaderCount());
+            
+            final WebappTemplateLoader tl1 = (WebappTemplateLoader) mtl.getTemplateLoader(0);
+            assertEquals(Boolean.FALSE, tl1.getURLConnectionUsesCaches());
+            assertFalse(tl1.getAttemptFileAccess());
+            
+            final WebappTemplateLoader tl2 = (WebappTemplateLoader) mtl.getTemplateLoader(1);
+            assertEquals(Boolean.TRUE, tl2.getURLConnectionUsesCaches());
+            assertTrue(tl2.getAttemptFileAccess());
+            
+            final ClassTemplateLoader tl3 = (ClassTemplateLoader) mtl.getTemplateLoader(2);
+            assertNull(tl3.getURLConnectionUsesCaches());
+            
+            final ClassTemplateLoader tl4 = (ClassTemplateLoader) mtl.getTemplateLoader(3);
+            assertEquals(Boolean.TRUE, tl4.getURLConnectionUsesCaches());
+        }
+    }
+    
+    @Test
+    public void testParseCommaSeparatedTemplateLoaderList() {
+        assertEquals(Collections.emptyList(),
+                InitParamParser.parseCommaSeparatedTemplatePaths(""));
+        assertEquals(Collections.emptyList(),
+                InitParamParser.parseCommaSeparatedTemplatePaths("  "));
+        assertEquals(Collections.emptyList(),
+                InitParamParser.parseCommaSeparatedTemplatePaths(","));
+        
+        assertEquals(ImmutableList.of("a"),
+                InitParamParser.parseCommaSeparatedTemplatePaths("a"));
+        assertEquals(ImmutableList.of("a"),
+                
+                InitParamParser.parseCommaSeparatedTemplatePaths("  a  "));
+        assertEquals(ImmutableList.of("a", "b", "c"),
+                InitParamParser.parseCommaSeparatedTemplatePaths("a,b,c"));
+        assertEquals(ImmutableList.of("a", "b", "c"),
+                InitParamParser.parseCommaSeparatedTemplatePaths("  a  ,  b  ,  c  "));
+        assertEquals(ImmutableList.of("a", "b", "c"),
+                InitParamParser.parseCommaSeparatedTemplatePaths("a,b,c,"));
+        
+        try {
+            assertEquals(ImmutableList.of("a", "b", "c"),
+                    InitParamParser.parseCommaSeparatedTemplatePaths("a,b,,c"));
+        } catch (Exception e) {
+            assertThat(e.getMessage(), containsString("comma"));
+        }
+        try {
+            assertEquals(ImmutableList.of("a", "b", "c"),
+                    InitParamParser.parseCommaSeparatedTemplatePaths(",a,b,c"));
+        } catch (Exception e) {
+            assertThat(e.getMessage(), containsString("comma"));
+        }
+        try {
+            assertEquals(ImmutableList.of("a", "b", "c"),
+                    InitParamParser.parseCommaSeparatedTemplatePaths(",a,b,c"));
+        } catch (Exception e) {
+            assertThat(e.getMessage(), containsString("comma"));
+        }
+        
+        assertEquals(ImmutableList.of("a?settings(1)", "b", "c?settings(2)"),
+                InitParamParser.parseCommaSeparatedTemplatePaths("a?settings(1),b,c?settings(2)"));
+        assertEquals(ImmutableList.of("a ? settings ( 1 )", "b", "c ? settings ( 2 )"),
+                InitParamParser.parseCommaSeparatedTemplatePaths(" a ? settings ( 1 ) , b , c ? settings ( 2 ) "));
+        assertEquals(ImmutableList.of("a?settings(1,2,3)", "b?settings(1,2)", "c?settings()"),
+                InitParamParser.parseCommaSeparatedTemplatePaths("a?settings(1,2,3),b?settings(1,2),c?settings()"));
+        assertEquals(ImmutableList.of("a?settings(x=1, y=2)"),
+                InitParamParser.parseCommaSeparatedTemplatePaths("a?settings(x=1, y=2)"));
+        
+        try {
+            InitParamParser.parseCommaSeparatedTemplatePaths("a?foo(x=1, y=2)");
+        } catch (Exception e) {
+            assertThat(e.getMessage(), containsString("settings"));
+        }
     }
 
 }

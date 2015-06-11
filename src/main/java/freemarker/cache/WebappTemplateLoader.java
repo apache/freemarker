@@ -28,12 +28,13 @@ import java.net.URL;
 import javax.servlet.ServletContext;
 
 import freemarker.log.Logger;
+import freemarker.template.Configuration;
 import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.StringUtil;
 
 /**
  * A {@link TemplateLoader} that uses streams reachable through {@link ServletContext#getResource(String)} as its source
- * of templates.
+ * of templates.  
  */
 public class WebappTemplateLoader implements TemplateLoader
 {
@@ -201,9 +202,12 @@ public class WebappTemplateLoader implements TemplateLoader
 
     /**
      * Specifies that before loading templates with {@link ServletContext#getResource(String)}, it should try to load
-     * the template as {@link File}; default is {@code true}. This is a workaround for the case when the servlet
-     * container doesn't show template modifications after the template was already loaded earlier. Another way of
-     * countering that phenomena is disabling the URL connection cache {@link #setURLConnectionUsesCaches(Boolean)}.
+     * the template as {@link File}; default is {@code true}, though it's not always recommended anymore. This is a
+     * workaround for the case when the servlet container doesn't show template modifications after the template was
+     * already loaded earlier. But it's certainly better to counter this problem by disabling the URL connection cache
+     * with {@link #setURLConnectionUsesCaches(Boolean)}, which is also the default behavior with
+     * {@link Configuration#setIncompatibleImprovements(freemarker.template.Version) incompatible_improvements} 2.3.21
+     * and later.
      * 
      * @since 2.3.23
      */
