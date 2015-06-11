@@ -16,7 +16,6 @@
 
 package freemarker.ext.servlet;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,7 +55,6 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNotFoundException;
-import freemarker.template._TemplateAPI;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
@@ -105,7 +103,9 @@ import freemarker.template.utility.StringUtil;
  * <ul>
  * 
  * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the templates. By default, this is
- * interpreted as web application directory relative URI.<br>
+ * interpreted as a {@link ServletContext} reasource path, which practically means a web application directory relative
+ * path, or a {@code WEB-INF/lib/*.jar/META-INF/resources}-relative path (note that this last didn't work properly
+ * before FreeMarker 2.3.23).<br>
  * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
  * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
  * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
@@ -115,7 +115,12 @@ import freemarker.template.utility.StringUtil;
  * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}.
  * This internally creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't
  * set to at least 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
- * For backward compatibility (not recommended!), you can also use the {@code class://} prefix, like in
+ * Any of the above can have a {@code ?setting(name=value, ...)} postfix to set the JavaBeans properties of the
+ * {@link TemplateLoader} created. For example,
+ * {@code /templates?settings(attemptFileAccess=false, URLConnectionUsesCaches=true)}
+ * calls {@link WebappTemplateLoader#setAttemptFileAccess(boolean)}
+ * and {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. 
+ * For backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
  * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
  * defining class loader of this servlet's class. This can cause template not found errors, if that class (in
  * {@code freemarer.jar} usually) is not local to the web application, while the templates are.<br>
@@ -237,10 +242,6 @@ public class FreemarkerServlet extends HttpServlet
     private static final Logger LOG = Logger.getLogger("freemarker.servlet");
     private static final Logger LOG_RT = Logger.getLogger("freemarker.runtime");
 
-    private static final String TEMPLATE_PATH_PREFIX_CLASSPATH = "classpath:";
-    private static final String TEMPLATE_PATH_PREFIX_CLASS = "class://";
-    private static final String TEMPLATE_PATH_PREFIX_FILE = "file://";
-    
     public static final long serialVersionUID = -2440216393145762479L;
 
     /**
@@ -463,7 +464,7 @@ public class FreemarkerServlet extends HttpServlet
         // Process TemplatePath init-param out of order:
         templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
         if (templatePath == null && !config.isTemplateLoaderExplicitlySet()) {
-            templatePath = TEMPLATE_PATH_PREFIX_CLASS;
+            templatePath = InitParamParser.TEMPLATE_PATH_PREFIX_CLASS;
         }
         if (templatePath != null) {
             try {
@@ -554,7 +555,7 @@ public class FreemarkerServlet extends HttpServlet
                     if (classpathTlds != null) {
                         newClasspathTlds.addAll(classpathTlds);
                     }
-                    newClasspathTlds.addAll(parseCommaSeparatedList(value));
+                    newClasspathTlds.addAll(InitParamParser.parseCommaSeparatedList(value));
                     classpathTlds = newClasspathTlds;
                 } else {
                     config.setSetting(name, value);
@@ -585,7 +586,7 @@ public class FreemarkerServlet extends HttpServlet
     private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
         List/*<MetaInfTldSource>*/ metaInfTldSources = null;
         
-        List/*<String>*/ values = parseCommaSeparatedList(value);
+        List/*<String>*/ values = InitParamParser.parseCommaSeparatedList(value);
         for (Iterator it = values.iterator(); it.hasNext();) {
             final String itemStr = (String) it.next();
             final MetaInfTldSource metaInfTldSource;
@@ -631,64 +632,10 @@ public class FreemarkerServlet extends HttpServlet
      *            the template path to create a loader for
      * @return a newly created template loader
      */
-    protected TemplateLoader createTemplateLoader(String templatePath) throws IOException
-    {
-        templatePath = templatePath.trim();
-        
-        if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_CLASS)) {
-            String packagePath = templatePath.substring(TEMPLATE_PATH_PREFIX_CLASS.length());
-            packagePath = normalizeToAbsolutePackagePath(packagePath);
-            return new ClassTemplateLoader(getClass(), packagePath);
-        } else if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_CLASSPATH)) {
-            // To be similar to Spring resource paths, we don't require "//":
-            String packagePath = templatePath.substring(TEMPLATE_PATH_PREFIX_CLASSPATH.length());
-            packagePath = normalizeToAbsolutePackagePath(packagePath);
-            
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            if (classLoader == null) {
-                LOG.warn("No Thread Context Class Loader was found. Falling back to the class loader of "
-                        + this.getClass().getName() + ".");
-                classLoader = getClass().getClassLoader();
-            }
-            
-            return new ClassTemplateLoader(classLoader, packagePath);
-        } else if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_FILE)) {
-                String filePath = templatePath.substring(TEMPLATE_PATH_PREFIX_FILE.length());
-                return new FileTemplateLoader(new File(filePath));
-        } else if (templatePath.startsWith("[")
-                && getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
-            if (!templatePath.endsWith("]")) {
-                // B.C. constraint: Can't throw any checked exceptions.
-                throw new RuntimeException("Failed to parse template path; closing \"]\" is missing.");
-            }
-            List pathItems;
-            try {
-                pathItems = parseCommaSeparatedList(templatePath.substring(1, templatePath.length() - 1));
-            } catch (ParseException e) {
-                // B.C. constraint: Can't throw any checked exceptions.
-                throw new RuntimeException("Failed to parse template path; see cause exception.", e);
-            }
-            TemplateLoader[] templateLoaders = new TemplateLoader[pathItems.size()];
-            for (int i = 0; i < pathItems.size(); i++) {
-                String pathItem = (String) pathItems.get(i);
-                templateLoaders[i] = createTemplateLoader(pathItem);
-            }
-            return new MultiTemplateLoader(templateLoaders);
-        } else if (templatePath.startsWith("{")
-                && getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
-            throw new RuntimeException("Template paths startin with \"{\" are reseved for future purposes");
-        } else {
-            return new WebappTemplateLoader(this.getServletContext(), templatePath);
-        }
+    protected TemplateLoader createTemplateLoader(String templatePath) throws IOException {
+        return InitParamParser.createTemplateLoader(templatePath, getConfiguration(), getClass(), getServletContext());
     }
-
-    private String normalizeToAbsolutePackagePath(String path) {
-        while (path.startsWith("/")) {
-            path = path.substring(1);
-        }
-        return "/" + path;
-    }
-
+    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException
     {
@@ -960,7 +907,7 @@ public class FreemarkerServlet extends HttpServlet
             List/*<Pattern>*/ jettyTaglibJarPatterns = null;
             try {
                 final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
-                jettyTaglibJarPatterns = attrVal != null ? parseCommaSeparatedPatterns(attrVal) : null;
+                jettyTaglibJarPatterns = attrVal != null ? InitParamParser.parseCommaSeparatedPatterns(attrVal) : null;
             } catch (Exception e) {
                 LOG.error("Failed to parse application context attribute \""
                         + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS + "\" - it will be ignored", e);
@@ -984,7 +931,7 @@ public class FreemarkerServlet extends HttpServlet
             String sysPropVal = SecurityUtilities.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
             if (sysPropVal != null) {
                 try {
-                    List/*<String>*/ classpathTldsSysProp = parseCommaSeparatedList(sysPropVal);
+                    List/*<String>*/ classpathTldsSysProp = InitParamParser.parseCommaSeparatedList(sysPropVal);
                     if (classpathTldsSysProp != null) {
                         mergedClassPathTlds.addAll(classpathTldsSysProp);
                     }
@@ -1335,29 +1282,6 @@ public class FreemarkerServlet extends HttpServlet
             // Last resort for those that ignore all of the above
             res.setHeader("Expires", EXPIRATION_DATE);
         }
-    }
-    
-    private List/*<String>*/ parseCommaSeparatedList(String value) throws ParseException {
-        List/*<String>*/ valuesList = new ArrayList();
-        String[] values = StringUtil.split(value, ',');
-        for (int i = 0; i < values.length; i++) {
-            final String s = values[i].trim();
-            if (s.length() != 0) {
-                valuesList.add(s);
-            } else if (i != values.length - 1) {
-                throw new ParseException("Missing list item after a comma", -1);
-            }
-        }
-        return valuesList;
-    }
-
-    private List parseCommaSeparatedPatterns(String value) throws ParseException {
-        List/*<String>*/ values = parseCommaSeparatedList(value);
-        List/*<Pattern>*/ patterns = new ArrayList(values.size());
-        for (int i = 0; i < values.size(); i++) {
-            patterns.add(Pattern.compile((String) values.get(i)));
-        }
-        return patterns;
     }
     
     private int parseSize(String value) throws ParseException {
