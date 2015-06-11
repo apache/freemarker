@@ -70,41 +70,62 @@ public class _ObjectBuilderSettingEvaluator {
     
     // Parsing results:
     private boolean v2321Mode = false;
-    private BuilderExpression rootExp;
     
-    private _ObjectBuilderSettingEvaluator(String src, Class expectedClass, _SettingEvaluationEnvironment env) {
+    private _ObjectBuilderSettingEvaluator(String src, int pos, Class expectedClass, _SettingEvaluationEnvironment env) {
         this.src = src;
+        this.pos = pos;
         this.expectedClass = expectedClass;
         this.env = env;
     }
-    
+
     public static Object eval(String src, Class expectedClass, _SettingEvaluationEnvironment env) throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
-        return new _ObjectBuilderSettingEvaluator(src, expectedClass, env).eval();
+        return new _ObjectBuilderSettingEvaluator(src, 0, expectedClass, env).eval();
+    }
+
+    /**
+     * Used for getting a list of setting assignments (like {@code (x=1, y=2)}) from an existing string, and apply it on
+     * an existing bean.
+     * 
+     * @return The location of the next character to process.
+     */
+    public static int configureBean(String argumentListSrc, int posAfterOpenParen, Object bean, _SettingEvaluationEnvironment env)
+            throws _ObjectBuilderSettingEvaluationException,
+            ClassNotFoundException, InstantiationException, IllegalAccessException {
+        return new _ObjectBuilderSettingEvaluator(argumentListSrc, posAfterOpenParen, bean.getClass(), env).configureBean(bean);
     }
     
     private Object eval() throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
-        parse();
-        return execute();
+        return execute(parse());
+    }
+    
+    private int configureBean(Object bean) throws _ObjectBuilderSettingEvaluationException,
+            ClassNotFoundException, InstantiationException, IllegalAccessException {
+        final PropertyAssignmentsExpression propAssignments = new PropertyAssignmentsExpression(bean);
+        fetchParameterListInto(propAssignments);
+        skipWS();
+        propAssignments.eval();
+        return pos;
     }
 
-    private void parse() throws _ObjectBuilderSettingEvaluationException {
+    private BuilderExpression parse() throws _ObjectBuilderSettingEvaluationException {
         skipWS();
-        rootExp = fetchBuilderCall(true, false);
+        BuilderExpression exp = fetchBuilderCall(true, false);
         skipWS();
         if (pos != src.length()) {
             throw new _ObjectBuilderSettingEvaluationException("end-of-expression", src, pos);
         }
+        return exp;
     }
 
-    private Object execute() throws _ObjectBuilderSettingEvaluationException,
+    private Object execute(BuilderExpression exp) throws _ObjectBuilderSettingEvaluationException,
     // Don't pack these into {@link ObjectFactorySettingEvaluationException} for backward compatibility:
     ClassNotFoundException, InstantiationException, IllegalAccessException {
         if (!v2321Mode) {
-            return ClassUtil.forName(rootExp.className).newInstance();
+            return ClassUtil.forName(exp.className).newInstance();
         } else {
-            return rootExp.eval();
+            return exp.eval();
         }
     }
 
@@ -143,45 +164,53 @@ public class _ObjectBuilderSettingEvaluator {
         }
     
         if (openParen != 0) {
-            // Before 2.3.21 there was no parameter list
-            v2321Mode = true;
-            
-            skipWS();
-            if (fetchOptionalChar(")") != ')') { 
-                do {
-                    skipWS();
-                    
-                    Object paramNameOrValue = fetchValueOrName(false);
-                    if (paramNameOrValue != null) {
-                        skipWS();
-                        if (paramNameOrValue instanceof ParameterName) {
-                            exp.namedParamNames.add(((ParameterName) paramNameOrValue).name);
-                            
-                            skipWS();
-                            fetchRequiredChar("=");
-                            skipWS();
-                            
-                            int paramValPos = pos;
-                            Object paramValue = fetchValueOrName(false);
-                            if (paramValue instanceof ParameterName) {
-                                throw new _ObjectBuilderSettingEvaluationException("concrete value", src, paramValPos);
-                            }
-                            exp.namedParamValues.add(eval(paramValue));
-                        } else {
-                            if (!exp.namedParamNames.isEmpty()) {
-                                throw new _ObjectBuilderSettingEvaluationException(
-                                        "Positional parameters must precede named parameters");
-                            }
-                            exp.positionalParamValues.add(eval(paramNameOrValue));
-                        }
-                        
-                        skipWS();
-                    }
-                } while (fetchRequiredChar(",)") == ',');
-            }
+            fetchParameterListInto(exp);
         }
         
         return exp;
+    }
+
+    private void fetchParameterListInto(ExpressionWithParameters exp) throws _ObjectBuilderSettingEvaluationException {
+        // Before 2.3.21 there was no parameter list
+        v2321Mode = true;
+        
+        skipWS();
+        if (fetchOptionalChar(")") != ')') { 
+            do {
+                skipWS();
+                
+                Object paramNameOrValue = fetchValueOrName(false);
+                if (paramNameOrValue != null) {
+                    skipWS();
+                    if (paramNameOrValue instanceof ParameterName) {
+                        exp.namedParamNames.add(((ParameterName) paramNameOrValue).name);
+                        
+                        skipWS();
+                        fetchRequiredChar("=");
+                        skipWS();
+                        
+                        int paramValPos = pos;
+                        Object paramValue = fetchValueOrName(false);
+                        if (paramValue instanceof ParameterName) {
+                            throw new _ObjectBuilderSettingEvaluationException("concrete value", src, paramValPos);
+                        }
+                        exp.namedParamValues.add(eval(paramValue));
+                    } else {
+                        if (!exp.namedParamNames.isEmpty()) {
+                            throw new _ObjectBuilderSettingEvaluationException(
+                                    "Positional parameters must precede named parameters");
+                        }
+                        if (!exp.getAllowPositionalParameters()) {
+                            throw new _ObjectBuilderSettingEvaluationException(
+                                    "Positional parameters not supported here");
+                        }
+                        exp.positionalParamValues.add(eval(paramNameOrValue));
+                    }
+                    
+                    skipWS();
+                }
+            } while (fetchRequiredChar(",)") == ',');
+        }
     }
 
     private Object fetchValueOrName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
@@ -458,6 +487,73 @@ public class _ObjectBuilderSettingEvaluator {
         String fullClassName = (String) SHORTHANDS.get(className);
         return fullClassName == null ? className : fullClassName;
     }
+    
+    private void setJavaBeanProperties(Object bean,
+            List/*<String>*/ namedParamNames, List/*<Object>*/ namedParamValues)
+            throws _ObjectBuilderSettingEvaluationException {
+        if (namedParamNames.isEmpty()) {
+            return;
+        }
+        
+        final Class cl = bean.getClass();
+        Map/*<String,Method>*/ beanPropSetters;
+        try {
+            PropertyDescriptor[] propDescs = Introspector.getBeanInfo(cl).getPropertyDescriptors();
+            beanPropSetters = new HashMap(propDescs.length * 4 / 3, 1.0f);
+            for (int i = 0; i < propDescs.length; i++) {
+                PropertyDescriptor propDesc = propDescs[i];
+                final Method writeMethod = propDesc.getWriteMethod();
+                if (writeMethod != null) {
+                    beanPropSetters.put(propDesc.getName(), writeMethod);
+                }
+            }
+        } catch (Exception e) {
+            throw new _ObjectBuilderSettingEvaluationException("Failed to inspect " + cl.getName() + " class", e);
+        }
+
+        TemplateHashModel beanTM = null;
+        for (int i = 0; i < namedParamNames.size(); i++) {
+            String name = (String) namedParamNames.get(i);
+            if (!beanPropSetters.containsKey(name)) {
+                throw new _ObjectBuilderSettingEvaluationException(
+                        "The " + cl.getName() + " class has no writeable JavaBeans property called "
+                        + StringUtil.jQuote(name) + ".");
+            }
+            
+            Method beanPropSetter = (Method) beanPropSetters.put(name, null);
+            if (beanPropSetter == null) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "JavaBeans property " + StringUtil.jQuote(name) + " is set twice.");
+            }
+            
+            try {
+                if (beanTM == null) {
+                    TemplateModel wrappedObj = env.getObjectWrapper().wrap(bean);
+                    if (!(wrappedObj instanceof TemplateHashModel)) {
+                        throw new _ObjectBuilderSettingEvaluationException(
+                                "The " + cl.getName() + " class is not a wrapped as TemplateHashModel.");
+                    }
+                    beanTM = (TemplateHashModel) wrappedObj;
+                }
+                
+                TemplateModel m = beanTM.get(beanPropSetter.getName());
+                if (m == null) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "Can't find " + beanPropSetter + " as FreeMarker method.");
+                }
+                if (!(m instanceof TemplateMethodModelEx)) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
+                }
+                List/*TemplateModel*/ args = new ArrayList();
+                args.add(env.getObjectWrapper().wrap(namedParamValues.get(i)));
+                ((TemplateMethodModelEx) m).exec(args);
+            } catch (Exception e) {
+                throw new _ObjectBuilderSettingEvaluationException(
+                        "Failed to set " + StringUtil.jQuote(name), e);
+            }
+        }
+    }
 
     private static class ParameterName {
         
@@ -472,11 +568,16 @@ public class _ObjectBuilderSettingEvaluator {
         abstract Object eval() throws _ObjectBuilderSettingEvaluationException;
     }
     
-    private class BuilderExpression extends SettingExpression {
+    private abstract class ExpressionWithParameters extends SettingExpression {
+        protected List positionalParamValues = new ArrayList();
+        protected List/*<String>*/ namedParamNames = new ArrayList();
+        protected List/*<Object>*/ namedParamValues = new ArrayList();
+        
+        protected abstract boolean getAllowPositionalParameters();
+    }
+    
+    private class BuilderExpression extends ExpressionWithParameters {
         private String className;
-        private List positionalParamValues = new ArrayList();
-        private List/*<String>*/ namedParamNames = new ArrayList();
-        private List/*<Object>*/ namedParamValues = new ArrayList();
         
         Object eval() throws _ObjectBuilderSettingEvaluationException {
             Class cl;
@@ -513,7 +614,7 @@ public class _ObjectBuilderSettingEvaluator {
             Object constructorResult = callConstructor(cl);
             
             // Named parameters will set JavaBeans properties:
-            setJavaBeanProperties(constructorResult);
+            setJavaBeanProperties(constructorResult, namedParamNames, namedParamValues);
 
             final Object result;
             if (clIsBuilderClass) {
@@ -562,71 +663,6 @@ public class _ObjectBuilderSettingEvaluator {
             }
         }
 
-        private void setJavaBeanProperties(Object bean)
-                throws _ObjectBuilderSettingEvaluationException {
-            if (namedParamNames.isEmpty()) {
-                return;
-            }
-            
-            final Class cl = bean.getClass();
-            Map/*<String,Method>*/ beanPropSetters;
-            try {
-                PropertyDescriptor[] propDescs = Introspector.getBeanInfo(cl).getPropertyDescriptors();
-                beanPropSetters = new HashMap(propDescs.length * 4 / 3, 1.0f);
-                for (int i = 0; i < propDescs.length; i++) {
-                    PropertyDescriptor propDesc = propDescs[i];
-                    final Method writeMethod = propDesc.getWriteMethod();
-                    if (writeMethod != null) {
-                        beanPropSetters.put(propDesc.getName(), writeMethod);
-                    }
-                }
-            } catch (Exception e) {
-                throw new _ObjectBuilderSettingEvaluationException("Failed to inspect " + cl.getName() + " class", e);
-            }
-
-            TemplateHashModel beanTM = null;
-            for (int i = 0; i < namedParamNames.size(); i++) {
-                String name = (String) namedParamNames.get(i);
-                if (!beanPropSetters.containsKey(name)) {
-                    throw new _ObjectBuilderSettingEvaluationException(
-                            "The " + cl.getName() + " class has no writeable JavaBeans property called "
-                            + StringUtil.jQuote(name) + ".");
-                }
-                
-                Method beanPropSetter = (Method) beanPropSetters.put(name, null);
-                if (beanPropSetter == null) {
-                        throw new _ObjectBuilderSettingEvaluationException(
-                                "JavaBeans property " + StringUtil.jQuote(name) + " is set twice.");
-                }
-                
-                try {
-                    if (beanTM == null) {
-                        TemplateModel wrappedObj = env.getObjectWrapper().wrap(bean);
-                        if (!(wrappedObj instanceof TemplateHashModel)) {
-                            throw new _ObjectBuilderSettingEvaluationException(
-                                    "The " + cl.getName() + " class is not a wrapped as TemplateHashModel.");
-                        }
-                        beanTM = (TemplateHashModel) wrappedObj;
-                    }
-                    
-                    TemplateModel m = beanTM.get(beanPropSetter.getName());
-                    if (m == null) {
-                        throw new _ObjectBuilderSettingEvaluationException(
-                                "Can't find " + beanPropSetter + " as FreeMarker method.");
-                    }
-                    if (!(m instanceof TemplateMethodModelEx)) {
-                        throw new _ObjectBuilderSettingEvaluationException(
-                                StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
-                    }
-                    List/*TemplateModel*/ args = new ArrayList();
-                    args.add(env.getObjectWrapper().wrap(namedParamValues.get(i)));
-                    ((TemplateMethodModelEx) m).exec(args);
-                } catch (Exception e) {
-                    throw new _ObjectBuilderSettingEvaluationException(
-                            "Failed to set " + StringUtil.jQuote(name), e);
-                }
-            }
-        }
 
         private Object callBuild(Object constructorResult)
                 throws _ObjectBuilderSettingEvaluationException {
@@ -658,6 +694,29 @@ public class _ObjectBuilderSettingEvaluator {
 
         private boolean hasNoParameters() {
             return positionalParamValues.isEmpty() && namedParamValues.isEmpty();
+        }
+
+        protected boolean getAllowPositionalParameters() {
+            return true;
+        }
+        
+    }
+    
+    private class PropertyAssignmentsExpression extends ExpressionWithParameters {
+        
+        private final Object bean;
+        
+        public PropertyAssignmentsExpression(Object bean) {
+            this.bean = bean;
+        }
+
+        Object eval() throws _ObjectBuilderSettingEvaluationException {
+            setJavaBeanProperties(bean, namedParamNames, namedParamValues);
+            return bean;
+        }
+
+        protected boolean getAllowPositionalParameters() {
+            return false;
         }
         
     }
