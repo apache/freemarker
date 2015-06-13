@@ -23894,6 +23894,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>FileTemplateLoader.setEmulateCaseSensitiveFileSystem(boolean)</literal>.
+              This is handy when you are developing on Windows but will deploy
+              to a platform with case sensitive file system. The default is
+              <literal>false</literal>, and <literal>true</literal> is only
+              meant for development, not for production installations. The
+              default can be overridden by setting the
+              <literal>org.freemarker.emulateCaseSensitiveFileSystem</literal>
+              system property to <literal>true</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/424">424</link>]:
               <literal>WebappTemplateLoader</literal> didn't find templates
