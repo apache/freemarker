@@ -128,7 +128,13 @@ final class DynamicKeyName extends Expression {
             throw new UnexpectedTypeException(
                     target, targetModel,
                     "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
-                    NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
+                    NUMERICAL_KEY_LHO_EXPECTED_TYPES,
+                    (targetModel instanceof TemplateHashModel
+                            ? "You had a numberical value inside the []. Currently that's only supported for "
+                                    + "sequences (lists) and strings. To get a Map item with a non-string key, "
+                                    + "use myMap?api.get(myKey)."
+                            : null),
+                    env);
         }
     }
 
