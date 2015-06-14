@@ -1,0 +1,10 @@
+@  // f.c.UnifiedCall
+    - callee: m  // f.c.Identifier
+    - argument name: "x"  // String
+    - argument value: dynamic "..."  // f.c.StringLiteral
+        - embedded template: #mixed_content  // f.c.MixedContent
+            ${...}  // f.c.DollarVariable
+                - content: e1  // f.c.Identifier
+    - argument name: "y"  // String
+    - argument value: "$\\{e2}"  // f.c.StringLiteral
+        - embedded template: null  // Null

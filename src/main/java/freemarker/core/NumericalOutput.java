@@ -21,11 +21,12 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import freemarker.template.TemplateException;
+import freemarker.template.utility.StringUtil;
 
 /**
  * An instruction that outputs the value of a numerical expression.
  */
-final class NumericalOutput extends TemplateElement {
+final class NumericalOutput extends Interpolation {
 
     private final Expression expression;
     private final boolean hasFormat;
@@ -79,9 +80,10 @@ final class NumericalOutput extends TemplateElement {
         env.getOut().write(fmth.format.format(num));
     }
 
-    protected String dump(boolean canonical) {
+    protected String dump(boolean canonical, boolean inStringLiteral) {
         StringBuffer buf = new StringBuffer("#{");
-        buf.append(expression.getCanonicalForm());
+        final String exprCF = expression.getCanonicalForm();
+        buf.append(inStringLiteral ? StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);
         if (hasFormat) {
             buf.append(" ; ");
             buf.append("m");

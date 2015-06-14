@@ -23967,8 +23967,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixed some expression canonical form bugs (they are mostly
-              used in error messages).</para>
+              <para>Bug fixed:
+              <literal>StringUtil.FTLStringLiteralEnc</literal> has escaped
+              <literal>$</literal> (hence generating an illegal escape) and
+              haven't escaped <literal>{</literal> after <literal>$</literal>
+              and <literal>#</literal>. While this function is only used for
+              generating error messages by FreeMarker, it's a public methods
+              so anyone could use it.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bugs fixed: Various canonical form glitches (they are
+              mostly used in error messages).</para>
             </listitem>
           </itemizedlist>
         </section>
