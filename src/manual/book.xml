@@ -23944,18 +23944,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed: The <literal>log_template_exceptions</literal>
-              setting (added in 2.3.22) couldn't be set through the
-              <literal>Configurable.setSetting(String, String)</literal>
-              API.</para>
-            </listitem>
-
-            <listitem>
               <para>Bug fixed:
               <literal>InvalidReferenceException.FAST_INSTANCE</literal> could
               accidentally store reference to an
               <literal>Environment</literal> instance, which hence was never
               garbage collected.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When the template was concurrently replaced
+              during its first loading was still ongoing, the older version of
+              the template could get into the cache with the time stamp of the
+              new version, hence it wasn't reloaded after the configured
+              update delay.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: The <literal>log_template_exceptions</literal>
+              setting (added in 2.3.22) couldn't be set through the
+              <literal>Configurable.setSetting(String, String)</literal>
+              API.</para>
             </listitem>
 
             <listitem>

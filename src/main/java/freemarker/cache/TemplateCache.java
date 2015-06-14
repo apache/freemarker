@@ -405,14 +405,13 @@ public class TemplateCache
                 LOG.debug("Loading template for " + debugName + " from " + StringUtil.jQuoteNoXSS(source));
             }
             
+            lastModified = lastModified == Long.MIN_VALUE ? templateLoader.getLastModified(source) : lastModified;            
             Template template = loadTemplate(
                     templateLoader, source,
                     name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition,
                     encoding, parseAsFTL);
             cachedTemplate.templateOrException = template;
-            cachedTemplate.lastModified = lastModified == Long.MIN_VALUE
-                    ? templateLoader.getLastModified(source)
-                    : lastModified;
+            cachedTemplate.lastModified = lastModified;
             storeCached(tk, cachedTemplate);
             return template;
         } catch(RuntimeException e) {
