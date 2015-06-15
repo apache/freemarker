@@ -18,6 +18,7 @@ package freemarker.core;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Enumeration;
 
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateException;
@@ -104,7 +105,22 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
 
     public String getCanonicalForm() {
-        return StringUtil.ftlQuote(value); 
+        if (dynamicValue == null) {
+            return StringUtil.ftlQuote(value);
+        } else {
+            StringBuffer sb = new StringBuffer();
+            sb.append('"');
+            for (Enumeration childrenEnum = dynamicValue.children(); childrenEnum.hasMoreElements();) {
+                TemplateElement child = (TemplateElement) childrenEnum.nextElement();
+                if (child instanceof Interpolation) {
+                    sb.append(((Interpolation) child).getCanonicalFormInStringLiteral());
+                } else {
+                    sb.append(StringUtil.FTLStringLiteralEnc(child.getCanonicalForm(), '"'));
+                }
+            }
+            sb.append('"');
+            return sb.toString();
+        }
     }
     
     String getNodeTypeSymbol() {
