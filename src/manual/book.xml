@@ -23805,6 +23805,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added tip in the error message for the frequent issue when
+              <literal><replaceable>someMap</replaceable>[<replaceable>someNumber</replaceable>]</literal>
+              complains that
+              <literal><replaceable>someMap</replaceable></literal> is not a
+              sequence nor is coercible to string.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed, activated with
               <literal>incompatible_improvements</literal> 2.3.23: There's a
               long existing parse-time rule that says that
@@ -23944,13 +23952,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed: The <literal>log_template_exceptions</literal>
-              setting (added in 2.3.22) couldn't be set through the
-              <literal>Configurable.setSetting(String, String)</literal>
-              API.</para>
-            </listitem>
-
-            <listitem>
               <para>Bug fixed:
               <literal>InvalidReferenceException.FAST_INSTANCE</literal> could
               accidentally store reference to an
@@ -23959,8 +23960,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixed some expression canonical form bugs (they are mostly
-              used in error messages).</para>
+              <para>Bug fixed: When the template was concurrently replaced
+              during its first loading was still ongoing, the older version of
+              the template could get into the cache with the time stamp of the
+              new version, hence it wasn't reloaded after the configured
+              update delay.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: The <literal>log_template_exceptions</literal>
+              setting (added in 2.3.22) couldn't be set through the
+              <literal>Configurable.setSetting(String, String)</literal>
+              API.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed:
+              <literal>StringUtil.FTLStringLiteralEnc</literal> has escaped
+              <literal>$</literal> (hence generating an illegal escape) and
+              haven't escaped <literal>{</literal> after <literal>$</literal>
+              and <literal>#</literal>. While this function is only used for
+              generating error messages by FreeMarker, it's a public methods
+              so anyone could use it.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bugs fixed: Various canonical form glitches (they are
+              mostly used in error messages).</para>
             </listitem>
           </itemizedlist>
         </section>

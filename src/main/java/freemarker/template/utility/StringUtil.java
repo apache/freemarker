@@ -384,7 +384,6 @@ public class StringUtil {
         escapes['\n'] = 'n';
         escapes['\f'] = 'f';
         escapes['\r'] = 'r';
-        escapes['$'] = '$';
         return escapes;
     }
 
@@ -417,7 +416,6 @@ public class StringUtil {
     private static String FTLStringLiteralEnc(String s, char quotation, boolean addQuotation)
     {
         final int ln = s.length();
-        final int escLn = ESCAPES.length;
         
         final char otherQuotation;
         if (quotation == 0) {
@@ -430,59 +428,38 @@ public class StringUtil {
             throw new IllegalArgumentException("Unsupported quotation character: " + quotation);
         }
         
+        final int escLn = ESCAPES.length;
         StringBuffer buf = null;
         for(int i = 0; i < ln; i++)
         {
             char c = s.charAt(i);
-            if(c < escLn)
-            {
-                char escape = ESCAPES[c];
-                if (escape == otherQuotation) {
-                    escape = 0;
-                }
-                switch(escape)
-                {
-                    case 0:
-                    {
-                        if (buf != null) {
-                            buf.append(c);
-                        }
-                        break;
-                    }
-                    case 1:
-                    {
-                        if (buf == null) {
-                            buf = new StringBuffer(s.length() + 3 + (addQuotation ? 2 : 0));
-                            if (addQuotation) {
-                                buf.append(quotation);
-                            }
-                            buf.append(s.substring(0, i));
-                        }
-                        // hex encoding for characters below 0x20
-                        // that have no other escape representation
-                        buf.append("\\x00");
-                        int c2 = (c >> 4) & 0x0F;
-                        c = (char) (c & 0x0F);
-                        buf.append((char) (c2 < 10 ? c2 + '0' : c2 - 10 + 'A'));
-                        buf.append((char) (c < 10 ? c + '0' : c - 10 + 'A'));
-                        break;
-                    }
-                    default:
-                    {
-                        if (buf == null) {
-                            buf = new StringBuffer(s.length() + 2 + (addQuotation ? 2 : 0));
-                            if (addQuotation) {
-                                buf.append(quotation);
-                            }
-                            buf.append(s.substring(0, i));
-                        }
-                        buf.append('\\');
-                        buf.append(escape);
-                    }
-                }
-            } else {
+            char escape =
+                    c < escLn ? ESCAPES[c] :
+                    c == '{' && i > 0 && isInterpolationStart(s.charAt(i - 1)) ? '{' :
+                    0;
+            if (escape == 0 || escape == otherQuotation) {
                 if (buf != null) {
                     buf.append(c);
+                }
+            } else {
+                if (buf == null) {
+                    buf = new StringBuffer(s.length() + 4 + (addQuotation ? 2 : 0));
+                    if (addQuotation) {
+                        buf.append(quotation);
+                    }
+                    buf.append(s.substring(0, i));
+                }
+                if (escape == 1) {
+                    // hex encoding for characters below 0x20
+                    // that have no other escape representation
+                    buf.append("\\x00");
+                    int c2 = (c >> 4) & 0x0F;
+                    c = (char) (c & 0x0F);
+                    buf.append((char) (c2 < 10 ? c2 + '0' : c2 - 10 + 'A'));
+                    buf.append((char) (c < 10 ? c + '0' : c - 10 + 'A'));
+                } else {
+                    buf.append('\\');
+                    buf.append(escape);
                 }
             }
         }
@@ -495,6 +472,10 @@ public class StringUtil {
             }
             return buf.toString();
         }
+    }
+
+    private static boolean isInterpolationStart(char c) {
+        return c == '$' || c == '#';
     }
 
     /**
