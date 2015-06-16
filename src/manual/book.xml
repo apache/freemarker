@@ -23740,13 +23740,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added <literal>++</literal> and <literal>--</literal>
+              assignment operators, which can be used for
+              <literal>#assign</literal>, <literal>#global</literal> and
+              <literal>#local</literal>. For example, <literal>&lt;#assign
+              counter++&gt;</literal> is equivalent to <literal>&lt;#assign
+              counter = counter + 1&gt;</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Added <literal>+=</literal>, <literal>-=</literal>,
               <literal>*=</literal>, <literal>/=</literal> and
               <literal>%=</literal> assignment operators, which can be used
               for <literal>#assign</literal>, <literal>#global</literal> and
               <literal>#local</literal>. For example, <literal>&lt;#assign
-              counter += 1&gt;</literal> is equivalent to <literal>&lt;#assign
-              counter = counter + 1&gt;</literal>.</para>
+              counter += 2&gt;</literal> is equivalent to <literal>&lt;#assign
+              counter = counter + 2&gt;</literal>.</para>
             </listitem>
 
             <listitem>

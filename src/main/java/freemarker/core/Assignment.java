@@ -30,7 +30,9 @@ final class Assignment extends TemplateElement {
 
     // These must not clash with ArithmeticExpression.TYPE_... constants: 
     private static final int OPERATOR_TYPE_EQUALS = 0x10000;
-    private static final int OPERATOR_TYPE_PLUS = 0x10001;
+    private static final int OPERATOR_TYPE_PLUS_EQUALS = 0x10001;
+    private static final int OPERATOR_TYPE_PLUS_PLUS = 0x10002;
+    private static final int OPERATOR_TYPE_MINUS_MINUS = 0x10003;
     
     private final int/*enum*/ scope;
     private final String variableName;
@@ -41,6 +43,9 @@ final class Assignment extends TemplateElement {
     static final int NAMESPACE = 1;
     static final int LOCAL = 2;
     static final int GLOBAL = 3;
+    
+    // Java 5: Integer.valueOf(1)
+    private static final Number ONE = new Integer(1);
 
     /**
      * @param variableName the variable name to assign to.
@@ -57,10 +62,17 @@ final class Assignment extends TemplateElement {
         
         if (operator == FMParserTokenManager.EQUALS) {
             operatorType = OPERATOR_TYPE_EQUALS;
-        } else if (operator == FMParserTokenManager.PLUS_EQUALS) {
-            operatorType = OPERATOR_TYPE_PLUS;
         } else {
             switch (operator) {
+            case FMParserTokenManager.PLUS_PLUS:
+                operatorType = OPERATOR_TYPE_PLUS_PLUS;
+                break;
+            case FMParserTokenManager.MINUS_MINUS:
+                operatorType = OPERATOR_TYPE_MINUS_MINUS;
+                break;
+            case FMParserTokenManager.PLUS_EQUALS:
+                operatorType = OPERATOR_TYPE_PLUS_EQUALS;
+                break;
             case FMParserTokenManager.MINUS_EQUALS:
                 operatorType = ArithmeticExpression.TYPE_SUBSTRACTION;
                 break;
@@ -141,7 +153,7 @@ final class Assignment extends TemplateElement {
                 }
             }
             
-            if (operatorType == OPERATOR_TYPE_PLUS) {
+            if (operatorType == OPERATOR_TYPE_PLUS_EQUALS) {
                 value = valueExp.eval(env);
                 if (value == null) {
                     if (env.isClassicCompatible()) {
@@ -151,7 +163,7 @@ final class Assignment extends TemplateElement {
                     }
                 }
                 value = AddConcatExpression._eval(env, namespaceExp, null, lhoValue, valueExp, value);
-            } else {  // operatorType == ArithmeticExpression.TYPE_...
+            } else {  // Numerical operation
                 Number lhoNumber;
                 if (lhoValue instanceof TemplateNumberModel) {
                     lhoNumber = EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
@@ -159,9 +171,15 @@ final class Assignment extends TemplateElement {
                     throw new NonNumericalException(variableName, lhoValue, null, env);
                 }
 
-                Number rhoNumber = valueExp.evalToNumber(env);
-                
-                value = ArithmeticExpression._eval(env, this, lhoNumber, operatorType, rhoNumber);
+                if (operatorType == OPERATOR_TYPE_PLUS_PLUS) {
+                    value  = AddConcatExpression._evalOnNumbers(env, parent, lhoNumber, ONE);
+                } else if (operatorType == OPERATOR_TYPE_MINUS_MINUS) {
+                    value = ArithmeticExpression._eval(
+                            env, parent, lhoNumber, ArithmeticExpression.TYPE_SUBSTRACTION, ONE);
+                } else { // operatorType == ArithmeticExpression.TYPE_...
+                    Number rhoNumber = valueExp.evalToNumber(env);
+                    value = ArithmeticExpression._eval(env, this, lhoNumber, operatorType, rhoNumber);
+                }
             }
         }
         
@@ -183,10 +201,14 @@ final class Assignment extends TemplateElement {
         
         buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(variableName));
         
-        buf.append(' ');
+        if (valueExp != null) {
+            buf.append(' ');
+        }
         buf.append(getOperatorTypeAsString());
-        buf.append(' ');
-        buf.append(valueExp.getCanonicalForm());
+        if (valueExp != null) {
+            buf.append(' ');
+            buf.append(valueExp.getCanonicalForm());
+        }
         if (dn != null) {
             if (namespaceExp != null) {
                 buf.append(" in ");
@@ -247,8 +269,12 @@ final class Assignment extends TemplateElement {
     private String getOperatorTypeAsString() {
         if (operatorType == OPERATOR_TYPE_EQUALS) {
             return "=";
-        } else if (operatorType == OPERATOR_TYPE_PLUS) {
+        } else if (operatorType == OPERATOR_TYPE_PLUS_EQUALS) {
             return "+=";
+        } else if (operatorType == OPERATOR_TYPE_PLUS_PLUS) {
+            return "++";
+        } else if (operatorType == OPERATOR_TYPE_MINUS_MINUS) {
+            return "--";
         } else {
             return ArithmeticExpression.getOperatorSymbol(operatorType) + "=";
         }
