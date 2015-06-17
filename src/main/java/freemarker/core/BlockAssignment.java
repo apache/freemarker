@@ -152,10 +152,6 @@ final class BlockAssignment extends TemplateElement {
         }
     }
 
-    boolean isIgnorable() {
-        return false;
-    }
-
     boolean isNestedBlockRepeater() {
         return false;
     }

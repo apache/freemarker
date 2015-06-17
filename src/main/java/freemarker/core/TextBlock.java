@@ -151,8 +151,6 @@ public final class TextBlock extends TemplateElement {
                 }
             }
         }
-        if (result) {
-        }
         return result;
     }
 
@@ -344,7 +342,7 @@ public final class TextBlock extends TemplateElement {
         TemplateElement prevSibling = previousSibling();
         TemplateElement nextSibling = nextSibling();
         return ((prevSibling == null && atTopLevel) || nonOutputtingType(prevSibling))
-              && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
+                && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
     }
     
 
