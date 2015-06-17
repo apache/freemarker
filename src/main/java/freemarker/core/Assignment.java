@@ -144,16 +144,16 @@ final class Assignment extends TemplateElement {
                 lhoValue = namespace.get(variableName);
             }
             
-            if (lhoValue == null) {
-                if (env.isClassicCompatible()) {
-                    lhoValue = TemplateScalarModel.EMPTY_STRING;
-                } else {
-                    throw InvalidReferenceException.getInstance(
-                            variableName, getOperatorTypeAsString(), env);
+            if (operatorType == OPERATOR_TYPE_PLUS_EQUALS) {  // Add or concat operation
+                if (lhoValue == null) {
+                    if (env.isClassicCompatible()) {
+                        lhoValue = TemplateScalarModel.EMPTY_STRING;
+                    } else {
+                        throw InvalidReferenceException.getInstance(
+                                variableName, getOperatorTypeAsString(), env);
+                    }
                 }
-            }
-            
-            if (operatorType == OPERATOR_TYPE_PLUS_EQUALS) {
+                
                 value = valueExp.eval(env);
                 if (value == null) {
                     if (env.isClassicCompatible()) {
@@ -167,6 +167,8 @@ final class Assignment extends TemplateElement {
                 Number lhoNumber;
                 if (lhoValue instanceof TemplateNumberModel) {
                     lhoNumber = EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
+                } else if (lhoValue == null) {
+                    throw InvalidReferenceException.getInstance(variableName, getOperatorTypeAsString(), env);
                 } else {
                     throw new NonNumericalException(variableName, lhoValue, null, env);
                 }

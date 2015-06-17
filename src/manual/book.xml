@@ -2037,6 +2037,14 @@ The average of the price of a python and an elephant is:
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para><link linkend="dgui_template_exp_assignment">Assignment
+              operators</link>: <literal>=</literal>, <literal>+=</literal>,
+              <literal>-=</literal>, <literal>*=</literal>,
+              <literal>/=</literal>, <literal>%=</literal>,
+              <literal>++</literal>, <literal>--</literal></para>
+            </listitem>
           </itemizedlist>
 
           <para>See also: <link
@@ -3747,6 +3755,31 @@ Creating mouse...
             <literal>product.color??</literal> and
             <literal>(product.color)??</literal>.</para>
           </section>
+        </section>
+
+        <section xml:id="dgui_template_exp_assignment">
+          <title>Assignment Operators</title>
+
+          <para>These are actually not expressions, but parts of the syntax of
+          the assignment directives, such as <link
+          linkend="ref_directive_assign"><literal>assign</literal></link>,
+          <link linkend="ref_directive_local"><literal>local</literal></link>
+          and <link
+          linkend="ref_directive_global"><literal>global</literal></link>. As
+          such, they can't be used anywhere else.</para>
+
+          <para><literal>&lt;#assign x += y&gt;</literal> is shorthand for
+          <literal>&lt;#assign x = x + y&gt;</literal>, <literal>&lt;#assign x
+          *= y&gt;</literal> is shorthand for <literal>&lt;#assign x = x *
+          y&gt;</literal>, and so on.</para>
+
+          <para><literal>&lt;#assign x++&gt;</literal> differs from
+          <literal>&lt;#assign x += 1&gt;</literal> (or <literal>&lt;#assign x
+          = x + 1&gt;</literal>) in that it always does arithmetical addition
+          (and fails if the variable is not a number), while the others are
+          overloaded to do string and sequence concatenation and hash
+          addition. <literal>&lt;#assign x--&gt;</literal> is shorthand for
+          <literal>&lt;#assign x -= 1&gt;</literal>.</para>
         </section>
 
         <section xml:id="dgui_template_exp_parentheses">
@@ -6424,7 +6457,7 @@ public class UpperDirective implements TemplateDirectiveModel {
 
 <emphasis>&lt;@repeat count=4&gt;</emphasis>
   Test ${x}
-  &lt;#assign x = x + 1&gt;
+  &lt;#assign x++&gt;
 <emphasis>&lt;/@repeat&gt;</emphasis>
 
 <emphasis>&lt;@repeat count=3 hr=true&gt;</emphasis>
@@ -15994,13 +16027,19 @@ or
             </listitem>
 
             <listitem>
-              <para><literal>=</literal>: Assignment operator; it can also be
+              <para><literal>=</literal>: Assignment operator. It can also be
+              one of the assignment shorthand operators (since FreeMarker
+              2.3.23): <literal>++</literal>, <literal>--</literal>,
               <literal>+=</literal>, <literal>-=</literal>,
               <literal>*=</literal>, <literal>/=</literal> or
-              <literal>%=</literal>. Like <literal>&lt;#assign x +=
-              1&gt;</literal> is the same as <literal>&lt;#assign x = x
-              +1&gt;</literal>. This is supported since FreeMarker
-              2.3.23.</para>
+              <literal>%=</literal>. Like <literal>&lt;#assign
+              x++&gt;</literal> is similar to <literal>&lt;#assign x = x +
+              1&gt;</literal>, and <literal>&lt;#assign x += 2&gt;</literal>
+              is the same as <literal>&lt;#assign x = x + 2&gt;</literal>.
+              Note that <literal>++</literal> always means arithmetical
+              addition (an so it will fail on non-numbers), unlike
+              <literal>+</literal> or <literal>+=</literal> that are
+              overloaded to do string concatenation and such.</para>
             </listitem>
 
             <listitem>
@@ -16037,7 +16076,7 @@ or
           <para>Example: Increments the numerical value stored in variable
           <literal>x</literal>:</para>
 
-          <programlisting role="template">&lt;#assign x = x + 1&gt;</programlisting>
+          <programlisting role="template">&lt;#assign x++&gt;</programlisting>
 
           <para>As a convenience feature, you can do more assignments with one
           <literal>assign</literal> tag. For example this will do the same as
@@ -16045,7 +16084,7 @@ or
 
           <programlisting role="template">&lt;#assign
   seq = ["foo", "bar", "baz"]
-  x = x + 1
+  x++
 &gt;</programlisting>
 
           <para>If you know what namespaces are: <literal>assign</literal>
@@ -16879,6 +16918,14 @@ or
               <literal>&lt;#global "foo-bar" = 1&gt;</literal>. Note that this
               string literal does not expand interpolations (as
               <literal>"${foo}"</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>=</literal>: Assignment operator, which can also
+              be one of the shorthand assignment operators
+              (<literal>++</literal>, <literal>+=</literal>, etc.), just like
+              with <link linkend="ref_directive_assign">the
+              <literal>assign</literal> directive</link>,</para>
             </listitem>
 
             <listitem>
@@ -18029,6 +18076,14 @@ or
               <literal>&lt;#local "foo-bar" = 1&gt;</literal>. Note that this
               string literal does not expand interpolations (as
               <literal>"${foo}"</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>=</literal>: Assignment operator, which can also
+              be one of the shorthand assignment operators
+              (<literal>++</literal>, <literal>+=</literal>, etc.), just like
+              with <link linkend="ref_directive_assign">the
+              <literal>assign</literal> directive</link>,</para>
             </listitem>
 
             <listitem>
@@ -23741,19 +23796,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added <literal>++</literal> and <literal>--</literal>
-              assignment operators, which can be used for
-              <literal>#assign</literal>, <literal>#global</literal> and
-              <literal>#local</literal>. For example, <literal>&lt;#assign
-              counter++&gt;</literal> is equivalent to <literal>&lt;#assign
-              counter = counter + 1&gt;</literal>.</para>
+              assignment operators, which can be used in assignment directives
+              (<literal>#assign</literal>, <literal>#global</literal> and
+              <literal>#local</literal> currently) only. For example,
+              <literal>&lt;#assign counter++&gt;</literal> is equivalent to
+              <literal>&lt;#assign counter = counter + 1&gt;</literal>.</para>
             </listitem>
 
             <listitem>
               <para>Added <literal>+=</literal>, <literal>-=</literal>,
               <literal>*=</literal>, <literal>/=</literal> and
-              <literal>%=</literal> assignment operators, which can be used
-              for <literal>#assign</literal>, <literal>#global</literal> and
-              <literal>#local</literal>. For example, <literal>&lt;#assign
+              <literal>%=</literal> assignment operators, which can be used in
+              assignment directives only. For example, <literal>&lt;#assign
               counter += 2&gt;</literal> is equivalent to <literal>&lt;#assign
               counter = counter + 2&gt;</literal>.</para>
             </listitem>
