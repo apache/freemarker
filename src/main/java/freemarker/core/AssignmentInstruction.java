@@ -17,7 +17,6 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import freemarker.template.TemplateException;
 
@@ -33,24 +32,26 @@ final class AssignmentInstruction extends TemplateElement {
 
     AssignmentInstruction(int scope) {
         this.scope = scope;
-        nestedElements = new ArrayList(1);
+        setRegulatedChildBufferCapacity(1);
     }
 
-    void addAssignment(Assignment ass) {
-        nestedElements.add(ass);
+    void addAssignment(Assignment assignment) {
+        addRegulatedChild(assignment);
     }
     
     void setNamespaceExp(Expression namespaceExp) {
         this.namespaceExp = namespaceExp;
-        for (int i=0; i<nestedElements.size();i++) {
-            ((Assignment) nestedElements.get(i)).setNamespaceExp(namespaceExp);
+        int ln = getRegulatedChildCount();
+        for (int i=0; i< ln; i++) {
+            ((Assignment) getRegulatedChild(i)).setNamespaceExp(namespaceExp);
         }
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        for (int i = 0; i<nestedElements.size(); i++) {
-            Assignment ass = (Assignment) nestedElements.get(i);
-            env.visit(ass);
+        int ln = getRegulatedChildCount();
+        for (int i = 0; i < ln; i++) {
+            Assignment assignment = (Assignment) getRegulatedChild(i);
+            env.visit(assignment);
         }
     }
 
@@ -60,12 +61,13 @@ final class AssignmentInstruction extends TemplateElement {
         buf.append(Assignment.getDirectiveName(scope));
         if (canonical) {
             buf.append(' ');
-            for (int i = 0; i<nestedElements.size(); i++) {
-                Assignment ass = (Assignment) nestedElements.get(i);
-                buf.append(ass.getCanonicalForm());
-                if (i < nestedElements.size() -1) {
+            int ln = getRegulatedChildCount();
+            for (int i = 0; i < ln; i++) {
+                if (i != 0) {
                     buf.append(", ");
                 }
+                Assignment assignment = (Assignment) getRegulatedChild(i);
+                buf.append(assignment.getCanonicalForm());
             }
         } else {
             buf.append("-container");

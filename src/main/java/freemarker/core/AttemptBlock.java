@@ -17,7 +17,6 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import freemarker.template.TemplateException;
 
@@ -32,9 +31,9 @@ final class AttemptBlock extends TemplateElement {
     AttemptBlock(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) {
         this.attemptBlock = attemptBlock;
         this.recoveryBlock = recoveryBlock;
-        nestedElements = new ArrayList(2);
-        nestedElements.add(attemptBlock);
-        nestedElements.add(recoveryBlock);
+        setRegulatedChildBufferCapacity(2);
+        addRegulatedChild(attemptBlock);
+        addRegulatedChild(recoveryBlock);
     }
 
     void accept(Environment env) throws TemplateException, IOException 

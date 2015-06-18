@@ -24023,6 +24023,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/53/">53</link>]:
+              Template parsing was abnormally slow for templates with very
+              high number of sibling AST (abstract syntax tree) nodes.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: When the template was concurrently replaced
               during its first loading was still ongoing, the older version of
               the template could get into the cache with the time stamp of the

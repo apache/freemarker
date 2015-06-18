@@ -17,8 +17,6 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
 
 import freemarker.template.TemplateException;
 
@@ -27,27 +25,21 @@ import freemarker.template.TemplateException;
  */
 final class MixedContent extends TemplateElement {
 
-    MixedContent()
-    {
-        nestedElements = new ArrayList();
-    }
+    MixedContent() { }
 
     void addElement(TemplateElement element) {
-        nestedElements.add(element);
+        addRegulatedChild(element);
     }
 
     void addElement(int index, TemplateElement element) {
-        nestedElements.add(index, element);
+        addRegulatedChild(index, element);
     }
     
     TemplateElement postParseCleanup(boolean stripWhitespace)
         throws ParseException 
     {
         super.postParseCleanup(stripWhitespace);
-        if (nestedElements.size() == 1) {
-            return (TemplateElement) nestedElements.get(0);
-        }
-        return this;
+        return getRegulatedChildCount() == 1 ? getRegulatedChild(0) : this;
     }
 
     /**
@@ -57,18 +49,18 @@ final class MixedContent extends TemplateElement {
     void accept(Environment env) 
         throws TemplateException, IOException 
     {
-        for (int i=0; i<nestedElements.size(); i++) {
-            TemplateElement element = (TemplateElement) nestedElements.get(i);
-            env.visit(element);
+        int ln = getRegulatedChildCount();
+        for (int i = 0; i < ln; i++) {
+            env.visit(getRegulatedChild(i));
         }
     }
 
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuffer buf = new StringBuffer();
-            for (int i = 0; i<nestedElements.size(); i++) {
-                TemplateElement element = (TemplateElement) nestedElements.get(i);
-                buf.append(element.getCanonicalForm());
+            int ln = getRegulatedChildCount();
+            for (int i = 0; i < ln; i++) {
+                buf.append(getRegulatedChild(i).getCanonicalForm());
             }
             return buf.toString();
         } else {
@@ -80,8 +72,9 @@ final class MixedContent extends TemplateElement {
     }
 
     protected boolean isOutputCacheable() {
-        for (Enumeration children = children(); children.hasMoreElements();) {
-            if (!((TemplateElement) children.nextElement()).isOutputCacheable()) {
+        int ln = getRegulatedChildCount();
+        for (int i = 0; i < ln; i++) {
+            if (!getRegulatedChild(i).isOutputCacheable()) {
                 return false;
             }
         }
@@ -109,7 +102,7 @@ final class MixedContent extends TemplateElement {
     }
     
     boolean isIgnorable() {
-        return nestedElements == null || nestedElements.size() == 0;
+        return getRegulatedChildCount() == 0;
     }
 
     boolean isNestedBlockRepeater() {

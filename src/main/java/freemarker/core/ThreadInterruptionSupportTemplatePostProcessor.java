@@ -17,8 +17,6 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateDateModel;
@@ -56,24 +54,22 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
             return;
         }
         
-        final List nestedElements = te.nestedElements;
         final TemplateElement nestedBlock = te.nestedBlock;
 
         // Deepest-first recursion:
         if (nestedBlock != null) {
             addInterruptionChecks(nestedBlock);
         }
-        if (nestedElements != null) {
-            for (Iterator iter = nestedElements.iterator(); iter.hasNext(); ) {
-                addInterruptionChecks((TemplateElement) iter.next());
-            }
+        final int regulatedChildrenCount = te.getRegulatedChildCount();
+        for (int i = 0; i < regulatedChildrenCount; i++) {
+            addInterruptionChecks(te.getRegulatedChild(i));
         }
         
         // Because nestedElements (means fixed schema for the children) and nestedBlock (means no fixed schema) are
         // mutually exclusive, and we only care about the last kind:
         if (te.isNestedBlockRepeater()) {
-            if (te.nestedElements != null) {
-                // Only elements that use nestedBlock instead of nestedElements should be block repeaters.
+            if (regulatedChildrenCount != 0) {
+                // Only elements that use nestedBlock instead of regulatedChildren should be block repeaters.
                 // Note that nestedBlock and nestedElements are (should be) mutually exclusive.
                 throw new BugException(); 
             }
