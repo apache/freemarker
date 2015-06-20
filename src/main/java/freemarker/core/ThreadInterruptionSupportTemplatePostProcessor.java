@@ -54,7 +54,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
             return;
         }
         
-        final TemplateElement nestedBlock = te.nestedBlock;
+        final TemplateElement nestedBlock = te.getNestedBlock();
 
         // Deepest-first recursion:
         if (nestedBlock != null) {
@@ -76,7 +76,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
             try {
                 final ThreadInterruptionCheck interruptedChk = new ThreadInterruptionCheck(te);
                 if (nestedBlock == null) {
-                    te.nestedBlock = interruptedChk;
+                    te.setNestedBlock(interruptedChk);
                 } else {
                     final MixedContent nestedMixedC;
                     if (nestedBlock instanceof MixedContent) {
@@ -84,10 +84,8 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
                     } else {
                         nestedMixedC = new MixedContent();
                         nestedMixedC.setLocation(te.getTemplate(), 0, 0, 0, 0);
-                        nestedMixedC.parent = te;
-                        nestedBlock.parent = nestedMixedC;
                         nestedMixedC.addElement(nestedBlock);
-                        te.nestedBlock = nestedMixedC;
+                        te.setNestedBlock(nestedMixedC);
                     }
                     nestedMixedC.addElement(0, interruptedChk);
                 }
@@ -104,8 +102,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
     static class ThreadInterruptionCheck extends TemplateElement {
         
         private ThreadInterruptionCheck(TemplateElement te) throws ParseException {
-            setLocation(te.getTemplate(), 0, 0, 0, 0);
-            parent = te;
+            setLocation(te.getTemplate(), te.beginColumn, te.beginLine, te.beginColumn, te.beginLine);
         }
 
         void accept(Environment env) throws TemplateException, IOException {

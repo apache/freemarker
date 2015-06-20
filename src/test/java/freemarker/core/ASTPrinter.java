@@ -274,7 +274,7 @@ public class ASTPrinter {
             throw new InvalidASTException("Mixed content with child count less than 2 should removed by optimizatoin, "
                     + "but found one with " + te.getRegulatedChildCount() + " child(ren).");
         }
-        if (te.getRegulatedChildCount() != 0 && te.nestedBlock != null) {
+        if (te.getRegulatedChildCount() != 0 && te.getNestedBlock() != null) {
             throw new InvalidASTException("Can't have both nestedBlock and regulatedChildren."
                     + "\nNode: " + te.dump(false));
         }

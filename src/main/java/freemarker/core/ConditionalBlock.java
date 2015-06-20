@@ -38,14 +38,14 @@ final class ConditionalBlock extends TemplateElement {
     ConditionalBlock(Expression condition, TemplateElement nestedBlock, int type)
     {
         this.condition = condition;
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
         this.type = type;
     }
 
     void accept(Environment env) throws TemplateException, IOException {
         if (condition == null || condition.evalToBoolean(env)) {
-            if (nestedBlock != null) {
-                env.visitByHiddingParent(nestedBlock);
+            if (getNestedBlock() != null) {
+                env.visitByHiddingParent(getNestedBlock());
             }
         }
     }
@@ -60,8 +60,8 @@ final class ConditionalBlock extends TemplateElement {
         }
         if (canonical) {
             buf.append(">");
-            if (nestedBlock != null) {
-                buf.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) {
+                buf.append(getNestedBlock().getCanonicalForm());
             }
             if (isLonelyIf) {
                 buf.append("</#if>");

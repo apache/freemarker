@@ -174,10 +174,10 @@ final class Assignment extends TemplateElement {
                 }
 
                 if (operatorType == OPERATOR_TYPE_PLUS_PLUS) {
-                    value  = AddConcatExpression._evalOnNumbers(env, parent, lhoNumber, ONE);
+                    value  = AddConcatExpression._evalOnNumbers(env, getParent(), lhoNumber, ONE);
                 } else if (operatorType == OPERATOR_TYPE_MINUS_MINUS) {
                     value = ArithmeticExpression._eval(
-                            env, parent, lhoNumber, ArithmeticExpression.TYPE_SUBSTRACTION, ONE);
+                            env, getParent(), lhoNumber, ArithmeticExpression.TYPE_SUBSTRACTION, ONE);
                 } else { // operatorType == ArithmeticExpression.TYPE_...
                     Number rhoNumber = valueExp.evalToNumber(env);
                     value = ArithmeticExpression._eval(env, this, lhoNumber, operatorType, rhoNumber);
@@ -194,7 +194,7 @@ final class Assignment extends TemplateElement {
 
     protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
-        String dn = parent instanceof AssignmentInstruction ? null : getNodeTypeSymbol();
+        String dn = getParent() instanceof AssignmentInstruction ? null : getNodeTypeSymbol();
         if (dn != null) {
             if (canonical) buf.append("<");
             buf.append(dn);

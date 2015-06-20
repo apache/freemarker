@@ -26,7 +26,7 @@ import freemarker.template.TemplateException;
 class Sep extends TemplateElement {
 
     public Sep(TemplateElement nestedBlock) {
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
     }
 
     void accept(Environment env) throws TemplateException, IOException {
@@ -38,7 +38,7 @@ class Sep extends TemplateElement {
         }
         
         if (iterCtx.hasNext()) {
-            env.visitByHiddingParent(nestedBlock);
+            env.visitByHiddingParent(getNestedBlock());
         }
     }
 
@@ -52,7 +52,7 @@ class Sep extends TemplateElement {
         sb.append(getNodeTypeSymbol());
         if (canonical) {
             sb.append('>');
-            if (nestedBlock != null) sb.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
             sb.append("</");
             sb.append(getNodeTypeSymbol());
             sb.append('>');

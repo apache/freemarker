@@ -38,14 +38,14 @@ class EscapeBlock extends TemplateElement {
     }
 
     void setContent(TemplateElement nestedBlock) {
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
         // We don't need it anymore at this point
         this.escapedExpr = null;
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        if (nestedBlock != null) {
-            env.visit(nestedBlock);
+        if (getNestedBlock() != null) {
+            env.visit(getNestedBlock());
         }
     }
 
@@ -61,8 +61,8 @@ class EscapeBlock extends TemplateElement {
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>');
-            if (nestedBlock != null) {
-                sb.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) {
+                sb.append(getNestedBlock().getCanonicalForm());
             }
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }

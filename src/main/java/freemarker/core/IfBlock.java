@@ -44,8 +44,8 @@ final class IfBlock extends TemplateElement {
             Expression condition = cblock.condition;
             env.replaceElementStackTop(cblock);
             if (condition == null || condition.evalToBoolean(env)) {
-                if (cblock.nestedBlock != null) {
-                    env.visitByHiddingParent(cblock.nestedBlock);
+                if (cblock.getNestedBlock() != null) {
+                    env.visitByHiddingParent(cblock.getNestedBlock());
                 }
                 return;
             }

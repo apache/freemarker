@@ -94,7 +94,7 @@ public final class TextBlock extends TemplateElement {
         if (!stripWhitespace || text.length == 0 ) {
             return this;
         }
-        if (parent.parent == null && previousSibling() == null) return this;
+        if (getParent().getParent() == null && previousSibling() == null) return this;
         if (!deliberateLeftTrim) {
             trailingCharsToStrip = trailingCharsToStrip();
         }

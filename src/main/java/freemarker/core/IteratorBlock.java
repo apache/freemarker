@@ -56,7 +56,7 @@ final class IteratorBlock extends TemplateElement {
     {
         this.listExp = listExp;
         this.loopVarName = loopVarName;
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
         this.isForEach = isForEach;
     }
 
@@ -119,10 +119,10 @@ final class IteratorBlock extends TemplateElement {
         }
         if (canonical) {
             buf.append(">");
-            if (nestedBlock != null) {
-                buf.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) {
+                buf.append(getNestedBlock().getCanonicalForm());
             }
-            if (!(parent instanceof ListElseContainer)) {
+            if (!(getParent() instanceof ListElseContainer)) {
                 buf.append("</");
                 buf.append(getNodeTypeSymbol());
                 buf.append('>');
@@ -191,7 +191,7 @@ final class IteratorBlock extends TemplateElement {
         }
         
         boolean accept(Environment env) throws TemplateException, IOException {
-            return executeNestedBlock(env, nestedBlock);
+            return executeNestedBlock(env, getNestedBlock());
         }
 
         void loopForItemsElement(Environment env, TemplateElement nestedBlock, String loopVarName)

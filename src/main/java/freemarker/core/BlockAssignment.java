@@ -36,15 +36,15 @@ final class BlockAssignment extends TemplateElement {
     private final int scope;
 
     BlockAssignment(TemplateElement nestedBlock, String varName, int scope, Expression namespaceExp) {
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
         this.varName = varName;
         this.namespaceExp = namespaceExp;
         this.scope = scope;
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        if (nestedBlock != null) {
-            env.visitAndTransform(nestedBlock, new CaptureOutput(env), null);
+        if (getNestedBlock() != null) {
+            env.visitAndTransform(getNestedBlock(), new CaptureOutput(env), null);
         } else {
 			TemplateModel value = new SimpleScalar("");
 			if (namespaceExp != null) {
@@ -116,7 +116,7 @@ final class BlockAssignment extends TemplateElement {
         }
         if (canonical) {
             sb.append('>');
-            sb.append(nestedBlock == null ? "" : nestedBlock.getCanonicalForm());
+            sb.append(getNestedBlock() == null ? "" : getNestedBlock().getCanonicalForm());
             sb.append("</");
             sb.append(getNodeTypeSymbol());
             sb.append('>');

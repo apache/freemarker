@@ -26,13 +26,13 @@ import freemarker.template.TemplateException;
 final class ElseOfList extends TemplateElement {
     
     ElseOfList(TemplateElement block) {
-        this.nestedBlock = block;
+        setNestedBlock(block);
     }
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        if (nestedBlock != null) {
-            env.visitByHiddingParent(nestedBlock);
+        if (getNestedBlock() != null) {
+            env.visitByHiddingParent(getNestedBlock());
         }
     }
 
@@ -40,8 +40,8 @@ final class ElseOfList extends TemplateElement {
         if (canonical) {
             StringBuffer buf = new StringBuffer();
             buf.append('<').append(getNodeTypeSymbol()).append('>');
-            if (nestedBlock != null) {
-                buf.append(nestedBlock.getCanonicalForm());            
+            if (getNestedBlock() != null) {
+                buf.append(getNestedBlock().getCanonicalForm());            
             }
             return buf.toString();
         } else {

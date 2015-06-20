@@ -38,13 +38,15 @@ abstract public class TemplateElement extends TemplateObject {
 
     private static final int INITIAL_REGULATED_CHILD_BUFFER_CAPACITY = 6;
 
-    TemplateElement parent;
+    private TemplateElement parent;
 
     /**
      * Used by elements that has no fixed schema for its child elements. For example, a {@code #case} can enclose any
      * kind of elements. Only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be non-{@code null}.
+     * This element is typically a {@link MixedContent}, at least before {@link #postParseCleanup(boolean)} (which
+     * optimizes out {@link MixedContent} with child count less than 2).
      */
-    TemplateElement nestedBlock;
+    private TemplateElement nestedBlock;
     
     /**
      * Used by elements that has a fixed schema for its child elements. For example, {@code #switch} can only have
@@ -55,7 +57,8 @@ abstract public class TemplateElement extends TemplateObject {
     private int regulatedChildCount;
 
     /**
-     * The index of the element in the parent's {@link #regulatedChildBuffer} array.
+     * The index of the element in the parent's {@link #regulatedChildBuffer} array, or 0 if this is the
+     * {@link #nestedBlock} of the parent.
      * 
      * @since 2.3.23
      */
@@ -259,6 +262,9 @@ abstract public class TemplateElement extends TemplateObject {
         }
     }
     
+    /**
+     * The element whose child this element is, or {@code null} if this is the root node.
+     */
     public TemplateElement getParent() {
         return parent;
     }
@@ -294,7 +300,8 @@ abstract public class TemplateElement extends TemplateObject {
             movedElement.index = i;
             lRegulatedChildBuffer[i] = movedElement;
         }
-        nestedElement.index = lRegulatedChildCount;
+        nestedElement.index = index;
+        nestedElement.parent = this;
         lRegulatedChildBuffer[index] = nestedElement;
         regulatedChildCount = lRegulatedChildCount + 1;
     }
@@ -311,6 +318,18 @@ abstract public class TemplateElement extends TemplateObject {
         return index;
     }
     
+    final TemplateElement getNestedBlock() {
+        return nestedBlock;
+    }
+
+    final void setNestedBlock(TemplateElement nestedBlock) {
+        if (nestedBlock != null) {
+            nestedBlock.parent = this;
+            nestedBlock.index = 0;
+        }
+        this.nestedBlock = nestedBlock;
+    }
+    
     /**
      * This is a special case, because a root element is not contained in another element, so we couldn't set the
      * private fields.
@@ -321,22 +340,15 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     /**
-     * Walk the tree and set the parent field in all the nested elements recursively.
-     */
-    final void setParentRecursively(TemplateElement parent) {
-        this.parent = parent;
-        int nestedSize = regulatedChildCount;
-        for (int i = 0; i < nestedSize; i++) {
-            regulatedChildBuffer[i].setParentRecursively(this);
-        }
-        if (nestedBlock != null) {
-            nestedBlock.setParentRecursively(this);
-        }
-    }
-
-    /**
-     * We walk the tree and do some cleanup 
-     * @param stripWhitespace whether to clean up superfluous whitespace
+     * Walk the AST subtree rooted by this element, and do simplifications where possible, also remove superfluous
+     * whitespace.
+     * 
+     * @param stripWhitespace
+     *            whether to remove superfluous whitespace
+     * 
+     * @return The element this element should be replaced with in the parent. If it's the same as this element, no
+     *         actual replacement will happen. Note that adjusting the {@link #parent} and {@link #index} of the result
+     *         is the duty of the caller, not of this method.
      */
     TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
         int regulatedChildCount = this.regulatedChildCount;
