@@ -264,6 +264,8 @@ abstract public class TemplateElement extends TemplateObject {
     
     /**
      * The element whose child this element is, or {@code null} if this is the root node.
+     * 
+     * @deprecated Don't use in internal code either; use {@link #getParentElement()} there.
      */
     public TemplateElement getParent() {
         return parent;
@@ -316,6 +318,13 @@ abstract public class TemplateElement extends TemplateObject {
     
     final int getIndex() {
         return index;
+    }
+    
+    /**
+     * The element whose child this element is, or {@code null} if this is the root node.
+     */
+    final TemplateElement getParentElement() {
+        return parent;
     }
     
     final TemplateElement getNestedBlock() {

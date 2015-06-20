@@ -244,11 +244,11 @@ public class ASTPrinter {
     
     public static void validateAST(Template t) throws InvalidASTException {
         final TemplateElement node = t.getRootTreeNode();
-        if (node.getParent() != null) {
+        if (node.getParentElement() != null) {
             throw new InvalidASTException("Root node parent must be null."
                     + "\nRoot node: " + node.dump(false)
                     + "\nParent"
-                    + ": " + node.getParent().getClass() + ", " + node.getParent().dump(false));
+                    + ": " + node.getParentElement().getClass() + ", " + node.getParentElement().dump(false));
         }
         validateAST(node);
     }
@@ -257,11 +257,11 @@ public class ASTPrinter {
         int ln = te.getRegulatedChildCount();
         for (int i = 0; i < ln; i++) {
             TemplateElement child = te.getRegulatedChild(i);
-            if (child.getParent() != te) {
+            if (child.getParentElement() != te) {
                 throw new InvalidASTException("Wrong parent node."
                         + "\nNode: " + child.dump(false)
                         + "\nExpected parent: " + te.dump(false)
-                        + "\nActual parent: " + child.getParent().dump(false));
+                        + "\nActual parent: " + child.getParentElement().dump(false));
             }
             if (child.getIndex() != i) {
                 throw new InvalidASTException("Wrong node index."

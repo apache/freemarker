@@ -64,7 +64,7 @@ final class MixedContent extends TemplateElement {
             }
             return buf.toString();
         } else {
-            if (getParent() == null) {
+            if (getParentElement() == null) {
                 return "root";
             }
             return getNodeTypeSymbol(); // MixedContent is uninteresting in a stack trace.
