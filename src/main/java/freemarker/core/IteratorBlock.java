@@ -122,7 +122,7 @@ final class IteratorBlock extends TemplateElement {
             if (getNestedBlock() != null) {
                 buf.append(getNestedBlock().getCanonicalForm());
             }
-            if (!(getParent() instanceof ListElseContainer)) {
+            if (!(getParentElement() instanceof ListElseContainer)) {
                 buf.append("</");
                 buf.append(getNodeTypeSymbol());
                 buf.append('>');

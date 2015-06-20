@@ -328,6 +328,13 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         return index;
     }
     
+    /**
+     * The element whose child this element is, or {@code null} if this is the root node.
+     */
+    final TemplateElement getParentElement() {
+        return parent;
+    }
+    
     final TemplateElement getNestedBlock() {
         return nestedBlock;
     }

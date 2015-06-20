@@ -1713,7 +1713,7 @@ public final class Environment extends Configurable {
     static private Macro getEnclosingMacro(TemplateElement stackEl) {
         while (stackEl != null) {
             if (stackEl instanceof Macro) return (Macro) stackEl;
-            stackEl = (TemplateElement) stackEl.getParent();
+            stackEl = stackEl.getParentElement();
         }
         return null;
     }
