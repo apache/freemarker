@@ -101,7 +101,7 @@ public class FreeMarkerTree extends JTree {
         }
 
         public TreeNode getParent() {
-            return getNode(element.getParent());
+            return getNode(element.getParentElement());
         }
 
         public boolean isLeaf() {

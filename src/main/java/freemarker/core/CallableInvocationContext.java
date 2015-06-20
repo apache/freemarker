@@ -63,8 +63,8 @@ class CallableInvocationContext implements LocalContext {
     void invoce(Environment env) throws TemplateException, IOException {
         sanityCheck(env);
         // Set default values for unspecified parameters
-        if (callableDefinition.nestedBlock != null) {
-            env.visit(callableDefinition.nestedBlock);
+        if (callableDefinition.getNestedBlock() != null) {
+            env.visit(callableDefinition.getNestedBlock());
         }
     }
 

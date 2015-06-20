@@ -33,14 +33,14 @@ final class Case extends TemplateElement {
     Case(Expression matchingValue, TemplateElement nestedBlock) 
     {
         this.condition = matchingValue;
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
     }
 
     void accept(Environment env) 
         throws TemplateException, IOException 
     {
-        if (nestedBlock != null) {
-            env.visitByHiddingParent(nestedBlock);
+        if (getNestedBlock() != null) {
+            env.visitByHiddingParent(getNestedBlock());
         }
     }
 
@@ -54,7 +54,7 @@ final class Case extends TemplateElement {
         }
         if (canonical) {
             sb.append('>');
-            if (nestedBlock != null) sb.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
         }
         return sb.toString();
     }

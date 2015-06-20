@@ -37,7 +37,7 @@ public final class ReturnInstruction extends TemplateElement {
             // We need to jump out using an exception.
             throw Return.INSTANCE;
         }
-        if (!(getParent() instanceof Macro || getParent().getParent() instanceof Macro)) {
+        if (!(getParentElement() instanceof Macro || getParentElement().getParentElement() instanceof Macro)) {
             // Here also, we need to jump out using an exception.
             throw Return.INSTANCE;
         }

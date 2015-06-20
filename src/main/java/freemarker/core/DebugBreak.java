@@ -31,16 +31,16 @@ public class DebugBreak extends TemplateElement
 {
     public DebugBreak(TemplateElement nestedBlock)
     {
-        this.nestedBlock = nestedBlock;
-        nestedBlock.parent = this;
+        setNestedBlock(nestedBlock);
         copyLocationFrom(nestedBlock);
     }
     
     protected void accept(Environment env) throws TemplateException, IOException
     {
-        if(!DebuggerService.suspendEnvironment(env, this.getUnboundTemplate().getSourceName(), nestedBlock.getBeginLine()))
+        if(!DebuggerService.suspendEnvironment(
+                env, this.getUnboundTemplate().getSourceName(), getNestedBlock().getBeginLine()))
         {
-            nestedBlock.accept(env);
+            getNestedBlock().accept(env);
         }
         else
         {
@@ -53,11 +53,11 @@ public class DebugBreak extends TemplateElement
             StringBuffer sb = new StringBuffer();
             sb.append("<#-- ");
             sb.append("debug break");
-            if (nestedBlock == null) {
+            if (getNestedBlock() == null) {
                 sb.append(" /-->");
             } else {
                 sb.append(" -->");
-                sb.append(nestedBlock.getCanonicalForm());                
+                sb.append(getNestedBlock().getCanonicalForm());                
                 sb.append("<#--/ debug break -->");
             }
             return sb.toString();

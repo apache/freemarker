@@ -969,6 +969,10 @@ TOKEN:
     |
     <MOD_EQUALS : "%=">
     |
+    <PLUS_PLUS : "++">
+    |
+    <MINUS_MINUS : "--">
+    |
     <LESS_THAN : "lt" | "\\lt" | "<" | "&lt;">
     |
     <LESS_THAN_EQUALS : "lte" | "\\lte" | "<=" | "&lt;=">
@@ -2656,21 +2660,38 @@ TemplateElement Assign() :
     }
     (
     	(
-	        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
-	        {
-	           equalsOp = token;
-	        }
-	        exp = Expression()
+            (
+	    	    (
+			        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+			        {
+			           equalsOp = token;
+			        }
+			        exp = Expression()
+		        )
+		        |
+		        (
+	                (<PLUS_PLUS>|<MINUS_MINUS>)
+	                {
+	                   equalsOp = token;
+	                   exp = null;
+	                }
+		        )
+	        )
 	        {
 	            ass = new Assignment(varName, equalsOp.kind, exp, scope);
-	            ass.setLocation(unboundTemplate, nameExp, exp);
+                if (exp != null) {
+                   ass.setLocation(unboundTemplate, nameExp, exp);
+                } else {
+                   ass.setLocation(unboundTemplate, nameExp, equalsOp);
+                }
 	            assignments.add(ass);
 	        }
 	        (
 	            LOOKAHEAD(
 	               [<COMMA>]
 	               (<ID>|<STRING_LITERAL>)
-	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>
+	                       |<PLUS_PLUS>|<MINUS_MINUS>)
 	            )
 	            [<COMMA>]
 	            nameExp = IdentifierOrStringLiteral()
@@ -2679,14 +2700,30 @@ TemplateElement Assign() :
 	                		? ((StringLiteral) nameExp).getAsString()
 	                		: ((Identifier) nameExp).getName();
 	            }
-	            (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
-	            {
-	               equalsOp = token;
-	            }
-	            exp = Expression()
+	            (
+	                (
+	                    (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	                    {
+	                       equalsOp = token;
+	                    }
+	                    exp = Expression()
+	                )
+	                |
+	                (
+	                    (<PLUS_PLUS>|<MINUS_MINUS>)
+	                    {
+	                       equalsOp = token;
+	                       exp = null;
+	                    }
+	                )
+	            )
 	            {
 	                ass = new Assignment(varName, equalsOp.kind, exp, scope);
-	                ass.setLocation(unboundTemplate, nameExp, exp);
+	                if (exp != null) {
+	                   ass.setLocation(unboundTemplate, nameExp, exp);
+	                } else {
+                       ass.setLocation(unboundTemplate, nameExp, equalsOp);
+	                }
 	                assignments.add(ass);
 	            } 
 	        )*
@@ -3711,7 +3748,10 @@ TemplateElement Root() :
     doc = OptionalBlock()
     <EOF>
     {
-        doc.setParentRecursively(null);
-        return doc.postParseCleanup(stripWhitespace);
+        doc.setFieldsForRootElement();
+        doc = doc.postParseCleanup(stripWhitespace);
+        // The cleanup result is possibly an element from deeper:
+        doc.setFieldsForRootElement();
+        return doc;
     }
 }

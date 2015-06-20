@@ -65,7 +65,7 @@ class UnboundCallable extends Macro {
         this.function = function;
         this.catchAllParamName = catchAllParamName; 
         
-        this.nestedBlock = nestedBlock;
+        this.setNestedBlock(nestedBlock);
     }
     
     String[] getParamNames() {
@@ -142,8 +142,8 @@ class UnboundCallable extends Macro {
         if (function) sb.append(')');
         if (canonical) {
             sb.append('>');
-            if (nestedBlock != null) {
-                sb.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) {
+                sb.append(getNestedBlock().getCanonicalForm());
             }
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }

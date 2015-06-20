@@ -16,7 +16,6 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import freemarker.template.TemplateException;
 
@@ -26,9 +25,9 @@ class ListElseContainer extends TemplateElement {
     private final ElseOfList elsePart;
 
     public ListElseContainer(IteratorBlock listPart, ElseOfList elsePart) {
-        nestedElements = new ArrayList(2);
-        nestedElements.add(listPart);
-        nestedElements.add(elsePart);
+        setRegulatedChildBufferCapacity(2);
+        addRegulatedChild(listPart);
+        addRegulatedChild(elsePart);
         this.listPart = listPart;
         this.elsePart = elsePart;
     }
@@ -46,8 +45,9 @@ class ListElseContainer extends TemplateElement {
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuffer buf = new StringBuffer();
-            for (int i = 0; i < nestedElements.size(); i++) {
-                TemplateElement element = (TemplateElement) nestedElements.get(i);
+            int ln = getRegulatedChildCount();
+            for (int i = 0; i < ln; i++) {
+                TemplateElement element = getRegulatedChild(i);
                 buf.append(element.dump(canonical));
             }
             buf.append("</#list>");

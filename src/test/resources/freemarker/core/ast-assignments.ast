@@ -140,3 +140,15 @@
             - assignment source: 5  // f.c.NumberLiteral
             - variable scope: "1"  // Integer
             - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "f"  // String
+            - assignment operator: "++"  // String
+            - assignment source: null  // Null
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
+        #assign  // f.c.Assignment
+            - assignment target: "g"  // String
+            - assignment operator: "--"  // String
+            - assignment source: null  // Null
+            - variable scope: "1"  // Integer
+            - namespace: null  // Null
