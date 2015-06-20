@@ -3775,6 +3775,9 @@ TemplateElement Root() :
     <EOF>
     {
         doc.setParentRecursively(null);
-        return doc.postParseCleanup(stripWhitespace);
+        doc = doc.postParseCleanup(stripWhitespace);
+        // Maybe the cleanup result is an element from deeper.
+        doc.setFieldsForRootElement();
+        return doc;
     }
 }

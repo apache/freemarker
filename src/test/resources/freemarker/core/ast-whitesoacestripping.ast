@@ -1,0 +1,52 @@
+#mixed_content  // f.c.MixedContent
+    #assign  // f.c.Assignment
+        - assignment target: "xs"  // String
+        - assignment operator: "="  // String
+        - assignment source: [...]  // f.c.ListLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    #list  // f.c.IteratorBlock
+        - list source: x  // f.c.Identifier
+        - target loop variable: "xs"  // String
+        #text  // f.c.TextBlock
+            - content: "    "  // String
+        ${...}  // f.c.DollarVariable
+            - content: x  // f.c.Identifier
+        #text  // f.c.TextBlock
+            - content: "\n"  // String
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    #assign  // f.c.Assignment
+        - assignment target: "a"  // String
+        - assignment operator: "="  // String
+        - assignment source: 1  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "b"  // String
+        - assignment operator: "="  // String
+        - assignment source: 1  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    @  // f.c.UnifiedCall
+        - callee: b  // f.c.Identifier
+        #text  // f.c.TextBlock
+            - content: "    x\n"  // String
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    @  // f.c.UnifiedCall
+        - callee: c  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    @  // f.c.UnifiedCall
+        - callee: d  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\na\n"  // String
+    #--...--  // f.c.Comment
+        - content: " comment "  // String
+    #text  // f.c.TextBlock
+        - content: "b"  // String

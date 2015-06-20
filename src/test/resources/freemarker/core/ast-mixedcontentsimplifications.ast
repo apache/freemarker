@@ -1,0 +1,20 @@
+#if  // f.c.ConditionalBlock
+    - condition: true  // f.c.BooleanLiteral
+    - AST-node subtype: "0"  // Integer
+    #if  // f.c.ConditionalBlock
+        - condition: true  // f.c.BooleanLiteral
+        - AST-node subtype: "0"  // Integer
+    #if  // f.c.ConditionalBlock
+        - condition: true  // f.c.BooleanLiteral
+        - AST-node subtype: "0"  // Integer
+        #text  // f.c.TextBlock
+            - content: "        text\n"  // String
+    #text  // f.c.TextBlock
+        - content: "    "  // String
+    #if  // f.c.ConditionalBlock
+        - condition: true  // f.c.BooleanLiteral
+        - AST-node subtype: "0"  // Integer
+        ${...}  // f.c.DollarVariable
+            - content: x  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n"  // String

@@ -235,11 +235,47 @@ public class ASTPrinter {
     }
 
     public static String getASTAsString(Template t, Options opts) throws IOException {
+        validateAST(t);
+        
         StringWriter out = new StringWriter();
         printNode(t.getRootTreeNode(), "", null, opts != null ? opts : Options.DEFAULT_INSTANCE, out);
         return out.toString();
     }
     
+    public static void validateAST(Template t) throws InvalidASTException {
+        final TemplateElement node = t.getRootTreeNode();
+        if (node.getParent() != null) {
+            throw new InvalidASTException("Root node parent must be null."
+                    + "\nRoot node: " + node.dump(false)
+                    + "\nParent"
+                    + ": " + node.getParent().getClass() + ", " + node.getParent().dump(false));
+        }
+        validateAST(node);
+    }
+
+    private static void validateAST(TemplateElement te) {
+        int ln = te.getRegulatedChildCount();
+        for (int i = 0; i < ln; i++) {
+            TemplateElement child = te.getRegulatedChild(i);
+            if (child.getParent() != te) {
+                throw new InvalidASTException("Wrong parent node."
+                        + "\nNode: " + child.dump(false)
+                        + "\nExpected parent: " + te.dump(false)
+                        + "\nActual parent: " + child.getParent().dump(false));
+            }
+            if (child.getIndex() != i) {
+                throw new InvalidASTException("Wrong node index."
+                        + "\nNode: " + child.dump(false)
+                        + "\nExpected index: " + i
+                        + "\nActual index: " + child.getIndex());
+            }
+        }
+        if (te instanceof MixedContent && te.getRegulatedChildCount() < 2) {
+            throw new InvalidASTException("Mixed content with child count less than 2 should removed by optimizatoin, "
+                    + "but found one with " + te.getRegulatedChildCount() + " child(ren).");
+        }
+    }
+
     private static void printNode(Object node, String ind, ParameterRole paramRole, Options opts, Writer out) throws IOException {
         if (node instanceof TemplateObject) {
             TemplateObject tObj = (TemplateObject) node;
@@ -348,4 +384,15 @@ public class ASTPrinter {
         System.out.println(obj);
     }
 
+    public static class InvalidASTException extends RuntimeException {
+
+        public InvalidASTException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public InvalidASTException(String message) {
+            super(message);
+        }
+        
+    }
 }

@@ -197,6 +197,10 @@ abstract public class TemplateElement extends TemplateObject {
         return regulatedChildCount;
     }
 
+    /**
+     * Note: For element with {@code #nestedBlock}, this will hide the {@code #nestedBlock} when that's a
+     * {@link MixedContent}.
+     */
     public Enumeration children() {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.children();
@@ -305,6 +309,15 @@ abstract public class TemplateElement extends TemplateObject {
     
     final int getIndex() {
         return index;
+    }
+    
+    /**
+     * This is a special case, because a root element is not contained in another element, so we couldn't set the
+     * private fields.
+     */
+    final void setFieldsForRootElement() {
+        index = 0;
+        parent = null;
     }
 
     /**
