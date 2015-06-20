@@ -14,6 +14,12 @@
 <@assertEquals expected=8 actual=x />
 <#assign x += x, x += x, x += x>
 <@assertEquals expected=64 actual=x />
+<#assign x++>
+<@assertEquals expected=65 actual=x />
+<#assign x-->
+<@assertEquals expected=64 actual=x />
+<#assign x--, x--, x--, x++, x -= 60>
+<@assertEquals expected=2 actual=x />
 
 <#assign x = 'a'>
 <#assign x += 1>
@@ -45,6 +51,10 @@
 <@assertEquals expected=8 actual=g />
 <#global g += 2>
 <@assertEquals expected=10 actual=g />
+<#global g++>
+<@assertEquals expected=11 actual=g />
+<#global g-->
+<@assertEquals expected=10 actual=g />
 
 <#macro m>
     <#local v = x + g>
@@ -57,16 +67,24 @@
     <@assertEquals expected=8 actual=v />
     <#local v += 2>
     <@assertEquals expected=10 actual=v />
+    <#local v++>
+    <@assertEquals expected=11 actual=v />
+    <#local v-->
+    <@assertEquals expected=10 actual=v />
 </#macro>
 <@m />
 
 <#assign foo = 'a'>
 <@assertFails messageRegexp=r".*expected.*number.*assignment.*foo.*string.*"><#assign foo -= 1></@>
+<@assertFails messageRegexp=r".*expected.*number.*assignment.*foo.*string.*"><#assign foo++></@>
+<@assertFails messageRegexp=r".*expected.*number.*assignment.*foo.*string.*"><#assign foo--></@>
 <#assign x = 1>
 <@assertFails messageRegexp=r"(?s).*expected.*number.*string.*'a'.*"><#assign x -= 'a'></@>
-<@assertFails messageRegexp=r".*assignment.*noSuchVar.*missing.*-=.*"><#assign noSuchVar -= 1></@>
-<@assertFails messageRegexp=r".*assignment.*noSuchVar.*missing.*\+=.*"><#assign noSuchVar += 1></@>
-<@assertFails messageRegexp=r".*assignment.*noSuchVar.*missing.*\*=.*"><#assign noSuchVar *= 1></@>
-<@assertFails messageRegexp=r".*assignment.*noSuchVar.*missing.*/=.*"><#assign noSuchVar /= 1></@>
-<@assertFails messageRegexp=r".*assignment.*noSuchVar.*missing.*%=.*"><#assign noSuchVar %= 1></@>
+<@assertFails messageRegexp=r"(?s).*assignment.*noSuchVar.*missing.*-=.*"><#assign noSuchVar -= 1></@>
+<@assertFails messageRegexp=r"(?s).*assignment.*noSuchVar.*missing.*\+=.*"><#assign noSuchVar += 1></@>
+<@assertFails messageRegexp=r"(?s).*assignment.*noSuchVar.*missing.*\*=.*"><#assign noSuchVar *= 1></@>
+<@assertFails messageRegexp=r"(?s).*assignment.*noSuchVar.*missing.*/=.*"><#assign noSuchVar /= 1></@>
+<@assertFails messageRegexp=r"(?s).*assignment.*noSuchVar.*missing.*%=.*"><#assign noSuchVar %= 1></@>
+<@assertFails messageRegexp=r"(?s).*assignment.*noSuchVar.*missing.*\+\+.*"><#assign noSuchVar++></@>
+<@assertFails messageRegexp=r"(?s).*assignment.*noSuchVar.*missing.*--.*"><#assign noSuchVar--></@>
 <@assertFails messageRegexp=r'(?s).*assignment.*noSuchVar.*missing.*\+=.*"\$".*'><#assign $noSuchVar += 1></@>

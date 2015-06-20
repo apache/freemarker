@@ -48,7 +48,7 @@ final class TransformBlock extends TemplateElement {
                    TemplateElement nestedBlock) {
         this.transformExpression = transformExpression;
         this.namedArgs = namedArgs;
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
     }
 
     void accept(Environment env) 
@@ -69,7 +69,7 @@ final class TransformBlock extends TemplateElement {
             } else {
                 args = EmptyMap.instance;
             }
-            env.visitAndTransform(nestedBlock, ttm, args);
+            env.visitAndTransform(getNestedBlock(), ttm, args);
         }
         else {
             TemplateModel tm = transformExpression.eval(env);
@@ -96,8 +96,8 @@ final class TransformBlock extends TemplateElement {
         }
         if (canonical) {
             sb.append(">");
-            if (nestedBlock != null) {
-                sb.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) {
+                sb.append(getNestedBlock().getCanonicalForm());
             }
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }

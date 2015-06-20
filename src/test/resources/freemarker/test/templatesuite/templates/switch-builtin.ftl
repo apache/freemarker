@@ -20,7 +20,7 @@
 <@assertEquals expected="low;low;medium;medium;high;high;" actual=out />
 
 <#function f x>
-  <#assign fInvocationCnt += 1>
+  <#assign fInvocationCnt++>
   <#return x>
 </#function>
 

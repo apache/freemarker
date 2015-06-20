@@ -29,18 +29,18 @@ import freemarker.template.utility.StandardCompress;
 final class CompressedBlock extends TemplateElement {
 
     CompressedBlock(TemplateElement nestedBlock) { 
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        if (nestedBlock != null) {
-            env.visitAndTransform(nestedBlock, StandardCompress.INSTANCE, null);
+        if (getNestedBlock() != null) {
+            env.visitAndTransform(getNestedBlock(), StandardCompress.INSTANCE, null);
         }
     }
 
     protected String dump(boolean canonical) {
         if (canonical) {
-            String nested = nestedBlock != null ? nestedBlock.getCanonicalForm() : "";
+            String nested = getNestedBlock() != null ? getNestedBlock().getCanonicalForm() : "";
             return "<" + getNodeTypeSymbol() + ">" + nested + "</" + getNodeTypeSymbol() + ">";
         } else {
             return getNodeTypeSymbol();
@@ -64,7 +64,7 @@ final class CompressedBlock extends TemplateElement {
     }
 
     boolean isIgnorable() {
-        return nestedBlock == null || nestedBlock.isIgnorable();
+        return getNestedBlock() == null || getNestedBlock().isIgnorable();
     }
 
     boolean isNestedBlockRepeater() {

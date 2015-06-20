@@ -17,11 +17,8 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
@@ -41,20 +38,33 @@ import freemarker.template.TemplateSequenceModel;
  */
 abstract public class TemplateElement extends TemplateObject implements TreeNode {
 
-    TemplateElement parent;
+    private static final int INITIAL_REGULATED_CHILD_BUFFER_CAPACITY = 6;
+
+    private TemplateElement parent;
 
     /**
      * Used by elements that has no fixed schema for its child elements. For example, a {@code #case} can enclose any
-     * kind of elements. Only one of {@link #nestedBlock} and {@link #nestedElements} can be non-{@code null} (or both).
+     * kind of elements. Only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be non-{@code null}.
+     * This element is typically a {@link MixedContent}, at least before {@link #postParseCleanup(boolean)} (which
+     * optimizes out {@link MixedContent} with child count less than 2).
      */
-    TemplateElement nestedBlock;
+    private TemplateElement nestedBlock;
     
     /**
      * Used by elements that has a fixed schema for its child elements. For example, {@code #switch} can only have
-     * {@code #case} and {@code #default} child elements. Only one of {@link #nestedBlock} and {@link #nestedElements}
-     * can be non-{@code null} (or both).
+     * {@code #case} and {@code #default} child elements. Only one of {@link #nestedBlock} and
+     * {@link #regulatedChildBuffer} can be non-{@code null}.
      */
-    List nestedElements; 
+    private TemplateElement[] regulatedChildBuffer;
+    private int regulatedChildCount;
+
+    /**
+     * The index of the element in the parent's {@link #regulatedChildBuffer} array, or 0 if this is the
+     * {@link #nestedBlock} of the parent.
+     * 
+     * @since 2.3.23
+     */
+    private int index;
 
     /**
      * Processes the contents of this <tt>TemplateElement</tt> and
@@ -101,7 +111,7 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     /**
      * Tells if this element possibly executes its {@link #nestedBlock} for many times. This flag is useful when
      * a template AST is modified for running time limiting (see {@link ThreadInterruptionSupportTemplatePostProcessor}).
-     * Elements that use {@link #nestedElements} should not need this, as the insertion of the timeout checks is
+     * Elements that use {@link #regulatedChildBuffer} should not need this, as the insertion of the timeout checks is
      * impossible there, given their rigid nested element schema.
      */
     abstract boolean isNestedBlockRepeater();
@@ -131,10 +141,14 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     }
     
     public TemplateSequenceModel getChildNodes() {
-        if (nestedElements != null) {
-            return new SimpleSequence(nestedElements);
+        if (regulatedChildBuffer != null) {
+            final SimpleSequence seq = new SimpleSequence(regulatedChildCount);
+            for (int i = 0; i < regulatedChildCount; i++) {
+                seq.add(regulatedChildBuffer[i]);
+            }
+            return seq;
         }
-        SimpleSequence result = new SimpleSequence();
+        SimpleSequence result = new SimpleSequence(1);
         if (nestedBlock != null) {
             result.add(nestedBlock);
         } 
@@ -147,13 +161,15 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         return classname.substring(shortNameOffset);
     }
     
-// Methods so that we can implement the Swing TreeNode API.    
+    // Methods so that we can implement the Swing TreeNode API.    
 
     public boolean isLeaf() {
-        return nestedBlock == null 
-               && (nestedElements == null || nestedElements.isEmpty());
+        return nestedBlock == null && regulatedChildCount == 0;
     }
 
+    /**
+     * @deprecated Meaningless; simply returns if the node currently has any child nodes.
+     */
     public boolean getAllowsChildren() {
         return !isLeaf();
     }
@@ -169,9 +185,12 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
             if (node == nestedBlock) {
                 return 0;
             }
-        }
-        else if (nestedElements != null) {
-            return nestedElements.indexOf(node);
+        } else {
+            for (int i = 0; i < regulatedChildCount; i++) {
+                if (regulatedChildBuffer[i].equals(node)) { 
+                    return i;
+                }
+            }
         }
         return -1;
     }
@@ -183,12 +202,13 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         if (nestedBlock != null) {
             return 1;
         }
-        else if (nestedElements != null) {
-            return nestedElements.size();
-        }
-        return 0;
+        return regulatedChildCount;
     }
 
+    /**
+     * Note: For element with {@code #nestedBlock}, this will hide the {@code #nestedBlock} when that's a
+     * {@link MixedContent}.
+     */
     public Enumeration children() {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.children();
@@ -196,8 +216,8 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         if (nestedBlock != null) {
             return Collections.enumeration(Collections.singletonList(nestedBlock));
         }
-        else if (nestedElements != null) {
-            return Collections.enumeration(nestedElements);
+        else if (regulatedChildBuffer != null) {
+            return new _ArrayEnumeration(regulatedChildBuffer, regulatedChildCount);
         }
         return Collections.enumeration(Collections.EMPTY_LIST);
     }
@@ -216,10 +236,15 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
             }
             throw new ArrayIndexOutOfBoundsException("invalid index");
         }
-        else if (nestedElements != null) {
-            return(TreeNode) nestedElements.get(index);
+        else if (regulatedChildCount != 0) {
+            try {
+                return regulatedChildBuffer[index];
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // nestedElements was a List earlier, so we emulate the same kind of exception
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + regulatedChildCount);
+            }
         }
-        throw new ArrayIndexOutOfBoundsException("element has no children");
+        throw new ArrayIndexOutOfBoundsException("Template element has no children");
     }
 
     public void setChildAt(int index, TemplateElement element) {
@@ -229,14 +254,16 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         else if(nestedBlock != null) {
             if(index == 0) {
                 nestedBlock = element;
+                element.index = 0;
                 element.parent = this;
             }
             else {
                 throw new IndexOutOfBoundsException("invalid index");
             }
         }
-        else if(nestedElements != null) {
-            nestedElements.set(index, element);
+        else if(regulatedChildBuffer != null) {
+            regulatedChildBuffer[index] = element;
+            element.index = index;
             element.parent = this;
         }
         else {
@@ -251,45 +278,123 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     public TreeNode getParent() {
         return parent;
     }
-
-    // Walk the tree and set the parent field in all the nested elements recursively.
-
-    void setParentRecursively(TemplateElement parent) {
-        this.parent = parent;
-        int nestedSize = nestedElements == null ? 0 : nestedElements.size();
-        for (int i = 0; i < nestedSize; i++) {
-            ((TemplateElement) nestedElements.get(i)).setParentRecursively(this);
+    
+    final void setRegulatedChildBufferCapacity(int capacity) {
+        int ln = regulatedChildCount;
+        TemplateElement[] newRegulatedChildBuffer = new TemplateElement[capacity];
+        for (int i = 0; i < ln; i++) {
+            newRegulatedChildBuffer[i] = regulatedChildBuffer[i];
         }
+        regulatedChildBuffer = newRegulatedChildBuffer;
+    }
+    
+    final void addRegulatedChild(TemplateElement nestedElement) {
+        addRegulatedChild(regulatedChildCount, nestedElement);
+    }
+
+    final void addRegulatedChild(int index, TemplateElement nestedElement) {
+        final int lRegulatedChildCount = regulatedChildCount;
+        
+        TemplateElement[] lRegulatedChildBuffer = regulatedChildBuffer;
+        if (lRegulatedChildBuffer == null) {
+            lRegulatedChildBuffer = new TemplateElement[INITIAL_REGULATED_CHILD_BUFFER_CAPACITY];
+            regulatedChildBuffer = lRegulatedChildBuffer;
+        } else if (lRegulatedChildCount == lRegulatedChildBuffer.length) {
+            setRegulatedChildBufferCapacity(lRegulatedChildCount != 0 ? lRegulatedChildCount * 2 : 1);
+            lRegulatedChildBuffer = regulatedChildBuffer; 
+        }
+        // At this point: nestedElements == this.nestedElements, and has sufficient capacity.
+
+        for (int i = lRegulatedChildCount; i > index; i--) {
+            TemplateElement movedElement = lRegulatedChildBuffer[i - 1];
+            movedElement.index = i;
+            lRegulatedChildBuffer[i] = movedElement;
+        }
+        nestedElement.index = index;
+        nestedElement.parent = this;
+        lRegulatedChildBuffer[index] = nestedElement;
+        regulatedChildCount = lRegulatedChildCount + 1;
+    }
+    
+    final int getRegulatedChildCount() {
+       return regulatedChildCount; 
+    }
+    
+    final TemplateElement getRegulatedChild(int index) {
+        return regulatedChildBuffer[index];
+    }
+    
+    final int getIndex() {
+        return index;
+    }
+    
+    final TemplateElement getNestedBlock() {
+        return nestedBlock;
+    }
+
+    final void setNestedBlock(TemplateElement nestedBlock) {
         if (nestedBlock != null) {
-            nestedBlock.setParentRecursively(this);
+            nestedBlock.parent = this;
+            nestedBlock.index = 0;
         }
+        this.nestedBlock = nestedBlock;
+    }
+    
+    /**
+     * This is a special case, because a root element is not contained in another element, so we couldn't set the
+     * private fields.
+     */
+    final void setFieldsForRootElement() {
+        index = 0;
+        parent = null;
     }
 
     /**
-     * We walk the tree and do some cleanup 
-     * @param stripWhitespace whether to clean up superfluous whitespace
+     * Walk the AST subtree rooted by this element, and do simplifications where possible, also remove superfluous
+     * whitespace.
+     * 
+     * @param stripWhitespace
+     *            whether to remove superfluous whitespace
+     * 
+     * @return The element this element should be replaced with in the parent. If it's the same as this element, no
+     *         actual replacement will happen. Note that adjusting the {@link #parent} and {@link #index} of the result
+     *         is the duty of the caller, not of this method.
      */
     TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
-        if (nestedElements != null) {
-            for (int i = 0; i < nestedElements.size(); i++) {
-                TemplateElement te = (TemplateElement) nestedElements.get(i);
+        int regulatedChildCount = this.regulatedChildCount;
+        if (regulatedChildCount != 0) {
+            for (int i = 0; i < regulatedChildCount; i++) {
+                TemplateElement te = regulatedChildBuffer[i];
                 te = te.postParseCleanup(stripWhitespace);
-                nestedElements.set(i, te);
+                regulatedChildBuffer[i] = te;
                 te.parent = this;
+                te.index = i;
             }
             if (stripWhitespace) {
-                for (Iterator it = nestedElements.iterator(); it.hasNext();) {
-                    TemplateElement te = (TemplateElement) it.next();
+                for (int i = 0; i < regulatedChildCount; i++) {
+                    TemplateElement te = regulatedChildBuffer[i];
                     if (te.isIgnorable()) {
-                        it.remove();
+                        regulatedChildCount--;
+                        for (int j = i; j < regulatedChildCount; j++) {
+                            final TemplateElement te2 = regulatedChildBuffer[j  + 1];
+                            regulatedChildBuffer[j] = te2;
+                            te2.index = j;
+                        }
+                        regulatedChildBuffer[regulatedChildCount] = null;
+                        this.regulatedChildCount = regulatedChildCount;
+                        i--;
                     }
                 }
             }
-            if (nestedElements instanceof ArrayList) {
-                ((ArrayList) nestedElements).trimToSize();
+            if (regulatedChildCount < regulatedChildBuffer.length
+                    && regulatedChildCount <= regulatedChildBuffer.length * 3 / 4) {
+                TemplateElement[] trimmedregulatedChildBuffer = new TemplateElement[regulatedChildCount];
+                for (int i = 0; i < regulatedChildCount; i++) {
+                    trimmedregulatedChildBuffer[i] = regulatedChildBuffer[i];
+                }
+                regulatedChildBuffer = trimmedregulatedChildBuffer;
             }
-        }
-        if (nestedBlock != null) {
+        } else if (nestedBlock != null) {
             nestedBlock = nestedBlock.postParseCleanup(stripWhitespace);
             if (nestedBlock.isIgnorable()) {
                 nestedBlock = null;
@@ -329,60 +434,40 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         return null;
     }
 
-
-
     TemplateElement previousSibling() {
         if (parent == null) {
             return null;
         }
-        List siblings = parent.nestedElements;
-        if (siblings == null) {
-            return null;
-        }
-        for (int i = siblings.size() - 1; i>=0; i--) {
-            if (siblings.get(i) == this) {
-                return(i >0) ? (TemplateElement) siblings.get(i-1) : null;
-            }
-        }
-        return null;
+        return index > 0 ? parent.regulatedChildBuffer[index - 1] : null;
     }
 
     TemplateElement nextSibling() {
         if (parent == null) {
             return null;
         }
-        List siblings = parent.nestedElements;
-        if (siblings == null) {
-            return null;
-        }
-        for (int i = 0; i < siblings.size(); i++) {
-            if (siblings.get(i) == this) {
-                return (i+1) < siblings.size() ? (TemplateElement) siblings.get(i+1) : null;
-            }
-        }
-        return null;
+        return index + 1 < parent.regulatedChildCount ? parent.regulatedChildBuffer[index + 1] : null;
     }
 
     private TemplateElement getFirstChild() {
         if (nestedBlock != null) {
             return nestedBlock;
         }
-        if (nestedElements != null && nestedElements.size() >0) {
-            return(TemplateElement) nestedElements.get(0);
+        if (regulatedChildCount == 0) {
+            return null;
         }
-        return null;
+        return regulatedChildBuffer[0];
     }
 
     private TemplateElement getLastChild() {
         if (nestedBlock != null) {
             return nestedBlock;
         }
-        if (nestedElements != null && nestedElements.size() >0) {
-            return(TemplateElement) nestedElements.get(nestedElements.size() -1);
+        final int regulatedChildCount = this.regulatedChildCount;
+        if (regulatedChildCount == 0) {
+            return null;
         }
-        return null;
+        return regulatedChildBuffer[regulatedChildCount - 1];
     }
-
 
     private TemplateElement getFirstLeaf() {
         TemplateElement te = this;

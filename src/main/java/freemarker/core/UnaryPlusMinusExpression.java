@@ -71,11 +71,6 @@ final class UnaryPlusMinusExpression extends Expression {
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
     	        isMinus);
     }
-    
-    
-    boolean isIgnorable() {
-        return true;
-    }
 
     int getParameterCount() {
         return 2;

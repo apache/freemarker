@@ -48,6 +48,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import freemarker.core.ASTPrinter;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.Java7MembersOnlyBeansWrapper;
@@ -491,6 +492,7 @@ public class TemplateTestCase extends FileTestCase {
             throw new AssertionFailedError(
                     "Could not load template " + StringUtil.jQuote(templateName) + ":\n" + getStackTrace(e));
         }
+        ASTPrinter.validateAST(template);
         
         StringWriter out = noOutput ? null : new StringWriter();
         try {

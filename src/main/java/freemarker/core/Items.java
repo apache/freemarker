@@ -29,7 +29,7 @@ public class Items extends TemplateElement {
 
     public Items(String loopVariableName, TemplateElement nestedBlock) {
         this.loopVarName = loopVariableName;
-        this.nestedBlock = nestedBlock;
+        setNestedBlock(nestedBlock);
     }
 
     void accept(Environment env) throws TemplateException, IOException {
@@ -40,7 +40,7 @@ public class Items extends TemplateElement {
                     new Object[] { getNodeTypeSymbol(), " without iteraton in context" });
         }
         
-        iterCtx.loopForItemsElement(env, nestedBlock, loopVarName);
+        iterCtx.loopForItemsElement(env, getNestedBlock(), loopVarName);
     }
 
     boolean isNestedBlockRepeater() {
@@ -55,7 +55,7 @@ public class Items extends TemplateElement {
         sb.append(loopVarName);
         if (canonical) {
             sb.append('>');
-            if (nestedBlock != null) sb.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
             sb.append("</");
             sb.append(getNodeTypeSymbol());
             sb.append('>');
