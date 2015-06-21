@@ -1,6 +1,6 @@
 package freemarker.core;
 
-public abstract class Interpolation extends TemplateElement {
+abstract class Interpolation extends TemplateElement {
 
     protected abstract String dump(boolean canonical, boolean inStringLiteral);
 
