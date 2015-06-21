@@ -22,8 +22,8 @@ import java.util.Date;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Represents a version number plus the further qualifiers and build into. This is
- * mostly used for representing a FreeMarker version number, but must also be able
+ * Represents a version number plus the further qualifiers and build info. This is
+ * mostly used for representing a FreeMarker version number, but should also be able
  * to parse the version strings of 3rd party libraries.
  * 
  * @see Configuration#getVersion()

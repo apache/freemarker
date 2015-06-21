@@ -23,7 +23,7 @@ import freemarker.template.TemplateException;
 /**
  * An #items element.
  */
-public class Items extends TemplateElement {
+class Items extends TemplateElement {
 
     private final String loopVarName;
 

@@ -1167,6 +1167,10 @@ public class Configurable
      * {@link #setObjectWrapper(ObjectWrapper)}. This meant to be used if you get the settings from somewhere
      * as text. Regardless, below you will find an overview of the settings available no matter how you set them. 
      * 
+     * <p>Note: As of FreeMarker 2.3.23, setting names can be written in camel case too. For example, instead of
+     * {@code date_format} you can also use {@code dateFormat}. It's likely that camel case will become to the
+     * recommended convention in the future.
+     * 
      * <p>The list of settings commonly supported in all {@link Configurable} subclasses:
      * <ul>
      *   <li><p>{@code "locale"}:
