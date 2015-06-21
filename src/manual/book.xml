@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.23-RC</subtitle>
+  <subtitle>For FreeMarker 2.3.23-RC1</subtitle>
 
   <preface xml:id="preface">
     <title>What's FreeMarker?</title>
@@ -23747,9 +23747,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_23">
-        <title>2.3.23</title>
+        <title>2.3.23 RC1</title>
 
-        <para>Date of release: TODO</para>
+        <para>Date of release: 2015-05-21</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -23795,21 +23795,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added <literal>++</literal> and <literal>--</literal>
-              assignment operators, which can be used in assignment directives
-              (<literal>#assign</literal>, <literal>#global</literal> and
-              <literal>#local</literal> currently) only. For example,
-              <literal>&lt;#assign counter++&gt;</literal> is equivalent to
-              <literal>&lt;#assign counter = counter + 1&gt;</literal>.</para>
-            </listitem>
+              <para>Added convenience assignment operators, which can be used
+              in assignment directives (<literal>#assign</literal>,
+              <literal>#global</literal> and <literal>#local</literal>
+              currently) only:</para>
 
-            <listitem>
-              <para>Added <literal>+=</literal>, <literal>-=</literal>,
-              <literal>*=</literal>, <literal>/=</literal> and
-              <literal>%=</literal> assignment operators, which can be used in
-              assignment directives only. For example, <literal>&lt;#assign
-              counter += 2&gt;</literal> is equivalent to <literal>&lt;#assign
-              counter = counter + 2&gt;</literal>.</para>
+              <itemizedlist>
+                <listitem>
+                  <para><literal>++</literal> and <literal>--</literal>:
+                  <literal>&lt;#assign counter++&gt;</literal> is equivalent
+                  to <literal>&lt;#assign counter = counter +
+                  1&gt;</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>+=</literal>, <literal>-=</literal>,
+                  <literal>*=</literal>, <literal>/=</literal> and
+                  <literal>%=</literal>: <literal>&lt;#assign counter +=
+                  2&gt;</literal> is equivalent to <literal>&lt;#assign
+                  counter = counter + 2&gt;</literal>.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -23850,9 +23856,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               possible to enforce the same naming convention on all templates
               from Java via
               <literal>Configuration.setNamingConvention(int)</literal>. It's
-              certain that camel case will be recommended convention starting
-              from some future version, because the Java API-s called from
-              templates use that too.</para>
+              certain that camel case will be the recommended convention
+              starting from some future version, because the Java API-s users
+              call from templates use that too.</para>
             </listitem>
 
             <listitem>
@@ -23876,9 +23882,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed, activated with
-              <literal>incompatible_improvements</literal> 2.3.23: There's a
-              long existing parse-time rule that says that
+              <para>Bug fixed, activated with setting
+              <literal>incompatible_improvements</literal> to 2.3.23: There's
+              a long existing parse-time rule that says that
               <literal>#break</literal>, in the FTL source code itself, must
               occur nested inside a breakable directive, such as
               <literal>#list</literal> or <literal>#switch</literal>. This
@@ -23994,8 +24000,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>IOException</literal> during reading its content, the
               parser (JavaCC) acted like if the template <quote>file</quote>
               was ended there, and the exception was suppressed. It's actually
-              JavaCC that does this, and this quirk of it was never fixed. But
-              now FreeMarker has added a workaround in the
+              a JavaCC quirk, but now FreeMarker has added a workaround in the
               <literal>Template</literal> constructor, and so now an exception
               will be thrown as expected.</para>
             </listitem>
@@ -24026,7 +24031,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/53/">53</link>]:
               Template parsing was abnormally slow for templates with very
-              high number of sibling AST (abstract syntax tree) nodes.</para>
+              high number AST (abstract syntax tree) nodes on the same
+              hierarchy level.</para>
             </listitem>
 
             <listitem>
@@ -24055,8 +24061,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bugs fixed: Various canonical form glitches (they are
-              mostly used in error messages).</para>
+              <para>Bugs fixed: Various canonical form glitches (they only
+              affect error messages as far as FreeMarker is concerned).</para>
             </listitem>
           </itemizedlist>
         </section>
