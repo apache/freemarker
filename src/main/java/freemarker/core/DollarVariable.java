@@ -19,11 +19,12 @@ package freemarker.core;
 import java.io.IOException;
 
 import freemarker.template.TemplateException;
+import freemarker.template.utility.StringUtil;
 
 /**
  * An instruction that outputs the value of an <tt>Expression</tt>.
  */
-final class DollarVariable extends TemplateElement {
+final class DollarVariable extends Interpolation {
 
     private final Expression expression;
     private final Expression escapedExpression;
@@ -40,10 +41,11 @@ final class DollarVariable extends TemplateElement {
         env.getOut().write(escapedExpression.evalAndCoerceToString(env));
     }
 
-    protected String dump(boolean canonical) {
+    protected String dump(boolean canonical, boolean inStringLiteral) {
         StringBuffer sb = new StringBuffer();
         sb.append("${");
-        sb.append(expression.getCanonicalForm());
+        final String exprCF = expression.getCanonicalForm();
+        sb.append(inStringLiteral ? StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);
         sb.append("}");
         if (!canonical && expression != escapedExpression) {
             sb.append(" auto-escaped");            

@@ -43,6 +43,18 @@ public class ASTTest extends FileTestCase {
         testAST("ast-builtins");
     }
     
+    public void testStringLiteralInterpolation() throws Exception {
+        testAST("ast-strlitinterpolation");
+    }
+    
+    public void testWhitespaceStripping() throws Exception {
+        testAST("ast-whitesoacestripping");
+    }
+
+    public void testMixedContentSimplifications() throws Exception {
+        testAST("ast-mixedcontentsimplifications");
+    }
+    
     private void testAST(String testName) throws FileNotFoundException, IOException {
         final String templateName = testName + ".ftl";
         assertExpectedFileEqualsString(

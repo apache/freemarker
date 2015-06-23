@@ -27,7 +27,7 @@ final class BuiltInsWithParseTimeParameters {
     /**
      * Behaves similarly to the ternary operator of Java.
      */
-    static class choose_BI extends BuiltInWithParseTimeParameters {
+    static class then_BI extends BuiltInWithParseTimeParameters {
         
         private Expression whenTrueExp;
         private Expression whenFalseExp;
@@ -66,7 +66,7 @@ final class BuiltInsWithParseTimeParameters {
         
         protected void cloneArguments(Expression cloneExp, String replacedIdentifier,
                 Expression replacement, ReplacemenetState replacementState) {
-            choose_BI clone = (choose_BI) cloneExp;
+            then_BI clone = (then_BI) cloneExp;
             clone.whenTrueExp = whenTrueExp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
             clone.whenFalseExp = whenFalseExp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
         }

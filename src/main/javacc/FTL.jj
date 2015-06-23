@@ -662,7 +662,7 @@ TOKEN_MGR_DECLS:
 
 TOKEN:
 {
-    <#BLANK : [" ", "\t", "\n", "\r"]>
+    <#BLANK : " " | "\t" | "\n" | "\r">
     |
     <#START_TAG : "<" | "<#" | "[#">
     |
@@ -824,7 +824,7 @@ TOKEN:
     /*
      * ATTENTION: Update _CoreAPI.BUILT_IN_DIRECTIVE_NAMES if you add new directives!
      */
-    <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
+    <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z", "A"-"Z", "_"])+>
     {
         if (!directiveSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
             matchedToken.kind = STATIC_TEXT_NON_WS;
@@ -896,7 +896,7 @@ TOKEN:
 
 <DEFAULT, NODIRECTIVE> TOKEN :
 {
-    <STATIC_TEXT_WS : (["\n", "\r", "\t", " "])+>
+    <STATIC_TEXT_WS : ("\n" | "\r" | "\t" | " ")+>
     |
     <STATIC_TEXT_NON_WS : (~["$", "<", "#", "[", "{", "\n", "\r", "\t", " "])+>
     |
@@ -911,7 +911,7 @@ TOKEN:
 {
     < ( " " | "\t" | "\n" | "\r" )+ >
     |
-    < ["<", "["] ["#", "!"] "--"> : EXPRESSION_COMMENT
+    < ("<" | "[") ("#" | "!") "--"> : EXPRESSION_COMMENT
 }
 
 <EXPRESSION_COMMENT> SKIP:
@@ -937,22 +937,22 @@ TOKEN:
     <#ESCAPED_CHAR :
         "\\"
         (
-            ["n","t","r","f","b","g","l","a","\\","'","\"","$","{"]
+            ("n" | "t" | "r" | "f" | "b" | "g" | "l" | "a" | "\\" | "'" | "\"" | "$" | "{")
             |
-            ("x" ["0"-"9","A"-"F","a"-"f"])
+            ("x" ["0"-"9", "A"-"F", "a"-"f"])
         )
     >
     | 
     <STRING_LITERAL :
         (
             "\""
-            ((~["\"","\\"]) | <ESCAPED_CHAR>)*
+            ((~["\"", "\\"]) | <ESCAPED_CHAR>)*
             "\""
         )
         |
         (
             "'"
-            ((~["'","\\"]) | <ESCAPED_CHAR>)*
+            ((~["'", "\\"]) | <ESCAPED_CHAR>)*
             "'"
         )
     >
@@ -994,6 +994,10 @@ TOKEN:
     <DIV_EQUALS : "/=">
     |
     <MOD_EQUALS : "%=">
+    |
+    <PLUS_PLUS : "++">
+    |
+    <MINUS_MINUS : "--">
     |
     <LESS_THAN : "lt" | "\\lt" | "<" | "&lt;">
     |
@@ -1239,11 +1243,11 @@ TOKEN:
         ]
     >
     |
-    <#ESCAPED_ID_CHAR: "\\" ["-", ".", ":"] >
+    <#ESCAPED_ID_CHAR: "\\" ("-" | "." | ":")>
     |
     <#ID_START_CHAR: <NON_ESCAPED_ID_START_CHAR>|<ESCAPED_ID_CHAR>>
     |
-    <#ASCII_DIGIT: ["0" - "9"] >
+    <#ASCII_DIGIT: ["0" - "9"]>
 }
 
 <FM_EXPRESSION, NO_SPACE_EXPRESSION, NAMED_PARAMETER_EXPRESSION> TOKEN :
@@ -2682,21 +2686,38 @@ TemplateElement Assign() :
     }
     (
     	(
-	        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
-	        {
-	           equalsOp = token;
-	        }
-	        exp = Expression()
+            (
+	    	    (
+			        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+			        {
+			           equalsOp = token;
+			        }
+			        exp = Expression()
+		        )
+		        |
+		        (
+	                (<PLUS_PLUS>|<MINUS_MINUS>)
+	                {
+	                   equalsOp = token;
+	                   exp = null;
+	                }
+		        )
+	        )
 	        {
 	            ass = new Assignment(varName, equalsOp.kind, exp, scope);
-	            ass.setLocation(template, nameExp, exp);
+                if (exp != null) {
+                   ass.setLocation(template, nameExp, exp);
+                } else {
+                   ass.setLocation(template, nameExp, equalsOp);
+                }
 	            assignments.add(ass);
 	        }
 	        (
 	            LOOKAHEAD(
 	               [<COMMA>]
 	               (<ID>|<STRING_LITERAL>)
-	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>
+	                       |<PLUS_PLUS>|<MINUS_MINUS>)
 	            )
 	            [<COMMA>]
 	            nameExp = IdentifierOrStringLiteral()
@@ -2705,14 +2726,30 @@ TemplateElement Assign() :
 	                		? ((StringLiteral) nameExp).getAsString()
 	                		: ((Identifier) nameExp).getName();
 	            }
-	            (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
-	            {
-	               equalsOp = token;
-	            }
-	            exp = Expression()
+	            (
+	                (
+	                    (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	                    {
+	                       equalsOp = token;
+	                    }
+	                    exp = Expression()
+	                )
+	                |
+	                (
+	                    (<PLUS_PLUS>|<MINUS_MINUS>)
+	                    {
+	                       equalsOp = token;
+	                       exp = null;
+	                    }
+	                )
+	            )
 	            {
 	                ass = new Assignment(varName, equalsOp.kind, exp, scope);
-	                ass.setLocation(template, nameExp, exp);
+	                if (exp != null) {
+	                   ass.setLocation(template, nameExp, exp);
+	                } else {
+                       ass.setLocation(template, nameExp, equalsOp);
+	                }
 	                assignments.add(ass);
 	            } 
 	        )*
@@ -2806,7 +2843,8 @@ Include Include() :
         	    parseExp = exp;
             } else if (attString.equalsIgnoreCase("encoding")) {
             	encodingExp = exp;
-            } else if (attString.equalsIgnoreCase("ignore_missing")) {
+            } else if (attString.equalsIgnoreCase("ignore_missing") || attString.equals("ignoreMissing")) {
+                token_source.checkNamingConvention(att);
             	ignoreMissingExp = exp;
             } else {
                 String correctedName = attString.equals("ignoreMissing") ? "ignore_missing" : null;
@@ -3736,7 +3774,10 @@ TemplateElement Root() :
     doc = OptionalBlock()
     <EOF>
     {
-        doc.setParentRecursively(null);
-        return doc.postParseCleanup(stripWhitespace);
+        doc.setFieldsForRootElement();
+        doc = doc.postParseCleanup(stripWhitespace);
+        // The cleanup result is possibly an element from deeper:
+        doc.setFieldsForRootElement();
+        return doc;
     }
 }

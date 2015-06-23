@@ -24,10 +24,19 @@ import freemarker.template.TemplateException;
  */
 public class InvalidReferenceException extends TemplateException {
 
-    static final InvalidReferenceException FAST_INSTANCE = new InvalidReferenceException(
-            "Invalid reference. Details are unavilable, as this should have been handled by an FTL construct. "
-            + "If it wasn't, that's problably a bug in FreeMarker.",
-            null);
+    static final InvalidReferenceException FAST_INSTANCE;
+    static {
+        Environment prevEnv = Environment.getCurrentEnvironment();
+        try {
+            Environment.setCurrentEnvironment(null);
+            FAST_INSTANCE = new InvalidReferenceException(
+                    "Invalid reference. Details are unavilable, as this should have been handled by an FTL construct. "
+                    + "If it wasn't, that's problably a bug in FreeMarker.",
+                    null);
+        } finally {
+            Environment.setCurrentEnvironment(prevEnv);
+        }
+    }
     
     private static final String[] TIP = new String[] {
         "If the failing expression is known to be legally refer to something that's sometimes null or missing, "

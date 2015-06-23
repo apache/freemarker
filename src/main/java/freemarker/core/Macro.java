@@ -63,7 +63,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.function = function;
         this.catchAllParamName = catchAllParamName; 
         
-        this.nestedBlock = nestedBlock;
+        this.setNestedBlock(nestedBlock);
     }
 
     public String getCatchAll() {
@@ -132,8 +132,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
         if (function) sb.append(')');
         if (canonical) {
             sb.append('>');
-            if (nestedBlock != null) {
-                sb.append(nestedBlock.getCanonicalForm());
+            if (getNestedBlock() != null) {
+                sb.append(getNestedBlock().getCanonicalForm());
             }
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }
@@ -180,8 +180,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
         void runMacro(Environment env) throws TemplateException, IOException {
             sanityCheck(env);
             // Set default values for unspecified parameters
-            if (nestedBlock != null) {
-                env.visit(nestedBlock);
+            if (getNestedBlock() != null) {
+                env.visit(getNestedBlock());
             }
         }
 

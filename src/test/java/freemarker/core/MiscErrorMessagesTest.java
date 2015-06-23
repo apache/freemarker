@@ -39,6 +39,10 @@ public class MiscErrorMessagesTest extends TemplateTest {
         assertErrorContains("<#include '../baaz'>", "Malformed template name", "root");
         assertErrorContains("<#include '\u0000'>", "Malformed template name", "\\u0000");
     }
-    
+
+    @Test
+    public void numericalKeyHint() {
+        assertErrorContains("${{}[10]}", "[]", "?api");
+    }
     
 }

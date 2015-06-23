@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.23-RC</subtitle>
+  <subtitle>For FreeMarker 2.3.23-RC1</subtitle>
 
   <preface xml:id="preface">
     <title>What's FreeMarker?</title>
@@ -2037,6 +2037,14 @@ The average of the price of a python and an elephant is:
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para><link linkend="dgui_template_exp_assignment">Assignment
+              operators</link>: <literal>=</literal>, <literal>+=</literal>,
+              <literal>-=</literal>, <literal>*=</literal>,
+              <literal>/=</literal>, <literal>%=</literal>,
+              <literal>++</literal>, <literal>--</literal></para>
+            </listitem>
           </itemizedlist>
 
           <para>See also: <link
@@ -3747,6 +3755,31 @@ Creating mouse...
             <literal>product.color??</literal> and
             <literal>(product.color)??</literal>.</para>
           </section>
+        </section>
+
+        <section xml:id="dgui_template_exp_assignment">
+          <title>Assignment Operators</title>
+
+          <para>These are actually not expressions, but parts of the syntax of
+          the assignment directives, such as <link
+          linkend="ref_directive_assign"><literal>assign</literal></link>,
+          <link linkend="ref_directive_local"><literal>local</literal></link>
+          and <link
+          linkend="ref_directive_global"><literal>global</literal></link>. As
+          such, they can't be used anywhere else.</para>
+
+          <para><literal>&lt;#assign x += y&gt;</literal> is shorthand for
+          <literal>&lt;#assign x = x + y&gt;</literal>, <literal>&lt;#assign x
+          *= y&gt;</literal> is shorthand for <literal>&lt;#assign x = x *
+          y&gt;</literal>, and so on.</para>
+
+          <para><literal>&lt;#assign x++&gt;</literal> differs from
+          <literal>&lt;#assign x += 1&gt;</literal> (or <literal>&lt;#assign x
+          = x + 1&gt;</literal>) in that it always does arithmetical addition
+          (and fails if the variable is not a number), while the others are
+          overloaded to do string and sequence concatenation and hash
+          addition. <literal>&lt;#assign x--&gt;</literal> is shorthand for
+          <literal>&lt;#assign x -= 1&gt;</literal>.</para>
         </section>
 
         <section xml:id="dgui_template_exp_parentheses">
@@ -6424,7 +6457,7 @@ public class UpperDirective implements TemplateDirectiveModel {
 
 <emphasis>&lt;@repeat count=4&gt;</emphasis>
   Test ${x}
-  &lt;#assign x = x + 1&gt;
+  &lt;#assign x++&gt;
 <emphasis>&lt;/@repeat&gt;</emphasis>
 
 <emphasis>&lt;@repeat count=3 hr=true&gt;</emphasis>
@@ -7213,7 +7246,13 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 
         <para><emphasis role="term">Settings</emphasis> are named values that
         influence the behavior of FreeMarker. Examples of settings are:
-        <literal>locale</literal>, <literal>number_format</literal></para>
+        <literal>locale</literal>, <literal>number_format</literal>,
+        <literal>default_encoding</literal>,
+        <literal>template_exception_handler</literal>. The full list of
+        settings can be found in the <link
+        xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">Java
+        API documentation of
+        <literal>Configuration.setSetting(...)</literal></link>.</para>
 
         <para>Settings stored in <literal>Configuration</literal> instance can
         be overridden in a <literal>Template</literal> instance. For example
@@ -10502,10 +10541,6 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
-            <para><link linkend="ref_builtin_choose">choose</link></para>
-          </listitem>
-
-          <listitem>
             <para><link
             linkend="ref_builtin_chop_linebreak">chop_linebreak</link></para>
           </listitem>
@@ -10869,6 +10904,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_switch">switch</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_then">then</link></para>
           </listitem>
 
           <listitem>
@@ -13778,76 +13817,6 @@ Tue, Apr 8, '03
           works on strings</link>.</para>
         </section>
 
-        <section xml:id="ref_builtin_choose">
-          <title>choose</title>
-
-          <indexterm>
-            <primary>choose built-in</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>ternary operator</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>format; boolean</primary>
-          </indexterm>
-
-          <note>
-            <para>This built-in exists since FreeMarker 2.3.23.</para>
-          </note>
-
-          <para>Used like
-          <literal><replaceable>booleanExp</replaceable>?choose(<replaceable>whenTrue</replaceable>,
-          <replaceable>whenFalse</replaceable>)</literal>, fills the same role
-          as the ternary operator in C-like languages (i.e.,
-          <literal><replaceable>booleanExp</replaceable> ?
-          <replaceable>whenTrue</replaceable> :
-          <replaceable>whenFalse</replaceable></literal>). If
-          <literal><replaceable>booleanExp</replaceable></literal> evaluates
-          to boolean true then it evaluates and returns its first argument, or
-          else if <literal><replaceable>booleanExp</replaceable></literal>
-          evaluates to boolean false then it evaluates and return its second
-          argument. Off course, all three expression can be arbitrary complex.
-          The argument expressions can have any type, even different
-          types.</para>
-
-          <para>An important special property of this built-in is that only
-          one of the argument expressions will be evaluated. This is unlike
-          with normal method calls, where all argument expressions are
-          evaluated, regardless if the method will need them. This also means
-          that the argument that's not needed can even refer to missing
-          variables without causing error. (It still can't be syntactically
-          invalid of course.)</para>
-
-          <para>Example:</para>
-
-          <programlisting role="template">${true?choose('Y', 'N')}
-${false?choose('Y', 'N')}
-
-&lt;#assign x = 10&gt;
-&lt;#assign y = 20&gt;
-&lt;#-- Prints 100 plus the maximum of x and y: --&gt;
-${100 + (x &gt; y)?choose(x, y)}</programlisting>
-
-          <programlisting role="output">Y
-N
-
-120</programlisting>
-
-          <note>
-            <para>If you need to choose based on a non-boolean value, you
-            should use the <link
-            linkend="ref_builtin_switch"><literal>switch</literal>
-            built-in</link> instead of nesting multiple
-            <literal>choose</literal>-s into each other, like
-            <literal>priority?choose(1, "low", 2, "medium", 3,
-            "high")</literal>, or even <literal>true?switch(priority &lt;= 1,
-            "low", priority == 2, "medium", priority &gt;= 3,
-            "high")</literal>.</para>
-          </note>
-        </section>
-
         <section xml:id="ref_builtin_string_for_boolean">
           <title>string (when used with a boolean value)</title>
 
@@ -13885,7 +13854,7 @@ N
             <listitem>
               <para>As <literal>foo?string("yes", "no")</literal>:
               <emphasis>Deprecated starting from FreeMarker 2.3.23: use <link
-              linkend="ref_builtin_choose"><literal>?choose("yes",
+              linkend="ref_builtin_then"><literal>?then("yes",
               "no")</literal></link> instead. </emphasis>This will return the
               first parameter (here: <literal>"yes"</literal>) if the boolean
               is true, otherwise the second parameter (here:
@@ -13922,6 +13891,80 @@ N
               effect.</para>
             </listitem>
           </itemizedlist>
+        </section>
+
+        <section xml:id="ref_builtin_then">
+          <title>then</title>
+
+          <indexterm>
+            <primary>then built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ternary operator</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format; boolean</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.23.</para>
+          </note>
+
+          <para>Used like
+          <literal><replaceable>booleanExp</replaceable>?then(<replaceable>whenTrue</replaceable>,
+          <replaceable>whenFalse</replaceable>)</literal>, fills the same role
+          as the ternary operator in C-like languages (i.e.,
+          <literal><replaceable>booleanExp</replaceable> ?
+          <replaceable>whenTrue</replaceable> :
+          <replaceable>whenFalse</replaceable></literal>). If
+          <literal><replaceable>booleanExp</replaceable></literal> evaluates
+          to boolean true then it evaluates and returns its first argument, or
+          else if <literal><replaceable>booleanExp</replaceable></literal>
+          evaluates to boolean false then it evaluates and return its second
+          argument. Off course, all three expression can be arbitrary complex.
+          The argument expressions can have any type, even different
+          types.</para>
+
+          <para>An important special property of this built-in is that only
+          one of the argument expressions will be evaluated. This is unlike
+          with normal method calls, where all argument expressions are
+          evaluated, regardless if the method will need them. This also means
+          that the argument that's not needed can even refer to missing
+          variables without causing error. (It still can't be syntactically
+          invalid of course.)</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#assign foo = true&gt;
+${foo?then('Y', 'N')}
+
+&lt;#assign foo = false&gt;
+${foo?then('Y', 'N')}
+
+&lt;#assign x = 10&gt;
+&lt;#assign y = 20&gt;
+&lt;#-- Prints 100 plus the maximum of x and y: --&gt;
+${100 + (x &gt; y)?then(x, y)}</programlisting>
+
+          <programlisting role="output">Y
+
+N
+
+120</programlisting>
+
+          <note>
+            <para>If you need to choose based on a non-boolean value, you
+            should use the <link
+            linkend="ref_builtin_switch"><literal>switch</literal>
+            built-in</link> instead of nesting multiple
+            <literal>then</literal>-s into each other, like
+            <literal>priority?switch(1, "low", 2, "medium", 3,
+            "high")</literal>, or even <literal>true?switch(priority &lt;= 1,
+            "low", priority == 2, "medium", priority &gt;= 3,
+            "high")</literal>.</para>
+          </note>
         </section>
       </section>
 
@@ -15089,8 +15132,19 @@ Sorted by name.last:
               called, and in this order: <literal>m()</literal>,
               <literal>c1()</literal>, <literal>c2()</literal>,
               <literal>r2()</literal>. (Naturally, arguments that aren't
-              evaluated can refer to missing variables without causing
-              error.)</para>
+              evaluated can refer to missing variables without causing error.)
+              It's guaranteed that the
+              <literal><replaceable>case</replaceable></literal> parameter
+              expressions are evaluated left to right, and only until the
+              first match was found. It's also guaranteed that only the
+              <literal><replaceable>result</replaceable></literal> expression
+              that belongs to the first matching
+              <literal><replaceable>case</replaceable></literal> will be
+              evaluated. It's also guaranteed that the
+              <literal><replaceable>defaultResult</replaceable></literal>
+              expression will only be evaluated if there was no matching
+              <literal><replaceable>case</replaceable></literal>
+              parameter.</para>
             </listitem>
 
             <listitem>
@@ -15124,9 +15178,9 @@ Sorted by name.last:
 
           <note>
             <para>If you need to switch by a boolean value, you should use the
-            <link linkend="ref_builtin_choose"><literal>choose</literal>
+            <link linkend="ref_builtin_then"><literal>then</literal>
             built-in</link> instead, like
-            <literal><replaceable>matchedBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+            <literal><replaceable>matchedBoolean</replaceable>?then(<replaceable>whenTrue</replaceable>,
             <replaceable>whenFalse</replaceable>)</literal>.</para>
           </note>
 
@@ -15347,6 +15401,21 @@ Sorted by name.last:
 
           <para>This built-in evaluates a string as an FTL expression. For
           example <literal>"1+2"?eval</literal> returns number 3.</para>
+
+          <para>The evaluated expression sees the same variables (such as
+          locals) that are visible at the place of the invocation of
+          <literal>eval</literal>. That is, it behaves similarly as if in
+          place of <literal><replaceable>s</replaceable>?eval</literal> you
+          had the <emphasis>value of</emphasis>
+          <literal><replaceable>s</replaceable></literal> there. Except, it
+          can't use <link linkend="ref_builtins_loop_var">loop variable
+          built-ins</link> that refer to a loop variable that was created
+          outside <literal><replaceable>s</replaceable></literal>.</para>
+
+          <para>The configuration settings that affect the expression parsing
+          (like syntax) are coming from the <literal>Configuration</literal>
+          object, not from template that invokes
+          <literal>eval</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_has_content">
@@ -15388,10 +15457,11 @@ Sorted by name.last:
             <primary>interpret built-in</primary>
           </indexterm>
 
-          <para>This built-in interprets a string as a FTL template, and
-          returns an user-defined directive that - when applied to any block -
-          executes the template just as if it was included at that point.
-          Example:</para>
+          <para>This built-in parser a string as an FTL template, and returns
+          an user-defined directive that executes that template, just as if a
+          template with that content were <link
+          linkend="ref_directive_include"><literal>include</literal>-d</link>
+          at that point. Example:</para>
 
           <programlisting role="template">&lt;#assign x=["a", "b", "c"]&gt;
 &lt;#assign templateSource = r"&lt;#list x as y&gt;${y}&lt;/#list&gt;"&gt;
@@ -15404,21 +15474,45 @@ Sorted by name.last:
           <programlisting role="output">abc</programlisting>
 
           <para>As you can see, <literal>inlineTemplate</literal> is a
-          user-defined directive that, when executed, runs the template that
-          was generated on-the-fly using the
-          <literal>interpret</literal>.</para>
+          user-defined directive that, when executed, runs the template whose
+          content is the value of <literal>templateSource</literal>.</para>
 
-          <para>You can also apply this built-in to a two-element sequence. In
-          this case the first element of the sequence is the template source,
-          and the second element is a name for the inline template. It can be
-          useful to give an explicit name to the inline template for debugging
-          purposes. So, you could have written:</para>
+          <para>The configuration settings that affect the parsing (like tag
+          syntax and naming convention) are coming from the
+          <literal>Configuration</literal> object, not from template that
+          calls <literal>interpret</literal>. This also means that the
+          previously auto-detected tag syntax or auto-detected naming
+          convention don't effect the parsing of the interpreted template.
+          This is consistent with how the <link
+          linkend="ref_directive_include"><literal>include</literal>
+          directive</link> works.</para>
 
-          <programlisting role="template">&lt;#assign inlineTemplate = [templateSource, "myInlineTemplate"]?interpret&gt;</programlisting>
+          <para>The name of the template created by
+          <literal>interpret</literal> is the name of the template that calls
+          <literal>interpret</literal>, plus
+          <literal>"-&gt;anonymous_interpreted"</literal>. For example, if the
+          template that calls the built-in is
+          <literal>"foo/bar.ftl"</literal>, then the name of the resulting
+          template is
+          <literal>"foo/bar.ftl-&gt;anonymous_interpreted"</literal>. Thus,
+          relative paths inside the interpreted template are relative to this
+          path (i.e., the base directory will be <literal>"foo"</literal>),
+          and errors inside the interpreted template will point to this
+          generated template name.</para>
 
-          <para>as well in the above template. Note that giving the inline
-          template a name has no immediate effect - it is only useful as an
-          extra bit of information if you get an error report.</para>
+          <para>For more helpful error messages, you can override the template
+          name part after the <literal>"-&gt;"</literal>. For example, let's
+          say <literal>mailTemplateSource</literal> comes from the
+          <literal>mail_template</literal> database table, and in the case of
+          error, you want the error log to contain the database ID of the
+          failing template:</para>
+
+          <programlisting role="template">&lt;#assign inlineTemplate = [mailTemplateSource, "mail_templates id=${mailTemplateId}"]?interpret&gt;</programlisting>
+
+          <para>As you can see, interpret can be applied on a sequence of two
+          items, in which case the first item is the FTL string to interpret,
+          and the second items is the template name used after the
+          <literal>"-&gt;"</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_isType">
@@ -15933,13 +16027,19 @@ or
             </listitem>
 
             <listitem>
-              <para><literal>=</literal>: Assignment operator; it can also be
+              <para><literal>=</literal>: Assignment operator. It can also be
+              one of the assignment shorthand operators (since FreeMarker
+              2.3.23): <literal>++</literal>, <literal>--</literal>,
               <literal>+=</literal>, <literal>-=</literal>,
               <literal>*=</literal>, <literal>/=</literal> or
-              <literal>%=</literal>. Like <literal>&lt;#assign x +=
-              1&gt;</literal> is the same as <literal>&lt;#assign x = x
-              +1&gt;</literal>. This is supported since FreeMarker
-              2.3.23.</para>
+              <literal>%=</literal>. Like <literal>&lt;#assign
+              x++&gt;</literal> is similar to <literal>&lt;#assign x = x +
+              1&gt;</literal>, and <literal>&lt;#assign x += 2&gt;</literal>
+              is the same as <literal>&lt;#assign x = x + 2&gt;</literal>.
+              Note that <literal>++</literal> always means arithmetical
+              addition (an so it will fail on non-numbers), unlike
+              <literal>+</literal> or <literal>+=</literal> that are
+              overloaded to do string concatenation and such.</para>
             </listitem>
 
             <listitem>
@@ -15976,7 +16076,7 @@ or
           <para>Example: Increments the numerical value stored in variable
           <literal>x</literal>:</para>
 
-          <programlisting role="template">&lt;#assign x = x + 1&gt;</programlisting>
+          <programlisting role="template">&lt;#assign x++&gt;</programlisting>
 
           <para>As a convenience feature, you can do more assignments with one
           <literal>assign</literal> tag. For example this will do the same as
@@ -15984,7 +16084,7 @@ or
 
           <programlisting role="template">&lt;#assign
   seq = ["foo", "bar", "baz"]
-  x = x + 1
+  x++
 &gt;</programlisting>
 
           <para>If you know what namespaces are: <literal>assign</literal>
@@ -16818,6 +16918,14 @@ or
               <literal>&lt;#global "foo-bar" = 1&gt;</literal>. Note that this
               string literal does not expand interpolations (as
               <literal>"${foo}"</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>=</literal>: Assignment operator, which can also
+              be one of the shorthand assignment operators
+              (<literal>++</literal>, <literal>+=</literal>, etc.), just like
+              with <link linkend="ref_directive_assign">the
+              <literal>assign</literal> directive</link>,</para>
             </listitem>
 
             <listitem>
@@ -17968,6 +18076,14 @@ or
               <literal>&lt;#local "foo-bar" = 1&gt;</literal>. Note that this
               string literal does not expand interpolations (as
               <literal>"${foo}"</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>=</literal>: Assignment operator, which can also
+              be one of the shorthand assignment operators
+              (<literal>++</literal>, <literal>+=</literal>, etc.), just like
+              with <link linkend="ref_directive_assign">the
+              <literal>assign</literal> directive</link>,</para>
             </listitem>
 
             <listitem>
@@ -19718,6 +19834,14 @@ There was no specific handler for node y
 
       <itemizedlist spacing="compact">
         <listitem>
+          <para><indexterm>
+              <primary>current_template_name</primary>
+            </indexterm><literal>current_template_name</literal>: The name of
+          the template where we are now (available since FreeMarker
+          2.3.23).</para>
+        </listitem>
+
+        <listitem>
           <para><literal>data_model</literal>: A hash that you can use to
           access the data-model directly. That is, variables you did with
           <literal>global</literal> directive are not visible here.</para>
@@ -19794,6 +19918,15 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
+          <para><indexterm>
+              <primary>main_template_name</primary>
+            </indexterm><literal>main_template_name</literal>: The name of the
+          top level template (available since FreeMarker 2.3.23). <phrase
+          role="forProgrammers">(In Java, this is the template for which
+          <literal>Template.process</literal> was called.)</phrase></para>
+        </listitem>
+
+        <listitem>
           <para><literal>namespace</literal>: A hash that you can use to
           access the current <link
           linkend="dgui_misc_namespace">namespace</link>. Note that global
@@ -19837,8 +19970,18 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
-          <para><literal>template_name</literal>: The name of the current
-          template (available since FreeMarker 2.3.14).</para>
+          <para><indexterm>
+              <primary>template_name</primary>
+            </indexterm><literal>template_name</literal>: <emphasis>Don't use
+          it, because its behavior is strange when macros are used; use
+          <literal>current_template_name</literal> or
+          <literal>main_template_name</literal> instead.</emphasis> Gives the
+          name of the main template, or if we are running an included or
+          imported template, the name of that template. When calling macros,
+          it becomes rather confusing: the macro call won't change the value
+          of this special variable, but when <literal>nested</literal> is
+          called, it changes it to the name of the template that belongs to
+          the current namespace. (Available since FreeMarker 2.3.14.)</para>
         </listitem>
 
         <listitem>
@@ -23604,9 +23747,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_23">
-        <title>2.3.23</title>
+        <title>2.3.23 RC1</title>
 
-        <para>Date of release: TODO</para>
+        <para>Date of release: 2015-05-21</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -23652,23 +23795,37 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added <literal>+=</literal>, <literal>-=</literal>,
-              <literal>*=</literal>, <literal>/=</literal> and
-              <literal>%=</literal> assignment operators, which can be used
-              for <literal>#assign</literal>, <literal>#global</literal> and
-              <literal>#local</literal>. For example, <literal>&lt;#assign
-              counter += 1&gt;</literal> is equivalent to <literal>&lt;#assign
-              counter = counter + 1&gt;</literal>.</para>
+              <para>Added convenience assignment operators, which can be used
+              in assignment directives (<literal>#assign</literal>,
+              <literal>#global</literal> and <literal>#local</literal>
+              currently) only:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>++</literal> and <literal>--</literal>:
+                  <literal>&lt;#assign counter++&gt;</literal> is equivalent
+                  to <literal>&lt;#assign counter = counter +
+                  1&gt;</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>+=</literal>, <literal>-=</literal>,
+                  <literal>*=</literal>, <literal>/=</literal> and
+                  <literal>%=</literal>: <literal>&lt;#assign counter +=
+                  2&gt;</literal> is equivalent to <literal>&lt;#assign
+                  counter = counter + 2&gt;</literal>.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>Added the <literal>choose</literal> built-in, which can be
+              <para>Added the <literal>then</literal> built-in, which can be
               used like a ternary operator:
-              <literal><replaceable>someBoolean</replaceable>?choose(<replaceable>whenTrue</replaceable>,
+              <literal><replaceable>someBoolean</replaceable>?then(<replaceable>whenTrue</replaceable>,
               <replaceable>whenFalse</replaceable>)</literal>. Just like with
               the ternary operator of most other languages, only one of the
               parameter expressions will be evaluated. <link
-              linkend="ref_builtin_choose">More details...</link></para>
+              linkend="ref_builtin_then">More details...</link></para>
             </listitem>
 
             <listitem>
@@ -23699,15 +23856,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               possible to enforce the same naming convention on all templates
               from Java via
               <literal>Configuration.setNamingConvention(int)</literal>. It's
-              certain that camel case will be recommended convention starting
-              from some future version, because the Java API-s called from
-              templates use that too.</para>
+              certain that camel case will be the recommended convention
+              starting from some future version, because the Java API-s users
+              call from templates use that too.</para>
             </listitem>
 
             <listitem>
-              <para>Bug fixed, activated with
-              <literal>incompatible_improvements</literal> 2.3.23: There's a
-              long existing parse-time rule that says that
+              <para>Added new <link linkend="ref_specvar">special
+              variables</link>, <literal>.current_template_name</literal> and
+              <literal>.main_template_name</literal>. These deprecate
+              <literal>.template_name</literal>, which was always broken when
+              it comes to macro calls. The new
+              <literal>.current_template_name</literal> always returns the
+              name of the template that contains the reference to the special
+              variable, and <literal>.main_template_name</literal> always
+              returns the name of the topmost template.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added tip in the error message for the frequent issue when
+              <literal><replaceable>someMap</replaceable>[<replaceable>someNumber</replaceable>]</literal>
+              complains that
+              <literal><replaceable>someMap</replaceable></literal> is not a
+              sequence nor is coercible to string.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed, activated with setting
+              <literal>incompatible_improvements</literal> to 2.3.23: There's
+              a long existing parse-time rule that says that
               <literal>#break</literal>, in the FTL source code itself, must
               occur nested inside a breakable directive, such as
               <literal>#list</literal> or <literal>#switch</literal>. This
@@ -23764,15 +23941,106 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added <literal>Environment.getCurrentTemplate()</literal>
+              method, which return the currently executed template (as opposed
+              to the main template).</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>WebappTemplateLoader.setAttemptFileAccess(boolean)</literal>,
+              which can be used to disable the legacy trick where we try to
+              load templates through direct file access, so that template
+              updating works without restarting. Disabling URL connection
+              caches
+              (<literal>someURLBasedTemplateLoader.setURLConnectionUsesCaches(false)</literal>,
+              which is also the default since
+              <literal>incompatible_improvements</literal> 2.3.21) probably
+              solves that on most modern Servlet containers.</para>
+            </listitem>
+
+            <listitem>
+              <para>In the <literal>FreemarkerServlet</literal>
+              <literal>TemplatePath</literal> init-param, paths (like
+              <literal>/templates</literal>) can have a
+              <literal>?settings(<replaceable>...</replaceable>)</literal>
+              postfix, with which you can set the JavaBean properties of the
+              resulting <literal>TemplateLoader</literal>. For example:
+              <literal>&lt;param-value&gt;/templates?settings(attemptFileAccess=false,
+              URLConnectionUsesCaches=false)&lt;/param-value&gt;</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>FileTemplateLoader.setEmulateCaseSensitiveFileSystem(boolean)</literal>.
+              This is handy when you are developing on Windows but will deploy
+              to a platform with case sensitive file system. The default is
+              <literal>false</literal>, and <literal>true</literal> is only
+              meant for development, not for production installations. The
+              default can be overridden by setting the
+              <literal>org.freemarker.emulateCaseSensitiveFileSystem</literal>
+              system property to <literal>true</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/424">424</link>]:
+              <literal>WebappTemplateLoader</literal> didn't find templates
+              that are stored in
+              <literal>WEB-INF/lib/*.jar/META-INF/resources</literal>. Files
+              under that directory are visible as
+              <literal>ServletContext</literal> resources since Servlet 3.0,
+              yet <literal>WebappTemplateLoader</literal> has usually failed
+              to see them because of some internal tricks.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: If a template <quote>file</quote> was
               successfully opened for reading, but then there was an
               <literal>IOException</literal> during reading its content, the
               parser (JavaCC) acted like if the template <quote>file</quote>
               was ended there, and the exception was suppressed. It's actually
-              JavaCC that does this, and this quirk of it was never fixed. But
-              now FreeMarker has added a workaround in the
+              a JavaCC quirk, but now FreeMarker has added a workaround in the
               <literal>Template</literal> constructor, and so now an exception
               will be thrown as expected.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/426/">426</link>]:
+              When setting <literal>incompatible_improvements</literal> to
+              2.3.22, the special variable reference
+              <literal>.template_name</literal> in templates always returns
+              the name of the main (topmost) template, due to an oversight in
+              2.3.22. Setting <literal>incompatible_improvements</literal> to
+              2.3.23 restores the old, backward compatible behavior. (Note
+              that the old behavior that we emulate is itself broken; you
+              should use <literal>.current_template_name</literal> or
+              <literal>.main_template_name</literal> instead.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed:
+              <literal>InvalidReferenceException.FAST_INSTANCE</literal> could
+              accidentally store reference to an
+              <literal>Environment</literal> instance, which hence was never
+              garbage collected.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/53/">53</link>]:
+              Template parsing was abnormally slow for templates with very
+              high number AST (abstract syntax tree) nodes on the same
+              hierarchy level.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When the template was concurrently replaced
+              during its first loading was still ongoing, the older version of
+              the template could get into the cache with the time stamp of the
+              new version, hence it wasn't reloaded after the configured
+              update delay.</para>
             </listitem>
 
             <listitem>
@@ -23780,6 +24048,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting (added in 2.3.22) couldn't be set through the
               <literal>Configurable.setSetting(String, String)</literal>
               API.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed:
+              <literal>StringUtil.FTLStringLiteralEnc</literal> has escaped
+              <literal>$</literal> (hence generating an illegal escape) and
+              haven't escaped <literal>{</literal> after <literal>$</literal>
+              and <literal>#</literal>. While this function is only used for
+              generating error messages by FreeMarker, it's a public methods
+              so anyone could use it.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bugs fixed: Various canonical form glitches (they only
+              affect error messages as far as FreeMarker is concerned).</para>
             </listitem>
           </itemizedlist>
         </section>

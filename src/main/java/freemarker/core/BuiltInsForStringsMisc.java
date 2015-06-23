@@ -18,11 +18,11 @@ package freemarker.core;
 
 import java.io.StringReader;
 
+import freemarker.template.Configuration;
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
-import freemarker.template._TemplateAPI;
 
 class BuiltInsForStringsMisc {
 
@@ -51,9 +51,10 @@ class BuiltInsForStringsMisc {
             SimpleCharStream scs = new SimpleCharStream(
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            token_source.incompatibleImprovements = _TemplateAPI.getTemplateLanguageVersionAsInt(this);
+            final Configuration cfg = env.getConfiguration();
+            token_source.incompatibleImprovements = cfg.getIncompatibleImprovements().intValue();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
-            int namingConvention = env.getConfiguration().getNamingConvention();
+            int namingConvention = cfg.getNamingConvention();
             token_source.initialNamingConvention = namingConvention;
             token_source.namingConvention = namingConvention;
             FMParser parser = new FMParser(token_source);

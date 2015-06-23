@@ -455,6 +455,18 @@ public class ObjectBuilderSettingsTest {
             assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
     }
+
+    @Test
+    public void configureBeanTest() throws Exception {
+        final TestBean7 bean = new TestBean7();
+        final String src = "a/b(s='foo', x=1, b=true), bar";
+        int nextPos = _ObjectBuilderSettingEvaluator.configureBean(src, src.indexOf('(') + 1, bean,
+                _SettingEvaluationEnvironment.getCurrent());
+        assertEquals("foo", bean.getS());
+        assertEquals(1, bean.getX());
+        assertTrue(bean.isB());
+        assertEquals(", bar", src.substring(nextPos));
+    }
     
     @Test
     public void parsingErrors() throws Exception {
@@ -872,6 +884,43 @@ public class ObjectBuilderSettingsTest {
         }
         
     }
+    
+    public class TestBean7 {
+
+        private String s;
+        private int x;
+        private boolean b;
+
+        public String getS() {
+            return s;
+        }
+
+        public void setS(String s) {
+            this.s = s;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+
+        public boolean isB() {
+            return b;
+        }
+
+        public void setB(boolean b) {
+            this.b = b;
+        }
+
+        @Override
+        public String toString() {
+            return "TestBean [s=" + s + ", x=" + x + ", b=" + b + "]";
+        }
+
+    }    
     
     public static class DummyArithmeticEngine extends ArithmeticEngine {
         

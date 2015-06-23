@@ -94,7 +94,7 @@ public final class TextBlock extends TemplateElement {
         if (!stripWhitespace || text.length == 0 ) {
             return this;
         }
-        if (parent.parent == null && previousSibling() == null) return this;
+        if (getParentElement().getParentElement() == null && previousSibling() == null) return this;
         if (!deliberateLeftTrim) {
             trailingCharsToStrip = trailingCharsToStrip();
         }
@@ -150,8 +150,6 @@ public final class TextBlock extends TemplateElement {
                     }
                 }
             }
-        }
-        if (result) {
         }
         return result;
     }
@@ -340,11 +338,11 @@ public final class TextBlock extends TemplateElement {
         if (!StringUtil.isTrimmableToEmpty(text)) {
             return false;
         }
-        boolean atTopLevel = (getParent().getParent() == null);
+        boolean atTopLevel = (getParentElement().getParentElement() == null);
         TemplateElement prevSibling = previousSibling();
         TemplateElement nextSibling = nextSibling();
         return ((prevSibling == null && atTopLevel) || nonOutputtingType(prevSibling))
-              && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
+                && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
     }
     
 

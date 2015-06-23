@@ -67,11 +67,7 @@ final class AddConcatExpression extends Expression {
         {
             Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
             Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, rightExp);
-            ArithmeticEngine ae =
-                env != null
-                    ? env.getArithmeticEngine()
-                    : parent.getTemplate().getArithmeticEngine();
-            return new SimpleNumber(ae.add(first, second));
+            return _evalOnNumbers(env, parent, first, second);
         }
         else if(leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel)
         {
@@ -106,6 +102,15 @@ final class AddConcatExpression extends Expression {
                 }
             }
         }
+    }
+
+    static TemplateModel _evalOnNumbers(Environment env, TemplateObject parent, Number first, Number second)
+            throws TemplateException {
+        ArithmeticEngine ae =
+            env != null
+                ? env.getArithmeticEngine()
+                : parent.getTemplate().getArithmeticEngine();
+        return new SimpleNumber(ae.add(first, second));
     }
 
     boolean isLiteral() {

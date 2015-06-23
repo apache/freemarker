@@ -28,3 +28,9 @@ ${x}
 ${x}
 <#assign x += noSuchVar>
 ${x}
+<@assertFails messageRegexp="(?s).*null or missing.*"><#assign noSuchVar = noSuchVar - 1></@>
+<@assertFails messageRegexp="(?s)(?=.*noSuchVar).*assignment.*null or missing.*"><#assign noSuchVar -= 1></@>
+<@assertFails messageRegexp="(?s)(?=.*noSuchVar).*assignment.*null or missing.*"><#assign noSuchVar--></@>
+<@assertFails messageRegexp="(?s)(?=.*noSuchVar).*assignment.*null or missing.*"><#assign noSuchVar++></@>
+<#assign noSuchVar = noSuchVar + 1>
+${noSuchVar}<#-- noSuchVar is "1" string here -->
