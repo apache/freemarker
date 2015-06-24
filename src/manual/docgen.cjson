@@ -51,7 +51,7 @@ secondaryTabs: [{
    "class": "icon-bug"
 }, {
   "href": "javascript:;"
-  "text": "Download v2.3.21",
+  "text": "Download",
   "class": "icon-download"
 }]
 
@@ -112,12 +112,6 @@ footerSiteMap: {
         "href": "app_faq.html"
       }
     ]
-}
-
-
-category: {
-  href: "index.html",
-  text: "Manual"
 }
 
 socialLinks: [

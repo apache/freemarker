@@ -6,9 +6,11 @@
       xmlns:ns4="http://www.w3.org/2000/svg"
       xmlns:ns3="http://www.w3.org/1998/Math/MathML"
       xmlns:ns="http://docbook.org/ns/docbook">
-  <title>FreeMarker Manual</title>
-
-  <subtitle>For FreeMarker 2.3.23-RC1</subtitle>
+  <info>
+    <title>FreeMarker Manual</title>
+    <titleabbrev>Manual</titleabbrev>
+    <productname>Freemarker 2.3.23</productname>
+  </info>      
 
   <preface xml:id="preface">
     <title>What's FreeMarker?</title>
