@@ -8,11 +8,13 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <info>
     <title>FreeMarker Manual</title>
-    <titleabbrev>Manual</titleabbrev>
-    <productname>Freemarker 2.3.23</productname>
-  </info>      
 
-  <preface xml:id="preface">
+    <titleabbrev>Manual</titleabbrev>
+
+    <productname>Freemarker 2.3.23</productname>
+  </info>
+
+  <preface role="index.html" xml:id="preface">
     <title>What's FreeMarker?</title>
 
     <para>FreeMarker is a <emphasis>template engine</emphasis>: a generic tool
@@ -33776,6 +33778,7 @@ Dekany, and Jonathan Revusky.</programlisting>
         <para>FreeMarker itself doesn't add any exporting limitations.</para>
       </section>
     </appendix>
+
     <appendix xml:id="search">
       <title>Search</title>
 
