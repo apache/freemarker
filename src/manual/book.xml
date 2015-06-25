@@ -33778,14 +33778,6 @@ Dekany, and Jonathan Revusky.</programlisting>
         <para>FreeMarker itself doesn't add any exporting limitations.</para>
       </section>
     </appendix>
-
-    <appendix xml:id="search">
-      <title>Search</title>
-
-      <indexterm>
-        <primary>search</primary>
-      </indexterm>
-    </appendix>
   </part>
 
   <glossary xml:id="gloss">
