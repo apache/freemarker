@@ -6,11 +6,15 @@
       xmlns:ns4="http://www.w3.org/2000/svg"
       xmlns:ns3="http://www.w3.org/1998/Math/MathML"
       xmlns:ns="http://docbook.org/ns/docbook">
-  <title>FreeMarker Manual</title>
+  <info>
+    <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.23-RC1</subtitle>
+    <titleabbrev>Manual</titleabbrev>
 
-  <preface xml:id="preface">
+    <productname>Freemarker 2.3.23</productname>
+  </info>
+
+  <preface role="index.html" xml:id="preface">
     <title>What's FreeMarker?</title>
 
     <para>FreeMarker is a <emphasis>template engine</emphasis>: a generic tool
