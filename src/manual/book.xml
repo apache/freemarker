@@ -12014,8 +12014,8 @@ foobar</programlisting>
           </note>
 
           <para>Removes the parameter substring from the ending of the string,
-          or returns the original string if it doesn't start with the
-          parameter substring. For example:</para>
+          or returns the original string if it doesn't end with the parameter
+          substring. For example:</para>
 
           <programlisting role="template">${"abcdef"?remove_ending("def")}
 ${"foobar"?remove_ending("def")}</programlisting>
