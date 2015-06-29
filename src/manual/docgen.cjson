@@ -1,7 +1,7 @@
 ﻿//charset: UTF-8
 
 deployUrl: "http://freemarker.org/docs/"
-onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+// onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
 searchKey: "014728049242975963158:8awjt03uofm"
 validation: {
   programlistingsRequireRole
