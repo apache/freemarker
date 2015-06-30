@@ -23878,7 +23878,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added tip in the error message for the frequent issue when
+              <para>Smaller error message improvements. Like, added tip in the
+              error message for the frequent issue when
               <literal><replaceable>someMap</replaceable>[<replaceable>someNumber</replaceable>]</literal>
               complains that
               <literal><replaceable>someMap</replaceable></literal> is not a
