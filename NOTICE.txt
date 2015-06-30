@@ -1,4 +1,8 @@
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
 
+Some fonts used in the included documentation are generated
+from Entypo pictograms, version 2.0, by Daniel Bruce
+(www.entypo.com).
+
 See the LICENSE.txt for more details.
