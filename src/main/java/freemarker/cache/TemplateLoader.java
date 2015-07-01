@@ -111,9 +111,9 @@ public interface TemplateLoader {
      * <p>
      * Typically, this method is called if the template is missing from the cache, or if after calling
      * {@link #findTemplateSource(String)} and {@link #getLastModified(Object)} it was determined that the cached copy
-     * of the template is stale. Then, if it turns out that the {@code encoding} parameter passed doesn't match the
-     * actual template content, this method will be called for a second time with the correct {@code encoding} parameter
-     * value.
+     * of the template is stale. Then, if it turns out that the {@code encoding} parameter used doesn't match the actual
+     * template content (based on the {@code #ftl encoding=...} header), this method will be called for a second time
+     * with the correct {@code encoding} parameter value.
      * 
      * @param templateSource
      *            an object representing a template source, obtained through a prior call to
@@ -123,10 +123,11 @@ public interface TemplateLoader {
      *            the character encoding used to translate source bytes to characters. Some loaders may not have access
      *            to the byte representation of the template stream, and instead directly obtain a character stream.
      *            These loaders should ignore the encoding parameter.
-     *            
-     * @return a reader representing the template character stream. It's the responsibility of the caller (
-     *         {@link TemplateCache} usually) to {@code close()} it.
-     *         
+     * 
+     * @return A {@link Reader} representing the template character stream. It's the responsibility of the caller (which
+     *         is {@link TemplateCache} usually) to {@code close()} it. The {@link Reader} is not required to work after
+     *         the {@code templateSource} was closed ({@link #closeTemplateSource(Object)}).
+     * 
      * @throws IOException
      *             if an I/O error occurs while accessing the stream.
      */
