@@ -6,11 +6,15 @@
       xmlns:ns4="http://www.w3.org/2000/svg"
       xmlns:ns3="http://www.w3.org/1998/Math/MathML"
       xmlns:ns="http://docbook.org/ns/docbook">
-  <title>FreeMarker Manual</title>
+  <info>
+    <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.23-RC</subtitle>
+    <titleabbrev>Manual</titleabbrev>
 
-  <preface xml:id="preface">
+    <productname>Freemarker 2.3.23</productname>
+  </info>
+
+  <preface role="index.html" xml:id="preface">
     <title>What's FreeMarker?</title>
 
     <para>FreeMarker is a <emphasis>template engine</emphasis>: a generic tool
@@ -12010,8 +12014,8 @@ foobar</programlisting>
           </note>
 
           <para>Removes the parameter substring from the ending of the string,
-          or returns the original string if it doesn't start with the
-          parameter substring. For example:</para>
+          or returns the original string if it doesn't end with the parameter
+          substring. For example:</para>
 
           <programlisting role="template">${"abcdef"?remove_ending("def")}
 ${"foobar"?remove_ending("def")}</programlisting>
@@ -23505,26 +23509,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry xml:id="faq_logging_suppressed">
-          <question>
-            <para>Why is FreeMarker logging suppressed for my
-            application?</para>
-          </question>
-
-          <answer>
-            <para>It's because FreeMarker does not find any logging system. To
-            fix this, you must make available one of the following logging
-            systems for your application: SLF4J (recommended), Apache Commons
-            Logging, Log4J (<literal>org.apache.log4j</literal>), Avalon
-            (<literal>org.apache.log</literal>), or use J2SE 1.4 or later
-            (that contains <literal>java.util.logging</literal>). That is, the
-            class-loader used with your application must find one of the
-            mentioned classes. Until 2.4, if you want to use SLF4J or Commons
-            Logging you need to do some extra steps; <link
-            linkend="pgui_misc_logging">see here...</link></para>
-          </answer>
-        </qandaentry>
-
         <qandaentry xml:id="faq_nice_error_page">
           <question>
             <para><anchor xml:id="misc.faq.niceErrorPage"/> In my Servlet
@@ -23611,135 +23595,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             this...</link></para>
           </answer>
         </qandaentry>
-
-        <qandaentry xml:id="faq_speed">
-          <question>
-            <para>How fast is FreeMarker? Is it true that 2.x is slower than
-            1.x (FreeMarker classic)?</para>
-          </question>
-
-          <answer>
-            <para>First of all, don't forget that FreeMarker is only the view
-            rendering component in an <link linkend="gloss.MVC">MVC</link>
-            system. Furthermore MVC templates tend to be simple: many static
-            text with a few interpolations and loops and conditional block. So
-            it is not like PHP or Model 1 JSP; your application performance is
-            not affected that much by the execution time of templates.</para>
-
-            <para>FreeMarker is certainly fast enough that it will only very
-            rarely be a bottleneck in your application. Rather, other factors
-            such as the speed of the data-base operations or network bandwidth
-            will likely dominate. The impact of FreeMarker performance could
-            be noticeable only for really busy sites (say, over 30 hits per
-            second per server), where almost all database data is cached. If
-            you are finding FreeMarker slow, do make sure that the cache of
-            parsed templates works well
-            (<literal>Configuration.getTemplate</literal> be default uses
-            caching). Parsing a template file is a relatively costly step; in
-            most long-running server-side applications, you will want to parse
-            a template once and have it be used many times. (Note that
-            FreeMarker 2.1.4 and earlier versions have bugs that sometimes can
-            ruin caching.)</para>
-
-            <para>FreeMarker 2.1 is slower than 1.7.1. This surely depends on
-            your templates, but it could be slower by a factor of 2 or 3. But
-            again, it does not means that response time will be 2 or 3 times
-            slower; most FreeMarker user simply should not be able to perceive
-            the change in the final response time.</para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_list_variables_used">
-          <question>
-            <para>How can my Java classes ask a template for information about
-            its structure (e.g. a list of all the variables)?</para>
-          </question>
-
-          <answer>
-            <para>In FreeMarker 2.2, <literal>Template</literal> has an
-            undocumented method for examining the parsed template:
-            <literal>getRootTreeNode</literal>.</para>
-
-            <para>But listing all accessed variables is not possible, because
-            variable names can be dynamically generated from data. However,
-            there's a more important reason why FreeMarker doesn't support
-            this. The design of FreeMarker is based on the idea of a
-            separation between business objects and presentation objects. This
-            separation takes two forms:</para>
-
-            <orderedlist>
-              <listitem>
-                <para>The templates know what data to expect, but they don't
-                know how it's generated.</para>
-              </listitem>
-
-              <listitem>
-                <para>The business objects know what data to produce, but they
-                don't know how it's going to be displayed. Therefore, they
-                don't know anything about templates.</para>
-              </listitem>
-            </orderedlist>
-
-            <para>Since the business objects don't rely on the templates, if
-            you need to use them with some other presentation system, you
-            won't have to rewrite your application.</para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_compatibility">
-          <question>
-            <para>Will you ever provide backward compatibility?</para>
-          </question>
-
-          <answer>
-            <para>FreeMarker 2.0 was a complete rewrite of FreeMarker 1.x, by
-            a new author. The 1.x series continues as separated project:
-            FreeMarker Classic. Since 2.x follows different philosophy than
-            1.x, 2.0x releases were immature despite the high major version
-            number. This caused further radical changes between 2.01 and 2.1.
-            As of 2.1 things were much more matured, and 2.2 is almost
-            backward compatible with 2.1. We hope that this tendency
-            continues.</para>
-
-            <para>Currently, the rule is that releases with different second
-            version number (as 2.1.x and 2.2.x) are not (fully) compatible.
-            Releases where only the third version number differs (as 2.2.1 and
-            2.2.6) are compatible.</para>
-
-            <para>We always provide backward compatible bugfix releases for
-            the released versions. So basically, you don't
-            <emphasis>have</emphasis> to switch to a new, non-backward
-            compatible release in an already written product. It's a something
-            for something situation... FreeMarker recovers faster from design
-            mistakes than many other projects, but the price of this is that
-            major releases are not backward compatible. This is admittedly not
-            optimal, it would be better if there are fewer design mistakes...
-            but, well, it is the reality.</para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_licence">
-          <question>
-            <para>If we distribute FreeMarker with our product, do we have to
-            release the source code for our product?</para>
-          </question>
-
-          <answer>
-            <para>No. As of 2.0, FreeMarker is released under a BSD-style
-            license. This means that source or binary distributions may be
-            made freely, and can be included in other products, whether
-            commercial or open source.</para>
-
-            <para>The only restrictions apply to the copyright of FreeMarker
-            itself, and the use of FreeMarker or its contributors as
-            endorsements of your own product. See the <link
-            linkend="app_license">LICENSE</link> for further details.</para>
-
-            <para>If you use FreeMarker, we hope you'll send us a link to some
-            information about your product, but that's optional as
-            well.</para>
-          </answer>
-        </qandaentry>
       </qandaset>
     </appendix>
 
@@ -23747,9 +23602,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_23">
-        <title>2.3.23</title>
+        <title>2.3.23 RC1</title>
 
-        <para>Date of release: TODO</para>
+        <para>Date of release: 2015-05-21</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -23795,21 +23650,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added <literal>++</literal> and <literal>--</literal>
-              assignment operators, which can be used in assignment directives
-              (<literal>#assign</literal>, <literal>#global</literal> and
-              <literal>#local</literal> currently) only. For example,
-              <literal>&lt;#assign counter++&gt;</literal> is equivalent to
-              <literal>&lt;#assign counter = counter + 1&gt;</literal>.</para>
-            </listitem>
+              <para>Added convenience assignment operators, which can be used
+              in assignment directives (<literal>#assign</literal>,
+              <literal>#global</literal> and <literal>#local</literal>
+              currently) only:</para>
 
-            <listitem>
-              <para>Added <literal>+=</literal>, <literal>-=</literal>,
-              <literal>*=</literal>, <literal>/=</literal> and
-              <literal>%=</literal> assignment operators, which can be used in
-              assignment directives only. For example, <literal>&lt;#assign
-              counter += 2&gt;</literal> is equivalent to <literal>&lt;#assign
-              counter = counter + 2&gt;</literal>.</para>
+              <itemizedlist>
+                <listitem>
+                  <para><literal>++</literal> and <literal>--</literal>:
+                  <literal>&lt;#assign counter++&gt;</literal> is equivalent
+                  to <literal>&lt;#assign counter = counter +
+                  1&gt;</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>+=</literal>, <literal>-=</literal>,
+                  <literal>*=</literal>, <literal>/=</literal> and
+                  <literal>%=</literal>: <literal>&lt;#assign counter +=
+                  2&gt;</literal> is equivalent to <literal>&lt;#assign
+                  counter = counter + 2&gt;</literal>.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -23850,9 +23711,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               possible to enforce the same naming convention on all templates
               from Java via
               <literal>Configuration.setNamingConvention(int)</literal>. It's
-              certain that camel case will be recommended convention starting
-              from some future version, because the Java API-s called from
-              templates use that too.</para>
+              certain that camel case will be the recommended convention
+              starting from some future version, because the Java API-s users
+              call from templates use that too.</para>
             </listitem>
 
             <listitem>
@@ -23868,7 +23729,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added tip in the error message for the frequent issue when
+              <para>Smaller error message improvements. Like, added tip in the
+              error message for the frequent issue when
               <literal><replaceable>someMap</replaceable>[<replaceable>someNumber</replaceable>]</literal>
               complains that
               <literal><replaceable>someMap</replaceable></literal> is not a
@@ -23876,9 +23738,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed, activated with
-              <literal>incompatible_improvements</literal> 2.3.23: There's a
-              long existing parse-time rule that says that
+              <para>Bug fixed, activated with setting
+              <literal>incompatible_improvements</literal> to 2.3.23: There's
+              a long existing parse-time rule that says that
               <literal>#break</literal>, in the FTL source code itself, must
               occur nested inside a breakable directive, such as
               <literal>#list</literal> or <literal>#switch</literal>. This
@@ -23994,8 +23856,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>IOException</literal> during reading its content, the
               parser (JavaCC) acted like if the template <quote>file</quote>
               was ended there, and the exception was suppressed. It's actually
-              JavaCC that does this, and this quirk of it was never fixed. But
-              now FreeMarker has added a workaround in the
+              a JavaCC quirk, but now FreeMarker has added a workaround in the
               <literal>Template</literal> constructor, and so now an exception
               will be thrown as expected.</para>
             </listitem>
@@ -24026,7 +23887,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/53/">53</link>]:
               Template parsing was abnormally slow for templates with very
-              high number of sibling AST (abstract syntax tree) nodes.</para>
+              high number AST (abstract syntax tree) nodes on the same
+              hierarchy level.</para>
             </listitem>
 
             <listitem>
@@ -24055,8 +23917,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bugs fixed: Various canonical form glitches (they are
-              mostly used in error messages).</para>
+              <para>Bugs fixed: Various canonical form glitches (they only
+              affect error messages as far as FreeMarker is concerned).</para>
             </listitem>
           </itemizedlist>
         </section>

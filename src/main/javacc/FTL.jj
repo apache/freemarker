@@ -636,7 +636,7 @@ TOKEN_MGR_DECLS:
 
 TOKEN:
 {
-    <#BLANK : [" ", "\t", "\n", "\r"]>
+    <#BLANK : " " | "\t" | "\n" | "\r">
     |
     <#START_TAG : "<" | "<#" | "[#">
     |
@@ -798,7 +798,7 @@ TOKEN:
     /*
      * ATTENTION: Update _CoreAPI.BUILT_IN_DIRECTIVE_NAMES if you add new directives!
      */
-    <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
+    <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z", "A"-"Z", "_"])+>
     {
         if (!directiveSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
             matchedToken.kind = STATIC_TEXT_NON_WS;
@@ -870,7 +870,7 @@ TOKEN:
 
 <DEFAULT, NODIRECTIVE> TOKEN :
 {
-    <STATIC_TEXT_WS : (["\n", "\r", "\t", " "])+>
+    <STATIC_TEXT_WS : ("\n" | "\r" | "\t" | " ")+>
     |
     <STATIC_TEXT_NON_WS : (~["$", "<", "#", "[", "{", "\n", "\r", "\t", " "])+>
     |
@@ -885,7 +885,7 @@ TOKEN:
 {
     < ( " " | "\t" | "\n" | "\r" )+ >
     |
-    < ["<", "["] ["#", "!"] "--"> : EXPRESSION_COMMENT
+    < ("<" | "[") ("#" | "!") "--"> : EXPRESSION_COMMENT
 }
 
 <EXPRESSION_COMMENT> SKIP:
@@ -911,22 +911,22 @@ TOKEN:
     <#ESCAPED_CHAR :
         "\\"
         (
-            ["n","t","r","f","b","g","l","a","\\","'","\"","$","{"]
+            ("n" | "t" | "r" | "f" | "b" | "g" | "l" | "a" | "\\" | "'" | "\"" | "$" | "{")
             |
-            ("x" ["0"-"9","A"-"F","a"-"f"])
+            ("x" ["0"-"9", "A"-"F", "a"-"f"])
         )
     >
     | 
     <STRING_LITERAL :
         (
             "\""
-            ((~["\"","\\"]) | <ESCAPED_CHAR>)*
+            ((~["\"", "\\"]) | <ESCAPED_CHAR>)*
             "\""
         )
         |
         (
             "'"
-            ((~["'","\\"]) | <ESCAPED_CHAR>)*
+            ((~["'", "\\"]) | <ESCAPED_CHAR>)*
             "'"
         )
     >
@@ -1217,11 +1217,11 @@ TOKEN:
         ]
     >
     |
-    <#ESCAPED_ID_CHAR: "\\" ["-", ".", ":"] >
+    <#ESCAPED_ID_CHAR: "\\" ("-" | "." | ":")>
     |
     <#ID_START_CHAR: <NON_ESCAPED_ID_START_CHAR>|<ESCAPED_ID_CHAR>>
     |
-    <#ASCII_DIGIT: ["0" - "9"] >
+    <#ASCII_DIGIT: ["0" - "9"]>
 }
 
 <FM_EXPRESSION, NO_SPACE_EXPRESSION, NAMED_PARAMETER_EXPRESSION> TOKEN :

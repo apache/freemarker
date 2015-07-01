@@ -237,7 +237,7 @@ public abstract class Logger {
                     setLibrary(libraryEnum);
                     loggersByCategory.clear();
                     if (loggerFactoryWasAlreadySet) {
-                        logWarnInLogger("Logger libraray was already set earlier to \""
+                        logWarnInLogger("Logger library was already set earlier to \""
                                 + getLibraryName(replacedLibraryEnum) + "\"; "
                                 + "change to \"" + getLibraryName(libraryEnum) + "\" won't effect loggers created "
                                 + "earlier.");
