@@ -17,7 +17,7 @@ generateEclipseTOC
 logo: {
   href: "http://freemarker.org"
   src: logo.png,
-  alt: "Freemarker"
+  alt: "FreeMarker"
 }
 
 olinks: {
@@ -75,7 +75,7 @@ secondaryTabs: {
 
 footerSiteMap: {
   "Overview": {
-    "What is Freemarker?": "olink:what-is-freemarker"
+    "What is FreeMarker?": "olink:what-is-freemarker"
     "Download": "olink:freemarkerdownload"
     "Version history": "id:app_versions"
     "About us": "olink:history"
@@ -89,7 +89,7 @@ footerSiteMap: {
     ".special_vars": "id:ref_specvar"
   }
   "Community": {
-    "Freemarker on Github": "olink:githubProject"
+    "FreeMarker on Github": "olink:githubProject"
     "Follow us on Twitter": "olink:twitter"
     "Report a bug": "olink:newBugReport"
     "Ask a question": "olink:newStackOverflowQuestion"
