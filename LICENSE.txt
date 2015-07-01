@@ -32,14 +32,24 @@ Apache Software Foundation. These files are:
 
 The "icomoon" font files (icomoon.eot, icomoon.svg, icomoon.ttf, and
 icomoon.woff) under the "documentation" directory of the Freemarker
-distribution are generated from Entypo pictograms, version 2.0, by
-Daniel Bruce (www.entypo.com). Each included pictogram is either licensed
-under Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0), or under
-SIL Open Font License. For more information about these licenses visit
-http://creativecommons.org/licenses/by-sa/3.0/legalcode" and
-http://scripts.sil.org/OFL. Note that the fonts are only used as part of
-the included documentation, and aren't needed for the operation of Freemarker,
-nor are they included in freemarker.jar.
+distribution contains a selection from the fonts listed below. Note that
+the fonts are only used as part of the included documentation, and
+aren't used for the operation of Freemarker, nor are they included in
+the binary, freemarker.jar. The fonts are:
+
+* Entypo pictograms, version 2.0, by Daniel Bruce (www.entypo.com).
+  Each included pictogram is either licensed under Creative
+  Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0)
+  (http://creativecommons.org/licenses/by-sa/3.0/legalcode), or
+  under SIL Open Font License 1.1 (http://scripts.sil.org/OFL).
+
+* Font Awesome by Dave Gandy (http://fontawesome.io), licensed under
+  SIL Open Font License 1.1 (http://scripts.sil.org/OFL).
+  
+* Material Design icons by Google
+  (http://google.github.io/material-design-icons/), licensed under
+  Creative Common Attribution 4.0 International License (CC-BY 4.0)
+  (https://creativecommons.org/licenses/by/4.0/).
 
     
 
