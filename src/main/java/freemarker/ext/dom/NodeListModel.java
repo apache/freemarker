@@ -33,6 +33,7 @@ import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
@@ -184,17 +185,23 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                     || TemplateDateModel.class.isAssignableFrom(expectedClass)
                     || TemplateNumberModel.class.isAssignableFrom(expectedClass)
                     || TemplateBooleanModel.class.isAssignableFrom(expectedClass)) {
-                return new Object[] {
-                        "This XML query result can't be used as string because for that it had to contain exactly "
-                        + "1 XML node, but it contains ", new Integer(size()), " nodes. "
-                        + "That is, the constructing XML query has found ",
-                        isEmpty()
-                            ? "no matches."
-                            : "multiple matches."
-                        };
+                return newTypeErrorExplanation("string");
+            } else if (TemplateNodeModel.class.isAssignableFrom(expectedClass)) {
+                return newTypeErrorExplanation("node");
             }
         }
         return null;
+    }
+
+    private Object[] newTypeErrorExplanation(String type) {
+        return new Object[] {
+                "This XML query result can't be used as ", type, " because for that it had to contain exactly "
+                + "1 XML node, but it contains ", new Integer(size()), " nodes. "
+                + "That is, the constructing XML query has found ",
+                isEmpty()
+                    ? "no matches."
+                    : "multiple matches."
+                };
     }
     
 }
