@@ -15,7 +15,7 @@
   </info>
 
   <preface role="index.html" xml:id="preface">
-    <title>What's FreeMarker?</title>
+    <title>What is FreeMarker?</title>
 
     <para>FreeMarker is a <emphasis>template engine</emphasis>: a generic tool
     to generate text output (HTML web pages, e-mails, configuration files,
