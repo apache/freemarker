@@ -23,58 +23,63 @@ import org.junit.Test;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.TemplateTest;
 
 public class TemplateNameSpecialVariablesTest extends TemplateTest  {
-
-    private static final Version[] BREAK_POINT_VERSIONS = new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22, Configuration.VERSION_2_3_23 };
+    
+    private static final Version[] BREAK_POINT_VERSIONS = new Version[] {
+            Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22, Configuration.VERSION_2_3_23 };
 
     private static TemplateLoader createTemplateLoader(String specVar) {
         StringTemplateLoader tl = new StringTemplateLoader();
-            tl.putTemplate("main.ftl",
-                    "In main: ${" + specVar + "}\n"
-                    + "<#import 'imp.ftl' as i>"
-                    + "In imp: ${inImp}\n"
-                    + "In main: ${" + specVar + "}\n"
-                    + "<@i.impM>${" + specVar + "}</@>\n"
-                    + "<@i.impM2 />\n"
-                    + "In main: ${" + specVar + "}\n"
-                    + "<#include 'inc.ftl'>"
-                    + "In main: ${" + specVar + "}\n"
-                    + "<@incM>${" + specVar + "}</@>\n"
-                    + "<@incM2 />\n"
-                    + "In main: ${" + specVar + "}\n"
-                    );
-            tl.putTemplate("imp.ftl",
-                    "<#global inImp = " + specVar + ">"
-                    + "<#macro impM>"
-                        + "${" + specVar + "}\n"
-                        + "{<#nested>}"
-                    + "</#macro>"
-                    + "<#macro impM2>"
-                        + "In imp call imp:\n"
-                        + "<@impM>${" + specVar + "}</@>\n"
-                        + "After: ${" + specVar + "}"
-                    + "</#macro>"
-                    );
-            tl.putTemplate("inc.ftl",
-                    "In inc: ${" + specVar + "}\n"
+        tl.putTemplate("main.ftl",
+                "In main: ${" + specVar + "}\n"
+                + "<#import 'imp.ftl' as i>"
+                + "In imp: ${inImp}\n"
+                + "In main: ${" + specVar + "}\n"
+                + "<@i.impM>${" + specVar + "}</@>\n"
+                + "<@i.impM2 />\n"
+                + "In main: ${" + specVar + "}\n"
+                + "<#include 'inc.ftl'>"
+                + "In main: ${" + specVar + "}\n"
+                + "<@incM>${" + specVar + "}</@>\n"
+                + "<@incM2 />\n"
+                + "In main: ${" + specVar + "}\n"
+                );
+        tl.putTemplate("imp.ftl",
+                "<#global inImp = " + specVar + ">"
+                + "<#macro impM>"
+                    + "${" + specVar + "}\n"
+                    + "{<#nested>}"
+                + "</#macro>"
+                + "<#macro impM2>"
+                    + "In imp call imp:\n"
+                    + "<@impM>${" + specVar + "}</@>\n"
+                    + "After: ${" + specVar + "}"
+                + "</#macro>"
+                );
+        tl.putTemplate("inc.ftl",
+                "In inc: ${" + specVar + "}\n"
+                + "In inc call imp:\n"
+                + "<@i.impM>${" + specVar + "}</@>\n"
+                + "<#macro incM>"
+                    + "${" + specVar + "}\n"
+                    + "{<#nested>}"
+                + "</#macro>"
+                + "<#macro incM2>"
                     + "In inc call imp:\n"
-                    + "<@i.impM>${" + specVar + "}</@>\n"
-                    + "<#macro incM>"
-                        + "${" + specVar + "}\n"
-                        + "{<#nested>}"
-                    + "</#macro>"
-                    + "<#macro incM2>"
-                        + "In inc call imp:\n"
-                        + "<@i.impM>${" + specVar + "}</@>"
-                    + "</#macro>"
-                    );
-            return tl;
+                    + "<@i.impM>${" + specVar + "}</@>"
+                + "</#macro>"
+                );
+        return tl;
     }
+
+    private static final String PRINT_ALL_FTL
+            = "t=${.templateName}, ct=${.currentTemplateName!'-'}, mt=${.mainTemplateName!'-'}";
     
     @Test
     public void testTemplateName230() throws IOException, TemplateException {
@@ -171,6 +176,34 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest  {
     public void setup() {
         Configuration cfg = getConfiguration();
         cfg.setWhitespaceStripping(false);
+    }
+    
+    @Test
+    public void testInAdhocTemplate() throws TemplateException, IOException {
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("inc.ftl", "Inc: " + PRINT_ALL_FTL);
+        getConfiguration().setTemplateLoader(tl);
+        
+        // In nameless templates, the deprecated .templateName is "", but the new variables are missing values. 
+        assertOutput(new Template(null, PRINT_ALL_FTL + "; <#include 'inc.ftl'>", getConfiguration()),
+                "t=, ct=-, mt=-; Inc: t=inc.ftl, ct=inc.ftl, mt=-");
+        
+        assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <#include 'inc.ftl'>", getConfiguration()),
+                "t=foo.ftl, ct=foo.ftl, mt=foo.ftl; Inc: t=inc.ftl, ct=inc.ftl, mt=foo.ftl");
+    }
+
+    @Test
+    public void testInInterpretTemplate() throws TemplateException, IOException {
+        getConfiguration().setSharedVariable("t", PRINT_ALL_FTL);
+        assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <@t?interpret />", getConfiguration()),
+                "t=foo.ftl, ct=foo.ftl, mt=foo.ftl; "
+                + "t=foo.ftl->anonymous_interpreted, ct=foo.ftl->anonymous_interpreted, mt=foo.ftl");
+        assertOutput(new Template(null, PRINT_ALL_FTL + "; <@t?interpret />", getConfiguration()),
+                "t=, ct=-, mt=-; "
+                + "t=nameless_template->anonymous_interpreted, ct=nameless_template->anonymous_interpreted, mt=-");
+        assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <@[t,'bar']?interpret />", getConfiguration()),
+                "t=foo.ftl, ct=foo.ftl, mt=foo.ftl; "
+                + "t=foo.ftl->bar, ct=foo.ftl->bar, mt=foo.ftl");
     }
     
 }

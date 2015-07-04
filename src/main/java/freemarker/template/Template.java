@@ -124,7 +124,7 @@ public class Template extends Configurable {
      * 
      * @param name
      *            The path of the template file relatively to the (virtual) directory that you use to store the
-     *            templates (except if {@link #Template(String, String, Reader, Configuration, String) sourceName} is
+     *            templates (except if {@link #Template(String, String, Reader, Configuration, String) sourceName}
      *            differs from it). Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}. Check
      *            {@link #getName()} to see how the name will be used. The name should be independent of the actual
      *            storage mechanism and physical location as far as possible. Even when the templates are stored
@@ -132,7 +132,10 @@ public class Template extends Configurable {
      *            an absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.ftl"}, and
      *            you are using {@code "/www/templates/"} as the template root directory via
      *            {@link Configuration#setDirectoryForTemplateLoading(java.io.File)}, then the template name will be
-     *            {@code "forum/main.ftl"}.
+     *            {@code "forum/main.ftl"}. The name can be {@code null} (should be used for template made on-the-fly
+     *            instead of being loaded from somewhere), in which case relative paths in it will be relative to
+     *            the template root directory (and here again, it's the {@link TemplateLoader} that knows what that
+     *            "physically" means).
      * @param sourceName
      *            See {@link #getSourceName()} for the meaning. Can be {@code null}, in which case
      *            {@link #getSourceName()} will return the same as {@link #getName()}.
