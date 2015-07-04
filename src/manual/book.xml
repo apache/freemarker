@@ -23957,16 +23957,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Many smaller Manual and site content
-              updates/improvements.</para>
+              <para>Modernized Manual and site design with improved
+              functionality (always visible navigation tree, search inside the
+              Manual, etc.), thanks to Evangelia Dendramis. (Also now the Site
+              uses the same format and HTML generator as the Manual.)</para>
             </listitem>
 
             <listitem>
-              <para>Modernized Manual and site design with improved
-              functionality, like constantly visible navigation tree on the
-              side, and search inside the Manual. (Also now the Site uses the
-              same format and HTML generator as the Manual: DocBook 5.0 and
-              Docgen 2.0.)</para>
+              <para>Many smaller Manual and site content
+              updates/improvements.</para>
             </listitem>
           </itemizedlist>
         </section>
