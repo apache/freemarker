@@ -17855,7 +17855,7 @@ All rights reserved.</emphasis></programlisting>
 
             <programlisting role="template">&lt;#list users as user&gt;
   &lt;div&gt;
-    ${user}&lt;#sep&gt;, <emphasis>&lt;/#sep&gt;</emphasis>
+    ${user}<emphasis>&lt;#sep&gt;, &lt;/#sep&gt;</emphasis>
   &lt;/div&gt;
 &lt;/#list&gt;</programlisting>
 
