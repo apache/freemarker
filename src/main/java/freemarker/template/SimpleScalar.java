@@ -39,7 +39,7 @@ implements TemplateScalarModel, Serializable {
 
     /**
      * Constructs a <tt>SimpleScalar</tt> containing a string value.
-     * @param value the string value.
+     * @param value the string value. If this is {@code null}, its value in FTL will be {@code ""}.
      */
     public SimpleScalar(String value) {
         this.value = value;
@@ -50,6 +50,17 @@ implements TemplateScalarModel, Serializable {
     }
 
     public String toString() {
+        // [2.4] Shouldn't return null
         return value;
     }
+    
+    /**
+     * Same as calling the constructor, except that for a {@code null} parameter it returns null. 
+     * 
+     * @since 2.3.23
+     */
+    public static SimpleScalar newInstanceOrNull(String s) {
+        return s != null ? new SimpleScalar(s) : null;
+    }
+    
 }

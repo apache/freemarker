@@ -58,7 +58,7 @@ public abstract class TemplateTest {
         assertOutput(configuration.getTemplate(name), expectedOut);
     }
     
-    private void assertOutput(Template t, String expectedOut) throws TemplateException, IOException {
+    protected void assertOutput(Template t, String expectedOut) throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         t.process(createDataModel(), out);
         assertEquals(expectedOut, out.toString());
