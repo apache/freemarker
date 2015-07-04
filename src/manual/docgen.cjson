@@ -1,34 +1,104 @@
-﻿olinks: {
-  homepage: "http://freemarker.org/"
-  api: "api/index.html"
-}
+﻿//charset: UTF-8
 
-internalBookmarks: {
-  "Alpha. index": alphaidx
-  "Expressions": exp_cheatsheet 
-  "?builtins": ref_builtins_alphaidx
-  "#directives": ref_directive_alphaidx
-  ".spec_vars": ref_specvar
-  "FAQ": app_faq
-  "Glossary": gloss
-}
-
-externalBookmarks: {
-  "API": "api/index.html"
-  "Home": "../index.html"
-}
-
+deployUrl: "http://freemarker.org/docs/"
+// onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+searchKey: "014728049242975963158:8awjt03uofm"
 validation: {
   programlistingsRequireRole
   // programlistingsRequireLanguage
   maximumProgramlistingWidth: 100
 }
-
+showXXELogo
 generateEclipseTOC
 // eclipse: {
 //  link_to: "freemarker-toc.xml#ManualLink"
 // }
 
-onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+logo: {
+  href: "http://freemarker.org"
+  src: logo.png,
+  alt: "FreeMarker"
+}
 
-showXXELogo
+olinks: {
+  homepage: "http://freemarker.org/"
+  api: "api/index.html"
+  
+  // Homepage links:
+  freemarkerdownload: "http://freemarker.org/freemarkerdownload.html"
+  contribute: "http://freemarker.org/contribute.html"
+  history: "http://freemarker.org/history.html"
+  what-is-freemarker: "http://freemarker.org/index.html"
+  mailing-lists: "http://freemarker.org/mailing-lists.html"
+  
+  // Manual links:
+  templateAuthorsGuide: "id:dgui_quickstart_basics"
+  license: "id:app_license"
+  versionHistory: "id:app_versions"
+  freemarkerServlet: "id:pgui_misc_servlet"
+  
+  // External URL-s:
+  onlineTemplateTester: "http://freemarker-online.kenshoo.com/"
+  twitter: "https://twitter.com/freemarker"
+  sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
+  githubProject: "https://github.com/freemarker/freemarker"
+  newBugReport: "https://sourceforge.net/p/freemarker/bugs/new/"
+  newStackOverflowQuestion: "http://stackoverflow.com/questions/ask?tags=freemarker"
+}
+
+internalBookmarks: {
+  "Alpha. index": alphaidx
+  "Glossary": gloss
+  "Expressions": exp_cheatsheet
+  "?builtins": ref_builtins_alphaidx
+  "#directives": ref_directive_alphaidx
+  ".spec_vars": ref_specvar
+  "FAQ": app_faq
+}
+
+tabs: {
+  "Home": "olink:homepage"
+  "Manual": ""  // Empty => We are here
+  "Java API": "olink:api"
+}
+
+// Available icons:
+// .icon-heart
+// .icon-bug
+// .icon-download
+// .icon-star
+secondaryTabs: {
+  "Contribute": { class: "icon-heart", href: "olink:contribute" }
+  "Report a Bug": { class: "icon-bug", href: "olink:newBugReport" }
+  "Download": { class: "icon-download", href: "olink:freemarkerdownload" }
+}
+
+footerSiteMap: {
+  "Overview": {
+    "What is FreeMarker?": "olink:what-is-freemarker"
+    "Download": "olink:freemarkerdownload"
+    "Version history": "id:app_versions"
+    "About us": "olink:history"
+    "License": "id:app_license"
+  }
+  "Handy stuff": {
+    "Try template online": "olink:onlineTemplateTester"
+    "Expressions cheatsheet": "id:exp_cheatsheet"
+    "#directives": "id:ref_directive_alphaidx"
+    "?built_ins": "id:ref_builtins_alphaidx"
+    ".special_vars": "id:ref_specvar"
+  }
+  "Community": {
+    "FreeMarker on Github": "olink:githubProject"
+    "Follow us on Twitter": "olink:twitter"
+    "Report a bug": "olink:newBugReport"
+    "Ask a question": "olink:newStackOverflowQuestion"
+    "Mailing lists": "olink:mailing-lists"
+  }
+}
+
+socialLinks: {
+  "Github": { class: "github", href: "olink:githubProject" }
+  "Twitter": { class: "twitter", href: "olink:twitter" }
+  "Stack Overflow": { class: "stack-overflow", href: "olink:newStackOverflowQuestion" }
+}

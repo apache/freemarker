@@ -174,10 +174,10 @@ final class BuiltinVariable extends Expression {
                     : new SimpleScalar(env.getTemplate().getName());
         }
         if (name == MAIN_TEMPLATE_NAME || name == MAIN_TEMPLATE_NAME_CC) {
-            return new SimpleScalar(env.getMainTemplate().getName());
+            return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getName());
         }
         if (name == CURRENT_TEMPLATE_NAME || name == CURRENT_TEMPLATE_NAME_CC) {
-            return new SimpleScalar(env.getCurrentTemplate().getName());
+            return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getName());
         }
         if (name == PASS) {
             return Macro.DO_NOTHING_MACRO;
@@ -187,11 +187,11 @@ final class BuiltinVariable extends Expression {
         }
         if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
             String s = env.getOutputEncoding();
-            return s != null ? new SimpleScalar(s) : null;
+            return SimpleScalar.newInstanceOrNull(s);
         }
         if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {
             String s = env.getURLEscapingCharset();
-            return s != null ? new SimpleScalar(s) : null;
+            return SimpleScalar.newInstanceOrNull(s);
         }
         if (name == ERROR) {
             return new SimpleScalar(env.getCurrentRecoveredErrorMessage());

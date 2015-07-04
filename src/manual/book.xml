@@ -6,12 +6,16 @@
       xmlns:ns4="http://www.w3.org/2000/svg"
       xmlns:ns3="http://www.w3.org/1998/Math/MathML"
       xmlns:ns="http://docbook.org/ns/docbook">
-  <title>FreeMarker Manual</title>
+  <info>
+    <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.23-RC1</subtitle>
+    <titleabbrev>Manual</titleabbrev>
 
-  <preface xml:id="preface">
-    <title>What's FreeMarker?</title>
+    <productname>Freemarker 2.3.23</productname>
+  </info>
+
+  <preface role="index.html" xml:id="preface">
+    <title>What is FreeMarker?</title>
 
     <para>FreeMarker is a <emphasis>template engine</emphasis>: a generic tool
     to generate text output (HTML web pages, e-mails, configuration files,
@@ -12010,8 +12014,8 @@ foobar</programlisting>
           </note>
 
           <para>Removes the parameter substring from the ending of the string,
-          or returns the original string if it doesn't start with the
-          parameter substring. For example:</para>
+          or returns the original string if it doesn't end with the parameter
+          substring. For example:</para>
 
           <programlisting role="template">${"abcdef"?remove_ending("def")}
 ${"foobar"?remove_ending("def")}</programlisting>
@@ -15509,10 +15513,10 @@ Sorted by name.last:
 
           <programlisting role="template">&lt;#assign inlineTemplate = [mailTemplateSource, "mail_templates id=${mailTemplateId}"]?interpret&gt;</programlisting>
 
-          <para>As you can see, interpret can be applied on a sequence of two
-          items, in which case the first item is the FTL string to interpret,
-          and the second items is the template name used after the
-          <literal>"-&gt;"</literal>.</para>
+          <para>As you can see, <literal>interpret</literal> can be applied on
+          a sequence of two items, in which case the first item is the FTL
+          string to interpret, and the second items is the template name used
+          after the <literal>"-&gt;"</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_isType">
@@ -17851,7 +17855,7 @@ All rights reserved.</emphasis></programlisting>
 
             <programlisting role="template">&lt;#list users as user&gt;
   &lt;div&gt;
-    ${user}&lt;#sep&gt;, <emphasis>&lt;/#sep&gt;</emphasis>
+    ${user}<emphasis>&lt;#sep&gt;, &lt;/#sep&gt;</emphasis>
   &lt;/div&gt;
 &lt;/#list&gt;</programlisting>
 
@@ -19836,9 +19840,22 @@ There was no specific handler for node y
         <listitem>
           <para><indexterm>
               <primary>current_template_name</primary>
-            </indexterm><literal>current_template_name</literal>: The name of
-          the template where we are now (available since FreeMarker
-          2.3.23).</para>
+            </indexterm><literal>current_template_name</literal><literal/>:
+          The name of the template where we are now (available since
+          FreeMarker 2.3.23). This can be missing (<literal>null</literal>) if
+          the template was created on-the-fly in Java <phrase
+          role="forProgrammers">(via <literal>new Template(null,
+          <replaceable>...</replaceable>)</literal>)</phrase>, rather than
+          loaded from a backing store by name <phrase
+          role="forProgrammers">(via
+          <literal><replaceable>cfg</replaceable>.getTemplate(name,
+          <replaceable>...</replaceable>)</literal>)</phrase>. Migration
+          notice: If you replace the deprecated
+          <literal>template_name</literal> with this, note that the later is a
+          0-length string instead of missing (<literal>null</literal>) if the
+          template has no name, so you might want to write
+          <literal>current_template_name!''</literal> in legacy
+          templates.</para>
         </listitem>
 
         <listitem>
@@ -19923,7 +19940,19 @@ There was no specific handler for node y
             </indexterm><literal>main_template_name</literal>: The name of the
           top level template (available since FreeMarker 2.3.23). <phrase
           role="forProgrammers">(In Java, this is the template for which
-          <literal>Template.process</literal> was called.)</phrase></para>
+          <literal>Template.process</literal> was called.) </phrase>This can
+          be missing (<literal>null</literal>) if the template was created
+          on-the-fly in Java <phrase role="forProgrammers">(via <literal>new
+          Template(null, <replaceable>...</replaceable>)</literal>)</phrase>,
+          rather than loaded from a backing store by name <phrase
+          role="forProgrammers">(via
+          <literal><replaceable>cfg</replaceable>.getTemplate(name,
+          <replaceable>...</replaceable>)</literal>)</phrase>. Migration
+          notice: If you replace the deprecated
+          <literal>template_name</literal> with this, note that the later is a
+          0-length string instead of missing (<literal>null</literal>) if the
+          template has no name, so you might want to write
+          <literal>main_template_name!''</literal> in legacy templates.</para>
         </listitem>
 
         <listitem>
@@ -19975,13 +20004,14 @@ There was no specific handler for node y
             </indexterm><literal>template_name</literal>: <emphasis>Don't use
           it, because its behavior is strange when macros are used; use
           <literal>current_template_name</literal> or
-          <literal>main_template_name</literal> instead.</emphasis> Gives the
-          name of the main template, or if we are running an included or
-          imported template, the name of that template. When calling macros,
-          it becomes rather confusing: the macro call won't change the value
-          of this special variable, but when <literal>nested</literal> is
-          called, it changes it to the name of the template that belongs to
-          the current namespace. (Available since FreeMarker 2.3.14.)</para>
+          <literal>main_template_name</literal> instead (see migration notices
+          there).</emphasis> Gives the name of the main template, or if we are
+          running an included or imported template, the name of that template.
+          When calling macros, it becomes rather confusing: the macro call
+          won't change the value of this special variable, but when
+          <literal>nested</literal> is called, it changes it to the name of
+          the template that belongs to the current namespace. (Available since
+          FreeMarker 2.3.14.)</para>
         </listitem>
 
         <listitem>
@@ -23505,26 +23535,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry xml:id="faq_logging_suppressed">
-          <question>
-            <para>Why is FreeMarker logging suppressed for my
-            application?</para>
-          </question>
-
-          <answer>
-            <para>It's because FreeMarker does not find any logging system. To
-            fix this, you must make available one of the following logging
-            systems for your application: SLF4J (recommended), Apache Commons
-            Logging, Log4J (<literal>org.apache.log4j</literal>), Avalon
-            (<literal>org.apache.log</literal>), or use J2SE 1.4 or later
-            (that contains <literal>java.util.logging</literal>). That is, the
-            class-loader used with your application must find one of the
-            mentioned classes. Until 2.4, if you want to use SLF4J or Commons
-            Logging you need to do some extra steps; <link
-            linkend="pgui_misc_logging">see here...</link></para>
-          </answer>
-        </qandaentry>
-
         <qandaentry xml:id="faq_nice_error_page">
           <question>
             <para><anchor xml:id="misc.faq.niceErrorPage"/> In my Servlet
@@ -23609,135 +23619,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             of <literal>&lt;</literal> and <literal>&gt;</literal>. For more
             details <link linkend="dgui_misc_alternativesyntax">read
             this...</link></para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_speed">
-          <question>
-            <para>How fast is FreeMarker? Is it true that 2.x is slower than
-            1.x (FreeMarker classic)?</para>
-          </question>
-
-          <answer>
-            <para>First of all, don't forget that FreeMarker is only the view
-            rendering component in an <link linkend="gloss.MVC">MVC</link>
-            system. Furthermore MVC templates tend to be simple: many static
-            text with a few interpolations and loops and conditional block. So
-            it is not like PHP or Model 1 JSP; your application performance is
-            not affected that much by the execution time of templates.</para>
-
-            <para>FreeMarker is certainly fast enough that it will only very
-            rarely be a bottleneck in your application. Rather, other factors
-            such as the speed of the data-base operations or network bandwidth
-            will likely dominate. The impact of FreeMarker performance could
-            be noticeable only for really busy sites (say, over 30 hits per
-            second per server), where almost all database data is cached. If
-            you are finding FreeMarker slow, do make sure that the cache of
-            parsed templates works well
-            (<literal>Configuration.getTemplate</literal> be default uses
-            caching). Parsing a template file is a relatively costly step; in
-            most long-running server-side applications, you will want to parse
-            a template once and have it be used many times. (Note that
-            FreeMarker 2.1.4 and earlier versions have bugs that sometimes can
-            ruin caching.)</para>
-
-            <para>FreeMarker 2.1 is slower than 1.7.1. This surely depends on
-            your templates, but it could be slower by a factor of 2 or 3. But
-            again, it does not means that response time will be 2 or 3 times
-            slower; most FreeMarker user simply should not be able to perceive
-            the change in the final response time.</para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_list_variables_used">
-          <question>
-            <para>How can my Java classes ask a template for information about
-            its structure (e.g. a list of all the variables)?</para>
-          </question>
-
-          <answer>
-            <para>In FreeMarker 2.2, <literal>Template</literal> has an
-            undocumented method for examining the parsed template:
-            <literal>getRootTreeNode</literal>.</para>
-
-            <para>But listing all accessed variables is not possible, because
-            variable names can be dynamically generated from data. However,
-            there's a more important reason why FreeMarker doesn't support
-            this. The design of FreeMarker is based on the idea of a
-            separation between business objects and presentation objects. This
-            separation takes two forms:</para>
-
-            <orderedlist>
-              <listitem>
-                <para>The templates know what data to expect, but they don't
-                know how it's generated.</para>
-              </listitem>
-
-              <listitem>
-                <para>The business objects know what data to produce, but they
-                don't know how it's going to be displayed. Therefore, they
-                don't know anything about templates.</para>
-              </listitem>
-            </orderedlist>
-
-            <para>Since the business objects don't rely on the templates, if
-            you need to use them with some other presentation system, you
-            won't have to rewrite your application.</para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_compatibility">
-          <question>
-            <para>Will you ever provide backward compatibility?</para>
-          </question>
-
-          <answer>
-            <para>FreeMarker 2.0 was a complete rewrite of FreeMarker 1.x, by
-            a new author. The 1.x series continues as separated project:
-            FreeMarker Classic. Since 2.x follows different philosophy than
-            1.x, 2.0x releases were immature despite the high major version
-            number. This caused further radical changes between 2.01 and 2.1.
-            As of 2.1 things were much more matured, and 2.2 is almost
-            backward compatible with 2.1. We hope that this tendency
-            continues.</para>
-
-            <para>Currently, the rule is that releases with different second
-            version number (as 2.1.x and 2.2.x) are not (fully) compatible.
-            Releases where only the third version number differs (as 2.2.1 and
-            2.2.6) are compatible.</para>
-
-            <para>We always provide backward compatible bugfix releases for
-            the released versions. So basically, you don't
-            <emphasis>have</emphasis> to switch to a new, non-backward
-            compatible release in an already written product. It's a something
-            for something situation... FreeMarker recovers faster from design
-            mistakes than many other projects, but the price of this is that
-            major releases are not backward compatible. This is admittedly not
-            optimal, it would be better if there are fewer design mistakes...
-            but, well, it is the reality.</para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_licence">
-          <question>
-            <para>If we distribute FreeMarker with our product, do we have to
-            release the source code for our product?</para>
-          </question>
-
-          <answer>
-            <para>No. As of 2.0, FreeMarker is released under a BSD-style
-            license. This means that source or binary distributions may be
-            made freely, and can be included in other products, whether
-            commercial or open source.</para>
-
-            <para>The only restrictions apply to the copyright of FreeMarker
-            itself, and the use of FreeMarker or its contributors as
-            endorsements of your own product. See the <link
-            linkend="app_license">LICENSE</link> for further details.</para>
-
-            <para>If you use FreeMarker, we hope you'll send us a link to some
-            information about your product, but that's optional as
-            well.</para>
           </answer>
         </qandaentry>
       </qandaset>
@@ -23874,7 +23755,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added tip in the error message for the frequent issue when
+              <para>Smaller error message improvements. Like, added tip in the
+              error message for the frequent issue when
               <literal><replaceable>someMap</replaceable>[<replaceable>someNumber</replaceable>]</literal>
               complains that
               <literal><replaceable>someMap</replaceable></literal> is not a
