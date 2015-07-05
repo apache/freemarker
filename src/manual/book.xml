@@ -33692,7 +33692,7 @@ Dekany, and Jonathan Revusky.</programlisting>
         <title>Export Control</title>
 
         <para>The FreeMarker source code doesn't include cryptography.
-        Furthermore it's binary (downloadable) forms don't include any
+        Furthermore its binary (downloadable) forms don't include any
         cryptography software. Hence, FreeMarker has no Export Control
         Classification Number (ECCN). Where an ECCN should be filled, the
         label "not subject to EAR" could be used.</para>
