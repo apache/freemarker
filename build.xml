@@ -674,6 +674,9 @@
     <copy todir="${dist.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <include name="*.txt" />
+        <!-- Because of the documentation fonts, the distribution has an extended version of these: -->
+        <exclude name="LICENSE.txt" />
+        <exclude name="NOTICE.txt" />
       </fileset>
     </copy>
     <replace
@@ -687,7 +690,9 @@
 
     <!-- Copy documentation -->
     <mkdir dir="${dist.dir}/documentation" />
-    <copy file="src/dist/index.html" todir="${dist.dir}/documentation" />
+    <copy todir="${dist.dir}/">
+      <fileset dir="src/dist/" />
+    </copy>
     <copy todir="${dist.dir}/documentation/_html" includeEmptyDirs="no">
       <fileset dir="build/manual" />
     </copy>
