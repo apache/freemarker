@@ -1,0 +1,15 @@
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+The included documentation contains selected icons from the following
+fonts:
+
+* Entypo pictograms, version 2.0, by Daniel Bruce
+  (http://www.entypo.com/, http://www.danielbruce.se/)
+  
+* Font Awesome by Dave Gandy (http://fontawesome.io)
+
+* Material Design Icons by Google
+  (https://github.com/google/material-design-icons)
+
+See the LICENSE.txt for more details.
