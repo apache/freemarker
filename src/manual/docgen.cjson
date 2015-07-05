@@ -14,6 +14,9 @@ generateEclipseTOC
 //  link_to: "freemarker-toc.xml#ManualLink"
 // }
 
+copyrightHolder: "The FreeMarker Project"
+copyrightStartYear: 1999
+
 logo: {
   href: "http://freemarker.org"
   src: logo.png,

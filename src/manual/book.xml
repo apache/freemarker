@@ -23628,9 +23628,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_23">
-        <title>2.3.23 RC1</title>
+        <title>2.3.23</title>
 
-        <para>Date of release: 2015-05-21</para>
+        <para>Date of release: 2015-07-05</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -23817,9 +23817,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>The <literal>template_update_delay</literal> setting now
-              supports time units, like in <literal>template_update_delay=500
-              ms</literal>.</para>
+              <para>The <literal>template_update_delay</literal> setting, when
+              specified as a string (as inside
+              <literal>java.util.Properties</literal>), supports time units,
+              like in <literal>template_update_delay=500 ms</literal>.</para>
             </listitem>
 
             <listitem>
@@ -23838,7 +23839,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (<literal>someURLBasedTemplateLoader.setURLConnectionUsesCaches(false)</literal>,
               which is also the default since
               <literal>incompatible_improvements</literal> 2.3.21) probably
-              solves that on most modern Servlet containers.</para>
+              solves that on modern Servlet containers.</para>
             </listitem>
 
             <listitem>
@@ -23882,23 +23883,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>IOException</literal> during reading its content, the
               parser (JavaCC) acted like if the template <quote>file</quote>
               was ended there, and the exception was suppressed. It's actually
-              a JavaCC quirk, but now FreeMarker has added a workaround in the
+              a JavaCC quirk that affects many other JavaCC-based languages
+              too, but now FreeMarker has added a workaround in the
               <literal>Template</literal> constructor, and so now an exception
               will be thrown as expected.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/426/">426</link>]:
-              When setting <literal>incompatible_improvements</literal> to
-              2.3.22, the special variable reference
-              <literal>.template_name</literal> in templates always returns
-              the name of the main (topmost) template, due to an oversight in
-              2.3.22. Setting <literal>incompatible_improvements</literal> to
-              2.3.23 restores the old, backward compatible behavior. (Note
-              that the old behavior that we emulate is itself broken; you
-              should use <literal>.current_template_name</literal> or
-              <literal>.main_template_name</literal> instead.)</para>
             </listitem>
 
             <listitem>
@@ -23911,6 +23899,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/426/">426</link>]:
+              When setting <literal>incompatible_improvements</literal> to
+              2.3.22, the special variable reference
+              <literal>.template_name</literal> in templates always returns
+              the name of the main (topmost) template, due to an oversight in
+              2.3.22. Setting <literal>incompatible_improvements</literal> to
+              2.3.23 restores the old, backward compatible behavior. (Note
+              that the old behavior that we emulate is itself broken, as it
+              doesn't work well with macro calls; you should use
+              <literal>.current_template_name</literal> or
+              <literal>.main_template_name</literal> instead.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/53/">53</link>]:
               Template parsing was abnormally slow for templates with very
               high number AST (abstract syntax tree) nodes on the same
@@ -23918,11 +23921,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed: When the template was concurrently replaced
-              during its first loading was still ongoing, the older version of
-              the template could get into the cache with the time stamp of the
-              new version, hence it wasn't reloaded after the configured
-              update delay.</para>
+              <para>Bug fixed: When the template was concurrently replaced on
+              the backing store during its first loading was still ongoing,
+              the older version of the template could get into the cache with
+              the time stamp of the new version, hence it wasn't reloaded
+              after the configured update delay.</para>
             </listitem>
 
             <listitem>
@@ -23945,6 +23948,47 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bugs fixed: Various canonical form glitches (they only
               affect error messages as far as FreeMarker is concerned).</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Modernized Manual and site design with improved
+              functionality (always visible navigation tree, search inside the
+              Manual, etc.), thanks to Evangelia Dendramis. (Also now the Site
+              uses the same format and HTML generator as the Manual.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Many smaller Manual and site content
+              updates/improvements.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Notes</title>
+
+          <para>Changes compared to 2.3.23 RC1:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>.current_name_name</literal> and
+              <literal>.main_template_name</literal> is now missing
+              (<literal>null</literal>) instead of <literal>""</literal> if
+              the template has no name</para>
+            </listitem>
+
+            <listitem>
+              <para>Some minor error message improvements</para>
+            </listitem>
+
+            <listitem>
+              <para>Documentation refinements</para>
             </listitem>
           </itemizedlist>
         </section>
