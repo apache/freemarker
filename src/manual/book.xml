@@ -23627,6 +23627,37 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_24">
+        <title>2.3.24</title>
+
+        <para>Date of release: FIXME</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>TODO</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Raised minimum required Java version from 1.4 to 5</para>
+            </listitem>
+
+            <listitem>
+              <para>Upgraded JavaCC (used during build to generate the parser)
+              from 3.2 to 6.1.2.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_23">
         <title>2.3.23</title>
 
@@ -33692,7 +33723,7 @@ Dekany, and Jonathan Revusky.</programlisting>
         <title>Export Control</title>
 
         <para>The FreeMarker source code doesn't include cryptography.
-        Furthermore it's binary (downloadable) forms don't include any
+        Furthermore its binary (downloadable) forms don't include any
         cryptography software. Hence, FreeMarker has no Export Control
         Classification Number (ECCN). Where an ECCN should be filled, the
         label "not subject to EAR" could be used.</para>

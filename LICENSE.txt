@@ -29,7 +29,7 @@ Apache Software Foundation. These files are:
     freemarker/ext/jsp/web-app_2_3.dtd
     freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
     freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
-    
+
 
 Historical notes
 ----------------
