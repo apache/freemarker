@@ -25,10 +25,6 @@
         description="for building FreeMarker without dependencies that optinal dependencies"
     />
 
-    <conf name="build.j2se1.5" extends="build.base"
-        description="for building FreeMarker parts that require J2SE 5"
-    />
-
     <conf name="build.jsp1.2" extends="build.base"
         description="for building FreeMarker with JSP 1.2 support"
     />
@@ -152,7 +148,7 @@
     
     <!-- parser -->
     
-    <dependency org="net.java.dev.javacc" name="javacc" rev="3.2" conf="parser->default" />
+    <dependency org="net.java.dev.javacc" name="javacc" rev="6.1.2" conf="parser->default" />
     
     <!-- bnd -->
     
