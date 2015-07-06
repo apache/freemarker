@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -203,7 +204,17 @@ public class Template extends Configurable {
                         actualCfg.getTagSyntax(),
                         actualCfg.getNamingConvention(),
                         actualCfg.getIncompatibleImprovements().intValue());
-                this.rootElement = parser.Root();
+                try {
+                    this.rootElement = parser.Root();
+                } catch (IndexOutOfBoundsException exc) {
+                    // There's a JavaCC bug where the Reader throws a RuntimeExcepton and then JavaCC fails with
+                    // IndexOutOfBoundsException. If that wasn't the case, we just rethrow. Otherwise we suppress the
+                    // IndexOutOfBoundsException and let the real cause to be thrown later. 
+                    if (!ltbReader.hasFailure()) {
+                        throw exc;
+                    }
+                    rootElement = null;
+                }
                 this.actualTagSyntax = parser._getLastTagSyntax();
                 this.actualNamingConvention = parser._getLastNamingConvention();
             }
@@ -661,7 +672,7 @@ public class Template extends Configurable {
         boolean closed;
         
         /** Needed to work around JavaCC behavior where it silently treats any errors as EOF. */ 
-        private IOException failure; 
+        private Exception failure; 
 
         /**
          * @param r the character stream to wrap
@@ -669,10 +680,20 @@ public class Template extends Configurable {
         LineTableBuilder(Reader r) {
             super(r);
         }
+        
+        public boolean hasFailure() {
+            return failure != null;
+        }
 
         public void throwFailure() throws IOException {
             if (failure != null) {
-                throw failure;
+                if (failure instanceof IOException) {
+                    throw (IOException) failure;
+                }
+                if (failure instanceof RuntimeException) {
+                    throw (RuntimeException) failure;
+                }
+                throw new UndeclaredThrowableException(failure);
             }
         }
 
@@ -681,17 +702,23 @@ public class Template extends Configurable {
                 int c = in.read();
                 handleChar(c);
                 return c;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw rememberException(e);
             }
         }
 
-        private IOException rememberException(IOException e) throws IOException {
+        private IOException rememberException(Exception e) throws IOException {
             // JavaCC used to read from the Reader after it was closed. So we must not treat that as a failure. 
             if (!closed) {
                 failure = e;
             }
-            return e;
+            if (e instanceof IOException) {
+                return (IOException) e;
+            }
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new UndeclaredThrowableException(e);
         }
 
         public int read(char cbuf[], int off, int len) throws IOException {
@@ -702,7 +729,7 @@ public class Template extends Configurable {
                     handleChar(c);
                 }
                 return numchars;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw rememberException(e);
             }
         }

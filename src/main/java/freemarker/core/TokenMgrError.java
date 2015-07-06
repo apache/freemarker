@@ -184,6 +184,15 @@ public class TokenMgrError extends Error
        this.endColumnNumber = new Integer(endColumnNumber); 
     }
 
+   /**
+    * Overload for JavaCC 6 compatibility.
+    * 
+    * @since 2.3.24
+    */
+   TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, int curChar, int reason) {
+       this(EOFSeen, lexState, errorLine, errorColumn, errorAfter, (char) curChar, reason);
+   }
+   
    public TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar, int reason) {
       this(LexicalError(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
       
