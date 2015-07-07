@@ -285,7 +285,7 @@ public final class UnboundTemplate {
         --beginColumn;
         --endColumn;
         --endLine;
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i = beginLine; i <= endLine; i++) {
             if (i < lines.size()) {
                 buf.append(lines.get(i));
@@ -461,7 +461,7 @@ public final class UnboundTemplate {
      */
     private class LineTableBuilder extends FilterReader {
         
-        private final StringBuffer lineBuf = new StringBuffer();
+        private final StringBuilder lineBuf = new StringBuilder();
         int lastChar;
         boolean closed;
         

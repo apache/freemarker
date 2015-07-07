@@ -65,7 +65,7 @@ final class PropertySetting extends TemplateElement {
             throws ParseException {
         String key = keyTk.image;
         if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             if (_TemplateAPI.getConfigurationSettingNames(cfg, true).contains(key)
                     || _TemplateAPI.getConfigurationSettingNames(cfg, false).contains(key)) {
                 sb.append("The setting name is recognized, but changing this setting from inside a template isn't "
@@ -122,7 +122,7 @@ final class PropertySetting extends TemplateElement {
     }
     
     protected String dump(boolean canonical) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(' ');

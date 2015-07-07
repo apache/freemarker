@@ -265,13 +265,13 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
                 return new SimpleScalar(localName);
             }
             if (key.equals("@@markup")) {
-                StringBuffer buf = new StringBuffer();
+                StringBuilder buf = new StringBuilder();
                 NodeOutputter nu = new NodeOutputter(node);
                 nu.outputContent(node, buf);
                 return new SimpleScalar(buf.toString());
             }
             if (key.equals("@@nested_markup")) {
-                StringBuffer buf = new StringBuffer();
+                StringBuilder buf = new StringBuilder();
                 NodeOutputter nu = new NodeOutputter(node);
                 nu.outputContent(node.getChildNodes(), buf);
                 return new SimpleScalar(buf.toString());

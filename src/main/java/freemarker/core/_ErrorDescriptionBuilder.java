@@ -67,7 +67,7 @@ public class _ErrorDescriptionBuilder {
     public String toString(TemplateElement parentElement, boolean showTips) {
         if (blamed == null && tips == null && tip == null && descriptionParts == null) return description;
 
-        StringBuffer sb = new StringBuffer(200);
+        StringBuilder sb = new StringBuilder(200);
         
         if (parentElement != null && blamed != null && showBlamer) {
             try {
@@ -203,7 +203,7 @@ public class _ErrorDescriptionBuilder {
         return null;
     }
 
-    private void appendParts(StringBuffer sb, Object[] parts) {
+    private void appendParts(StringBuilder sb, Object[] parts) {
         UnboundTemplate unboundTemplate = this.template != null
                 ? this.template.getUnboundTemplate()
                 : (blamed != null ? blamed.getUnboundTemplate() : null); 

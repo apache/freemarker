@@ -274,7 +274,7 @@ public class _ObjectBuilderSettingEvaluator {
 
     private String fetchClassName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
         int startPos = pos;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         do {
             String name = fetchSimpleName(true);
             if (name == null) {
@@ -449,7 +449,7 @@ public class _ObjectBuilderSettingEvaluator {
         } else if (optional) {
             return 0;
         } else {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < expectedChars.length(); i++) {
                 if (i != 0) {
                     sb.append(" or ");

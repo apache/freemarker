@@ -3169,7 +3169,7 @@ ArrayList PositionalArgs() :
 Comment Comment() :
 {
     Token start, end;
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 }
 {
     (
@@ -3188,7 +3188,7 @@ Comment Comment() :
 TextBlock NoParse() :
 {
     Token start, end;
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 }
 {
     start = <NOPARSE>
@@ -3465,7 +3465,7 @@ TemplateElement FreemarkerDirective() :
  */
 TextBlock PCData() :
 {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     Token t = null, start = null, prevToken = null;
 }
 {
@@ -3500,7 +3500,7 @@ TextBlock PCData() :
  * It returns the ending token. The content
  * of the tag is put in buf.
  */
-Token UnparsedContent(Token start, StringBuffer buf) :
+Token UnparsedContent(Token start, StringBuilder buf) :
 {
     Token t;
 }

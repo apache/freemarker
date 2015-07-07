@@ -63,7 +63,7 @@ public class NormalizeNewlines implements TemplateTransformModel {
     public Writer getWriter(final Writer out,
                             final Map args)
     {
-        final StringBuffer buf = new StringBuffer();
+        final StringBuilder buf = new StringBuilder();
         return new Writer() {
             public void write(char cbuf[], int off, int len) {
                 buf.append(cbuf, off, len);

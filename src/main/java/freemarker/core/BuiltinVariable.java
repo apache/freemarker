@@ -102,7 +102,7 @@ final class BuiltinVariable extends Expression {
     BuiltinVariable(Token nameTk, FMParserTokenManager tokenManager) throws ParseException {
         String name = nameTk.image;
         if (Arrays.binarySearch(SPEC_VAR_NAMES, name) < 0) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("Unknown special variable name: ");
             sb.append(StringUtil.jQuote(name)).append(".");
             

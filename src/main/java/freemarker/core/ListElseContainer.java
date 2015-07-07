@@ -44,7 +44,7 @@ class ListElseContainer extends TemplateElement {
 
     protected String dump(boolean canonical) {
         if (canonical) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             int ln = getRegulatedChildCount();
             for (int i = 0; i < ln; i++) {
                 TemplateElement element = getRegulatedChild(i);

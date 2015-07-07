@@ -767,7 +767,7 @@ public class DateUtil {
             return DateUtil.UTC;
         }
         
-        StringBuffer sb = new StringBuffer(9);
+        StringBuilder sb = new StringBuilder(9);
         sb.append("GMT");
         sb.append(s.charAt(0));
         

@@ -193,7 +193,7 @@ public class ClassUtil
         }
     }
 
-    private static void appendTemplateModelTypeName(StringBuffer sb, Set typeNamesAppended, Class cl) {
+    private static void appendTemplateModelTypeName(StringBuilder sb, Set typeNamesAppended, Class cl) {
         if (TemplateNodeModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "node");
         }
@@ -258,7 +258,7 @@ public class ClassUtil
         return unwrapped != null ? unwrapped.getClass() : null;
     }
 
-    private static void appendTypeName(StringBuffer sb, Set typeNamesAppended, String name) {
+    private static void appendTypeName(StringBuilder sb, Set typeNamesAppended, String name) {
         if (!typeNamesAppended.contains(name)) {
             if (sb.length() != 0) sb.append("+");
             sb.append(name);
@@ -280,7 +280,7 @@ public class ClassUtil
         } else {
             Set typeNamesAppended = new HashSet();
             
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
     
             Class primaryInterface = getPrimaryTemplateModelInterface(tm);
             if (primaryInterface != null) {

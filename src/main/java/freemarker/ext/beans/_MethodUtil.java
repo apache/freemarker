@@ -233,7 +233,7 @@ public final class _MethodUtil {
             throw new IllegalArgumentException("\"member\" must be a Method or Constructor");
         }
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         
         if ((member.getModifiers() & Modifier.STATIC) != 0) {
             sb.append("static ");

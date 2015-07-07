@@ -108,7 +108,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         if (dynamicValue == null) {
             return StringUtil.ftlQuote(value);
         } else {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append('"');
             for (Enumeration childrenEnum = dynamicValue.children(); childrenEnum.hasMoreElements();) {
                 TemplateElement child = (TemplateElement) childrenEnum.nextElement();

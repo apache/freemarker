@@ -42,7 +42,7 @@ final class DollarVariable extends Interpolation {
     }
 
     protected String dump(boolean canonical, boolean inStringLiteral) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("${");
         final String exprCF = expression.getCanonicalForm();
         sb.append(inStringLiteral ? StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);

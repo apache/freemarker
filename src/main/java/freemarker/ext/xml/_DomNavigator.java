@@ -44,10 +44,10 @@ public class _DomNavigator extends Navigator {
     } 
 
     void getAsString(Object node, StringWriter sw) {
-        outputContent((Node)node, sw.getBuffer());
+        outputContent((Node)node, sw);
     }
     
-    private void outputContent(Node n, StringBuffer buf) {
+    private void outputContent(Node n, StringWriter buf) {
         switch(n.getNodeType()) {
             case Node.ATTRIBUTE_NODE: {
                 buf.append(' ')
@@ -111,13 +111,13 @@ public class _DomNavigator extends Navigator {
         }
     }
 
-    private void outputContent(NodeList nodes, StringBuffer buf) {
+    private void outputContent(NodeList nodes, StringWriter buf) {
         for(int i = 0; i < nodes.getLength(); ++i) {
             outputContent(nodes.item(i), buf);
         }
     }
     
-    private void outputContent(NamedNodeMap nodes, StringBuffer buf) {
+    private void outputContent(NamedNodeMap nodes, StringWriter buf) {
         for(int i = 0; i < nodes.getLength(); ++i) {
             outputContent(nodes.item(i), buf);
         }
@@ -225,7 +225,7 @@ public class _DomNavigator extends Navigator {
     }
 
     String getText(Object node) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         if(node instanceof Element) {
             NodeList children = ((Node)node).getChildNodes();
             for(int i = 0; i < children.getLength(); ++i) {

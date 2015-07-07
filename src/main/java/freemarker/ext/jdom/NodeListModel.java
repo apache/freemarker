@@ -486,7 +486,7 @@ implements
     TemplateModelException
     {
         List list = evaluateElementOperation((TextOp)OPERATIONS.get("_text"), nodes);
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (Iterator it = list.iterator(); it.hasNext();) {
             buf.append(it.next());
         }

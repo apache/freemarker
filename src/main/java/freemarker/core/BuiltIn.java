@@ -295,7 +295,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         String key = keyTk.image;
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
-            StringBuffer buf = new StringBuffer("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
+            StringBuilder buf = new StringBuilder("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
             
             buf.append(
                     "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "

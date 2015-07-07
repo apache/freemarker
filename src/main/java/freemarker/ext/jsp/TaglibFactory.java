@@ -271,7 +271,7 @@ public class TaglibFactory implements TemplateHashModel {
             if (failedTldLocations.isEmpty()) {
                 return null;
             }
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < failedTldLocations.size(); i++) {
                 if (i != 0) {
                     sb.append(", ");
@@ -1531,7 +1531,7 @@ public class TaglibFactory implements TemplateHashModel {
         private static final String E_TAGLIB_LOCATION = "taglib-location";
         private static final String E_TAGLIB_URI = "taglib-uri";
 
-        private StringBuffer cDataCollector;
+        private StringBuilder cDataCollector;
         private String taglibUriCData;
         private String taglibLocationCData;
         private Locator locator;
@@ -1546,7 +1546,7 @@ public class TaglibFactory implements TemplateHashModel {
                 String qName,
                 Attributes atts) {
             if (E_TAGLIB_URI.equals(qName) || E_TAGLIB_LOCATION.equals(qName)) {
-                cDataCollector = new StringBuffer();
+                cDataCollector = new StringBuilder();
             }
         }
 
@@ -1588,7 +1588,7 @@ public class TaglibFactory implements TemplateHashModel {
     private static class TldParserForTaglibUriExtraction extends DefaultHandler {
         private static final String E_URI = "uri";
 
-        private StringBuffer cDataCollector;
+        private StringBuilder cDataCollector;
         private String uri;
 
         TldParserForTaglibUriExtraction() {
@@ -1604,7 +1604,7 @@ public class TaglibFactory implements TemplateHashModel {
                 String qName,
                 Attributes atts) {
             if (E_URI.equals(qName)) {
-                cDataCollector = new StringBuffer();
+                cDataCollector = new StringBuilder();
             }
         }
 
@@ -1641,7 +1641,7 @@ public class TaglibFactory implements TemplateHashModel {
         private final List listeners = new ArrayList();
 
         private Locator locator;
-        private StringBuffer cDataCollector;
+        private StringBuilder cDataCollector;
 
         private Stack stack = new Stack();
 
@@ -1686,7 +1686,7 @@ public class TaglibFactory implements TemplateHashModel {
                 if (E_NAME.equals(qName) || E_TAG_CLASS_LEGACY.equals(qName) || E_TAG_CLASS.equals(qName)
                         || E_LISTENER_CLASS.equals(qName) || E_FUNCTION_CLASS.equals(qName)
                         || E_FUNCTION_SIGNATURE.equals(qName)) {
-                    cDataCollector = new StringBuffer();
+                    cDataCollector = new StringBuilder();
                 }
             }
         }
@@ -1926,7 +1926,7 @@ public class TaglibFactory implements TemplateHashModel {
         }
     
         public String toString() {
-            StringBuffer sb = new StringBuffer(getClass().getName());
+            StringBuilder sb = new StringBuilder(getClass().getName());
             sb.append(": ");
             int startLn = sb.length();
     

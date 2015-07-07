@@ -24,7 +24,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
             throws ParseException;
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         
         buf.append(super.getCanonicalForm());
         
