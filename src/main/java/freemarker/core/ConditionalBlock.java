@@ -89,7 +89,7 @@ final class ConditionalBlock extends TemplateElement {
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return condition;
-        case 1: return new Integer(type);
+        case 1: return Integer.valueOf(type);
         default: throw new IndexOutOfBoundsException();
         }
     }

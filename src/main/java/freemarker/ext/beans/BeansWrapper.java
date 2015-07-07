@@ -1139,7 +1139,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                 if(model instanceof TemplateScalarModel) {
                     String s = ((TemplateScalarModel)model).getAsString();
                     if(s.length() == 1) {
-                        return new Character(s.charAt(0));
+                        return Character.valueOf(s.charAt(0));
                     }
                 }
                 // Character is final, no other conversion will work
@@ -1187,7 +1187,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                         if ((itf & TypeFlags.ACCEPTS_STRING) != 0) {
                             return new CharacterOrString(strVal);
                         } else {
-                            return new Character(strVal.charAt(0));
+                            return Character.valueOf(strVal.charAt(0));
                         }
                     } else if ((itf & TypeFlags.ACCEPTS_STRING) != 0) {
                         return strVal; 
@@ -1271,7 +1271,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                         throw new _TemplateModelException(new Object[] {
                                 "Failed to convert ",  new _DelayedFTLTypeDescription(seq),
                                 " object to ", new _DelayedShortClassName(array.getClass()),
-                                ": Problematic sequence item at index ", new Integer(i) ," with value type: ",
+                                ": Problematic sequence item at index ", Integer.valueOf(i) ," with value type: ",
                                 new _DelayedFTLTypeDescription(seqItem)});
                     }
                     
@@ -1327,7 +1327,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                         String listItemStr = (String) listItem;
                         if (listItemStr.length() == 1) {
                             // Java 5: use Character.valueOf
-                            listItem = new Character(listItemStr.charAt(0));
+                            listItem = Character.valueOf(listItemStr.charAt(0));
                         }
                     } else if (componentType.isArray()) {
                         if (listItem instanceof List) {
@@ -1381,11 +1381,11 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         if (targetType == n.getClass()) {
             return n;
         } else if (targetType == int.class || targetType == Integer.class) {
-            return n instanceof Integer ? (Integer) n : new Integer(n.intValue());
+            return n instanceof Integer ? (Integer) n : Integer.valueOf(n.intValue());
         } else if (targetType == long.class || targetType == Long.class) {
-            return n instanceof Long ? (Long) n : new Long(n.longValue());
+            return n instanceof Long ? (Long) n : Long.valueOf(n.longValue());
         } else if (targetType == double.class || targetType == Double.class) {
-            return n instanceof Double ? (Double) n : new Double(n.doubleValue());
+            return n instanceof Double ? (Double) n : Double.valueOf(n.doubleValue());
         } else if(targetType == BigDecimal.class) {
             if(n instanceof BigDecimal) {
                 return n;
@@ -1398,11 +1398,11 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                 return new BigDecimal(n.doubleValue());
             }
         } else if (targetType == float.class || targetType == Float.class) {
-            return n instanceof Float ? (Float) n : new Float(n.floatValue());
+            return n instanceof Float ? (Float) n : Float.valueOf(n.floatValue());
         } else if (targetType == byte.class || targetType == Byte.class) {
-            return n instanceof Byte ? (Byte) n : new Byte(n.byteValue());
+            return n instanceof Byte ? (Byte) n : Byte.valueOf(n.byteValue());
         } else if (targetType == short.class || targetType == Short.class) {
-            return n instanceof Short ? (Short) n : new Short(n.shortValue());
+            return n instanceof Short ? (Short) n : Short.valueOf(n.shortValue());
         } else if (targetType == BigInteger.class) {
             if (n instanceof BigInteger) {
                 return n;
@@ -1671,22 +1671,22 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
     public static Object coerceBigDecimal(BigDecimal bd, Class formalType) {
         // int is expected in most situations, so we check it first
         if(formalType == int.class || formalType == Integer.class) {
-            return new Integer(bd.intValue());
+            return Integer.valueOf(bd.intValue());
         }
         else if(formalType == double.class || formalType == Double.class) {
-            return new Double(bd.doubleValue());
+            return Double.valueOf(bd.doubleValue());
         }
         else if(formalType == long.class || formalType == Long.class) {
-            return new Long(bd.longValue());
+            return Long.valueOf(bd.longValue());
         }
         else if(formalType == float.class || formalType == Float.class) {
-            return new Float(bd.floatValue());
+            return Float.valueOf(bd.floatValue());
         }
         else if(formalType == short.class || formalType == Short.class) {
-            return new Short(bd.shortValue());
+            return Short.valueOf(bd.shortValue());
         }
         else if(formalType == byte.class || formalType == Byte.class) {
-            return new Byte(bd.byteValue());
+            return Byte.valueOf(bd.byteValue());
         }
         else if(java.math.BigInteger.class.isAssignableFrom(formalType)) {
             return bd.toBigInteger();

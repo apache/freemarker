@@ -225,7 +225,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             for (int i = fixArgCount; i < totalArgCount; ++i) {
                 Object val = unwrapper.tryUnwrapTo((TemplateModel)modelArgs.get(i), varArgsCompType);
                 if (val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
-                    return new Integer(i + 1);
+                    return Integer.valueOf(i + 1);
                 }
                 Array.set(varargs, i - fixArgCount, val);
             }
@@ -234,7 +234,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         } else {
             Object val = unwrapper.tryUnwrapTo((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
             if (val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
-                return new Integer(fixArgCount + 1);
+                return Integer.valueOf(fixArgCount + 1);
             }
             Object array = Array.newInstance(varArgsCompType, 1);
             Array.set(array, 0, val);

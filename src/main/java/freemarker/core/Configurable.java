@@ -332,7 +332,7 @@ public class Configurable
         dateTimeFormat = "";
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
         
-        classicCompatible = new Integer(0);
+        classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         
         templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
@@ -426,7 +426,7 @@ public class Configurable
      * of this mode, see {@link #isClassicCompatible()}.
      */
     public void setClassicCompatible(boolean classicCompatibility) {
-        this.classicCompatible = new Integer(classicCompatibility ? 1 : 0);
+        this.classicCompatible = Integer.valueOf(classicCompatibility ? 1 : 0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatibilityIntToString(classicCompatible));
     }
 
@@ -444,7 +444,7 @@ public class Configurable
         if (classicCompatibility < 0 || classicCompatibility > 2) {
             throw new IllegalArgumentException("Unsupported \"classicCompatibility\": " + classicCompatibility);
         }
-        this.classicCompatible = new Integer(classicCompatibility);
+        this.classicCompatible = Integer.valueOf(classicCompatibility);
     }
     
     private String classicCompatibilityIntToString(Integer i) {

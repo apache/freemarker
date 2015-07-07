@@ -168,7 +168,7 @@ extends
         Object id; 
         synchronized(listeners)
         {
-            id = new Long(System.currentTimeMillis());
+            id = Long.valueOf(System.currentTimeMillis());
             listeners.put(id, listener);
         }
         return id;

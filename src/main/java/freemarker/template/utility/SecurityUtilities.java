@@ -82,7 +82,7 @@ public class SecurityUtilities
         {
             LOG.warn("Insufficient permissions to read system property " + 
                     StringUtil.jQuote(key) + ", using default value " + defValue);
-            return new Integer(defValue);
+            return Integer.valueOf(defValue);
         }
     }
 }

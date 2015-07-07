@@ -37,11 +37,11 @@ public class Page {
     }
     
     public void put(String name, int value) {
-        root.put(name, new Integer(value));
+        root.put(name, Integer.valueOf(value));
     }
     
     public void put(String name, double value) {
-        root.put(name, new Double(value));
+        root.put(name, Double.valueOf(value));
     }
 
     public void put(String name, boolean value) {

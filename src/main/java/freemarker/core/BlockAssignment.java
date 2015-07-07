@@ -137,7 +137,7 @@ final class BlockAssignment extends TemplateElement {
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return varName;
-        case 1: return new Integer(scope);
+        case 1: return Integer.valueOf(scope);
         case 2: return namespaceExp;
         default: throw new IndexOutOfBoundsException();
         }

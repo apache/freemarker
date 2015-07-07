@@ -1075,13 +1075,13 @@ implements
     {
         Map map = new HashMap();
 
-        Integer copy = new Integer(SPECIAL_OPERATION_COPY);
-        Integer unique = new Integer(SPECIAL_OPERATION_UNIQUE);
-        Integer fname = new Integer(SPECIAL_OPERATION_FILTER_NAME);
-        Integer ftype = new Integer(SPECIAL_OPERATION_FILTER_TYPE);
-        Integer type = new Integer(SPECIAL_OPERATION_QUERY_TYPE);
-        Integer regns = new Integer(SPECIAL_OPERATION_REGISTER_NAMESPACE);
-        Integer plaintext = new Integer(SPECIAL_OPERATION_PLAINTEXT);
+        Integer copy = Integer.valueOf(SPECIAL_OPERATION_COPY);
+        Integer unique = Integer.valueOf(SPECIAL_OPERATION_UNIQUE);
+        Integer fname = Integer.valueOf(SPECIAL_OPERATION_FILTER_NAME);
+        Integer ftype = Integer.valueOf(SPECIAL_OPERATION_FILTER_TYPE);
+        Integer type = Integer.valueOf(SPECIAL_OPERATION_QUERY_TYPE);
+        Integer regns = Integer.valueOf(SPECIAL_OPERATION_REGISTER_NAMESPACE);
+        Integer plaintext = Integer.valueOf(SPECIAL_OPERATION_PLAINTEXT);
 
         map.put("_copy", copy);
         map.put("_unique", unique);

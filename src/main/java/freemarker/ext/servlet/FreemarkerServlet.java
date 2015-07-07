@@ -536,7 +536,7 @@ public class FreemarkerServlet extends HttpServlet
                 } else if (name.equals(INIT_PARAM_NO_CACHE)) {
                     noCache = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_BUFFER_SIZE)) {
-                    bufferSize = new Integer(parseSize(value));
+                    bufferSize = Integer.valueOf(parseSize(value));
                 } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
                     if (getInitParameter(INIT_PARAM_DEBUG) != null) {
                         throw new ConflictingInitParamsException(INIT_PARAM_DEBUG, DEPR_INITPARAM_DEBUG);
