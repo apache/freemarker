@@ -57,7 +57,7 @@ final class MixedContent extends TemplateElement {
 
     protected String dump(boolean canonical) {
         if (canonical) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             int ln = getRegulatedChildCount();
             for (int i = 0; i < ln; i++) {
                 buf.append(getRegulatedChild(i).getCanonicalForm());

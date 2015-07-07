@@ -45,7 +45,7 @@ final class AttemptBlock extends TemplateElement {
         if (!canonical) {
             return getNodeTypeSymbol();
         } else {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             buf.append("<").append(getNodeTypeSymbol()).append(">");
             if (attemptBlock != null) {
                 buf.append(attemptBlock.getCanonicalForm());            

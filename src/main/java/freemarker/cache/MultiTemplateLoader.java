@@ -183,7 +183,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
      * @since 2.3.21
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("MultiTemplateLoader(");
         for (int i = 0; i < loaders.length; i++) {
             if (i != 0) {

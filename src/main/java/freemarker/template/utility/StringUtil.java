@@ -74,8 +74,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
-                StringBuffer b =
-                        new StringBuffer(s.substring(0, i));
+                StringBuilder b =
+                        new StringBuilder(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '>': b.append("&gt;"); break;
@@ -117,8 +117,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '>' || c == '&' || c == '"') {
-                StringBuffer b =
-                        new StringBuffer(s.substring(0, i));
+                StringBuilder b =
+                        new StringBuilder(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '>': b.append("&gt;"); break;
@@ -159,8 +159,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '&' || c == '"') {
-                StringBuffer b =
-                        new StringBuffer(s.substring(0, i));
+                StringBuilder b =
+                        new StringBuilder(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '&': b.append("&amp;"); break;
@@ -205,8 +205,8 @@ public class StringUtil {
                             && s.charAt(i - 1) == ']'
                             && s.charAt(i - 2) == ']')
                     || c == '&') {
-                StringBuffer b =
-                        new StringBuffer(s.substring(0, i));
+                StringBuilder b =
+                        new StringBuilder(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '>': b.append("&gt;"); break;
@@ -252,8 +252,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '\\' || c == '{' || c == '}') {
-                StringBuffer b =
-                        new StringBuffer(s.substring(0, i));
+                StringBuilder b =
+                        new StringBuilder(s.substring(0, i));
                 switch (c) {
                     case '\\': b.append("\\\\"); break;
                     case '{': b.append("\\{"); break;
@@ -317,7 +317,7 @@ public class StringUtil {
             return s;
         }
 
-        StringBuffer b = new StringBuffer(ln + ln / 3 + 2);
+        StringBuilder b = new StringBuilder(ln + ln / 3 + 2);
         b.append(s.substring(0, i));
 
         int encStart = i;
@@ -429,7 +429,7 @@ public class StringUtil {
         }
         
         final int escLn = ESCAPES.length;
-        StringBuffer buf = null;
+        StringBuilder buf = null;
         for(int i = 0; i < ln; i++)
         {
             char c = s.charAt(i);
@@ -443,7 +443,7 @@ public class StringUtil {
                 }
             } else {
                 if (buf == null) {
-                    buf = new StringBuffer(s.length() + 4 + (addQuotation ? 2 : 0));
+                    buf = new StringBuilder(s.length() + 4 + (addQuotation ? 2 : 0));
                     if (addQuotation) {
                         buf.append(quotation);
                     }
@@ -505,7 +505,7 @@ public class StringUtil {
 
         int lidx = s.length() - 1;
         int bidx = 0;
-        StringBuffer buf = new StringBuffer(lidx);
+        StringBuilder buf = new StringBuilder(lidx);
         do {
             buf.append(s.substring(bidx, idx));
             if (idx >= lidx) {
@@ -623,7 +623,7 @@ public class StringUtil {
 
     public static String capitalize(String s) {
         StringTokenizer st = new StringTokenizer(s, " \t\r\n", true);
-        StringBuffer buf = new StringBuffer(s.length());
+        StringBuilder buf = new StringBuilder(s.length());
         while (st.hasMoreTokens()) {
             String tok = st.nextToken();
             buf.append(tok.substring(0, 1).toUpperCase());
@@ -734,7 +734,7 @@ public class StringUtil {
                                   boolean caseInsensitive,
                                   boolean firstOnly) 
     {
-        StringBuffer buf;
+        StringBuilder buf;
         int tln;
         int oln = oldsub.length();
         
@@ -747,7 +747,7 @@ public class StringUtil {
                     return newsub + text;
                 } else {
                     tln = text.length();
-                    buf = new StringBuffer(tln + (tln + 1) * nln);
+                    buf = new StringBuilder(tln + (tln + 1) * nln);
                     buf.append(newsub);
                     for (int i = 0; i < tln; i++) {
                         buf.append(text.charAt(i));
@@ -765,7 +765,7 @@ public class StringUtil {
             }
             int b = 0;
             tln = text.length();
-            buf = new StringBuffer(
+            buf = new StringBuilder(
                     tln + Math.max(newsub.length() - oln, 0) * 3);
             do {
                 buf.append(text.substring(b, e));
@@ -815,7 +815,7 @@ public class StringUtil {
             return "null";
         }
         int ln = s.length();
-        StringBuffer b = new StringBuffer(ln + 4);
+        StringBuilder b = new StringBuilder(ln + 4);
         b.append('"');
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
@@ -867,7 +867,7 @@ public class StringUtil {
             return "null";
         }
         int ln = s.length();
-        StringBuffer b = new StringBuffer(ln + 4);
+        StringBuilder b = new StringBuilder(ln + 4);
         b.append('"');
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
@@ -1220,7 +1220,7 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '"' || c == '\\' || c < 0x20) {
-                StringBuffer b = new StringBuffer(ln + 4);
+                StringBuilder b = new StringBuilder(ln + 4);
                 b.append(s.substring(0, i));
                 while (true) {
                     if (c == '"') {
@@ -1337,7 +1337,7 @@ public class StringUtil {
         NullArgumentException.check("s", s);
         
         int ln = s.length();
-        StringBuffer sb = null;
+        StringBuilder sb = null;
         for (int i = 0; i < ln; i++) {
             final char c = s.charAt(i);
             final int escapeType;  // 
@@ -1401,7 +1401,7 @@ public class StringUtil {
                 
                 if (escapeType != NO_ESC) { // If needs escaping
                     if (sb == null) {
-                        sb = new StringBuffer(ln + 6);
+                        sb = new StringBuilder(ln + 6);
                         sb.append(s.substring(0, i));
                     }
                     
@@ -1677,7 +1677,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuffer res = new StringBuffer(minLength);
+        StringBuilder res = new StringBuilder(minLength);
         
         int dif = minLength - ln;
         for (int i = 0; i < dif; i++) {
@@ -1706,7 +1706,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuffer res = new StringBuffer(minLength);
+        StringBuilder res = new StringBuilder(minLength);
 
         int dif = minLength - ln;
         int fln = filling.length();
@@ -1755,7 +1755,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuffer res = new StringBuffer(minLength);
+        StringBuilder res = new StringBuilder(minLength);
 
         res.append(s);
         
@@ -1786,7 +1786,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuffer res = new StringBuffer(minLength);
+        StringBuilder res = new StringBuilder(minLength);
 
         res.append(s);
 
@@ -1911,7 +1911,7 @@ public class StringUtil {
         
         // Increase the digits of the place values until we get as close
         // to n as possible (but don't step over it).
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (weight != 0) {
             // digitIncrease: how many we increase the digit which is already 1
             final int digitIncrease = (n - reached) / weight;

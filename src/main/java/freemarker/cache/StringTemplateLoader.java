@@ -143,7 +143,7 @@ public class StringTemplateLoader implements TemplateLoader {
      * @since 2.3.21
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(TemplateLoaderUtils.getClassNameForToString(this));
         sb.append("(Map { ");
         int cnt = 0;

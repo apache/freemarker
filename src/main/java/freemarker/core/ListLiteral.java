@@ -100,7 +100,7 @@ final class ListLiteral extends Expression {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("[");
+        StringBuilder buf = new StringBuilder("[");
         int size = items.size();
         for (int i = 0; i<size; i++) {
             Expression value = (Expression) items.get(i);

@@ -116,7 +116,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     protected String dump(boolean canonical) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append('@');
         MessageUtil.appendExpressionAsUntearable(sb, nameExp);
