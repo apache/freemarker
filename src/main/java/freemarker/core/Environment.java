@@ -1265,7 +1265,7 @@ public final class Environment extends Configurable {
                 break;
             default:
                 throw new _TemplateModelException(new Object[] {
-                        "Invalid date type enum: ", new Integer(dateType) });
+                        "Invalid date type enum: ", Integer.valueOf(dateType) });
             } // switch
 
             f = getTemplateDateFormat(

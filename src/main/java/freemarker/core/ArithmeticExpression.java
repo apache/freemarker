@@ -65,10 +65,10 @@ final class ArithmeticExpression extends Expression {
             default:
                 if (parent instanceof Expression) {
                     throw new _MiscTemplateException((Expression) parent, new Object[] {
-                            "Unknown operation: ", new Integer(operator) });
+                            "Unknown operation: ", Integer.valueOf(operator) });
                 } else {
                     throw new _MiscTemplateException(new Object[] {
-                            "Unknown operation: ", new Integer(operator) });
+                            "Unknown operation: ", Integer.valueOf(operator) });
                 }
         }
     }
@@ -105,7 +105,7 @@ final class ArithmeticExpression extends Expression {
         switch (idx) {
         case 0: return lho;
         case 1: return rho;
-        case 2: return new Integer(operator);
+        case 2: return Integer.valueOf(operator);
         default: throw new IndexOutOfBoundsException();
         }
     }

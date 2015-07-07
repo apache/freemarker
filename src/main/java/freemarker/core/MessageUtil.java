@@ -196,17 +196,17 @@ class MessageUtil {
             if (maxCnt == 0) {
                 desc.add("no");
             } else {
-                desc.add(new Integer(maxCnt));
+                desc.add(Integer.valueOf(maxCnt));
             }
         } else if (maxCnt - minCnt == 1) {
-            desc.add(new Integer(minCnt));
+            desc.add(Integer.valueOf(minCnt));
             desc.add(" or ");
-            desc.add(new Integer(maxCnt));
+            desc.add(Integer.valueOf(maxCnt));
         } else {
-            desc.add(new Integer(minCnt));
+            desc.add(Integer.valueOf(minCnt));
             if (maxCnt != Integer.MAX_VALUE) {
                 desc.add(" to ");
-                desc.add(new Integer(maxCnt));
+                desc.add(Integer.valueOf(maxCnt));
             } else {
                 desc.add(" or more (unlimited)");
             }
@@ -218,7 +218,7 @@ class MessageUtil {
         if (argCnt == 0) {
             desc.add("none");
         } else {
-            desc.add(new Integer(argCnt));
+            desc.add(Integer.valueOf(argCnt));
         }
         desc.add(".");
         
@@ -255,7 +255,7 @@ class MessageUtil {
     static TemplateModelException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
         return new _TemplateModelException(new Object[] {
-                methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", new Integer(argIdx + 1),
+                methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", Integer.valueOf(argIdx + 1),
                 ", but received ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(arg)), "." });
     }
     
@@ -265,7 +265,7 @@ class MessageUtil {
     static TemplateModelException newMethodArgInvalidValueException(
             String methodName, int argIdx, Object[] details) {
         return new _TemplateModelException(new Object[] {
-                methodName, "(...) argument #", new Integer(argIdx + 1),
+                methodName, "(...) argument #", Integer.valueOf(argIdx + 1),
                 " had invalid value: ", details });
     }
 

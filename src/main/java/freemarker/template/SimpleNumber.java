@@ -37,27 +37,27 @@ public final class SimpleNumber implements TemplateNumberModel, Serializable {
     }
 
     public SimpleNumber(byte val) {
-        this.value = new Byte(val);
+        this.value = Byte.valueOf(val);
     }
 
     public SimpleNumber(short val) {
-        this.value = new Short(val);
+        this.value = Short.valueOf(val);
     }
 
     public SimpleNumber(int val) {
-        this.value = new Integer(val);
+        this.value = Integer.valueOf(val);
     }
 
     public SimpleNumber(long val) {
-        this.value = new Long(val);
+        this.value = Long.valueOf(val);
     }
 
     public SimpleNumber(float val) {
-        this.value = new Float(val);
+        this.value = Float.valueOf(val);
     }
     
     public SimpleNumber(double val) {
-        this.value = new Double(val);
+        this.value = Double.valueOf(val);
     }
 
     public Number getAsNumber() {

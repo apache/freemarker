@@ -583,9 +583,9 @@ class BuiltInsForStringsBasic {
                         if (beginIdx > endIdx) {
                             throw MessageUtil.newMethodArgsInvalidValueException(
                                     "?" + key, new Object[] {
-                                            "The begin index argument, ", new Integer(beginIdx),
+                                            "The begin index argument, ", Integer.valueOf(beginIdx),
                                             ", shouldn't be greater than the end index argument, ",
-                                            new Integer(endIdx), "." });
+                                            Integer.valueOf(endIdx), "." });
                         }
                         return new SimpleScalar(s.substring(beginIdx, endIdx));
                     } else {
@@ -598,8 +598,8 @@ class BuiltInsForStringsBasic {
                     return MessageUtil.newMethodArgInvalidValueException(
                             "?" + key, argIdx, new Object[] {
                                     "The index mustn't be greater than the length of the string, ",
-                                    new Integer(len),
-                                    ", but it was ", new Integer(idx), "." });
+                                    Integer.valueOf(len),
+                                    ", but it was ", Integer.valueOf(idx), "." });
                 }
     
                 private TemplateModelException newIndexLessThan0Exception(
@@ -607,7 +607,7 @@ class BuiltInsForStringsBasic {
                     return MessageUtil.newMethodArgInvalidValueException(
                             "?" + key, argIdx, new Object[] {
                                     "The index must be at least 0, but was ",
-                                    new Integer(idx), "." });
+                                    Integer.valueOf(idx), "." });
                 }
                 
             };

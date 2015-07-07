@@ -90,7 +90,7 @@ implements
         if(val == null) {
             if(key.length() == 1) {
                 // just check for Character key if this is a single-character string
-                Character charKey = new Character(key.charAt(0));
+                Character charKey = Character.valueOf(key.charAt(0));
                 val = map.get(charKey);
                 if (val == null && !(map.containsKey(key) || map.containsKey(charKey))) {
                     return UNKNOWN;

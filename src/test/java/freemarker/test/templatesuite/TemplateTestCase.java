@@ -284,11 +284,11 @@ public class TemplateTestCase extends FileTestCase {
         }
         
         else if (simpleTestName.startsWith("number-format")) {
-            dataModel.put("int", new SimpleNumber(new Integer(1)));
-            dataModel.put("double", new SimpleNumber(new Double(1.0)));
-            dataModel.put("double2", new SimpleNumber(new Double(1 + 1e-15)));
-            dataModel.put("double3", new SimpleNumber(new Double(1e-16)));
-            dataModel.put("double4", new SimpleNumber(new Double(-1e-16)));
+            dataModel.put("int", new SimpleNumber(Integer.valueOf(1)));
+            dataModel.put("double", new SimpleNumber(Double.valueOf(1.0)));
+            dataModel.put("double2", new SimpleNumber(Double.valueOf(1 + 1e-15)));
+            dataModel.put("double3", new SimpleNumber(Double.valueOf(1e-16)));
+            dataModel.put("double4", new SimpleNumber(Double.valueOf(-1e-16)));
             dataModel.put("bigDecimal", new SimpleNumber(java.math.BigDecimal.valueOf(1)));
             dataModel.put("bigDecimal2", new SimpleNumber(java.math.BigDecimal.valueOf(1, 16)));
         }
@@ -327,7 +327,7 @@ public class TemplateTestCase extends FileTestCase {
         else if (simpleTestName.equals("multimodels")) {
             dataModel.put("test", "selftest");
             dataModel.put("self", "self");
-            dataModel.put("zero", new Integer(0));
+            dataModel.put("zero", Integer.valueOf(0));
             dataModel.put("data", new MultiModel1());
         }
         
@@ -354,9 +354,9 @@ public class TemplateTestCase extends FileTestCase {
         }
         
         else if (simpleTestName.equals("var-layers")) {
-            dataModel.put("x", new Integer(4));
-            dataModel.put("z", new Integer(4));
-            conf.setSharedVariable("y", new Integer(7));
+            dataModel.put("x", Integer.valueOf(4));
+            dataModel.put("z", Integer.valueOf(4));
+            conf.setSharedVariable("y", Integer.valueOf(7));
         }
         
         else if (simpleTestName.equals("xml-fragment")) {
@@ -572,7 +572,7 @@ public class TemplateTestCase extends FileTestCase {
         Map testBean = new TestMapBean();
         testBean.put("name", "Chris");
         testBean.put("location", "San Francisco");
-        testBean.put("age", new Integer(27));
+        testBean.put("age", Integer.valueOf(27));
         return testBean;
     }
 

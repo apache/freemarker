@@ -108,7 +108,7 @@ class CallableInvocationContext implements LocalContext {
                                 new _ErrorDescriptionBuilder(new Object[] {
                                         "When calling macro ", new _DelayedJQuote(callableDefinition.getName()), 
                                         ", required parameter ", new _DelayedJQuote(argName),
-                                        " (parameter #", new Integer(i + 1), ") was ", 
+                                        " (parameter #", Integer.valueOf(i + 1), ") was ", 
                                         (argWasSpecified
                                                 ? "specified, but had null/missing value."
                                                 : "not specified.") 

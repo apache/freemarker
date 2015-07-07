@@ -106,7 +106,7 @@ class XalanXPathSupport implements XPathSupport {
                 return new SimpleScalar(xresult.toString());
             }
             if (xresult instanceof XNumber) {
-                return new SimpleNumber(new Double(((XNumber) xresult).num()));
+                return new SimpleNumber(Double.valueOf(((XNumber) xresult).num()));
             }
             throw new TemplateModelException("Cannot deal with type: " + xresult.getClass().getName());
         } catch (TransformerException te) {

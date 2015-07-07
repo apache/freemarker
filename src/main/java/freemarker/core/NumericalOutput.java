@@ -124,8 +124,8 @@ final class NumericalOutput extends Interpolation {
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return expression;
-        case 1: return new Integer(minFracDigits);
-        case 2: return new Integer(maxFracDigits);
+        case 1: return Integer.valueOf(minFracDigits);
+        case 2: return Integer.valueOf(maxFracDigits);
         default: throw new IndexOutOfBoundsException();
         }
     }

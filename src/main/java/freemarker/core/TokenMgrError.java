@@ -189,17 +189,17 @@ public class TokenMgrError extends Error
        this.detail = detail;
        errorCode = reason;
        
-       this.lineNumber = new Integer(errorLine);  // In J2SE there was no Integer.valueOf(int)
-       this.columnNumber = new Integer(errorColumn);
-       this.endLineNumber = new Integer(endLineNumber); 
-       this.endColumnNumber = new Integer(endColumnNumber); 
+       this.lineNumber = Integer.valueOf(errorLine);  // In J2SE there was no Integer.valueOf(int)
+       this.columnNumber = Integer.valueOf(errorColumn);
+       this.endLineNumber = Integer.valueOf(endLineNumber); 
+       this.endColumnNumber = Integer.valueOf(endColumnNumber); 
     }
 
    public TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, int curChar, int reason) {
       this(LexicalErr(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
       
-      this.lineNumber = new Integer(errorLine);  // In J2SE there was no Integer.valueOf(int)
-      this.columnNumber = new Integer(errorColumn);
+      this.lineNumber = Integer.valueOf(errorLine);  // In J2SE there was no Integer.valueOf(int)
+      this.columnNumber = Integer.valueOf(errorColumn);
       // We blame the single character that can't be the start of a legal token: 
       this.endLineNumber = this.lineNumber; 
       this.endColumnNumber = this.columnNumber; 

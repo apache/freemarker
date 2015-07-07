@@ -111,7 +111,7 @@ TemplateBooleanModel, TemplateNumberModel
     }
     
     public Number getAsNumber()  {
-        return new Double(Context.toNumber(scriptable));
+        return Double.valueOf(Context.toNumber(scriptable));
     }
     
     public String getAsString() {

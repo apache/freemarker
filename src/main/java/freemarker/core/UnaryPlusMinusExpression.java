@@ -28,7 +28,7 @@ final class UnaryPlusMinusExpression extends Expression {
 
     private final Expression target;
     private final boolean isMinus;
-    private static final Integer MINUS_ONE = new Integer(-1); 
+    private static final Integer MINUS_ONE = Integer.valueOf(-1); 
 
     UnaryPlusMinusExpression(Expression target, boolean isMinus) {
         this.target = target;
@@ -79,7 +79,7 @@ final class UnaryPlusMinusExpression extends Expression {
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return target;
-        case 1: return new Integer(isMinus ? TYPE_MINUS : TYPE_PLUS);
+        case 1: return Integer.valueOf(isMinus ? TYPE_MINUS : TYPE_PLUS);
         default: throw new IndexOutOfBoundsException();
         }
     }

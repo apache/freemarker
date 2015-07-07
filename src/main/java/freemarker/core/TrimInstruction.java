@@ -78,7 +78,7 @@ final class TrimInstruction extends TemplateElement {
         } else {
             type = TYPE_NT;
         }
-        return new Integer(type);
+        return Integer.valueOf(type);
     }
 
     ParameterRole getParameterRole(int idx) {

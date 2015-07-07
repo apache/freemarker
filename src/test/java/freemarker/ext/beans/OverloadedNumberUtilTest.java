@@ -29,89 +29,89 @@ public class OverloadedNumberUtilTest extends TestCase {
     }
     
     public void testIntegerCoercions() {
-        cipEqu(new Byte(Byte.MAX_VALUE));
-        cipEqu(new Byte((byte) 0));
-        cipEqu(new Byte(Byte.MIN_VALUE));
+        cipEqu(Byte.valueOf(Byte.MAX_VALUE));
+        cipEqu(Byte.valueOf((byte) 0));
+        cipEqu(Byte.valueOf(Byte.MIN_VALUE));
         
-        cipEqu(new Short(Byte.MAX_VALUE),
+        cipEqu(Short.valueOf(Byte.MAX_VALUE),
                 new OverloadedNumberUtil.ShortOrByte((short) Byte.MAX_VALUE, Byte.MAX_VALUE));
-        cipEqu(new Short((short) 0),
+        cipEqu(Short.valueOf((short) 0),
                 new OverloadedNumberUtil.ShortOrByte((short) 0, (byte) 0));
-        cipEqu(new Short(Byte.MIN_VALUE),
+        cipEqu(Short.valueOf(Byte.MIN_VALUE),
                 new OverloadedNumberUtil.ShortOrByte((short) Byte.MIN_VALUE, Byte.MIN_VALUE));
         
-        cipEqu(new Short((short) (Byte.MAX_VALUE + 1)));
-        cipEqu(new Short((short) (Byte.MIN_VALUE - 1)));
-        cipEqu(new Short(Short.MAX_VALUE));
-        cipEqu(new Short(Short.MIN_VALUE));
+        cipEqu(Short.valueOf((short) (Byte.MAX_VALUE + 1)));
+        cipEqu(Short.valueOf((short) (Byte.MIN_VALUE - 1)));
+        cipEqu(Short.valueOf(Short.MAX_VALUE));
+        cipEqu(Short.valueOf(Short.MIN_VALUE));
         
-        cipEqu(new Integer(Byte.MAX_VALUE),
+        cipEqu(Integer.valueOf(Byte.MAX_VALUE),
                 new OverloadedNumberUtil.IntegerOrByte((int) Byte.MAX_VALUE, Byte.MAX_VALUE));
-        cipEqu(new Integer(0),
+        cipEqu(Integer.valueOf(0),
                 new OverloadedNumberUtil.IntegerOrByte(0, (byte) 0));
-        cipEqu(new Integer(Byte.MIN_VALUE),
+        cipEqu(Integer.valueOf(Byte.MIN_VALUE),
                 new OverloadedNumberUtil.IntegerOrByte((int) Byte.MIN_VALUE, Byte.MIN_VALUE));
         
-        cipEqu(new Integer(Byte.MAX_VALUE + 1),
+        cipEqu(Integer.valueOf(Byte.MAX_VALUE + 1),
                 new OverloadedNumberUtil.IntegerOrShort(Byte.MAX_VALUE + 1, (short) (Byte.MAX_VALUE + 1)));
-        cipEqu(new Integer(Byte.MIN_VALUE - 1),
+        cipEqu(Integer.valueOf(Byte.MIN_VALUE - 1),
                 new OverloadedNumberUtil.IntegerOrShort(Byte.MIN_VALUE - 1, (short) (Byte.MIN_VALUE - 1)));
-        cipEqu(new Integer(Short.MAX_VALUE),
+        cipEqu(Integer.valueOf(Short.MAX_VALUE),
                 new OverloadedNumberUtil.IntegerOrShort((int) Short.MAX_VALUE, Short.MAX_VALUE));
-        cipEqu(new Integer(Short.MIN_VALUE),
+        cipEqu(Integer.valueOf(Short.MIN_VALUE),
                 new OverloadedNumberUtil.IntegerOrShort((int) Short.MIN_VALUE, Short.MIN_VALUE));
         
-        cipEqu(new Integer(Short.MAX_VALUE + 1));
-        cipEqu(new Integer(Short.MIN_VALUE - 1));
-        cipEqu(new Integer(Integer.MAX_VALUE));
-        cipEqu(new Integer(Integer.MIN_VALUE));
+        cipEqu(Integer.valueOf(Short.MAX_VALUE + 1));
+        cipEqu(Integer.valueOf(Short.MIN_VALUE - 1));
+        cipEqu(Integer.valueOf(Integer.MAX_VALUE));
+        cipEqu(Integer.valueOf(Integer.MIN_VALUE));
         
-        cipEqu(new Long(Byte.MAX_VALUE),
+        cipEqu(Long.valueOf(Byte.MAX_VALUE),
                 new OverloadedNumberUtil.LongOrByte((long) Byte.MAX_VALUE, Byte.MAX_VALUE));
-        cipEqu(new Long(0),
+        cipEqu(Long.valueOf(0),
                 new OverloadedNumberUtil.LongOrByte((long) 0, (byte) 0));
-        cipEqu(new Long(Byte.MIN_VALUE),
+        cipEqu(Long.valueOf(Byte.MIN_VALUE),
                 new OverloadedNumberUtil.LongOrByte((long) Byte.MIN_VALUE, Byte.MIN_VALUE));
         
-        cipEqu(new Long(Byte.MAX_VALUE + 1),
+        cipEqu(Long.valueOf(Byte.MAX_VALUE + 1),
                 new OverloadedNumberUtil.LongOrShort((long) (Byte.MAX_VALUE + 1), (short) (Byte.MAX_VALUE + 1)));
-        cipEqu(new Long(Byte.MIN_VALUE - 1),
+        cipEqu(Long.valueOf(Byte.MIN_VALUE - 1),
                 new OverloadedNumberUtil.LongOrShort((long) (Byte.MIN_VALUE - 1), (short) (Byte.MIN_VALUE - 1)));
-        cipEqu(new Long(Short.MAX_VALUE),
+        cipEqu(Long.valueOf(Short.MAX_VALUE),
                 new OverloadedNumberUtil.LongOrShort((long) Short.MAX_VALUE, Short.MAX_VALUE));
-        cipEqu(new Long(Short.MIN_VALUE),
+        cipEqu(Long.valueOf(Short.MIN_VALUE),
                 new OverloadedNumberUtil.LongOrShort((long) Short.MIN_VALUE, Short.MIN_VALUE));
 
-        cipEqu(new Long(Short.MAX_VALUE + 1),
+        cipEqu(Long.valueOf(Short.MAX_VALUE + 1),
                 new OverloadedNumberUtil.LongOrInteger((long) Short.MAX_VALUE + 1, Short.MAX_VALUE + 1));
-        cipEqu(new Long(Short.MIN_VALUE - 1),
+        cipEqu(Long.valueOf(Short.MIN_VALUE - 1),
                 new OverloadedNumberUtil.LongOrInteger((long) Short.MIN_VALUE - 1, Short.MIN_VALUE - 1));
-        cipEqu(new Long(Integer.MAX_VALUE),
+        cipEqu(Long.valueOf(Integer.MAX_VALUE),
                 new OverloadedNumberUtil.LongOrInteger((long) Integer.MAX_VALUE, Integer.MAX_VALUE));
-        cipEqu(new Long(Integer.MIN_VALUE),
+        cipEqu(Long.valueOf(Integer.MIN_VALUE),
                 new OverloadedNumberUtil.LongOrInteger((long) Integer.MIN_VALUE, Integer.MIN_VALUE));
         
-        cipEqu(new Long(Integer.MAX_VALUE + 1L));
-        cipEqu(new Long(Integer.MIN_VALUE - 1L));
-        cipEqu(new Long(Long.MAX_VALUE));
-        cipEqu(new Long(Long.MIN_VALUE));
+        cipEqu(Long.valueOf(Integer.MAX_VALUE + 1L));
+        cipEqu(Long.valueOf(Integer.MIN_VALUE - 1L));
+        cipEqu(Long.valueOf(Long.MAX_VALUE));
+        cipEqu(Long.valueOf(Long.MIN_VALUE));
     }
     
     public void testIntegerNoCoercions() {
-        cipEqu(new Integer(Byte.MAX_VALUE), new Integer(Byte.MAX_VALUE), 0);
-        cipEqu(new Integer(0), new Integer(0), 0);
-        cipEqu(new Integer(Byte.MIN_VALUE), new Integer(Byte.MIN_VALUE), 0);
+        cipEqu(Integer.valueOf(Byte.MAX_VALUE), Integer.valueOf(Byte.MAX_VALUE), 0);
+        cipEqu(Integer.valueOf(0), Integer.valueOf(0), 0);
+        cipEqu(Integer.valueOf(Byte.MIN_VALUE), Integer.valueOf(Byte.MIN_VALUE), 0);
     }
     
     public void testIntegerLimitedCoercions() {
-        cipEqu(new Integer(Byte.MAX_VALUE), new Integer(Byte.MAX_VALUE), TypeFlags.INTEGER);
-        cipEqu(new Integer(0), new Integer(0), TypeFlags.INTEGER);
-        cipEqu(new Integer(Byte.MIN_VALUE), new Integer(Byte.MIN_VALUE), TypeFlags.INTEGER);
+        cipEqu(Integer.valueOf(Byte.MAX_VALUE), Integer.valueOf(Byte.MAX_VALUE), TypeFlags.INTEGER);
+        cipEqu(Integer.valueOf(0), Integer.valueOf(0), TypeFlags.INTEGER);
+        cipEqu(Integer.valueOf(Byte.MIN_VALUE), Integer.valueOf(Byte.MIN_VALUE), TypeFlags.INTEGER);
         
-        cipEqu(new Long(Integer.MAX_VALUE + 1L), new Long(Integer.MAX_VALUE + 1L), TypeFlags.INTEGER);
+        cipEqu(Long.valueOf(Integer.MAX_VALUE + 1L), Long.valueOf(Integer.MAX_VALUE + 1L), TypeFlags.INTEGER);
         
         for (int n = -1; n < 2; n++) {
-            final Long longN = new Long(n);
+            final Long longN = Long.valueOf(n);
             cipEqu(longN, new OverloadedNumberUtil.LongOrInteger(longN, n), TypeFlags.INTEGER);
             cipEqu(longN, new OverloadedNumberUtil.LongOrShort(longN, (short) n), TypeFlags.SHORT);
             cipEqu(longN, new OverloadedNumberUtil.LongOrByte(longN, (byte) n), TypeFlags.BYTE);

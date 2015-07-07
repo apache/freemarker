@@ -202,10 +202,10 @@ public class TemplateException extends Exception {
                     final UnboundTemplate unboundTemplate = templateObject.getUnboundTemplate();
                     templateName = getTemplateNameOrNull(unboundTemplate);
                     templateSourceName = unboundTemplate != null ? unboundTemplate.getSourceName() : null;
-                    lineNumber = new Integer(templateObject.getBeginLine());
-                    columnNumber = new Integer(templateObject.getBeginColumn());
-                    endLineNumber = new Integer(templateObject.getEndLine());
-                    endColumnNumber = new Integer(templateObject.getEndColumn());
+                    lineNumber = Integer.valueOf(templateObject.getBeginLine());
+                    columnNumber = Integer.valueOf(templateObject.getBeginColumn());
+                    endLineNumber = Integer.valueOf(templateObject.getEndLine());
+                    endColumnNumber = Integer.valueOf(templateObject.getEndColumn());
                 }
                 positionsCalculated = true;
                 deleteFTLInstructionStackSnapshotIfNotNeeded();

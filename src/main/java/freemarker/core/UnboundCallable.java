@@ -185,7 +185,7 @@ class UnboundCallable extends Macro {
             } else if (idx == argDescsEnd) {
                 return catchAllParamName;
             } else if (idx == argDescsEnd + 1) {
-                return new Integer(function ? TYPE_FUNCTION : TYPE_MACRO);
+                return Integer.valueOf(function ? TYPE_FUNCTION : TYPE_MACRO);
             } else {
                 throw new IndexOutOfBoundsException();
             }

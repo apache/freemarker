@@ -203,7 +203,7 @@ public class FileTemplateLoader implements TemplateLoader
         {
             public Object run()
             {
-                return new Long(((File)templateSource).lastModified());
+                return Long.valueOf(((File)templateSource).lastModified());
             }
         }))).longValue();
         

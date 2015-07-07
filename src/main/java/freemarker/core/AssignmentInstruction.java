@@ -86,7 +86,7 @@ final class AssignmentInstruction extends TemplateElement {
 
     Object getParameterValue(int idx) {
         switch (idx) {
-        case 0: return new Integer(scope);
+        case 0: return Integer.valueOf(scope);
         case 1: return namespaceExp;
         default: return null;
         }
