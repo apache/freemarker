@@ -19,17 +19,15 @@ package freemarker.ext.beans;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
 import freemarker.template.TemplateModel;
 
 public class BeansModelCache extends ModelCache
 {
-    private final Map classToFactory = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
-    private final boolean classToFactoryIsConcurrent
-            = _ConcurrentMapFactory.isConcurrent(classToFactory);
+    private final Map classToFactory = new ConcurrentHashMap();
     private final Set mappedClassNames = new HashSet();
 
     private final BeansWrapper wrapper;
@@ -45,11 +43,7 @@ public class BeansModelCache extends ModelCache
     protected TemplateModel create(Object object) {
         Class clazz = object.getClass();
         
-        ModelFactory factory = null;
-
-        if (classToFactoryIsConcurrent) {
-            factory = (ModelFactory) classToFactory.get(clazz);
-        }
+        ModelFactory factory = (ModelFactory) classToFactory.get(clazz);
         
         if (factory == null) {
             synchronized(classToFactory) {

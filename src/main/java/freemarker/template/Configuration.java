@@ -35,6 +35,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import freemarker.cache.CacheStorage;
 import freemarker.cache.ClassTemplateLoader;
@@ -53,7 +55,6 @@ import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
-import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
@@ -388,7 +389,7 @@ public class Configuration extends Configurable implements Cloneable {
     private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
     
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
-    private Map localeToCharsetMap = _ConcurrentMapFactory.newThreadSafeMap();
+    private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
     private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
@@ -769,7 +770,7 @@ public class Configuration extends Configurable implements Cloneable {
         try {
             Configuration copy = (Configuration)super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
-            copy.localeToCharsetMap = new HashMap(localeToCharsetMap);
+            copy.localeToCharsetMap = new ConcurrentHashMap(localeToCharsetMap);
             copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
             copy.autoImports = (ArrayList) autoImports.clone();
             copy.autoIncludes = (ArrayList) autoIncludes.clone();

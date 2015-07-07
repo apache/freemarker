@@ -22,8 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
@@ -57,9 +57,7 @@ abstract class OverloadedMethodsSubset {
     // TODO: This can cause memory-leak when classes are re-loaded. However, first the genericClassIntrospectionCache
     // and such need to be fixed in this regard. 
     private final Map/*<ArgumentTypes, MaybeEmptyCallableMemberDescriptor>*/ argTypesToMemberDescCache
-            = _ConcurrentMapFactory.newMaybeConcurrentHashMap(6, 0.75f, 1);
-    private final boolean isArgTypesToMemberDescCacheConcurrentMap
-            = _ConcurrentMapFactory.isConcurrent(argTypesToMemberDescCache);
+            = new ConcurrentHashMap(6, 0.75f, 1);
     
     private final List/*<ReflectionCallableMemberDescriptor>*/ memberDescs = new LinkedList();
     
@@ -133,10 +131,8 @@ abstract class OverloadedMethodsSubset {
     
     final MaybeEmptyCallableMemberDescriptor getMemberDescriptorForArgs(Object[] args, boolean varArg) {
         ArgumentTypes argTypes = new ArgumentTypes(args, bugfixed);
-        MaybeEmptyCallableMemberDescriptor memberDesc = 
-                isArgTypesToMemberDescCacheConcurrentMap
-                        ? (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes)
-                        : null;
+        MaybeEmptyCallableMemberDescriptor memberDesc
+                = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
         if (memberDesc == null) {
             synchronized(argTypesToMemberDescCache) {
                 memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);

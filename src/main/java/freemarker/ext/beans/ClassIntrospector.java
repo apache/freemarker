@@ -39,9 +39,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import freemarker.core.BugException;
-import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
@@ -141,9 +141,7 @@ class ClassIntrospector {
     // State fields:
 
     private final Object sharedLock;
-    private final Map/* <Class, Map<String, Object>> */cache = _ConcurrentMapFactory.newMaybeConcurrentHashMap(0,
-            0.75f, 16);
-    private final boolean isCacheConcurrentMap = _ConcurrentMapFactory.isConcurrent(cache);
+    private final Map/* <Class, Map<String, Object>> */cache = new ConcurrentHashMap(0, 0.75f, 16);
     private final Set/* <String> */cacheClassNames = new HashSet(0);
     private final Set/* <Class> */classIntrospectionsInProgress = new HashSet(0);
 
@@ -209,7 +207,7 @@ class ClassIntrospector {
      *         {@link OverloadedMethods} or {@link Field} (but better check the source code...).
      */
     Map get(Class clazz) {
-        if (isCacheConcurrentMap) {
+        {
             Map introspData = (Map) cache.get(clazz);
             if (introspData != null) return introspData;
         }
