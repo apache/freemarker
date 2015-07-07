@@ -193,7 +193,7 @@ final class Assignment extends TemplateElement {
     }
 
     protected String dump(boolean canonical) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         String dn = getParentElement() instanceof AssignmentInstruction ? null : getNodeTypeSymbol();
         if (dn != null) {
             if (canonical) buf.append("<");

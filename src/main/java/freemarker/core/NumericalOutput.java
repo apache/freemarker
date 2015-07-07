@@ -81,7 +81,7 @@ final class NumericalOutput extends Interpolation {
     }
 
     protected String dump(boolean canonical, boolean inStringLiteral) {
-        StringBuffer buf = new StringBuffer("#{");
+        StringBuilder buf = new StringBuilder("#{");
         final String exprCF = expression.getCanonicalForm();
         buf.append(inStringLiteral ? StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);
         if (hasFormat) {

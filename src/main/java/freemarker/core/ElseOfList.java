@@ -38,7 +38,7 @@ final class ElseOfList extends TemplateElement {
 
     protected String dump(boolean canonical) {
         if (canonical) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             buf.append('<').append(getNodeTypeSymbol()).append('>');
             if (getNestedBlock() != null) {
                 buf.append(getNestedBlock().getCanonicalForm());            

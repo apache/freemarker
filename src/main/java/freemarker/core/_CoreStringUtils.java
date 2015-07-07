@@ -100,7 +100,7 @@ public final class _CoreStringUtils {
             return camelCaseName;
         }
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(camelCaseName.substring(0, i));
         while (i < camelCaseName.length()) {
             final char c = camelCaseName.charAt(i);

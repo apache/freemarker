@@ -95,7 +95,7 @@ public class _CoreAPI {
         return Collections.unmodifiableSet(BuiltIn.builtins.keySet());
     }
     
-    public static void appendInstructionStackItem(TemplateElement stackEl, StringBuffer sb) {
+    public static void appendInstructionStackItem(TemplateElement stackEl, StringBuilder sb) {
         Environment.appendInstructionStackItem(stackEl, sb);
     }
     

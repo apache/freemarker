@@ -160,7 +160,7 @@ class MessageUtil {
         }
     }
     
-    static StringBuffer appendExpressionAsUntearable(StringBuffer sb, Expression argExp) {
+    static StringBuilder appendExpressionAsUntearable(StringBuilder sb, Expression argExp) {
         boolean needParen =
                 !(argExp instanceof NumberLiteral)
                 && !(argExp instanceof StringLiteral)

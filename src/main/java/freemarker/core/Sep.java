@@ -47,7 +47,7 @@ class Sep extends TemplateElement {
     }
 
     protected String dump(boolean canonical) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         if (canonical) {

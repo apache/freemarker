@@ -107,7 +107,7 @@ public class IsApplicableTest extends TestCase {
         assertApplicable(ats, Object.class, CharSequence.class, Integer.class, Serializable.class);
         assertApplicable(ats, Object.class, Comparable.class, Integer.TYPE, Serializable.class);
         assertNotApplicable(ats, Object.class, String.class, Number.class, Number.class);
-        assertNotApplicable(ats, Object.class, StringBuffer.class, Number.class, Boolean.class);
+        assertNotApplicable(ats, Object.class, StringBuilder.class, Number.class, Boolean.class);
         assertNotApplicable(ats, int.class, Object.class, Object.class, Object.class);
         assertNotApplicable(ats, Object.class, Object.class, Object.class);
         assertNotApplicable(ats, Object.class, Object.class, Object.class, Object.class, Object.class);

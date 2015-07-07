@@ -32,7 +32,7 @@ public class _DelayedJoinWithComma extends _DelayedConversionToString {
             totalLength += items[i].length();
         }
         
-        StringBuffer sb = new StringBuffer(totalLength);
+        StringBuilder sb = new StringBuilder(totalLength);
         for (int i = 0; i < items.length; i++) {
             if (i != 0) sb.append(", ");
             sb.append(items[i]);

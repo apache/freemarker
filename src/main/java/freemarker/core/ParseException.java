@@ -363,7 +363,7 @@ public class ParseException extends IOException implements FMParserConstants {
             tokenErrDesc = getCustomTokenErrorDescription();
             if (tokenErrDesc == null) {
                 // The default JavaCC message generation stuff follows.
-                StringBuffer expected = new StringBuffer();
+                StringBuilder expected = new StringBuilder();
                 int maxSize = 0;
                 for (int i = 0; i < expectedTokenSequences.length; i++) {
                     if (i != 0) {
@@ -483,7 +483,7 @@ public class ParseException extends IOException implements FMParserConstants {
     }
 
     private String concatWithOrs(Set/*<String>*/ endNames) {
-        StringBuffer sb = new StringBuffer(); 
+        StringBuilder sb = new StringBuilder(); 
         for (Iterator/*<String>*/ it = endNames.iterator(); it.hasNext(); ) {
             String endName = (String) it.next();
             if (sb.length() != 0) {
@@ -500,7 +500,7 @@ public class ParseException extends IOException implements FMParserConstants {
      * string literal.
      */
     protected String add_escapes(String str) {
-        StringBuffer retval = new StringBuffer();
+        StringBuilder retval = new StringBuilder();
         char ch;
         for (int i = 0; i < str.length(); i++) {
             switch (str.charAt(i))

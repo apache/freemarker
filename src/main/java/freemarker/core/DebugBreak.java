@@ -50,7 +50,7 @@ public class DebugBreak extends TemplateElement
 
     protected String dump(boolean canonical) {
         if (canonical) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("<#-- ");
             sb.append("debug break");
             if (getNestedBlock() == null) {

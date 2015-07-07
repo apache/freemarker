@@ -1690,12 +1690,12 @@ public final class Environment extends Configurable {
     }
 
     static String instructionStackItemToString(TemplateElement stackEl) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         appendInstructionStackItem(stackEl, sb);
         return sb.toString();
     }
     
-    static void appendInstructionStackItem(TemplateElement stackEl, StringBuffer sb) {
+    static void appendInstructionStackItem(TemplateElement stackEl, StringBuilder sb) {
         sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
         
         sb.append("  [");

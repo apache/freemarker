@@ -166,7 +166,7 @@ class BuiltInsForSequences {
                 final String whenEmpty = getOptStringMethodArg(args, 1);
                 final String afterLast = getOptStringMethodArg(args, 2);
                 
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 
                 TemplateModelIterator it = coll.iterator();
                 
