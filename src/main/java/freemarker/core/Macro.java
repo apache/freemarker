@@ -225,7 +225,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                     new _ErrorDescriptionBuilder(new Object[] {
                                             "When calling macro ", new _DelayedJQuote(name), 
                                             ", required parameter ", new _DelayedJQuote(argName),
-                                            " (parameter #", new Integer(i + 1), ") was ", 
+                                            " (parameter #", Integer.valueOf(i + 1), ") was ", 
                                             (argWasSpecified
                                                     ? "specified, but had null/missing value."
                                                     : "not specified.") 
@@ -301,7 +301,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             } else if (idx == argDescsEnd) {
                 return catchAllParamName;
             } else if (idx == argDescsEnd + 1) {
-                return new Integer(function ? TYPE_FUNCTION : TYPE_MACRO);
+                return Integer.valueOf(function ? TYPE_FUNCTION : TYPE_MACRO);
             } else {
                 throw new IndexOutOfBoundsException();
             }

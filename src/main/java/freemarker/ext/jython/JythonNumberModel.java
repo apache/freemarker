@@ -62,7 +62,7 @@ implements
             Object value = object.__tojava__(java.lang.Number.class);
             if(value == null || value == Py.NoConversion)
             {
-                return new Double(object.__float__().getValue());
+                return Double.valueOf(object.__float__().getValue());
             }
             return (Number)value;
         }

@@ -132,7 +132,7 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         public TemplateModel get(int index) throws TemplateModelException {
             // Java 5: Use valueOf
-            return index >= 0 && index < array.length ? wrap(new Byte(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(Byte.valueOf(array[index])) : null;
         }
 
         public int size() throws TemplateModelException {
@@ -156,7 +156,7 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         public TemplateModel get(int index) throws TemplateModelException {
             // Java 5: Use valueOf
-            return index >= 0 && index < array.length ? wrap(new Short(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(Short.valueOf(array[index])) : null;
         }
 
         public int size() throws TemplateModelException {
@@ -180,7 +180,7 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         public TemplateModel get(int index) throws TemplateModelException {
             // Java 5: Integer.valueOf
-            return index >= 0 && index < array.length ? wrap(new Integer(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(Integer.valueOf(array[index])) : null;
         }
 
         public int size() throws TemplateModelException {
@@ -204,7 +204,7 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         public TemplateModel get(int index) throws TemplateModelException {
             // Java 5: Use valueOf
-            return index >= 0 && index < array.length ? wrap(new Long(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(Long.valueOf(array[index])) : null;
         }
 
         public int size() throws TemplateModelException {
@@ -228,7 +228,7 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         public TemplateModel get(int index) throws TemplateModelException {
             // Java 5: Use valueOf
-            return index >= 0 && index < array.length ? wrap(new Float(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(Float.valueOf(array[index])) : null;
         }
 
         public int size() throws TemplateModelException {
@@ -252,7 +252,7 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         public TemplateModel get(int index) throws TemplateModelException {
             // Java 5: Use valueOf
-            return index >= 0 && index < array.length ? wrap(new Double(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(Double.valueOf(array[index])) : null;
         }
 
         public int size() throws TemplateModelException {
@@ -276,7 +276,7 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         public TemplateModel get(int index) throws TemplateModelException {
             // Java 5: Use valueOf
-            return index >= 0 && index < array.length ? wrap(new Character(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(Character.valueOf(array[index])) : null;
         }
 
         public int size() throws TemplateModelException {

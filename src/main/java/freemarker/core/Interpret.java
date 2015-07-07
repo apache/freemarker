@@ -64,10 +64,10 @@ class Interpret extends BuiltIn
         String id = "anonymous_interpreted";
         if(model instanceof TemplateSequenceModel)
         {
-            sourceExpr = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(0))).copyLocationFrom(target));
+            sourceExpr = ((Expression)new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(0))).copyLocationFrom(target));
             if(((TemplateSequenceModel)model).size() > 1)
             {
-                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(1))).copyLocationFrom(target)).evalAndCoerceToString(env);
+                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(1))).copyLocationFrom(target)).evalAndCoerceToString(env);
             }
         }
         else if (model instanceof TemplateScalarModel)

@@ -84,7 +84,7 @@ public class OptimizerUtil
                 if(d != Double.POSITIVE_INFINITY && d != Double.NEGATIVE_INFINITY)
                 {
                     // BigDecimal -> Double
-                    return new Double(d);
+                    return Double.valueOf(d);
                 }
             }
         }
@@ -94,12 +94,12 @@ public class OptimizerUtil
             if(bi.compareTo(INTEGER_MAX) <= 0 && bi.compareTo(INTEGER_MIN) >= 0)
             {
                 // BigInteger -> Integer
-                return new Integer(bi.intValue());
+                return Integer.valueOf(bi.intValue());
             }
             if(bi.compareTo(LONG_MAX) <= 0 && bi.compareTo(LONG_MIN) >= 0)
             {
                 // BigInteger -> Long
-                return new Long(bi.longValue());
+                return Long.valueOf(bi.longValue());
             }
         }
         return number;

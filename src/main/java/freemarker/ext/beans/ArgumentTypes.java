@@ -713,7 +713,7 @@ final class ArgumentTypes {
                     if (paramType == Character.class || paramType == char.class
                             || (!paramType.isAssignableFrom(String.class)
                                     && paramType.isAssignableFrom(Character.class))) {
-                        args[i] = new Character(((CharacterOrString) arg).getAsChar());
+                        args[i] = Character.valueOf(((CharacterOrString) arg).getAsChar());
                     } else {
                         args[i] = ((CharacterOrString) arg).getAsString();
                     }

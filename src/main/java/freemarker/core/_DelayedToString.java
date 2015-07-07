@@ -23,7 +23,7 @@ public class _DelayedToString extends _DelayedConversionToString {
     }
 
     public _DelayedToString(int object) {
-        super(new Integer(object));
+        super(Integer.valueOf(object));
     }
     
     protected String doConversion(Object obj) {

@@ -52,7 +52,7 @@ class BuiltInsForNumbers {
             if (n <= 0) {
                 throw new _TemplateModelException(target, new Object[] {
                         "The left side operand of to ?", key, " must be at least 1, but was ",
-                        new Integer(n), "." });
+                        Integer.valueOf(n), "." });
             }
             return new SimpleScalar(toABC(n));
         }
@@ -147,7 +147,7 @@ class BuiltInsForNumbers {
             if (num instanceof Byte) {
                 return model;
             }
-            return new SimpleNumber(new Byte(num.byteValue()));
+            return new SimpleNumber(Byte.valueOf(num.byteValue()));
         }
     }
 
@@ -249,7 +249,7 @@ class BuiltInsForNumbers {
             if (num instanceof Short) {
                 return model;
             }
-            return new SimpleNumber(new Short(num.shortValue()));
+            return new SimpleNumber(Short.valueOf(num.shortValue()));
         }
     }
 
@@ -258,7 +258,7 @@ class BuiltInsForNumbers {
             double d = Math.round(((Double) num).doubleValue());
             if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
                 throw new _TemplateModelException(new Object[] {
-                        "Number doesn't fit into a 64 bit signed integer (long): ", new Double(d) });
+                        "Number doesn't fit into a 64 bit signed integer (long): ", Double.valueOf(d) });
             } else {
                 return (long) d;
             }
@@ -266,7 +266,7 @@ class BuiltInsForNumbers {
             float f = Math.round(((Float) num).floatValue());
             if (f > Long.MAX_VALUE || f < Long.MIN_VALUE) {
                 throw new _TemplateModelException(new Object[] {
-                        "Number doesn't fit into a 64 bit signed integer (long): ", new Float(f) });
+                        "Number doesn't fit into a 64 bit signed integer (long): ", Float.valueOf(f) });
             } else {
                 return (long) f;
             }

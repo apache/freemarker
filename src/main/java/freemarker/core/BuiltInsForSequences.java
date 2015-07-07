@@ -184,7 +184,7 @@ class BuiltInsForSequences {
                             sb.append(EvalUtil.coerceModelToString(item, null, null, env));
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e, new Object[] {
-                                    "\"?", key, "\" failed at index ", new Integer(idx), " with this error:\n\n",
+                                    "\"?", key, "\" failed at index ", Integer.valueOf(idx), " with this error:\n\n",
                                     MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                                     new _DelayedGetMessageWithoutStackTop(e),
                                     MessageUtil.EMBEDDED_MESSAGE_END });
@@ -518,7 +518,7 @@ class BuiltInsForSequences {
                             if (!(item instanceof TemplateScalarModel)) {
                                 throw new _TemplateModelException(new Object[] {
                                         "The argument to ?", key, "(key), when it's a sequence, must be a "
-                                        + "sequence of strings, but the item at index ", new Integer(i),
+                                        + "sequence of strings, but the item at index ", Integer.valueOf(i),
                                         " is not a string."});
                             }
                         }
@@ -780,7 +780,7 @@ class BuiltInsForSequences {
         static Object[] startErrorMessage(int keyNamesLn, int index) {
             return new Object[] {
                     (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"),
-                    " failed at sequence index ", new Integer(index),
+                    " failed at sequence index ", Integer.valueOf(index),
                     (index == 0 ? ": " : " (0-based): ") };
         }
         
@@ -822,7 +822,7 @@ class BuiltInsForSequences {
                     env);
         } catch (TemplateException ex) {
             throw new _TemplateModelException(ex, new Object[] {
-                    "This error has occurred when comparing sequence item at 0-based index ", new Integer(seqItemIndex),
+                    "This error has occurred when comparing sequence item at 0-based index ", Integer.valueOf(seqItemIndex),
                     " to the searched item:\n", new _DelayedGetMessage(ex) });
         }
     }

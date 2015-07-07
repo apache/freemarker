@@ -45,7 +45,7 @@ final class Assignment extends TemplateElement {
     static final int GLOBAL = 3;
     
     // Java 5: Integer.valueOf(1)
-    private static final Number ONE = new Integer(1);
+    private static final Number ONE = Integer.valueOf(1);
 
     /**
      * @param variableName the variable name to assign to.
@@ -247,7 +247,7 @@ final class Assignment extends TemplateElement {
         case 0: return variableName;
         case 1: return getOperatorTypeAsString();
         case 2: return valueExp;
-        case 3: return new Integer(scope);
+        case 3: return Integer.valueOf(scope);
         case 4: return namespaceExp;
         default: throw new IndexOutOfBoundsException();
         }

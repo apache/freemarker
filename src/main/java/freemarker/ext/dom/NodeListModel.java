@@ -196,7 +196,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     private Object[] newTypeErrorExplanation(String type) {
         return new Object[] {
                 "This XML query result can't be used as ", type, " because for that it had to contain exactly "
-                + "1 XML node, but it contains ", new Integer(size()), " nodes. "
+                + "1 XML node, but it contains ", Integer.valueOf(size()), " nodes. "
                 + "That is, the constructing XML query has found ",
                 isEmpty()
                     ? "no matches."
