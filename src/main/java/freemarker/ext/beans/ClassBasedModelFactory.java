@@ -19,8 +19,8 @@ package freemarker.ext.beans;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -32,10 +32,7 @@ import freemarker.template.utility.ClassUtil;
 abstract class ClassBasedModelFactory implements TemplateHashModel {
     private final BeansWrapper wrapper;
     
-    private final Map/*<String,TemplateModel>*/ cache
-            = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
-    private final boolean isCacheConcurrentMap
-            = _ConcurrentMapFactory.isConcurrent(cache);
+    private final Map/*<String,TemplateModel>*/ cache = new ConcurrentHashMap();
     private final Set classIntrospectionsInProgress = new HashSet();
     
     protected ClassBasedModelFactory(BeansWrapper wrapper) {
@@ -55,7 +52,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     }
 
     private TemplateModel getInternal(String key) throws TemplateModelException, ClassNotFoundException {
-        if (isCacheConcurrentMap) {
+        {
             TemplateModel model = (TemplateModel) cache.get(key);
             if (model != null) return model;
         }
