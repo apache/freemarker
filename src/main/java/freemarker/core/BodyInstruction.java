@@ -61,7 +61,7 @@ final class BodyInstruction extends TemplateElement {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         if (bodyParameters != null) {
-            for (int i = 0; i<bodyParameters.size(); i++) {
+            for (int i = 0; i < bodyParameters.size(); i++) {
                 sb.append(' ');
                 sb.append(((Expression) bodyParameters.get(i)).getCanonicalForm());
             }
@@ -112,7 +112,7 @@ final class BodyInstruction extends TemplateElement {
             invokingMacroContext = env.getCurrentMacroContext();
             List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
             if (bodyParameters != null) {
-                for (int i=0; i<bodyParameters.size(); i++) {
+                for (int i = 0; i < bodyParameters.size(); i++) {
                     Expression exp = (Expression) bodyParameters.get(i);
                     TemplateModel tm = exp.eval(env);
                     if (bodyParameterNames != null && i < bodyParameterNames.size()) {

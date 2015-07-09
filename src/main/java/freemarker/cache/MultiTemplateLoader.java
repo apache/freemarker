@@ -33,8 +33,7 @@ import java.util.Map;
  * must be provided by the callers. Note that {@link TemplateCache}, the natural user of this class, provides the
  * necessary synchronizations when it uses this class, so then you don't have to worry this.
  */
-public class MultiTemplateLoader implements StatefulTemplateLoader
-{
+public class MultiTemplateLoader implements StatefulTemplateLoader {
 
     private final TemplateLoader[] loaders;
     private final Map lastLoaderForName = Collections.synchronizedMap(new HashMap());
@@ -51,17 +50,13 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
     }
 
     public Object findTemplateSource(String name)
-            throws
-            IOException
-    {
+            throws IOException {
         // Use soft affinity - give the loader that last found this
         // resource a chance to find it again first.
         TemplateLoader lastLoader = (TemplateLoader) lastLoaderForName.get(name);
-        if (lastLoader != null)
-        {
+        if (lastLoader != null) {
             Object source = lastLoader.findTemplateSource(name);
-            if (source != null)
-            {
+            if (source != null) {
                 return new MultiSource(source, lastLoader);
             }
         }
@@ -70,12 +65,10 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
         // again, try all loaders in order of appearance. If any manages
         // to find the resource, then associate it as the new affine loader
         // for this resource.
-        for (int i = 0; i < loaders.length; ++i)
-        {
+        for (int i = 0; i < loaders.length; ++i) {
             TemplateLoader loader = loaders[i];
             Object source = loader.findTemplateSource(name);
-            if (source != null)
-            {
+            if (source != null) {
                 lastLoaderForName.put(name, loader);
                 return new MultiSource(source, loader);
             }
@@ -91,27 +84,21 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
         return null;
     }
 
-    public long getLastModified(Object templateSource)
-    {
+    public long getLastModified(Object templateSource) {
         return ((MultiSource) templateSource).getLastModified();
     }
 
     public Reader getReader(Object templateSource, String encoding)
-            throws
-            IOException
-    {
+            throws IOException {
         return ((MultiSource) templateSource).getReader(encoding);
     }
 
     public void closeTemplateSource(Object templateSource)
-            throws
-            IOException
-    {
+            throws IOException {
         ((MultiSource) templateSource).close();
     }
 
-    public void resetState()
-    {
+    public void resetState() {
         lastLoaderForName.clear();
         for (int i = 0; i < loaders.length; i++) {
             TemplateLoader loader = loaders[i];
@@ -125,8 +112,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
      * Represents a template source bound to a specific template loader. It serves as the complete template source
      * descriptor used by the MultiTemplateLoader class.
      */
-    static final class MultiSource
-    {
+    static final class MultiSource {
 
         private final Object source;
         private final TemplateLoader loader;
@@ -137,22 +123,17 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
             this.loader = loader;
         }
 
-        long getLastModified()
-        {
+        long getLastModified() {
             return loader.getLastModified(source);
         }
 
         Reader getReader(String encoding)
-                throws
-                IOException
-        {
+                throws IOException {
             return loader.getReader(source, encoding);
         }
 
         void close()
-                throws
-                IOException
-        {
+                throws IOException {
             loader.closeTemplateSource(source);
         }
 

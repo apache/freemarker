@@ -60,8 +60,7 @@ class ExistenceBuiltins {
             return model == null ? FIRST_NON_NULL_METHOD : new ConstantMethod(model);
         }
 
-        private static class ConstantMethod implements TemplateMethodModelEx
-        {
+        private static class ConstantMethod implements TemplateMethodModelEx {
             private final TemplateModel constant;
 
             ConstantMethod(TemplateModel constant) {
@@ -81,7 +80,7 @@ class ExistenceBuiltins {
             new TemplateMethodModelEx() {
                 public Object exec(List args) throws TemplateModelException {
                     int argCnt = args.size();
-                    if(argCnt == 0) throw MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);
+                    if (argCnt == 0) throw MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);
                     for (int i = 0; i < argCnt; i++ ) {
                         TemplateModel result = (TemplateModel) args.get(i);
                         if (result != null) return result;
@@ -115,8 +114,7 @@ class ExistenceBuiltins {
 
     static class if_existsBI extends ExistenceBuiltins.ExistenceBuiltIn {
         TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
+                throws TemplateException {
             TemplateModel model = evalMaybeNonexistentTarget(env);
             return model == null ? TemplateModel.NOTHING : model;
         }

@@ -24,29 +24,24 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
-public class TestSimpleTag extends SimpleTagSupport
-{
+public class TestSimpleTag extends SimpleTagSupport {
     private int bodyLoopCount = 1;
     private String name;
     
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
     
-    public void setBodyLoopCount(int bodyLoopCount)
-    {
+    public void setBodyLoopCount(int bodyLoopCount) {
         this.bodyLoopCount = bodyLoopCount;
     }
     
-    public void doTag() throws JspException, IOException
-    {
+    public void doTag() throws JspException, IOException {
         JspContext ctx = getJspContext();
         JspWriter w = ctx.getOut();
         w.println("enter TestSimpleTag " + name);
         JspFragment f = getJspBody();
-        for(int i = 0; i < bodyLoopCount; ++i)
-        {
+        for (int i = 0; i < bodyLoopCount; ++i) {
             w.println("invoking body i=" + i);
             f.invoke(w);
         }

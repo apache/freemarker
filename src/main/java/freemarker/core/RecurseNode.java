@@ -48,8 +48,7 @@ final class RecurseNode extends TemplateElement {
         TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
         if (namespaces instanceof StringLiteral) {
             nss = env.importLib(((TemplateScalarModel) nss).getAsString(), null);
-        }
-        else if (namespaces instanceof ListLiteral) {
+        } else if (namespaces instanceof ListLiteral) {
             nss = ((ListLiteral) namespaces).evaluateStringsToNamespaces(env);
         }
         if (nss != null) {
@@ -57,8 +56,7 @@ final class RecurseNode extends TemplateElement {
                 SimpleSequence ss = new SimpleSequence(1);
                 ss.add(nss);
                 nss = ss;
-            }
-            else if (!(nss instanceof TemplateSequenceModel)) {
+            } else if (!(nss instanceof TemplateSequenceModel)) {
                 if (namespaces != null) {
                     throw new NonSequenceException(namespaces, nss, env);
                 } else {

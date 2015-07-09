@@ -28,8 +28,7 @@ import java.io.IOException;
  * evaluation, and gets notified about exceptions that are thrown during the
  * body evaluation.
  */
-public interface TransformControl
-{
+public interface TransformControl {
     /**
      * Constant returned from {@link #afterBody()} that tells the
      * template engine to repeat transform body evaluation and feed

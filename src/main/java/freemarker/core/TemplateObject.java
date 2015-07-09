@@ -39,37 +39,27 @@ public abstract class TemplateObject {
     static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
     final void setLocation(Template template, Token begin, Token end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     final void setLocation(Template template, Token begin, TemplateObject end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     final void setLocation(Template template, TemplateObject begin, Token end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     final void setLocation(Template template, TemplateObject begin, TemplateObject end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws
-        ParseException
-    {
+    throws ParseException {
         this.template = template;
         this.beginColumn = beginColumn;
         this.beginLine = beginLine;
@@ -171,8 +161,7 @@ public abstract class TemplateObject {
         return template;
     }
     
-    TemplateObject copyLocationFrom(TemplateObject from)
-    {
+    TemplateObject copyLocationFrom(TemplateObject from) {
         template = from.template;
         beginColumn = from.beginColumn;
         beginLine = from.beginLine;

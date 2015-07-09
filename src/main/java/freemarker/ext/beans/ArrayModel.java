@@ -36,14 +36,12 @@ extends
     BeanModel
 implements
     TemplateCollectionModel,
-    TemplateSequenceModel
-{
+    TemplateSequenceModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new ArrayModel(object, (BeansWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new ArrayModel(object, (BeansWrapper) wrapper);
             }
         };
         
@@ -63,21 +61,18 @@ implements
     {
         super(array, wrapper);
         Class clazz = array.getClass();
-        if(!clazz.isArray())
+        if (!clazz.isArray())
             throw new IllegalArgumentException("Object is not an array, it's " + array.getClass().getName());
         length = Array.getLength(array);
     }
 
 
-    public TemplateModelIterator iterator()
-    {
+    public TemplateModelIterator iterator() {
         return new Iterator();
     }
 
     public TemplateModel get(int index)
-    throws
-        TemplateModelException
-    {
+    throws TemplateModelException {
         try
         {
             return wrap(Array.get(object, index));
@@ -92,37 +87,29 @@ implements
     private class Iterator
     implements 
         TemplateSequenceModel,
-        TemplateModelIterator
-    {
+        TemplateModelIterator {
         private int position = 0;
 
-        public boolean hasNext()
-        {
+        public boolean hasNext() {
             return position < length;
         }
 
         public TemplateModel get(int index)
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             return ArrayModel.this.get(index);
         }
 
         public TemplateModel next()
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             return position < length ? get(position++) : null;
         }
 
-        public int size() 
-        {
+        public int size() {
             return ArrayModel.this.size();
         }
     }
 
-    public int size() 
-    {
+    public int size() {
         return length;
     }
 

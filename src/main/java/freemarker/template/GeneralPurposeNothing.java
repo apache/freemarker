@@ -35,7 +35,7 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     private GeneralPurposeNothing() {
     }
 
-    static TemplateModel getInstance()  {
+    static TemplateModel getInstance() {
         return instance;
     }
 

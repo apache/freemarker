@@ -36,8 +36,7 @@ final class MixedContent extends TemplateElement {
     }
     
     TemplateElement postParseCleanup(boolean stripWhitespace)
-        throws ParseException 
-    {
+        throws ParseException {
         super.postParseCleanup(stripWhitespace);
         return getRegulatedChildCount() == 1 ? getRegulatedChild(0) : this;
     }
@@ -47,8 +46,7 @@ final class MixedContent extends TemplateElement {
      * and outputs the resulting text.
      */
     void accept(Environment env) 
-        throws TemplateException, IOException 
-    {
+        throws TemplateException, IOException {
         int ln = getRegulatedChildCount();
         for (int i = 0; i < ln; i++) {
             env.visit(getRegulatedChild(i));

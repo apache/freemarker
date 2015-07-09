@@ -35,23 +35,17 @@ final class ComparisonExpression extends BooleanExpression {
         this.opString = opString;
         if (opString == "==" || opString == "=") {
             operation = EvalUtil.CMP_OP_EQUALS;
-        }
-        else if (opString == "!=") {
+        } else if (opString == "!=") {
             operation = EvalUtil.CMP_OP_NOT_EQUALS;
-        }
-        else if (opString == "gt" || opString == "\\gt" || opString == ">" || opString == "&gt;") {
+        } else if (opString == "gt" || opString == "\\gt" || opString == ">" || opString == "&gt;") {
             operation = EvalUtil.CMP_OP_GREATER_THAN;
-        }
-        else if (opString == "gte" || opString == "\\gte" || opString == ">=" || opString == "&gt;=") {
+        } else if (opString == "gte" || opString == "\\gte" || opString == ">=" || opString == "&gt;=") {
             operation = EvalUtil.CMP_OP_GREATER_THAN_EQUALS;
-        }
-        else if (opString== "lt" || opString == "\\lt" || opString == "<" || opString == "&lt;") {
+        } else if (opString == "lt" || opString == "\\lt" || opString == "<" || opString == "&lt;") {
             operation = EvalUtil.CMP_OP_LESS_THAN;
-        }
-        else if (opString == "lte" || opString == "\\lte" || opString == "<=" || opString == "&lt;=") {
+        } else if (opString == "lte" || opString == "\\lte" || opString == "<=" || opString == "&lt;=") {
             operation = EvalUtil.CMP_OP_LESS_THAN_EQUALS;
-        }
-        else {
+        } else {
             throw new BugException("Unknown comparison operator " + opString);
         }
     }

@@ -25,8 +25,7 @@ import javax.servlet.jsp.PageContext;
 
 /**
  */
-abstract class FreeMarkerJspFactory extends JspFactory
-{
+abstract class FreeMarkerJspFactory extends JspFactory {
     protected abstract String getSpecificationVersion();
     
     public JspEngineInfo getEngineInfo() {

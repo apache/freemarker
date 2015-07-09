@@ -33,8 +33,7 @@ import freemarker.template.utility.DeepUnwrap;
  *
  * @since 2.3.11
  */
-public interface TemplateDirectiveModel extends TemplateModel
-{
+public interface TemplateDirectiveModel extends TemplateModel {
     /**
      * Executes this user-defined directive; called by FreeMarker when the user-defined
      * directive is called in the template.

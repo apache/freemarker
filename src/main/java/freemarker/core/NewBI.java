@@ -30,8 +30,7 @@ import freemarker.template.TemplateModelException;
  * A built-in that allows us to instantiate an instance of a java class.
  * Usage is something like: <tt>&lt;#assign foobar = "foo.bar.MyClass"?new()></tt>;
  */
-class NewBI extends BuiltIn
-{
+class NewBI extends BuiltIn {
     
     static final Class BEAN_MODEL_CLASS = freemarker.ext.beans.BeanModel.class;
     static Class JYTHON_MODEL_CLASS;
@@ -44,8 +43,7 @@ class NewBI extends BuiltIn
     }
     
     TemplateModel _eval(Environment env)
-            throws TemplateException 
-    {
+            throws TemplateException {
         return new ConstructorFunction(target.evalAndCoerceToString(env), env, target.getTemplate());
     }
 
@@ -75,7 +73,7 @@ class NewBI extends BuiltIn
             ObjectWrapper ow = env.getObjectWrapper();
             BeansWrapper bw = 
                 ow instanceof BeansWrapper 
-                ? (BeansWrapper)ow
+                ? (BeansWrapper) ow
                 : BeansWrapper.getDefaultInstance();
             return bw.newInstance(cl, arguments);
         }

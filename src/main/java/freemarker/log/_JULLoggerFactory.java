@@ -22,17 +22,14 @@ import java.util.logging.Level;
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
-public class _JULLoggerFactory implements LoggerFactory
-{
-    public Logger getLogger(String category)
-    {
+public class _JULLoggerFactory implements LoggerFactory {
+    public Logger getLogger(String category) {
         return new JULLogger(java.util.logging.Logger.getLogger(category));
     }
 
     private static class JULLogger
     extends
-        Logger
-    {
+        Logger {
         private final java.util.logging.Logger logger;
         
         JULLogger(java.util.logging.Logger logger)
@@ -40,68 +37,55 @@ public class _JULLoggerFactory implements LoggerFactory
             this.logger = logger;
         }
         
-        public void debug(String message)
-        {
+        public void debug(String message) {
             logger.log(Level.FINE, message);
         }
 
-        public void debug(String message, Throwable t)
-        {
+        public void debug(String message, Throwable t) {
             logger.log(Level.FINE, message, t);
         }
 
-        public void error(String message)
-        {
+        public void error(String message) {
             logger.log(Level.SEVERE, message);
         }
 
-        public void error(String message, Throwable t)
-        {
+        public void error(String message, Throwable t) {
             logger.log(Level.SEVERE, message, t);
         }
 
-        public void info(String message)
-        {
+        public void info(String message) {
             logger.log(Level.INFO, message);
         }
 
-        public void info(String message, Throwable t)
-        {
+        public void info(String message, Throwable t) {
             logger.log(Level.INFO, message, t);
         }
 
-        public void warn(String message)
-        {
+        public void warn(String message) {
             logger.log(Level.WARNING, message);
         }
 
-        public void warn(String message, Throwable t)
-        {
+        public void warn(String message, Throwable t) {
             logger.log(Level.WARNING, message, t);
         }
 
-        public boolean isDebugEnabled()
-        {
+        public boolean isDebugEnabled() {
             return logger.isLoggable(Level.FINE);
         }
 
-        public boolean isInfoEnabled()
-        {
+        public boolean isInfoEnabled() {
             return logger.isLoggable(Level.INFO);
         }
 
-        public boolean isWarnEnabled()
-        {
+        public boolean isWarnEnabled() {
             return logger.isLoggable(Level.WARNING);
         }
 
-        public boolean isErrorEnabled()
-        {
+        public boolean isErrorEnabled() {
             return logger.isLoggable(Level.SEVERE);
         }
 
-        public boolean isFatalEnabled()
-        {
+        public boolean isFatalEnabled() {
             return logger.isLoggable(Level.SEVERE);
         }
     }

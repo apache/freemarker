@@ -51,8 +51,7 @@ import java.util.Map;
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
-public class MruCacheStorage implements CacheStorageWithGetSize
-{
+public class MruCacheStorage implements CacheStorageWithGetSize {
     private final MruEntry strongHead = new MruEntry();
     private final MruEntry softHead = new MruEntry();
     {
@@ -74,36 +73,35 @@ public class MruCacheStorage implements CacheStorageWithGetSize
      *          the least recently will be discarded.
      */
     public MruCacheStorage(int strongSizeLimit, int softSizeLimit) {
-        if(strongSizeLimit < 0) throw new IllegalArgumentException("strongSizeLimit < 0");
-        if(softSizeLimit < 0) throw new IllegalArgumentException("softSizeLimit < 0");
+        if (strongSizeLimit < 0) throw new IllegalArgumentException("strongSizeLimit < 0");
+        if (softSizeLimit < 0) throw new IllegalArgumentException("softSizeLimit < 0");
         this.strongSizeLimit = strongSizeLimit;
         this.softSizeLimit = softSizeLimit;
     }
     
     public Object get(Object key) {
         removeClearedReferences();
-        MruEntry entry = (MruEntry)map.get(key);
-        if(entry == null) {
+        MruEntry entry = (MruEntry) map.get(key);
+        if (entry == null) {
             return null;
         }
         relinkEntryAfterStrongHead(entry, null);
         Object value = entry.getValue();
-        if(value instanceof MruReference) {
+        if (value instanceof MruReference) {
             // This can only happen with strongSizeLimit == 0
-            return ((MruReference)value).get();
+            return ((MruReference) value).get();
         }
         return value;
     }
 
     public void put(Object key, Object value) {
         removeClearedReferences();
-        MruEntry entry = (MruEntry)map.get(key);
-        if(entry == null) {
+        MruEntry entry = (MruEntry) map.get(key);
+        if (entry == null) {
             entry = new MruEntry(key, value);
             map.put(key, entry);
             linkAfterStrongHead(entry);
-        }
-        else {
+        } else {
             relinkEntryAfterStrongHead(entry, value);
         }
         
@@ -115,8 +113,8 @@ public class MruCacheStorage implements CacheStorageWithGetSize
     }
 
     private void removeInternal(Object key) {
-        MruEntry entry = (MruEntry)map.remove(key);
-        if(entry != null) {
+        MruEntry entry = (MruEntry) map.remove(key);
+        if (entry != null) {
             unlinkEntryAndInspectIfSoft(entry);
         }
     }
@@ -127,13 +125,13 @@ public class MruCacheStorage implements CacheStorageWithGetSize
         map.clear();
         strongSize = softSize = 0;
         // Quick refQueue processing
-        while(refQueue.poll() != null);
+        while (refQueue.poll() != null);
     }
 
     private void relinkEntryAfterStrongHead(MruEntry entry, Object newValue) {
-        if(unlinkEntryAndInspectIfSoft(entry) && newValue == null) {
+        if (unlinkEntryAndInspectIfSoft(entry) && newValue == null) {
             // Turn soft reference into strong reference, unless is was cleared
-            MruReference mref = (MruReference)entry.getValue();
+            MruReference mref = (MruReference) entry.getValue();
             Object strongValue = mref.get();
             if (strongValue != null) {
                 entry.setValue(strongValue);
@@ -151,53 +149,49 @@ public class MruCacheStorage implements CacheStorageWithGetSize
 
     private void linkAfterStrongHead(MruEntry entry) {
         entry.linkAfter(strongHead);
-        if(strongSize == strongSizeLimit) {
+        if (strongSize == strongSizeLimit) {
             // softHead.previous is LRU strong entry
             MruEntry lruStrong = softHead.getPrevious();
             // Attila: This is equaivalent to strongSizeLimit != 0
             // DD: But entry.linkAfter(strongHead) was just executed above, so
             //     lruStrong != strongHead is true even if strongSizeLimit == 0.
-            if(lruStrong != strongHead) {
+            if (lruStrong != strongHead) {
                 lruStrong.unlink();
-                if(softSizeLimit > 0) {
+                if (softSizeLimit > 0) {
                     lruStrong.linkAfter(softHead);
                     lruStrong.setValue(new MruReference(lruStrong, refQueue));
-                    if(softSize == softSizeLimit) {
+                    if (softSize == softSizeLimit) {
                         // List is circular, so strongHead.previous is LRU soft entry
                         MruEntry lruSoft = strongHead.getPrevious();
                         lruSoft.unlink();
                         map.remove(lruSoft.getKey());
-                    }
-                    else {
+                    } else {
                         ++softSize;
                     }
-                }
-                else {
+                } else {
                     map.remove(lruStrong.getKey());
                 }
             }
-        }
-        else {
+        } else {
             ++strongSize;
         }
     }
 
     private boolean unlinkEntryAndInspectIfSoft(MruEntry entry) {
         entry.unlink();
-        if(entry.getValue() instanceof MruReference) {
+        if (entry.getValue() instanceof MruReference) {
             --softSize;
             return true;
-        }
-        else {
+        } else {
             --strongSize;
             return false;
         }
     }
     
     private void removeClearedReferences() {
-        for(;;) {
-            MruReference ref = (MruReference)refQueue.poll();
-            if(ref == null) {
+        for (; ; ) {
+            MruReference ref = (MruReference) refQueue.poll();
+            if (ref == null) {
                 break;
             }
             removeInternal(ref.getKey());
@@ -254,8 +248,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize
         return getSoftSize() + getStrongSize();
     }
 
-    private static final class MruEntry
-    {
+    private static final class MruEntry {
         private MruEntry prev;
         private MruEntry next;
         private final Object key;
@@ -310,8 +303,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize
         }
     }
     
-    private static class MruReference extends SoftReference
-    {
+    private static class MruReference extends SoftReference {
         private final Object key;
         
         MruReference(MruEntry entry, ReferenceQueue queue) {

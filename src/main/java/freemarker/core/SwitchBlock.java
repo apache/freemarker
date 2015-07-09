@@ -47,8 +47,7 @@ final class SwitchBlock extends TemplateElement {
     }
 
     void accept(Environment env) 
-        throws TemplateException, IOException 
-    {
+        throws TemplateException, IOException {
         boolean processedCase = false;
         int ln = getRegulatedChildCount();
         try {
@@ -89,7 +88,7 @@ final class SwitchBlock extends TemplateElement {
         if (canonical) {
             buf.append('>');
             int ln = getRegulatedChildCount();
-            for (int i = 0; i< ln; i++) {
+            for (int i = 0; i < ln; i++) {
                 Case cas = (Case) getRegulatedChild(i);
                 buf.append(cas.getCanonicalForm());
             }

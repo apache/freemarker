@@ -32,8 +32,7 @@ import java.rmi.RemoteException;
  * {@link freemarker.core.Configurable} objects. 
 
  */
-public interface DebuggedEnvironment extends DebugModel
-{
+public interface DebuggedEnvironment extends DebugModel {
     /**
      * Resumes the processing of the environment in the remote VM after it was 
      * stopped on a breakpoint.

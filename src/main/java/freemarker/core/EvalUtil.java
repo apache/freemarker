@@ -33,8 +33,7 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * Internally used static utilities for evaluation expressions.
  */
-class EvalUtil
-{
+class EvalUtil {
     static final int CMP_OP_EQUALS = 1;
     static final int CMP_OP_NOT_EQUALS = 2;
     static final int CMP_OP_LESS_THAN = 3;
@@ -53,7 +52,7 @@ class EvalUtil
     static String modelToString(TemplateScalarModel model, Expression expr, Environment env)
     throws TemplateModelException {
         String value = model.getAsString();
-        if(value == null) {
+        if (value == null) {
             if (env == null) env = Environment.getCurrentEnvironment();
             if (env != null && env.isClassicCompatible()) {
                 return "";
@@ -68,10 +67,9 @@ class EvalUtil
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
     static Number modelToNumber(TemplateNumberModel model, Expression expr)
-        throws TemplateModelException
-    {
+        throws TemplateModelException {
         Number value = model.getAsNumber();
-        if(value == null) throw newModelHasStoredNullException(Number.class, model, expr);
+        if (value == null) throw newModelHasStoredNullException(Number.class, model, expr);
         return value;
     }
 
@@ -79,10 +77,9 @@ class EvalUtil
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
     static Date modelToDate(TemplateDateModel model, Expression expr)
-        throws TemplateModelException
-    {
+        throws TemplateModelException {
         Date value = model.getAsDate();
-        if(value == null) throw newModelHasStoredNullException(Date.class, model, expr);
+        if (value == null) throw newModelHasStoredNullException(Date.class, model, expr);
         return value;
     }
     
@@ -347,7 +344,7 @@ class EvalUtil
             return env.formatDate((TemplateDateModel) tm, exp);
         } else if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
-        } else if(tm == null) {
+        } else if (tm == null) {
             if (env.isClassicCompatible()) {
                 return "";
             } else {

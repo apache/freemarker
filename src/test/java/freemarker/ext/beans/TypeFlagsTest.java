@@ -107,7 +107,7 @@ public class TypeFlagsTest extends TestCase {
 
         checkTypeFlags(MultiNumTypeC.class, "m3",
                 TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT 
-                | TypeFlags.BIG_DECIMAL| TypeFlags.BIG_INTEGER
+                | TypeFlags.BIG_DECIMAL | TypeFlags.BIG_INTEGER
                 | TypeFlags.ACCEPTS_NUMBER,
                 TypeFlags.BIG_INTEGER | TypeFlags.ACCEPTS_NUMBER,
                 TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT

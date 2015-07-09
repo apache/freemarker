@@ -66,8 +66,7 @@ implements
     TemplateMethodModel,
     TemplateScalarModel,
     TemplateSequenceModel,
-    TemplateNodeModel
-{
+    TemplateNodeModel {
     private static final Logger LOG = Logger.getLogger("freemarker.xml");
     
     private static final Class DOM_NODE_CLASS = getClass("org.w3c.dom.Node");
@@ -98,23 +97,19 @@ implements
      */
     public NodeListModel(Object nodes) {
         Object node = nodes;
-        if(nodes instanceof Collection) {
-            this.nodes = new ArrayList((Collection)nodes);
+        if (nodes instanceof Collection) {
+            this.nodes = new ArrayList((Collection) nodes);
             node = this.nodes.isEmpty() ? null : this.nodes.get(0);
-        }
-        else if(nodes != null) {
+        } else if (nodes != null) {
             this.nodes = Collections.singletonList(nodes);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("nodes == null");
         }
-        if(DOM_NODE_CLASS != null && DOM_NODE_CLASS.isInstance(node)) {
+        if (DOM_NODE_CLASS != null && DOM_NODE_CLASS.isInstance(node)) {
             navigator = DOM_NAVIGATOR;
-        }
-        else if(DOM4J_NODE_CLASS != null && DOM4J_NODE_CLASS.isInstance(node)) {
+        } else if (DOM4J_NODE_CLASS != null && DOM4J_NODE_CLASS.isInstance(node)) {
             navigator = DOM4J_NAVIGATOR;
-        }
-        else {
+        } else {
             // Assume JDOM
             navigator = JDOM_NAVIGATOR;
         }
@@ -122,7 +117,7 @@ implements
     }
     
     private Namespaces createNamespaces() {
-        if(useJaxenNamespaces) {
+        if (useJaxenNamespaces) {
             try {
             	return (Namespaces)
             			Class.forName("freemarker.ext.xml._JaxenNamespaces")
@@ -163,11 +158,11 @@ implements
      * @see freemarker.template.TemplateMethodModel#exec(List)
      */
     public Object exec(List arguments) throws TemplateModelException {
-        if(arguments.size() != 1) {
+        if (arguments.size() != 1) {
             throw new TemplateModelException(
                 "Expecting exactly one argument - an XPath expression");
         }
-        return deriveModel(navigator.applyXPath(nodes, (String)arguments.get(0), namespaces));
+        return deriveModel(navigator.applyXPath(nodes, (String) arguments.get(0), namespaces));
     }
 
     /**
@@ -183,12 +178,11 @@ implements
      */
     public String getAsString() throws TemplateModelException {
         StringWriter sw = new StringWriter(size() * 128);
-        for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+        for (Iterator iter = nodes.iterator(); iter.hasNext(); ) {
             Object o = iter.next();
-            if(o instanceof String) {
-                sw.write((String)o);
-            }
-            else {
+            if (o instanceof String) {
+                sw.write((String) o);
+            } else {
                 navigator.getAsString(o, sw);
            }
         }
@@ -389,45 +383,41 @@ implements
         String localName = null;
         String namespaceUri = "";
         // If not a nav op, then check for special keys.
-        if(op == null && key.length() > 0 && key.charAt(0) == '_') {
-            if(key.equals("_unique")) {
+        if (op == null && key.length() > 0 && key.charAt(0) == '_') {
+            if (key.equals("_unique")) {
                 return deriveModel(removeDuplicates(nodes));
-            }
-            else if(key.equals("_filterType") || key.equals("_ftype")) {
+            } else if (key.equals("_filterType") || key.equals("_ftype")) {
                 return new FilterByType();
-            }
-            else if(key.equals("_registerNamespace")) {
-                if(namespaces.isShared()) {
-                    namespaces = (Namespaces)namespaces.clone();
+            } else if (key.equals("_registerNamespace")) {
+                if (namespaces.isShared()) {
+                    namespaces = (Namespaces) namespaces.clone();
                 }
             }
         }
         // Last, do a named child element or attribute lookup 
-        if(op == null) {
+        if (op == null) {
             int colon = key.indexOf(':');
-            if(colon == -1) {
+            if (colon == -1) {
                 // No namespace prefix specified
                 localName = key;
-            }
-            else {
+            } else {
                 // Namespace prefix specified
                 localName = key.substring(colon + 1);
                 String prefix = key.substring(0, colon);
                 namespaceUri = namespaces.translateNamespacePrefixToUri(prefix);
-                if(namespaceUri == null) {
+                if (namespaceUri == null) {
                     throw new TemplateModelException("Namespace prefix " + prefix + " is not registered.");
                 }
             }
-            if(localName.charAt(0) == '@') {
+            if (localName.charAt(0) == '@') {
                 op = navigator.getAttributeOperator();
                 localName = localName.substring(1);
-            }
-            else {
+            } else {
                 op = navigator.getChildrenOperator();
             }
         }
         List result = new ArrayList();
-        for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+        for (Iterator iter = nodes.iterator(); iter.hasNext(); ) {
             try {
                 op.process(iter.next(), localName, namespaceUri, result);
             }
@@ -453,23 +443,20 @@ implements
      * @param uri the namespace URI that identifies the namespace.
      */
     public void registerNamespace(String prefix, String uri) {
-        if(namespaces.isShared()) {
-            namespaces = (Namespaces)namespaces.clone();
+        if (namespaces.isShared()) {
+            namespaces = (Namespaces) namespaces.clone();
         }
         namespaces.registerNamespace(prefix, uri);
     }
     
     private class FilterByType
     implements
-        TemplateMethodModel
-    {
-        public Object exec(List arguments)
-        {
+        TemplateMethodModel {
+        public Object exec(List arguments) {
             List filteredNodes = new ArrayList();
-            for (Iterator iter = arguments.iterator(); iter.hasNext();)
-            {
+            for (Iterator iter = arguments.iterator(); iter.hasNext(); ) {
                 Object node = iter.next();
-                if(arguments.contains(navigator.getType(node))) {
+                if (arguments.contains(navigator.getType(node))) {
                     filteredNodes.add(node);
                 }
             }
@@ -477,8 +464,7 @@ implements
         }
     }
 
-    private static final List removeDuplicates(List list)
-    {
+    private static final List removeDuplicates(List list) {
         int s = list.size();
         ArrayList ulist = new ArrayList(s);
         Set set = new HashSet(s * 4 / 3, .75f);
@@ -497,7 +483,7 @@ implements
             return ClassUtil.forName(className);
         }
         catch(Exception e) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Couldn't load class " + className, e);
             }
             return null;
@@ -510,51 +496,46 @@ implements
                     navType + "Navigator").newInstance();
         }
         catch(Throwable t) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Could not load navigator for " + navType, t);
             }
             return null;
         }
     }
 
-    public TemplateSequenceModel getChildNodes() throws TemplateModelException
-    {
-        return (TemplateSequenceModel)get("_content");
+    public TemplateSequenceModel getChildNodes() throws TemplateModelException {
+        return (TemplateSequenceModel) get("_content");
     }
 
-    public String getNodeName() throws TemplateModelException
-    {
-        return getUniqueText((NodeListModel)get("_name"), "name");
+    public String getNodeName() throws TemplateModelException {
+        return getUniqueText((NodeListModel) get("_name"), "name");
     }
 
-    public String getNodeNamespace() throws TemplateModelException
-    {
-        return getUniqueText((NodeListModel)get("_nsuri"), "namespace");
+    public String getNodeNamespace() throws TemplateModelException {
+        return getUniqueText((NodeListModel) get("_nsuri"), "namespace");
     }
 
-    public String getNodeType() throws TemplateModelException
-    {
-        return getUniqueText((NodeListModel)get("_type"), "type");
+    public String getNodeType() throws TemplateModelException {
+        return getUniqueText((NodeListModel) get("_type"), "type");
     }
-    public TemplateNodeModel getParentNode() throws TemplateModelException
-    {
-        return (TemplateNodeModel)get("_parent"); 
+    public TemplateNodeModel getParentNode() throws TemplateModelException {
+        return (TemplateNodeModel) get("_parent"); 
     }
 
     private String getUniqueText(NodeListModel model, String property) throws TemplateModelException {
         String s1 = null;
         Set s = null;
-        for(Iterator it = model.nodes.iterator(); it.hasNext();) {
-            String s2 = (String)it.next();
-            if(s2 != null) {
+        for (Iterator it = model.nodes.iterator(); it.hasNext(); ) {
+            String s2 = (String) it.next();
+            if (s2 != null) {
                 // No text yet, make this text the current text
-                if(s1 == null) {
+                if (s1 == null) {
                     s1 = s2;
                 }
                 // else if there's already a text and they differ, start 
                 // accumulating them for an error message
-                else if(!s1.equals(s2)) {
-                    if(s == null) {
+                else if (!s1.equals(s2)) {
+                    if (s == null) {
                         s = new HashSet();
                         s.add(s1);
                     }
@@ -563,7 +544,7 @@ implements
             }
         }
         // If the set for the error messages is empty, return the retval
-        if(s == null) {
+        if (s == null) {
             return s1;
         }
         // Else throw an exception signaling ambiguity

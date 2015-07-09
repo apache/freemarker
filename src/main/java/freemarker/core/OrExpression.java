@@ -41,7 +41,7 @@ final class OrExpression extends BooleanExpression {
     }
 
     boolean isLiteral() {
-        return constantValue !=null || (lho.isLiteral() && rho.isLiteral());
+        return constantValue != null || (lho.isLiteral() && rho.isLiteral());
     }
 
     protected Expression deepCloneWithIdentifierReplaced_inner(

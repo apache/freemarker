@@ -314,7 +314,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
             
             boolean first = true;
-            for (Iterator it = names.iterator(); it.hasNext();) {
+            for (Iterator it = names.iterator(); it.hasNext(); ) {
                 String correctName = (String) it.next();
                 int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
                 if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
@@ -432,7 +432,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	try {
-	    	BuiltIn clone = (BuiltIn)clone();
+	    	BuiltIn clone = (BuiltIn) clone();
 	    	clone.target = target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
 	    	return clone;
         }

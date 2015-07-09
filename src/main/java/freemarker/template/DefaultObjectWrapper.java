@@ -165,13 +165,13 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             return new SimpleNumber((Number) obj);
         }
         if (obj instanceof java.util.Date) {
-            if(obj instanceof java.sql.Date) {
+            if (obj instanceof java.sql.Date) {
                 return new SimpleDate((java.sql.Date) obj);
             }
-            if(obj instanceof java.sql.Time) {
+            if (obj instanceof java.sql.Time) {
                 return new SimpleDate((java.sql.Time) obj);
             }
-            if(obj instanceof java.sql.Timestamp) {
+            if (obj instanceof java.sql.Timestamp) {
                 return new SimpleDate((java.sql.Timestamp) obj);
             }
             return new SimpleDate((java.util.Date) obj, getDefaultDateType());
@@ -245,7 +245,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     protected Object convertArray(Object arr) {
         final int size = Array.getLength(arr);
         ArrayList list = new ArrayList(size);
-        for (int i=0;i<size; i++) {
+        for (int i = 0; i < size; i++) {
             list.add(Array.get(arr, i));
         }
         return list;

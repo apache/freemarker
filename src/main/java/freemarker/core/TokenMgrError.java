@@ -28,8 +28,7 @@ import freemarker.template.Template;
  * 
  * @see ParseException
  */
-public class TokenMgrError extends Error
-{
+public class TokenMgrError extends Error {
    /*
     * Ordinals for various reasons why an Error of this type can be thrown.
     */
@@ -127,7 +126,7 @@ public class TokenMgrError extends Error
     */
    protected static String LexicalError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar) {
       return("Lexical error: encountered " +
-           (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar)) + "\"") + " (" + (int)curChar + "), ") +
+           (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar)) + "\"") + " (" + (int) curChar + "), ") +
            "after \"" + addEscapes(errorAfter) + "\".");
    }
 

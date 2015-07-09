@@ -29,15 +29,13 @@ import freemarker.template.Template;
 import freemarker.template.TemplateNotFoundException;
 import freemarker.template.Version;
 
-public class TemplateCacheTest extends TestCase
-{
+public class TemplateCacheTest extends TestCase {
     public TemplateCacheTest(String name)
     {
         super(name);
     }
 
-    public void testCachedException() throws Exception
-    {
+    public void testCachedException() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
         TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage());
         cache.setDelay(1000L);
@@ -79,8 +77,7 @@ public class TemplateCacheTest extends TestCase
         }
     }
     
-    public void testCachedNotFound() throws Exception
-    {
+    public void testCachedNotFound() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
         TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage(), new Configuration());
         cache.setDelay(1000L);
@@ -96,44 +93,36 @@ public class TemplateCacheTest extends TestCase
         assertEquals(2, loader.getFindCount());
     }
 
-    private static class MockTemplateLoader implements TemplateLoader
-    {
+    private static class MockTemplateLoader implements TemplateLoader {
         private boolean throwException;
         private int findCount; 
         
-        public void setThrowException(boolean throwException)
-        {
+        public void setThrowException(boolean throwException) {
            this.throwException = throwException;
         }
         
-        public int getFindCount()
-        {
+        public int getFindCount() {
             return findCount;
         }
         
         public void closeTemplateSource(Object templateSource)
-                throws IOException
-        {
+                throws IOException {
         }
 
-        public Object findTemplateSource(String name) throws IOException
-        {
+        public Object findTemplateSource(String name) throws IOException {
             ++findCount;
-            if(throwException)
-            {
+            if (throwException) {
                 throw new IOException("mock IO exception");
             }
             return null;
         }
 
-        public long getLastModified(Object templateSource)
-        {
+        public long getLastModified(Object templateSource) {
             return 0;
         }
 
         public Reader getReader(Object templateSource, String encoding)
-                throws IOException
-        {
+                throws IOException {
             return null;
         }
         

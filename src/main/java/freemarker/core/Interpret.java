@@ -39,8 +39,7 @@ import freemarker.template.TemplateTransformModel;
  * specify another parameter to the method call in which case the
  * template name suffix is the specified id instead of "anonymous_interpreted".
  */
-class Interpret extends BuiltIn
-{
+class Interpret extends BuiltIn {
     /**
      * Constructs a template on-the-fly and returns it embedded in a
      * {@link TemplateTransformModel}.
@@ -57,25 +56,18 @@ class Interpret extends BuiltIn
      * just as if it had been <tt>&lt;transform></tt>-ed at that point.
      */
     TemplateModel _eval(Environment env)
-            throws TemplateException 
-    {
+            throws TemplateException {
         TemplateModel model = target.eval(env);
         Expression sourceExpr = null;
         String id = "anonymous_interpreted";
-        if(model instanceof TemplateSequenceModel)
-        {
-            sourceExpr = ((Expression)new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(0))).copyLocationFrom(target));
-            if(((TemplateSequenceModel)model).size() > 1)
-            {
-                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(1))).copyLocationFrom(target)).evalAndCoerceToString(env);
+        if (model instanceof TemplateSequenceModel) {
+            sourceExpr = ((Expression) new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(0))).copyLocationFrom(target));
+            if (((TemplateSequenceModel) model).size() > 1) {
+                id = ((Expression) new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(1))).copyLocationFrom(target)).evalAndCoerceToString(env);
             }
-        }
-        else if (model instanceof TemplateScalarModel)
-        {
+        } else if (model instanceof TemplateScalarModel) {
             sourceExpr = target;
-        }
-        else
-        {
+        } else {
             throw new UnexpectedTypeException(
                     target, model,
                     "sequence or string", new Class[] { TemplateSequenceModel.class, TemplateScalarModel.class },
@@ -108,8 +100,7 @@ class Interpret extends BuiltIn
 
     private class TemplateProcessorModel
     implements
-        TemplateTransformModel
-    {
+        TemplateTransformModel {
         private final Template template;
         
         TemplateProcessorModel(Template template)
@@ -117,8 +108,7 @@ class Interpret extends BuiltIn
             this.template = template;
         }
         
-        public Writer getWriter(final Writer out, Map args) throws TemplateModelException, IOException
-        {
+        public Writer getWriter(final Writer out, Map args) throws TemplateModelException, IOException {
             try
             {
                 Environment env = Environment.getCurrentEnvironment();
@@ -140,17 +130,14 @@ class Interpret extends BuiltIn
     
             return new Writer(out)
             {
-                public void close()
-                {
+                public void close() {
                 }
                 
-                public void flush() throws IOException
-                {
+                public void flush() throws IOException {
                     out.flush();
                 }
                 
-                public void write(char[] cbuf, int off, int len) throws IOException
-                {
+                public void write(char[] cbuf, int off, int len) throws IOException {
                     out.write(cbuf, off, len);
                 }
             };

@@ -23,8 +23,7 @@ import freemarker.template.Configuration;
  * sort of internal state (i.e. caches of earlier lookups for performance 
  * optimization purposes etc.) and support resetting of their state. 
  */
-public interface StatefulTemplateLoader extends TemplateLoader
-{
+public interface StatefulTemplateLoader extends TemplateLoader {
     /**
      * Invoked by {@link Configuration#clearTemplateCache()} to instruct this
      * template loader to throw away its current state and start afresh. 

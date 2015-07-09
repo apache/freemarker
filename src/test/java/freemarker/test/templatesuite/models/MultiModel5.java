@@ -61,7 +61,7 @@ public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
      * or null if not found.
      */
     public TemplateModel get(String key) {
-        if( key.equals( "empty" )) {
+        if ( key.equals( "empty" )) {
             return new SimpleScalar( "Dummy hash value, for test purposes." );
         } else {
             return null;

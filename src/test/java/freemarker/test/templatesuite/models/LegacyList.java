@@ -62,7 +62,7 @@ public class LegacyList extends SimpleSequence {
             iterator = list.listIterator();
         }
         if (iterator.hasNext()) {
-            return (TemplateModel)iterator.next();
+            return (TemplateModel) iterator.next();
         } else {
             throw new TemplateModelException("No more elements.");
         }

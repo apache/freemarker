@@ -22,8 +22,7 @@ import freemarker.template.TemplateModelException;
 
 abstract class BuiltInForNumber extends BuiltIn {
     TemplateModel _eval(Environment env)
-            throws TemplateException
-    {
+            throws TemplateException {
         TemplateModel model = target.eval(env);
         return calculateResult(target.modelToNumber(model, env), model);
     }

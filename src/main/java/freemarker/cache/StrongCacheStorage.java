@@ -29,8 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
-public class StrongCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize
-{
+public class StrongCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize {
     private final Map map = new ConcurrentHashMap();
 
     /**

@@ -37,14 +37,11 @@ public class XmlEscape implements TemplateTransformModel {
     private static final char[] QUOT = "&quot;".toCharArray();
     private static final char[] APOS = "&apos;".toCharArray();
 
-    public Writer getWriter(final Writer out, Map args)
-    {
+    public Writer getWriter(final Writer out, Map args) {
         return new Writer()
         {
             public void write(int c)
-            throws
-                IOException
-            {
+            throws IOException {
                 switch(c)
                 {
                     case '<': out.write(LT, 0, 4); break;
@@ -57,13 +54,10 @@ public class XmlEscape implements TemplateTransformModel {
             }
 
             public void write(char cbuf[], int off, int len)
-            throws
-                IOException
-            {
+            throws IOException {
                 int lastoff = off;
                 int lastpos = off + len;
-                for (int i = off; i < lastpos; i++)
-                {
+                for (int i = off; i < lastpos; i++) {
                     switch (cbuf[i])
                     {
                         case '<': out.write(cbuf, lastoff, i - lastoff); out.write(LT, 0, 4); lastoff = i + 1; break;
@@ -74,8 +68,7 @@ public class XmlEscape implements TemplateTransformModel {
                     }
                 }
                 int remaining = lastpos - lastoff;
-                if(remaining > 0)
-                {
+                if (remaining > 0) {
                     out.write(cbuf, lastoff, remaining);
                 }
             }

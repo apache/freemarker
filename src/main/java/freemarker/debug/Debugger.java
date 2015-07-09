@@ -25,8 +25,7 @@ import java.util.List;
  * The main debugger interface. Allows management of breakpoints as well as
  * installation of listeners for debug events.
  */
-public interface Debugger extends Remote
-{
+public interface Debugger extends Remote {
     public static final int DEFAULT_PORT = 7011;
 
     /**
@@ -34,53 +33,46 @@ public interface Debugger extends Remote
      * @param breakpoint the breakpoint to add
      */
     public void addBreakpoint(Breakpoint breakpoint)
-    throws
-        RemoteException;
+    throws RemoteException;
     
     /**
      * Removes a single breakpoint
      * @param breakpoint the breakpoint to remove
      */
     public void removeBreakpoint(Breakpoint breakpoint)
-    throws
-        RemoteException;
+    throws RemoteException;
 
     /**
      * Removes all breakpoints for a specific template
      */
     public void removeBreakpoints(String templateName)
-    throws
-        RemoteException;
+    throws RemoteException;
 
     /**
      * Removes all breakpoints
      */
     public void removeBreakpoints()
-    throws
-        RemoteException;
+    throws RemoteException;
 
     /**
      * Retrieves a list of all {@link Breakpoint} objects.
      */
     public List getBreakpoints()
-    throws
-        RemoteException;
+    throws RemoteException;
         
     /**
      * Retrieves a list of all {@link Breakpoint} objects for the specified
      * template.
      */
     public List getBreakpoints(String templateName)
-    throws
-        RemoteException;
+    throws RemoteException;
 
     /**
      * Retrieves a collection of all {@link DebuggedEnvironment} objects that 
      * are currently suspended.
      */
     public Collection getSuspendedEnvironments()
-    throws
-        RemoteException;
+    throws RemoteException;
         
     /**
      * Adds a listener for debugger events.
@@ -88,8 +80,7 @@ public interface Debugger extends Remote
      * {@link #removeDebuggerListener(Object)} to remove this listener.
      */
     public Object addDebuggerListener(DebuggerListener listener)
-    throws
-        RemoteException;
+    throws RemoteException;
         
     /**
      * Removes a previously added debugger listener.
@@ -97,6 +88,5 @@ public interface Debugger extends Remote
      * from a prior call to {@link #addDebuggerListener(DebuggerListener)}.
      */
     public void removeDebuggerListener(Object id)
-    throws
-        RemoteException;
+    throws RemoteException;
 }

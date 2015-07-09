@@ -53,7 +53,7 @@ final class HashLiteral extends Expression {
             buf.append(key.getCanonicalForm());
             buf.append(": ");
             buf.append(value.getCanonicalForm());
-            if (i != size-1) {
+            if (i != size - 1) {
                 buf.append(", ");
             }
         }
@@ -82,14 +82,14 @@ final class HashLiteral extends Expression {
 
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-		ArrayList clonedKeys = (ArrayList)keys.clone();
-		for (ListIterator iter = clonedKeys.listIterator(); iter.hasNext();) {
-            iter.set(((Expression)iter.next()).deepCloneWithIdentifierReplaced(
+		ArrayList clonedKeys = (ArrayList) keys.clone();
+		for (ListIterator iter = clonedKeys.listIterator(); iter.hasNext(); ) {
+            iter.set(((Expression) iter.next()).deepCloneWithIdentifierReplaced(
                     replacedIdentifier, replacement, replacementState));
         }
-		ArrayList clonedValues = (ArrayList)values.clone();
-		for (ListIterator iter = clonedValues.listIterator(); iter.hasNext();) {
-            iter.set(((Expression)iter.next()).deepCloneWithIdentifierReplaced(
+		ArrayList clonedValues = (ArrayList) values.clone();
+		for (ListIterator iter = clonedValues.listIterator(); iter.hasNext(); ) {
+            iter.set(((Expression) iter.next()).deepCloneWithIdentifierReplaced(
                     replacedIdentifier, replacement, replacementState));
         }
     	return new HashLiteral(clonedKeys, clonedValues);
@@ -119,7 +119,7 @@ final class HashLiteral extends Expression {
                 map = new HashMap();
                 ArrayList keyList = new ArrayList(size);
                 ArrayList valueList = new ArrayList(size);
-                for (int i = 0; i< size; i++) {
+                for (int i = 0; i < size; i++) {
                     Expression keyExp = (Expression) keys.get(i);
                     Expression valExp = (Expression) values.get(i);
                     String key = keyExp.evalAndCoerceToString(env);

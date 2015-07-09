@@ -63,8 +63,7 @@ import freemarker.template.utility.StringUtil;
  * parent of a <code>Template</code> object is a <code>Configuration</code>
  * object.
  */
-public class Configurable
-{
+public class Configurable {
     static final String C_TRUE_FALSE = "true,false";
     
     private static final String DEFAULT = "default";
@@ -384,9 +383,9 @@ public class Configurable
     }
     
     protected Object clone() throws CloneNotSupportedException {
-        Configurable copy = (Configurable)super.clone();
+        Configurable copy = (Configurable) super.clone();
         copy.properties = new Properties(properties);
-        copy.customAttributes = (HashMap)customAttributes.clone();
+        copy.customAttributes = (HashMap) customAttributes.clone();
         return copy;
     }
     
@@ -678,7 +677,7 @@ public class Configurable
         NullArgumentException.check("booleanFormat", booleanFormat);
         
         int commaIdx = booleanFormat.indexOf(',');
-        if(commaIdx == -1) {
+        if (commaIdx == -1) {
             throw new IllegalArgumentException(
                     "Setting value must be string that contains two comma-separated values for true and false, " +
                     "respectively.");
@@ -1765,7 +1764,7 @@ public class Configurable
     public void setSettings(Properties props) throws TemplateException {
         final _SettingEvaluationEnvironment prevEnv = _SettingEvaluationEnvironment.startScope();
         try {
-            for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+            for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
                 String key = (String) it.next();
                 setSetting(key, props.getProperty(key).trim()); 
             }
@@ -1804,7 +1803,7 @@ public class Configurable
     Object getCustomAttribute(Object key, CustomAttribute attr) {
         synchronized(customAttributes) {
             Object o = customAttributes.get(key);
-            if(o == null && !customAttributes.containsKey(key)) {
+            if (o == null && !customAttributes.containsKey(key)) {
                 o = attr.create();
                 customAttributes.put(key, o);
             }
@@ -1838,12 +1837,12 @@ public class Configurable
     public String[] getCustomAttributeNames() {
         synchronized(customAttributes) {
             Collection names = new LinkedList(customAttributes.keySet());
-            for (Iterator iter = names.iterator(); iter.hasNext();) {
-                if(!(iter.next() instanceof String)) {
+            for (Iterator iter = names.iterator(); iter.hasNext(); ) {
+                if (!(iter.next() instanceof String)) {
                     iter.remove();
                 }
             }
-            return (String[])names.toArray(new String[names.size()]);
+            return (String[]) names.toArray(new String[names.size()]);
         }
     }
     
@@ -1879,20 +1878,19 @@ public class Configurable
         Object retval;
         synchronized(customAttributes) {
             retval = customAttributes.get(name);
-            if(retval == null && customAttributes.containsKey(name)) {
+            if (retval == null && customAttributes.containsKey(name)) {
                 return null;
             }
         }
-        if(retval == null && parent != null) {
+        if (retval == null && parent != null) {
             return parent.getCustomAttribute(name);
         }
         return retval;
     }
     
     protected void doAutoImportsAndIncludes(Environment env)
-    throws TemplateException, IOException
-    {
-        if(parent != null) parent.doAutoImportsAndIncludes(env);
+    throws TemplateException, IOException {
+        if (parent != null) parent.doAutoImportsAndIncludes(env);
     }
 
     protected ArrayList parseAsList(String text) throws ParseException {

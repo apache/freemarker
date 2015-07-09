@@ -30,14 +30,12 @@ public class NumberModel
 extends
     BeanModel
 implements
-    TemplateNumberModel
-{
+    TemplateNumberModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new NumberModel((Number)object, (BeansWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new NumberModel((Number) object, (BeansWrapper) wrapper);
             }
         };
     /**
@@ -53,8 +51,7 @@ implements
         super(number, wrapper);
     }
 
-    public Number getAsNumber()
-    {
-        return (Number)object;
+    public Number getAsNumber() {
+        return (Number) object;
     }
 }

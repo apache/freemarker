@@ -40,7 +40,7 @@ public class ToCanonical {
         if (args.length == 0) {
             usage();
         }
-        for (int i=0; i<args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             File f = new File(args[i]);
             if (!f.exists()) {
                 System.err.println("File " + f + " doesn't exist.");

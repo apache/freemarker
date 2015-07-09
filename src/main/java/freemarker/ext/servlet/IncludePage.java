@@ -56,8 +56,7 @@ import freemarker.template.utility.DeepUnwrap;
  * request. In this case values in 'params' will get prepended to the existing
  * values of parameters.
  */
-public class IncludePage implements TemplateDirectiveModel
-{
+public class IncludePage implements TemplateDirectiveModel {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     
@@ -68,20 +67,19 @@ public class IncludePage implements TemplateDirectiveModel
     
     public void execute(final Environment env, Map params, 
             TemplateModel[] loopVars, TemplateDirectiveBody body)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         // Determine the path
-        final TemplateModel path = (TemplateModel)params.get("path");
-        if(path == null) {
+        final TemplateModel path = (TemplateModel) params.get("path");
+        if (path == null) {
             throw new _MiscTemplateException(env, "Missing required parameter \"path\"");
         }
-        if(!(path instanceof TemplateScalarModel)) {
+        if (!(path instanceof TemplateScalarModel)) {
             throw new _MiscTemplateException(env, new Object[] {
                     "Expected a scalar model. \"path\" is instead ",
                     new _DelayedFTLTypeDescription(path) });
         }
-        final String strPath = ((TemplateScalarModel)path).getAsString();
-        if(strPath == null) {
+        final String strPath = ((TemplateScalarModel) path).getAsString();
+        if (strPath == null) {
             throw new _MiscTemplateException(env, "String value of \"path\" parameter is null");
         }
         
@@ -91,14 +89,13 @@ public class IncludePage implements TemplateDirectiveModel
         // writer. 
         final Writer envOut = env.getOut(); 
         final HttpServletResponse wrappedResponse;
-        if(envOut == response.getWriter()) {
+        if (envOut == response.getWriter()) {
             // Don't bother wrapping if environment's writer is same as 
             // response writer
             wrappedResponse = response;
-        }
-        else {
+        } else {
             final PrintWriter printWriter = (envOut instanceof PrintWriter) ?
-                (PrintWriter)envOut :
+                (PrintWriter) envOut :
                 new PrintWriter(envOut); 
             // Otherwise, create a response wrapper that will pass the
             // env writer, potentially first wrapping it in a print
@@ -112,44 +109,41 @@ public class IncludePage implements TemplateDirectiveModel
 
         // Determine inherit_params value
         final boolean inheritParams;
-        final TemplateModel inheritParamsModel = (TemplateModel)params.get("inherit_params");
-        if(inheritParamsModel == null) {
+        final TemplateModel inheritParamsModel = (TemplateModel) params.get("inherit_params");
+        if (inheritParamsModel == null) {
             // defaults to true when not specified
             inheritParams = true; 
-        }
-        else {
-            if(!(inheritParamsModel instanceof TemplateBooleanModel)) {
+        } else {
+            if (!(inheritParamsModel instanceof TemplateBooleanModel)) {
                 throw new _MiscTemplateException(env, new Object[] {
                         "\"inherit_params\" should be a boolean but it's a(n) ",
                         inheritParamsModel.getClass().getName(), " instead" });
             }
-            inheritParams = ((TemplateBooleanModel)inheritParamsModel).getAsBoolean();
+            inheritParams = ((TemplateBooleanModel) inheritParamsModel).getAsBoolean();
         }
         
         // Get explicit params, if any
-        final TemplateModel paramsModel = (TemplateModel)params.get("params");
+        final TemplateModel paramsModel = (TemplateModel) params.get("params");
         
         // Determine whether we need to wrap the request
         final HttpServletRequest wrappedRequest;
-        if(paramsModel == null && inheritParams) {
+        if (paramsModel == null && inheritParams) {
             // Inherit original request params & no params explicitly 
             // specified, so use the original request
             wrappedRequest = request;
-        }
-        else {
+        } else {
             // In any other case, use a custom request wrapper
             final Map paramsMap;
-            if(paramsModel != null) {
+            if (paramsModel != null) {
                 // Convert params to a Map
                 final Object unwrapped = DeepUnwrap.unwrap(paramsModel);
-                if(!(unwrapped instanceof Map)) {
+                if (!(unwrapped instanceof Map)) {
                     throw new _MiscTemplateException(env, new Object[] {
                             "Expected \"params\" to unwrap into a java.util.Map. It unwrapped into ",
                             unwrapped.getClass().getName(), " instead." });
                 }
-                paramsMap = (Map)unwrapped;
-            }
-            else {
+                paramsMap = (Map) unwrapped;
+            } else {
                 paramsMap = Collections.EMPTY_MAP;
             }
             wrappedRequest = new CustomParamsRequest(request, paramsMap, 
@@ -166,65 +160,56 @@ public class IncludePage implements TemplateDirectiveModel
         }
     }
 
-    private static final class CustomParamsRequest extends HttpServletRequestWrapper
-    {
+    private static final class CustomParamsRequest extends HttpServletRequestWrapper {
         private final HashMap paramsMap;
 
         private CustomParamsRequest(HttpServletRequest request, Map paramMap, 
                 boolean inheritParams) {
             super(request);
             paramsMap = inheritParams ? new HashMap(request.getParameterMap()) : new HashMap();
-            for (Iterator it = paramMap.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry)it.next();
+            for (Iterator it = paramMap.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry entry = (Map.Entry) it.next();
                 String name = String.valueOf(entry.getKey());
                 Object value = entry.getValue();
                 final String[] valueArray;
-                if(value == null) {
+                if (value == null) {
                     // Null values are explicitly added (so, among other 
                     // things, we can hide inherited param values).
                     valueArray = new String[] { null };
-                }
-                else if(value instanceof String[]) {
+                } else if (value instanceof String[]) {
                     // String[] arrays are just passed through
-                    valueArray = (String[])value;
-                }
-                else if(value instanceof Collection) {
+                    valueArray = (String[]) value;
+                } else if (value instanceof Collection) {
                     // Collections are converted to String[], with 
                     // String.valueOf() used on elements
-                    Collection col = (Collection)value;
+                    Collection col = (Collection) value;
                     valueArray = new String[col.size()];
                     int i = 0;
-                    for (Iterator it2 = col.iterator(); it2.hasNext();) {
+                    for (Iterator it2 = col.iterator(); it2.hasNext(); ) {
                         valueArray[i++] = String.valueOf(it2.next());
                     }
-                }
-                else if(value.getClass().isArray()) {
+                } else if (value.getClass().isArray()) {
                     // Other array types are too converted to String[], with 
                     // String.valueOf() used on elements
                     int len = Array.getLength(value);
                     valueArray = new String[len];
-                    for(int i = 0; i < len; ++i) {
+                    for (int i = 0; i < len; ++i) {
                         valueArray[i] = String.valueOf(Array.get(value, i));
                     }
-                }
-                else {
+                } else {
                     // All other values (including strings) are converted to a
                     // single-element String[], with String.valueOf applied to
                     // the value.
                     valueArray = new String[] { String.valueOf(value) };
                 }
-                String[] existingParams = (String[])paramsMap.get(name);
+                String[] existingParams = (String[]) paramsMap.get(name);
                 int el = existingParams == null ? 0 : existingParams.length;
-                if(el == 0)
-                {
+                if (el == 0) {
                     // No original params, just put our array
                     paramsMap.put(name, valueArray);
-                }
-                else
-                {
+                } else {
                     int vl = valueArray.length;
-                    if(vl > 0)
-                    {
+                    if (vl > 0) {
                         // Both original params and new params, prepend our
                         // params to original params
                         String[] newValueArray = new String[el + vl];
@@ -237,12 +222,12 @@ public class IncludePage implements TemplateDirectiveModel
         }
 
         public String[] getParameterValues(String name) {
-            String[] value = ((String[])paramsMap.get(name));
-            return value != null ? (String[])value.clone() : null;
+            String[] value = ((String[]) paramsMap.get(name));
+            return value != null ? (String[]) value.clone() : null;
         }
 
         public String getParameter(String name) {
-            String[] values = (String[])paramsMap.get(name);
+            String[] values = (String[]) paramsMap.get(name);
             return values != null && values.length > 0 ? values[0] : null;
         }
 
@@ -251,10 +236,10 @@ public class IncludePage implements TemplateDirectiveModel
         }
 
         public Map getParameterMap() {
-            HashMap clone = (HashMap)paramsMap.clone();
-            for (Iterator it = clone.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry)it.next();
-                entry.setValue(((String[])entry.getValue()).clone());
+            HashMap clone = (HashMap) paramsMap.clone();
+            for (Iterator it = clone.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry entry = (Map.Entry) it.next();
+                entry.setValue(((String[]) entry.getValue()).clone());
             }
             return Collections.unmodifiableMap(clone);
         }

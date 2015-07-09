@@ -263,11 +263,9 @@ public abstract class Logger {
      * @deprecated This wasn't reliable, unless you can somehow ensure that you access the FreeMarker classes first. As
      *             it's not known to be useful for users, consider it removed.
      */
-    public static void setCategoryPrefix(String prefix)
-    {
+    public static void setCategoryPrefix(String prefix) {
         synchronized (Logger.class) {
-            if (prefix == null)
-            {
+            if (prefix == null) {
                 throw new IllegalArgumentException();
             }
             categoryPrefix = prefix;

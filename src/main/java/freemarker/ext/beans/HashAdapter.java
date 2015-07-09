@@ -66,14 +66,14 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
 
     public boolean containsKey(Object key) {
         // A quick check that doesn't require TemplateHashModelEx 
-        if(get(key) != null) {
+        if (get(key) != null) {
             return true;
         }
         return super.containsKey(key);
     }
     
     public Set entrySet() {
-        if(entrySet != null) {
+        if (entrySet != null) {
             return entrySet;
         }
         return entrySet = new AbstractSet() {
@@ -119,7 +119,7 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                             public boolean equals(Object o) {
                                 if (!(o instanceof Map.Entry))
                                     return false;
-                                Map.Entry e = (Map.Entry)o;
+                                Map.Entry e = (Map.Entry) o;
                                 Object k1 = getKey();
                                 Object k2 = e.getKey();
                                 if (k1 == k2 || (k1 != null && k1.equals(k2))) {
@@ -133,8 +133,8 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                         
                             public int hashCode() {
                                 Object value = getValue();
-                                return (key==null ? 0 : key.hashCode()) ^
-                                       (value==null ? 0 : value.hashCode());
+                                return (key == null ? 0 : key.hashCode()) ^
+                                       (value == null ? 0 : value.hashCode());
                             }
                         };
                     }
@@ -157,8 +157,8 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
     }
     
     private TemplateHashModelEx getModelEx() {
-        if(model instanceof TemplateHashModelEx) {
-            return ((TemplateHashModelEx)model);
+        if (model instanceof TemplateHashModelEx) {
+            return ((TemplateHashModelEx) model);
         }
         throw new UnsupportedOperationException(
                 "Operation supported only on TemplateHashModelEx. " + 

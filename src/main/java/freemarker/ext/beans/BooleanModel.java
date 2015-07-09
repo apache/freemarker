@@ -22,8 +22,7 @@ import freemarker.template.TemplateBooleanModel;
  * <p>A class that will wrap instances of {@link java.lang.Boolean} into a
  * {@link TemplateBooleanModel}.
  */
-public class BooleanModel extends BeanModel implements TemplateBooleanModel
-{
+public class BooleanModel extends BeanModel implements TemplateBooleanModel {
     private final boolean value;
     
     public BooleanModel(Boolean bool, BeansWrapper wrapper)
@@ -32,8 +31,7 @@ public class BooleanModel extends BeanModel implements TemplateBooleanModel
         value = bool.booleanValue();
     }
 
-    public boolean getAsBoolean()
-    {
+    public boolean getAsBoolean() {
         return value;
     }
 }

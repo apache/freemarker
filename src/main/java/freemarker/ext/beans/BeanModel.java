@@ -60,8 +60,7 @@ import freemarker.template.utility.StringUtil;
 
 public class BeanModel
 implements
-    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport
-{
+    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
     protected final Object object;
     protected final BeansWrapper wrapper;
@@ -72,9 +71,8 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new BeanModel(object, (BeansWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new BeanModel(object, (BeansWrapper) wrapper);
             }
         };
 
@@ -142,35 +140,28 @@ implements
      * a generic <tt>get</tt> method to invoke.
      */
     public TemplateModel get(String key)
-        throws
-        TemplateModelException
-    {
+        throws TemplateModelException {
         Class clazz = object.getClass();
         Map classInfo = wrapper.getClassIntrospector().get(clazz);
         TemplateModel retval = null;
         
         try
         {
-            if (wrapper.isMethodsShadowItems())
-            {
+            if (wrapper.isMethodsShadowItems()) {
                 Object fd = classInfo.get(key);
-                if(fd != null)
-                {
+                if (fd != null) {
                     retval = invokeThroughDescriptor(fd, classInfo);
                 } else {
                     retval = invokeGenericGet(classInfo, clazz, key);
                 }
-            }
-            else
-            {
+            } else {
                 TemplateModel model = invokeGenericGet(classInfo, clazz, key);
                 final TemplateModel nullModel = wrapper.wrap(null);
-                if(model != nullModel && model != UNKNOWN) 
-                {
+                if (model != nullModel && model != UNKNOWN) {
                     return model;
                 }
                 Object fd = classInfo.get(key);
-                if(fd != null) {
+                if (fd != null) {
                     retval = invokeThroughDescriptor(fd, classInfo);
                     if (retval == UNKNOWN && model == nullModel) {
                         // This is the (somewhat subtle) case where the generic get() returns null
@@ -204,8 +195,7 @@ implements
         }
     }
 
-    private void logNoSuchKey(String key, Map keyMap)
-    {
+    private void logNoSuchKey(String key, Map keyMap) {
         LOG.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
             object.getClass().getName() + ". Introspection information for " +
             "the class is: " + keyMap);
@@ -220,62 +210,50 @@ implements
     }
     
     private TemplateModel invokeThroughDescriptor(Object desc, Map classInfo)
-        throws
-        IllegalAccessException,
+        throws IllegalAccessException,
         InvocationTargetException,
-        TemplateModelException
-    {
+        TemplateModelException {
         // See if this particular instance has a cached implementation
         // for the requested feature descriptor
         TemplateModel member;
         synchronized(this) {
-            if(memberMap != null) {
-                member = (TemplateModel)memberMap.get(desc);
-            }
-            else {
+            if (memberMap != null) {
+                member = (TemplateModel) memberMap.get(desc);
+            } else {
                 member = null;
             }
         }
 
-        if(member != null)
+        if (member != null)
             return member;
 
         TemplateModel retval = UNKNOWN;
-        if(desc instanceof IndexedPropertyDescriptor)
-        {
+        if (desc instanceof IndexedPropertyDescriptor) {
             Method readMethod = 
-                ((IndexedPropertyDescriptor)desc).getIndexedReadMethod(); 
+                ((IndexedPropertyDescriptor) desc).getIndexedReadMethod(); 
             retval = member = 
                 new SimpleMethodModel(object, readMethod, 
                         ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
-        }
-        else if(desc instanceof PropertyDescriptor)
-        {
-            PropertyDescriptor pd = (PropertyDescriptor)desc;
+        } else if (desc instanceof PropertyDescriptor) {
+            PropertyDescriptor pd = (PropertyDescriptor) desc;
             retval = wrapper.invokeMethod(object, pd.getReadMethod(), null);
             // (member == null) condition remains, as we don't cache these
-        }
-        else if(desc instanceof Field)
-        {
-            retval = wrapper.wrap(((Field)desc).get(object));
+        } else if (desc instanceof Field) {
+            retval = wrapper.wrap(((Field) desc).get(object));
             // (member == null) condition remains, as we don't cache these
-        }
-        else if(desc instanceof Method)
-        {
-            Method method = (Method)desc;
+        } else if (desc instanceof Method) {
+            Method method = (Method) desc;
             retval = member = new SimpleMethodModel(object, method, 
                     ClassIntrospector.getArgTypes(classInfo, method), wrapper);
-        }
-        else if(desc instanceof OverloadedMethods)
-        {
+        } else if (desc instanceof OverloadedMethods) {
             retval = member = 
                 new OverloadedMethodsModel(object, (OverloadedMethods) desc, wrapper);
         }
         
         // If new cacheable member was created, cache it
-        if(member != null) {
+        if (member != null) {
             synchronized(this) {
-                if(memberMap == null) {
+                if (memberMap == null) {
                     memberMap = new HashMap();
                 }
                 memberMap.put(desc, member);
@@ -291,28 +269,23 @@ implements
     }
 
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
-    throws
-        IllegalAccessException,
+    throws IllegalAccessException,
         InvocationTargetException,
-        TemplateModelException
-    {
-        Method genericGet = (Method)keyMap.get(ClassIntrospector.GENERIC_GET_KEY);
-        if(genericGet == null)
+        TemplateModelException {
+        Method genericGet = (Method) keyMap.get(ClassIntrospector.GENERIC_GET_KEY);
+        if (genericGet == null)
             return UNKNOWN;
 
         return wrapper.invokeMethod(object, genericGet, new Object[] { key });
     }
 
     protected TemplateModel wrap(Object obj)
-    throws TemplateModelException
-    {
+    throws TemplateModelException {
         return wrapper.getOuterIdentity().wrap(obj);
     }
     
     protected Object unwrap(TemplateModel model)
-    throws
-        TemplateModelException
-    {
+    throws TemplateModelException {
         return wrapper.unwrap(model);
     }
 
@@ -320,8 +293,7 @@ implements
      * Tells whether the model is empty. It is empty if either the wrapped 
      * object is null, or it's a Boolean with false value.
      */
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         if (object instanceof String) {
             return ((String) object).length() == 0;
         }
@@ -346,22 +318,19 @@ implements
         return object;
     }
     
-    public int size()
-    {
+    public int size() {
         return wrapper.getClassIntrospector().keyCount(object.getClass());
     }
 
-    public TemplateCollectionModel keys()
-    {
+    public TemplateCollectionModel keys() {
         return new CollectionAndSequence(new SimpleSequence(keySet(), wrapper));
     }
 
-    public TemplateCollectionModel values() throws TemplateModelException
-    {
+    public TemplateCollectionModel values() throws TemplateModelException {
         List values = new ArrayList(size());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
-            String key = ((TemplateScalarModel)it.next()).getAsString();
+            String key = ((TemplateScalarModel) it.next()).getAsString();
             values.add(get(key));
         }
         return new CollectionAndSequence(new SimpleSequence(values, wrapper));
@@ -387,8 +356,7 @@ implements
      * interface. Subclasses that override <tt>invokeGenericGet</tt> to
      * provide additional hash keys should also override this method.
      */
-    protected Set keySet()
-    {
+    protected Set keySet() {
         return wrapper.getClassIntrospector().keySet(object.getClass());
     }
 

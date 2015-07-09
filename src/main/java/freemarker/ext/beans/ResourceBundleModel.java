@@ -53,14 +53,12 @@ public class ResourceBundleModel
     extends
     BeanModel
     implements
-    TemplateMethodModelEx
-{
+    TemplateMethodModelEx {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new ResourceBundleModel((ResourceBundle)object, (BeansWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new ResourceBundleModel((ResourceBundle) object, (BeansWrapper) wrapper);
             }
         };
 
@@ -75,12 +73,10 @@ public class ResourceBundleModel
      * Overridden to invoke the getObject method of the resource bundle.
      */
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
-    throws
-    	TemplateModelException
-    {
+    throws TemplateModelException {
         try
         {
-            return wrap(((ResourceBundle)object).getObject(key));
+            return wrap(((ResourceBundle) object).getObject(key));
         }
         catch(MissingResourceException e)
         {
@@ -94,21 +90,18 @@ public class ResourceBundleModel
     /**
      * Returns true if this bundle contains no objects.
      */
-    public boolean isEmpty()
-    {
-        return !((ResourceBundle)object).getKeys().hasMoreElements() &&
+    public boolean isEmpty() {
+        return !((ResourceBundle) object).getKeys().hasMoreElements() &&
             super.isEmpty();
     }
 
-    public int size()
-    {
+    public int size() {
         return keySet().size();
     }
 
-    protected Set keySet()
-    {
+    protected Set keySet() {
         Set set = super.keySet();
-        Enumeration e = ((ResourceBundle)object).getKeys();
+        Enumeration e = ((ResourceBundle) object).getKeys();
         while (e.hasMoreElements()) {
             set.add(e.nextElement());
         }
@@ -121,27 +114,24 @@ public class ResourceBundleModel
      * rest of the arguments. The created MessageFormats are cached for later reuse.
      */
     public Object exec(List arguments)
-        throws
-        TemplateModelException
-    {
+        throws TemplateModelException {
         // Must have at least one argument - the key
-        if(arguments.size() < 1)
+        if (arguments.size() < 1)
             throw new TemplateModelException("No message key was specified");
         // Read it
         Iterator it = arguments.iterator();
-        String key = unwrap((TemplateModel)it.next()).toString();
+        String key = unwrap((TemplateModel) it.next()).toString();
         try
         {
-            if(!it.hasNext())
-            {
-                return wrap(((ResourceBundle)object).getObject(key));
+            if (!it.hasNext()) {
+                return wrap(((ResourceBundle) object).getObject(key));
             }
     
             // Copy remaining arguments into an Object[]
             int args = arguments.size() - 1;
             Object[] params = new Object[args];
-            for(int i = 0; i < args; ++i)
-                params[i] = unwrap((TemplateModel)it.next());
+            for (int i = 0; i < args; ++i)
+                params[i] = unwrap((TemplateModel) it.next());
     
             // Invoke format
             return new StringModel(format(key, params), wrapper);
@@ -160,9 +150,7 @@ public class ResourceBundleModel
      * Provides direct access to caching format engine from code (instead of from script).
      */
     public String format(String key, Object[] params)
-        throws
-        MissingResourceException
-    {
+        throws MissingResourceException {
         // Check to see if we already have a cache for message formats
         // and construct it if we don't
         // NOTE: this block statement should be synchronized. However
@@ -170,7 +158,7 @@ public class ResourceBundleModel
         // consequences, and we avoid a performance hit.
         /* synchronized(this) */
         {
-            if(formats == null)
+            if (formats == null)
                 formats = new Hashtable();
         }
 
@@ -182,10 +170,9 @@ public class ResourceBundleModel
         // consequences, and we avoid a performance hit.
         /* synchronized(formats) */
         {
-            format = (MessageFormat)formats.get(key);
-            if(format == null)
-            {
-                format = new MessageFormat(((ResourceBundle)object).getString(key));
+            format = (MessageFormat) formats.get(key);
+            if (format == null) {
+                format = new MessageFormat(((ResourceBundle) object).getString(key));
                 format.setLocale(getBundle().getLocale());
                 formats.put(key, format);
             }
@@ -199,8 +186,7 @@ public class ResourceBundleModel
         }
     }
 
-    public ResourceBundle getBundle()
-    {
-        return (ResourceBundle)object;
+    public ResourceBundle getBundle() {
+        return (ResourceBundle) object;
     }
 }

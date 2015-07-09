@@ -48,8 +48,8 @@ public class MultiModel2 implements TemplateScalarModel, TemplateMethodModel {
         StringBuilder  aResults = new StringBuilder( "Arguments are:<br />" );
         Iterator    iList = arguments.iterator();
 
-        while( iList.hasNext() ) {
-            aResults.append( (String)iList.next() );
+        while ( iList.hasNext() ) {
+            aResults.append( (String) iList.next() );
             aResults.append( "<br />" );
         }
 

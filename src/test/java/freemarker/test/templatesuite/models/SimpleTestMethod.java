@@ -34,9 +34,9 @@ public class SimpleTestMethod implements TemplateMethodModel {
      * @return the <tt>TemplateModel</tt> produced by the method, or null.
      */
     public Object exec(List arguments) {
-        if( arguments.size() == 0 ) {
+        if ( arguments.size() == 0 ) {
             return new SimpleScalar( "Empty list provided" );
-        } else if( arguments.size() > 1 ) {
+        } else if ( arguments.size() > 1 ) {
             return new SimpleScalar( "Argument size is: " + arguments.size() );
         } else {
             return new SimpleScalar( "Single argument value is: " + arguments.get(0) );

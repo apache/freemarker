@@ -20,8 +20,7 @@ package freemarker.template.utility;
 /**
  * The equivalent of JDK 1.3 UndeclaredThrowableException.
  */
-public class UndeclaredThrowableException extends RuntimeException
-{
+public class UndeclaredThrowableException extends RuntimeException {
     
     public UndeclaredThrowableException(Throwable t)
     {

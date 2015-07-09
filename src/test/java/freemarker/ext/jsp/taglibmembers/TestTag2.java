@@ -24,8 +24,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 /**
  */
-public class TestTag2 extends TagSupport
-{
+public class TestTag2 extends TagSupport {
     public int doStartTag() throws JspException {
         try {
             pageContext.getOut().println("TestTag2.doStartTag() called here");

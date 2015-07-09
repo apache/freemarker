@@ -23,8 +23,7 @@ import freemarker.template.TemplateScalarModel;
  */
 public class NewTestModel
 implements
-    TemplateScalarModel
-{
+    TemplateScalarModel {
     private final String string;
     
     public NewTestModel() {

@@ -44,11 +44,9 @@ class NodeOutputter {
     NodeOutputter(Node node) {
         if (node instanceof Element) {
             setContext((Element) node);
-        }
-        else if (node instanceof Attr) {
+        } else if (node instanceof Attr) {
             setContext(((Attr) node).getOwnerElement());
-        }
-        else if (node instanceof Document) {
+        } else if (node instanceof Document) {
             setContext(((Document) node).getDocumentElement());
         }
     }
@@ -57,7 +55,7 @@ class NodeOutputter {
         this.contextNode = contextNode;
         this.env = Environment.getCurrentEnvironment();
         this.defaultNS = env.getDefaultNS();
-        this.hasDefaultNS = defaultNS != null && defaultNS.length() >0;
+        this.hasDefaultNS = defaultNS != null && defaultNS.length() > 0;
         namespacesToPrefixLookup.put(null, "");
         namespacesToPrefixLookup.put("", "");
         buildPrefixLookup(contextNode);
@@ -69,10 +67,10 @@ class NodeOutputter {
     
     private void buildPrefixLookup(Node n) {
         String nsURI = n.getNamespaceURI();
-        if (nsURI != null && nsURI.length() >0) {
+        if (nsURI != null && nsURI.length() > 0) {
             String prefix = env.getPrefixForNamespace(nsURI);
             namespacesToPrefixLookup.put(nsURI, prefix);
-        }  else if (hasDefaultNS && n.getNodeType() == Node.ELEMENT_NODE) {
+        } else if (hasDefaultNS && n.getNodeType() == Node.ELEMENT_NODE) {
             namespacesToPrefixLookup.put(defaultNS, Template.DEFAULT_NAMESPACE_PREFIX); 
             explicitDefaultNSPrefix = true;
         } else if (n.getNodeType() == Node.ATTRIBUTE_NODE && hasDefaultNS && defaultNS.equals(nsURI)) {
@@ -80,7 +78,7 @@ class NodeOutputter {
             explicitDefaultNSPrefix = true;
         }
         NodeList childNodes = n.getChildNodes();
-        for (int i = 0; i<childNodes.getLength(); i++) {
+        for (int i = 0; i < childNodes.getLength(); i++) {
             buildPrefixLookup(childNodes.item(i));
         }
     }
@@ -92,7 +90,7 @@ class NodeOutputter {
             buf.append(defaultNS);
             buf.append("\"");
         }
-        for (Iterator it = namespacesToPrefixLookup.keySet().iterator(); it.hasNext();) {
+        for (Iterator it = namespacesToPrefixLookup.keySet().iterator(); it.hasNext(); ) {
             String nsURI = (String) it.next();
             if (nsURI == null || nsURI.length() == 0) {
                 continue;
@@ -101,7 +99,7 @@ class NodeOutputter {
             if (prefix == null) {
                 // Okay, let's auto-assign a prefix.
                 // Should we do this??? (REVISIT)
-                for (int i=0;i<26;i++) {
+                for (int i = 0; i < 26; i++) {
                     char[] cc = new char[1];
                     cc[0] = (char) ('a' + i);
                     prefix = new String(cc);
@@ -116,7 +114,7 @@ class NodeOutputter {
                 namespacesToPrefixLookup.put(nsURI, prefix);
             }
             buf.append(" xmlns");
-            if (prefix.length() >0) {
+            if (prefix.length() > 0) {
                 buf.append(":");
                 buf.append(prefix);
             }
@@ -168,14 +166,14 @@ class NodeOutputter {
             }
             case Node.DOCUMENT_TYPE_NODE: {
                 buf.append("<!DOCTYPE ").append(n.getNodeName());
-                DocumentType dt = (DocumentType)n;
-                if(dt.getPublicId() != null) {
+                DocumentType dt = (DocumentType) n;
+                if (dt.getPublicId() != null) {
                     buf.append(" PUBLIC \"").append(dt.getPublicId()).append('"');
                 }
-                if(dt.getSystemId() != null) {
+                if (dt.getSystemId() != null) {
                     buf.append(" \"").append(dt.getSystemId()).append('"');
                 }
-                if(dt.getInternalSubset() != null) {
+                if (dt.getInternalSubset() != null) {
                     buf.append(" [").append(dt.getInternalSubset()).append(']');
                 }
                 buf.append('>');
@@ -226,17 +224,16 @@ class NodeOutputter {
     }
 
     void outputContent(NodeList nodes, StringBuilder buf) {
-        for(int i = 0; i < nodes.getLength(); ++i) {
+        for (int i = 0; i < nodes.getLength(); ++i) {
             outputContent(nodes.item(i), buf);
         }
     }
     
     void outputContent(NamedNodeMap nodes, StringBuilder buf) {
-        for(int i = 0; i < nodes.getLength(); ++i) {
+        for (int i = 0; i < nodes.getLength(); ++i) {
             Node n = nodes.item(i);
             if (n.getNodeType() != Node.ATTRIBUTE_NODE 
-                || (!n.getNodeName().startsWith("xmlns:") && !n.getNodeName().equals("xmlns"))) 
-            { 
+                || (!n.getNodeName().startsWith("xmlns:") && !n.getNodeName().equals("xmlns"))) { 
                 outputContent(n, buf);
             }
         }

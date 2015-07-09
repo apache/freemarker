@@ -54,9 +54,7 @@ abstract public class Expression extends TemplateObject {
     // Hook in here to set the constant value if possible.
     
     void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws
-        ParseException
-    {
+    throws ParseException {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
         if (isLiteral()) {
             try {
@@ -99,7 +97,7 @@ abstract public class Expression extends TemplateObject {
     }
 
     Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
-        if(model instanceof TemplateNumberModel) {
+        if (model instanceof TemplateNumberModel) {
             return EvalUtil.modelToNumber((TemplateNumberModel) model, this);
         } else {
             throw new NonNumericalException(this, model, env);
@@ -166,8 +164,7 @@ abstract public class Expression extends TemplateObject {
     protected abstract Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState);
 
-    static boolean isEmpty(TemplateModel model) throws TemplateModelException
-    {
+    static boolean isEmpty(TemplateModel model) throws TemplateModelException {
         if (model instanceof BeanModel) {
             return ((BeanModel) model).isEmpty();
         } else if (model instanceof TemplateSequenceModel) {

@@ -43,7 +43,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
 
     static {
-        if(JspFactory.getDefaultFactory() == null) {
+        if (JspFactory.getDefaultFactory() == null) {
             JspFactory.setDefaultFactory(new FreeMarkerJspFactory21());
         }
         LOG.debug("Using JspFactory implementation class " + 
@@ -61,7 +61,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
      */
     public ExpressionEvaluator getExpressionEvaluator() {
         try {
-            Class type = ((ClassLoader)AccessController.doPrivileged(
+            Class type = ((ClassLoader) AccessController.doPrivileged(
                     new PrivilegedAction() {
                         public Object run() {
                             return Thread.currentThread().getContextClassLoader();
@@ -95,10 +95,10 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
     private ELContext elContext;
     
     public ELContext getELContext() {
-        if(elContext == null) { 
+        if (elContext == null) { 
             JspApplicationContext jspctx = JspFactory.getDefaultFactory().getJspApplicationContext(getServletContext());
-            if(jspctx instanceof FreeMarkerJspApplicationContext) {
-                elContext = ((FreeMarkerJspApplicationContext)jspctx).createNewELContext(this);
+            if (jspctx instanceof FreeMarkerJspApplicationContext) {
+                elContext = ((FreeMarkerJspApplicationContext) jspctx).createNewELContext(this);
                 elContext.putContext(JspContext.class, this);
             } else {
                 throw new UnsupportedOperationException(

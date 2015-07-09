@@ -61,8 +61,7 @@ import freemarker.template.TemplateTransformModel;
 public class NormalizeNewlines implements TemplateTransformModel {
 
     public Writer getWriter(final Writer out,
-                            final Map args)
-    {
+                            final Map args) {
         final StringBuilder buf = new StringBuilder();
         return new Writer() {
             public void write(char cbuf[], int off, int len) {
@@ -88,8 +87,7 @@ public class NormalizeNewlines implements TemplateTransformModel {
      * @param in the input to be transformed
      * @param out the destination of the transformation
      */
-    public void transform(Reader in, Writer out) throws IOException
-    {
+    public void transform(Reader in, Writer out) throws IOException {
         BufferedReader br = (in instanceof BufferedReader)
                             ? (BufferedReader) in
                             : new BufferedReader(in);

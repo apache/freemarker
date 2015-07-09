@@ -38,8 +38,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
-public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize
-{
+public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize {
     private static final Method atomicRemove = getAtomicRemoveMethod();
     
     private final ReferenceQueue queue = new ReferenceQueue();
@@ -61,7 +60,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
     
     public Object get(Object key) {
         processQueue();
-        Reference ref = (Reference)map.get(key);
+        Reference ref = (Reference) map.get(key);
         return ref == null ? null : ref.get();
     }
 
@@ -91,13 +90,13 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
     }
 
     private void processQueue() {
-        for(;;) {
-            SoftValueReference ref = (SoftValueReference)queue.poll();
-            if(ref == null) {
+        for (; ; ) {
+            SoftValueReference ref = (SoftValueReference) queue.poll();
+            if (ref == null) {
                 return;
             }
             Object key = ref.getKey();
-            if(concurrent) {
+            if (concurrent) {
                 try {
                     atomicRemove.invoke(map, new Object[] { key, ref });
                 }
@@ -107,8 +106,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
                 catch(InvocationTargetException e) {
                     throw new UndeclaredThrowableException(e);
                 }
-            }
-            else if(map.get(key) == ref) {
+            } else if (map.get(key) == ref) {
                 map.remove(key);
             }
         }

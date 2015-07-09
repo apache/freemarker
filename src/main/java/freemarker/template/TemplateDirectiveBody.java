@@ -27,8 +27,7 @@ import java.io.Writer;
  *
  * @since 2.3.11
  */
-public interface TemplateDirectiveBody
-{
+public interface TemplateDirectiveBody {
     /**
      * Renders the body of the directive body to the specified writer. The 
      * writer is not flushed after the rendering. If you pass the environment's

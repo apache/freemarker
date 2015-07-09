@@ -51,7 +51,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
             throws ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         Map/*<TemplateDateFormat>*/[] formatCache = this.formatCache;
-        if(formatCache == null) {
+        if (formatCache == null) {
             formatCache = new Map[4]; // Index 0..3: values of TemplateDateModel's date type constants
             this.formatCache = formatCache; 
         }
@@ -63,7 +63,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
         }
 
         TemplateDateFormat format = (TemplateDateFormat) formatsForDateType.get(formatDescriptor);
-        if(format == null) {
+        if (format == null) {
             format = new JavaTemplateDateFormat(getJavaDateFormat(dateType, formatDescriptor));
             formatsForDateType.put(formatDescriptor, format);
         }
@@ -98,7 +98,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
                         }
                         case TemplateDateModel.DATETIME: {
                             int tok2Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : tok1Style;
-                            if(tok2Style != -1) {
+                            if (tok2Style != -1) {
                                 jDateFormat = DateFormat.getDateTimeInstance(tok1Style, tok2Style, cacheKey.locale);
                             }
                             break;

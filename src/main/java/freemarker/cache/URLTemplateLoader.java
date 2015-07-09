@@ -31,15 +31,12 @@ import freemarker.template.Configuration;
  * the {@link #getURL(String)} method. Both {@link ClassTemplateLoader} and
  * {@link WebappTemplateLoader} are (quite trivial) subclasses of this class.
  */
-public abstract class URLTemplateLoader implements TemplateLoader
-{
+public abstract class URLTemplateLoader implements TemplateLoader {
     
     private Boolean urlConnectionUsesCaches;
     
     public Object findTemplateSource(String name)
-    throws
-    	IOException
-    {
+    throws IOException {
         URL url = getURL(name);
         return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
@@ -54,24 +51,19 @@ public abstract class URLTemplateLoader implements TemplateLoader
      */
     protected abstract URL getURL(String name);
     
-    public long getLastModified(Object templateSource)
-    {
+    public long getLastModified(Object templateSource) {
         return ((URLTemplateSource) templateSource).lastModified();
     }
     
     public Reader getReader(Object templateSource, String encoding)
-    throws
-        IOException
-    {
+    throws IOException {
         return new InputStreamReader(
                 ((URLTemplateSource) templateSource).getInputStream(),
                 encoding);
     }
     
     public void closeTemplateSource(Object templateSource)
-    throws
-    	IOException
-    {
+    throws IOException {
         ((URLTemplateSource) templateSource).close();
     }
 
@@ -82,13 +74,11 @@ public abstract class URLTemplateLoader implements TemplateLoader
      * forward slashes, and a trailing slash is appended if the original
      * prefix wasn't empty and didn't already end with a slash.
      */
-    protected static String canonicalizePrefix(String prefix)
-    {
+    protected static String canonicalizePrefix(String prefix) {
         // make it foolproof
         prefix = prefix.replace('\\', '/');
         // ensure there's a trailing slash
-        if (prefix.length() > 0 && !prefix.endsWith("/"))
-        {
+        if (prefix.length() > 0 && !prefix.endsWith("/")) {
             prefix += "/";
         }
         return prefix;

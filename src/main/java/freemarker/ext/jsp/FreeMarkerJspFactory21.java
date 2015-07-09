@@ -21,8 +21,7 @@ import javax.servlet.jsp.JspApplicationContext;
 
 /**
  */
-class FreeMarkerJspFactory21 extends FreeMarkerJspFactory
-{
+class FreeMarkerJspFactory21 extends FreeMarkerJspFactory {
     private static final String JSPCTX_KEY =  
         FreeMarkerJspFactory21.class.getName() + "#jspAppContext";
 
@@ -31,12 +30,12 @@ class FreeMarkerJspFactory21 extends FreeMarkerJspFactory
     }
     
     public JspApplicationContext getJspApplicationContext(ServletContext ctx) {
-        JspApplicationContext jspctx = (JspApplicationContext)ctx.getAttribute(
+        JspApplicationContext jspctx = (JspApplicationContext) ctx.getAttribute(
                 JSPCTX_KEY);
-        if(jspctx == null) {
+        if (jspctx == null) {
             synchronized(ctx) {
-                jspctx = (JspApplicationContext)ctx.getAttribute(JSPCTX_KEY);
-                if(jspctx == null) {
+                jspctx = (JspApplicationContext) ctx.getAttribute(JSPCTX_KEY);
+                if (jspctx == null) {
                     jspctx = new FreeMarkerJspApplicationContext();
                     ctx.setAttribute(JSPCTX_KEY, jspctx);
                 }
