@@ -212,7 +212,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
             // Check for Character key if this is a single-character string.
             // In SortedMap-s, however, we can't do that safely, as it can cause ClassCastException.
             if (key.length() == 1 && !(map instanceof SortedMap)) {
-                Character charKey = Character/**/.valueOf(key.charAt(0));
+                Character charKey = Character.valueOf(key.charAt(0));
                 try {
                     result = map.get(charKey);
                     if (result != null || map.containsKey(charKey)) {
