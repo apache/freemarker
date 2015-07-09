@@ -30,8 +30,7 @@ import freemarker.template.Template;
  * 
  * @see ParseException
  */
-public class TokenMgrError extends Error
-{
+public class TokenMgrError extends Error {
     
     /**
      * The version identifier for this Serializable class.
@@ -134,11 +133,11 @@ public class TokenMgrError extends Error
     * Note: You can customize the lexical error message by modifying this method.
     */
    protected static String LexicalErr(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, int curChar) {
-     char curChar1 = (char)curChar;
+     char curChar1 = (char) curChar;
      return("Lexical error at line " +
            errorLine + ", column " +
            errorColumn + ".  Encountered: " +
-           (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar1)) + "\"") + " (" + (int)curChar + "), ") +
+           (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar1)) + "\"") + " (" + (int) curChar + "), ") +
            "after : \"" + addEscapes(errorAfter) + "\"");
    }
 

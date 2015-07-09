@@ -46,8 +46,7 @@ class BuiltInsForStringsMisc {
     }
 
     static class evalBI extends BuiltInForString {
-        TemplateModel calculateResult(String s, Environment env) throws TemplateException 
-        {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             SimpleCharStream scs = new SimpleCharStream(
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
@@ -88,8 +87,7 @@ class BuiltInsForStringsMisc {
     }
 
     static class numberBI extends BuiltInForString {
-        TemplateModel calculateResult(String s, Environment env)  throws TemplateException
-        {
+        TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
             try {
                 return new SimpleNumber(env.getArithmeticEngine().toNumber(s));
             } catch(NumberFormatException nfe) {

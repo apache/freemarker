@@ -116,7 +116,7 @@ public abstract class TemplateNameFormat {
             
             if (targetName.indexOf("://") > 0) {
                 return targetName;
-            } else if (targetName.startsWith("/"))  {
+            } else if (targetName.startsWith("/")) {
                 int schemeSepIdx = baseName.indexOf("://");
                 if (schemeSepIdx > 0) {
                     return baseName.substring(0, schemeSepIdx + 2) + targetName;
@@ -139,15 +139,15 @@ public abstract class TemplateNameFormat {
             // Also, note that `path` will be repeatedly replaced below, while `name` is final.
             String path = name;
             
-            for(;;) {
+            for (; ; ) {
                 int parentDirPathLoc = path.indexOf("/../");
-                if(parentDirPathLoc == 0) {
+                if (parentDirPathLoc == 0) {
                     // If it starts with /../, then it reaches outside the template
                     // root.
                     throw newRootLeavingException(name);
                 }
-                if(parentDirPathLoc == -1) {
-                    if(path.startsWith("../")) {
+                if (parentDirPathLoc == -1) {
+                    if (path.startsWith("../")) {
                         throw newRootLeavingException(name);
                     }
                     break;
@@ -156,10 +156,10 @@ public abstract class TemplateNameFormat {
                 path = path.substring(0, previousSlashLoc + 1) +
                        path.substring(parentDirPathLoc + "/../".length());
             }
-            for(;;) {
+            for (; ; ) {
                 int currentDirPathLoc = path.indexOf("/./");
-                if(currentDirPathLoc == -1) {
-                    if(path.startsWith("./")) {
+                if (currentDirPathLoc == -1) {
+                    if (path.startsWith("./")) {
                         path = path.substring("./".length());
                     }
                     break;
@@ -168,7 +168,7 @@ public abstract class TemplateNameFormat {
                        path.substring(currentDirPathLoc + "/./".length() - 1);
             }
             // Editing can leave us with a leading slash; strip it.
-            if(path.length() > 1 && path.charAt(0) == '/') {
+            if (path.length() > 1 && path.charAt(0) == '/') {
                 path = path.substring(1);
             }
             return path;
@@ -188,7 +188,7 @@ public abstract class TemplateNameFormat {
             
             if (findSchemeSectionEnd(targetName) != 0) {
                 return targetName;
-            } else if (targetName.startsWith("/"))  {  // targetName is an absolute path
+            } else if (targetName.startsWith("/")) {  // targetName is an absolute path
                 final String targetNameAsRelative = targetName.substring(1);
                 final int schemeSectionEnd = findSchemeSectionEnd(baseName);
                 if (schemeSectionEnd == 0) {

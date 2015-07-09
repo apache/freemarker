@@ -37,8 +37,7 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * Utility methods for unwrapping {@link TemplateModel}-s.
  */
-public class DeepUnwrap
-{
+public class DeepUnwrap {
     private static final Class OBJECT_CLASS = Object.class;
     /**
      * Unwraps {@link TemplateModel}-s recursively.
@@ -93,9 +92,9 @@ public class DeepUnwrap
     private static Object unwrap(TemplateModel model, boolean permissive) throws TemplateModelException {
         Environment env = Environment.getCurrentEnvironment();
         TemplateModel nullModel = null;
-        if(env != null) {
+        if (env != null) {
             ObjectWrapper wrapper = env.getObjectWrapper();
-            if(wrapper != null) {
+            if (wrapper != null) {
                 nullModel = wrapper.wrap(null);
             }
         }
@@ -103,50 +102,50 @@ public class DeepUnwrap
     }
 
     private static Object unwrap(TemplateModel model, TemplateModel nullModel, boolean permissive) throws TemplateModelException {
-        if(model instanceof AdapterTemplateModel) {
-            return ((AdapterTemplateModel)model).getAdaptedObject(OBJECT_CLASS);
+        if (model instanceof AdapterTemplateModel) {
+            return ((AdapterTemplateModel) model).getAdaptedObject(OBJECT_CLASS);
         }
         if (model instanceof WrapperTemplateModel) {
-            return ((WrapperTemplateModel)model).getWrappedObject();
+            return ((WrapperTemplateModel) model).getWrappedObject();
         }
-        if(model == nullModel) {
+        if (model == nullModel) {
             return null;
         }
-        if(model instanceof TemplateScalarModel) {
-            return ((TemplateScalarModel)model).getAsString();
+        if (model instanceof TemplateScalarModel) {
+            return ((TemplateScalarModel) model).getAsString();
         }
-        if(model instanceof TemplateNumberModel) {
-            return ((TemplateNumberModel)model).getAsNumber();
+        if (model instanceof TemplateNumberModel) {
+            return ((TemplateNumberModel) model).getAsNumber();
         }
-        if(model instanceof TemplateDateModel) {
-            return ((TemplateDateModel)model).getAsDate();
+        if (model instanceof TemplateDateModel) {
+            return ((TemplateDateModel) model).getAsDate();
         }
-        if(model instanceof TemplateBooleanModel) {
-            return Boolean.valueOf(((TemplateBooleanModel)model).getAsBoolean());
+        if (model instanceof TemplateBooleanModel) {
+            return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
         }
-        if(model instanceof TemplateSequenceModel) {
-            TemplateSequenceModel seq = (TemplateSequenceModel)model;
+        if (model instanceof TemplateSequenceModel) {
+            TemplateSequenceModel seq = (TemplateSequenceModel) model;
             ArrayList list = new ArrayList(seq.size());
-            for(int i = 0; i < seq.size(); ++i) {
+            for (int i = 0; i < seq.size(); ++i) {
                 list.add(unwrap(seq.get(i), nullModel, permissive));
             }
             return list;
         }
-        if(model instanceof TemplateCollectionModel) {
-            TemplateCollectionModel coll = (TemplateCollectionModel)model;
+        if (model instanceof TemplateCollectionModel) {
+            TemplateCollectionModel coll = (TemplateCollectionModel) model;
             ArrayList list = new ArrayList();
             TemplateModelIterator it = coll.iterator();            
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 list.add(unwrap(it.next(), nullModel, permissive));
             }
             return list;
         }
-        if(model instanceof TemplateHashModelEx) {
-            TemplateHashModelEx hash = (TemplateHashModelEx)model;
+        if (model instanceof TemplateHashModelEx) {
+            TemplateHashModelEx hash = (TemplateHashModelEx) model;
             HashMap map = new HashMap();
             TemplateModelIterator keys = hash.keys().iterator();
-            while(keys.hasNext()) {
-                String key = (String)unwrap(keys.next(), nullModel, permissive); 
+            while (keys.hasNext()) {
+                String key = (String) unwrap(keys.next(), nullModel, permissive); 
                 map.put(key, unwrap(hash.get(key), nullModel, permissive));
             }
             return map;

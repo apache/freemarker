@@ -509,7 +509,7 @@ class ClassIntrospector {
         if (l == null) {
             return null;
         }
-        for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = l.iterator(); iterator.hasNext(); ) {
             Method am = (Method) iterator.next();
             if (am.getReturnType() == m.getReturnType()) {
                 return am;
@@ -600,7 +600,7 @@ class ClassIntrospector {
             cacheClassNames.clear();
             clearingCounter++;
 
-            for (Iterator it = modelFactories.iterator(); it.hasNext();) {
+            for (Iterator it = modelFactories.iterator(); it.hasNext(); ) {
                 Object regedMf = ((WeakReference) it.next()).get();
                 if (regedMf != null) {
                     if (regedMf instanceof ClassBasedModelFactory) {
@@ -628,7 +628,7 @@ class ClassIntrospector {
             cacheClassNames.remove(clazz.getName());
             clearingCounter++;
 
-            for (Iterator it = modelFactories.iterator(); it.hasNext();) {
+            for (Iterator it = modelFactories.iterator(); it.hasNext(); ) {
                 Object regedMf = ((WeakReference) it.next()).get();
                 if (regedMf != null) {
                     if (regedMf instanceof ClassBasedModelFactory) {
@@ -697,7 +697,7 @@ class ClassIntrospector {
 
     void unregisterModelFactory(Object mf) {
         synchronized (sharedLock) {
-            for (Iterator it = modelFactories.iterator(); it.hasNext();) {
+            for (Iterator it = modelFactories.iterator(); it.hasNext(); ) {
                 Object regedMf = ((Reference) it.next()).get();
                 if (regedMf == mf) {
                     it.remove();
@@ -711,7 +711,7 @@ class ClassIntrospector {
         Reference cleardRef;
         while ((cleardRef = modelFactoriesRefQueue.poll()) != null) {
             synchronized (sharedLock) {
-                findCleardRef: for (Iterator it = modelFactories.iterator(); it.hasNext();) {
+                findCleardRef: for (Iterator it = modelFactories.iterator(); it.hasNext(); ) {
                     if (it.next() == cleardRef) {
                         it.remove();
                         break findCleardRef;

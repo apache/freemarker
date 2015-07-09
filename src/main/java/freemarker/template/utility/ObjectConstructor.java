@@ -35,8 +35,7 @@ import freemarker.template.TemplateModelException;
  * <br>
  * <br>&lt;#assign aList = objectConstructor("java.util.ArrayList", 100)&gt;
  */
-public class ObjectConstructor implements TemplateMethodModelEx
-{
+public class ObjectConstructor implements TemplateMethodModelEx {
     public Object exec(List args) throws TemplateModelException {
         if (args.isEmpty()) {
             throw new TemplateModelException("This method must have at least one argument, the name of the class to instantiate.");

@@ -42,8 +42,7 @@ import freemarker.template.utility.ClassUtil;
 
 /**
  */
-class FreeMarkerJspApplicationContext implements JspApplicationContext
-{
+class FreeMarkerJspApplicationContext implements JspApplicationContext {
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
     private static final ExpressionFactory expressionFactoryImpl = findExpressionFactoryImplementation();
     
@@ -69,9 +68,9 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext
 
     private static ExpressionFactory findExpressionFactoryImplementation() {
         ExpressionFactory ef = tryExpressionFactoryImplementation("com.sun");
-        if(ef == null) {
+        if (ef == null) {
             ef = tryExpressionFactoryImplementation("org.apache");
-            if(ef == null) {
+            if (ef == null) {
                 LOG.warn("Could not find any implementation for " + 
                         ExpressionFactory.class.getName());
             }
@@ -83,10 +82,10 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext
         String className = packagePrefix + ".el.ExpressionFactoryImpl";
         try {
             Class cl = ClassUtil.forName(className);
-            if(ExpressionFactory.class.isAssignableFrom(cl)) {
+            if (ExpressionFactory.class.isAssignableFrom(cl)) {
                 LOG.info("Using " + className + " as implementation of " + 
                         ExpressionFactory.class.getName());
-                return (ExpressionFactory)cl.newInstance();
+                return (ExpressionFactory) cl.newInstance();
             }
             LOG.warn("Class " + className + " does not implement " + 
                     ExpressionFactory.class.getName());
@@ -111,7 +110,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext
         ELContext ctx = new FreeMarkerELContext(pageCtx);
         ELContextEvent event = new ELContextEvent(ctx);
         synchronized(listeners) {
-            for (Iterator iter = listeners.iterator(); iter.hasNext();) {
+            for (Iterator iter = listeners.iterator(); iter.hasNext(); ) {
                 ELContextListener l = (ELContextListener) iter.next();
                 l.contextCreated(event);
             }
@@ -138,7 +137,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext
             return new VariableMapper() {
                 public ValueExpression resolveVariable(String name) {
                     Object obj = pageCtx.findAttribute(name);
-                    if(obj == null) {
+                    if (obj == null) {
                         return null;
                     }
                     return expressionFactoryImpl.createValueExpression(obj, 

@@ -22,17 +22,14 @@ import org.apache.log4j.Level;
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
-public class _Log4jLoggerFactory implements LoggerFactory
-{
-    public Logger getLogger(String category)
-    {
+public class _Log4jLoggerFactory implements LoggerFactory {
+    public Logger getLogger(String category) {
         return new Log4jLogger(org.apache.log4j.Logger.getLogger(category));
     }
 
     private static class Log4jLogger
     extends
-        Logger
-    {
+        Logger {
         private final org.apache.log4j.Logger logger;
         
         Log4jLogger(org.apache.log4j.Logger logger)
@@ -40,68 +37,55 @@ public class _Log4jLoggerFactory implements LoggerFactory
             this.logger = logger;
         }
         
-        public void debug(String message)
-        {
+        public void debug(String message) {
             logger.debug(message);
         }
 
-        public void debug(String message, Throwable t)
-        {
+        public void debug(String message, Throwable t) {
             logger.debug(message, t);
         }
 
-        public void error(String message)
-        {
+        public void error(String message) {
             logger.error(message);
         }
 
-        public void error(String message, Throwable t)
-        {
+        public void error(String message, Throwable t) {
             logger.error(message, t);
         }
 
-        public void info(String message)
-        {
+        public void info(String message) {
             logger.info(message);
         }
 
-        public void info(String message, Throwable t)
-        {
+        public void info(String message, Throwable t) {
             logger.info(message, t);
         }
 
-        public void warn(String message)
-        {
+        public void warn(String message) {
             logger.warn(message);
         }
 
-        public void warn(String message, Throwable t)
-        {
+        public void warn(String message, Throwable t) {
             logger.warn(message, t);
         }
 
-        public boolean isDebugEnabled()
-        {
+        public boolean isDebugEnabled() {
             return logger.isDebugEnabled();
         }
 
-        public boolean isInfoEnabled()
-        {
+        public boolean isInfoEnabled() {
             return logger.isInfoEnabled();
         }
 
-        public boolean isWarnEnabled()
-        {
+        public boolean isWarnEnabled() {
             return logger.isEnabledFor(Level.WARN);
         }
 
-        public boolean isErrorEnabled()
-        {
+        public boolean isErrorEnabled() {
             return logger.isEnabledFor(Level.ERROR);
         }
 
-        public boolean isFatalEnabled()
-        {
+        public boolean isFatalEnabled() {
             return logger.isEnabledFor(Level.FATAL);
         }
     }

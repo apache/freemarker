@@ -39,11 +39,11 @@ public class MultiModel1 implements TemplateHashModel,
 
     /** Creates new MultiModel1 */
     public MultiModel1() {
-        for( int i = 0; i < 10; i++ ) {
-            ((SimpleSequence)m_cListModel).add( "Model1 value: " + Integer.toString( i ));
+        for ( int i = 0; i < 10; i++ ) {
+            ((SimpleSequence) m_cListModel).add( "Model1 value: " + Integer.toString( i ));
         }
-        ((SimpleSequence)m_cListModel).add( new MultiModel3() );
-        ((SimpleHash)m_cHashModel).put( "nested", new MultiModel3() );
+        ((SimpleSequence) m_cListModel).add( new MultiModel3() );
+        ((SimpleHash) m_cHashModel).put( "nested", new MultiModel3() );
     }
 
     /**
@@ -55,19 +55,19 @@ public class MultiModel1 implements TemplateHashModel,
      * or null if not found.
      */
     public TemplateModel get(String key) {
-        if( key.equals( "model2" )) {
+        if ( key.equals( "model2" )) {
             return m_cSubModel;
-        } else if( key.equals( "modellist" )) {
+        } else if ( key.equals( "modellist" )) {
             return m_cListModel;
-        } else if( key.equals( "selftest" )) {
+        } else if ( key.equals( "selftest" )) {
             return new SimpleScalar( "Selftest of a hash from MultiModel1" );
-        } else if( key.equals( "one" )) {
+        } else if ( key.equals( "one" )) {
             return m_cListHashModel1;
-        } else if( key.equals( "two" )) {
+        } else if ( key.equals( "two" )) {
             return m_cListHashModel2;
-        } else if( key.equals( "size" )) {
+        } else if ( key.equals( "size" )) {
             return new SimpleScalar( "Nasty!" );
-        } else if( key.equals( "nesting1" )) {
+        } else if ( key.equals( "nesting1" )) {
             return m_cHashModel;
         } else {
             return null;

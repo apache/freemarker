@@ -187,8 +187,7 @@ public final class Environment extends Configurable {
      * method to obtain the environment object that represents the template processing that is currently running on the
      * current thread.
      */
-    public static Environment getCurrentEnvironment()
-    {
+    public static Environment getCurrentEnvironment() {
         return (Environment) threadEnv.get();
     }
     
@@ -218,7 +217,7 @@ public final class Environment extends Configurable {
      *             method is often not what you expect when it comes to macro/function invocations.
      */
     public Template getTemplate() {
-        return (Template)getParent();
+        return (Template) getParent();
     }
     
     /** Returns the same value as pre-IcI 2.3.22 getTemplate() did. */
@@ -320,8 +319,7 @@ public final class Environment extends Configurable {
      * "Visit" the template element.
      */
     void visit(TemplateElement element)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         pushElement(element);
         try {
             element.accept(this);
@@ -363,20 +361,18 @@ public final class Environment extends Configurable {
             TemplateDirectiveModel directiveModel, Map args, 
             final List bodyParameterNames) throws TemplateException, IOException {
         TemplateDirectiveBody nested;
-        if(element == null) {
+        if (element == null) {
             nested = null;
-        }
-        else {
+        } else {
             nested = new NestedElementTemplateDirectiveBody(element);
         }
         final TemplateModel[] outArgs;
-        if(bodyParameterNames == null || bodyParameterNames.isEmpty()) {
+        if (bodyParameterNames == null || bodyParameterNames.isEmpty()) {
             outArgs = NO_OUT_ARGS;
-        }
-        else {
+        } else {
             outArgs = new TemplateModel[bodyParameterNames.size()];
         }
-        if(outArgs.length > 0) {
+        if (outArgs.length > 0) {
             pushLocalContext(new LocalContext() {
                 public TemplateModel getLocalVariable(String name) {
                     int index = bodyParameterNames.indexOf(name);
@@ -392,7 +388,7 @@ public final class Environment extends Configurable {
             directiveModel.execute(this, args, outArgs, nested);
         }
         finally {
-            if(outArgs.length > 0) {
+            if (outArgs.length > 0) {
                 popLocalContext();
             }
         }
@@ -409,22 +405,21 @@ public final class Environment extends Configurable {
     void visitAndTransform(TemplateElement element,
                TemplateTransformModel transform,
                Map args)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         try {
             Writer tw = transform.getWriter(out, args);
             if (tw == null) tw = EMPTY_BODY_WRITER;
             TransformControl tc =
                 tw instanceof TransformControl
-                ? (TransformControl)tw
+                ? (TransformControl) tw
                 : null;
 
             Writer prevOut = out;
             out = tw;
             try {
-                if(tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
+                if (tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
                     do {
-                        if(element != null) {
+                        if (element != null) {
                             visitByHiddingParent(element);
                         }
                     } while(tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
@@ -432,10 +427,9 @@ public final class Environment extends Configurable {
             }
             catch(Throwable t) {
                 try {
-                    if(tc != null) {
+                    if (tc != null) {
                         tc.onError(t);
-                    }
-                    else {
+                    } else {
                         throw t;
                     }
                 }
@@ -495,7 +489,7 @@ public final class Environment extends Configurable {
                  recoveredErrorStack.add(thrownException);
                  visit(recoveryBlock);
              } finally {
-                 recoveredErrorStack.remove(recoveredErrorStack.size() -1);
+                 recoveredErrorStack.remove(recoveredErrorStack.size() - 1);
              }
          } else {
              out.write(sw.toString());
@@ -503,10 +497,10 @@ public final class Environment extends Configurable {
      }
      
      String getCurrentRecoveredErrorMessage() throws TemplateException {
-         if(recoveredErrorStack.isEmpty()) {
+         if (recoveredErrorStack.isEmpty()) {
              throw new _MiscTemplateException(this, ".error is not available outside of a #recover block");
          }
-         return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() -1)).getMessage();
+         return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() - 1)).getMessage();
      }
      
      /**
@@ -574,8 +568,7 @@ public final class Environment extends Configurable {
      * "visit" an IteratorBlock
      */
     boolean visitIteratorBlock(IteratorBlock.IterationContext ictxt)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         pushLocalContext(ictxt);
         try {
             return ictxt.accept(this);
@@ -593,8 +586,7 @@ public final class Environment extends Configurable {
      * Used for {@code #visit} and {@code #recurse}.
      */
     void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces) 
-    throws TemplateException, IOException 
-    {
+    throws TemplateException, IOException {
         if (nodeNamespaces == null) {
             SimpleSequence ss = new SimpleSequence(1);
             ss.add(currentNamespace);
@@ -613,32 +605,26 @@ public final class Environment extends Configurable {
             TemplateModel macroOrTransform = getNodeProcessor(node);
             if (macroOrTransform instanceof BoundCallable) {
                 invoke((BoundCallable) macroOrTransform, null, null, null, null);
-            }
-            else if (macroOrTransform instanceof TemplateTransformModel) {
+            } else if (macroOrTransform instanceof TemplateTransformModel) {
                 visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
-            }
-            else {
+            } else {
                 String nodeType = node.getNodeType();
                 if (nodeType != null) {
                     // If the node's type is 'text', we just output it.
-                    if ((nodeType.equals("text") && node instanceof TemplateScalarModel)) 
-                    {
+                    if ((nodeType.equals("text") && node instanceof TemplateScalarModel)) {
                            out.write(((TemplateScalarModel) node).getAsString());
-                    }
-                    else if (nodeType.equals("document")) {
+                    } else if (nodeType.equals("document")) {
                         recurse(node, namespaces);
                     }
                     // We complain here, unless the node's type is 'pi', or "comment" or "document_type", in which case
                     // we just ignore it.
                     else if (!nodeType.equals("pi") 
                          && !nodeType.equals("comment") 
-                         && !nodeType.equals("document_type")) 
-                    {
+                         && !nodeType.equals("document_type")) {
                         throw new _MiscTemplateException(
                                 this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), nodeType));
                     }
-                }
-                else {
+                } else {
                     throw new _MiscTemplateException(
                             this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), "default"));
                 }
@@ -676,8 +662,7 @@ public final class Environment extends Configurable {
         TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
         if (macroOrTransform instanceof BoundCallable) {
             invoke((BoundCallable) macroOrTransform, null, null, null, null);
-        }
-        else if (macroOrTransform instanceof TemplateTransformModel) {
+        } else if (macroOrTransform instanceof TemplateTransformModel) {
             visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
         }
     }
@@ -744,7 +729,7 @@ public final class Environment extends Configurable {
                 catchAllParamValue = null;
             }
             
-            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
+            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
                 final Map.Entry argNameAndValExp = (Map.Entry) it.next();
                 final String argName = (String) argNameAndValExp.getKey();
                 final boolean isArgNameDeclared = unboundCallable.hasArgNamed(argName);
@@ -806,8 +791,7 @@ public final class Environment extends Configurable {
     }
     
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
-    throws TemplateException, IOException 
-    {
+    throws TemplateException, IOException {
         if (node == null) {
             node = this.getCurrentVisitorNode();
             if (node == null) {
@@ -817,7 +801,7 @@ public final class Environment extends Configurable {
         }
         TemplateSequenceModel children = node.getChildNodes();
         if (children == null) return;
-        for (int i=0; i<children.size(); i++) {
+        for (int i = 0; i < children.size(); i++) {
             TemplateNodeModel child = (TemplateNodeModel) children.get(i);
             if (child != null) {
                 invokeNodeHandlerFor(child, namespaces);
@@ -830,24 +814,23 @@ public final class Environment extends Configurable {
     }
     
     private void handleTemplateException(TemplateException templateException)
-        throws TemplateException
-    {
+        throws TemplateException {
         // Logic to prevent double-handling of the exception in
         // nested visit() calls.
-        if(lastThrowable == templateException) {
+        if (lastThrowable == templateException) {
             throw templateException;
         }
         lastThrowable = templateException;
 
         // Log the exception, if logTemplateExceptions isn't false. However, even if it's false, if we are inside
         // an #attempt block, it has to be logged, as it certainly won't bubble up to the caller of FreeMarker.
-        if(LOG.isErrorEnabled() && (isInAttemptBlock() || getLogTemplateExceptions())) {
+        if (LOG.isErrorEnabled() && (isInAttemptBlock() || getLogTemplateExceptions())) {
             LOG.error("Error executing FreeMarker template", templateException);
         }
 
         // Stop exception is not passed to the handler, but
         // explicitly rethrown.
-        if(templateException instanceof StopException) {
+        if (templateException instanceof StopException) {
             throw templateException;
         }
 
@@ -993,7 +976,7 @@ public final class Environment extends Configurable {
     }
 
     Collator getCollator() {
-        if(cachedCollator == null) {
+        if (cachedCollator == null) {
             cachedCollator = Collator.getInstance(getLocale());
         }
         return cachedCollator;
@@ -1070,7 +1053,7 @@ public final class Environment extends Configurable {
     }
 
     String formatNumber(Number number) {
-        if(cachedNumberFormat == null) {
+        if (cachedNumberFormat == null) {
             cachedNumberFormat = getNumberFormatObject(getNumberFormat());
         }
         return cachedNumberFormat.format(number);
@@ -1133,15 +1116,13 @@ public final class Environment extends Configurable {
         this.lastReturnValue = null;
     }
 
-    NumberFormat getNumberFormatObject(String pattern)
-    {
-        if(cachedNumberFormats == null) {
+    NumberFormat getNumberFormatObject(String pattern) {
+        if (cachedNumberFormats == null) {
             cachedNumberFormats = new HashMap();
         }
 
         NumberFormat format = (NumberFormat) cachedNumberFormats.get(pattern);
-        if(format != null)
-        {
+        if (format != null) {
             return format;
         }
 
@@ -1150,29 +1131,19 @@ public final class Environment extends Configurable {
         {
             Locale locale = getLocale();
             NumberFormatKey fk = new NumberFormatKey(pattern, locale);
-            format = (NumberFormat)JAVA_NUMBER_FORMATS.get(fk);
-            if(format == null)
-            {
+            format = (NumberFormat) JAVA_NUMBER_FORMATS.get(fk);
+            if (format == null) {
                 // Add format to global format cache. Note this is
                 // globally done once per locale per pattern.
-                if("number".equals(pattern))
-                {
+                if ("number".equals(pattern)) {
                     format = NumberFormat.getNumberInstance(locale);
-                }
-                else if("currency".equals(pattern))
-                {
+                } else if ("currency".equals(pattern)) {
                     format = NumberFormat.getCurrencyInstance(locale);
-                }
-                else if("percent".equals(pattern))
-                {
+                } else if ("percent".equals(pattern)) {
                     format = NumberFormat.getPercentInstance(locale);
-                }
-                else if ("computer".equals(pattern))
-                {
+                } else if ("computer".equals(pattern)) {
                     format = getCNumberFormat();
-                }
-                else
-                {
+                } else {
                     format = new DecimalFormat(pattern, new DecimalFormatSymbols(getLocale()));
                 }
                 JAVA_NUMBER_FORMATS.put(fk, format);
@@ -1180,7 +1151,7 @@ public final class Environment extends Configurable {
         }
 
         // Clone it and store the clone in the local cache
-        format = (NumberFormat)format.clone();
+        format = (NumberFormat) format.clone();
         cachedNumberFormats.put(pattern, format);
         return format;
     }
@@ -1430,8 +1401,7 @@ public final class Environment extends Configurable {
         TemplateModel tm = exp.eval(this);
         if (tm instanceof TemplateTransformModel) {
             ttm = (TemplateTransformModel) tm;
-        }
-        else if (exp instanceof Identifier) {
+        } else if (exp instanceof Identifier) {
             tm = getConfiguration().getSharedVariable(exp.toString());
             if (tm instanceof TemplateTransformModel) {
                 ttm = (TemplateTransformModel) tm;
@@ -1448,7 +1418,7 @@ public final class Environment extends Configurable {
      */
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         if (localContextStack != null) {
-            for (int i = localContextStack.size()-1; i>=0; i--) {
+            for (int i = localContextStack.size() - 1; i >= 0; i--) {
                 LocalContext lc = (LocalContext) localContextStack.get(i);
                 TemplateModel tm = lc.getLocalVariable(name);
                 if (tm != null) {
@@ -1534,7 +1504,7 @@ public final class Environment extends Configurable {
      * macro body.
      */
     public void setLocalVariable(String name, TemplateModel model) {
-        if(currentMacroContext == null) {
+        if (currentMacroContext == null) {
             throw new IllegalStateException("Not executing macro body");
         }
         currentMacroContext.setLocalVar(name, model);
@@ -1560,27 +1530,27 @@ public final class Environment extends Configurable {
         if (rootDataModel instanceof TemplateHashModelEx) {
             TemplateModelIterator rootNames =
                 ((TemplateHashModelEx) rootDataModel).keys().iterator();
-            while(rootNames.hasNext()) {
-                set.add(((TemplateScalarModel)rootNames.next()).getAsString());
+            while (rootNames.hasNext()) {
+                set.add(((TemplateScalarModel) rootNames.next()).getAsString());
             }
         }
         
         // globals
-        for (TemplateModelIterator tmi = globalNamespace.keys().iterator(); tmi.hasNext();) {
+        for (TemplateModelIterator tmi = globalNamespace.keys().iterator(); tmi.hasNext(); ) {
             set.add(((TemplateScalarModel) tmi.next()).getAsString());
         }
         
         // current name-space
-        for (TemplateModelIterator tmi = currentNamespace.keys().iterator(); tmi.hasNext();) {
+        for (TemplateModelIterator tmi = currentNamespace.keys().iterator(); tmi.hasNext(); ) {
             set.add(((TemplateScalarModel) tmi.next()).getAsString());
         }
         
         // locals and loop vars
-        if(currentMacroContext != null) {
+        if (currentMacroContext != null) {
             set.addAll(currentMacroContext.getLocalVariableNames());
         }
         if (localContextStack != null) {
-            for (int i = localContextStack.size()-1; i>=0; i--) {
+            for (int i = localContextStack.size() - 1; i >= 0; i--) {
                 LocalContext lc = (LocalContext) localContextStack.get(i);
                 set.addAll(lc.getLocalVariableNames());
             }
@@ -1909,11 +1879,10 @@ public final class Environment extends Configurable {
     }
     
     private TemplateModel getNodeProcessor(final String nodeName, final String nsURI, int startIndex) 
-    throws TemplateException 
-    {
+    throws TemplateException {
         TemplateModel result = null;
         int i;
-        for (i = startIndex; i<nodeNamespaces.size(); i++) {
+        for (i = startIndex; i < nodeNamespaces.size(); i++) {
             Namespace ns = null;
             try {                                   
                 ns = (Namespace) nodeNamespaces.get(i);
@@ -1927,7 +1896,7 @@ public final class Environment extends Configurable {
                 break;
         }
         if (result != null) {
-            this.nodeNamespaceIndex = i+1;
+            this.nodeNamespaceIndex = i + 1;
             this.currentNodeName = nodeName;
             this.currentNodeNS = nsURI;
         }
@@ -1949,7 +1918,7 @@ public final class Environment extends Configurable {
                 // since it has no prefix registered for the namespace
                 return null;
             }
-            if (prefix.length() >0) {
+            if (prefix.length() > 0) {
                 result = ns.get(prefix + ":" + localName);
                 if (!(result instanceof BoundCallable) && !(result instanceof TemplateTransformModel)) {
                     result = null;
@@ -1990,8 +1959,7 @@ public final class Environment extends Configurable {
      * @see #include(Template includedTemplate)
      */
     public void include(String name, String encoding, boolean parse)
-    throws IOException, TemplateException
-    {
+    throws IOException, TemplateException {
         include(getTemplateForInclusion(name, encoding, parse));
     }
 
@@ -2038,8 +2006,7 @@ public final class Environment extends Configurable {
      * @since 2.3.21
      */
     public Template getTemplateForInclusion(String name, String encoding, boolean parseAsFTL, boolean ignoreMissing)
-    throws IOException
-    {
+    throws IOException {
         final Template inheritedTemplate = getTemplate();
         
         if (encoding == null) {
@@ -2067,8 +2034,7 @@ public final class Environment extends Configurable {
      * {@link #getTemplateForInclusion(String name, String encoding, boolean parse)}.
      */
     public void include(Template includedTemplate)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         final Template prevTemplate;
         final boolean parentReplacementOn = isIcI2322OrLater();
         prevTemplate = getTemplate();
@@ -2108,8 +2074,7 @@ public final class Environment extends Configurable {
      * @see #importLib(Template includedTemplate, String namespace)
      */
     public Namespace importLib(String name, String namespace)
-    throws IOException, TemplateException
-    {
+    throws IOException, TemplateException {
         return importLib(getTemplateForImporting(name), namespace);
     }
 
@@ -2135,8 +2100,7 @@ public final class Environment extends Configurable {
      * to be a template returned by {@link #getTemplateForImporting(String name)}.
      */
     public Namespace importLib(Template loadedTemplate, String namespace)
-    throws IOException, TemplateException
-    {
+    throws IOException, TemplateException {
         if (loadedLibs == null) {
             loadedLibs = new HashMap();
         }
@@ -2146,8 +2110,7 @@ public final class Environment extends Configurable {
             if (namespace != null) {
                 setVariable(namespace, existingNamespace);
             }
-        }
-        else {
+        } else {
             Namespace newNamespace = new Namespace(loadedTemplate);
             if (namespace != null) {
                 currentNamespace.put(namespace, newNamespace);
@@ -2288,8 +2251,7 @@ public final class Environment extends Configurable {
         
     }
 
-    private static final class NumberFormatKey
-    {
+    private static final class NumberFormatKey {
         private final String pattern;
         private final Locale locale;
 
@@ -2299,18 +2261,15 @@ public final class Environment extends Configurable {
             this.locale = locale;
         }
 
-        public boolean equals(Object o)
-        {
-            if(o instanceof NumberFormatKey)
-            {
-                NumberFormatKey fk = (NumberFormatKey)o;
+        public boolean equals(Object o) {
+            if (o instanceof NumberFormatKey) {
+                NumberFormatKey fk = (NumberFormatKey) o;
                 return fk.pattern.equals(pattern) && fk.locale.equals(locale);
             }
             return false;
         }
 
-        public int hashCode()
-        {
+        public int hashCode() {
             return pattern.hashCode() ^ locale.hashCode();
         }
     }

@@ -35,9 +35,9 @@ public class BooleanHash1 implements TemplateHashModel {
      * or null if not found.
      */
     public TemplateModel get(String key) {
-        if( key.equals( "temp" )) {
+        if ( key.equals( "temp" )) {
             return new SimpleScalar( "Hello, world." );
-        } else if( key.equals( "boolean" )) {
+        } else if ( key.equals( "boolean" )) {
             return TemplateBooleanModel.FALSE;
         } else {
             return new SimpleScalar( "Just another key..." );

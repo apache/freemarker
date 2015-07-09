@@ -52,12 +52,12 @@ class PageContextFactory {
     static FreeMarkerPageContext getCurrentPageContext() throws TemplateModelException {
         Environment env = Environment.getCurrentEnvironment();
         TemplateModel pageContextModel = env.getGlobalVariable(PageContext.PAGECONTEXT);
-        if(pageContextModel instanceof FreeMarkerPageContext) {
-            return (FreeMarkerPageContext)pageContextModel;
+        if (pageContextModel instanceof FreeMarkerPageContext) {
+            return (FreeMarkerPageContext) pageContextModel;
         }
         try {
             FreeMarkerPageContext pageContext = 
-                (FreeMarkerPageContext)pageContextImpl.newInstance();
+                (FreeMarkerPageContext) pageContextImpl.newInstance();
             env.setGlobalVariable(PageContext.PAGECONTEXT, pageContext);
             return pageContext;
         }

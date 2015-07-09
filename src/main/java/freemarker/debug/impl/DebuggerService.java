@@ -29,71 +29,58 @@ import freemarker.template.utility.SecurityUtilities;
  * not usable for anyone outside the FreeMarker core classes. It is public only
  * as an implementation detail.
  */
-public abstract class DebuggerService
-{
+public abstract class DebuggerService {
     private static final DebuggerService instance = createInstance();
     
-    private static DebuggerService createInstance()
-    {
+    private static DebuggerService createInstance() {
         // Creates the appropriate service class. If the debugging is turned
         // off, this is a fast no-op service, otherwise it's the real-thing
         // RMI service.
         return 
             SecurityUtilities.getSystemProperty("freemarker.debug.password", null) == null
-            ? (DebuggerService)new NoOpDebuggerService()
-            : (DebuggerService)new RmiDebuggerService();
+            ? (DebuggerService) new NoOpDebuggerService()
+            : (DebuggerService) new RmiDebuggerService();
     }
 
-    public static List getBreakpoints(String templateName)
-    {
+    public static List getBreakpoints(String templateName) {
         return instance.getBreakpointsSpi(templateName);
     }
     
     abstract List getBreakpointsSpi(String templateName);
 
-    public static void registerTemplate(Template template)
-    {
+    public static void registerTemplate(Template template) {
         instance.registerTemplateSpi(template);
     }
     
     abstract void registerTemplateSpi(Template template);
     
     public static boolean suspendEnvironment(Environment env, String templateName, int line)
-    throws
-        RemoteException
-    {
+    throws RemoteException {
         return instance.suspendEnvironmentSpi(env, templateName, line);
     }
     
     abstract boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
-    throws
-        RemoteException;
+    throws RemoteException;
 
     abstract void shutdownSpi();
 
-    public static void shutdown()
-    {
+    public static void shutdown() {
         instance.shutdownSpi();
     }
 
-    private static class NoOpDebuggerService extends DebuggerService
-    {
-        List getBreakpointsSpi(String templateName)
-        {
+    private static class NoOpDebuggerService extends DebuggerService {
+        List getBreakpointsSpi(String templateName) {
             return Collections.EMPTY_LIST;
         }
         
-        boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
-        {
+        boolean suspendEnvironmentSpi(Environment env, String templateName, int line) {
             throw new UnsupportedOperationException();
         }
         
-        void registerTemplateSpi(Template template)
-        {
+        void registerTemplateSpi(Template template) {
         }
 
-        void shutdownSpi()
-        {
+        void shutdownSpi() {
         }
     }
 }

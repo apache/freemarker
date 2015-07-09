@@ -366,11 +366,9 @@ public class StringUtil {
                 || keepSlash && c == '/';
     }
     
-    private static char[] createEscapes()
-    {
+    private static char[] createEscapes() {
         char[] escapes = new char['\\' + 1];
-        for(int i = 0; i < 32; ++i)
-        {
+        for (int i = 0; i < 32; ++i) {
             escapes[i] = 1;
         }
         escapes['\\'] = '\\';
@@ -413,8 +411,7 @@ public class StringUtil {
         return FTLStringLiteralEnc(s, (char) 0, false);
     }
 
-    private static String FTLStringLiteralEnc(String s, char quotation, boolean addQuotation)
-    {
+    private static String FTLStringLiteralEnc(String s, char quotation, boolean addQuotation) {
         final int ln = s.length();
         
         final char otherQuotation;
@@ -430,8 +427,7 @@ public class StringUtil {
         
         final int escLn = ESCAPES.length;
         StringBuilder buf = null;
-        for(int i = 0; i < ln; i++)
-        {
+        for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             char escape =
                     c < escLn ? ESCAPES[c] :
@@ -603,7 +599,7 @@ public class StringUtil {
     public static Locale deduceLocale(String input) {
        if (input == null) return null;
        Locale locale = Locale.getDefault();
-       if (input.length() > 0 && input.charAt(0) == '"') input = input.substring(1, input.length() -1);
+       if (input.length() > 0 && input.charAt(0) == '"') input = input.substring(1, input.length() - 1);
        StringTokenizer st = new StringTokenizer(input, ",_ ");
        String lang = "", country = "";
        if (st.hasMoreTokens()) {
@@ -614,8 +610,7 @@ public class StringUtil {
        }
        if (!st.hasMoreTokens()) {
           locale = new Locale(lang, country);
-       }
-       else {
+       } else {
           locale = new Locale(lang, country, st.nextToken());
        }
        return locale;
@@ -634,7 +629,7 @@ public class StringUtil {
 
     public static boolean getYesNo(String s) {
         if (s.startsWith("\"")) {
-            s = s.substring(1, s.length() -1);
+            s = s.substring(1, s.length() - 1);
 
         }
         if (s.equalsIgnoreCase("n")
@@ -642,8 +637,7 @@ public class StringUtil {
                 || s.equalsIgnoreCase("f")
                 || s.equalsIgnoreCase("false")) {
             return false;
-        }
-        else if  (s.equalsIgnoreCase("y")
+        } else if (s.equalsIgnoreCase("y")
                 || s.equalsIgnoreCase("yes")
                 || s.equalsIgnoreCase("t")
                 || s.equalsIgnoreCase("true")) {
@@ -732,8 +726,7 @@ public class StringUtil {
                                   String oldsub, 
                                   String newsub, 
                                   boolean caseInsensitive,
-                                  boolean firstOnly) 
-    {
+                                  boolean firstOnly) {
         StringBuilder buf;
         int tln;
         int oln = oldsub.length();
@@ -1341,7 +1334,7 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             final char c = s.charAt(i);
             final int escapeType;  // 
-            if (!(c > '>' && c < 0x7F && c != '\\') && c != ' ' && !(c >= 0xA0 && c < 0x2028))  {  // skip common chars
+            if (!(c > '>' && c < 0x7F && c != '\\') && c != ' ' && !(c >= 0xA0 && c < 0x2028)) {  // skip common chars
                 if (c <= 0x1F) {  // control chars range 1
                     if (c == '\n') {
                         escapeType = 'n';
@@ -1613,13 +1606,13 @@ public class StringUtil {
      * (This routine might only be 99% accurate. Should maybe REVISIT) 
      */
     static public boolean isXMLID(String name) {
-        for (int i=0; i<name.length(); i++) {
+        for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
-            if (i==0) {
-                if (c== '-' || c=='.' || Character.isDigit(c))
+            if (i == 0) {
+                if (c == '-' || c == '.' || Character.isDigit(c))
                     return false;
             }
-            if (!Character.isLetterOrDigit(c) && c != ':' && c != '_' && c != '-' && c!='.') {
+            if (!Character.isLetterOrDigit(c) && c != ':' && c != '_' && c != '-' && c != '.') {
                 return false;
             }
         }
@@ -1855,7 +1848,7 @@ public class StringUtil {
         } catch (Throwable e2) {
             eStr = ClassUtil.getShortClassNameOfObject(e);
         }
-        return "[" + ClassUtil.getShortClassNameOfObject(object) +".toString() failed: " + eStr + "]";
+        return "[" + ClassUtil.getShortClassNameOfObject(object) + ".toString() failed: " + eStr + "]";
     }
     
     /**

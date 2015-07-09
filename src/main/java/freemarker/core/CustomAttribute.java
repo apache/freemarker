@@ -65,7 +65,7 @@ public class CustomAttribute {
      * @param scope one of <tt>SCOPE_</tt> constants. 
      */
     public CustomAttribute(int scope) {
-        if(scope != SCOPE_ENVIRONMENT && 
+        if (scope != SCOPE_ENVIRONMENT && 
            scope != SCOPE_TEMPLATE && 
            scope != SCOPE_CONFIGURATION) {
                 throw new IllegalArgumentException();
@@ -121,10 +121,10 @@ public class CustomAttribute {
      *             If {@code template} is null
      */
     public final Object get(Template template) {
-        if(scope != SCOPE_TEMPLATE) {
+        if (scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        return ((Configurable)template).getCustomAttribute(key, this);
+        return ((Configurable) template).getCustomAttribute(key, this);
     }
     
     /**
@@ -138,7 +138,7 @@ public class CustomAttribute {
      * @since 2.3.22
      */
     public final Object get(Configuration cfg) {
-        if(scope != SCOPE_CONFIGURATION) {
+        if (scope != SCOPE_CONFIGURATION) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
         return ((Configurable) cfg).getCustomAttribute(key, this);
@@ -188,7 +188,7 @@ public class CustomAttribute {
      *             If {@code template} is null
      */
     public final void set(Object value, Template template) {
-        if(scope != SCOPE_TEMPLATE) {
+        if (scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
         ((Configurable) template).setCustomAttribute(key, value);
@@ -208,7 +208,7 @@ public class CustomAttribute {
      * @since 2.3.22
      */
     public final void set(Object value, Configuration cfg) {
-        if(scope != SCOPE_CONFIGURATION) {
+        if (scope != SCOPE_CONFIGURATION) {
             throw new UnsupportedOperationException("This is not a configuration-scope attribute");
         }
         ((Configurable) cfg).setCustomAttribute(key, value);
@@ -216,7 +216,7 @@ public class CustomAttribute {
     
     private Environment getRequiredCurrentEnvironment() {
         Environment c = Environment.getCurrentEnvironment();
-        if(c == null) {
+        if (c == null) {
             throw new IllegalStateException("No current environment");
         }
         return c;

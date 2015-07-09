@@ -64,7 +64,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     
     NodeListModel(NodeList nodeList, NodeModel contextNode) {
         super(nodeWrapper);
-        for (int i=0; i<nodeList.getLength();i++) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
             list.add(nodeList.item(i));
         }
         this.contextNode = contextNode;
@@ -72,7 +72,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     
     NodeListModel(NamedNodeMap nodeList, NodeModel contextNode) {
         super(nodeWrapper);
-        for (int i=0; i<nodeList.getLength();i++) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
             list.add(nodeList.item(i));
         }
         this.contextNode = contextNode;
@@ -90,7 +90,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
             return result;
         }
         Environment env = Environment.getCurrentEnvironment();
-        for (int i = 0; i<size; i++) {
+        for (int i = 0; i < size; i++) {
             NodeModel nm = (NodeModel) get(i);
             if (nm instanceof ElementModel) {
                 if (((ElementModel) nm).matchesName(name, env)) {
@@ -106,17 +106,16 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     public TemplateModel get(String key) throws TemplateModelException {
-        if (size() ==1) {
+        if (size() == 1) {
             NodeModel nm = (NodeModel) get(0);
             return nm.get(key);
         }
         if (key.startsWith("@@") &&
             (key.equals("@@markup") 
             || key.equals("@@nested_markup") 
-            || key.equals("@@text")))
-        {
+            || key.equals("@@text"))) {
             StringBuilder result = new StringBuilder();
-            for (int i=0; i<size(); i++) {
+            for (int i = 0; i < size(); i++) {
                 NodeModel nm = (NodeModel) get(i);
                 TemplateScalarModel textModel = (TemplateScalarModel) nm.get(key);
                 result.append(textModel.getAsString());
@@ -125,16 +124,15 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         }
         if (StringUtil.isXMLID(key) 
             || ((key.startsWith("@") && StringUtil.isXMLID(key.substring(1))))
-            || key.equals("*") || key.equals("**") || key.equals("@@") || key.equals("@*")) 
-        {
+            || key.equals("*") || key.equals("**") || key.equals("@@") || key.equals("@*")) {
             NodeListModel result = new NodeListModel(contextNode);
-            for (int i=0; i<size(); i++) {
+            for (int i = 0; i < size(); i++) {
                 NodeModel nm = (NodeModel) get(i);
                 if (nm instanceof ElementModel) {
                     TemplateSequenceModel tsm = (TemplateSequenceModel) ((ElementModel) nm).get(key);
                     if (tsm != null) {
                         int size = tsm.size();
-                        for (int j=0; j < size; j++) {
+                        for (int j = 0; j < size; j++) {
                             result.add(tsm.get(j));
                         }
                     }
@@ -160,7 +158,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     private List rawNodeList() throws TemplateModelException {
         int size = size();
         ArrayList al = new ArrayList(size);
-        for (int i=0; i<size; i++) {
+        for (int i = 0; i < size; i++) {
             al.add(((NodeModel) get(i)).node);
         }
         return al;
@@ -170,8 +168,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         if (xpathSupport == null) {
             if (contextNode != null) {
                 xpathSupport = contextNode.getXPathSupport();
-            }
-            else if (size() >0) {
+            } else if (size() > 0) {
                 xpathSupport = ((NodeModel) get(0)).getXPathSupport();
             }
         }

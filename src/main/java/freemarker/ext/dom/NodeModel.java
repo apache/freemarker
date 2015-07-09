@@ -69,8 +69,7 @@ import freemarker.template.TemplateSequenceModel;
  */
 abstract public class NodeModel
 implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
-    AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel
-{
+    AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel {
 
     static private final Logger LOG = Logger.getLogger("freemarker.dom");
 
@@ -157,8 +156,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
      * (recursively from the tree before processing
      */
     static public NodeModel parse(InputSource is, boolean removeComments, boolean removePIs)
-        throws SAXException, IOException, ParserConfigurationException 
-    {
+        throws SAXException, IOException, ParserConfigurationException {
         DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
         ErrorHandler errorHandler = getErrorHandler();
         if (errorHandler != null) builder.setErrorHandler(errorHandler);
@@ -210,8 +208,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
      * (recursively from the tree before processing
      */
     static public NodeModel parse(File f, boolean removeComments, boolean removePIs) 
-        throws SAXException, IOException, ParserConfigurationException 
-    {
+        throws SAXException, IOException, ParserConfigurationException {
         DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
         ErrorHandler errorHandler = getErrorHandler();
         if (errorHandler != null) builder.setErrorHandler(errorHandler);
@@ -346,7 +343,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     public final int size() {return 1;}
     
     public final TemplateModel get(int i) {
-        return i==0 ? this : null;
+        return i == 0 ? this : null;
     }
     
     public String getNodeNamespace() {
@@ -461,8 +458,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
                     ((CharacterData) child).setData(fullText);
                     node.removeChild(next);
                 }
-            }
-            else {
+            } else {
                 mergeAdjacentText(child);
             }
             child = child.getNextSibling();
@@ -513,8 +509,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     NodeModel getDocumentNodeModel() {
         if (node instanceof Document) {
             return this;
-        }
-        else {
+        } else {
             return wrap(node.getOwnerDocument());
         }
     }
@@ -616,14 +611,12 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         String result = "";
         if (node instanceof Text || node instanceof CDATASection) {
             result = ((org.w3c.dom.CharacterData) node).getData();
-        }
-        else if (node instanceof Element) {
+        } else if (node instanceof Element) {
             NodeList children = node.getChildNodes();
-            for (int i= 0; i<children.getLength(); i++) {
+            for (int i = 0; i < children.getLength(); i++) {
                 result += getText(children.item(i));
             }
-        }
-        else if (node instanceof Document) {
+        } else if (node instanceof Document) {
             result = getText(((Document) node).getDocumentElement());
         }
         return result;

@@ -50,19 +50,17 @@ final class MethodCall extends Expression {
         this.arguments = arguments;
     }
 
-    TemplateModel _eval(Environment env) throws TemplateException
-    {
+    TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel targetModel = target.eval(env);
         if (targetModel instanceof TemplateMethodModel) {
-            TemplateMethodModel targetMethod = (TemplateMethodModel)targetModel;
+            TemplateMethodModel targetMethod = (TemplateMethodModel) targetModel;
             List argumentStrings = 
             targetMethod instanceof TemplateMethodModelEx
             ? arguments.getModelList(env)
             : arguments.getValueList(env);
             Object result = targetMethod.exec(argumentStrings);
             return env.getObjectWrapper().wrap(result);
-        }
-        else if (targetModel instanceof BoundCallable) {
+        } else if (targetModel instanceof BoundCallable) {
             final BoundCallable boundFunc = (BoundCallable) targetModel;
             final Macro unboundFunc = boundFunc.getUnboundCallable();
             env.setLastReturnValue(null);
@@ -80,8 +78,7 @@ final class MethodCall extends Expression {
                 env.setOut(prevOut);
             }
             return env.getLastReturnValue();
-        }
-        else {
+        } else {
             throw new NonMethodException(target, targetModel, env);
         }
     }
@@ -91,7 +88,7 @@ final class MethodCall extends Expression {
         buf.append(target.getCanonicalForm());
         buf.append("(");
         String list = arguments.getCanonicalForm();
-        buf.append(list.substring(1, list.length() -1));
+        buf.append(list.substring(1, list.length() - 1));
         buf.append(")");
         return buf.toString();
     }
@@ -112,7 +109,7 @@ final class MethodCall extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new MethodCall(
                 target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-                (ListLiteral)arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+                (ListLiteral) arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
     int getParameterCount() {

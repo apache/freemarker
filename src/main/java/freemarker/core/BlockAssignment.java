@@ -67,13 +67,13 @@ final class BlockAssignment extends TemplateElement {
         CaptureOutput(Environment env) throws TemplateException {
             this.env = env;
             TemplateModel nsModel = null;
-            if(namespaceExp != null) {
+            if (namespaceExp != null) {
                 nsModel = namespaceExp.eval(env);
                 if (!(nsModel instanceof Environment.Namespace)) {
                     throw new NonNamespaceException(namespaceExp, nsModel, env);
                 }
             }
-            fnsModel = (Environment.Namespace )nsModel; 
+            fnsModel = (Environment.Namespace ) nsModel; 
         }
         
         public Writer getWriter(Writer out, Map args) {
@@ -82,10 +82,9 @@ final class BlockAssignment extends TemplateElement {
                     SimpleScalar result = new SimpleScalar(toString());
                     switch(scope) {
                         case Assignment.NAMESPACE: {
-                            if(fnsModel != null) {
+                            if (fnsModel != null) {
                                 fnsModel.put(varName, result);
-                            }
-                            else {
+                            } else {
                                 env.setVariable(varName, result);
                             }
                             break;

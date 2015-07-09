@@ -129,8 +129,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
         this.basePackagePath = canonBasePackagePath;
     }
 
-    protected URL getURL(String name)
-    {
+    protected URL getURL(String name) {
         String fullPath = basePackagePath + name;
 
         // Block java.net.URLClassLoader exploits:

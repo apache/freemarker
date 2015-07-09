@@ -35,8 +35,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  */
-class DebuggerServer
-{
+class DebuggerServer {
     private static final Logger LOG = Logger.getLogger("freemarker.debug.server");
     // TODO: Eventually replace with Yarrow    
     private static final Random R = new SecureRandom();
@@ -61,24 +60,20 @@ class DebuggerServer
         this.debuggerStub = debuggerStub;
     }
     
-    public void start()
-    {
+    public void start() {
         new Thread(new Runnable()
         {
-            public void run()
-            {
+            public void run() {
                 startInternal();
             }
         }, "FreeMarker Debugger Server Acceptor").start();
     }
     
-    private void startInternal()
-    {
+    private void startInternal() {
         try
         {
             serverSocket = new ServerSocket(port);
-            while(!stop)
-            {
+            while (!stop) {
                 Socket s = serverSocket.accept();
                 new Thread(new DebuggerAuthProtocol(s)).start();
             }
@@ -89,8 +84,7 @@ class DebuggerServer
         }
     }
     
-    private class DebuggerAuthProtocol implements Runnable
-    {
+    private class DebuggerAuthProtocol implements Runnable {
         private final Socket s;
         
         DebuggerAuthProtocol(Socket s)
@@ -98,8 +92,7 @@ class DebuggerServer
             this.s = s;
         }
         
-        public void run()
-        {
+        public void run() {
             try
             {
                 ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
@@ -111,13 +104,10 @@ class DebuggerServer
                 MessageDigest md = MessageDigest.getInstance("SHA");
                 md.update(password);
                 md.update(challenge);
-                byte[] response = (byte[])in.readObject();
-                if(Arrays.equals(response, md.digest()))
-                {
+                byte[] response = (byte[]) in.readObject();
+                if (Arrays.equals(response, md.digest())) {
                     out.writeObject(debuggerStub);
-                }
-                else
-                {
+                } else {
                     out.writeObject(null);
                 }
             }
@@ -129,11 +119,9 @@ class DebuggerServer
 
     }
 
-    public void stop()
-    {
+    public void stop() {
         this.stop = true;
-        if(serverSocket != null)
-        {
+        if (serverSocket != null) {
             try
             {
                 serverSocket.close();

@@ -36,7 +36,7 @@ public class TransformMethodWrapper1 extends Object implements TemplateMethodMod
      */
     public Object exec(List arguments) {
 
-        if(( arguments.size() > 0 ) && ( arguments.get( 0 ).toString().equals( "xml" ))) {
+        if (( arguments.size() > 0 ) && ( arguments.get( 0 ).toString().equals( "xml" ))) {
             return new XmlEscape();
         } else {
             return new HtmlEscape();

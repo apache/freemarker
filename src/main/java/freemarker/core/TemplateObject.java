@@ -38,37 +38,27 @@ public abstract class TemplateObject {
     static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
     final void setLocation(UnboundTemplate unboundTemplate, Token begin, Token end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     final void setLocation(UnboundTemplate unboundTemplate, Token begin, TemplateObject end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, Token end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, TemplateObject end)
-    throws
-        ParseException
-    {
+    throws ParseException {
         setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
     void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws
-        ParseException
-    {
+    throws ParseException {
         this.unboundTemplate = unboundTemplate;
         this.beginColumn = beginColumn;
         this.beginLine = beginLine;
@@ -197,8 +187,7 @@ public abstract class TemplateObject {
         return unboundTemplate;
     }
 
-    TemplateObject copyLocationFrom(TemplateObject from)
-    {
+    TemplateObject copyLocationFrom(TemplateObject from) {
         unboundTemplate = from.unboundTemplate;
         beginColumn = from.beginColumn;
         beginLine = from.beginLine;

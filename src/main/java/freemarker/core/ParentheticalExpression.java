@@ -39,8 +39,7 @@ final class ParentheticalExpression extends Expression {
         return "(...)";
     }
     
-    TemplateModel _eval(Environment env) throws TemplateException 
-    {
+    TemplateModel _eval(Environment env) throws TemplateException {
         return nested.eval(env);
     }
     

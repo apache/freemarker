@@ -51,9 +51,9 @@ public class MultiModel3 implements TemplateScalarModel, TemplateHashModel {
      * or null if not found.
      */
     public TemplateModel get(String key) {
-        if( key.equals( "selftest" )) {
+        if ( key.equals( "selftest" )) {
             return new SimpleScalar( "Selftest from MultiModel3!" );
-        } else if( key.equals( "message" )) {
+        } else if ( key.equals( "message" )) {
             return new SimpleScalar( "Hello world from MultiModel3!" );
         } else {
             return null;

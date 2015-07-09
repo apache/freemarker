@@ -63,29 +63,24 @@ final class AddConcatExpression extends Expression {
             Expression leftExp, TemplateModel leftModel,
             Expression rightExp, TemplateModel rightModel)
             throws TemplateModelException, TemplateException, NonStringException {
-        if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel)
-        {
+        if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel) {
             Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
             Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, rightExp);
             return _evalOnNumbers(env, parent, first, second);
-        }
-        else if(leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel)
-        {
-            return new ConcatenatedSequence((TemplateSequenceModel)leftModel, (TemplateSequenceModel)rightModel);
-        }
-        else
-        {
+        } else if (leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel) {
+            return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
+        } else {
             try {
                 String s1 = Expression.coerceModelToString(leftModel, leftExp, env);
-                if(s1 == null) s1 = "null";
+                if (s1 == null) s1 = "null";
                 String s2 = Expression.coerceModelToString(rightModel, rightExp, env);
-                if(s2 == null) s2 = "null";
+                if (s2 == null) s2 = "null";
                 return new SimpleScalar(s1.concat(s2));
             } catch (NonStringException e) {
                 if (leftModel instanceof TemplateHashModel && rightModel instanceof TemplateHashModel) {
                     if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
-                        TemplateHashModelEx leftModelEx = (TemplateHashModelEx)leftModel;
-                        TemplateHashModelEx rightModelEx = (TemplateHashModelEx)rightModel;
+                        TemplateHashModelEx leftModelEx = (TemplateHashModelEx) leftModel;
+                        TemplateHashModelEx rightModelEx = (TemplateHashModelEx) rightModel;
                         if (leftModelEx.size() == 0) {
                             return rightModelEx;
                         } else if (rightModelEx.size() == 0) {
@@ -94,8 +89,8 @@ final class AddConcatExpression extends Expression {
                             return new ConcatenatedHashEx(leftModelEx, rightModelEx);
                         }
                     } else {
-                        return new ConcatenatedHash((TemplateHashModel)leftModel,
-                                                    (TemplateHashModel)rightModel);
+                        return new ConcatenatedHash((TemplateHashModel) leftModel,
+                                                    (TemplateHashModel) rightModel);
                     }
                 } else {
                     throw e;
@@ -146,8 +141,7 @@ final class AddConcatExpression extends Expression {
 
     private static final class ConcatenatedSequence
     implements
-        TemplateSequenceModel
-    {
+        TemplateSequenceModel {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
 
@@ -158,24 +152,19 @@ final class AddConcatExpression extends Expression {
         }
 
         public int size()
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             return left.size() + right.size();
         }
 
         public TemplateModel get(int i)
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             int ls = left.size();
             return i < ls ? left.get(i) : right.get(i - ls);
         }
     }
 
     private static class ConcatenatedHash
-    implements TemplateHashModel
-    {
+    implements TemplateHashModel {
         protected final TemplateHashModel left;
         protected final TemplateHashModel right;
 
@@ -186,23 +175,20 @@ final class AddConcatExpression extends Expression {
         }
         
         public TemplateModel get(String key)
-        throws TemplateModelException
-        {
+        throws TemplateModelException {
             TemplateModel model = right.get(key);
             return (model != null) ? model : left.get(key);
         }
 
         public boolean isEmpty()
-        throws TemplateModelException
-        {
+        throws TemplateModelException {
             return left.isEmpty() && right.isEmpty();
         }
     }
 
     private static final class ConcatenatedHashEx
     extends ConcatenatedHash
-    implements TemplateHashModelEx
-    {
+    implements TemplateHashModelEx {
         private CollectionAndSequence keys;
         private CollectionAndSequence values;
         private int size;
@@ -212,45 +198,40 @@ final class AddConcatExpression extends Expression {
             super(left, right);
         }
         
-        public int size() throws TemplateModelException
-        {
+        public int size() throws TemplateModelException {
             initKeys();
             return size;
         }
 
         public TemplateCollectionModel keys()
-        throws TemplateModelException
-        {
+        throws TemplateModelException {
             initKeys();
             return keys;
         }
 
         public TemplateCollectionModel values()
-        throws TemplateModelException
-        {
+        throws TemplateModelException {
             initValues();
             return values;
         }
 
         private void initKeys()
-        throws TemplateModelException
-        {
+        throws TemplateModelException {
             if (keys == null) {
                 HashSet keySet = new HashSet();
                 SimpleSequence keySeq = new SimpleSequence(32);
-                addKeys(keySet, keySeq, (TemplateHashModelEx)this.left);
-                addKeys(keySet, keySeq, (TemplateHashModelEx)this.right);
+                addKeys(keySet, keySeq, (TemplateHashModelEx) this.left);
+                addKeys(keySet, keySeq, (TemplateHashModelEx) this.right);
                 size = keySet.size();
                 keys = new CollectionAndSequence(keySeq);
             }
         }
 
         private static void addKeys(Set set, SimpleSequence keySeq, TemplateHashModelEx hash)
-        throws TemplateModelException
-        {
+        throws TemplateModelException {
             TemplateModelIterator it = hash.keys().iterator();
             while (it.hasNext()) {
-                TemplateScalarModel tsm = (TemplateScalarModel)it.next();
+                TemplateScalarModel tsm = (TemplateScalarModel) it.next();
                 if (set.add(tsm.getAsString())) {
                     // The first occurence of the key decides the index;
                     // this is consisten with stuff like java.util.LinkedHashSet.
@@ -260,15 +241,14 @@ final class AddConcatExpression extends Expression {
         }        
 
         private void initValues()
-        throws TemplateModelException
-        {
+        throws TemplateModelException {
             if (values == null) {
                 SimpleSequence seq = new SimpleSequence(size());
                 // Note: size() invokes initKeys() if needed.
             
                 int ln = keys.size();
                 for (int i  = 0; i < ln; i++) {
-                    seq.add(get(((TemplateScalarModel)keys.get(i)).getAsString()));
+                    seq.add(get(((TemplateScalarModel) keys.get(i)).getAsString()));
                 }
                 values = new CollectionAndSequence(seq);
             }

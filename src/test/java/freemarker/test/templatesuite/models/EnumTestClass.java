@@ -25,8 +25,7 @@ public enum EnumTestClass
     THREE;
     
     @Override
-    public String toString()
-    {
+    public String toString() {
         return name() + "x";
     }
 }

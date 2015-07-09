@@ -105,7 +105,7 @@ class BuiltInsForNodes {
                 return this;
             }
             AncestorSequence result = new AncestorSequence(env);
-            for (int i=0; i<size(); i++) {
+            for (int i = 0; i < size(); i++) {
                 TemplateNodeModel tnm = (TemplateNodeModel) get(i);
                 String nodeName = tnm.getNodeName();
                 String nsURI = tnm.getNodeNamespace();
@@ -114,7 +114,7 @@ class BuiltInsForNodes {
                         result.add(tnm);
                     }
                 } else {
-                    for (int j = 0; j<names.size(); j++) {
+                    for (int j = 0; j < names.size(); j++) {
                         if (StringUtil.matchesName((String) names.get(j), nodeName, nsURI, env)) {
                             result.add(tnm);
                             break;

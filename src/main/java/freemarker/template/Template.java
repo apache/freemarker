@@ -241,8 +241,7 @@ public class Template extends Configurable {
      * @throws IOException if an I/O exception occurs during writing to the writer.
      */
     public void process(Object dataModel, Writer out)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         createProcessingEnvironment(dataModel, out, null).process();
     }
 
@@ -258,8 +257,7 @@ public class Template extends Configurable {
      * @throws IOException if an I/O exception occurs during writing to the writer.
      */
     public void process(Object dataModel, Writer out, ObjectWrapper wrapper, TemplateNodeModel rootNode)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         Environment env = createProcessingEnvironment(dataModel, out, wrapper);
         if (rootNode != null) {
             env.setCurrentVisitorNode(rootNode);
@@ -274,8 +272,7 @@ public class Template extends Configurable {
      *      provides, or {@code null} if you don't want to override that. 
      */
     public void process(Object dataModel, Writer out, ObjectWrapper wrapper)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         createProcessingEnvironment(dataModel, out, wrapper).process();
     }
     
@@ -331,7 +328,7 @@ public class Template extends Configurable {
         if (dataModel instanceof TemplateHashModel) {
             dataModelHash = (TemplateHashModel) dataModel;
         } else {
-            if(wrapper == null) {
+            if (wrapper == null) {
                 wrapper = getObjectWrapper();
             }
 
@@ -361,8 +358,7 @@ public class Template extends Configurable {
      * createProcessingEnvironment(dataModel, out, null)}.
      */
     public Environment createProcessingEnvironment(Object dataModel, Writer out)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         return createProcessingEnvironment(dataModel, out, null);
     }
     

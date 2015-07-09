@@ -40,8 +40,7 @@ import freemarker.template.TemplateModelException;
  * <tt>preTemplateProcess</tt>) are discovered as "page" variables by the FM
  * JSP PageContext implementation.
  */
-public class AllHttpScopesHashModel extends SimpleHash
-{
+public class AllHttpScopesHashModel extends SimpleHash {
     private final ServletContext context;
     private final HttpServletRequest request;
     private final Map unlistedModels = new HashMap();
@@ -67,42 +66,41 @@ public class AllHttpScopesHashModel extends SimpleHash
      * @param key the key under which the model is stored
      * @param model the stored model
      */
-    public void putUnlistedModel(String key, TemplateModel model)
-    {
+    public void putUnlistedModel(String key, TemplateModel model) {
         unlistedModels.put(key, model);
     }
 
     public TemplateModel get(String key) throws TemplateModelException {
         // Lookup in page scope
         TemplateModel model = super.get(key);
-        if(model != null) {
+        if (model != null) {
             return model;
         }
 
         // Look in unlisted models
-        model = (TemplateModel)unlistedModels.get(key);
-        if(model != null) {
+        model = (TemplateModel) unlistedModels.get(key);
+        if (model != null) {
             return model;
         }
         
         // Lookup in request scope
         Object obj = request.getAttribute(key);
-        if(obj != null) {
+        if (obj != null) {
             return wrap(obj);
         }
 
         // Lookup in session scope
         HttpSession session = request.getSession(false);
-        if(session != null) {
+        if (session != null) {
             obj = session.getAttribute(key);
-            if(obj != null) {
+            if (obj != null) {
                 return wrap(obj);
             }
         }
 
         // Lookup in application scope
         obj = context.getAttribute(key);
-        if(obj != null) {
+        if (obj != null) {
             return wrap(obj);
         }
 

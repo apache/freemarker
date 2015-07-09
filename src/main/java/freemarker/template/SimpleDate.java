@@ -21,8 +21,7 @@ package freemarker.template;
  * interface. Note that this class is immutable.
  * <p>This class is thread-safe.
  */
-public class SimpleDate implements TemplateDateModel
-{
+public class SimpleDate implements TemplateDateModel {
     private final java.util.Date date;
     private final int type;
     
@@ -55,7 +54,7 @@ public class SimpleDate implements TemplateDateModel
      * having the specified type.
      */
     public SimpleDate(java.util.Date date, int type) {
-        if(date == null) {
+        if (date == null) {
             throw new IllegalArgumentException("date == null");
         }
         this.date = date;

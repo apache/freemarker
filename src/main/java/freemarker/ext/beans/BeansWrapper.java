@@ -81,8 +81,7 @@ import freemarker.template.utility.WriteProtectable;
  * JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that was safely
  * published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety.
  */
-public class BeansWrapper implements RichObjectWrapper, WriteProtectable
-{
+public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
 
     /**
@@ -459,8 +458,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * which will be used to wrap the sub-objects.
      * @param outerIdentity the aggregate ObjectWrapper
      */
-    public void setOuterIdentity(ObjectWrapper outerIdentity)
-    {
+    public void setOuterIdentity(ObjectWrapper outerIdentity) {
         checkModifiable();
         this.outerIdentity = outerIdentity;
     }
@@ -469,8 +467,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * By default returns <tt>this</tt>.
      * @see #setOuterIdentity(ObjectWrapper)
      */
-    public ObjectWrapper getOuterIdentity()
-    {
+    public ObjectWrapper getOuterIdentity() {
         return outerIdentity;
     }
 
@@ -497,8 +494,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      *       the "field"-namespaces aren't separate in FreeMarker, hence {@code myMap.get} can return the {@code get}
      *       method.
      */
-    public void setSimpleMapWrapper(boolean simpleMapWrapper)
-    {
+    public void setSimpleMapWrapper(boolean simpleMapWrapper) {
         checkModifiable();
         this.simpleMapWrapper = simpleMapWrapper;
     }
@@ -509,8 +505,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @return true if Maps are exposed as simple hashes, false if they're
      * exposed as full JavaBeans.
      */
-    public boolean isSimpleMapWrapper()
-    {
+    public boolean isSimpleMapWrapper() {
         return simpleMapWrapper;
     }
 
@@ -544,8 +539,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
      * constants.
      */
-    public void setExposureLevel(int exposureLevel)
-    {
+    public void setExposureLevel(int exposureLevel) {
         checkModifiable();
      
         if (classIntrospector.getExposureLevel() != exposureLevel) {
@@ -558,8 +552,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
     /**
      * @since 2.3.21
      */
-    public int getExposureLevel()
-    {
+    public int getExposureLevel() {
         return classIntrospector.getExposureLevel();
     }
     
@@ -573,8 +566,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * referring to "foo" in template invokes the getter. If set to false, no
      * access to public instance fields of classes is given. Default is false.
      */
-    public void setExposeFields(boolean exposeFields)
-    {
+    public void setExposeFields(boolean exposeFields) {
         checkModifiable();
         
         if (classIntrospector.getExposeFields() != exposeFields) {
@@ -589,8 +581,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * enabled. See {@link #setExposeFields(boolean)} for details.
      * @return true if public instance fields are exposed, false otherwise.
      */
-    public boolean isExposeFields()
-    {
+    public boolean isExposeFields() {
         return classIntrospector.getExposeFields();
     }
     
@@ -708,8 +699,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * When set to false, the lookup order is reversed and generic get method
      * is called first, and only if it returns null is method lookup attempted.
      */
-    public void setMethodsShadowItems(boolean methodsShadowItems)
-    {
+    public void setMethodsShadowItems(boolean methodsShadowItems) {
         // This sync is here as this method was originally synchronized, but was never truly thread-safe, so I don't
         // want to advertise it in the javadoc, nor I wanted to break any apps that work because of this accidentally.
         synchronized (this) {
@@ -718,8 +708,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         }
     }
     
-    boolean isMethodsShadowItems()
-    {
+    boolean isMethodsShadowItems() {
         return methodsShadowItems;
     }
     
@@ -756,8 +745,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * the same object will likely return the same model (although there is
      * no guarantee as the cache items can be cleared any time).
      */
-    public void setUseCache(boolean useCache)
-    {
+    public void setUseCache(boolean useCache) {
         checkModifiable();
         modelCache.setUseCache(useCache);
     }
@@ -765,8 +753,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
     /**
      * @since 2.3.21
      */
-    public boolean getUseCache()
-    {
+    public boolean getUseCache() {
         return modelCache.getUseCache();
     }
     
@@ -779,8 +766,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * 
      * @deprecated Changing the {@code null} model can cause a lot of confusion; don't do it.
      */
-    public void setNullModel(TemplateModel nullModel)
-    {
+    public void setNullModel(TemplateModel nullModel) {
         checkModifiable();
         this.nullModel = nullModel;
     }
@@ -829,8 +815,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @deprecated Use {@link BeansWrapperBuilder} instead. The instance returned here is not read-only, so it's
      *     dangerous to use.
      */
-    public static final BeansWrapper getDefaultInstance()
-    {
+    public static final BeansWrapper getDefaultInstance() {
         return BeansWrapperSingletonHolder.INSTANCE;
     }
 
@@ -854,9 +839,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * <li>otherwise, returns a generic {@link StringModel} for it.
      * </ul>
      */
-    public TemplateModel wrap(Object object) throws TemplateModelException
-    {
-        if(object == null) return nullModel;
+    public TemplateModel wrap(Object object) throws TemplateModelException {
+        if (object == null) return nullModel;
         return modelCache.getInstance(object);
     }
     
@@ -892,55 +876,54 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @param object The object to wrap
      * @param factory The factory that wraps the object
      */
-    protected TemplateModel getInstance(Object object, ModelFactory factory)
-    {
+    protected TemplateModel getInstance(Object object, ModelFactory factory) {
         return factory.create(object, this);
     }
 
     private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return ((Boolean)object).booleanValue() ? trueModel : falseModel; 
+            return ((Boolean) object).booleanValue() ? trueModel : falseModel; 
         }
     };
 
     private static final ModelFactory ITERATOR_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new IteratorModel((Iterator)object, (BeansWrapper)wrapper); 
+            return new IteratorModel((Iterator) object, (BeansWrapper) wrapper); 
         }
     };
 
     private static final ModelFactory ENUMERATION_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new EnumerationModel((Enumeration)object, (BeansWrapper)wrapper); 
+            return new EnumerationModel((Enumeration) object, (BeansWrapper) wrapper); 
         }
     };
 
     protected ModelFactory getModelFactory(Class clazz) {
-        if(Map.class.isAssignableFrom(clazz)) {
+        if (Map.class.isAssignableFrom(clazz)) {
             return simpleMapWrapper ? SimpleMapModel.FACTORY : MapModel.FACTORY;
         }
-        if(Collection.class.isAssignableFrom(clazz)) {
+        if (Collection.class.isAssignableFrom(clazz)) {
             return CollectionModel.FACTORY;
         }
-        if(Number.class.isAssignableFrom(clazz)) {
+        if (Number.class.isAssignableFrom(clazz)) {
             return NumberModel.FACTORY;
         }
-        if(Date.class.isAssignableFrom(clazz)) {
+        if (Date.class.isAssignableFrom(clazz)) {
             return DateModel.FACTORY;
         }
-        if(Boolean.class == clazz) { // Boolean is final 
+        if (Boolean.class == clazz) { // Boolean is final 
             return BOOLEAN_FACTORY;
         }
-        if(ResourceBundle.class.isAssignableFrom(clazz)) {
+        if (ResourceBundle.class.isAssignableFrom(clazz)) {
             return ResourceBundleModel.FACTORY;
         }
-        if(Iterator.class.isAssignableFrom(clazz)) {
+        if (Iterator.class.isAssignableFrom(clazz)) {
             return ITERATOR_FACTORY;
         }
-        if(Enumeration.class.isAssignableFrom(clazz)) {
+        if (Enumeration.class.isAssignableFrom(clazz)) {
             return ENUMERATION_FACTORY;
         }
-        if(clazz.isArray()) {
+        if (clazz.isArray()) {
             return ArrayModel.FACTORY;
         }
         return StringModel.FACTORY;
@@ -959,8 +942,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * returned unchanged.
      * @throws TemplateModelException if an attempted unwrapping fails.
      */
-    public Object unwrap(TemplateModel model) throws TemplateModelException
-    {
+    public Object unwrap(TemplateModel model) throws TemplateModelException {
         return unwrap(model, Object.class);
     }
 
@@ -978,10 +960,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @see #tryUnwrapTo(TemplateModel, Class)
      */
     public Object unwrap(TemplateModel model, Class targetClass) 
-    throws TemplateModelException
-    {
+    throws TemplateModelException {
         final Object obj = tryUnwrapTo(model, targetClass);
-        if(obj == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
+        if (obj == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
           throw new TemplateModelException("Can not unwrap model of type " + 
               model.getClass().getName() + " to type " + targetClass.getName());
         }
@@ -991,8 +972,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
     /**
      * @since 2.3.22
      */
-    public Object tryUnwrapTo(TemplateModel model, Class targetClass) throws TemplateModelException
-    {
+    public Object tryUnwrapTo(TemplateModel model, Class targetClass) throws TemplateModelException {
         return tryUnwrapTo(model, targetClass, 0);
     }
     
@@ -1004,8 +984,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @return {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} or the unwrapped object.
      */
     Object tryUnwrapTo(TemplateModel model, Class targetClass, int typeFlags) 
-    throws TemplateModelException
-    {
+    throws TemplateModelException {
         Object res = tryUnwrapTo(model, targetClass, typeFlags, null);
         if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
@@ -1020,7 +999,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      */
     private Object tryUnwrapTo(final TemplateModel model, Class targetClass, final int typeFlags, final Map recursionStops) 
     throws TemplateModelException {
-        if(model == null || model == nullModel) {
+        if (model == null || model == nullModel) {
             return null;
         }
         
@@ -1034,8 +1013,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         // Passing the targetClass allows i.e. a Jython-aware method that declares a
         // PyObject as its argument to receive a PyObject from a JythonModel
         // passed as an argument to TemplateMethodModelEx etc.
-        if(model instanceof AdapterTemplateModel) {
-            Object wrapped = ((AdapterTemplateModel)model).getAdaptedObject(
+        if (model instanceof AdapterTemplateModel) {
+            Object wrapped = ((AdapterTemplateModel) model).getAdaptedObject(
                     targetClass);
             if (targetClass == Object.class || targetClass.isInstance(wrapped)) {
                 return wrapped;
@@ -1044,20 +1023,20 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
             // Attempt numeric conversion: 
             if (targetClass != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(targetClass))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
-                if(number != null) return number;
+                if (number != null) return number;
             }
         }
         
-        if(model instanceof WrapperTemplateModel) {
-            Object wrapped = ((WrapperTemplateModel)model).getWrappedObject();
+        if (model instanceof WrapperTemplateModel) {
+            Object wrapped = ((WrapperTemplateModel) model).getWrappedObject();
             if (targetClass == Object.class || targetClass.isInstance(wrapped)) {
                 return wrapped;
             }
             
             // Attempt numeric conversion: 
-            if(targetClass != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(targetClass))) {
+            if (targetClass != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(targetClass))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
-                if(number != null) {
+                if (number != null) {
                     return number;
                 }
             }
@@ -1070,64 +1049,64 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         if (targetClass != Object.class) {
 
             // Java 5: Also should check for CharSequence at the end
-            if(String.class == targetClass) {
-                if(model instanceof TemplateScalarModel) {
-                    return ((TemplateScalarModel)model).getAsString();
+            if (String.class == targetClass) {
+                if (model instanceof TemplateScalarModel) {
+                    return ((TemplateScalarModel) model).getAsString();
                 }
                 // String is final, so no other conversion will work
                 return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
             }
     
             // Primitive numeric types & Number.class and its subclasses
-            if(ClassUtil.isNumerical(targetClass)) {
-                if(model instanceof TemplateNumberModel) {
+            if (ClassUtil.isNumerical(targetClass)) {
+                if (model instanceof TemplateNumberModel) {
                     Number number = forceUnwrappedNumberToType(
-                            ((TemplateNumberModel)model).getAsNumber(), targetClass, is2321Bugfixed);
-                    if(number != null) {
+                            ((TemplateNumberModel) model).getAsNumber(), targetClass, is2321Bugfixed);
+                    if (number != null) {
                         return number;
                     }
                 }
             }
             
-            if(boolean.class == targetClass || Boolean.class == targetClass) {
-                if(model instanceof TemplateBooleanModel) {
+            if (boolean.class == targetClass || Boolean.class == targetClass) {
+                if (model instanceof TemplateBooleanModel) {
                     return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
                 }
                 // Boolean is final, no other conversion will work
                 return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
             }
     
-            if(Map.class == targetClass) {
-                if(model instanceof TemplateHashModel) {
-                    return new HashAdapter((TemplateHashModel)model, this);
+            if (Map.class == targetClass) {
+                if (model instanceof TemplateHashModel) {
+                    return new HashAdapter((TemplateHashModel) model, this);
                 }
             }
             
-            if(List.class == targetClass) {
-                if(model instanceof TemplateSequenceModel) {
-                    return new SequenceAdapter((TemplateSequenceModel)model, this);
+            if (List.class == targetClass) {
+                if (model instanceof TemplateSequenceModel) {
+                    return new SequenceAdapter((TemplateSequenceModel) model, this);
                 }
             }
             
-            if(Set.class == targetClass) {
-                if(model instanceof TemplateCollectionModel) {
-                    return new SetAdapter((TemplateCollectionModel)model, this);
+            if (Set.class == targetClass) {
+                if (model instanceof TemplateCollectionModel) {
+                    return new SetAdapter((TemplateCollectionModel) model, this);
                 }
             }
             
-            if(Collection.class == targetClass || ITERABLE_CLASS == targetClass) {
-                if(model instanceof TemplateCollectionModel) {
-                    return new CollectionAdapter((TemplateCollectionModel)model, 
+            if (Collection.class == targetClass || ITERABLE_CLASS == targetClass) {
+                if (model instanceof TemplateCollectionModel) {
+                    return new CollectionAdapter((TemplateCollectionModel) model, 
                             this);
                 }
-                if(model instanceof TemplateSequenceModel) {
-                    return new SequenceAdapter((TemplateSequenceModel)model, this);
+                if (model instanceof TemplateSequenceModel) {
+                    return new SequenceAdapter((TemplateSequenceModel) model, this);
                 }
             }
             
             // TemplateSequenceModels can be converted to arrays
-            if(targetClass.isArray()) {
-                if(model instanceof TemplateSequenceModel) {
+            if (targetClass.isArray()) {
+                if (model instanceof TemplateSequenceModel) {
                     return unwrapSequenceToArray((TemplateSequenceModel) model, targetClass, true, recursionStops);
                 }
                 // array classes are final, no other conversion will work
@@ -1135,10 +1114,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
             }
             
             // Allow one-char strings to be coerced to characters
-            if(char.class == targetClass || targetClass == Character.class) {
-                if(model instanceof TemplateScalarModel) {
-                    String s = ((TemplateScalarModel)model).getAsString();
-                    if(s.length() == 1) {
+            if (char.class == targetClass || targetClass == Character.class) {
+                if (model instanceof TemplateScalarModel) {
+                    String s = ((TemplateScalarModel) model).getAsString();
+                    if (s.length() == 1) {
                         return Character.valueOf(s.charAt(0));
                     }
                 }
@@ -1146,9 +1125,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                 return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
             }
     
-            if(Date.class.isAssignableFrom(targetClass) && model instanceof TemplateDateModel) {
-                Date date = ((TemplateDateModel)model).getAsDate();
-                if(targetClass.isInstance(date)) {
+            if (Date.class.isAssignableFrom(targetClass) && model instanceof TemplateDateModel) {
+                Date date = ((TemplateDateModel) model).getAsDate();
+                if (targetClass.isInstance(date)) {
                     return date;
                 }
             }
@@ -1248,9 +1227,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      */
     Object unwrapSequenceToArray(TemplateSequenceModel seq, Class arrayClass, boolean tryOnly, Map recursionStops)
             throws TemplateModelException {
-        if(recursionStops != null) {
+        if (recursionStops != null) {
             Object retval = recursionStops.get(seq);
-            if(retval != null) {
+            if (retval != null) {
                 return retval;
             }
         } else {
@@ -1264,7 +1243,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
             for (int i = 0; i < size; i++) {
                 final TemplateModel seqItem = seq.get(i);
                 Object val = tryUnwrapTo(seqItem, componentType, 0, recursionStops);
-                if(val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
+                if (val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                     if (tryOnly) {
                         return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
                     } else {
@@ -1293,9 +1272,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                     recursionStops);
         }
         
-        if(recursionStops != null) {
+        if (recursionStops != null) {
             Object retval = recursionStops.get(list);
-            if(retval != null) {
+            if (retval != null) {
                 return retval;
             }
         } else {
@@ -1309,7 +1288,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
             boolean isComponentTypeNumerical = false;  // will be filled on demand
             boolean isComponentTypeList = false;  // will be filled on demand
             int i = 0;
-            for (Iterator it = list.iterator(); it.hasNext();) {
+            for (Iterator it = list.iterator(); it.hasNext(); ) {
                 Object listItem = it.next();
                 if (listItem != null && !componentType.isInstance(listItem)) {
                     // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
@@ -1386,8 +1365,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
             return n instanceof Long ? (Long) n : Long.valueOf(n.longValue());
         } else if (targetType == double.class || targetType == Double.class) {
             return n instanceof Double ? (Double) n : Double.valueOf(n.doubleValue());
-        } else if(targetType == BigDecimal.class) {
-            if(n instanceof BigDecimal) {
+        } else if (targetType == BigDecimal.class) {
+            if (n instanceof BigDecimal) {
                 return n;
             } else if (n instanceof BigInteger) {
                 return new BigDecimal((BigInteger) n);
@@ -1448,11 +1427,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * BeansWrapper never throws TemplateModelException).
      */
     TemplateModel invokeMethod(Object object, Method method, Object[] args)
-    throws
-        InvocationTargetException,
+    throws InvocationTargetException,
         IllegalAccessException,
-        TemplateModelException
-    {
+        TemplateModelException {
         // [2.4]: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
         // There should at least be an option to check this.
         Object retval = method.invoke(object, args);
@@ -1475,8 +1452,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * that returns hash models whose elements are the static models of the
      * classes.
      */
-    public TemplateHashModel getStaticModels()
-    {
+    public TemplateHashModel getStaticModels() {
         return staticModels;
     }
     
@@ -1497,7 +1473,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * pre-1.5 JRE, as Java enums aren't supported there.
      */
     public TemplateHashModel getEnumModels() {
-        if(enumModels == null) {
+        if (enumModels == null) {
             throw new UnsupportedOperationException(
                     "Enums not supported before J2SE 5.");
         }
@@ -1518,23 +1494,19 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @return The instance created; it's not wrapped into {@link TemplateModel}.
      */
     public Object newInstance(Class clazz, List/*<TemplateModel>*/ arguments)
-    throws
-        TemplateModelException
-    {
+    throws TemplateModelException {
         try
         {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
-            if(ctors == null)
-            {
+            if (ctors == null) {
                 throw new TemplateModelException("Class " + clazz.getName() + 
                         " has no public constructors.");
             }
             Constructor ctor = null;
             Object[] objargs;
-            if(ctors instanceof SimpleMethod)
-            {
-                SimpleMethod sm = (SimpleMethod)ctors;
-                ctor = (Constructor)sm.getMember();
+            if (ctors instanceof SimpleMethod) {
+                SimpleMethod sm = (SimpleMethod) ctors;
+                ctor = (Constructor) sm.getMember();
                 objargs = sm.unwrapArguments(arguments, this);
                 try {
                     return ctor.newInstance(objargs);
@@ -1542,9 +1514,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                     if (e instanceof TemplateModelException) throw (TemplateModelException) e;
                     throw _MethodUtil.newInvocationTemplateModelException(null, ctor, e);
                 }
-            }
-            else if(ctors instanceof OverloadedMethods)
-            {
+            } else if (ctors instanceof OverloadedMethods) {
                 final MemberAndArguments mma = ((OverloadedMethods) ctors).getMemberAndArguments(arguments, this);
                 try {
                     return mma.invokeConstructor(this);
@@ -1553,9 +1523,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
                     
                     throw _MethodUtil.newInvocationTemplateModelException(null, mma.getCallableMemberDescriptor(), e);
                 }
-            }
-            else
-            {
+            } else {
                 // Cannot happen
                 throw new BugException();
             }
@@ -1618,26 +1586,23 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * the corresponding formal argument of the method.
      */
     // Unused?
-    public static void coerceBigDecimals(AccessibleObject callable, Object[] args)
-    {
+    public static void coerceBigDecimals(AccessibleObject callable, Object[] args) {
         Class[] formalTypes = null;
-        for(int i = 0; i < args.length; ++i) {
+        for (int i = 0; i < args.length; ++i) {
             Object arg = args[i];
-            if(arg instanceof BigDecimal) {
-                if(formalTypes == null) {
-                    if(callable instanceof Method) {
-                        formalTypes = ((Method)callable).getParameterTypes();
-                    }
-                    else if(callable instanceof Constructor) {
-                        formalTypes = ((Constructor)callable).getParameterTypes();
-                    }
-                    else {
+            if (arg instanceof BigDecimal) {
+                if (formalTypes == null) {
+                    if (callable instanceof Method) {
+                        formalTypes = ((Method) callable).getParameterTypes();
+                    } else if (callable instanceof Constructor) {
+                        formalTypes = ((Constructor) callable).getParameterTypes();
+                    } else {
                         throw new IllegalArgumentException("Expected method or "
                                 + " constructor; callable is " + 
                                 callable.getClass().getName());
                     }
                 }
-                args[i] = coerceBigDecimal((BigDecimal)arg, formalTypes[i]);
+                args[i] = coerceBigDecimal((BigDecimal) arg, formalTypes[i]);
             }
         }
     }
@@ -1646,23 +1611,22 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * Converts any {@link BigDecimal}s in the passed array to the type of
      * the corresponding formal argument of the method.
      */
-    public static void coerceBigDecimals(Class[] formalTypes, Object[] args)
-    {
+    public static void coerceBigDecimals(Class[] formalTypes, Object[] args) {
         int typeLen = formalTypes.length;
         int argsLen = args.length;
         int min = Math.min(typeLen, argsLen);
-        for(int i = 0; i < min; ++i) {
+        for (int i = 0; i < min; ++i) {
             Object arg = args[i];
-            if(arg instanceof BigDecimal) {
-                args[i] = coerceBigDecimal((BigDecimal)arg, formalTypes[i]);
+            if (arg instanceof BigDecimal) {
+                args[i] = coerceBigDecimal((BigDecimal) arg, formalTypes[i]);
             }
         }
-        if(argsLen > typeLen) {
+        if (argsLen > typeLen) {
             Class varArgType = formalTypes[typeLen - 1];
-            for(int i = typeLen; i < argsLen; ++i) {
+            for (int i = typeLen; i < argsLen; ++i) {
                 Object arg = args[i];
-                if(arg instanceof BigDecimal) {
-                    args[i] = coerceBigDecimal((BigDecimal)arg, varArgType);
+                if (arg instanceof BigDecimal) {
+                    args[i] = coerceBigDecimal((BigDecimal) arg, varArgType);
                 }
             }
         }
@@ -1670,25 +1634,19 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
 
     public static Object coerceBigDecimal(BigDecimal bd, Class formalType) {
         // int is expected in most situations, so we check it first
-        if(formalType == int.class || formalType == Integer.class) {
+        if (formalType == int.class || formalType == Integer.class) {
             return Integer.valueOf(bd.intValue());
-        }
-        else if(formalType == double.class || formalType == Double.class) {
+        } else if (formalType == double.class || formalType == Double.class) {
             return Double.valueOf(bd.doubleValue());
-        }
-        else if(formalType == long.class || formalType == Long.class) {
+        } else if (formalType == long.class || formalType == Long.class) {
             return Long.valueOf(bd.longValue());
-        }
-        else if(formalType == float.class || formalType == Float.class) {
+        } else if (formalType == float.class || formalType == Float.class) {
             return Float.valueOf(bd.floatValue());
-        }
-        else if(formalType == short.class || formalType == Short.class) {
+        } else if (formalType == short.class || formalType == Short.class) {
             return Short.valueOf(bd.shortValue());
-        }
-        else if(formalType == byte.class || formalType == Byte.class) {
+        } else if (formalType == byte.class || formalType == Byte.class) {
             return Byte.valueOf(bd.byteValue());
-        }
-        else if(java.math.BigInteger.class.isAssignableFrom(formalType)) {
+        } else if (java.math.BigInteger.class.isAssignableFrom(formalType)) {
             return bd.toBigInteger();
         } else {
             return bd;
@@ -1727,9 +1685,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
     }
 
     private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {
-        if(ENUMS_MODEL_CTOR != null) {
+        if (ENUMS_MODEL_CTOR != null) {
             try {
-                return (ClassBasedModelFactory)ENUMS_MODEL_CTOR.newInstance(
+                return (ClassBasedModelFactory) ENUMS_MODEL_CTOR.newInstance(
                         new Object[] { wrapper });
             } catch(Exception e) {
                 throw new UndeclaredThrowableException(e);

@@ -38,8 +38,8 @@ public class TemplateLevelSettings {
     private static final StringTemplateLoader TEMPLATES = new StringTemplateLoader();
     static {
         TEMPLATES.putTemplate(MAIN_FTL,
-                "${true}<#include '" + INCLUDED_FTL +"'>"
-                + "${true}<#import '" + IMPORTED_FTL +"' as ns>"
+                "${true}<#include '" + INCLUDED_FTL + "'>"
+                + "${true}<#import '" + IMPORTED_FTL + "' as ns>"
                 + "${true}<@ns.impM1>${true}</@>"
                 + "${true}<@incM>${true}</@>"
                 + "${true}");

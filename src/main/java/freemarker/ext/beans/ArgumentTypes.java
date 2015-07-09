@@ -63,7 +63,7 @@ final class ArgumentTypes {
     ArgumentTypes(Object[] args, boolean bugfixed) {
         int ln = args.length;
         Class[] typesTmp = new Class[ln];
-        for(int i = 0; i < ln; ++i) {
+        for (int i = 0; i < ln; ++i) {
             Object arg = args[i];
             typesTmp[i] = arg == null
                     ? (bugfixed ? Null.class : Object.class)
@@ -77,20 +77,20 @@ final class ArgumentTypes {
     
     public int hashCode() {
         int hash = 0;
-        for(int i = 0; i < types.length; ++i) {
+        for (int i = 0; i < types.length; ++i) {
             hash ^= types[i].hashCode();
         }
         return hash;
     }
     
     public boolean equals(Object o) {
-        if(o instanceof ArgumentTypes) {
-            ArgumentTypes cs = (ArgumentTypes)o;
-            if(cs.types.length != types.length) {
+        if (o instanceof ArgumentTypes) {
+            ArgumentTypes cs = (ArgumentTypes) o;
+            if (cs.types.length != types.length) {
                 return false;
             }
-            for(int i = 0; i < types.length; ++i) {
-                if(cs.types[i] != types[i]) {
+            for (int i = 0; i < types.length; ++i) {
+                if (cs.types[i] != types[i]) {
                     return false;
                 }
             }
@@ -104,24 +104,21 @@ final class ArgumentTypes {
      *         {@link EmptyCallableMemberDescriptor#AMBIGUOUS_METHOD}. 
      */
     MaybeEmptyCallableMemberDescriptor getMostSpecific(
-            List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg)
-    {
+            List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg) {
         LinkedList/*<ReflectionCallableMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
-        if(applicables.isEmpty()) {
+        if (applicables.isEmpty()) {
             return EmptyCallableMemberDescriptor.NO_SUCH_METHOD;
         }
-        if(applicables.size() == 1) {
+        if (applicables.size() == 1) {
             return (CallableMemberDescriptor) applicables.getFirst();
         }
         
         LinkedList/*<CallableMemberDescriptor>*/ maximals = new LinkedList();
-        for (Iterator applicablesIter = applicables.iterator(); applicablesIter.hasNext();)
-        {
+        for (Iterator applicablesIter = applicables.iterator(); applicablesIter.hasNext(); ) {
             CallableMemberDescriptor applicable = (CallableMemberDescriptor) applicablesIter.next();
             boolean lessSpecific = false;
             for (Iterator maximalsIter = maximals.iterator(); 
-                maximalsIter.hasNext();)
-            {
+                maximalsIter.hasNext(); ) {
                 CallableMemberDescriptor maximal = (CallableMemberDescriptor) maximalsIter.next();
                 final int cmpRes = compareParameterListPreferability(
                         applicable.getParamTypes(), maximal.getParamTypes(), varArg); 
@@ -131,11 +128,11 @@ final class ArgumentTypes {
                     lessSpecific = true;
                 }
             }
-            if(!lessSpecific) {
+            if (!lessSpecific) {
                 maximals.addLast(applicable);
             }
         }
-        if(maximals.size() > 1) {
+        if (maximals.size() > 1) {
             return EmptyCallableMemberDescriptor.AMBIGUOUS_METHOD;
         }
         return (CallableMemberDescriptor) maximals.getFirst();
@@ -377,10 +374,10 @@ final class ArgumentTypes {
         } else { // non-bugfixed (backward-compatible) mode
             boolean paramTypes1HasAMoreSpecific = false;
             boolean paramTypes2HasAMoreSpecific = false;
-            for(int i = 0; i < paramTypes1Len; ++i) {
+            for (int i = 0; i < paramTypes1Len; ++i) {
                 Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
                 Class paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
-                if(paramType1 != paramType2) {
+                if (paramType1 != paramType2) {
                     paramTypes1HasAMoreSpecific = 
                         paramTypes1HasAMoreSpecific
                         || _MethodUtil.isMoreOrSameSpecificParameterType(paramType1, paramType2, false, 0) != 0;
@@ -390,9 +387,9 @@ final class ArgumentTypes {
                 }
             }
             
-            if(paramTypes1HasAMoreSpecific) {
+            if (paramTypes1HasAMoreSpecific) {
                 return paramTypes2HasAMoreSpecific ? 0 : 1;
-            } else if(paramTypes2HasAMoreSpecific) {
+            } else if (paramTypes2HasAMoreSpecific) {
                 return -1;
             } else {
                 return 0;
@@ -452,11 +449,11 @@ final class ArgumentTypes {
     LinkedList/*<ReflectionCallableMemberDescriptor>*/ getApplicables(
             List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg) {
         LinkedList applicables = new LinkedList();
-        for (Iterator it = memberDescs.iterator(); it.hasNext();) {
+        for (Iterator it = memberDescs.iterator(); it.hasNext(); ) {
             ReflectionCallableMemberDescriptor memberDesc = (ReflectionCallableMemberDescriptor) it.next();
             int difficulty = isApplicable(memberDesc, varArg);
             if (difficulty != CONVERSION_DIFFICULTY_IMPOSSIBLE) {
-                if(difficulty == CONVERSION_DIFFICULTY_REFLECTION) {
+                if (difficulty == CONVERSION_DIFFICULTY_REFLECTION) {
                     applicables.add(memberDesc);
                 } else if (difficulty == CONVERSION_DIFFICULTY_FREEMARKER) {
                     applicables.add(new SpecialConversionCallableMemberDescriptor(memberDesc));
@@ -479,31 +476,31 @@ final class ArgumentTypes {
         final Class[] paramTypes = memberDesc.getParamTypes(); 
         final int cl = types.length;
         final int fl = paramTypes.length - (varArg ? 1 : 0);
-        if(varArg) {
-            if(cl < fl) {
+        if (varArg) {
+            if (cl < fl) {
                 return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
         } else {
-            if(cl != fl) {
+            if (cl != fl) {
                 return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
         }
         
         int maxDifficulty = 0;
-        for(int i = 0; i < fl; ++i) {
+        for (int i = 0; i < fl; ++i) {
             int difficulty = isMethodInvocationConvertible(paramTypes[i], types[i]);
-            if(difficulty == CONVERSION_DIFFICULTY_IMPOSSIBLE) {
+            if (difficulty == CONVERSION_DIFFICULTY_IMPOSSIBLE) {
                 return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
             if (maxDifficulty < difficulty) {
                 maxDifficulty = difficulty;
             }
         }
-        if(varArg) {
+        if (varArg) {
             Class varArgParamType = paramTypes[fl].getComponentType();
-            for(int i = fl; i < cl; ++i) {
+            for (int i = fl; i < cl; ++i) {
                 int difficulty = isMethodInvocationConvertible(varArgParamType, types[i]); 
-                if(difficulty == CONVERSION_DIFFICULTY_IMPOSSIBLE) {
+                if (difficulty == CONVERSION_DIFFICULTY_IMPOSSIBLE) {
                     return CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 }
                 if (maxDifficulty < difficulty) {
@@ -530,7 +527,7 @@ final class ArgumentTypes {
      */
     private int isMethodInvocationConvertible(final Class formal, final Class actual) {
         // Check for identity or widening reference conversion
-        if(formal.isAssignableFrom(actual) && actual != CharacterOrString.class) {
+        if (formal.isAssignableFrom(actual) && actual != CharacterOrString.class) {
             return CONVERSION_DIFFICULTY_REFLECTION;
         } else if (bugfixed) {
             final Class formalNP;
@@ -576,11 +573,11 @@ final class ArgumentTypes {
             // - Doesn't support NumberWithFallbackType-s and CharacterOrString-s. Those are only produced in bugfixed
             //   mode anyway.
             // - Doesn't support conversion between array and List
-            if(formal.isPrimitive()) {
+            if (formal.isPrimitive()) {
                 // Check for boxing with widening primitive conversion. Note that 
                 // actual parameters are never primitives.
                 // It doesn't do the same with boxing types... that was a bug.
-                if(formal == Boolean.TYPE) {
+                if (formal == Boolean.TYPE) {
                     return actual == Boolean.class
                             ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 } else if (formal == Double.TYPE && 
@@ -604,9 +601,9 @@ final class ArgumentTypes {
                 } else if (formal == Character.TYPE) {
                     return actual == Character.class
                             ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
-                } else if(formal == Byte.TYPE && actual == Byte.class) {
+                } else if (formal == Byte.TYPE && actual == Byte.class) {
                     return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if(formal == Short.TYPE &&
+                } else if (formal == Short.TYPE &&
                    (actual == Short.class || actual == Byte.class)) {
                     return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if (BigDecimal.class.isAssignableFrom(actual) && ClassUtil.isNumerical(formal)) {

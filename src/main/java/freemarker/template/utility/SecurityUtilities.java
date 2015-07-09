@@ -24,34 +24,29 @@ import freemarker.log.Logger;
 
 /**
  */
-public class SecurityUtilities
-{
+public class SecurityUtilities {
     private static final Logger LOG = Logger.getLogger("freemarker.security");
     private SecurityUtilities()
     {
     }
     
-    public static String getSystemProperty(final String key)
-    {
+    public static String getSystemProperty(final String key) {
         return (String) AccessController.doPrivileged(
             new PrivilegedAction()
             {
-                public Object run()
-                {
+                public Object run() {
                     return System.getProperty(key);
                 }
             });
     }
 
-    public static String getSystemProperty(final String key, final String defValue)
-    {
+    public static String getSystemProperty(final String key, final String defValue) {
         try
         {
             return (String) AccessController.doPrivileged(
                 new PrivilegedAction()
                 {
-                    public Object run()
-                    {
+                    public Object run() {
                         return System.getProperty(key, defValue);
                     }
                 });
@@ -65,15 +60,13 @@ public class SecurityUtilities
         }
     }
 
-    public static Integer getSystemProperty(final String key, final int defValue)
-    {
+    public static Integer getSystemProperty(final String key, final int defValue) {
         try
         {
             return (Integer) AccessController.doPrivileged(
                 new PrivilegedAction()
                 {
-                    public Object run()
-                    {
+                    public Object run() {
                         return Integer.getInteger(key, defValue);
                     }
                 });

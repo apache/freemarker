@@ -86,8 +86,7 @@ public interface TemplateLoader {
      *             {@code null} then!
      */
     public Object findTemplateSource(String name)
-    throws
-        IOException;
+    throws IOException;
         
     /**
      * Returns the time of last modification of the specified template source, if the backing storage mechanism supports
@@ -141,8 +140,7 @@ public interface TemplateLoader {
      *             if an I/O error occurs while accessing the stream.
      */
     public Reader getReader(Object templateSource, String encoding)
-    throws
-        IOException;
+    throws IOException;
     
     /**
      * Closes the template source, releasing any resources held that are only required for reading the template and/or
@@ -154,6 +152,5 @@ public interface TemplateLoader {
      *            the template source that should be closed.
      */
     public void closeTemplateSource(Object templateSource)
-    throws
-        IOException;
+    throws IOException;
 }

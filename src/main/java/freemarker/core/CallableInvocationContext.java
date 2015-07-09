@@ -77,32 +77,30 @@ class CallableInvocationContext implements LocalContext {
             firstUnresolvedExpression = null;
             firstReferenceException = null;
             resolvedAnArg = hasUnresolvedArg = false;
-            for(int i = 0; i < callableDefinition.getParamNames().length; ++i) {
+            for (int i = 0; i < callableDefinition.getParamNames().length; ++i) {
                 String argName = callableDefinition.getParamNames()[i];
-                if(localVars.get(argName) == null) {
+                if (localVars.get(argName) == null) {
                     Expression valueExp = (Expression) callableDefinition.getParamDefaults().get(argName);
                     if (valueExp != null) {
                         try {
                             TemplateModel tm = valueExp.eval(env);
-                            if(tm == null) {
-                                if(!hasUnresolvedArg) {
+                            if (tm == null) {
+                                if (!hasUnresolvedArg) {
                                     firstUnresolvedExpression = valueExp;
                                     hasUnresolvedArg = true;
                                 }
-                            }
-                            else {
+                            } else {
                                 localVars.put(argName, tm);
                                 resolvedAnArg = true;
                             }
                         }
                         catch(InvalidReferenceException e) {
-                            if(!hasUnresolvedArg) {
+                            if (!hasUnresolvedArg) {
                                 hasUnresolvedArg = true;
                                 firstReferenceException = e;
                             }
                         }
-                    }
-                    else if (!env.isClassicCompatible()) {
+                    } else if (!env.isClassicCompatible()) {
                         boolean argWasSpecified = localVars.containsKey(argName);
                         throw new _MiscTemplateException(env,
                                 new _ErrorDescriptionBuilder(new Object[] {
@@ -128,8 +126,8 @@ class CallableInvocationContext implements LocalContext {
             }
         }
         while(resolvedAnArg && hasUnresolvedArg);
-        if(hasUnresolvedArg) {
-            if(firstReferenceException != null) {
+        if (hasUnresolvedArg) {
+            if (firstReferenceException != null) {
                 throw firstReferenceException;
             } else if (!env.isClassicCompatible()) {
                 throw InvalidReferenceException.getInstance(firstUnresolvedExpression, env);
@@ -158,7 +156,7 @@ class CallableInvocationContext implements LocalContext {
 
     public Collection getLocalVariableNames() throws TemplateModelException {
         HashSet result = new HashSet();
-        for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext();) {
+        for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext(); ) {
             result.add(it.next().toString());
         }
         return result;

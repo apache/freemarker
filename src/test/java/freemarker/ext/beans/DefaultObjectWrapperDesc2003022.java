@@ -18,7 +18,7 @@ package freemarker.ext.beans;
 
 import freemarker.template.Configuration;
 
-public class DefaultObjectWrapperDesc2003022 extends DefaultObjectWrapperWithSortedMethods{
+public class DefaultObjectWrapperDesc2003022 extends DefaultObjectWrapperWithSortedMethods {
 
     public DefaultObjectWrapperDesc2003022() {
         super(Configuration.VERSION_2_3_22, true);

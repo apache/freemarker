@@ -63,8 +63,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  */
-abstract class FreeMarkerPageContext extends PageContext implements TemplateModel
-{
+abstract class FreeMarkerPageContext extends PageContext implements TemplateModel {
     private static final Class OBJECT_CLASS = Object.class;
         
     private final Environment environment;
@@ -86,14 +85,13 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
 
         TemplateModel appModel = environment.getGlobalVariable(
                 FreemarkerServlet.KEY_APPLICATION_PRIVATE);
-        if(!(appModel instanceof ServletContextHashModel)) {
+        if (!(appModel instanceof ServletContextHashModel)) {
             appModel = environment.getGlobalVariable(
                     FreemarkerServlet.KEY_APPLICATION);
         }
-        if(appModel instanceof ServletContextHashModel) {
-            this.servlet = ((ServletContextHashModel)appModel).getServlet();
-        }
-        else {
+        if (appModel instanceof ServletContextHashModel) {
+            this.servlet = ((ServletContextHashModel) appModel).getServlet();
+        } else {
             throw new  TemplateModelException("Could not find an instance of " + 
                     ServletContextHashModel.class.getName() + 
                     " in the data model under either the name " + 
@@ -103,20 +101,19 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         
         TemplateModel requestModel = 
             environment.getGlobalVariable(FreemarkerServlet.KEY_REQUEST_PRIVATE);
-        if(!(requestModel instanceof HttpRequestHashModel)) {
+        if (!(requestModel instanceof HttpRequestHashModel)) {
             requestModel = environment.getGlobalVariable(
                     FreemarkerServlet.KEY_REQUEST);
         }
-        if(requestModel instanceof HttpRequestHashModel) {
-            HttpRequestHashModel reqHash = (HttpRequestHashModel)requestModel;
+        if (requestModel instanceof HttpRequestHashModel) {
+            HttpRequestHashModel reqHash = (HttpRequestHashModel) requestModel;
             request = reqHash.getRequest();
             session = request.getSession(false);
             response = reqHash.getResponse();
             wrapper = reqHash.getObjectWrapper();
             unwrapper = this.wrapper instanceof ObjectWrapperAndUnwrapper
                     ? (ObjectWrapperAndUnwrapper) this.wrapper : null;
-        }
-        else  {
+        } else {
             throw new  TemplateModelException("Could not find an instance of " + 
                     HttpRequestHashModel.class.getName() + 
                     " in the data model under either the name " + 
@@ -142,8 +139,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     public void initialize(
         Servlet servlet, ServletRequest request, ServletResponse response,
         String errorPageURL, boolean needsSession, int bufferSize, 
-        boolean autoFlush)
-    {
+        boolean autoFlush) {
         throw new UnsupportedOperationException();
     }
 
@@ -183,13 +179,11 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
     }
 
-    public Object getAttribute(String name)
-    {
+    public Object getAttribute(String name) {
         return getAttribute(name, PAGE_SCOPE);
     }
 
-    public Object getAttribute(String name, int scope)
-    {
+    public Object getAttribute(String name, int scope) {
         switch (scope) {
             case PAGE_SCOPE: {
                 try {
@@ -201,7 +195,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                             return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
                         }
                         if (tm instanceof WrapperTemplateModel) {
-                            return ((WrapperTemplateModel)tm).getWrappedObject();
+                            return ((WrapperTemplateModel) tm).getWrappedObject();
                         }
                         if (tm instanceof TemplateScalarModel) {
                             return ((TemplateScalarModel) tm).getAsString();
@@ -228,7 +222,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             }
             case SESSION_SCOPE: {
                 HttpSession session = getSession(false);
-                if(session == null) {
+                if (session == null) {
                     return null;
                 }
                 return session.getAttribute(name);
@@ -242,14 +236,13 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
     }
 
-    public Object findAttribute(String name)
-    {
+    public Object findAttribute(String name) {
         Object retval = getAttribute(name, PAGE_SCOPE);
-        if(retval != null) return retval;
+        if (retval != null) return retval;
         retval = getAttribute(name, REQUEST_SCOPE);
-        if(retval != null) return retval;
+        if (retval != null) return retval;
         retval = getAttribute(name, SESSION_SCOPE);
-        if(retval != null) return retval;
+        if (retval != null) return retval;
         return getAttribute(name, APPLICATION_SCOPE);
     }
 
@@ -272,7 +265,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             }
             case SESSION_SCOPE: {
                 HttpSession session = getSession(false);
-                if(session != null) {
+                if (session != null) {
                     session.removeAttribute(name);
                 }
                 break;
@@ -288,10 +281,10 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     }
 
     public int getAttributesScope(String name) {
-        if(getAttribute(name, PAGE_SCOPE) != null) return PAGE_SCOPE;
-        if(getAttribute(name, REQUEST_SCOPE) != null) return REQUEST_SCOPE;
-        if(getAttribute(name, SESSION_SCOPE) != null) return SESSION_SCOPE;
-        if(getAttribute(name, APPLICATION_SCOPE) != null) return APPLICATION_SCOPE;
+        if (getAttribute(name, PAGE_SCOPE) != null) return PAGE_SCOPE;
+        if (getAttribute(name, REQUEST_SCOPE) != null) return REQUEST_SCOPE;
+        if (getAttribute(name, SESSION_SCOPE) != null) return SESSION_SCOPE;
+        if (getAttribute(name, APPLICATION_SCOPE) != null) return APPLICATION_SCOPE;
         return 0;
     }
 
@@ -311,7 +304,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             }
             case SESSION_SCOPE: {
                 HttpSession session = getSession(false);
-                if(session != null) {
+                if (session != null) {
                     return session.getAttributeNames();
                 }
                 return Collections.enumeration(Collections.EMPTY_SET);
@@ -330,9 +323,9 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     }
 
     private HttpSession getSession(boolean create) {
-        if(session == null) {
+        if (session == null) {
             session = request.getSession(create);
-            if(session != null) {
+            if (session != null) {
                 setAttribute(SESSION, session);
             }
         }
@@ -378,7 +371,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     }
 
     public void include(String url, boolean flush) throws ServletException, IOException {
-        if(flush) {
+        if (flush) {
             jspOut.flush();
         }
         final PrintWriter pw = new PrintWriter(jspOut);
@@ -403,7 +396,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     }
 
     public BodyContent pushBody() {
-      return (BodyContent)pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
+      return (BodyContent) pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
   }
 
   public JspWriter pushBody(Writer w) {
@@ -416,10 +409,9 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     }
 
     Object peekTopTag(Class tagClass) {
-        for (ListIterator iter = tags.listIterator(tags.size()); iter.hasPrevious();)
-        {
+        for (ListIterator iter = tags.listIterator(tags.size()); iter.hasPrevious(); ) {
             Object tag = iter.previous();
-            if(tagClass.isInstance(tag)) {
+            if (tagClass.isInstance(tag)) {
                 return tag;
             }
         }
@@ -431,7 +423,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     }  
 
     void popWriter() {
-        jspOut = (JspWriter)outs.remove(outs.size() - 1);
+        jspOut = (JspWriter) outs.remove(outs.size() - 1);
         setAttribute(OUT, jspOut);
     }
     

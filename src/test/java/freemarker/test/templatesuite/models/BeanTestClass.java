@@ -18,43 +18,35 @@ package freemarker.test.templatesuite.models;
 
 /**
  */
-public class BeanTestClass extends BeanTestSuperclass implements BeanTestInterface<Integer>
-{
+public class BeanTestClass extends BeanTestSuperclass implements BeanTestInterface<Integer> {
     public static final String STATIC_FINAL_FIELD = "static-final-field";
     public static String STATIC_FIELD = "static-field";
     
-	public String getFoo()
-	{
+	public String getFoo() {
 	    return "foo-value";
 	}
 	
-	public String getBar(int index)
-	{
+	public String getBar(int index) {
 	    return "bar-value-" + index;
 	}
 	
-	public String overloaded(int i)
-	{
+	public String overloaded(int i) {
 	    return "overloaded-int-" + i;
 	}
 	
-	public String overloaded(String s)
-	{
+	public String overloaded(String s) {
 	    return "overloaded-String-" + s;
 	}
 	
-	public static String staticMethod()
-	{
+	public static String staticMethod() {
 	    return "static-method";
 	}
 	
-	public static String staticOverloaded(int i)
-	{
+	public static String staticOverloaded(int i) {
 	    return "static-overloaded-int-" + i;
 	}
 
-	public static String staticOverloaded(String s)
-	{
+	public static String staticOverloaded(String s) {
 	    return "static-overloaded-String-" + s;
 	}
 	

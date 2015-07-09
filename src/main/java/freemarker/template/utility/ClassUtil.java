@@ -54,8 +54,7 @@ import freemarker.template.TemplateTransformModel;
 
 /**
  */
-public class ClassUtil
-{
+public class ClassUtil {
     private ClassUtil()
     {
     }
@@ -67,9 +66,7 @@ public class ClassUtil
      * fall back to the class loader that loads the FreeMarker classes.
      */
     public static Class forName(String className)
-    throws
-        ClassNotFoundException
-    {
+    throws ClassNotFoundException {
         try
         {
             ClassLoader ctcl = Thread.currentThread().getContextClassLoader();

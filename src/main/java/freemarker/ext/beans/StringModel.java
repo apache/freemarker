@@ -27,14 +27,12 @@ import freemarker.template.TemplateScalarModel;
  * interface.
  */
 public class StringModel extends BeanModel
-implements TemplateScalarModel
-{
+implements TemplateScalarModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new StringModel(object, (BeansWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new StringModel(object, (BeansWrapper) wrapper);
             }
         };
 
@@ -56,8 +54,7 @@ implements TemplateScalarModel
      * Returns the result of calling {@link Object#toString()} on the wrapped
      * object.
      */
-    public String getAsString()
-    {
+    public String getAsString() {
         return object.toString();
     }
 }

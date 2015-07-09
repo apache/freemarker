@@ -49,43 +49,32 @@ public class _JdomNavigator extends Navigator {
     } 
 
     void getAsString(Object node, StringWriter sw)
-    throws
-        TemplateModelException
-    {
+    throws TemplateModelException {
         try {
             if (node instanceof Element) {
-                OUTPUT.output((Element)node, sw);
-            }
-            else if (node instanceof Attribute) {
-                Attribute attribute = (Attribute)node;
+                OUTPUT.output((Element) node, sw);
+            } else if (node instanceof Attribute) {
+                Attribute attribute = (Attribute) node;
                 sw.write(" ");
                 sw.write(attribute.getQualifiedName());
                 sw.write("=\"");
                 sw.write(OUTPUT.escapeAttributeEntities(attribute.getValue()));
                 sw.write("\"");
-            }
-            else if (node instanceof Text) {
-                OUTPUT.output((Text)node, sw);
-            }
-            else if (node instanceof Document) {
-                OUTPUT.output((Document)node, sw);
-            }
-            else if (node instanceof ProcessingInstruction) {
-                OUTPUT.output((ProcessingInstruction)node, sw);
-            }
-            else if (node instanceof Comment) {
-                OUTPUT.output((Comment)node, sw);
-            }
-            else if (node instanceof CDATA) {
-                OUTPUT.output((CDATA)node, sw);
-            }
-            else if (node instanceof DocType) {
-                OUTPUT.output((DocType)node, sw);
-            }
-            else if (node instanceof EntityRef) {
-                OUTPUT.output((EntityRef)node, sw);
-            }
-            else {
+            } else if (node instanceof Text) {
+                OUTPUT.output((Text) node, sw);
+            } else if (node instanceof Document) {
+                OUTPUT.output((Document) node, sw);
+            } else if (node instanceof ProcessingInstruction) {
+                OUTPUT.output((ProcessingInstruction) node, sw);
+            } else if (node instanceof Comment) {
+                OUTPUT.output((Comment) node, sw);
+            } else if (node instanceof CDATA) {
+                OUTPUT.output((CDATA) node, sw);
+            } else if (node instanceof DocType) {
+                OUTPUT.output((DocType) node, sw);
+            } else if (node instanceof EntityRef) {
+                OUTPUT.output((EntityRef) node, sw);
+            } else {
                 throw new TemplateModelException(node.getClass().getName() + " is not a core JDOM class");
             }
         }
@@ -95,74 +84,66 @@ public class _JdomNavigator extends Navigator {
     }
 
     void getChildren(Object node, String localName, String namespaceUri, List result) {
-        if(node instanceof Element) {
-            Element e = (Element)node;
-            if(localName == null) {
+        if (node instanceof Element) {
+            Element e = (Element) node;
+            if (localName == null) {
                 result.addAll(e.getChildren());
-            }
-            else {
+            } else {
                 result.addAll(e.getChildren(localName, Namespace.getNamespace("", namespaceUri)));
             }
-        }
-        else if(node instanceof Document) {
-            Element root = ((Document)node).getRootElement();
-            if(localName == null || (equal(root.getName(), localName) && equal(root.getNamespaceURI(), namespaceUri))) {
+        } else if (node instanceof Document) {
+            Element root = ((Document) node).getRootElement();
+            if (localName == null || (equal(root.getName(), localName) && equal(root.getNamespaceURI(), namespaceUri))) {
                 result.add(root);
             }
         }
     }
     
     void getAttributes(Object node, String localName, String namespaceUri, List result) {
-        if(node instanceof Element) {
-            Element e = (Element)node;
-            if(localName == null) {
+        if (node instanceof Element) {
+            Element e = (Element) node;
+            if (localName == null) {
                 result.addAll(e.getAttributes());
-            }
-            else {
+            } else {
                 Attribute attr = e.getAttribute(localName, Namespace.getNamespace("", namespaceUri)); 
-                if(attr != null) {
+                if (attr != null) {
                     result.add(attr);
                 } 
             }
         } else if (node instanceof ProcessingInstruction) {
-            ProcessingInstruction pi = (ProcessingInstruction)node;
+            ProcessingInstruction pi = (ProcessingInstruction) node;
             if ("target".equals(localName)) {
                 result.add(new Attribute("target", pi.getTarget()));
-            }
-            else if ("data".equals(localName)) {
+            } else if ("data".equals(localName)) {
                 result.add(new Attribute("data", pi.getData()));
-            }
-            else {
+            } else {
                 result.add(new Attribute(localName, pi.getValue(localName)));
             }
         } else if (node instanceof DocType) {
-            DocType doctype = (DocType)node;
+            DocType doctype = (DocType) node;
             if ("publicId".equals(localName)) {
                 result.add(new Attribute("publicId", doctype.getPublicID()));
-            }
-            else if ("systemId".equals(localName)) {
+            } else if ("systemId".equals(localName)) {
                 result.add(new Attribute("systemId", doctype.getSystemID()));
-            }
-            else if ("elementName".equals(localName)) {
+            } else if ("elementName".equals(localName)) {
                 result.add(new Attribute("elementName", doctype.getElementName()));
             }
         } 
     }
 
     void getDescendants(Object node, List result) {
-        if(node instanceof Document) {
-            Element root = ((Document)node).getRootElement();
+        if (node instanceof Document) {
+            Element root = ((Document) node).getRootElement();
             result.add(root);
             getDescendants(root, result);
-        }
-        else if(node instanceof Element) {
-            getDescendants((Element)node, result);
+        } else if (node instanceof Element) {
+            getDescendants((Element) node, result);
         }
     }
     
     private void getDescendants(Element node, List result) {
-        for (Iterator iter = node.getChildren().iterator(); iter.hasNext();) {
-            Element subnode = (Element)iter.next();
+        for (Iterator iter = node.getChildren().iterator(); iter.hasNext(); ) {
+            Element subnode = (Element) iter.next();
             result.add(subnode);
             getDescendants(subnode, result);
         }
@@ -170,48 +151,43 @@ public class _JdomNavigator extends Navigator {
 
     Object getParent(Object node) {
         if (node instanceof Element) {
-            return((Element)node).getParent();
+            return((Element) node).getParent();
         }
         if (node instanceof Attribute) {
-            return((Attribute)node).getParent();
+            return((Attribute) node).getParent();
         }
         if (node instanceof Text) {
-            return((Text)node).getParent();
+            return((Text) node).getParent();
         }
         if (node instanceof ProcessingInstruction) {
-            return((ProcessingInstruction)node).getParent();
+            return((ProcessingInstruction) node).getParent();
         }
         if (node instanceof Comment) {
-            return((Comment)node).getParent();
+            return((Comment) node).getParent();
         }
         if (node instanceof EntityRef) {
-            return((EntityRef)node).getParent();
+            return((EntityRef) node).getParent();
         }
         return null;
     }
 
     Object getDocument(Object node) {
         if (node instanceof Element) {
-            return ((Element)node).getDocument();
-        }
-        else if (node instanceof Attribute) {
-            Element parent = ((Attribute)node).getParent();
+            return ((Element) node).getDocument();
+        } else if (node instanceof Attribute) {
+            Element parent = ((Attribute) node).getParent();
             return parent == null ? null : parent.getDocument();
-        } 
-        else if (node instanceof Text) {
-            Element parent = ((Text)node).getParent();
+        } else if (node instanceof Text) {
+            Element parent = ((Text) node).getParent();
             return parent == null ? null : parent.getDocument();
-        } 
-        else if (node instanceof Document)
+        } else if (node instanceof Document)
             return node;
         else if (node instanceof ProcessingInstruction) {
-            return ((ProcessingInstruction)node).getDocument();
-        }
-        else if (node instanceof EntityRef) {
-            return ((EntityRef)node).getDocument();
-        }
-        else if (node instanceof Comment) {
-            return ((Comment)node).getDocument();
+            return ((ProcessingInstruction) node).getDocument();
+        } else if (node instanceof EntityRef) {
+            return ((EntityRef) node).getDocument();
+        } else if (node instanceof Comment) {
+            return ((Comment) node).getDocument();
         }
         return null;
     }
@@ -219,111 +195,110 @@ public class _JdomNavigator extends Navigator {
     Object getDocumentType(Object node) {
         return 
             node instanceof Document 
-            ? ((Document)node).getDocType()
+            ? ((Document) node).getDocType()
             : null; 
     }
     
     void getContent(Object node, List result) {
         if (node instanceof Element)
-            result.addAll(((Element)node).getContent());
+            result.addAll(((Element) node).getContent());
         else if (node instanceof Document)
-            result.addAll(((Document)node).getContent());
+            result.addAll(((Document) node).getContent());
     }
 
     String getText(Object node) {
         if (node instanceof Element) {
-            return ((Element)node).getTextTrim();
+            return ((Element) node).getTextTrim();
         }
         if (node instanceof Attribute) {
-            return ((Attribute)node).getValue();
+            return ((Attribute) node).getValue();
         }
         if (node instanceof CDATA) {
-            return ((CDATA)node).getText();
+            return ((CDATA) node).getText();
         }
         if (node instanceof Comment) {
-            return ((Comment)node).getText();
+            return ((Comment) node).getText();
         }
         if (node instanceof ProcessingInstruction) {
-            return ((ProcessingInstruction)node).getData();
+            return ((ProcessingInstruction) node).getData();
         }
         return null;
     }
 
     String getLocalName(Object node) {
         if (node instanceof Element) {
-            return ((Element)node).getName();
+            return ((Element) node).getName();
         }
         if (node instanceof Attribute) {
-            return ((Attribute)node).getName();
+            return ((Attribute) node).getName();
         }
         if (node instanceof EntityRef) {
-            return ((EntityRef)node).getName();
+            return ((EntityRef) node).getName();
         }
         if (node instanceof ProcessingInstruction) {
-            return ((ProcessingInstruction)node).getTarget();
+            return ((ProcessingInstruction) node).getTarget();
         }
         if (node instanceof DocType) {
-            return ((DocType)node).getElementName();
+            return ((DocType) node).getElementName();
         }
         return null;
     }
 
     String getNamespacePrefix(Object node) {
-        if(node instanceof Element) {
-            return ((Element)node).getNamespacePrefix();
+        if (node instanceof Element) {
+            return ((Element) node).getNamespacePrefix();
         }
-        if(node instanceof Attribute) {
-            return ((Attribute)node).getNamespacePrefix();
+        if (node instanceof Attribute) {
+            return ((Attribute) node).getNamespacePrefix();
         }
         return null;
     }
 
     String getNamespaceUri(Object node) {
-        if(node instanceof Element) {
-            return ((Element)node).getNamespaceURI();
+        if (node instanceof Element) {
+            return ((Element) node).getNamespaceURI();
         }
-        if(node instanceof Attribute) {
-            return ((Attribute)node).getNamespaceURI();
+        if (node instanceof Attribute) {
+            return ((Attribute) node).getNamespaceURI();
         }
         return null;
     }
 
     String getType(Object node) {
-        if(node instanceof Attribute) {
+        if (node instanceof Attribute) {
             return "attribute";
         }
-        if(node instanceof CDATA) {
+        if (node instanceof CDATA) {
             return "cdata";
         }
-        if(node instanceof Comment) {
+        if (node instanceof Comment) {
             return "comment";
         }
-        if(node instanceof Document) {
+        if (node instanceof Document) {
             return "document";
         }
-        if(node instanceof DocType) {
+        if (node instanceof DocType) {
             return "documentType";
         }
-        if(node instanceof Element) {
+        if (node instanceof Element) {
             return "element";
         }
-        if(node instanceof EntityRef) {
+        if (node instanceof EntityRef) {
             return "entityReference";
         }
-        if(node instanceof Namespace) {
+        if (node instanceof Namespace) {
             return "namespace";
         }
-        if(node instanceof ProcessingInstruction) {
+        if (node instanceof ProcessingInstruction) {
             return "processingInstruction";
         }
-        if(node instanceof Text) {
+        if (node instanceof Text) {
             return "text";
         }
         return "unknown";
     }
 
-    XPathEx createXPathEx(String xpathString) throws TemplateModelException
-    {
+    XPathEx createXPathEx(String xpathString) throws TemplateModelException {
         try {
             return new JDOMXPathEx(xpathString);
         }
@@ -336,19 +311,15 @@ public class _JdomNavigator extends Navigator {
     extends
         JDOMXPath
     implements
-        XPathEx
-    {
+        XPathEx {
         JDOMXPathEx(String path)
-        throws 
-            Exception
+        throws Exception
         {
             super(path);
         }
 
         public List selectNodes(Object object, NamespaceContext namespaces)
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             Context context = getContext(object);
             context.getContextSupport().setNamespaceContext(namespaces);
             try {

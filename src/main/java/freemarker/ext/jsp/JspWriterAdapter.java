@@ -65,113 +65,93 @@ class JspWriterAdapter extends JspWriter {
         out.write(arg0 ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
     }
 
-    public void print(char arg0) throws IOException
-    {
+    public void print(char arg0) throws IOException {
         out.write(arg0);
     }
 
-    public void print(char[] arg0) throws IOException
-    {
+    public void print(char[] arg0) throws IOException {
         out.write(arg0);
     }
 
-    public void print(double arg0) throws IOException
-    {
+    public void print(double arg0) throws IOException {
         out.write(Double.toString(arg0));
     }
 
-    public void print(float arg0) throws IOException
-    {
+    public void print(float arg0) throws IOException {
         out.write(Float.toString(arg0));
     }
 
-    public void print(int arg0) throws IOException
-    {
+    public void print(int arg0) throws IOException {
         out.write(Integer.toString(arg0));
     }
 
-    public void print(long arg0) throws IOException
-    {
+    public void print(long arg0) throws IOException {
         out.write(Long.toString(arg0));
     }
 
-    public void print(Object arg0) throws IOException
-    {
+    public void print(Object arg0) throws IOException {
         out.write(arg0 == null ? "null" : arg0.toString());
     }
 
-    public void print(String arg0) throws IOException
-    {
+    public void print(String arg0) throws IOException {
         out.write(arg0);
     }
 
-    public void println() throws IOException
-    {
+    public void println() throws IOException {
         newLine();
     }
 
-    public void println(boolean arg0) throws IOException
-    {
+    public void println(boolean arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(char arg0) throws IOException
-    {
+    public void println(char arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(char[] arg0) throws IOException
-    {
+    public void println(char[] arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(double arg0) throws IOException
-    {
+    public void println(double arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(float arg0) throws IOException
-    {
+    public void println(float arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(int arg0) throws IOException
-    {
+    public void println(int arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(long arg0) throws IOException
-    {
+    public void println(long arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(Object arg0) throws IOException
-    {
+    public void println(Object arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void println(String arg0) throws IOException
-    {
+    public void println(String arg0) throws IOException {
         print(arg0);
         newLine();
     }
 
-    public void write(int c) throws IOException
-    {
+    public void write(int c) throws IOException {
         out.write(c);
     }
     
     public void write(char[] arg0, int arg1, int arg2)
-        throws IOException
-    {
+        throws IOException {
         out.write(arg0, arg1, arg2);
     }
 }

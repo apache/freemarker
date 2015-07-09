@@ -44,7 +44,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     // TODO This should be the part of the "parent" parsing; now it contains hacks like those with namingConvention.  
     void parseValue(FMParserTokenManager parentTokenSource) throws ParseException {
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
-            SimpleCharStream scs = new SimpleCharStream(new StringReader(value), beginLine, beginColumn+1, value.length());
+            SimpleCharStream scs = new SimpleCharStream(new StringReader(value), beginLine, beginColumn + 1, value.length());
             
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
             token_source.onlyTextOutput = true;
@@ -88,8 +88,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     String evalAndCoerceToString(Environment env) throws TemplateException {
         if (dynamicValue == null) {
             return value;
-        } 
-        else {
+        } else {
             TemplateExceptionHandler teh = env.getTemplateExceptionHandler();
             env.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             try {
@@ -110,7 +109,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         } else {
             StringBuilder sb = new StringBuilder();
             sb.append('"');
-            for (Enumeration childrenEnum = dynamicValue.children(); childrenEnum.hasMoreElements();) {
+            for (Enumeration childrenEnum = dynamicValue.children(); childrenEnum.hasMoreElements(); ) {
                 TemplateElement child = (TemplateElement) childrenEnum.nextElement();
                 if (child instanceof Interpolation) {
                     sb.append(((Interpolation) child).getCanonicalFormInStringLiteral());

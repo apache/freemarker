@@ -52,14 +52,13 @@ final class TransformBlock extends TemplateElement {
     }
 
     void accept(Environment env) 
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         TemplateTransformModel ttm = env.getTransform(transformExpression);
         if (ttm != null) {
             Map args;
             if (namedArgs != null && !namedArgs.isEmpty()) {
                 args = new HashMap();
-                for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
+                for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry entry = (Map.Entry) it.next();
                     String key = (String) entry.getKey();
                     Expression valueExp = (Expression) entry.getValue();
@@ -70,8 +69,7 @@ final class TransformBlock extends TemplateElement {
                 args = EmptyMap.instance;
             }
             env.visitAndTransform(getNestedBlock(), ttm, args);
-        }
-        else {
+        } else {
             TemplateModel tm = transformExpression.eval(env);
             throw new UnexpectedTypeException(
                     transformExpression, tm,
@@ -86,7 +84,7 @@ final class TransformBlock extends TemplateElement {
         sb.append(' ');
         sb.append(transformExpression);
         if (namedArgs != null) {
-            for (Iterator it = getSortedNamedArgs().iterator(); it.hasNext();) {
+            for (Iterator it = getSortedNamedArgs().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) it.next();
                 sb.append(' ');
                 sb.append(entry.getKey());

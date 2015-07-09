@@ -51,8 +51,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * {@link Configuration#setTemplateLoader(TemplateLoader)} and
  * {@link Configuration#setCacheStorage(CacheStorage)}.
  */
-public class TemplateCache
-{
+public class TemplateCache {
     
     /**
      * The default template update delay; see {@link Configuration#setTemplateUpdateDelayMilliseconds(long)}.
@@ -157,7 +156,7 @@ public class TemplateCache
         NullArgumentException.check("cacheStorage", cacheStorage);
         this.storage = cacheStorage;
         isStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
-                ((ConcurrentCacheStorage)cacheStorage).isConcurrent();
+                ((ConcurrentCacheStorage) cacheStorage).isConcurrent();
         
         NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
         this.templateLookupStrategy = templateLookupStrategy;
@@ -175,19 +174,16 @@ public class TemplateCache
      * 
      * @deprecated Use the {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} constructor.
      */
-    public void setConfiguration(Configuration config)
-    {
+    public void setConfiguration(Configuration config) {
         this.config = config;
         clear();
     }
 
-    public TemplateLoader getTemplateLoader()
-    {
+    public TemplateLoader getTemplateLoader() {
         return templateLoader;
     }
     
-    public CacheStorage getCacheStorage()
-    {
+    public CacheStorage getCacheStorage() {
         return storage;
     }
     
@@ -237,8 +233,7 @@ public class TemplateCache
      */
     public MaybeMissingTemplate getTemplate(String name, Locale locale, Object customLookupCondition,
             String encoding, boolean parseAsFTL)
-    throws IOException
-    {
+    throws IOException {
         NullArgumentException.check("name", name);
         NullArgumentException.check("locale", locale);
         NullArgumentException.check("encoding", encoding);
@@ -289,8 +284,7 @@ public class TemplateCache
     private Template getTemplateInternal(
             final String name, final Locale locale, final Object customLookupCondition,
             final String encoding, final boolean parseAsFTL)
-    throws IOException
-    {
+    throws IOException {
         final boolean debug = LOG.isDebugEnabled();
         final String debugName = debug
                 ? buildDebugName(name, locale, customLookupCondition, encoding, parseAsFTL)
@@ -298,7 +292,7 @@ public class TemplateCache
         final TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parseAsFTL);
         
         CachedTemplate cachedTemplate;
-        if(isStorageConcurrent) {
+        if (isStorageConcurrent) {
             cachedTemplate = (CachedTemplate) storage.get(tk);
         } else {
             synchronized(storage) {
@@ -315,20 +309,18 @@ public class TemplateCache
             if (cachedTemplate != null) {
                 // If we're within the refresh delay, return the cached copy
                 if (now - cachedTemplate.lastChecked < updateDelay) {
-                    if(debug) {
+                    if (debug) {
                         LOG.debug(debugName + " cached copy not yet stale; using cached.");
                     }
                     // Can be null, indicating a cached negative lookup
                     Object t = cachedTemplate.templateOrException;
-                    if(t instanceof Template || t == null) {
-                        return (Template)t;
-                    }
-                    else if(t instanceof RuntimeException) {
-                        throwLoadFailedException((RuntimeException)t);
-                    }
-                    else if(t instanceof IOException) {
+                    if (t instanceof Template || t == null) {
+                        return (Template) t;
+                    } else if (t instanceof RuntimeException) {
+                        throwLoadFailedException((RuntimeException) t);
+                    } else if (t instanceof IOException) {
                         rethrown = true;
-                        throwLoadFailedException((IOException)t);
+                        throwLoadFailedException((IOException) t);
                     }
                     throw new BugException("t is " + t.getClass().getName());
                 }
@@ -344,7 +336,7 @@ public class TemplateCache
 
                 // Template source was removed
                 if (!newLookupResult.isPositive()) {
-                    if(debug) {
+                    if (debug) {
                         LOG.debug(debugName + " no source found.");
                     } 
                     storeNegativeLookup(tk, cachedTemplate, null);
@@ -358,11 +350,11 @@ public class TemplateCache
                 boolean lastModifiedNotChanged = lastModified == cachedTemplate.lastModified;
                 boolean sourceEquals = newLookupResultSource.equals(cachedTemplate.source);
                 if (lastModifiedNotChanged && sourceEquals) {
-                    if(debug) {
+                    if (debug) {
                         LOG.debug(debugName + ": using cached since " + newLookupResultSource + " hasn't changed.");
                     }
                     storeCached(tk, cachedTemplate);
-                    return (Template)cachedTemplate.templateOrException;
+                    return (Template) cachedTemplate.templateOrException;
                 } else if (debug) {
                     if (!sourceEquals) {
                         LOG.debug("Updating source because: " + 
@@ -443,7 +435,7 @@ public class TemplateCache
     
     private void throwLoadFailedException(Exception e) throws IOException {
         IOException ioe;
-        if(INIT_CAUSE != null) {
+        if (INIT_CAUSE != null) {
             ioe = new IOException("There was an error loading the " +
                 "template on an earlier attempt; it's attached as a cause");
             try {
@@ -453,8 +445,7 @@ public class TemplateCache
             } catch(Exception ex) {
                 throw new UndeclaredThrowableException(ex);
             }
-        }
-        else {
+        } else {
             ioe = new IOException("There was an error loading the " +
             "template on an earlier attempt: " + e.getClass().getName() + 
             ": " + e.getMessage());
@@ -471,10 +462,9 @@ public class TemplateCache
     }
 
     private void storeCached(TemplateKey tk, CachedTemplate cachedTemplate) {
-        if(isStorageConcurrent) {
+        if (isStorageConcurrent) {
             storage.put(tk, cachedTemplate);
-        }
-        else {
+        } else {
             synchronized(storage) {
                 storage.put(tk, cachedTemplate);
             }
@@ -541,8 +531,7 @@ public class TemplateCache
      * template source.
      * @return the current value of the delay
      */
-    public long getDelay()
-    {
+    public long getDelay() {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
             return updateDelay;
@@ -554,8 +543,7 @@ public class TemplateCache
      * template sources.
      * @param delay the new value of the delay
      */
-    public void setDelay(long delay)
-    {
+    public void setDelay(long delay) {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
             this.updateDelay = delay;
@@ -565,8 +553,7 @@ public class TemplateCache
     /**
      * Returns if localized template lookup is enabled or not.
      */
-    public boolean getLocalizedLookup()
-    {
+    public boolean getLocalizedLookup() {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
             return localizedLookup;
@@ -576,8 +563,7 @@ public class TemplateCache
     /**
      * Setis if localized template lookup is enabled or not.
      */
-    public void setLocalizedLookup(boolean localizedLookup)
-    {
+    public void setLocalizedLookup(boolean localizedLookup) {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
             if (this.localizedLookup != localizedLookup) {
@@ -594,12 +580,11 @@ public class TemplateCache
      * {@link StatefulTemplateLoader stateful}, then its 
      * {@link StatefulTemplateLoader#resetState()} method is invoked as well.
      */
-    public void clear()
-    {
+    public void clear() {
         synchronized (storage) {
             storage.clear();
-            if(templateLoader instanceof StatefulTemplateLoader) {
-                ((StatefulTemplateLoader)templateLoader).resetState();
+            if (templateLoader instanceof StatefulTemplateLoader) {
+                ((StatefulTemplateLoader) templateLoader).resetState();
             }
         }
     }
@@ -630,21 +615,21 @@ public class TemplateCache
             throw new IllegalArgumentException("Argument \"encoding\" can't be null");
         }
         name = templateNameFormat.normalizeAbsoluteName(name);
-        if(name != null && templateLoader != null) {
+        if (name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugName = debug
                     ? buildDebugName(name, locale, customLookupCondition, encoding, parse)
                     : null;
             TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parse);
             
-            if(isStorageConcurrent) {
+            if (isStorageConcurrent) {
                 storage.remove(tk);
             } else {
                 synchronized(storage) {
                     storage.remove(tk);
                 }
             }
-            if(debug) {
+            if (debug) {
                 LOG.debug(debugName + " was removed from the cache, if it was there");
             }
         }
@@ -685,24 +670,19 @@ public class TemplateCache
         return lookupResult;
     }
 
-    private TemplateLookupResult lookupTemplateWithAcquisitionStrategy(String path) throws IOException
-    {
+    private TemplateLookupResult lookupTemplateWithAcquisitionStrategy(String path) throws IOException {
         int asterisk = path.indexOf(ASTERISK);
         // Shortcut in case there is no acquisition
-        if(asterisk == -1)
-        {
+        if (asterisk == -1) {
             return TemplateLookupResult.from(path, findTemplateSource(path));
         }
         StringTokenizer tok = new StringTokenizer(path, "/");
         int lastAsterisk = -1;
         List tokpath = new ArrayList();
-        while(tok.hasMoreTokens())
-        {
+        while (tok.hasMoreTokens()) {
             String pathToken = tok.nextToken();
-            if(pathToken.equals(ASTERISKSTR))
-            {
-                if(lastAsterisk != -1)
-                {
+            if (pathToken.equals(ASTERISKSTR)) {
+                if (lastAsterisk != -1) {
                     tokpath.remove(lastAsterisk);
                 }
                 lastAsterisk = tokpath.size();
@@ -714,22 +694,18 @@ public class TemplateCache
         }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
-        if(resourcePath.endsWith("/"))
-        {
+        if (resourcePath.endsWith("/")) {
             resourcePath = resourcePath.substring(0, resourcePath.length() - 1);
         }
         StringBuilder buf = new StringBuilder(path.length()).append(basePath);
         int l = basePath.length();
-        for(;;)
-        {
+        for (; ; ) {
             String fullPath = buf.append(resourcePath).toString();
             Object templateSource = findTemplateSource(fullPath);
-            if(templateSource != null)
-            {
+            if (templateSource != null) {
                 return TemplateLookupResult.from(fullPath, templateSource);
             }
-            if(l == 0)
-            {
+            if (l == 0) {
                 return TemplateLookupResult.createNegativeResult();
             }
             l = basePath.lastIndexOf(SLASH, l - 2) + 1;
@@ -768,11 +744,9 @@ public class TemplateCache
         return templateSource;
     }
 
-    private String concatPath(List path, int from, int to)
-    {
+    private String concatPath(List path, int from, int to) {
         StringBuilder buf = new StringBuilder((to - from) * 16);
-        for(int i = from; i < to; ++i)
-        {
+        for (int i = from; i < to; ++i) {
             buf.append(path.get(i)).append('/');
         }
         return buf.toString();
@@ -782,8 +756,7 @@ public class TemplateCache
      * This class holds a (name, locale) pair and is used as the key in
      * the cached templates map.
      */
-    private static final class TemplateKey
-    {
+    private static final class TemplateKey {
         private final String name;
         private final Locale locale;
         private final Object customLookupCondition;
@@ -799,11 +772,9 @@ public class TemplateCache
             this.parse = parse;
         }
 
-        public boolean equals(Object o)
-        {
-            if (o instanceof TemplateKey)
-            {
-                TemplateKey tk = (TemplateKey)o;
+        public boolean equals(Object o) {
+            if (o instanceof TemplateKey) {
+                TemplateKey tk = (TemplateKey) o;
                 return
                     parse == tk.parse &&
                     name.equals(tk.name) &&
@@ -820,8 +791,7 @@ public class TemplateCache
                 : o2 == null;
         }
 
-        public int hashCode()
-        {
+        public int hashCode() {
             return
                 name.hashCode() ^
                 locale.hashCode() ^
@@ -839,8 +809,7 @@ public class TemplateCache
      * to serialize/replicate them (see tracker issue #1926150); FreeMarker 
      * code itself doesn't rely on its serializability.
      */
-    private static final class CachedTemplate implements Cloneable, Serializable
-    {
+    private static final class CachedTemplate implements Cloneable, Serializable {
         private static final long serialVersionUID = 1L;
 
         Object templateOrException;
@@ -850,7 +819,7 @@ public class TemplateCache
         
         public CachedTemplate cloneCachedTemplate() {
             try {
-                return (CachedTemplate)super.clone();
+                return (CachedTemplate) super.clone();
             }
             catch(CloneNotSupportedException e) {
                 throw new UndeclaredThrowableException(e);

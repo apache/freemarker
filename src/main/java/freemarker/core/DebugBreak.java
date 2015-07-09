@@ -27,23 +27,18 @@ import freemarker.template.TemplateException;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
-public class DebugBreak extends TemplateElement
-{
+public class DebugBreak extends TemplateElement {
     public DebugBreak(TemplateElement nestedBlock)
     {
         setNestedBlock(nestedBlock);
         copyLocationFrom(nestedBlock);
     }
     
-    protected void accept(Environment env) throws TemplateException, IOException
-    {
-        if(!DebuggerService.suspendEnvironment(
-                env, this.getUnboundTemplate().getSourceName(), getNestedBlock().getBeginLine()))
-        {
+    protected void accept(Environment env) throws TemplateException, IOException {
+        if (!DebuggerService.suspendEnvironment(
+                env, this.getUnboundTemplate().getSourceName(), getNestedBlock().getBeginLine())) {
             getNestedBlock().accept(env);
-        }
-        else
-        {
+        } else {
             throw new StopException(env, "Stopped by debugger");        
         }
     }

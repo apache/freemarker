@@ -63,8 +63,7 @@ import freemarker.template.utility.StringUtil;
  * parent of a <code>Template</code> object is a <code>Configuration</code>
  * object.
  */
-public class Configurable
-{
+public class Configurable {
     static final String C_TRUE_FALSE = "true,false";
     
     private static final String DEFAULT = "default";
@@ -385,7 +384,7 @@ public class Configurable
     }
     
     protected Object clone() throws CloneNotSupportedException {
-        Configurable copy = (Configurable)super.clone();
+        Configurable copy = (Configurable) super.clone();
         copy.properties = new Properties(properties);
         copy.customAttributesLock = new Object();
         copy.customAttributes = customAttributes == null ? null : (LinkedHashMap) customAttributes.clone();
@@ -680,7 +679,7 @@ public class Configurable
         NullArgumentException.check("booleanFormat", booleanFormat);
         
         int commaIdx = booleanFormat.indexOf(',');
-        if(commaIdx == -1) {
+        if (commaIdx == -1) {
             throw new IllegalArgumentException(
                     "Setting value must be string that contains two comma-separated values for true and false, " +
                     "respectively.");
@@ -1767,7 +1766,7 @@ public class Configurable
     public void setSettings(Properties props) throws TemplateException {
         final _SettingEvaluationEnvironment prevEnv = _SettingEvaluationEnvironment.startScope();
         try {
-            for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+            for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
                 String key = (String) it.next();
                 setSetting(key, props.getProperty(key).trim()); 
             }
@@ -1812,7 +1811,7 @@ public class Configurable
         synchronized (customAttributesLock) {
             LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             Object value = customAttributes != null ? customAttributes.get(key) : null;
-            if(value == null && (customAttributes == null || !customAttributes.containsKey(key))) {
+            if (value == null && (customAttributes == null || !customAttributes.containsKey(key))) {
                 value = attr.create();
                 if (customAttributes == null) {
                     customAttributes = createInitialCustomAttributes();
@@ -1986,9 +1985,8 @@ public class Configurable
     }
 
     protected void doAutoImportsAndIncludes(Environment env)
-    throws TemplateException, IOException
-    {
-        if(parent != null) parent.doAutoImportsAndIncludes(env);
+    throws TemplateException, IOException {
+        if (parent != null) parent.doAutoImportsAndIncludes(env);
     }
 
     protected ArrayList parseAsList(String text) throws ParseException {

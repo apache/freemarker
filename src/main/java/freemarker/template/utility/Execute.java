@@ -70,11 +70,11 @@ public class Execute implements freemarker.template.TemplateMethodModel {
         String aExecute;
         StringBuilder    aOutputBuffer = new StringBuilder();
 
-        if( arguments.size() < 1 ) {
+        if ( arguments.size() < 1 ) {
             throw new TemplateModelException( "Need an argument to execute" );
         }
 
-        aExecute = (String)(arguments.get(0));
+        aExecute = (String) (arguments.get(0));
 
         try {
             Process exec = Runtime.getRuntime().exec( aExecute );
@@ -86,7 +86,7 @@ public class Execute implements freemarker.template.TemplateMethodModel {
     
                 char[] buffer = new char[ OUTPUT_BUFFER_SIZE ];
                 int bytes_read = execReader.read( buffer );
-                while( bytes_read > 0 ) {
+                while ( bytes_read > 0 ) {
                     aOutputBuffer.append( buffer, 0, bytes_read );
                     bytes_read = execReader.read( buffer );
                 }

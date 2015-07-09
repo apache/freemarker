@@ -24,8 +24,7 @@ import freemarker.template.TemplateModel;
 
 abstract class BuiltInForDate extends BuiltIn {
     TemplateModel _eval(Environment env)
-            throws TemplateException
-    {
+            throws TemplateException {
         TemplateModel model = target.eval(env);
         if (model instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) model;
@@ -43,7 +42,7 @@ abstract class BuiltInForDate extends BuiltIn {
     static TemplateException newNonDateException(Environment env, TemplateModel model, Expression target)
             throws InvalidReferenceException {
         TemplateException e;
-        if(model == null) {
+        if (model == null) {
             e = InvalidReferenceException.getInstance(target, env);
         } else {
             e = new NonDateException(target, model, "date", env);

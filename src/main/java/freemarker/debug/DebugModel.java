@@ -33,8 +33,7 @@ import freemarker.template.TemplateModelException;
  * returns a bit mask of various <tt>TYPE_xxx</tt> constants flagging which
  * template models are implemented by the mirrored object.
  */
-public interface DebugModel extends Remote
-{
+public interface DebugModel extends Remote {
     public static final int TYPE_SCALAR        =    1;
     public static final int TYPE_NUMBER        =    2;
     public static final int TYPE_DATE          =    4;
@@ -51,66 +50,53 @@ public interface DebugModel extends Remote
     public static final int TYPE_CONFIGURATION = 8192;
     
     public String getAsString()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
         
     public Number getAsNumber()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
     
     public boolean getAsBoolean()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
     
     public Date getAsDate()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
     
     public int getDateType()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
         
     public int size()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
         
     public DebugModel get(int index)
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
     
     public DebugModel[] get(int fromIndex, int toIndex)
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
         
     public DebugModel get(String key)
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
         
     public DebugModel[] get(String[] keys)
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
     
     public DebugModel[] getCollection()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
 
     public String[] keys()
-    throws
-        TemplateModelException,
+    throws TemplateModelException,
         RemoteException;
     
     public int getModelTypes()
-    throws
-        RemoteException;
+    throws RemoteException;
 }

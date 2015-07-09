@@ -31,8 +31,7 @@ class RmiDebuggerImpl
 extends
     UnicastRemoteObject
 implements
-    Debugger
-{
+    Debugger {
     private static final long serialVersionUID = 1L;
 
     private final RmiDebuggerService service;
@@ -42,48 +41,39 @@ implements
         this.service = service;
     }
 
-    public void addBreakpoint(Breakpoint breakpoint)
-    {
+    public void addBreakpoint(Breakpoint breakpoint) {
         service.addBreakpoint(breakpoint);
     }
 
-    public Object addDebuggerListener(DebuggerListener listener)
-    {
+    public Object addDebuggerListener(DebuggerListener listener) {
         return service.addDebuggerListener(listener);
     }
 
-    public List getBreakpoints()
-    {
+    public List getBreakpoints() {
         return service.getBreakpointsSpi();
     }
 
-    public List getBreakpoints(String templateName)
-    {
+    public List getBreakpoints(String templateName) {
         return service.getBreakpointsSpi(templateName);
     }
 
-    public Collection getSuspendedEnvironments()
-    {
+    public Collection getSuspendedEnvironments() {
         return service.getSuspendedEnvironments();
     }
 
-    public void removeBreakpoint(Breakpoint breakpoint)
-    {
+    public void removeBreakpoint(Breakpoint breakpoint) {
         service.removeBreakpoint(breakpoint);
     }
 
-    public void removeDebuggerListener(Object id)
-    {
+    public void removeDebuggerListener(Object id) {
         service.removeDebuggerListener(id);
     }
 
-    public void removeBreakpoints()
-    {
+    public void removeBreakpoints() {
         service.removeBreakpoints();
     }
 
-    public void removeBreakpoints(String templateName)
-    {
+    public void removeBreakpoints(String templateName) {
         service.removeBreakpoints(templateName);
     }
 }

@@ -39,17 +39,15 @@ import freemarker.template.TemplateScalarModel;
  */
 public class JythonModel
 implements TemplateBooleanModel, TemplateScalarModel, TemplateHashModel, 
-TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
-{
+TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
     protected final PyObject object;
     protected final JythonWrapper wrapper;
     
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new JythonModel((PyObject)object, (JythonWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new JythonModel((PyObject) object, (JythonWrapper) wrapper);
             }
         };
         
@@ -62,8 +60,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
     /**
      * Returns the value of {@link PyObject#__nonzero__()}.
      */
-    public boolean getAsBoolean() throws TemplateModelException
-    {
+    public boolean getAsBoolean() throws TemplateModelException {
         try
         {
             return object.__nonzero__();
@@ -77,8 +74,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
     /**
      * Returns the value of {@link Object#toString()}.
      */
-    public String getAsString() throws TemplateModelException
-    {
+    public String getAsString() throws TemplateModelException {
         try
         {
             return object.toString();
@@ -97,11 +93,8 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
      * lookup takes precedence over attribute lookup).
      */
     public TemplateModel get(String key)
-    throws
-        TemplateModelException
-    {
-        if(key != null)
-        {
+    throws TemplateModelException {
+        if (key != null) {
             key = key.intern();
         }
         
@@ -109,19 +102,14 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
         
         try
         {
-            if(wrapper.isAttributesShadowItems())
-            {
+            if (wrapper.isAttributesShadowItems()) {
                 obj = object.__findattr__(key);
-                if(obj == null)
-                {
+                if (obj == null) {
                     obj = object.__finditem__(key);
                 }
-            }
-            else
-            {
+            } else {
                 obj = object.__finditem__(key);
-                if(obj == null)
-                {
+                if (obj == null) {
                     obj = object.__findattr__(key);
                 }
             }
@@ -137,8 +125,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
     /**
      * Returns {@link PyObject#__len__()}<code> == 0</code>.
      */
-    public boolean isEmpty() throws TemplateModelException
-    {
+    public boolean isEmpty() throws TemplateModelException {
         try
         {
             return object.__len__() == 0;
@@ -152,8 +139,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
     /**
      * @see freemarker.template.TemplateMethodModel#exec(List)
      */
-    public Object exec(List arguments) throws TemplateModelException
-    {
+    public Object exec(List arguments) throws TemplateModelException {
         int size = arguments.size();
         try
         {
@@ -166,14 +152,13 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
                 case 1:
                 {
                     return wrapper.wrap(object.__call__(wrapper.unwrap(
-                        (TemplateModel)arguments.get(0))));
+                        (TemplateModel) arguments.get(0))));
                 }
                 default:
                 {
                     PyObject[] pyargs = new PyObject[size];
                     int i = 0;
-                    for (Iterator arg = arguments.iterator(); arg.hasNext();)
-                    {
+                    for (Iterator arg = arguments.iterator(); arg.hasNext(); ) {
                         pyargs[i++] = wrapper.unwrap(
                             (TemplateModel) arg.next());
                     }
@@ -188,11 +173,11 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel
     }
 
     public Object getAdaptedObject(Class hint) {
-        if(object == null) {
+        if (object == null) {
             return null;
         }
         Object view = object.__tojava__(hint);
-        if(view == Py.NoConversion) {
+        if (view == Py.NoConversion) {
             view = object.__tojava__(Object.class);
         }
         return view;

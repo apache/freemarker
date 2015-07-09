@@ -27,8 +27,7 @@ import javax.servlet.jsp.tagext.TryCatchFinally;
 
 /**
  */
-public class TestTag extends BodyTagSupport implements TryCatchFinally
-{
+public class TestTag extends BodyTagSupport implements TryCatchFinally {
     private boolean throwException;
     private int repeatCount;
     
@@ -43,7 +42,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally
     public int doStartTag() throws JspException {
         try {
             pageContext.getOut().println("doStartTag() called here");
-            if(throwException) {
+            if (throwException) {
                 throw new JspException("throwException==true");
             }
             return repeatCount == 0 ? Tag.SKIP_BODY : BodyTag.EVAL_BODY_BUFFERED;

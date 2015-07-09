@@ -489,7 +489,7 @@ public class DefaultObjectWrapperTest {
         for (int i = 0; i < 2; i++) { // Run twice to check if we always get a new iterator
             int idx = 0;
             TemplateModelIterator it2 = null;
-            for (TemplateModelIterator it = coll.iterator(); it.hasNext();) {
+            for (TemplateModelIterator it = coll.iterator(); it.hasNext(); ) {
                 TemplateModel actualItem = it.next();
                 if (idx >= expectedItems.length) {
                     fail("Number of items is more than the expected " + expectedItems.length);

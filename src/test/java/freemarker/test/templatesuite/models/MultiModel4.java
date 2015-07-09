@@ -45,7 +45,7 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
      * or null if not found.
      */
     public TemplateModel get(String key) {
-        if( key.equals( "size" )) {
+        if ( key.equals( "size" )) {
             return new SimpleScalar( "Key size, not the listSize method." );
         } else {
             return null;

@@ -47,8 +47,7 @@ class BuiltInsForDates {
         }
 
         TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
+                throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel tdm = (TemplateDateModel) model;

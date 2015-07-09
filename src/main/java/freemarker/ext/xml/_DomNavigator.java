@@ -44,7 +44,7 @@ public class _DomNavigator extends Navigator {
     } 
 
     void getAsString(Object node, StringWriter sw) {
-        outputContent((Node)node, sw);
+        outputContent((Node) node, sw);
     }
     
     private void outputContent(Node n, StringWriter buf) {
@@ -71,14 +71,14 @@ public class _DomNavigator extends Navigator {
             }
             case Node.DOCUMENT_TYPE_NODE: {
                 buf.append("<!DOCTYPE ").append(n.getNodeName());
-                DocumentType dt = (DocumentType)n;
-                if(dt.getPublicId() != null) {
+                DocumentType dt = (DocumentType) n;
+                if (dt.getPublicId() != null) {
                     buf.append(" PUBLIC \"").append(dt.getPublicId()).append('"');
                 }
-                if(dt.getSystemId() != null) {
+                if (dt.getSystemId() != null) {
                     buf.append('"').append(dt.getSystemId()).append('"');
                 }
-                if(dt.getInternalSubset() != null) {
+                if (dt.getInternalSubset() != null) {
                     buf.append(" [").append(dt.getInternalSubset()).append(']');
                 }
                 buf.append('>');
@@ -112,27 +112,27 @@ public class _DomNavigator extends Navigator {
     }
 
     private void outputContent(NodeList nodes, StringWriter buf) {
-        for(int i = 0; i < nodes.getLength(); ++i) {
+        for (int i = 0; i < nodes.getLength(); ++i) {
             outputContent(nodes.item(i), buf);
         }
     }
     
     private void outputContent(NamedNodeMap nodes, StringWriter buf) {
-        for(int i = 0; i < nodes.getLength(); ++i) {
+        for (int i = 0; i < nodes.getLength(); ++i) {
             outputContent(nodes.item(i), buf);
         }
     }
     
     void getChildren(Object node, String localName, String namespaceUri, List result) {
-        if("".equals(namespaceUri)) {
+        if ("".equals(namespaceUri)) {
             namespaceUri = null;
         }
-        NodeList children = ((Node)node).getChildNodes();
-        for(int i = 0; i < children.getLength(); ++i) {
+        NodeList children = ((Node) node).getChildNodes();
+        for (int i = 0; i < children.getLength(); ++i) {
             Node subnode = children.item(i);
             // IMO, we should get the text nodes as well -- will discuss.
-            if(subnode.getNodeType() == Node.ELEMENT_NODE || subnode.getNodeType() == Node.TEXT_NODE) {
-                if(localName == null || (equal(subnode.getNodeName(), localName) && equal(subnode.getNamespaceURI(), namespaceUri))) {
+            if (subnode.getNodeType() == Node.ELEMENT_NODE || subnode.getNodeType() == Node.TEXT_NODE) {
+                if (localName == null || (equal(subnode.getNodeName(), localName) && equal(subnode.getNamespaceURI(), namespaceUri))) {
                     result.add(subnode);
                 }
             }
@@ -140,46 +140,40 @@ public class _DomNavigator extends Navigator {
     }
     
     void getAttributes(Object node, String localName, String namespaceUri, List result) {
-        if(node instanceof Element) {
-            Element e = (Element)node;
-            if(localName == null) {
+        if (node instanceof Element) {
+            Element e = (Element) node;
+            if (localName == null) {
                 NamedNodeMap atts = e.getAttributes();
-                for(int i = 0; i < atts.getLength(); ++i) {
+                for (int i = 0; i < atts.getLength(); ++i) {
                     result.add(atts.item(i));
                 }
-            }
-            else {
-                if("".equals(namespaceUri)) {
+            } else {
+                if ("".equals(namespaceUri)) {
                     namespaceUri = null;
                 }
                 Attr attr = e.getAttributeNodeNS(namespaceUri, localName);
-                if(attr != null) {
+                if (attr != null) {
                     result.add(attr);
                 }
             }
-        }
-        else if (node instanceof ProcessingInstruction) {
-            ProcessingInstruction pi = (ProcessingInstruction)node;
+        } else if (node instanceof ProcessingInstruction) {
+            ProcessingInstruction pi = (ProcessingInstruction) node;
             if ("target".equals(localName)) {
                 result.add(createAttribute(pi, "target", pi.getTarget()));
-            }
-            else if ("data".equals(localName)) {
+            } else if ("data".equals(localName)) {
                 result.add(createAttribute(pi, "data", pi.getData()));
-            }
-            else {
+            } else {
                 // TODO: DOM has no facility for parsing data into
                 // name-value pairs...
                 ;
             }
         } else if (node instanceof DocumentType) {
-            DocumentType doctype = (DocumentType)node;
+            DocumentType doctype = (DocumentType) node;
             if ("publicId".equals(localName)) {
                 result.add(createAttribute(doctype, "publicId", doctype.getPublicId()));
-            }
-            else if ("systemId".equals(localName)) {
+            } else if ("systemId".equals(localName)) {
                 result.add(createAttribute(doctype, "systemId", doctype.getSystemId()));
-            }
-            else if ("elementName".equals(localName)) {
+            } else if ("elementName".equals(localName)) {
                 result.add(createAttribute(doctype, "elementName", doctype.getNodeName()));
             }
         } 
@@ -192,10 +186,10 @@ public class _DomNavigator extends Navigator {
     }
     
     void getDescendants(Object node, List result) {
-        NodeList children = ((Node)node).getChildNodes();
-        for(int i = 0; i < children.getLength(); ++i) {
+        NodeList children = ((Node) node).getChildNodes();
+        for (int i = 0; i < children.getLength(); ++i) {
             Node subnode = children.item(i);
-            if(subnode.getNodeType() == Node.ELEMENT_NODE) {
+            if (subnode.getNodeType() == Node.ELEMENT_NODE) {
                 result.add(subnode);
                 getDescendants(subnode, result);
             }
@@ -203,58 +197,57 @@ public class _DomNavigator extends Navigator {
     }
 
     Object getParent(Object node) {
-        return ((Node)node).getParentNode();
+        return ((Node) node).getParentNode();
     }
 
     Object getDocument(Object node) {
-        return ((Node)node).getOwnerDocument();
+        return ((Node) node).getOwnerDocument();
     }
 
     Object getDocumentType(Object node) {
         return 
             node instanceof Document
-            ? ((Document)node).getDoctype()
+            ? ((Document) node).getDoctype()
             : null;
     }
 
     void getContent(Object node, List result) {
-        NodeList children = ((Node)node).getChildNodes();
-        for(int i = 0; i < children.getLength(); ++i) {
+        NodeList children = ((Node) node).getChildNodes();
+        for (int i = 0; i < children.getLength(); ++i) {
             result.add(children.item(i));
         }
     }
 
     String getText(Object node) {
         StringBuilder buf = new StringBuilder();
-        if(node instanceof Element) {
-            NodeList children = ((Node)node).getChildNodes();
-            for(int i = 0; i < children.getLength(); ++i) {
+        if (node instanceof Element) {
+            NodeList children = ((Node) node).getChildNodes();
+            for (int i = 0; i < children.getLength(); ++i) {
                 Node child = children.item(i);
-                if(child instanceof Text) { 
+                if (child instanceof Text) { 
                     buf.append(child.getNodeValue());
                 }
             }
             return buf.toString();
-        }
-        else {
-            return ((Node)node).getNodeValue();
+        } else {
+            return ((Node) node).getNodeValue();
         }
     }
 
     String getLocalName(Object node) {
-        return ((Node)node).getNodeName();
+        return ((Node) node).getNodeName();
     }
 
     String getNamespacePrefix(Object node) {
-        return ((Node)node).getPrefix();
+        return ((Node) node).getPrefix();
     }
 
     String getNamespaceUri(Object node) {
-        return ((Node)node).getNamespaceURI();
+        return ((Node) node).getNamespaceURI();
     }
 
     String getType(Object node) {
-        switch(((Node)node).getNodeType()) {
+        switch(((Node) node).getNodeType()) {
             case Node.ATTRIBUTE_NODE: {
                 return "attribute";
             }
@@ -289,8 +282,7 @@ public class _DomNavigator extends Navigator {
         return "unknown";
     }
 
-    XPathEx createXPathEx(String xpathString) throws TemplateModelException
-    {
+    XPathEx createXPathEx(String xpathString) throws TemplateModelException {
         try {
             return new DomXPathEx(xpathString);
         }
@@ -303,19 +295,15 @@ public class _DomNavigator extends Navigator {
     extends
         DOMXPath
     implements
-        XPathEx
-    {
+        XPathEx {
         DomXPathEx(String path)
-        throws 
-            Exception
+        throws Exception
         {
             super(path);
         }
 
         public List selectNodes(Object object, NamespaceContext namespaces)
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             Context context = getContext(object);
             context.getContextSupport().setNamespaceContext(namespaces);
             try {

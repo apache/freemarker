@@ -41,8 +41,8 @@ public class FreeMarkerTree extends JTree {
     }
 
     private TreeNode getNode(TemplateElement element) {
-        TreeNode n = (TreeNode)nodeMap.get(element);
-        if(n != null) {
+        TreeNode n = (TreeNode) nodeMap.get(element);
+        if (n != null) {
             return n;
         }
         n = new TemplateElementTreeNode(element);
@@ -57,8 +57,7 @@ public class FreeMarkerTree extends JTree {
 
     public String convertValueToText(Object value, boolean selected,
                                      boolean expanded, boolean leaf, int row,
-                                     boolean hasFocus) 
-    {
+                                     boolean hasFocus) {
         if (value instanceof TemplateElementTreeNode) {
             return ((TemplateElementTreeNode) value).element.getDescription();
         }
@@ -79,7 +78,7 @@ public class FreeMarkerTree extends JTree {
                     return e.hasMoreElements();
                 }
                 public Object nextElement() {
-                    return getNode((TemplateElement)e.nextElement());
+                    return getNode((TemplateElement) e.nextElement());
                 }
             };
         }
@@ -97,7 +96,7 @@ public class FreeMarkerTree extends JTree {
         }
 
         public int getIndex(TreeNode node) {
-            return element.getIndex(((TemplateElementTreeNode)node).element);
+            return element.getIndex(((TemplateElementTreeNode) node).element);
         }
 
         public TreeNode getParent() {

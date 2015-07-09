@@ -27,8 +27,7 @@ import freemarker.template.TemplateScalarModel;
 class Namespaces
 implements
     TemplateMethodModel,
-    Cloneable
-{
+    Cloneable {
     private HashMap namespaces;
     private boolean shared;
         
@@ -41,8 +40,8 @@ implements
         
     public Object clone() {
         try {
-            Namespaces clone = (Namespaces)super.clone();
-            clone.namespaces = (HashMap)namespaces.clone();
+            Namespaces clone = (Namespaces) super.clone();
+            clone.namespaces = (HashMap) namespaces.clone();
             clone.shared = false;
             return clone;
         }
@@ -53,7 +52,7 @@ implements
     
     public String translateNamespacePrefixToUri(String prefix) {
         synchronized(namespaces) {
-            return (String)namespaces.get(prefix);
+            return (String) namespaces.get(prefix);
         }   
     }
     
@@ -61,7 +60,7 @@ implements
         if (arguments.size() != 2) {
             throw new TemplateModelException("_registerNamespace(prefix, uri) requires two arguments");
         }
-        registerNamespace((String)arguments.get(0), (String)arguments.get(1));
+        registerNamespace((String) arguments.get(0), (String) arguments.get(1));
         return TemplateScalarModel.EMPTY_STRING;
     }
     
@@ -72,7 +71,7 @@ implements
     }
     
     void markShared() {
-        if(!shared) {
+        if (!shared) {
             shared = true;
         }
     }

@@ -276,8 +276,7 @@ public final class UnboundTemplate {
     public String getSource(int beginColumn,
             int beginLine,
             int endColumn,
-            int endLine)
-    {
+            int endLine) {
         if (beginLine < 1 || endLine < 1) return null; // dynamically ?eval-ed expressions has no source available
 
         // Our container is zero-based.
@@ -443,7 +442,7 @@ public final class UnboundTemplate {
         TemplateElement element = rootElement;
         mainloop: while (element.contains(column, line)) {
             elements.add(element);
-            for (Enumeration enumeration = element.children(); enumeration.hasMoreElements();) {
+            for (Enumeration enumeration = element.children(); enumeration.hasMoreElements(); ) {
                 TemplateElement elem = (TemplateElement) enumeration.nextElement();
                 if (elem.contains(column, line)) {
                     element = elem;
@@ -518,7 +517,7 @@ public final class UnboundTemplate {
         public int read(char cbuf[], int off, int len) throws IOException {
             try {
                 int numchars = in.read(cbuf, off, len);
-                for (int i=off; i < off+numchars; i++) {
+                for (int i = off; i < off + numchars; i++) {
                     char c = cbuf[i];
                     handleChar(c);
                 }
@@ -529,7 +528,7 @@ public final class UnboundTemplate {
         }
 
         public void close() throws IOException {
-            if (lineBuf.length() >0) {
+            if (lineBuf.length() > 0) {
                 lines.add(lineBuf.toString());
                 lineBuf.setLength(0);
             }
@@ -540,7 +539,7 @@ public final class UnboundTemplate {
         private void handleChar(int c) {
             if (c == '\n' || c == '\r') {
                 if (lastChar == '\r' && c == '\n') { // CRLF under Windoze
-                    int lastIndex = lines.size() -1;
+                    int lastIndex = lines.size() - 1;
                     String lastLine = (String) lines.get(lastIndex);
                     lines.set(lastIndex, lastLine + '\n');
                 } else {
@@ -548,14 +547,12 @@ public final class UnboundTemplate {
                     lines.add(lineBuf.toString());
                     lineBuf.setLength(0);
                 }
-            }
-            else if (c == '\t') {
-                int numSpaces = 8 - (lineBuf.length() %8);
-                for (int i=0; i<numSpaces; i++) {
+            } else if (c == '\t') {
+                int numSpaces = 8 - (lineBuf.length() % 8);
+                for (int i = 0; i < numSpaces; i++) {
                     lineBuf.append(' ');
                 }
-            }
-            else {
+            } else {
                 lineBuf.append((char) c);
             }
             lastChar = c;

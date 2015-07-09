@@ -39,8 +39,7 @@ public final class SimpleMethodModel extends SimpleMethod
     implements
     TemplateMethodModelEx,
     TemplateSequenceModel,
-    _UnexpectedTypeErrorExplainerTemplateModel
-{
+    _UnexpectedTypeErrorExplainerTemplateModel {
     private final Object object;
     private final BeansWrapper wrapper;
 
@@ -63,12 +62,10 @@ public final class SimpleMethodModel extends SimpleMethod
      * Invokes the method, passing it the arguments from the list.
      */
     public Object exec(List arguments)
-        throws
-        TemplateModelException
-    {
+        throws TemplateModelException {
         try
         {
-            return wrapper.invokeMethod(object, (Method)getMember(), 
+            return wrapper.invokeMethod(object, (Method) getMember(), 
                     unwrapArguments(arguments, wrapper));
         }
         catch(TemplateModelException e)
@@ -81,8 +78,7 @@ public final class SimpleMethodModel extends SimpleMethod
         }
     }
     
-    public TemplateModel get(int index) throws TemplateModelException
-    {
+    public TemplateModel get(int index) throws TemplateModelException {
         return (TemplateModel) exec(Collections.singletonList(
                 new SimpleNumber(Integer.valueOf(index))));
     }

@@ -42,17 +42,17 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
 
     MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
-        if(tmArgs == null) {
+        if (tmArgs == null) {
             // null is treated as empty args
             tmArgs = Collections.EMPTY_LIST;
         }
         final int argCount = tmArgs.size();
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
-        if(unwrappingHintsByParamCount.length <= argCount) {
+        if (unwrappingHintsByParamCount.length <= argCount) {
             return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENTS;
         }
         Class[] unwarppingHints = unwrappingHintsByParamCount[argCount];
-        if(unwarppingHints == null) {
+        if (unwarppingHints == null) {
             return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENTS;
         }
         
@@ -64,19 +64,19 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         }
 
         Iterator it = tmArgs.iterator();
-        for(int i = 0; i < argCount; ++i) {
+        for (int i = 0; i < argCount; ++i) {
             Object pojo = unwrapper.tryUnwrapTo(
                     (TemplateModel) it.next(),
                     unwarppingHints[i],
                     typeFlags != null ? typeFlags[i] : 0);
-            if(pojo == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
+            if (pojo == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                 return EmptyMemberAndArguments.noCompatibleOverload(i + 1);
             }
             pojoArgs[i] = pojo;
         }
         
         MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, false);
-        if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
+        if (maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
             if (bugfixed) {
                 if (typeFlags != null) {

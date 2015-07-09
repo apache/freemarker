@@ -118,7 +118,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public SimpleSequence(TemplateCollectionModel tcm) throws TemplateModelException {
         ArrayList alist = new ArrayList();
-        for (TemplateModelIterator it = tcm.iterator(); it.hasNext();) {
+        for (TemplateModelIterator it = tcm.iterator(); it.hasNext(); ) {
             alist.add(it.next());
         }
         alist.trimToSize();

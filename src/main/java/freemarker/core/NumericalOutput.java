@@ -51,8 +51,7 @@ final class NumericalOutput extends Interpolation {
         this.maxFracDigits = maxFracDigits;
     }
 
-    void accept(Environment env) throws TemplateException, IOException 
-    {
+    void accept(Environment env) throws TemplateException, IOException {
         Number num = expression.evalToNumber(env);
         
         FormatHolder fmth = formatCache;  // atomic sampling

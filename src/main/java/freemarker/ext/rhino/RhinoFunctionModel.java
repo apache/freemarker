@@ -46,9 +46,9 @@ implements TemplateMethodModelEx {
         Object[] args = arguments.toArray();
         BeansWrapper wrapper = getWrapper();
         for (int i = 0; i < args.length; i++) {
-            args[i] = wrapper.unwrap((TemplateModel)args[i]);
+            args[i] = wrapper.unwrap((TemplateModel) args[i]);
         }
-        return wrapper.wrap(((Function)getScriptable()).call(cx, 
+        return wrapper.wrap(((Function) getScriptable()).call(cx, 
                 ScriptableObject.getTopLevelScope(fnThis), fnThis, args));
     }
 }

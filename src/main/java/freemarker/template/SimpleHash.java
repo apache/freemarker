@@ -81,7 +81,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      * @deprecated Use {@link #SimpleHash(ObjectWrapper)}
      */
     public SimpleHash() {
-        this((ObjectWrapper)null);
+        this((ObjectWrapper) null);
     }
 
     /**
@@ -152,8 +152,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
         if (map instanceof SortedMap) {
             if (map instanceof TreeMap) {
                 return (Map) ((TreeMap) map).clone();
-            }
-            else {
+            } else {
                 return new TreeMap((SortedMap) map);
             }
         } 
@@ -233,7 +232,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
                 }
             }
             if (putKey == null) {
-                if(!map.containsKey(key)) {
+                if (!map.containsKey(key)) {
                     return null;
                 } else {
                     putKey = key;
@@ -282,7 +281,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      */
 
     public void putAll(Map m) {
-        for (Iterator it = m.entrySet().iterator(); it.hasNext();) {
+        for (Iterator it = m.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             this.put((String) entry.getKey(), entry.getValue());
         }
@@ -307,7 +306,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
             // Create a copy to maintain immutability semantics and
             // Do nested unwrapping of elements if necessary.
             BeansWrapper bw = BeansWrapper.getDefaultInstance();
-            for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+            for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) it.next();
                 Object key = entry.getKey();
                 Object value = entry.getValue();
@@ -316,7 +315,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
                 }
                 m.put(key, value);
             }
-            unwrappedMap=m;
+            unwrappedMap = m;
         }
         return unwrappedMap;
     }

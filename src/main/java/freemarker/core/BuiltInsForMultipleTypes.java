@@ -133,16 +133,14 @@ class BuiltInsForMultipleTypes {
         implements
             TemplateDateModel,
             TemplateMethodModel,
-            TemplateHashModel
-        {
+            TemplateHashModel {
             private final String text;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
             private Date cachedValue;
             
             DateParser(String text, Environment env)
-            throws
-                TemplateModelException
+            throws TemplateModelException
             {
                 this.text = text;
                 this.env = env;
@@ -162,7 +160,7 @@ class BuiltInsForMultipleTypes {
             }
     
             public Date getAsDate() throws TemplateModelException {
-                if(cachedValue == null) {
+                if (cachedValue == null) {
                     cachedValue = parse(defaultFormat);
                 }
                 return cachedValue;
@@ -172,15 +170,12 @@ class BuiltInsForMultipleTypes {
                 return dateType;
             }
     
-            public boolean isEmpty()
-            {
+            public boolean isEmpty() {
                 return false;
             }
     
             private Date parse(TemplateDateFormat df)
-            throws
-                TemplateModelException
-            {
+            throws TemplateModelException {
                 try {
                     return df.parse(text);
                 }
@@ -203,18 +198,17 @@ class BuiltInsForMultipleTypes {
         }
         
         TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
+                throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateDateModel) {
-                TemplateDateModel dmodel = (TemplateDateModel)model;
+                TemplateDateModel dmodel = (TemplateDateModel) model;
                 int dtype = dmodel.getDateType();
                 // Any date model can be coerced into its own type
-                if(dateType == dtype) {
+                if (dateType == dtype) {
                     return model;
                 }
                 // unknown and datetime can be coerced into any date type
-                if(dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATETIME) {
+                if (dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATETIME) {
                     return new SimpleDate(dmodel.getAsDate(), dateType);
                 }
                 throw new _MiscTemplateException(this, new Object[] {
@@ -459,8 +453,7 @@ class BuiltInsForMultipleTypes {
         private class BooleanFormatter
         implements 
             TemplateScalarModel, 
-            TemplateMethodModel 
-        {
+            TemplateMethodModel {
             private final TemplateBooleanModel bool;
             private final Environment env;
             
@@ -492,16 +485,14 @@ class BuiltInsForMultipleTypes {
         implements
             TemplateScalarModel,
             TemplateHashModel,
-            TemplateMethodModel
-        {
+            TemplateMethodModel {
             private final TemplateDateModel dateModel;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
             private String cachedValue;
     
             DateFormatter(TemplateDateModel dateModel, Environment env)
-            throws
-                TemplateModelException
+            throws TemplateModelException
             {
                 this.dateModel = dateModel;
                 this.env = env;
@@ -519,17 +510,13 @@ class BuiltInsForMultipleTypes {
             }
 
             public TemplateModel get(String key)
-            throws
-                TemplateModelException
-            {
+            throws TemplateModelException {
                 return new SimpleScalar(env.formatDate(dateModel, key, target));
             }
             
             public String getAsString()
-            throws
-                TemplateModelException
-            {
-                if(cachedValue == null) {
+            throws TemplateModelException {
+                if (cachedValue == null) {
                     try {
                         if (defaultFormat == null) {
                             if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
@@ -546,8 +533,7 @@ class BuiltInsForMultipleTypes {
                 return cachedValue;
             }
     
-            public boolean isEmpty()
-            {
+            public boolean isEmpty() {
                 return false;
             }
         }
@@ -556,8 +542,7 @@ class BuiltInsForMultipleTypes {
         implements
             TemplateScalarModel,
             TemplateHashModel,
-            TemplateMethodModel
-        {
+            TemplateMethodModel {
             private final Number number;
             private final Environment env;
             private final NumberFormat defaultFormat;
@@ -575,21 +560,18 @@ class BuiltInsForMultipleTypes {
                 return get((String) args.get(0));
             }
     
-            public TemplateModel get(String key)
-            {
+            public TemplateModel get(String key) {
                 return new SimpleScalar(env.getNumberFormatObject(key).format(number));
             }
             
-            public String getAsString()
-            {
-                if(cachedValue == null) {
+            public String getAsString() {
+                if (cachedValue == null) {
                     cachedValue = defaultFormat.format(number);
                 }
                 return cachedValue;
             }
     
-            public boolean isEmpty()
-            {
+            public boolean isEmpty() {
                 return false;
             }
         }
@@ -597,9 +579,9 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel)model, target), env);
+                return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel) model, target), env);
             } else if (model instanceof TemplateDateModel) {
-                TemplateDateModel dm = (TemplateDateModel)model;
+                TemplateDateModel dm = (TemplateDateModel) model;
                 return new DateFormatter(dm, env);
             } else if (model instanceof SimpleScalar) {
                 return model;

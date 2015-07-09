@@ -230,9 +230,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("s2", w1.wrap("world"));
             dataModel.put("s3", w5.wrap("hello"));
             dataModel.put("s4", w5.wrap("world"));
-        }
-        
-        else if (simpleTestName.equals("beans")) {
+        } else if (simpleTestName.equals("beans")) {
             dataModel.put("array", new String[] { "array-0", "array-1"});
             dataModel.put("list", Arrays.asList(new String[] { "list-0", "list-1", "list-2"}));
             Map tmap = new HashMap();
@@ -246,9 +244,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("date", new GregorianCalendar(1974, 10, 14).getTime());
             dataModel.put("statics", BeansWrapper.getDefaultInstance().getStaticModels());
             dataModel.put("enums", BeansWrapper.getDefaultInstance().getEnumModels());
-        }
-        
-        else if (simpleTestName.equals("boolean")) {
+        } else if (simpleTestName.equals("boolean")) {
             dataModel.put( "boolean1", TemplateBooleanModel.FALSE);
             dataModel.put( "boolean2", TemplateBooleanModel.TRUE);
             dataModel.put( "boolean3", TemplateBooleanModel.TRUE);
@@ -260,9 +256,7 @@ public class TemplateTestCase extends FileTestCase {
     
             dataModel.put( "hash1", new BooleanHash1() );
             dataModel.put( "hash2", new BooleanHash2() );
-        }
-        
-        else if (simpleTestName.startsWith("dateformat")) {
+        } else if (simpleTestName.startsWith("dateformat")) {
             GregorianCalendar cal = new GregorianCalendar(2002, 10, 15, 14, 54, 13);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
             dataModel.put("date", new SimpleDate(cal.getTime(), TemplateDateModel.DATETIME));
@@ -276,14 +270,10 @@ public class TemplateTestCase extends FileTestCase {
             });
             dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
-        }
-
-        else if (templateName.equals("list.ftl")
+        } else if (templateName.equals("list.ftl")
                 || templateName.equals("list2.ftl") || templateName.equals("list3.ftl")) {
             dataModel.put("listables", new Listables());
-        }
-        
-        else if (simpleTestName.startsWith("number-format")) {
+        } else if (simpleTestName.startsWith("number-format")) {
             dataModel.put("int", new SimpleNumber(Integer.valueOf(1)));
             dataModel.put("double", new SimpleNumber(Double.valueOf(1.0)));
             dataModel.put("double2", new SimpleNumber(Double.valueOf(1 + 1e-15)));
@@ -291,9 +281,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("double4", new SimpleNumber(Double.valueOf(-1e-16)));
             dataModel.put("bigDecimal", new SimpleNumber(java.math.BigDecimal.valueOf(1)));
             dataModel.put("bigDecimal2", new SimpleNumber(java.math.BigDecimal.valueOf(1, 16)));
-        }
-        
-        else if (simpleTestName.equals("simplehash-char-key")) {
+        } else if (simpleTestName.equals("simplehash-char-key")) {
             HashMap mStringC = new HashMap();
             mStringC.put("c", "string");
             dataModel.put("mStringC", mStringC);
@@ -316,34 +304,24 @@ public class TemplateTestCase extends FileTestCase {
             mMixed.put("s2", "string2");
             mMixed.put("s2n", null);
             dataModel.put("mMixed", mMixed);
-        }
-    
-        else if (simpleTestName.equals("default-xmlns")) {
+        } else if (simpleTestName.equals("default-xmlns")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
-        }
-        
-        else if (simpleTestName.equals("multimodels")) {
+        } else if (simpleTestName.equals("multimodels")) {
             dataModel.put("test", "selftest");
             dataModel.put("self", "self");
             dataModel.put("zero", Integer.valueOf(0));
             dataModel.put("data", new MultiModel1());
-        }
-        
-        else if (simpleTestName.equals("stringbimethods")) {
+        } else if (simpleTestName.equals("stringbimethods")) {
             dataModel.put("multi", new TestBoolean());
-        }
-        
-        else if (simpleTestName.startsWith("type-builtins")) {
+        } else if (simpleTestName.startsWith("type-builtins")) {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
             dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet(), null));
             dataModel.put("bean", new TestBean());
-        }
-
-        else if (simpleTestName.equals("date-type-builtins")) {
+        } else if (simpleTestName.equals("date-type-builtins")) {
             GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
             cal.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date d = cal.getTime();
@@ -351,51 +329,37 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("timeOnly", new java.sql.Time(d.getTime()));
             dataModel.put("dateOnly", new java.sql.Date(d.getTime()));
             dataModel.put("dateTime", new java.sql.Timestamp(d.getTime()));
-        }
-        
-        else if (simpleTestName.equals("var-layers")) {
+        } else if (simpleTestName.equals("var-layers")) {
             dataModel.put("x", Integer.valueOf(4));
             dataModel.put("z", Integer.valueOf(4));
             conf.setSharedVariable("y", Integer.valueOf(7));
-        }
-        
-        else if (simpleTestName.equals("xml-fragment")) {
+        } else if (simpleTestName.equals("xml-fragment")) {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             f.setNamespaceAware(true);
             DocumentBuilder db = f.newDocumentBuilder();
             org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/xmlfragment.xml")));
             dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
-        }
-        
-        else if (simpleTestName.equals("xmlns1")) {
+        } else if (simpleTestName.equals("xmlns1")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
-        }
-        
-        else if (simpleTestName.equals("xmlns2")) {
+        } else if (simpleTestName.equals("xmlns2")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns2.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
-        }
-        
-        else if (simpleTestName.equals("xmlns3") || simpleTestName.equals("xmlns4")) {
+        } else if (simpleTestName.equals("xmlns3") || simpleTestName.equals("xmlns4")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns3.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
-        }
-        else if (simpleTestName.equals("xmlns5")) {
+        } else if (simpleTestName.equals("xmlns5")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
-        }
-        else if (simpleTestName.equals("xml-ns_prefix-scope")) {
+        } else if (simpleTestName.equals("xml-ns_prefix-scope")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xml-ns_prefix-scope.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
-        }
-        
-        else if (simpleTestName.startsWith("sequence-builtins")) {
+        } else if (simpleTestName.startsWith("sequence-builtins")) {
             Set abcSet = new TreeSet();
             abcSet.add("a");
             abcSet.add("b");
@@ -421,28 +385,18 @@ public class TemplateTestCase extends FileTestCase {
             set.add("b");
             set.add("c");
             dataModel.put("set", set);
-        }
-        
-        else if (simpleTestName.equals("number-to-date")) {
+        } else if (simpleTestName.equals("number-to-date")) {
           dataModel.put("bigInteger", new BigInteger("1305575275540"));
           dataModel.put("bigDecimal", new BigDecimal("1305575275539.5"));
-        }
-        
-        else if (simpleTestName.equals("varargs")) {
+        } else if (simpleTestName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
-        }
-        
-        else if (simpleTestName.startsWith("overloaded-methods-") && !simpleTestName.startsWith("overloaded-methods-2-")) {
+        } else if (simpleTestName.startsWith("overloaded-methods-") && !simpleTestName.startsWith("overloaded-methods-2-")) {
           dataModel.put("obj", new OverloadedMethods());
-        }
-        
-        else if (simpleTestName.startsWith("boolean-formatting")) {
+        } else if (simpleTestName.startsWith("boolean-formatting")) {
           dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (BeansWrapper) conf.getObjectWrapper()));
           dataModel.put("booleanAndString", new BooleanAndStringTemplateModel());
           dataModel.put("booleanVsStringMethods", new BooleanVsStringMethods());
-        }
-        
-        else if (simpleTestName.startsWith("number-math-builtins")) {
+        } else if (simpleTestName.startsWith("number-math-builtins")) {
             dataModel.put("fNan", Float.valueOf(Float.NaN));
             dataModel.put("dNan", Double.valueOf(Double.NaN));
             dataModel.put("fNinf", Float.valueOf(Float.NEGATIVE_INFINITY));
@@ -465,16 +419,12 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bp", Byte.valueOf((byte) 5));
             dataModel.put("bip", BigInteger.valueOf(5));
             dataModel.put("bdp", BigDecimal.valueOf(0.05));
-          }
-          
-        else if (simpleTestName.startsWith("classic-compatible")) {
+          } else if (simpleTestName.startsWith("classic-compatible")) {
             dataModel.put("array", new String[] { "a", "b", "c" });
             dataModel.put("beansArray", new BeansWrapper().wrap(new String[] { "a", "b", "c" }));
             dataModel.put("beanTrue", new BeansWrapper().wrap(Boolean.TRUE));
             dataModel.put("beanFalse", new BeansWrapper().wrap(Boolean.FALSE));
-        }
-        
-        else if (simpleTestName.startsWith("overloaded-methods-2-")) {
+        } else if (simpleTestName.startsWith("overloaded-methods-2-")) {
             dataModel.put("obj", new OverloadedMethods2());
             final boolean dow = conf.getObjectWrapper() instanceof DefaultObjectWrapper;
             dataModel.put("dow", dow);
@@ -567,8 +517,7 @@ public class TemplateTestCase extends FileTestCase {
       }
     }
 
-   public Object getTestMapBean()
-    {
+   public Object getTestMapBean() {
         Map testBean = new TestMapBean();
         testBean.put("name", "Chris");
         testBean.put("location", "San Francisco");
