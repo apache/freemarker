@@ -33,8 +33,7 @@ public class RmiDebuggerListenerImpl
 extends
     UnicastRemoteObject
 implements
-    DebuggerListener, Unreferenced
-{
+    DebuggerListener, Unreferenced {
     private static final Logger LOG = Logger.getLogger(
             "freemarker.debug.client");
     
@@ -42,8 +41,7 @@ implements
 
     private final DebuggerListener listener;
 
-    public void unreferenced()
-    {
+    public void unreferenced() {
         try
         {
             UnicastRemoteObject.unexportObject(this, false);
@@ -61,8 +59,7 @@ implements
     }
 
     public void environmentSuspended(EnvironmentSuspendedEvent e) 
-    throws RemoteException
-    {
+    throws RemoteException {
         listener.environmentSuspended(e);
     }
 }

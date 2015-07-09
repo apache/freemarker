@@ -37,8 +37,7 @@ final class Case extends TemplateElement {
     }
 
     void accept(Environment env) 
-        throws TemplateException, IOException 
-    {
+        throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visitByHiddingParent(getNestedBlock());
         }

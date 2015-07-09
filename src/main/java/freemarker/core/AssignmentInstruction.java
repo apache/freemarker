@@ -42,7 +42,7 @@ final class AssignmentInstruction extends TemplateElement {
     void setNamespaceExp(Expression namespaceExp) {
         this.namespaceExp = namespaceExp;
         int ln = getRegulatedChildCount();
-        for (int i=0; i< ln; i++) {
+        for (int i = 0; i < ln; i++) {
             ((Assignment) getRegulatedChild(i)).setNamespaceExp(namespaceExp);
         }
     }

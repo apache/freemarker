@@ -62,7 +62,7 @@ public class CaptureOutput implements TemplateTransformModel {
                 + "which to capture the output with the 'var' or 'local' or 'global' parameter.";
         if (args == null) throw new TemplateModelException(errmsg);
 
-        boolean local = false, global=false;
+        boolean local = false, global = false;
         final TemplateModel nsModel = (TemplateModel) args.get("namespace");
         Object varNameModel = args.get("var");
         if (varNameModel == null) {
@@ -77,7 +77,7 @@ public class CaptureOutput implements TemplateTransformModel {
                 throw new TemplateModelException(errmsg);
             }
         }
-        if (args.size()==2) {
+        if (args.size() == 2) {
             if (nsModel == null) {
                 throw new TemplateModelException("Second parameter can only be namespace");
             }
@@ -90,15 +90,14 @@ public class CaptureOutput implements TemplateTransformModel {
             if (!(nsModel instanceof Environment.Namespace)) {
                 throw new TemplateModelException("namespace parameter does not specify a namespace. It is a " + nsModel.getClass().getName());
             }
-        }
-        else if (args.size() != 1) throw new TemplateModelException(
+        } else if (args.size() != 1) throw new TemplateModelException(
                 "Bad parameters. Use only one of 'var' or 'local' or 'global' parameters.");
 
-        if(!(varNameModel instanceof TemplateScalarModel)) {
+        if (!(varNameModel instanceof TemplateScalarModel)) {
             throw new TemplateModelException("'var' or 'local' or 'global' parameter doesn't evaluate to a string");
         }
         final String varName = ((TemplateScalarModel) varNameModel).getAsString();
-        if(varName == null) {
+        if (varName == null) {
             throw new TemplateModelException("'var' or 'local' or 'global' parameter evaluates to null string");
         }
 
@@ -124,8 +123,7 @@ public class CaptureOutput implements TemplateTransformModel {
                         env.setLocalVariable(varName, result);
                     } else if (globalVar) {
                         env.setGlobalVariable(varName, result);
-                    }
-                    else {
+                    } else {
                         if (nsModel == null) {
                             env.setVariable(varName, result);
                         } else {

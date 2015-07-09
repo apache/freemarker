@@ -43,14 +43,12 @@ public class MapModel
 extends
     StringModel
 implements
-    TemplateMethodModelEx
-{
+    TemplateMethodModelEx {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new MapModel((Map)object, (BeansWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new MapModel((Map) object, (BeansWrapper) wrapper);
             }
         };
 
@@ -71,11 +69,9 @@ implements
      * The first argument is used as a key to call the map's <tt>get</tt> method.
      */
     public Object exec(List arguments)
-    throws
-        TemplateModelException
-    {
-        Object key = unwrap((TemplateModel)arguments.get(0));
-        return wrap(((Map)object).get(key));
+    throws TemplateModelException {
+        Object key = unwrap((TemplateModel) arguments.get(0));
+        return wrap(((Map) object).get(key));
     }
 
     /**
@@ -83,40 +79,35 @@ implements
      * through reflection - should yield better performance.
      */
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
-    throws TemplateModelException
-    {
+    throws TemplateModelException {
         Map map = (Map) object;
         Object val = map.get(key);
-        if(val == null) {
-            if(key.length() == 1) {
+        if (val == null) {
+            if (key.length() == 1) {
                 // just check for Character key if this is a single-character string
                 Character charKey = Character.valueOf(key.charAt(0));
                 val = map.get(charKey);
                 if (val == null && !(map.containsKey(key) || map.containsKey(charKey))) {
                     return UNKNOWN;
                 }
-            }
-            else if(!map.containsKey(key)) {
+            } else if (!map.containsKey(key)) {
                 return UNKNOWN;
             }
         }
         return wrap(val);
     }
 
-    public boolean isEmpty()
-    {
-        return ((Map)object).isEmpty() && super.isEmpty();
+    public boolean isEmpty() {
+        return ((Map) object).isEmpty() && super.isEmpty();
     }
 
-    public int size()
-    {
+    public int size() {
         return keySet().size();
     }
 
-    protected Set keySet()
-    {
+    protected Set keySet() {
         Set set = super.keySet();
-        set.addAll(((Map)object).keySet());
+        set.addAll(((Map) object).keySet());
         return set;
     }
 }

@@ -83,14 +83,13 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
             }    
             env.invoke(macro, namedArgs, positionalArgs, bodyParameterNames,
                     getNestedBlock());
-        }
-        else {
+        } else {
             boolean isDirectiveModel = tm instanceof TemplateDirectiveModel; 
             if (isDirectiveModel || tm instanceof TemplateTransformModel) {
                 Map args;
                 if (namedArgs != null && !namedArgs.isEmpty()) {
                     args = new HashMap();
-                    for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
+                    for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
                         Map.Entry entry = (Map.Entry) it.next();
                         String key = (String) entry.getKey();
                         Expression valueExp = (Expression) entry.getValue();
@@ -100,14 +99,12 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 } else {
                     args = EmptyMap.instance;
                 }
-                if(isDirectiveModel) {
+                if (isDirectiveModel) {
                     env.visit(getNestedBlock(), (TemplateDirectiveModel) tm, args, bodyParameterNames);
-                }
-                else { 
+                } else { 
                     env.visitAndTransform(getNestedBlock(), (TemplateTransformModel) tm, args);
                 }
-            }
-            else if (tm == null) {
+            } else if (tm == null) {
                 throw InvalidReferenceException.getInstance(nameExp, env);
             } else {
                 throw new NonUserDefinedDirectiveLikeException(nameExp, tm, env);
@@ -122,7 +119,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         MessageUtil.appendExpressionAsUntearable(sb, nameExp);
         boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
-            for (int i=0; i < positionalArgs.size(); i++) {
+            for (int i = 0; i < positionalArgs.size(); i++) {
                 Expression argExp = (Expression) positionalArgs.get(i);
                 if (i != 0) {
                     sb.append(',');
@@ -153,8 +150,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         if (canonical) {
             if (getNestedBlock() == null) {
                 sb.append("/>");
-            } 
-            else {
+            } else {
                 sb.append('>');
                 sb.append(getNestedBlock().getCanonicalForm());
                 sb.append("</@");

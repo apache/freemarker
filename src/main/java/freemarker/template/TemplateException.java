@@ -160,13 +160,13 @@ public class TemplateException extends Exception {
         this.descriptionBuilder = descriptionBuilder;
         description = renderedDescription;
         
-        if(env != null) ftlInstructionStackSnapshot = _CoreAPI.getInstructionStackSnapshot(env);
+        if (env != null) ftlInstructionStackSnapshot = _CoreAPI.getInstructionStackSnapshot(env);
     }
     
-    private void renderMessages()  {
+    private void renderMessages() {
         String description = getDescription();
         
-        if(description != null && description.length() != 0) {
+        if (description != null && description.length() != 0) {
             messageWithoutStackTop = description;
         } else if (getCause() != null) {
             messageWithoutStackTop = "No error description was specified for this error; low-level message: "

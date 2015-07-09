@@ -26,8 +26,7 @@ package freemarker.cache;
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
-public interface CacheStorage
-{
+public interface CacheStorage {
     public Object get(Object key);
     public void put(Object key, Object value);
     public void remove(Object key);

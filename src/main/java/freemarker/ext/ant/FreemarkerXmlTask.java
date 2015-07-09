@@ -227,8 +227,7 @@ import freemarker.template.utility.SecurityUtilities;
  */
 public class FreemarkerXmlTask
 extends
-    MatchingTask
-{
+    MatchingTask {
     private JythonAntTask prepareModel;
     private JythonAntTask prepareEnvironment;
     private final DocumentBuilderFactory builderFactory;
@@ -298,8 +297,7 @@ extends
     /**
      * Set the base directory. Defaults to <tt>.</tt>
      */
-    public void setBasedir(File dir)
-    {
+    public void setBasedir(File dir) {
         baseDir = dir;
     }
 
@@ -308,16 +306,14 @@ extends
      * files should be copied to
      * @param dir the name of the destination directory
      */
-    public void setDestdir(File dir)
-    {
+    public void setDestdir(File dir) {
         destDir = dir;
     }
 
     /**
      * Set the output file extension. <tt>.html</tt> by default.
      */
-    public void setExtension(String extension)
-    {
+    public void setExtension(String extension) {
         this.extension = extension;
     }
 
@@ -337,56 +333,47 @@ extends
     /**
      * Set the path to the project XML file
      */
-    public void setProjectfile(String projectAttribute)
-    {
+    public void setProjectfile(String projectAttribute) {
         this.projectAttribute = projectAttribute;
     }
 
     /**
      * Turn on/off incremental processing. On by default
      */
-    public void setIncremental(String incremental)
-    {
+    public void setIncremental(String incremental) {
         this.incremental = !(incremental.equalsIgnoreCase("false") || incremental.equalsIgnoreCase("no") || incremental.equalsIgnoreCase("off"));
     }
 
     /**
      * Set encoding for generated files. Defaults to platform default encoding.
      */
-    public void setEncoding(String encoding)
-    {
+    public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
 
-    public void setTemplateEncoding(String inputEncoding)
-    {
+    public void setTemplateEncoding(String inputEncoding) {
         this.templateEncoding = inputEncoding;
     }
     
     /**
      * Sets whether to validate the XML input.
      */
-    public void setValidation(boolean validation) 
-    {
+    public void setValidation(boolean validation) {
         this.validation = validation;
     }
 
-    public void setModels(String models)
-    {
+    public void setModels(String models) {
         this.models = models;
     }
     
-    public void execute() throws BuildException
-    {
+    public void execute() throws BuildException {
         DirectoryScanner scanner;
         String[]         list;
 
-        if (baseDir == null)
-        {
+        if (baseDir == null) {
             baseDir = getProject().getBaseDir();
         }
-        if (destDir == null )
-        {
+        if (destDir == null ) {
             String msg = "destdir attribute must be set!";
             throw new BuildException(msg, getLocation());
         }
@@ -401,8 +388,7 @@ extends
                 }
                 templateDir = templateFile.getParentFile();
                 templateName = templateFile.getName();
-            }
-            else {
+            } else {
                 templateDir = baseDir;
             }
             setTemplateDir(templateDir);
@@ -428,13 +414,11 @@ extends
         log("Transforming into: " + destDir.getAbsolutePath(), Project.MSG_INFO);
 
         // projectFile relative to baseDir
-        if (projectAttribute != null && projectAttribute.length() > 0)
-        {
+        if (projectAttribute != null && projectAttribute.length() > 0) {
             projectFile = new File(baseDir, projectAttribute);
             if (projectFile.isFile())
                 projectFileLastModified = projectFile.lastModified();
-            else
-            {
+            else {
                 log ("Project file is defined, but could not be located: " +
                      projectFile.getAbsolutePath(), Project.MSG_INFO );
                 projectFile = null;
@@ -463,8 +447,7 @@ extends
         list = scanner.getIncludedFiles();
         
         
-        for (int i = 0;i < list.length; ++i)
-        {
+        for (int i = 0; i < list.length; ++i) {
             process(baseDir, list[i], destDir);
         }
     }
@@ -485,10 +468,9 @@ extends
      * Process an XML file using FreeMarker
      */
     private void process(File baseDir, String xmlFile, File destDir)
-    throws BuildException
-    {
-        File outFile=null;
-        File inFile=null;
+    throws BuildException {
+        File outFile = null;
+        File inFile = null;
         try
         {
             // the current input file relative to the baseDir
@@ -502,8 +484,7 @@ extends
             if (!incremental ||
                 (inFile.lastModified() > outFile.lastModified() ||
                  templateFileLastModified > outFile.lastModified() ||
-                 projectFileLastModified > outFile.lastModified()))
-            {
+                 projectFileLastModified > outFile.lastModified())) {
                 ensureDirectoryFor(outFile);
 
                 //-- command line status
@@ -577,7 +558,7 @@ extends
         catch (Throwable e)
         {
             if (outFile != null ) {
-                if(!outFile.delete() && outFile.exists()) {
+                if (!outFile.delete() && outFile.exists()) {
                     log("Failed to delete " + outFile, Project.MSG_WARN);
                 }
             }
@@ -586,33 +567,25 @@ extends
         }
     }
 
-    private void generateModels()
-    {
+    private void generateModels() {
         StringTokenizer modelTokenizer = new StringTokenizer(models, ",; ");
-        while(modelTokenizer.hasMoreTokens())
-        {
+        while (modelTokenizer.hasMoreTokens()) {
             String modelSpec = modelTokenizer.nextToken();
             String name = null;
             String clazz = null;
             
             int sep = modelSpec.indexOf('=');
-            if(sep == -1)
-            {
+            if (sep == -1) {
                 // No explicit name - use unqualified class name
                 clazz = modelSpec;
                 int dot = clazz.lastIndexOf('.');
-                if(dot == -1)
-                {
+                if (dot == -1) {
                     // clazz in the default package
                     name = clazz;
-                }
-                else
-                {
+                } else {
                     name = clazz.substring(dot + 1);
                 }
-            }
-            else
-            {
+            } else {
                 name = modelSpec.substring(0, sep);
                 clazz = modelSpec.substring(sep + 1);
             }
@@ -630,42 +603,34 @@ extends
     /**
      * create directories as needed
      */
-    private void ensureDirectoryFor( File targetFile ) throws BuildException
-    {
+    private void ensureDirectoryFor( File targetFile ) throws BuildException {
         File directory = new File( targetFile.getParent() );
-        if (!directory.exists())
-        {
-            if (!directory.mkdirs())
-            {
+        if (!directory.exists()) {
+            if (!directory.mkdirs()) {
                 throw new BuildException("Unable to create directory: "
                                          + directory.getAbsolutePath(), getLocation());
             }
         }
     }
 
-    private static TemplateModel wrapMap(Map table)
-    {
+    private static TemplateModel wrapMap(Map table) {
         SimpleHash model = new SimpleHash();
-        for (Iterator it = table.entrySet().iterator(); it.hasNext();)
-        {
-            Map.Entry entry = (Map.Entry)it.next();
+        for (Iterator it = table.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
             model.put(String.valueOf(entry.getKey()), new SimpleScalar(String.valueOf(entry.getValue())));
         }
         return model;
     }
 
-    protected void insertDefaults(Map root) 
-    {
+    protected void insertDefaults(Map root) {
         root.put("properties", propertiesTemplate);
         root.put("userProperties", userPropertiesTemplate);
         if (projectTemplate != null) {
             root.put("project", projectTemplate);
             root.put("project_node", projectNode);
         }
-        if(modelsMap.size() > 0)
-        {
-            for (Iterator it = modelsMap.entrySet().iterator(); it.hasNext();)
-            {
+        if (modelsMap.size() > 0) {
+            for (Iterator it = modelsMap.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) it.next();
                 root.put(entry.getKey(), entry.getValue());
             }

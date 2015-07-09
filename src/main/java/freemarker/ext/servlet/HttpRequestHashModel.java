@@ -33,8 +33,7 @@ import freemarker.template.TemplateModelException;
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.
  */
-public final class HttpRequestHashModel implements TemplateHashModelEx
-{
+public final class HttpRequestHashModel implements TemplateHashModelEx {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final ObjectWrapper wrapper;
@@ -59,19 +58,17 @@ public final class HttpRequestHashModel implements TemplateHashModelEx
         this.wrapper = wrapper;
     }
     
-    public TemplateModel get(String key) throws TemplateModelException
-    {
+    public TemplateModel get(String key) throws TemplateModelException {
         return wrapper.wrap(request.getAttribute(key));
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return !request.getAttributeNames().hasMoreElements();
     }
     
     public int size() {
         int result = 0;
-        for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements();) {
+        for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             enumeration.nextElement();
             ++result;
         }
@@ -80,7 +77,7 @@ public final class HttpRequestHashModel implements TemplateHashModelEx
     
     public TemplateCollectionModel keys() {
         ArrayList keys = new ArrayList();
-        for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements();) {
+        for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             keys.add(enumeration.nextElement());
         }
         return new SimpleCollection(keys.iterator());
@@ -88,24 +85,21 @@ public final class HttpRequestHashModel implements TemplateHashModelEx
     
     public TemplateCollectionModel values() {
         ArrayList values = new ArrayList();
-        for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements();) {
-            values.add(request.getAttribute((String)enumeration.nextElement()));
+        for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
+            values.add(request.getAttribute((String) enumeration.nextElement()));
         }
         return new SimpleCollection(values.iterator(), wrapper);
     }
 
-    public HttpServletRequest getRequest()
-    {
+    public HttpServletRequest getRequest() {
         return request;
     }
     
-    public HttpServletResponse getResponse()
-    {
+    public HttpServletResponse getResponse() {
         return response;
     }
     
-    public ObjectWrapper getObjectWrapper()
-    {
+    public ObjectWrapper getObjectWrapper() {
         return wrapper;
     }
 }

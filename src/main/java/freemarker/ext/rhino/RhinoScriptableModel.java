@@ -40,12 +40,11 @@ import freemarker.template.TemplateSequenceModel;
  */
 public class RhinoScriptableModel implements TemplateHashModelEx, 
 TemplateSequenceModel, AdapterTemplateModel, TemplateScalarModel, 
-TemplateBooleanModel, TemplateNumberModel
-{
+TemplateBooleanModel, TemplateNumberModel {
     static final ModelFactory FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new RhinoScriptableModel((Scriptable)object, 
-                    (BeansWrapper)wrapper);
+            return new RhinoScriptableModel((Scriptable) object, 
+                    (BeansWrapper) wrapper);
         }
     };
     
@@ -59,20 +58,18 @@ TemplateBooleanModel, TemplateNumberModel
     
     public TemplateModel get(String key) throws TemplateModelException {
         Object retval = ScriptableObject.getProperty(scriptable, key);
-        if(retval instanceof Function) {
-            return new RhinoFunctionModel((Function)retval, scriptable, wrapper);
-        }
-        else {
+        if (retval instanceof Function) {
+            return new RhinoFunctionModel((Function) retval, scriptable, wrapper);
+        } else {
             return wrapper.wrap(retval);
         }
     }
     
     public TemplateModel get(int index) throws TemplateModelException {
         Object retval = ScriptableObject.getProperty(scriptable, index);
-        if(retval instanceof Function) {
-            return new RhinoFunctionModel((Function)retval, scriptable, wrapper);
-        }
-        else {
+        if (retval instanceof Function) {
+            return new RhinoFunctionModel((Function) retval, scriptable, wrapper);
+        } else {
             return wrapper.wrap(retval);
         }
     }
@@ -82,7 +79,7 @@ TemplateBooleanModel, TemplateNumberModel
     }
     
     public TemplateCollectionModel keys() throws TemplateModelException {
-        return (TemplateCollectionModel)wrapper.wrap(scriptable.getIds());
+        return (TemplateCollectionModel) wrapper.wrap(scriptable.getIds());
     }
     
     public int size() {
@@ -94,23 +91,22 @@ TemplateBooleanModel, TemplateNumberModel
         Object[] values = new Object[ids.length];
         for (int i = 0; i < values.length; i++) {
             Object id = ids[i];
-            if(id instanceof Number) {
+            if (id instanceof Number) {
                 values[i] = ScriptableObject.getProperty(scriptable, 
-                        ((Number)id).intValue());
-            }
-            else {
+                        ((Number) id).intValue());
+            } else {
                 values[i] = ScriptableObject.getProperty(scriptable, 
                         String.valueOf(id)); 
             }
         }
-        return (TemplateCollectionModel)wrapper.wrap(values);
+        return (TemplateCollectionModel) wrapper.wrap(values);
     }
     
     public boolean getAsBoolean() {
         return Context.toBoolean(scriptable);
     }
     
-    public Number getAsNumber()  {
+    public Number getAsNumber() {
         return Double.valueOf(Context.toNumber(scriptable));
     }
     

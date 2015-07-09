@@ -24,8 +24,7 @@ import freemarker.template.TemplateModel;
  * 
  * <p>You may also want to implement {@link freemarker.template.AdapterTemplateModel}.
  */
-public interface WrapperTemplateModel extends TemplateModel
-{
+public interface WrapperTemplateModel extends TemplateModel {
     /**
      * Retrieves the original object wrapped by this model.
      */

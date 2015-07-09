@@ -52,8 +52,7 @@ import freemarker.template.utility.OptimizerUtil;
  * An object wrapper that wraps Jython objects into FreeMarker template models
  * and vice versa.
  */
-public class JythonWrapper implements ObjectWrapper
-{
+public class JythonWrapper implements ObjectWrapper {
     private static final Class PYOBJECT_CLASS = PyObject.class;
     public static final JythonWrapper INSTANCE = new JythonWrapper();
 
@@ -70,8 +69,7 @@ public class JythonWrapper implements ObjectWrapper
      * When set to true, calling {@link #wrap(Object)} multiple times for
      * the same object will return the same model.
      */
-    public void setUseCache(boolean useCache)
-    {
+    public void setUseCache(boolean useCache) {
         modelCache.setUseCache(useCache);
     }
     
@@ -85,13 +83,11 @@ public class JythonWrapper implements ObjectWrapper
      * When set to false, the lookup order is reversed and items
      * are looked up before attributes.
      */
-    public synchronized void setAttributesShadowItems(boolean attributesShadowItems)
-    {
+    public synchronized void setAttributesShadowItems(boolean attributesShadowItems) {
         this.attributesShadowItems = attributesShadowItems;
     }
     
-    boolean isAttributesShadowItems()
-    {
+    boolean isAttributesShadowItems() {
         return attributesShadowItems;
     }
     
@@ -108,9 +104,8 @@ public class JythonWrapper implements ObjectWrapper
      * #unwrap(TemplateModel)}, the template model that was passed to
      * <code>unwrap</code> is returned.
      */
-    public TemplateModel wrap(Object obj)
-    {
-        if(obj == null) {
+    public TemplateModel wrap(Object obj) {
+        if (obj == null) {
             return null;
         }
         return modelCache.getInstance(obj);
@@ -138,39 +133,32 @@ public class JythonWrapper implements ObjectWrapper
      *   appropriate hash, sequence, and method models.</li>
      * </ul>
      */
-    public PyObject unwrap(TemplateModel model) throws TemplateModelException
-    {
-        if(model instanceof AdapterTemplateModel) {
-            return Py.java2py(((AdapterTemplateModel)model).getAdaptedObject(
+    public PyObject unwrap(TemplateModel model) throws TemplateModelException {
+        if (model instanceof AdapterTemplateModel) {
+            return Py.java2py(((AdapterTemplateModel) model).getAdaptedObject(
                     PYOBJECT_CLASS));
         }
-        if(model instanceof WrapperTemplateModel) {
-            return Py.java2py(((WrapperTemplateModel)model).getWrappedObject());
+        if (model instanceof WrapperTemplateModel) {
+            return Py.java2py(((WrapperTemplateModel) model).getWrappedObject());
         }
 
         // Scalars are marshalled to PyString.
-        if(model instanceof TemplateScalarModel)
-        {
-            return new PyString(((TemplateScalarModel)model).getAsString());
+        if (model instanceof TemplateScalarModel) {
+            return new PyString(((TemplateScalarModel) model).getAsString());
         }
         
         // Numbers are wrapped to Python built-in numeric types.
-        if(model instanceof TemplateNumberModel)
-        {
-            Number number = ((TemplateNumberModel)model).getAsNumber();
-            if(number instanceof BigDecimal)
-            {
+        if (model instanceof TemplateNumberModel) {
+            Number number = ((TemplateNumberModel) model).getAsNumber();
+            if (number instanceof BigDecimal) {
                 number = OptimizerUtil.optimizeNumberRepresentation(number);
             }
-            if(number instanceof BigInteger)
-            {
+            if (number instanceof BigInteger) {
                 // Py.java2py can't automatically coerce a BigInteger into
                 // a PyLong. This will probably get fixed in later Jython
                 // release.
-                return new PyLong((BigInteger)number);
-            }
-            else
-            {
+                return new PyLong((BigInteger) number);
+            } else {
                 return Py.java2py(number);
             }
         }
@@ -179,8 +167,7 @@ public class JythonWrapper implements ObjectWrapper
     }
 
     private class TemplateModelToJythonAdapter extends PyObject 
-    implements TemplateModelAdapter 
-    {
+    implements TemplateModelAdapter {
         private final TemplateModel model;
         
         TemplateModelToJythonAdapter(TemplateModel model)
@@ -188,27 +175,22 @@ public class JythonWrapper implements ObjectWrapper
             this.model = model;
         }
         
-        public TemplateModel getTemplateModel()
-        {
+        public TemplateModel getTemplateModel() {
             return model;
         }
         
-        public PyObject __finditem__(PyObject key)
-        {
-            if(key instanceof PyInteger)
-            {
-                return __finditem__(((PyInteger)key).getValue());
+        public PyObject __finditem__(PyObject key) {
+            if (key instanceof PyInteger) {
+                return __finditem__(((PyInteger) key).getValue());
             }
             return __finditem__(key.toString());
         }
 
-        public PyObject __finditem__(String key)
-        {
-            if(model instanceof TemplateHashModel)
-            {
+        public PyObject __finditem__(String key) {
+            if (model instanceof TemplateHashModel) {
                 try
                 {
-                    return unwrap(((TemplateHashModel)model).get(key));
+                    return unwrap(((TemplateHashModel) model).get(key));
                 }
                 catch(TemplateModelException e)
                 {
@@ -218,13 +200,11 @@ public class JythonWrapper implements ObjectWrapper
             throw Py.TypeError("item lookup on non-hash model (" + getModelClass() + ")");
         }
         
-        public PyObject __finditem__(int index)
-        {
-            if(model instanceof TemplateSequenceModel)
-            {
+        public PyObject __finditem__(int index) {
+            if (model instanceof TemplateSequenceModel) {
                 try
                 {
-                    return unwrap(((TemplateSequenceModel)model).get(index));
+                    return unwrap(((TemplateSequenceModel) model).get(index));
                 }
                 catch(TemplateModelException e)
                 {
@@ -234,25 +214,22 @@ public class JythonWrapper implements ObjectWrapper
             throw Py.TypeError("item lookup on non-sequence model (" + getModelClass() + ")");
         }
         
-        public PyObject __call__(PyObject args[], String keywords[])
-        {
-            if(model instanceof TemplateMethodModel)
-            {
+        public PyObject __call__(PyObject args[], String keywords[]) {
+            if (model instanceof TemplateMethodModel) {
                 boolean isEx = model instanceof TemplateMethodModelEx;
                 List list = new ArrayList(args.length);
                 try
                 {
-                    for(int i = 0; i < args.length; ++i)
-                    {
+                    for (int i = 0; i < args.length; ++i) {
                         list.add(
                             isEx 
-                            ? (Object)wrap(args[i]) 
-                            : (Object)(
+                            ? (Object) wrap(args[i]) 
+                            : (Object) (
                                 args[i] == null 
                                 ? null 
                                 : args[i].toString()));
                     }
-                    return unwrap((TemplateModel) ((TemplateMethodModelEx)model).exec(list));
+                    return unwrap((TemplateModel) ((TemplateMethodModelEx) model).exec(list));
                 }
                 catch(TemplateModelException e)
                 {
@@ -262,17 +239,14 @@ public class JythonWrapper implements ObjectWrapper
             throw Py.TypeError("call of non-method model (" + getModelClass() + ")");
         }
         
-        public int __len__()
-        {
+        public int __len__() {
             try
             {
-                if(model instanceof TemplateSequenceModel)
-                {
-                    return ((TemplateSequenceModel)model).size();
+                if (model instanceof TemplateSequenceModel) {
+                    return ((TemplateSequenceModel) model).size();
                 }
-                if(model instanceof TemplateHashModelEx)
-                {
-                    return ((TemplateHashModelEx)model).size();
+                if (model instanceof TemplateHashModelEx) {
+                    return ((TemplateHashModelEx) model).size();
                 }
             }
             catch(TemplateModelException e)
@@ -283,21 +257,17 @@ public class JythonWrapper implements ObjectWrapper
             return 0;
         }
         
-        public boolean __nonzero__()
-        {
+        public boolean __nonzero__() {
             try
             {
-                if(model instanceof TemplateBooleanModel)
-                {
-                    return ((TemplateBooleanModel)model).getAsBoolean();
+                if (model instanceof TemplateBooleanModel) {
+                    return ((TemplateBooleanModel) model).getAsBoolean();
                 }
-                if(model instanceof TemplateSequenceModel)
-                {
-                    return ((TemplateSequenceModel)model).size() > 0;
+                if (model instanceof TemplateSequenceModel) {
+                    return ((TemplateSequenceModel) model).size() > 0;
                 }
-                if(model instanceof TemplateHashModel)
-                {
-                    return !((TemplateHashModelEx)model).isEmpty();
+                if (model instanceof TemplateHashModel) {
+                    return !((TemplateHashModelEx) model).isEmpty();
                 }
             }
             catch(TemplateModelException e)
@@ -307,8 +277,7 @@ public class JythonWrapper implements ObjectWrapper
             return false;
         }
         
-        private String getModelClass()
-        {
+        private String getModelClass() {
             return model == null ? "null" : model.getClass().getName();
         }
     }

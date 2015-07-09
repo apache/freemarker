@@ -206,8 +206,7 @@ class BuiltInsForNumbers {
     // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
     static class longBI extends BuiltIn {
         TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
+                throws TemplateException {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {

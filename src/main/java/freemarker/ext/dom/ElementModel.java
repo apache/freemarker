@@ -55,7 +55,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         if (key.equals("*")) {
             NodeListModel ns = new NodeListModel(this);
             TemplateSequenceModel children = getChildNodes();
-            for (int i=0;i < children.size();i++) {
+            for (int i = 0; i < children.size(); i++) {
                 NodeModel child = (NodeModel) children.get(i);
                 if (child.node.getNodeType() == Node.ELEMENT_NODE) {
                     ns.add(child);
@@ -106,7 +106,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     public String getAsString() throws TemplateModelException {
         NodeList nl = node.getChildNodes();
         String result = "";
-        for (int i = 0; i<nl.getLength(); i++) {
+        for (int i = 0; i < nl.getLength(); i++) {
             Node child = nl.item(i);
             int nodeType = child.getNodeType();
             if (nodeType == Node.ELEMENT_NODE) {
@@ -115,8 +115,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                              + node.getNodeName()
                              + "\" has a child element named: " + child.getNodeName();
                 throw new TemplateModelException(msg);
-            }
-            else if (nodeType == Node.TEXT_NODE || nodeType == Node.CDATA_SECTION_NODE) {
+            } else if (nodeType == Node.TEXT_NODE || nodeType == Node.CDATA_SECTION_NODE) {
                 result += child.getNodeValue();
             }
         }
@@ -149,7 +148,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         if (prefix == null) {
             return null; // We have no qualified name, because there is no prefix mapping
         }
-        if (prefix.length() >0) {
+        if (prefix.length() > 0) {
             prefix += ":";
         }
         return prefix + nodeName;
@@ -161,7 +160,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         if (result != null)
             return result;
         int colonIndex = qname.indexOf(':');
-        if (colonIndex >0) {
+        if (colonIndex > 0) {
             String prefix = qname.substring(0, colonIndex);
             String uri;
             if (prefix.equals(Template.DEFAULT_NAMESPACE_PREFIX)) {
@@ -169,7 +168,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
             } else {
                 uri = Environment.getCurrentEnvironment().getNamespaceForPrefix(prefix);
             }
-            String localName = qname.substring(1+colonIndex);
+            String localName = qname.substring(1 + colonIndex);
             if (uri != null) {
                 result = element.getAttributeNodeNS(uri, localName);
             }

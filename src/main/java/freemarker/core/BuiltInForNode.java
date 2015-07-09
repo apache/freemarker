@@ -23,8 +23,7 @@ import freemarker.template.TemplateNodeModel;
 
 abstract class BuiltInForNode extends BuiltIn {
     TemplateModel _eval(Environment env)
-            throws TemplateException
-    {
+            throws TemplateException {
         TemplateModel model = target.eval(env);
         if (model instanceof TemplateNodeModel) {
             return calculateResult((TemplateNodeModel) model, env);

@@ -64,8 +64,7 @@ final class IteratorBlock extends TemplateElement {
         acceptWithResult(env);
     }
     
-    boolean acceptWithResult(Environment env) throws TemplateException, IOException 
-    {
+    boolean acceptWithResult(Environment env) throws TemplateException, IOException {
         TemplateModel listValue = listExp.eval(env);
         if (listValue == null) {
             if (env.isClassicCompatible()) {
@@ -109,8 +108,7 @@ final class IteratorBlock extends TemplateElement {
             buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVarName));
             buf.append(" in ");
             buf.append(listExp.getCanonicalForm());
-        }
-        else {
+        } else {
             buf.append(listExp.getCanonicalForm());
             if (loopVarName != null) {
                 buf.append(" as ");
@@ -309,12 +307,12 @@ final class IteratorBlock extends TemplateElement {
                     case 0: 
                         return loopVar;
                     case 6: 
-                        if(name.endsWith(LOOP_STATE_INDEX)) {
+                        if (name.endsWith(LOOP_STATE_INDEX)) {
                             return new SimpleNumber(index);
                         }
                         break;
                     case 9: 
-                        if(name.endsWith(LOOP_STATE_HAS_NEXT)) {
+                        if (name.endsWith(LOOP_STATE_HAS_NEXT)) {
                             return hasNext ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
                         }
                         break;

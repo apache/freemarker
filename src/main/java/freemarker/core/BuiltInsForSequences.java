@@ -137,9 +137,7 @@ class BuiltInsForSequences {
     
     static class firstBI extends BuiltInForSequence {
         TemplateModel calculateResult(TemplateSequenceModel tsm)
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             if (tsm.size() == 0) {
                 return null;
             }
@@ -221,19 +219,16 @@ class BuiltInsForSequences {
 
     static class lastBI extends BuiltInForSequence {
         TemplateModel calculateResult(TemplateSequenceModel tsm)
-        throws
-            TemplateModelException
-        {
+        throws TemplateModelException {
             if (tsm.size() == 0) {
                 return null;
             }
-            return tsm.get(tsm.size() -1);
+            return tsm.get(tsm.size() - 1);
         }
     }
 
     static class reverseBI extends BuiltInForSequence {
-        private static class ReverseSequence implements TemplateSequenceModel
-        {
+        private static class ReverseSequence implements TemplateSequenceModel {
             private final TemplateSequenceModel seq;
 
             ReverseSequence(TemplateSequenceModel seq)
@@ -241,13 +236,11 @@ class BuiltInsForSequences {
                 this.seq = seq;
             }
 
-            public TemplateModel get(int index) throws TemplateModelException
-            {
+            public TemplateModel get(int index) throws TemplateModelException {
                 return seq.get(seq.size() - 1 - index);
             }
 
-            public int size() throws TemplateModelException
-            {
+            public int size() throws TemplateModelException {
                 return seq.size();
             }
         }

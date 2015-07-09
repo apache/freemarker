@@ -16,8 +16,7 @@
 
 package freemarker.test.templatesuite.models;
 
-public class BeanTestSuperclass
-{
+public class BeanTestSuperclass {
     public Integer getSomething() {
         return 42;
     }

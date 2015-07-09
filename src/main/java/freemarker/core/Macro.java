@@ -56,7 +56,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             TemplateElement nestedBlock) 
     {
         this.name = name;
-        this.paramNames = (String[])argumentNames.toArray(
+        this.paramNames = (String[]) argumentNames.toArray(
                 new String[argumentNames.size()]);
         this.paramDefaults = args;
         
@@ -71,7 +71,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
     
     public String[] getArgumentNames() {
-        return (String[])paramNames.clone();
+        return (String[]) paramNames.clone();
     }
 
     String[] getArgumentNamesInternal() {
@@ -194,32 +194,30 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 firstUnresolvedExpression = null;
                 firstReferenceException = null;
                 resolvedAnArg = hasUnresolvedArg = false;
-                for(int i = 0; i < paramNames.length; ++i) {
+                for (int i = 0; i < paramNames.length; ++i) {
                     String argName = paramNames[i];
-                    if(localVars.get(argName) == null) {
+                    if (localVars.get(argName) == null) {
                         Expression valueExp = (Expression) paramDefaults.get(argName);
                         if (valueExp != null) {
                             try {
                                 TemplateModel tm = valueExp.eval(env);
-                                if(tm == null) {
-                                    if(!hasUnresolvedArg) {
+                                if (tm == null) {
+                                    if (!hasUnresolvedArg) {
                                         firstUnresolvedExpression = valueExp;
                                         hasUnresolvedArg = true;
                                     }
-                                }
-                                else {
+                                } else {
                                     localVars.put(argName, tm);
                                     resolvedAnArg = true;
                                 }
                             }
                             catch(InvalidReferenceException e) {
-                                if(!hasUnresolvedArg) {
+                                if (!hasUnresolvedArg) {
                                     hasUnresolvedArg = true;
                                     firstReferenceException = e;
                                 }
                             }
-                        }
-                        else if (!env.isClassicCompatible()) {
+                        } else if (!env.isClassicCompatible()) {
                             boolean argWasSpecified = localVars.containsKey(argName);
                             throw new _MiscTemplateException(env,
                                     new _ErrorDescriptionBuilder(new Object[] {
@@ -245,8 +243,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 }
             }
             while(resolvedAnArg && hasUnresolvedArg);
-            if(hasUnresolvedArg) {
-                if(firstReferenceException != null) {
+            if (hasUnresolvedArg) {
+                if (firstReferenceException != null) {
                     throw firstReferenceException;
                 } else if (!env.isClassicCompatible()) {
                     throw InvalidReferenceException.getInstance(firstUnresolvedExpression, env);
@@ -275,7 +273,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
         public Collection getLocalVariableNames() throws TemplateModelException {
             HashSet result = new HashSet();
-            for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext();) {
+            for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext(); ) {
                 result.add(it.next().toString());
             }
             return result;

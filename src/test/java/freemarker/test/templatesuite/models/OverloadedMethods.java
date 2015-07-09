@@ -147,9 +147,9 @@ public class OverloadedMethods {
 		    return "null";
 		} else if (value instanceof Character) {
 			return "'" + StringUtil.FTLStringLiteralEnc(value.toString()) + "'"; 
-		} else if (value instanceof String){
+		} else if (value instanceof String) {
 			return "\"" + StringUtil.FTLStringLiteralEnc((String) value) + "\""; 
-		} else if (value instanceof Map){
+		} else if (value instanceof Map) {
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("{");
 			boolean hadItems = false;
@@ -162,7 +162,7 @@ public class OverloadedMethods {
 			}
 			sb.append("}");
 			return sb.toString();
-		} else if (value instanceof Collection || value.getClass().isArray()){
+		} else if (value instanceof Collection || value.getClass().isArray()) {
 			StringBuilder sb = new StringBuilder();
 			
 	        if (value.getClass().isArray()) {

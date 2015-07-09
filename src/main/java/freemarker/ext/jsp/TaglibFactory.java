@@ -446,14 +446,14 @@ public class TaglibFactory implements TemplateHashModel {
             List/*<String>*/ resourcePaths = new ArrayList/*<String>*/(unsortedResourcePaths);
             Collections.sort(resourcePaths);
             // First process the files...
-            for (Iterator it = resourcePaths.iterator(); it.hasNext();) {
+            for (Iterator it = resourcePaths.iterator(); it.hasNext(); ) {
                 String resourcePath = (String) it.next();
                 if (resourcePath.endsWith(".tld")) {
                     addTldLocationFromTld(new ServletContextTldLocation(resourcePath));
                 }
             }
             // ... only later the directories
-            for (Iterator it = resourcePaths.iterator(); it.hasNext();) {
+            for (Iterator it = resourcePaths.iterator(); it.hasNext(); ) {
                 String resourcePath = (String) it.next();
                 if (resourcePath.endsWith("/")) {
                     addTldLocationsFromServletContextResourceTlds(resourcePath);
@@ -495,7 +495,7 @@ public class TaglibFactory implements TemplateHashModel {
                     cpMetaInfDirUrlsWithEF = collectMetaInfUrlsFromClassLoaders();
                 }
 
-                for (Iterator iterator = cpMetaInfDirUrlsWithEF.iterator(); iterator.hasNext();) {
+                for (Iterator iterator = cpMetaInfDirUrlsWithEF.iterator(); iterator.hasNext(); ) {
                     URLWithExternalForm urlWithEF = (URLWithExternalForm) iterator.next();
                     final URL url = urlWithEF.getUrl();
                     final boolean isJarUrl = isJarUrl(url);
@@ -539,7 +539,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         Set libEntPaths = servletContext.getResourcePaths("/WEB-INF/lib");
         if (libEntPaths != null) {
-            for (Iterator iter = libEntPaths.iterator(); iter.hasNext();) {
+            for (Iterator iter = libEntPaths.iterator(); iter.hasNext(); ) {
                 final String libEntryPath = (String) iter.next();
                 if (isJarPath(libEntryPath)) {
                     addTldLocationsFromServletContextJar(libEntryPath);
@@ -555,7 +555,7 @@ public class TaglibFactory implements TemplateHashModel {
         
         LOG.debug("Looking for TLD locations in TLD-s specified in cfg.classpathTlds");
         
-        for (Iterator it = classpathTlds.iterator(); it.hasNext();) {
+        for (Iterator it = classpathTlds.iterator(); it.hasNext(); ) {
             String tldResourcePath = (String) it.next();
             if (tldResourcePath.trim().length() == 0) {
                 throw new TaglibGettingException("classpathTlds can't contain empty item"); 
@@ -604,7 +604,7 @@ public class TaglibFactory implements TemplateHashModel {
                 LOG.debug("Scanning for " + META_INF_ABS_PATH + "*.tld-s in JarFile: servletContext:"
                         + jarResourcePath);
             }
-            for (Enumeration/*<JarEntry>*/ entries = jarFile.entries(); entries.hasMoreElements();) {
+            for (Enumeration/*<JarEntry>*/ entries = jarFile.entries(); entries.hasMoreElements(); ) {
                 final JarEntry curEntry = (JarEntry) entries.nextElement();
                 final String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
                 if (curEntryPath.startsWith(metaInfEntryPath) && curEntryPath.endsWith(".tld")) {
@@ -689,7 +689,7 @@ public class TaglibFactory implements TemplateHashModel {
                 LOG.debug("Scanning for " + META_INF_ABS_PATH + "**/*.tld-s in random access mode: "
                         + jarBaseEntryUrl);
             }
-            for (Enumeration/*<JarEntry>*/ entries = jarFile.entries(); entries.hasMoreElements();) {
+            for (Enumeration/*<JarEntry>*/ entries = jarFile.entries(); entries.hasMoreElements(); ) {
                 final JarEntry curEntry = (JarEntry) entries.nextElement();
                 final String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
                 if (curEntryPath.startsWith(baseEntryPath) && curEntryPath.endsWith(".tld")) {
@@ -872,8 +872,7 @@ public class TaglibFactory implements TemplateHashModel {
         reader.parse(inSrc);
     }
 
-    private static String resolveRelativeUri(String uri) throws TaglibGettingException
-    {
+    private static String resolveRelativeUri(String uri) throws TaglibGettingException {
         TemplateModel reqHash;
         try {
             reqHash = Environment.getCurrentEnvironment().getVariable(
@@ -895,8 +894,7 @@ public class TaglibFactory implements TemplateHashModel {
             int lastSlash = reqPath.lastIndexOf('/');
             if (lastSlash != -1) {
                 return reqPath.substring(0, lastSlash + 1) + uri;
-            }
-            else {
+            } else {
                 return '/' + uri;
             }
         }
@@ -1655,8 +1653,7 @@ public class TaglibFactory implements TemplateHashModel {
         TldParserForTaglibBuilding(ObjectWrapper wrapper) {
             if (wrapper instanceof BeansWrapper) {
                 beansWrapper = (BeansWrapper) wrapper;
-            }
-            else {
+            } else {
                 beansWrapper = null;
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Custom EL functions won't be loaded because "
@@ -1706,21 +1703,16 @@ public class TaglibFactory implements TemplateHashModel {
                 if (E_NAME.equals(qName)) {
                     if (E_TAG.equals(stack.get(1))) {
                         tagNameCData = pullCData();
-                    }
-                    else if (E_FUNCTION.equals(stack.get(1))) {
+                    } else if (E_FUNCTION.equals(stack.get(1))) {
                         functionNameCData = pullCData();
                     }
-                }
-                else if (E_TAG_CLASS_LEGACY.equals(qName) || E_TAG_CLASS.equals(qName)) {
+                } else if (E_TAG_CLASS_LEGACY.equals(qName) || E_TAG_CLASS.equals(qName)) {
                     tagClassCData = pullCData();
-                }
-                else if (E_LISTENER_CLASS.equals(qName)) {
+                } else if (E_LISTENER_CLASS.equals(qName)) {
                     listenerClassCData = pullCData();
-                }
-                else if (E_FUNCTION_CLASS.equals(qName)) {
+                } else if (E_FUNCTION_CLASS.equals(qName)) {
                     functionClassCData = pullCData();
-                }
-                else if (E_FUNCTION_SIGNATURE.equals(qName)) {
+                } else if (E_FUNCTION_SIGNATURE.equals(qName)) {
                     functionSignatureCData = pullCData();
                 }
             } else if (stack.size() == 2) {
@@ -1734,8 +1726,7 @@ public class TaglibFactory implements TemplateHashModel {
                     try {
                         if (Tag.class.isAssignableFrom(tagClass)) {
                             impl = new TagTransformModel(tagNameCData, tagClass);
-                        }
-                        else {
+                        } else {
                             impl = new SimpleTagDirectiveModel(tagNameCData, tagClass);
                         }
                     } catch (IntrospectionException e) {
@@ -1883,20 +1874,15 @@ public class TaglibFactory implements TemplateHashModel {
             DTDS.put("http://java.sun.com/j2ee/dtds/web-app_2_2.dtd", "web-app_2_2.dtd");
         }
         
-        public InputSource resolveEntity(String publicId, String systemId)
-        {
+        public InputSource resolveEntity(String publicId, String systemId) {
             String resourceName = (String) DTDS.get(publicId);
-            if (resourceName == null)
-            {
+            if (resourceName == null) {
                 resourceName = (String) DTDS.get(systemId);
             }
             InputStream resourceStream;
-            if (resourceName != null)
-            {
+            if (resourceName != null) {
                 resourceStream = getClass().getResourceAsStream(resourceName);
-            }
-            else
-            {
+            } else {
                 // Fake an empty stream for unknown DTDs
                 resourceStream = new ByteArrayInputStream(new byte[0]);
             }

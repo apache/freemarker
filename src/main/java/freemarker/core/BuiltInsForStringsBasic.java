@@ -404,8 +404,7 @@ class BuiltInsForStringsBasic {
     }    
 
     static class lower_caseBI extends BuiltInForString {
-        TemplateModel calculateResult(String s, Environment env)
-        {
+        TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.toLowerCase(env.getLocale()));
         }
     }    
@@ -637,8 +636,7 @@ class BuiltInsForStringsBasic {
     }
 
     static class upper_caseBI extends BuiltInForString {
-        TemplateModel calculateResult(String s, Environment env)
-        {
+        TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.toUpperCase(env.getLocale()));
         }
     }

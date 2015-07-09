@@ -29,7 +29,7 @@ import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.TemplateTest;
 
-public class TemplateNameSpecialVariablesTest extends TemplateTest  {
+public class TemplateNameSpecialVariablesTest extends TemplateTest {
     
     private static final Version[] BREAK_POINT_VERSIONS = new Version[] {
             Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22, Configuration.VERSION_2_3_23 };

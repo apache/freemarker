@@ -768,7 +768,7 @@ public class Configuration extends Configurable implements Cloneable {
     
     public Object clone() {
         try {
-            Configuration copy = (Configuration)super.clone();
+            Configuration copy = (Configuration) super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
             copy.localeToCharsetMap = new ConcurrentHashMap(localeToCharsetMap);
             copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
@@ -1542,8 +1542,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setTagSyntax(int tagSyntax) {
         if (tagSyntax != AUTO_DETECT_TAG_SYNTAX
             && tagSyntax != SQUARE_BRACKET_TAG_SYNTAX
-            && tagSyntax != ANGLE_BRACKET_TAG_SYNTAX)
-        {
+            && tagSyntax != ANGLE_BRACKET_TAG_SYNTAX) {
             throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
                     + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
                     + "or Configuration.SQAUARE_BRACKET_SYNTAX");
@@ -1612,8 +1611,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setNamingConvention(int namingConvention) {
         if (namingConvention != AUTO_DETECT_NAMING_CONVENTION
             && namingConvention != LEGACY_NAMING_CONVENTION
-            && namingConvention != CAMEL_CASE_NAMING_CONVENTION)
-        {
+            && namingConvention != CAMEL_CASE_NAMING_CONVENTION) {
             throw new IllegalArgumentException("\"naming_convention\" can only be set to one of these: "
                     + "Configuration.AUTO_DETECT_NAMING_CONVENTION, "
                     + "or Configuration.LEGACY_NAMING_CONVENTION"
@@ -2011,7 +2009,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     private void setSharedVariablesFromRewrappableSharedVariables() throws TemplateModelException {
         if (rewrappableSharedVariables == null) return;
-        for (Iterator it = rewrappableSharedVariables.entrySet().iterator(); it.hasNext();) {
+        for (Iterator it = rewrappableSharedVariables.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry/*<String, Object>*/ ent = (Entry) it.next();
             String name = (String) ent.getKey();
             Object value = ent.getValue();
@@ -2048,9 +2046,8 @@ public class Configuration extends Configurable implements Cloneable {
     public void setAllSharedVariables(TemplateHashModelEx hash) throws TemplateModelException {
         TemplateModelIterator keys = hash.keys().iterator();
         TemplateModelIterator values = hash.values().iterator();
-        while(keys.hasNext())
-        {
-            setSharedVariable(((TemplateScalarModel)keys.next()).getAsString(), values.next());
+        while (keys.hasNext()) {
+            setSharedVariable(((TemplateScalarModel) keys.next()).getAsString(), values.next());
         }
     }
     
@@ -2377,20 +2374,17 @@ public class Configuration extends Configurable implements Cloneable {
             autoImports = new ArrayList(map.keySet());
             if (map instanceof HashMap) {
                 autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
-            } 
-            else if (map instanceof SortedMap) {
+            } else if (map instanceof SortedMap) {
                 autoImportNsToTmpMap = new TreeMap(map);             
-            }
-            else {
+            } else {
                 autoImportNsToTmpMap = new HashMap(map);
             }
         }
     }
     
     protected void doAutoImportsAndIncludes(Environment env)
-    throws TemplateException, IOException
-    {
-        for (int i=0; i<autoImports.size(); i++) {
+    throws TemplateException, IOException {
+        for (int i = 0; i < autoImports.size(); i++) {
             String namespace = (String) autoImports.get(i);
             String templateName = (String) autoImportNsToTmpMap.get(namespace);
             env.importLib(templateName, namespace);

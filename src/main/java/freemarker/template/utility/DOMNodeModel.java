@@ -67,68 +67,53 @@ public class DOMNodeModel implements TemplateHashModel {
                 NamedNodeMap attributes = node.getAttributes();
                 if (attributes != null) {
                     SimpleHash hash = new SimpleHash();
-                    for (int i = 0; i<attributes.getLength(); i++) {
+                    for (int i = 0; i < attributes.getLength(); i++) {
                         Attr att = (Attr) attributes.item(i);
                         hash.put(att.getName(), att.getValue());
                     }
                     result = hash;
                 }
-            }
-            else if (key.charAt(0) == '@') {
+            } else if (key.charAt(0) == '@') {
                 if (node instanceof Element) {
                     String attValue = ((Element) node).getAttribute(key.substring(1));
                     result = new SimpleScalar(attValue);
-                }
-                else {
+                } else {
                     throw new TemplateModelException("Trying to get an attribute value for a non-element node");
                 }
-            }
-            else if ("is_element".equals(key)) {
+            } else if ("is_element".equals(key)) {
                 result = (node instanceof Element) ?
                     TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-            }
-            else if ("is_text".equals(key)) {
+            } else if ("is_text".equals(key)) {
                 result = (node instanceof Text) ?
                     TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-            }
-            else if ("name".equals(key)) {
+            } else if ("name".equals(key)) {
                 result = new SimpleScalar(node.getNodeName());
-            }
-            else if ("children".equals(key)) {
+            } else if ("children".equals(key)) {
                 result = new NodeListTM(node.getChildNodes());
-            }
-            else if ("parent".equals(key)) {
+            } else if ("parent".equals(key)) {
                 Node parent = node.getParentNode();
                 result = (parent == null) ? null : new DOMNodeModel(parent);
-            }
-            else if ("ancestorByName".equals(key)) {
+            } else if ("ancestorByName".equals(key)) {
                 result = new AncestorByName();
-            }
-            else if ("nextSibling".equals(key)) {
+            } else if ("nextSibling".equals(key)) {
                 Node next = node.getNextSibling();
                 result = (next == null) ? null : new DOMNodeModel(next);
-            }
-            else if ("previousSibling".equals(key)) {
+            } else if ("previousSibling".equals(key)) {
                 Node previous = node.getPreviousSibling();
                 result = (previous == null) ? null : new DOMNodeModel(previous);
-            }
-            else if ("nextSiblingElement".equals(key)) {
+            } else if ("nextSiblingElement".equals(key)) {
                 Node next = nextSiblingElement(node);
                 result = (next == null) ? null : new DOMNodeModel(next);
-            }
-            else if ("previousSiblingElement".equals(key)) {
+            } else if ("previousSiblingElement".equals(key)) {
                 Node previous = previousSiblingElement(node);
                 result = (previous == null) ? null : new DOMNodeModel(previous);
-            }
-            else if ("nextElement".equals(key)) {
+            } else if ("nextElement".equals(key)) {
                 Node next = nextElement(node);
                 result = (next == null) ? null : new DOMNodeModel(next);
-            }
-            else if ("previousElement".equals(key)) {
+            } else if ("previousElement".equals(key)) {
                 Node previous = previousElement(node);
                 result = (previous == null) ? null : new DOMNodeModel(previous);
-            }
-            else if ("text".equals(key)) {
+            } else if ("text".equals(key)) {
                 result = new SimpleScalar(getText(node));
             }
             cache.put(key, result);
@@ -144,10 +129,9 @@ public class DOMNodeModel implements TemplateHashModel {
         String result = "";
         if (node instanceof Text) {
             result = ((Text) node).getData();
-        }
-        else if (node instanceof Element) {
+        } else if (node instanceof Element) {
             NodeList children = node.getChildNodes();
-            for (int i= 0; i<children.getLength(); i++) {
+            for (int i = 0; i < children.getLength(); i++) {
                 result += getText(children.item(i));
             }
         }
@@ -179,7 +163,7 @@ public class DOMNodeModel implements TemplateHashModel {
     static private Element nextElement(Node node) {
         if (node.hasChildNodes()) {
             NodeList children = node.getChildNodes();
-            for (int i=0; i<children.getLength();i++) {
+            for (int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
                 if (child instanceof Element) {
                     return (Element) child;

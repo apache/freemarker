@@ -23,13 +23,11 @@ import java.util.EventListener;
 /**
  * An interface for components that wish to receive debugging events.
  */
-public interface DebuggerListener extends Remote, EventListener
-{
+public interface DebuggerListener extends Remote, EventListener {
     /**
      * Called whenever an environment gets suspended (ie hits a breakpoint).
      * @param e the event object
      */
     public void environmentSuspended(EnvironmentSuspendedEvent e)
-    throws
-        RemoteException;
+    throws RemoteException;
 }

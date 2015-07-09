@@ -18,7 +18,7 @@ package freemarker.ext.beans;
 
 import freemarker.template.Configuration;
 
-public class BeansWrapperDesc2003021 extends BeansWrapperWithShortedMethods{
+public class BeansWrapperDesc2003021 extends BeansWrapperWithShortedMethods {
 
     public BeansWrapperDesc2003021() {
         super(Configuration.VERSION_2_3_21, true);

@@ -329,8 +329,7 @@ public class Template extends Configurable {
      * @throws IOException if an I/O exception occurs during writing to the writer.
      */
     public void process(Object dataModel, Writer out)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         createProcessingEnvironment(dataModel, out, null).process();
     }
 
@@ -346,8 +345,7 @@ public class Template extends Configurable {
      * @throws IOException if an I/O exception occurs during writing to the writer.
      */
     public void process(Object dataModel, Writer out, ObjectWrapper wrapper, TemplateNodeModel rootNode)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         Environment env = createProcessingEnvironment(dataModel, out, wrapper);
         if (rootNode != null) {
             env.setCurrentVisitorNode(rootNode);
@@ -362,8 +360,7 @@ public class Template extends Configurable {
      *      provides, or {@code null} if you don't want to override that. 
      */
     public void process(Object dataModel, Writer out, ObjectWrapper wrapper)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         createProcessingEnvironment(dataModel, out, wrapper).process();
     }
     
@@ -419,7 +416,7 @@ public class Template extends Configurable {
         if (dataModel instanceof TemplateHashModel) {
             dataModelHash = (TemplateHashModel) dataModel;
         } else {
-            if(wrapper == null) {
+            if (wrapper == null) {
                 wrapper = getObjectWrapper();
             }
 
@@ -449,8 +446,7 @@ public class Template extends Configurable {
      * createProcessingEnvironment(dataModel, out, null)}.
      */
     public Environment createProcessingEnvironment(Object dataModel, Writer out)
-    throws TemplateException, IOException
-    {
+    throws TemplateException, IOException {
         return createProcessingEnvironment(dataModel, out, null);
     }
     
@@ -639,8 +635,7 @@ public class Template extends Configurable {
     public String getSource(int beginColumn,
                             int beginLine,
                             int endColumn,
-                            int endLine)
-    {
+                            int endLine) {
         if (beginLine < 1 || endLine < 1) return null;  // dynamically ?eval-ed expressions has no source available
         
         // Our container is zero-based.
@@ -649,13 +644,13 @@ public class Template extends Configurable {
         --endColumn;
         --endLine;
         StringBuilder buf = new StringBuilder();
-        for (int i = beginLine ; i<=endLine; i++) {
+        for (int i = beginLine ; i <= endLine; i++) {
             if (i < lines.size()) {
                 buf.append(lines.get(i));
             }
         }
         int lastLineLength = lines.get(endLine).toString().length();
-        int trailingCharsToDelete = lastLineLength - endColumn -1;
+        int trailingCharsToDelete = lastLineLength - endColumn - 1;
         buf.delete(0, beginColumn);
         buf.delete(buf.length() - trailingCharsToDelete, buf.length());
         return buf.toString();
@@ -724,7 +719,7 @@ public class Template extends Configurable {
         public int read(char cbuf[], int off, int len) throws IOException {
             try {
                 int numchars = in.read(cbuf, off, len);
-                for (int i=off; i < off+numchars; i++) {
+                for (int i = off; i < off + numchars; i++) {
                     char c = cbuf[i];
                     handleChar(c);
                 }
@@ -735,7 +730,7 @@ public class Template extends Configurable {
         }
 
         public void close() throws IOException {
-            if (lineBuf.length() >0) {
+            if (lineBuf.length() > 0) {
                 lines.add(lineBuf.toString());
                 lineBuf.setLength(0);
             }
@@ -746,7 +741,7 @@ public class Template extends Configurable {
         private void handleChar(int c) {
             if (c == '\n' || c == '\r') {
                 if (lastChar == '\r' && c == '\n') { // CRLF under Windoze
-                    int lastIndex = lines.size() -1;
+                    int lastIndex = lines.size() - 1;
                     String lastLine = (String) lines.get(lastIndex);
                     lines.set(lastIndex, lastLine + '\n');
                 } else {
@@ -754,14 +749,12 @@ public class Template extends Configurable {
                     lines.add(lineBuf.toString());
                     lineBuf.setLength(0);
                 }
-            }
-            else if (c == '\t') {
-                int numSpaces = 8 - (lineBuf.length() %8);
-                for (int i=0; i<numSpaces; i++) {
+            } else if (c == '\t') {
+                int numSpaces = 8 - (lineBuf.length() % 8);
+                for (int i = 0; i < numSpaces; i++) {
                     lineBuf.append(' ');
                 }
-            }
-            else {
+            } else {
                 lineBuf.append((char) c);
             }
             lastChar = c;
@@ -880,7 +873,7 @@ public class Template extends Configurable {
         TemplateElement element = rootElement;
         mainloop: while (element.contains(column, line)) {
             elements.add(element);
-            for (Enumeration enumeration = element.children(); enumeration.hasMoreElements();) {
+            for (Enumeration enumeration = element.children(); enumeration.hasMoreElements(); ) {
                 TemplateElement elem = (TemplateElement) enumeration.nextElement();
                 if (elem.contains(column, line)) {
                     element = elem;

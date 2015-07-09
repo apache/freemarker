@@ -70,7 +70,7 @@ public final class _MethodUtil {
     public static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
             int ifHigherThan) {
         if (ifHigherThan >= 4) return 0;
-        if(generic.isAssignableFrom(specific)) {
+        if (generic.isAssignableFrom(specific)) {
             // Identity or widening reference conversion:
             return generic == specific ? 1 : 4;
         } else {
@@ -114,7 +114,7 @@ public final class _MethodUtil {
     }
 
     private static boolean isWideningPrimitiveNumberConversion(final Class source, final Class target) {
-        if(target == Short.TYPE && (source == Byte.TYPE)) {
+        if (target == Short.TYPE && (source == Byte.TYPE)) {
             return true;
         } else if (target == Integer.TYPE && 
            (source == Short.TYPE || source == Byte.TYPE)) {
@@ -138,7 +138,7 @@ public final class _MethodUtil {
     }
 
     private static boolean isWideningBoxedNumberConversion(final Class source, final Class target) {
-        if(target == Short.class && source == Byte.class) {
+        if (target == Short.class && source == Byte.class) {
             return true;
         } else if (target == Integer.class && 
            (source == Short.class || source == Byte.class)) {
@@ -171,45 +171,45 @@ public final class _MethodUtil {
     }
     
     private static void collectAssignables(Class c1, Class c2, Set s) {
-        if(c1.isAssignableFrom(c2)) {
+        if (c1.isAssignableFrom(c2)) {
             s.add(c1);
         }
         Class sc = c1.getSuperclass();
-        if(sc != null) {
+        if (sc != null) {
             collectAssignables(sc, c2, s);
         }
         Class[] itf = c1.getInterfaces();
-        for(int i = 0; i < itf.length; ++i) {
+        for (int i = 0; i < itf.length; ++i) {
             collectAssignables(itf[i], c2, s);
         }
     }
 
     public static Class[] getParameterTypes(Member member) {
-        if(member instanceof Method) {
-            return ((Method)member).getParameterTypes();
+        if (member instanceof Method) {
+            return ((Method) member).getParameterTypes();
         }
-        if(member instanceof Constructor) {
-            return ((Constructor)member).getParameterTypes();
+        if (member instanceof Constructor) {
+            return ((Constructor) member).getParameterTypes();
         }
         throw new IllegalArgumentException("\"member\" must be Method or Constructor");
     }
 
     public static boolean isVarargs(Member member) {
-        if(member instanceof Method) { 
+        if (member instanceof Method) { 
             return isVarargs(member, METHOD_IS_VARARGS);
         }
-        if(member instanceof Constructor) {
+        if (member instanceof Constructor) {
             return isVarargs(member, CONSTRUCTOR_IS_VARARGS);
         }
         throw new BugException();
     }
 
     private static boolean isVarargs(Member member, Method isVarArgsMethod) {
-        if(isVarArgsMethod == null) {
+        if (isVarArgsMethod == null) {
             return false;
         }
         try {
-            return ((Boolean)isVarArgsMethod.invoke(member, (Object[]) null)).booleanValue();
+            return ((Boolean) isVarArgsMethod.invoke(member, (Object[]) null)).booleanValue();
         }
         catch(Exception e) {
             throw new UndeclaredThrowableException(e);

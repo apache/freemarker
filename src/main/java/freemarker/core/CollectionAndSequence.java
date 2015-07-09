@@ -30,8 +30,7 @@ import freemarker.template.TemplateSequenceModel;
  * vice versa. Used by ?keys and ?values built-ins.
  */
 final public class CollectionAndSequence
-implements TemplateCollectionModel, TemplateSequenceModel, Serializable
-{
+implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
     private TemplateCollectionModel collection;
     private TemplateSequenceModel sequence;
     private ArrayList data;
@@ -57,7 +56,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable
             return sequence.get(i);
         } else {
             initSequence();
-            return (TemplateModel)data.get(i);
+            return (TemplateModel) data.get(i);
         }
     }
 
@@ -81,8 +80,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable
     }
 
     private static class SequenceIterator
-    implements TemplateModelIterator
-    {
+    implements TemplateModelIterator {
         private final TemplateSequenceModel sequence;
         private final int size;
         private int index = 0;

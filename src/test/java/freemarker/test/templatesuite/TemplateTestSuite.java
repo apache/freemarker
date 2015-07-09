@@ -158,7 +158,7 @@ public class TemplateTestSuite extends TestSuite {
     String getTextInElement(Element e) {
         StringBuilder buf = new StringBuilder();
         NodeList children = e.getChildNodes();
-        for(int i=0; i<children.getLength(); i++) {
+        for (int i = 0; i < children.getLength(); i++) {
             Node n = children.item(i);
             short type = n.getNodeType();
             if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {

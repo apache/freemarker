@@ -39,8 +39,7 @@ import freemarker.template.utility.StringUtil;
  * feature by using {@link #FileTemplateLoader(File, boolean)} with {@code true} second argument, but before that, check
  * the security implications there!
  */
-public class FileTemplateLoader implements TemplateLoader
-{
+public class FileTemplateLoader implements TemplateLoader {
     
     /**
      * By setting this Java system property to {@code true}, you can change the default of
@@ -81,8 +80,7 @@ public class FileTemplateLoader implements TemplateLoader
      *             {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
      */
     public FileTemplateLoader()
-    throws
-    	IOException
+    throws IOException
     {
         this(new File(SecurityUtilities.getSystemProperty("user.dir")));
     }
@@ -95,8 +93,7 @@ public class FileTemplateLoader implements TemplateLoader
      * @param baseDir the base directory for loading templates
      */
     public FileTemplateLoader(final File baseDir)
-    throws
-        IOException
+    throws IOException
     {
         this(baseDir, false);
     }
@@ -118,8 +115,7 @@ public class FileTemplateLoader implements TemplateLoader
      *            template paths that are supplied by the visitor or an external system.
      */
     public FileTemplateLoader(final File baseDir, final boolean disableCanonicalPathCheck)
-    throws
-    	IOException
+    throws IOException
     {
         try {
             Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction() {
@@ -131,11 +127,10 @@ public class FileTemplateLoader implements TemplateLoader
                         throw new IOException(baseDir + " is not a directory.");
                     }
                     Object[] retval = new Object[2];
-                    if(disableCanonicalPathCheck) {
+                    if (disableCanonicalPathCheck) {
                         retval[0] = baseDir;
                         retval[1] = null;
-                    }
-                    else {
+                    } else {
                         retval[0] = baseDir.getCanonicalFile();
                         String basePath = ((File) retval[0]).getPath();
                         // Most canonical paths don't end with File.separator,
@@ -155,26 +150,24 @@ public class FileTemplateLoader implements TemplateLoader
         }
         catch(PrivilegedActionException e)
         {
-            throw (IOException)e.getException();
+            throw (IOException) e.getException();
         }
     }
     
     public Object findTemplateSource(final String name)
-    throws
-    	IOException
-    {
+    throws IOException {
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction() {
                 public Object run() throws IOException {
                     File source = new File(baseDir, SEP_IS_SLASH ? name : 
                         name.replace('/', File.separatorChar));
-                    if(!source.isFile()) {
+                    if (!source.isFile()) {
                         return null;
                     }
                     // Security check for inadvertently returning something 
                     // outside the template directory when linking is not 
                     // allowed.
-                    if(canonicalBasePath != null) {
+                    if (canonicalBasePath != null) {
                         String normalized = source.getCanonicalPath();
                         if (!normalized.startsWith(canonicalBasePath)) {
                             throw new SecurityException(source.getAbsolutePath() 
@@ -193,17 +186,15 @@ public class FileTemplateLoader implements TemplateLoader
         }
         catch(PrivilegedActionException e)
         {
-            throw (IOException)e.getException();
+            throw (IOException) e.getException();
         }
     }
     
-    public long getLastModified(final Object templateSource)
-    {
-        return ((Long)(AccessController.doPrivileged(new PrivilegedAction()
+    public long getLastModified(final Object templateSource) {
+        return ((Long) (AccessController.doPrivileged(new PrivilegedAction()
         {
-            public Object run()
-            {
-                return Long.valueOf(((File)templateSource).lastModified());
+            public Object run() {
+                return Long.valueOf(((File) templateSource).lastModified());
             }
         }))).longValue();
         
@@ -211,17 +202,13 @@ public class FileTemplateLoader implements TemplateLoader
     }
     
     public Reader getReader(final Object templateSource, final String encoding)
-    throws
-        IOException
-    {
+    throws IOException {
         try
         {
-            return (Reader)AccessController.doPrivileged(new PrivilegedExceptionAction()
+            return (Reader) AccessController.doPrivileged(new PrivilegedExceptionAction()
             {
                 public Object run()
-                throws 
-                    IOException
-                {
+                throws IOException {
                     if (!(templateSource instanceof File)) {
                         throw new IllegalArgumentException(
                                 "templateSource wasn't a File, but a: " + 
@@ -233,7 +220,7 @@ public class FileTemplateLoader implements TemplateLoader
         }
         catch(PrivilegedActionException e)
         {
-            throw (IOException)e.getException();
+            throw (IOException) e.getException();
         }
     }
     
@@ -285,8 +272,7 @@ public class FileTemplateLoader implements TemplateLoader
         return true;
     }
 
-    public void closeTemplateSource(Object templateSource)
-    {
+    public void closeTemplateSource(Object templateSource) {
         // Do nothing.
     }
     

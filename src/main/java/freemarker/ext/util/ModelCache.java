@@ -27,8 +27,7 @@ import freemarker.template.TemplateModelAdapter;
  * Internally used by various wrapper implementations to implement model
  * caching.
  */
-public abstract class ModelCache
-{
+public abstract class ModelCache {
     private boolean useCache = false;
     private Map modelCache = null;
     private ReferenceQueue refQueue = null;
@@ -42,16 +41,12 @@ public abstract class ModelCache
      * When set to true, calling {@link #getInstance(Object)} 
      * multiple times for the same object will return the same model.
      */
-    public synchronized void setUseCache(boolean useCache)
-    {
+    public synchronized void setUseCache(boolean useCache) {
         this.useCache = useCache;
-        if(useCache)
-        {
+        if (useCache) {
             modelCache = new IdentityHashMap();
             refQueue = new ReferenceQueue();
-        }
-        else
-        {
+        } else {
             modelCache = null;
             refQueue = null;
         }
@@ -64,23 +59,21 @@ public abstract class ModelCache
         return useCache;
     }
     
-    public TemplateModel getInstance(Object object)
-    {
-        if(object instanceof TemplateModel) {
-            return (TemplateModel)object;
+    public TemplateModel getInstance(Object object) {
+        if (object instanceof TemplateModel) {
+            return (TemplateModel) object;
         }
-        if(object instanceof TemplateModelAdapter) {
-            return ((TemplateModelAdapter)object).getTemplateModel();
+        if (object instanceof TemplateModelAdapter) {
+            return ((TemplateModelAdapter) object).getTemplateModel();
         }
-        if(useCache && isCacheable(object)) {
+        if (useCache && isCacheable(object)) {
             TemplateModel model = lookup(object);
-            if(model == null) {
+            if (model == null) {
                 model = create(object);
                 register(model, object);
             }
             return model;
-        }
-        else {
+        } else {
             return create(object);
         }
     }
@@ -88,10 +81,8 @@ public abstract class ModelCache
     protected abstract TemplateModel create(Object object);
     protected abstract boolean isCacheable(Object object);
     
-    public void clearCache()
-    {
-        if(modelCache != null)
-        {
+    public void clearCache() {
+        if (modelCache != null) {
             synchronized(modelCache)
             {
                 modelCache.clear();
@@ -99,8 +90,7 @@ public abstract class ModelCache
         }
     }
 
-    private final TemplateModel lookup(Object object)
-    {
+    private final TemplateModel lookup(Object object) {
         ModelReference ref = null;
         // NOTE: we're doing minimal synchronizations -- which can lead to
         // duplicate wrapper creation. However, this has no harmful side-effects and
@@ -116,11 +106,10 @@ public abstract class ModelCache
         return null;
     }
 
-    private final void register(TemplateModel model, Object object)
-    {
+    private final void register(TemplateModel model, Object object) {
         synchronized (modelCache) {
             // Remove cleared references
-            for (;;) {
+            for (; ; ) {
                 ModelReference queuedRef = (ModelReference) refQueue.poll();
                 if (queuedRef == null)
                     break;
@@ -136,8 +125,7 @@ public abstract class ModelCache
      * When it gets cleared (that is, the model became unreachable)
      * it will remove itself from the model cache.
      */
-    private static final class ModelReference extends SoftReference
-    {
+    private static final class ModelReference extends SoftReference {
         Object object;
 
         ModelReference(TemplateModel ref, Object object, ReferenceQueue refQueue)
@@ -146,8 +134,7 @@ public abstract class ModelCache
             this.object = object;
         }
 
-        TemplateModel getModel()
-        {
+        TemplateModel getModel() {
             return (TemplateModel) this.get();
         }
     }

@@ -34,14 +34,12 @@ public class JythonNumberModel
 extends
     JythonModel
 implements
-    TemplateNumberModel
-{
+    TemplateNumberModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new JythonNumberModel((PyObject)object, (JythonWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new JythonNumberModel((PyObject) object, (JythonWrapper) wrapper);
             }
         };
         
@@ -55,16 +53,14 @@ implements
      * {@link java.lang.Number}.class as argument. If that fails, returns 
      * {@link PyObject#__float__()}.
      */
-    public Number getAsNumber() throws TemplateModelException
-    {
+    public Number getAsNumber() throws TemplateModelException {
         try
         {
             Object value = object.__tojava__(java.lang.Number.class);
-            if(value == null || value == Py.NoConversion)
-            {
+            if (value == null || value == Py.NoConversion) {
                 return Double.valueOf(object.__float__().getValue());
             }
-            return (Number)value;
+            return (Number) value;
         }
         catch(PyException e)
         {

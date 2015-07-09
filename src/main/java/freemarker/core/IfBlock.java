@@ -39,7 +39,7 @@ final class IfBlock extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         int ln  = getRegulatedChildCount();
-        for (int i = 0; i< ln; i++) {
+        for (int i = 0; i < ln; i++) {
             ConditionalBlock cblock = (ConditionalBlock) getRegulatedChild(i);
             Expression condition = cblock.condition;
             env.replaceElementStackTop(cblock);
@@ -53,15 +53,13 @@ final class IfBlock extends TemplateElement {
     }
 
     TemplateElement postParseCleanup(boolean stripWhitespace)
-        throws ParseException 
-    {
+        throws ParseException {
         if (getRegulatedChildCount() == 1) {
             ConditionalBlock cblock = (ConditionalBlock) getRegulatedChild(0);
             cblock.isLonelyIf = true;
             cblock.setLocation(getTemplate(), cblock, this);
             return cblock.postParseCleanup(stripWhitespace);
-        }
-        else {
+        } else {
             return super.postParseCleanup(stripWhitespace);
         }
     }

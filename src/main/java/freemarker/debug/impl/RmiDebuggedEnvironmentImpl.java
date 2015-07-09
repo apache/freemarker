@@ -51,8 +51,7 @@ class RmiDebuggedEnvironmentImpl
 extends
     RmiDebugModelImpl
 implements
-    DebuggedEnvironment
-{
+    DebuggedEnvironment {
     private static final long serialVersionUID = 1L;
 
     private static final CacheStorage storage = new SoftCacheStorage(new IdentityHashMap());
@@ -74,110 +73,82 @@ implements
     }
 
     static synchronized Object getCachedWrapperFor(Object key)
-    throws
-        RemoteException
-    {
+    throws RemoteException {
         Object value = storage.get(key);
-        if(value == null)
-        {
-            if(key instanceof TemplateModel)
-            {
+        if (value == null) {
+            if (key instanceof TemplateModel) {
                 int extraTypes;
-                if(key instanceof DebugConfigurationModel)
-                {
+                if (key instanceof DebugConfigurationModel) {
                     extraTypes = DebugModel.TYPE_CONFIGURATION;
-                }
-                else if(key instanceof DebugTemplateModel)
-                {
+                } else if (key instanceof DebugTemplateModel) {
                     extraTypes = DebugModel.TYPE_TEMPLATE;
-                }
-                else
-                {
+                } else {
                     extraTypes = 0;
                 }
-                value = new RmiDebugModelImpl((TemplateModel)key, extraTypes);
-            }
-            else if(key instanceof Environment)
-            {
-                value = new RmiDebuggedEnvironmentImpl((Environment)key); 
-            }
-            else if(key instanceof Template)
-            {
-                value = new DebugTemplateModel((Template)key);
-            }
-            else if(key instanceof Configuration)
-            {
-                value = new DebugConfigurationModel((Configuration)key);
+                value = new RmiDebugModelImpl((TemplateModel) key, extraTypes);
+            } else if (key instanceof Environment) {
+                value = new RmiDebuggedEnvironmentImpl((Environment) key); 
+            } else if (key instanceof Template) {
+                value = new DebugTemplateModel((Template) key);
+            } else if (key instanceof Configuration) {
+                value = new DebugConfigurationModel((Configuration) key);
             }
         }
-        if(value != null)
-        {
+        if (value != null) {
             storage.put(key, value);
         }
-        if(value instanceof Remote)
-        {
+        if (value instanceof Remote) {
             remotes.add(value);
         }
         return value;
     }
 
-    public void resume()
-    {
+    public void resume() {
         synchronized(this)
         {
             notify();
         }
     }
 
-    public void stop()
-    {
+    public void stop() {
         stopped = true;
         resume();
     }
 
-    public long getId()
-    {
+    public long getId() {
         return id;
     }
     
-    boolean isStopped()
-    {
+    boolean isStopped() {
         return stopped;
     }
     
-    private abstract static class DebugMapModel implements TemplateHashModelEx
-    {
-        public int size()
-        {
+    private abstract static class DebugMapModel implements TemplateHashModelEx {
+        public int size() {
             return keySet().size();
         }
 
-        public TemplateCollectionModel keys()
-        {
+        public TemplateCollectionModel keys() {
             return new SimpleCollection(keySet());
         }
 
-        public TemplateCollectionModel values() throws TemplateModelException
-        {
+        public TemplateCollectionModel values() throws TemplateModelException {
             Collection keys = keySet();
             List list = new ArrayList(keys.size());
             
-            for(Iterator it = keys.iterator(); it.hasNext();)
-            {
-                list.add(get((String)it.next()));
+            for (Iterator it = keys.iterator(); it.hasNext(); ) {
+                list.add(get((String) it.next()));
             }
             return new SimpleCollection(list);
         }
 
-        public boolean isEmpty()
-        {
+        public boolean isEmpty() {
             return size() == 0;
         }
         
         abstract Collection keySet();
 
-        static List composeList(Collection c1, Collection c2)
-        {
+        static List composeList(Collection c1, Collection c2) {
             List list = new ArrayList(c1);
             list.addAll(c2);
             Collections.sort(list);
@@ -185,8 +156,7 @@ implements
         }
     }
     
-    private static class DebugConfigurableModel extends DebugMapModel
-    {
+    private static class DebugConfigurableModel extends DebugMapModel {
         static final List KEYS = Arrays.asList(new String[]
         {
             Configurable.ARITHMETIC_ENGINE_KEY,
@@ -205,33 +175,28 @@ implements
             this.configurable = configurable;
         }
         
-        Collection keySet()
-        {
+        Collection keySet() {
             return KEYS;
         }
         
-        public TemplateModel get(String key) throws TemplateModelException
-        {
+        public TemplateModel get(String key) throws TemplateModelException {
             String s = configurable.getSetting(key);
             return s == null ? null : new SimpleScalar(s);
         }
 
     }
     
-    private static class DebugConfigurationModel extends DebugConfigurableModel
-    {
+    private static class DebugConfigurationModel extends DebugConfigurableModel {
         private static final List KEYS = composeList(DebugConfigurableModel.KEYS, Collections.singleton("sharedVariables"));
 
         private TemplateModel sharedVariables = new DebugMapModel()
         {
-            Collection keySet()
-            {
-                return ((Configuration)configurable).getSharedVariableNames();
+            Collection keySet() {
+                return ((Configuration) configurable).getSharedVariableNames();
             }
         
-            public TemplateModel get(String key)
-            {
-                return ((Configuration)configurable).getSharedVariable(key);
+            public TemplateModel get(String key) {
+                return ((Configuration) configurable).getSharedVariable(key);
             }
         };
         
@@ -240,26 +205,20 @@ implements
             super(config);
         }
         
-        Collection keySet()
-        {
+        Collection keySet() {
             return KEYS;
         }
 
-        public TemplateModel get(String key) throws TemplateModelException
-        {
-            if("sharedVariables".equals(key))
-            {
+        public TemplateModel get(String key) throws TemplateModelException {
+            if ("sharedVariables".equals(key)) {
                 return sharedVariables; 
-            }
-            else
-            {
+            } else {
                 return super.get(key);
             }
         }
     }
     
-    private static class DebugTemplateModel extends DebugConfigurableModel
-    {
+    private static class DebugTemplateModel extends DebugConfigurableModel {
         private static final List KEYS = composeList(DebugConfigurableModel.KEYS, 
             Arrays.asList(new String[] {
                 "configuration", 
@@ -274,34 +233,29 @@ implements
             this.name = new SimpleScalar(template.getName());
         }
 
-        Collection keySet()
-        {
+        Collection keySet() {
             return KEYS;
         }
 
-        public TemplateModel get(String key) throws TemplateModelException
-        {
-            if("configuration".equals(key))
-            {
+        public TemplateModel get(String key) throws TemplateModelException {
+            if ("configuration".equals(key)) {
                 try
                 {
-                    return (TemplateModel)getCachedWrapperFor(((Template)configurable).getConfiguration());
+                    return (TemplateModel) getCachedWrapperFor(((Template) configurable).getConfiguration());
                 }
                 catch (RemoteException e)
                 {
                     throw new TemplateModelException(e);
                 }
             }
-            if("name".equals(key))
-            {
+            if ("name".equals(key)) {
                 return name;
             }
             return super.get(key);
         }
     }
 
-    private static class DebugEnvironmentModel extends DebugConfigurableModel
-    {
+    private static class DebugEnvironmentModel extends DebugConfigurableModel {
         private static final List KEYS = composeList(DebugConfigurableModel.KEYS, 
             Arrays.asList(new String[] {
                 "currentNamespace",
@@ -314,11 +268,10 @@ implements
     
         private TemplateModel knownVariables = new DebugMapModel()
         {
-            Collection keySet()
-            {
+            Collection keySet() {
                 try
                 {
-                    return ((Environment)configurable).getKnownVariableNames();
+                    return ((Environment) configurable).getKnownVariableNames();
                 }
                 catch (TemplateModelException e)
                 {
@@ -326,9 +279,8 @@ implements
                 }
             }
         
-            public TemplateModel get(String key) throws TemplateModelException
-            {
-                return ((Environment)configurable).getVariable(key);
+            public TemplateModel get(String key) throws TemplateModelException {
+                return ((Environment) configurable).getVariable(key);
             }
         };
          
@@ -337,38 +289,30 @@ implements
             super(env);
         }
 
-        Collection keySet()
-        {
+        Collection keySet() {
             return KEYS;
         }
 
-        public TemplateModel get(String key) throws TemplateModelException
-        {
-            if("currentNamespace".equals(key))
-            {
-                return ((Environment)configurable).getCurrentNamespace();
+        public TemplateModel get(String key) throws TemplateModelException {
+            if ("currentNamespace".equals(key)) {
+                return ((Environment) configurable).getCurrentNamespace();
             }
-            if("dataModel".equals(key))
-            {
-                return ((Environment)configurable).getDataModel();
+            if ("dataModel".equals(key)) {
+                return ((Environment) configurable).getDataModel();
             }
-            if("globalNamespace".equals(key))
-            {
-                return ((Environment)configurable).getGlobalNamespace();
+            if ("globalNamespace".equals(key)) {
+                return ((Environment) configurable).getGlobalNamespace();
             }
-            if("knownVariables".equals(key))
-            {
+            if ("knownVariables".equals(key)) {
                 return knownVariables;
             }
-            if("mainNamespace".equals(key))
-            {
-                return ((Environment)configurable).getMainNamespace();
+            if ("mainNamespace".equals(key)) {
+                return ((Environment) configurable).getMainNamespace();
             }
-            if("template".equals(key))
-            {
+            if ("template".equals(key)) {
                 try
                 {
-                    return (TemplateModel) getCachedWrapperFor(((Environment)configurable).getTemplate());
+                    return (TemplateModel) getCachedWrapperFor(((Environment) configurable).getTemplate());
                 }
                 catch (RemoteException e)
                 {
@@ -380,8 +324,7 @@ implements
     }
 
     public static void cleanup() {
-        for(Iterator i = remotes.iterator(); i.hasNext();)
-        {
+        for (Iterator i = remotes.iterator(); i.hasNext(); ) {
             Object remoteObject = i.next();
             try
             {

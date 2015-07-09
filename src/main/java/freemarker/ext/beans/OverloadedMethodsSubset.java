@@ -168,7 +168,7 @@ abstract class OverloadedMethodsSubset {
      * @param c2 Parameter type 2
      */
     protected Class getCommonSupertypeForUnwrappingHint(Class c1, Class c2) {
-        if(c1 == c2) return c1;
+        if (c1 == c2) return c1;
         // This also means that the hint for (Integer, Integer) will be Integer, not just Number. This is consistent
         // with how non-overloaded method hints work.
         
@@ -211,14 +211,14 @@ abstract class OverloadedMethodsSubset {
             }
             // Falls through
         } else {  // old buggy behavior
-            if(c2.isPrimitive()) {
-                if(c2 == Byte.TYPE) c2 = Byte.class;
-                else if(c2 == Short.TYPE) c2 = Short.class;
-                else if(c2 == Character.TYPE) c2 = Character.class;
-                else if(c2 == Integer.TYPE) c2 = Integer.class;
-                else if(c2 == Float.TYPE) c2 = Float.class;
-                else if(c2 == Long.TYPE) c2 = Long.class;
-                else if(c2 == Double.TYPE) c2 = Double.class;
+            if (c2.isPrimitive()) {
+                if (c2 == Byte.TYPE) c2 = Byte.class;
+                else if (c2 == Short.TYPE) c2 = Short.class;
+                else if (c2 == Character.TYPE) c2 = Character.class;
+                else if (c2 == Integer.TYPE) c2 = Integer.class;
+                else if (c2 == Float.TYPE) c2 = Float.class;
+                else if (c2 == Long.TYPE) c2 = Long.class;
+                else if (c2 == Double.TYPE) c2 = Double.class;
             }
         }
         
@@ -228,7 +228,7 @@ abstract class OverloadedMethodsSubset {
         
         Set commonTypes = _MethodUtil.getAssignables(c1, c2);
         commonTypes.retainAll(_MethodUtil.getAssignables(c2, c1));
-        if(commonTypes.isEmpty()) {
+        if (commonTypes.isEmpty()) {
             // Can happen when at least one of the arguments is an interface, as
             // they don't have Object at the root of their hierarchy
             return Object.class;
@@ -239,15 +239,15 @@ abstract class OverloadedMethodsSubset {
         // and Number.class, you'll have Comparable, Serializable, and Object as 
         // maximal elements. 
         List max = new ArrayList();
-        listCommonTypes:  for (Iterator commonTypesIter = commonTypes.iterator(); commonTypesIter.hasNext();) {
-            Class clazz = (Class)commonTypesIter.next();
-            for (Iterator maxIter = max.iterator(); maxIter.hasNext();) {
-                Class maxClazz = (Class)maxIter.next();
-                if(_MethodUtil.isMoreOrSameSpecificParameterType(maxClazz, clazz, false /*bugfixed [1]*/, 0) != 0) {
+        listCommonTypes:  for (Iterator commonTypesIter = commonTypes.iterator(); commonTypesIter.hasNext(); ) {
+            Class clazz = (Class) commonTypesIter.next();
+            for (Iterator maxIter = max.iterator(); maxIter.hasNext(); ) {
+                Class maxClazz = (Class) maxIter.next();
+                if (_MethodUtil.isMoreOrSameSpecificParameterType(maxClazz, clazz, false /*bugfixed [1]*/, 0) != 0) {
                     // clazz can't be maximal, if there's already a more specific or equal maximal than it.
                     continue listCommonTypes;
                 }
-                if(_MethodUtil.isMoreOrSameSpecificParameterType(clazz, maxClazz, false /*bugfixed [1]*/, 0) != 0) {
+                if (_MethodUtil.isMoreOrSameSpecificParameterType(clazz, maxClazz, false /*bugfixed [1]*/, 0) != 0) {
                     // If it's more specific than a currently maximal element,
                     // that currently maximal is no longer a maximal.
                     maxIter.remove();
@@ -264,7 +264,7 @@ abstract class OverloadedMethodsSubset {
         if (max.size() > 1) {  // we have an ambiguity
             if (bugfixed) {
                 // Find the non-interface class
-                for (Iterator it = max.iterator(); it.hasNext();) {
+                for (Iterator it = max.iterator(); it.hasNext(); ) {
                     Class maxCl = (Class) it.next();
                     if (!maxCl.isInterface()) {
                         if (maxCl != Object.class) {  // This actually shouldn't ever happen, but to be sure...

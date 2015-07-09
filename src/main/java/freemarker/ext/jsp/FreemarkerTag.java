@@ -33,8 +33,7 @@ import freemarker.template.Template;
  * JSP. Inspired by similar class in Velocity template engine developed by
  * <a href="mailto:geirm@optonline.net">Geir Magnusson Jr.</a>
  */
-public class FreemarkerTag implements BodyTag
-{
+public class FreemarkerTag implements BodyTag {
     private Tag parent;
     private BodyContent bodyContent;
     private PageContext pageContext;
@@ -43,78 +42,64 @@ public class FreemarkerTag implements BodyTag
     private boolean caching = true;
     private String name = "";
     
-    public boolean getCaching()
-    {
+    public boolean getCaching() {
         return caching;
     }
 
-    public void setCaching(boolean caching)
-    {
+    public void setCaching(boolean caching) {
         this.caching = caching;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name == null ? "" : name;
     }
     
-    public Tag getParent()
-    {
+    public Tag getParent() {
         return parent;
     }
 
-    public void setParent(Tag parent)
-    {
+    public void setParent(Tag parent) {
         this.parent = parent;
     }
 
-    public int doStartTag()
-    {
+    public int doStartTag() {
         return EVAL_BODY_BUFFERED;
     }
 
-    public void setBodyContent(BodyContent bodyContent)
-    {
+    public void setBodyContent(BodyContent bodyContent) {
         this.bodyContent = bodyContent;
     }
 
-    public void setPageContext(PageContext pageContext)
-    {
+    public void setPageContext(PageContext pageContext) {
         this.pageContext = pageContext;
         root = null;
     }
 
-    public void doInitBody()
-    {
+    public void doInitBody() {
     }
 
-    public int doAfterBody()
-    {
+    public int doAfterBody() {
         return SKIP_BODY;
     }
 
-    public void release()
-    {
+    public void release() {
         root = null;
         template = null;
         name = "";
     }
 
     public int doEndTag()
-        throws JspException
-    {
+        throws JspException {
         if (bodyContent == null)
             return EVAL_PAGE;
 
         try
         {
-            if(template == null)
-            {
+            if (template == null) {
                 template = new Template(name, bodyContent.getReader());
             }
 
-            if(root == null)
-            {
+            if (root == null) {
                 root = new SimpleHash();
                 root.put("page", new JspContextModel(pageContext, JspContextModel.PAGE_SCOPE));
                 root.put("request", new JspContextModel(pageContext, JspContextModel.REQUEST_SCOPE));
@@ -141,8 +126,7 @@ public class FreemarkerTag implements BodyTag
         }
         finally
         {
-            if(!caching)
-            {
+            if (!caching) {
                 template = null;
             }
         }

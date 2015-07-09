@@ -43,8 +43,7 @@ extends
     BeanModel
 implements
     TemplateModelIterator,
-    TemplateCollectionModel
-{
+    TemplateCollectionModel {
     private boolean accessed = false;
     
     /**
@@ -64,10 +63,9 @@ implements
      * This allows the iterator to be used in a <tt>&lt;#list&gt;</tt> block.
      * @return "this"
      */
-    public TemplateModelIterator iterator() throws TemplateModelException
-    {
+    public TemplateModelIterator iterator() throws TemplateModelException {
         synchronized(this) {
-            if(accessed) {
+            if (accessed) {
                 throw new TemplateModelException(
                     "This collection is stateful and can not be iterated over the" +
                     " second time.");
@@ -81,7 +79,7 @@ implements
      * Calls underlying {@link Iterator#hasNext()}.
      */
     public boolean hasNext() {
-        return ((Iterator)object).hasNext();
+        return ((Iterator) object).hasNext();
     }
 
 
@@ -89,11 +87,9 @@ implements
      * Calls underlying {@link Iterator#next()} and wraps the result.
      */
     public TemplateModel next()
-    throws
-        TemplateModelException
-    {
+    throws TemplateModelException {
         try {
-            return wrap(((Iterator)object).next());
+            return wrap(((Iterator) object).next());
         }
         catch(NoSuchElementException e) {
             throw new TemplateModelException(

@@ -40,14 +40,14 @@ public class TransformMethodWrapper2 implements TemplateMethodModel {
         // Sets up properties of the Transform model based on the arguments
         // passed into this method
 
-        while( iArgument.hasNext() ) {
-            String  aArgument = (String)iArgument.next();
+        while ( iArgument.hasNext() ) {
+            String  aArgument = (String) iArgument.next();
 
-            if( aArgument.equals( "quote" )) {
+            if ( aArgument.equals( "quote" )) {
                 cTransformer.setQuotes( true );
-            } else if( aArgument.equals( "tag" )) {
+            } else if ( aArgument.equals( "tag" )) {
                 cTransformer.setTags( true );
-            } else if( aArgument.equals( "ampersand" )) {
+            } else if ( aArgument.equals( "ampersand" )) {
                 cTransformer.setAmpersands( true );
             } else {
                 cTransformer.setComment( aArgument );

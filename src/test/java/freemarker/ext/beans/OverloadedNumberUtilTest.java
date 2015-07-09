@@ -164,7 +164,7 @@ public class OverloadedNumberUtilTest extends TestCase {
         cipEqu(Double.valueOf(Short.MAX_VALUE + 1),
                 new OverloadedNumberUtil.DoubleOrIntegerOrFloat((double) Short.MAX_VALUE + 1, Short.MAX_VALUE + 1));
         cipEqu(Double.valueOf(Short.MIN_VALUE - 1),
-                new OverloadedNumberUtil.DoubleOrIntegerOrFloat((double) Short.MIN_VALUE - 1, Short.MIN_VALUE-  1));
+                new OverloadedNumberUtil.DoubleOrIntegerOrFloat((double) Short.MIN_VALUE - 1, Short.MIN_VALUE -  1));
         cipEqu(Double.valueOf(16777216), new OverloadedNumberUtil.DoubleOrIntegerOrFloat(16777216.0, 16777216));
         cipEqu(Double.valueOf(-16777216), new OverloadedNumberUtil.DoubleOrIntegerOrFloat(-16777216.0, -16777216));
         

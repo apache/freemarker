@@ -37,7 +37,7 @@ abstract class Navigator {
     private final NodeOperator childrenOperator = getOperator("_children");
     
     NodeOperator getOperator(String key) {
-        return (NodeOperator)operators.get(key);
+        return (NodeOperator) operators.get(key);
     }
     
     NodeOperator getAttributeOperator() {
@@ -49,26 +49,22 @@ abstract class Navigator {
     }
     
     abstract void getAsString(Object node, StringWriter sw)
-    throws
-        TemplateModelException;
+    throws TemplateModelException;
 
     List applyXPath(List nodes, String xpathString, Object namespaces)
-    throws
-        TemplateModelException
-    {
+    throws TemplateModelException {
         XPathEx xpath = null;
         try
         {
             synchronized(xpathCache)
             {
-                xpath = (XPathEx)xpathCache.get(xpathString);
-                if (xpath == null)
-                {
+                xpath = (XPathEx) xpathCache.get(xpathString);
+                if (xpath == null) {
                     xpath = createXPathEx(xpathString);
                     xpathCache.put(xpathString, xpath);
                 }
             }
-            return xpath.selectNodes(nodes, (NamespaceContext)namespaces);
+            return xpath.selectNodes(nodes, (NamespaceContext) namespaces);
         }
         catch(Exception e)
         {
@@ -76,8 +72,7 @@ abstract class Navigator {
         }
     }
     
-    interface XPathEx
-    {
+    interface XPathEx {
         List selectNodes(Object nodes, NamespaceContext namespaces)  throws TemplateModelException;
     }
     
@@ -95,11 +90,10 @@ abstract class Navigator {
     
     abstract Object getDocumentType(Object node);
 
-    private void getAncestors(Object node, List result)
-    {
-        for(;;) {
+    private void getAncestors(Object node, List result) {
+        for (; ; ) {
             Object parent = getParent(node);
-            if(parent == null) {
+            if (parent == null) {
                 break;
             }
             result.add(parent);
@@ -117,14 +111,13 @@ abstract class Navigator {
 
     String getQualifiedName(Object node) {
         String lname = getLocalName(node);
-        if(lname == null) {
+        if (lname == null) {
             return null;
         }
         String nsprefix = getNamespacePrefix(node);
-        if(nsprefix == null || nsprefix.length() == 0) {
+        if (nsprefix == null || nsprefix.length() == 0) {
             return lname;
-        }
-        else {
+        } else {
             return nsprefix + ":" + lname;
         }
     }
@@ -161,139 +154,123 @@ abstract class Navigator {
     }
 
     private class ChildrenOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             getChildren(node, localName, namespaceUri, result);
         }
     }
 
     private class AttributesOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             getAttributes(node, localName, namespaceUri, result);
         }
     }
 
     private class DescendantOrSelfOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             result.add(node);
             getDescendants(node, result);
         }
     }
 
     private class DescendantOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             getDescendants(node, result);
         }
     }
 
     private class AncestorOrSelfOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             result.add(node);
             getAncestors(node, result);
         }
     }
 
     private class AncestorOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             getAncestors(node, result);
         }
     }
 
     private class ParentOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             Object parent = getParent(node);
-            if(parent != null) {
+            if (parent != null) {
                 result.add(parent);
             }
         }
     }
 
     private class DocumentOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             Object document = getDocument(node);
-            if(document != null) {
+            if (document != null) {
                 result.add(document);
             }
         }
     }
 
     private class DocumentTypeOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             Object documentType = getDocumentType(node);
-            if(documentType != null) {
+            if (documentType != null) {
                 result.add(documentType);
             }
         }
     }
 
     private class ContentOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             getContent(node, result);
         }
     }
 
     private class TextOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getText(node);
-            if(text != null) {
+            if (text != null) {
                 result.add(text);
             }
         }
     }
 
     private class LocalNameOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getLocalName(node);
-            if(text != null) {
+            if (text != null) {
                 result.add(text);
             }
         }
     }
 
     private class QualifiedNameOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             String qname = getQualifiedName(node);
-            if(qname != null) {
+            if (qname != null) {
                 result.add(qname);
             }
         }
     }
 
     private class NamespacePrefixOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getNamespacePrefix(node);
-            if(text != null) {
+            if (text != null) {
                 result.add(text);
             }
         }
     }
 
     private class NamespaceUriOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             String text = getNamespaceUri(node);
-            if(text != null) {
+            if (text != null) {
                 result.add(text);
             }
         }
     }
 
     private class TypeOp implements NodeOperator {
-        public void process(Object node, String localName, String namespaceUri, List result)
-        {
+        public void process(Object node, String localName, String namespaceUri, List result) {
             result.add(getType(node));
         }
     }

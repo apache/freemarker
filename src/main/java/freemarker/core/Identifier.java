@@ -77,7 +77,7 @@ final class Identifier extends Expression {
 
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-        if(this.name.equals(replacedIdentifier)) {
+        if (this.name.equals(replacedIdentifier)) {
             if (replacementState.replacementAlreadyInUse) {
                 Expression clone = replacement.deepCloneWithIdentifierReplaced(null, null, replacementState);
                 clone.copyLocationFrom(replacement);

@@ -237,8 +237,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * </ul>
  */
-public class FreemarkerServlet extends HttpServlet
-{
+public class FreemarkerServlet extends HttpServlet {
     private static final Logger LOG = Logger.getLogger("freemarker.servlet");
     private static final Logger LOG_RT = Logger.getLogger("freemarker.runtime");
 
@@ -525,9 +524,9 @@ public class FreemarkerServlet extends HttpServlet
                         config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG.equals(value)) {
                         config.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
-                    } else if  (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG.equals(value)) {
+                    } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG.equals(value)) {
                         config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-                    } else if  (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE.equals(value)) {
+                    } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE.equals(value)) {
                         config.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
                     } else {
                         throw new InitParamValueException(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER, value,
@@ -587,7 +586,7 @@ public class FreemarkerServlet extends HttpServlet
         List/*<MetaInfTldSource>*/ metaInfTldSources = null;
         
         List/*<String>*/ values = InitParamParser.parseCommaSeparatedList(value);
-        for (Iterator it = values.iterator(); it.hasNext();) {
+        for (Iterator it = values.iterator(); it.hasNext(); ) {
             final String itemStr = (String) it.next();
             final MetaInfTldSource metaInfTldSource;
             if (itemStr.equals(META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS)) {
@@ -637,24 +636,21 @@ public class FreemarkerServlet extends HttpServlet
     }
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException
-    {
+        throws ServletException, IOException {
         process(request, response);
     }
 
     public void doPost(
         HttpServletRequest request,
         HttpServletResponse response)
-        throws ServletException, IOException
-    {
+        throws ServletException, IOException {
         process(request, response);
     }
 
     private void process(
         HttpServletRequest request,
         HttpServletResponse response)
-        throws ServletException, IOException
-    {
+        throws ServletException, IOException {
         // Give chance to subclasses to perform preprocessing
         if (preprocessRequest(request, response)) {
             return;
@@ -700,7 +696,7 @@ public class FreemarkerServlet extends HttpServlet
         }
         
         Object attrContentType = template.getCustomAttribute("content_type");
-        if(attrContentType != null) {
+        if (attrContentType != null) {
             response.setContentType(attrContentType.toString());
         } else {
             if (noCharsetInContentType) {
@@ -830,15 +826,14 @@ public class FreemarkerServlet extends HttpServlet
             // Create hash model wrapper for session
             HttpSessionHashModel sessionModel;
             HttpSession session = request.getSession(false);
-            if(session != null) {
+            if (session != null) {
                 sessionModel = (HttpSessionHashModel) session.getAttribute(ATTR_SESSION_MODEL);
                 if (sessionModel == null || sessionModel.isOrphaned(session)) {
                     sessionModel = new HttpSessionHashModel(session, objectWrapper);
                     initializeSessionAndInstallModel(request, response, 
                             sessionModel, session);
                 }
-            }
-            else {
+            } else {
                 sessionModel = new HttpSessionHashModel(this, request, response, objectWrapper);
             }
             params.putUnlistedModel(KEY_SESSION, sessionModel);
@@ -846,8 +841,7 @@ public class FreemarkerServlet extends HttpServlet
             // Create hash model wrapper for request
             HttpRequestHashModel requestModel =
                 (HttpRequestHashModel) request.getAttribute(ATTR_REQUEST_MODEL);
-            if (requestModel == null || requestModel.getRequest() != request)
-            {
+            if (requestModel == null || requestModel.getRequest() != request) {
                 requestModel = new HttpRequestHashModel(request, response, objectWrapper);
                 request.setAttribute(ATTR_REQUEST_MODEL, requestModel);
                 request.setAttribute(
@@ -913,7 +907,7 @@ public class FreemarkerServlet extends HttpServlet
                         + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS + "\" - it will be ignored", e);
             }
             if (jettyTaglibJarPatterns != null) {
-                for (Iterator/*<Pattern>*/ it = jettyTaglibJarPatterns.iterator(); it.hasNext();) {
+                for (Iterator/*<Pattern>*/ it = jettyTaglibJarPatterns.iterator(); it.hasNext(); ) {
                     Pattern pattern = (Pattern) it.next();
                     mergedMetaInfTldSources.add(new ClasspathMetaInfTldSource(pattern));
                 }
@@ -980,8 +974,7 @@ public class FreemarkerServlet extends HttpServlet
     void initializeSessionAndInstallModel(HttpServletRequest request,
             HttpServletResponse response, HttpSessionHashModel sessionModel, 
             HttpSession session)
-            throws ServletException, IOException
-    {
+            throws ServletException, IOException {
         session.setAttribute(ATTR_SESSION_MODEL, sessionModel);
         initializeSession(request, response);
     }
@@ -1002,12 +995,10 @@ public class FreemarkerServlet extends HttpServlet
      * @throws ServletException
      *             Can be thrown since 2.3.22, if the template path can't be deduced from the URL.
      */
-    protected String requestUrlToTemplatePath(HttpServletRequest request) throws ServletException
-    {
+    protected String requestUrlToTemplatePath(HttpServletRequest request) throws ServletException {
         // First, see if it's an included request
         String includeServletPath  = (String) request.getAttribute("javax.servlet.include.servlet_path");
-        if(includeServletPath != null)
-        {
+        if (includeServletPath != null) {
             // Try path info; only if that's null (servlet is mapped to an
             // URL extension instead of to prefix) use servlet path.
             String includePathInfo = (String) request.getAttribute("javax.servlet.include.path_info");
@@ -1096,10 +1087,10 @@ public class FreemarkerServlet extends HttpServlet
             if (DEPR_INITPARAM_WRAPPER_BEANS.equals(wrapper)) {
                 return ObjectWrapper.BEANS_WRAPPER;
             }
-            if(DEPR_INITPARAM_WRAPPER_SIMPLE.equals(wrapper)) {
+            if (DEPR_INITPARAM_WRAPPER_SIMPLE.equals(wrapper)) {
                 return ObjectWrapper.SIMPLE_WRAPPER;
             }
-            if(DEPR_INITPARAM_WRAPPER_JYTHON.equals(wrapper)) {
+            if (DEPR_INITPARAM_WRAPPER_JYTHON.equals(wrapper)) {
                 // Avoiding compile-time dependency on Jython package
                 try {
                     return (ObjectWrapper) Class.forName("freemarker.ext.jython.JythonWrapper")
@@ -1201,8 +1192,7 @@ public class FreemarkerServlet extends HttpServlet
     protected void initializeSession(
         HttpServletRequest request,
         HttpServletResponse response)
-        throws ServletException, IOException
-    {
+        throws ServletException, IOException {
     }
 
     /**
@@ -1233,8 +1223,7 @@ public class FreemarkerServlet extends HttpServlet
         HttpServletResponse response,
         Template template,
         TemplateModel data)
-        throws ServletException, IOException
-    {
+        throws ServletException, IOException {
         return true;
     }
 
@@ -1253,8 +1242,7 @@ public class FreemarkerServlet extends HttpServlet
         HttpServletResponse response,
         Template template,
         TemplateModel data)
-        throws ServletException, IOException
-    {
+        throws ServletException, IOException {
     }
     
     /**
@@ -1270,10 +1258,8 @@ public class FreemarkerServlet extends HttpServlet
      * If the parameter "nocache" was set to true, generate a set of headers
      * that will advise the HTTP client not to cache the returned page.
      */
-    private void setBrowserCachingPolicy(HttpServletResponse res)
-    {
-        if (noCache)
-        {
+    private void setBrowserCachingPolicy(HttpServletResponse res) {
+        if (noCache) {
             // HTTP/1.1 + IE extensions
             res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, "
                     + "post-check=0, pre-check=0");

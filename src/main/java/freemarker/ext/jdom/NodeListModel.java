@@ -87,8 +87,7 @@ implements
     TemplateMethodModel,
     TemplateCollectionModel,
     TemplateSequenceModel,
-    TemplateScalarModel
-{
+    TemplateScalarModel {
     private static final AttributeXMLOutputter OUTPUT = new AttributeXMLOutputter();
     // A convenience singleton for representing a node list without nodes.
     private static final NodeListModel EMPTY = new NodeListModel(null, false);
@@ -169,8 +168,7 @@ implements
         this.namespaces = namespaces;
     }
 
-    private static final NodeListModel createNodeListModel(List list, Map namespaces)
-    {
+    private static final NodeListModel createNodeListModel(List list, Map namespaces) {
         if (list == null || list.isEmpty()) {
             if (namespaces.isEmpty()) {
                 return EMPTY;
@@ -185,8 +183,7 @@ implements
     /**
      * Returns true if this model contains no nodes.
      */
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return nodes.isEmpty();
     }
 
@@ -198,36 +195,34 @@ implements
      * in variable x as XML fragment, you simply write ${x} in the template.
      */
     public String getAsString()
-    throws
-    TemplateModelException
-    {
+    throws TemplateModelException {
         if (isEmpty())
             return "";
 
         java.io.StringWriter sw = new java.io.StringWriter(nodes.size() * 128);
         try {
-            for (Iterator i = nodes.iterator(); i.hasNext();) {
+            for (Iterator i = nodes.iterator(); i.hasNext(); ) {
                 Object node = i.next();
                 if (node instanceof Element)
-                    OUTPUT.output((Element)node, sw);
+                    OUTPUT.output((Element) node, sw);
                 else if (node instanceof Attribute)
-                    OUTPUT.output((Attribute)node, sw);
+                    OUTPUT.output((Attribute) node, sw);
                 else if (node instanceof String)
                     sw.write(OUTPUT.escapeElementEntities(node.toString()));
                 else if (node instanceof Text)
-                    OUTPUT.output((Text)node, sw);
+                    OUTPUT.output((Text) node, sw);
                 else if (node instanceof Document)
-                    OUTPUT.output((Document)node, sw);
+                    OUTPUT.output((Document) node, sw);
                 else if (node instanceof ProcessingInstruction)
-                    OUTPUT.output((ProcessingInstruction)node, sw);
+                    OUTPUT.output((ProcessingInstruction) node, sw);
                 else if (node instanceof Comment)
-                    OUTPUT.output((Comment)node, sw);
+                    OUTPUT.output((Comment) node, sw);
                 else if (node instanceof CDATA)
-                    OUTPUT.output((CDATA)node, sw);
+                    OUTPUT.output((CDATA) node, sw);
                 else if (node instanceof DocType)
-                    OUTPUT.output((DocType)node, sw);
+                    OUTPUT.output((DocType) node, sw);
                 else if (node instanceof EntityRef)
-                    OUTPUT.output((EntityRef)node, sw);
+                    OUTPUT.output((EntityRef) node, sw);
                 else
                     throw new TemplateModelException(node.getClass().getName() + " is not a core JDOM class");
             }
@@ -354,9 +349,7 @@ implements
      * @return a new NodeListModel that represents the requested set of nodes.
      */
     public TemplateModel get(String key)
-    throws
-    TemplateModelException
-    {
+    throws TemplateModelException {
         if (isEmpty())
             return EMPTY;
 
@@ -393,17 +386,17 @@ implements
             case 'x':
             case '_':
                 {
-                    op = (NodeOperator)OPERATIONS.get(key);
+                    op = (NodeOperator) OPERATIONS.get(key);
                     if (op == null) {
                         // Some special operation?
-                        Integer specop = (Integer)SPECIAL_OPERATIONS.get(key);
+                        Integer specop = (Integer) SPECIAL_OPERATIONS.get(key);
                         if (specop != null) {
                             switch (specop.intValue()) {
                                 case SPECIAL_OPERATION_COPY:
                                 {
                                     synchronized(namespaces)
                                     {
-                                        return new NodeListModel(nodes, (Map)((HashMap)namespaces).clone());
+                                        return new NodeListModel(nodes, (Map) ((HashMap) namespaces).clone());
                                     }
                                 }
                                 case SPECIAL_OPERATION_UNIQUE:
@@ -442,7 +435,7 @@ implements
                 String nsPrefix = name.substring(0, colon);
                 synchronized(namespaces)
                 {
-                    namespace = (Namespace)namespaces.get(nsPrefix);
+                    namespace = (Namespace) namespaces.get(nsPrefix);
                 }
                 if (namespace == null) {
                     if (nsPrefix.equals("xml"))
@@ -457,8 +450,7 @@ implements
         return createNodeListModel(list, namespaces);
     }
 
-    private TemplateModel getType()
-    {
+    private TemplateModel getType() {
         if (nodes.size() == 0)
             return new SimpleScalar("");
         Object firstNode = nodes.get(0);
@@ -485,30 +477,25 @@ implements
     }
 
     private SimpleScalar getPlainText()
-    throws
-    TemplateModelException
-    {
-        List list = evaluateElementOperation((TextOp)OPERATIONS.get("_text"), nodes);
+    throws TemplateModelException {
+        List list = evaluateElementOperation((TextOp) OPERATIONS.get("_text"), nodes);
         StringBuilder buf = new StringBuilder();
-        for (Iterator it = list.iterator(); it.hasNext();) {
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
             buf.append(it.next());
         }
         return new SimpleScalar(buf.toString());
     }
 
-    public TemplateModelIterator iterator()
-    {
+    public TemplateModelIterator iterator() {
         return new TemplateModelIterator()
         {
             private final Iterator it = nodes.iterator();
 
-            public TemplateModel next()
-            {
+            public TemplateModel next() {
                 return it.hasNext() ? new NodeListModel(it.next(), namespaces) : null;
             }
 
-            public boolean hasNext() 
-            {
+            public boolean hasNext() {
                 return it.hasNext();
             }
         };
@@ -518,9 +505,7 @@ implements
      * Retrieves the i-th element of the node list.
      */
     public TemplateModel get(int i)
-    throws
-    TemplateModelException
-    {
+    throws TemplateModelException {
         try {
             return new NodeListModel(nodes.get(i), namespaces);
         } catch (IndexOutOfBoundsException e) {
@@ -528,8 +513,7 @@ implements
         }
     }
     
-    public int size()
-    {
+    public int size() {
         return nodes.size();
     }
 
@@ -551,21 +535,18 @@ implements
      * of the XPath to the current node list.
      */
     public Object exec(List arguments)
-    throws
-    TemplateModelException
-    {
+    throws TemplateModelException {
         if (arguments == null || arguments.size() != 1)
             throw new TemplateModelException("Exactly one argument required for execute() on NodeTemplate");
 
-        String xpathString = (String)arguments.get(0);
+        String xpathString = (String) arguments.get(0);
         JDOMXPathEx xpath = null;
         try
         {
             synchronized(XPATH_CACHE)
             {
-                xpath = (JDOMXPathEx)XPATH_CACHE.get(xpathString);
-                if (xpath == null)
-                {
+                xpath = (JDOMXPathEx) XPATH_CACHE.get(xpathString);
+                if (xpath == null) {
                     xpath = new JDOMXPathEx(xpathString);
                     XPATH_CACHE.put(xpathString, xpath);
                 }
@@ -603,8 +584,7 @@ implements
      * original node list has, but they can be manipulated independently
      * thereon.
      */
-    public void registerNamespace(String prefix, String uri)
-    {
+    public void registerNamespace(String prefix, String uri) {
         synchronized(namespaces)
         {
             namespaces.put(prefix, Namespace.getNamespace(prefix, uri));
@@ -613,23 +593,20 @@ implements
 
     private interface NodeOperator {
         List operate(Object node)
-        throws
-        TemplateModelException;
+        throws TemplateModelException;
     }
 
     private interface NamedNodeOperator {
         List operate(Object node, String localName, Namespace namespace)
-        throws
-        TemplateModelException;
+        throws TemplateModelException;
     }
 
     private static final class AllChildrenOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Element)
-                return((Element)node).getChildren();
+                return((Element) node).getChildren();
             else if (node instanceof Document) {
-                Element root = ((Document)node).getRootElement();
+                Element root = ((Document) node).getRootElement();
                 return root == null ? Collections.EMPTY_LIST : Collections.singletonList(root);
             } 
  // With 2.1 semantics it  makes more sense to just return a null and let the core 
@@ -643,12 +620,11 @@ implements
     }
 
     private static final class NamedChildrenOp implements NamedNodeOperator {
-        public List operate(Object node, String localName, Namespace namespace)
-        {
+        public List operate(Object node, String localName, Namespace namespace) {
             if (node instanceof Element) {
-                return((Element)node).getChildren(localName, namespace);
+                return((Element) node).getChildren(localName, namespace);
             } else if (node instanceof Document) {
-                Element root = ((Document)node).getRootElement();
+                Element root = ((Document) node).getRootElement();
                 if (root != null &&
                     root.getName().equals(localName) &&
                     root.getNamespaceURI().equals(namespace.getURI())) {
@@ -667,14 +643,13 @@ implements
     }
 
     private static final class AllAttributesOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
  // With 2.1 semantics it  makes more sense to just return a null and let the core 
  // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             if (!(node instanceof Element)) {
                 return null;
             }
-            return ((Element)node).getAttributes();
+            return ((Element) node).getAttributes();
 /*
             else
                 throw new TemplateModelException("_allAttributes can not be applied on " + node.getClass());
@@ -683,14 +658,13 @@ implements
     }
 
     private static final class NamedAttributeOp implements NamedNodeOperator {
-        public List operate(Object node, String localName, Namespace namespace)
-        {
+        public List operate(Object node, String localName, Namespace namespace) {
             Attribute attr = null;
             if (node instanceof Element) {
-                Element element = (Element)node;
+                Element element = (Element) node;
                 attr = element.getAttribute(localName, namespace);
             } else if (node instanceof ProcessingInstruction) {
-                ProcessingInstruction pi = (ProcessingInstruction)node;
+                ProcessingInstruction pi = (ProcessingInstruction) node;
                 if ("target".equals(localName))
                     attr = new Attribute("target", pi.getTarget());
                 else if ("data".equals(localName))
@@ -698,7 +672,7 @@ implements
                 else
                     attr = new Attribute(localName, pi.getValue(localName));
             } else if (node instanceof DocType) {
-                DocType doctype = (DocType)node;
+                DocType doctype = (DocType) node;
                 if ("publicId".equals(localName))
                     attr = new Attribute("publicId", doctype.getPublicID());
                 else if ("systemId".equals(localName))
@@ -720,18 +694,17 @@ implements
     }
 
     private static final class NameOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Element)
-                return Collections.singletonList(((Element)node).getName());
+                return Collections.singletonList(((Element) node).getName());
             else if (node instanceof Attribute)
-                return Collections.singletonList(((Attribute)node).getName());
+                return Collections.singletonList(((Attribute) node).getName());
             else if (node instanceof EntityRef)
-                return Collections.singletonList(((EntityRef)node).getName());
+                return Collections.singletonList(((EntityRef) node).getName());
             else if (node instanceof ProcessingInstruction)
-                return Collections.singletonList(((ProcessingInstruction)node).getTarget());
+                return Collections.singletonList(((ProcessingInstruction) node).getTarget());
             else if (node instanceof DocType)
-                return Collections.singletonList(((DocType)node).getPublicID());
+                return Collections.singletonList(((DocType) node).getPublicID());
             else
                 return null;
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
@@ -741,12 +714,11 @@ implements
     }
 
     private static final class QNameOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Element)
-                return Collections.singletonList(((Element)node).getQualifiedName());
+                return Collections.singletonList(((Element) node).getQualifiedName());
             else if (node instanceof Attribute)
-                return Collections.singletonList(((Attribute)node).getQualifiedName());
+                return Collections.singletonList(((Attribute) node).getQualifiedName());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -755,12 +727,11 @@ implements
     }
 
     private static final class NamespaceUriOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Element)
-                return Collections.singletonList(((Element)node).getNamespace().getURI());
+                return Collections.singletonList(((Element) node).getNamespace().getURI());
             else if (node instanceof Attribute)
-                return Collections.singletonList(((Attribute)node).getNamespace().getURI());
+                return Collections.singletonList(((Attribute) node).getNamespace().getURI());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -769,12 +740,11 @@ implements
     }
 
     private static final class NamespacePrefixOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Element)
-                return Collections.singletonList(((Element)node).getNamespace().getPrefix());
+                return Collections.singletonList(((Element) node).getNamespace().getPrefix());
             else if (node instanceof Attribute)
-                return Collections.singletonList(((Attribute)node).getNamespace().getPrefix());
+                return Collections.singletonList(((Attribute) node).getNamespace().getPrefix());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -783,16 +753,12 @@ implements
     }
 
     private static final class CanonicalNameOp implements NodeOperator {
-        public List operate(Object node)
-        {
-            if (node instanceof Element)
-            {
-                Element element = (Element)node;
+        public List operate(Object node) {
+            if (node instanceof Element) {
+                Element element = (Element) node;
                 return Collections.singletonList(element.getNamespace().getURI() + element.getName());
-            }
-            else if (node instanceof Attribute)
-            {
-                Attribute attribute = (Attribute)node;
+            } else if (node instanceof Attribute) {
+                Attribute attribute = (Attribute) node;
                 return Collections.singletonList(attribute.getNamespace().getURI() + attribute.getName());
             }
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
@@ -803,20 +769,19 @@ implements
     }
 
 
-    private static final Element getParent(Object node)
-    {
+    private static final Element getParent(Object node) {
         if (node instanceof Element)
-            return((Element)node).getParent();
+            return((Element) node).getParent();
         else if (node instanceof Attribute)
-            return((Attribute)node).getParent();
+            return((Attribute) node).getParent();
         else if (node instanceof Text)
-            return((Text)node).getParent();
+            return((Text) node).getParent();
         else if (node instanceof ProcessingInstruction)
-            return((ProcessingInstruction)node).getParent();
+            return((ProcessingInstruction) node).getParent();
         else if (node instanceof Comment)
-            return((Comment)node).getParent();
+            return((Comment) node).getParent();
         else if (node instanceof EntityRef)
-            return((EntityRef)node).getParent();
+            return((EntityRef) node).getParent();
         else
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
@@ -825,16 +790,14 @@ implements
     }
 
     private static final class ParentOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             Element parent = getParent(node);
             return parent == null ? Collections.EMPTY_LIST : Collections.singletonList(parent);
         }
     }
 
     private static final class AncestorOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             Element parent = getParent(node);
             if (parent == null) return Collections.EMPTY_LIST;
             LinkedList list = new LinkedList();
@@ -848,8 +811,7 @@ implements
     }
 
     private static final class AncestorOrSelfOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             Element parent = getParent(node);
             if (parent == null) return Collections.singletonList(node);
             LinkedList list = new LinkedList();
@@ -864,18 +826,15 @@ implements
     }
 
     private static class DescendantOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             LinkedList list = new LinkedList();
             if (node instanceof Element) {
-                addChildren((Element)node, list);
-            }
-            else if (node instanceof Document) {
-                Element root = ((Document)node).getRootElement();
+                addChildren((Element) node, list);
+            } else if (node instanceof Document) {
+                Element root = ((Document) node).getRootElement();
                 list.add(root);
                 addChildren(root, list);
-            }
-            else
+            } else
                 // With 2.1 semantics it  makes more sense to just return a null and let the core 
                 // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
                 return null;
@@ -884,12 +843,11 @@ implements
             return list;
         }
 
-        private void addChildren(Element element, List list)
-        {
+        private void addChildren(Element element, List list) {
             List children = element.getChildren();
             Iterator it = children.iterator();
             while (it.hasNext()) {
-                Element child = (Element)it.next();
+                Element child = (Element) it.next();
                 list.add(child);
                 addChildren(child, list);
             }
@@ -897,34 +855,32 @@ implements
     }
 
     private static final class DescendantOrSelfOp extends DescendantOp {
-        public List operate(Object node)
-        {
-            LinkedList list = (LinkedList)super.operate(node);
+        public List operate(Object node) {
+            LinkedList list = (LinkedList) super.operate(node);
             list.addFirst(node);
             return list;
         }
     }
 
     private static final class DocumentOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             Document doc = null;
             if (node instanceof Element)
-                doc = ((Element)node).getDocument();
+                doc = ((Element) node).getDocument();
             else if (node instanceof Attribute) {
-                Element parent = ((Attribute)node).getParent();
+                Element parent = ((Attribute) node).getParent();
                 doc = parent == null ? null : parent.getDocument();
             } else if (node instanceof Text) {
-                Element parent = ((Text)node).getParent();
+                Element parent = ((Text) node).getParent();
                 doc = parent == null ? null : parent.getDocument();
             } else if (node instanceof Document)
-                doc = (Document)node;
+                doc = (Document) node;
             else if (node instanceof ProcessingInstruction)
-                doc = ((ProcessingInstruction)node).getDocument();
+                doc = ((ProcessingInstruction) node).getDocument();
             else if (node instanceof EntityRef)
-                doc = ((EntityRef)node).getDocument();
+                doc = ((EntityRef) node).getDocument();
             else if (node instanceof Comment)
-                doc = ((Comment)node).getDocument();
+                doc = ((Comment) node).getDocument();
             else
                 // With 2.1 semantics it  makes more sense to just return a null and let the core 
                 // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
@@ -936,10 +892,9 @@ implements
     }
 
     private static final class DocTypeOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Document) {
-                DocType doctype = ((Document)node).getDocType();
+                DocType doctype = ((Document) node).getDocType();
                 return doctype == null ? Collections.EMPTY_LIST : Collections.singletonList(doctype);
             } else
                 // With 2.1 semantics it  makes more sense to just return a null and let the core 
@@ -950,12 +905,11 @@ implements
     }
 
     private static final class ContentOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Element)
-                return((Element)node).getContent();
+                return((Element) node).getContent();
             else if (node instanceof Document)
-                return((Document)node).getContent();
+                return((Document) node).getContent();
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -964,18 +918,17 @@ implements
     }
 
     private static final class TextOp implements NodeOperator {
-        public List operate(Object node)
-        {
+        public List operate(Object node) {
             if (node instanceof Element)
-                return Collections.singletonList(((Element)node).getTextTrim());
+                return Collections.singletonList(((Element) node).getTextTrim());
             if (node instanceof Attribute)
-                return Collections.singletonList(((Attribute)node).getValue());
+                return Collections.singletonList(((Attribute) node).getValue());
             if (node instanceof CDATA)
-                return Collections.singletonList(((CDATA)node).getText());
+                return Collections.singletonList(((CDATA) node).getText());
             if (node instanceof Comment)
-                return Collections.singletonList(((Comment)node).getText());
+                return Collections.singletonList(((Comment) node).getText());
             if (node instanceof ProcessingInstruction)
-                return Collections.singletonList(((ProcessingInstruction)node).getData());
+                return Collections.singletonList(((ProcessingInstruction) node).getData());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -984,9 +937,7 @@ implements
     }
 
     private static final List evaluateElementOperation(NodeOperator op, List nodes)
-    throws
-    TemplateModelException
-    {
+    throws TemplateModelException {
         int s = nodes.size();
         List[] lists = new List[s];
         int l = 0;
@@ -1011,9 +962,7 @@ implements
     }
 
     private static final List evaluateNamedElementOperation(NamedNodeOperator op, String localName, Namespace namespace, List nodes)
-    throws
-    TemplateModelException
-    {
+    throws TemplateModelException {
         int s = nodes.size();
         List[] lists = new List[s];
         int l = 0;
@@ -1032,8 +981,7 @@ implements
         return retval;
     }
 
-    private static final List removeDuplicates(List list)
-    {
+    private static final List removeDuplicates(List list) {
         int s = list.size();
         ArrayList ulist = new ArrayList(s);
         Set set = new HashSet(s * 4 / 3, .75f);
@@ -1047,8 +995,7 @@ implements
         return ulist;
     }
 
-    private static final Map createOperations()
-    {
+    private static final Map createOperations() {
         Map map = new HashMap();
 
         map.put("_ancestor", new AncestorOp());
@@ -1071,8 +1018,7 @@ implements
         return map;
     }
 
-    private static final Map createSpecialOperations()
-    {
+    private static final Map createSpecialOperations() {
         Map map = new HashMap();
 
         Integer copy = Integer.valueOf(SPECIAL_OPERATION_COPY);
@@ -1102,32 +1048,27 @@ implements
     }
 
     private final class RegisterNamespace implements TemplateMethodModel {
-        public boolean isEmpty()
-        {
+        public boolean isEmpty() {
             return false;
         }
 
         public Object exec(List arguments)
-        throws
-        TemplateModelException
-        {
+        throws TemplateModelException {
             if (arguments.size() != 2)
                 throw new TemplateModelException("_registerNamespace(prefix, uri) requires two arguments");
 
-            registerNamespace((String)arguments.get(0), (String)arguments.get(1));
+            registerNamespace((String) arguments.get(0), (String) arguments.get(1));
 
             return TemplateScalarModel.EMPTY_STRING;
         }
     }
 
     private final class NameFilter implements TemplateMethodModel {
-        public boolean isEmpty()
-        {
+        public boolean isEmpty() {
             return false;
         }
 
-        public Object exec(List arguments)
-        {
+        public Object exec(List arguments) {
             Set names = new HashSet(arguments);
             List list = new LinkedList(nodes);
             Iterator it = list.iterator();
@@ -1135,15 +1076,15 @@ implements
                 Object node = it.next();
                 String name = null;
                 if (node instanceof Element)
-                    name = ((Element)node).getName();
+                    name = ((Element) node).getName();
                 else if (node instanceof Attribute)
-                    name = ((Attribute)node).getName();
+                    name = ((Attribute) node).getName();
                 else if (node instanceof ProcessingInstruction)
-                    name = ((ProcessingInstruction)node).getTarget();
+                    name = ((ProcessingInstruction) node).getTarget();
                 else if (node instanceof EntityRef)
-                    name = ((EntityRef)node).getName();
+                    name = ((EntityRef) node).getName();
                 else if (node instanceof DocType)
-                    name = ((DocType)node).getPublicID();
+                    name = ((DocType) node).getPublicID();
 
                 if (name == null || !names.contains(name))
                     it.remove();
@@ -1153,18 +1094,15 @@ implements
     }
 
     private final class TypeFilter implements TemplateMethodModel {
-        public boolean isEmpty()
-        {
+        public boolean isEmpty() {
             return false;
         }
 
         public Object exec(List arguments)
-        throws
-        TemplateModelException
-        {
+        throws TemplateModelException {
             if (arguments == null || arguments.size() == 0)
                 throw new TemplateModelException("_type expects exactly one argument");
-            String arg = (String)arguments.get(0);
+            String arg = (String) arguments.get(0);
             boolean invert = arg.indexOf('!') != -1;
             // NOTE: true in each of these variables means 'remove', not 'keep'
             // This is so we don't invert their values in the loop. So,
@@ -1206,9 +1144,7 @@ implements
      * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
      */
     public static void main(String[] args)
-    throws
-    Exception
-    {
+    throws Exception {
         org.jdom.input.SAXBuilder builder = new org.jdom.input.SAXBuilder();
         Document document = builder.build(System.in);
         SimpleHash model = new SimpleHash();
@@ -1223,9 +1159,7 @@ implements
 
     private static final class AttributeXMLOutputter extends XMLOutputter {
         public void output(Attribute attribute, Writer out)
-        throws
-        IOException
-        {
+        throws IOException {
             out.write(" ");
             out.write(attribute.getQualifiedName());
             out.write("=");
@@ -1238,19 +1172,15 @@ implements
 
     private static final class JDOMXPathEx
     extends
-        JDOMXPath
-    {
+        JDOMXPath {
         JDOMXPathEx(String path)
-        throws 
-            JaxenException
+        throws JaxenException
         {
             super(path);
         }
 
         public List selectNodes(Object object, Map namespaces)
-        throws
-            JaxenException
-        {
+        throws JaxenException {
             Context context = getContext(object);
             context.getContextSupport().setNamespaceContext(new NamespaceContextImpl(namespaces));
             return selectNodesForContext(context);
@@ -1258,8 +1188,7 @@ implements
 
         private static final class NamespaceContextImpl
         implements
-            NamespaceContext
-        {
+            NamespaceContext {
             private final Map namespaces;
             
             NamespaceContextImpl(Map namespaces)
@@ -1267,16 +1196,14 @@ implements
                 this.namespaces = namespaces;
             }
             
-            public String translateNamespacePrefixToUri(String prefix)
-            {
+            public String translateNamespacePrefixToUri(String prefix) {
                 // Empty prefix always maps to empty URL in XPath
-                if(prefix.length() == 0)
-                {
+                if (prefix.length() == 0) {
                     return prefix;
                 }
                 synchronized(namespaces)
                 {
-                    Namespace ns = (Namespace)namespaces.get(prefix);
+                    Namespace ns = (Namespace) namespaces.get(prefix);
                     return ns == null ? null : ns.getURI();
                 }   
             }

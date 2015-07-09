@@ -32,14 +32,12 @@ public class DateModel
 extends
     BeanModel
 implements
-    TemplateDateModel
-{
+    TemplateDateModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
-            public TemplateModel create(Object object, ObjectWrapper wrapper)
-            {
-                return new DateModel((Date)object, (BeansWrapper)wrapper);
+            public TemplateModel create(Object object, ObjectWrapper wrapper) {
+                return new DateModel((Date) object, (BeansWrapper) wrapper);
             }
         };
 
@@ -56,22 +54,19 @@ implements
     public DateModel(Date date, BeansWrapper wrapper)
     {
         super(date, wrapper);
-        if(date instanceof java.sql.Date) {
+        if (date instanceof java.sql.Date) {
             type = DATE;
-        }
-        else if(date instanceof java.sql.Time) {
+        } else if (date instanceof java.sql.Time) {
             type = TIME;
-        }
-        else if(date instanceof java.sql.Timestamp) {
+        } else if (date instanceof java.sql.Timestamp) {
             type = DATETIME;
-        }
-        else {
+        } else {
             type = wrapper.getDefaultDateType();
         }
     }
 
     public Date getAsDate() {
-        return (Date)object;
+        return (Date) object;
     }
 
     public int getDateType() {

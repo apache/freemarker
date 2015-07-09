@@ -36,11 +36,10 @@ import freemarker.template.TemplateModel;
 
 /**
  */
-class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirectiveModel
-{
+class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirectiveModel {
     protected SimpleTagDirectiveModel(String tagName, Class tagClass) throws IntrospectionException {
         super(tagName, tagClass);
-        if(!SimpleTag.class.isAssignableFrom(tagClass)) {
+        if (!SimpleTag.class.isAssignableFrom(tagClass)) {
             throw new IllegalArgumentException(tagClass.getName() + 
                     " does not implement either the " + Tag.class.getName() + 
                     " interface or the " + SimpleTag.class.getName() + 
@@ -52,17 +51,17 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
             final TemplateDirectiveBody body) 
     throws TemplateException, IOException {
         try {
-            SimpleTag tag = (SimpleTag)getTagInstance();
+            SimpleTag tag = (SimpleTag) getTagInstance();
             final FreeMarkerPageContext pageContext = PageContextFactory.getCurrentPageContext();
             pageContext.pushWriter(new JspWriterAdapter(env.getOut()));
             try {
                 tag.setJspContext(pageContext);
-                JspTag parentTag = (JspTag)pageContext.peekTopTag(JspTag.class);
-                if(parentTag != null) {
+                JspTag parentTag = (JspTag) pageContext.peekTopTag(JspTag.class);
+                if (parentTag != null) {
                     tag.setParent(parentTag);
                 }
                 setupTag(tag, args, pageContext.getObjectWrapper());
-                if(body != null) {
+                if (body != null) {
                     tag.setJspBody(new JspFragment() {
                         public JspContext getJspContext() {
                             return pageContext;
@@ -84,8 +83,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                     finally {
                         pageContext.popTopTag();
                     }
-                }
-                else {
+                } else {
                     tag.doTag();
                 }
             }

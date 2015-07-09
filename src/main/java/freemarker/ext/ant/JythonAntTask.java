@@ -53,7 +53,7 @@ public class JythonAntTask extends Task {
             ensureJythonOpsExists();
             jythonOps.execute(scriptFile, vars);
         } 
-        if (script.trim().length() >0) {
+        if (script.trim().length() > 0) {
             ensureJythonOpsExists();
             String finalScript = ProjectHelper.replaceProperties(
                     project, script, project.getProperties());

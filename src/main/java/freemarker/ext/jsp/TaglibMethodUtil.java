@@ -57,8 +57,7 @@ final class TaglibMethodUtil {
 
             if ("".equals(params)) {
                 paramTypes = new Class[0];
-            }
-            else {
+            } else {
                 String [] paramsArray = StringUtil.split(params, ',');
                 paramTypes = new Class[paramsArray.length];
                 String token = null;
@@ -82,37 +81,27 @@ final class TaglibMethodUtil {
                     if (isPrimitive) {
                         if ("byte".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? byte[].class : byte.class);
-                        }
-                        else if ("short".equals(paramType)) {
+                        } else if ("short".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? short[].class : short.class);
-                        }
-                        else if ("int".equals(paramType)) {
+                        } else if ("int".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? int[].class : int.class);
-                        }
-                        else if ("long".equals(paramType)) {
+                        } else if ("long".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? long[].class : long.class);
-                        }
-                        else if ("float".equals(paramType)) {
+                        } else if ("float".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? float[].class : float.class);
-                        }
-                        else if ("double".equals(paramType)) {
+                        } else if ("double".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? double[].class : double.class);
-                        }
-                        else if ("boolean".equals(paramType)) {
+                        } else if ("boolean".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? boolean[].class : boolean.class);
-                        }
-                        else if ("char".equals(paramType)) {
+                        } else if ("char".equals(paramType)) {
                             paramTypes[i] = (isArrayType ? char[].class : char.class);
-                        }
-                        else {
+                        } else {
                             throw new IllegalArgumentException("Invalid primitive type: '" + paramType + "'.");
                         }
-                    }
-                    else {
+                    } else {
                         if (isArrayType) {
                             paramTypes[i] = ClassUtil.forName("[L" + paramType + ";");
-                        }
-                        else {
+                        } else {
                             paramTypes[i] = ClassUtil.forName(paramType);
                         }
                     }

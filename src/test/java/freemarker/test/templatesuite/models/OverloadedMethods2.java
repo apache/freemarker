@@ -682,7 +682,7 @@ public class OverloadedMethods2 {
     }
     
     public String mMapOrBoolean(Map v) {
-        return "mMapOrBoolean(Map " + v +")";
+        return "mMapOrBoolean(Map " + v + ")";
     }
 
     public String mMapOrBoolean(boolean v) {
@@ -690,7 +690,7 @@ public class OverloadedMethods2 {
     }
 
     public String mMapOrBooleanVarargs(Map... v) {
-        return "mMapOrBooleanVarargs(Map... " + Helpers.arrayToString(v) +")";
+        return "mMapOrBooleanVarargs(Map... " + Helpers.arrayToString(v) + ")";
     }
 
     public String mMapOrBooleanVarargs(boolean... v) {
@@ -698,7 +698,7 @@ public class OverloadedMethods2 {
     }
 
     public String mMapOrBooleanFixedAndVarargs(Map v) {
-        return "mMapOrBooleanFixedAndVarargs(Map " + v +")";
+        return "mMapOrBooleanFixedAndVarargs(Map " + v + ")";
     }
 
     public String mMapOrBooleanFixedAndVarargs(boolean v) {
@@ -706,7 +706,7 @@ public class OverloadedMethods2 {
     }
 
     public String mMapOrBooleanFixedAndVarargs(Map... v) {
-        return "mMapOrBooleanFixedAndVarargs(Map... " + Helpers.arrayToString(v) +")";
+        return "mMapOrBooleanFixedAndVarargs(Map... " + Helpers.arrayToString(v) + ")";
     }
 
     public String mMapOrBooleanFixedAndVarargs(boolean... v) {

@@ -44,8 +44,7 @@ final class DynamicKeyName extends Expression {
         this.keyExpression = keyExpression;
     }
 
-    TemplateModel _eval(Environment env) throws TemplateException
-    {
+    TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel targetModel = target.eval(env);
         if (targetModel == null) {
             if (env.isClassicCompatible()) {
@@ -57,10 +56,9 @@ final class DynamicKeyName extends Expression {
         
         TemplateModel keyModel = keyExpression.eval(env);
         if (keyModel == null) {
-            if(env.isClassicCompatible()) {
+            if (env.isClassicCompatible()) {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
-            }
-            else {
+            } else {
                 keyExpression.assertNonNull(null, env);
             }
         }
@@ -69,7 +67,7 @@ final class DynamicKeyName extends Expression {
             return dealWithNumericalKey(targetModel, index, env);
         }
         if (keyModel instanceof TemplateScalarModel) {
-            String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, keyExpression, env);
+            String key = EvalUtil.modelToString((TemplateScalarModel) keyModel, keyExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
         if (keyModel instanceof RangeModel) {
@@ -91,8 +89,7 @@ final class DynamicKeyName extends Expression {
     private TemplateModel dealWithNumericalKey(TemplateModel targetModel, 
                                                int index, 
                                                Environment env)
-        throws TemplateException
-    {
+        throws TemplateException {
         if (targetModel instanceof TemplateSequenceModel) {
             TemplateSequenceModel tsm = (TemplateSequenceModel) targetModel;
             int size;
@@ -139,9 +136,8 @@ final class DynamicKeyName extends Expression {
     }
 
     private TemplateModel dealWithStringKey(TemplateModel targetModel, String key, Environment env)
-        throws TemplateException
-    {
-        if(targetModel instanceof TemplateHashModel) {
+        throws TemplateException {
+        if (targetModel instanceof TemplateHashModel) {
             return((TemplateHashModel) targetModel).get(key);
         }
         throw new NonHashException(target, targetModel, env);

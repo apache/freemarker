@@ -69,7 +69,7 @@ public abstract class ArithmeticEngine {
      * value is 12.
      */
     public void setMinScale(int minScale) {
-        if(minScale < 0) {
+        if (minScale < 0) {
             throw new IllegalArgumentException("minScale < 0");
         }
         this.minScale = minScale;
@@ -80,7 +80,7 @@ public abstract class ArithmeticEngine {
      * Default value is 100.
      */
     public void setMaxScale(int maxScale) {
-        if(maxScale < minScale) {
+        if (maxScale < minScale) {
             throw new IllegalArgumentException("maxScale < minScale");
         }
         this.maxScale = maxScale;
@@ -94,8 +94,7 @@ public abstract class ArithmeticEngine {
             && roundingPolicy != BigDecimal.ROUND_HALF_EVEN
             && roundingPolicy != BigDecimal.ROUND_HALF_UP
             && roundingPolicy != BigDecimal.ROUND_UNNECESSARY
-            && roundingPolicy != BigDecimal.ROUND_UP) 
-        {
+            && roundingPolicy != BigDecimal.ROUND_UP) {
             throw new IllegalArgumentException("invalid rounding policy");        
         }
         
@@ -109,8 +108,7 @@ public abstract class ArithmeticEngine {
      */
     public static class BigDecimalEngine
     extends
-        ArithmeticEngine    
-    {
+        ArithmeticEngine {
         public int compareNumbers(Number first, Number second) {
             // We try to find the result based on the sign (+/-/0) first, because:
             // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
@@ -249,7 +247,7 @@ public abstract class ArithmeticEngine {
                     int n = n1 + n2;
                     return
                         ((n ^ n1) < 0 && (n ^ n2) < 0) // overflow check
-                        ? Long.valueOf(((long)n1) + n2)
+                        ? Long.valueOf(((long) n1) + n2)
                         : Integer.valueOf(n);
                 }
                 case LONG: {
@@ -291,8 +289,8 @@ public abstract class ArithmeticEngine {
                     int n = n1 - n2;
                     return
                         ((n ^ n1) < 0 && (n ^ ~n2) < 0) // overflow check
-                        ? (Number)Long.valueOf(((long)n1) - n2)
-                        : (Number)Integer.valueOf(n);
+                        ? (Number) Long.valueOf(((long) n1) - n2)
+                        : (Number) Integer.valueOf(n);
                 }
                 case LONG: {
                     long n1 = first.longValue();
@@ -300,8 +298,8 @@ public abstract class ArithmeticEngine {
                     long n = n1 - n2;
                     return
                         ((n ^ n1) < 0 && (n ^ ~n2) < 0) // overflow check
-                        ? (Number)toBigInteger(first).subtract(toBigInteger(second))
-                        : (Number)Long.valueOf(n);
+                        ? (Number) toBigInteger(first).subtract(toBigInteger(second))
+                        : (Number) Long.valueOf(n);
                 }
                 case FLOAT: {
                     return Float.valueOf(first.floatValue() - second.floatValue());
@@ -332,18 +330,18 @@ public abstract class ArithmeticEngine {
                     int n2 = second.intValue();
                     int n = n1 * n2;
                     return
-                        n1== 0 || n/n1 == n2 // overflow check
-                        ? (Number)Integer.valueOf(n)
-                        : (Number)Long.valueOf(((long)n1) * n2);
+                        n1 == 0 || n / n1 == n2 // overflow check
+                        ? (Number) Integer.valueOf(n)
+                        : (Number) Long.valueOf(((long) n1) * n2);
                 }
                 case LONG: {
                     long n1 = first.longValue();
                     long n2 = second.longValue();
                     long n = n1 * n2;
                     return
-                        n1==0L || n / n1 == n2 // overflow check
-                        ? (Number)Long.valueOf(n)
-                        : (Number)toBigInteger(first).multiply(toBigInteger(second));
+                        n1 == 0L || n / n1 == n2 // overflow check
+                        ? (Number) Long.valueOf(n)
+                        : (Number) toBigInteger(first).multiply(toBigInteger(second));
                 }
                 case FLOAT: {
                     return Float.valueOf(first.floatValue() * second.floatValue());
@@ -374,17 +372,17 @@ public abstract class ArithmeticEngine {
                     int n1 = first.intValue();
                     int n2 = second.intValue();
                     if (n1 % n2 == 0) {
-                        return Integer.valueOf(n1/n2);
+                        return Integer.valueOf(n1 / n2);
                     }
-                    return Double.valueOf(((double)n1)/n2);
+                    return Double.valueOf(((double) n1) / n2);
                 }
                 case LONG: {
                     long n1 = first.longValue();
                     long n2 = second.longValue();
                     if (n1 % n2 == 0) {
-                        return Long.valueOf(n1/n2);
+                        return Long.valueOf(n1 / n2);
                     }
-                    return Double.valueOf(((double)n1)/n2);
+                    return Double.valueOf(((double) n1) / n2);
                 }
                 case FLOAT: {
                     return Float.valueOf(first.floatValue() / second.floatValue());
@@ -396,10 +394,9 @@ public abstract class ArithmeticEngine {
                     BigInteger n1 = toBigInteger(first);
                     BigInteger n2 = toBigInteger(second);
                     BigInteger[] divmod = n1.divideAndRemainder(n2);
-                    if(divmod[1].equals(BigInteger.ZERO)) {
+                    if (divmod[1].equals(BigInteger.ZERO)) {
                         return divmod[0];
-                    }
-                    else {
+                    } else {
                         BigDecimal bd1 = new BigDecimal(n1);
                         BigDecimal bd2 = new BigDecimal(n2);
                         return bd1.divide(bd2, minScale, roundingPolicy);
@@ -469,10 +466,10 @@ public abstract class ArithmeticEngine {
         
         private static int getClassCode(Number num) throws TemplateException {
             try {
-                return ((Integer)classCodes.get(num.getClass())).intValue();
+                return ((Integer) classCodes.get(num.getClass())).intValue();
             }
             catch(NullPointerException e) {
-                if(num == null) {
+                if (num == null) {
                     throw new _MiscTemplateException("The Number object was null.");
                 } else {
                     throw new _MiscTemplateException(new Object[] {
@@ -491,14 +488,14 @@ public abstract class ArithmeticEngine {
             // Double instead of Float to preserve the bigger bit width.
             switch(c) {
                 case FLOAT: {
-                    if((c1 < c2 ? c1 : c2) == LONG) {
+                    if ((c1 < c2 ? c1 : c2) == LONG) {
                         return DOUBLE;
                     }
                     break;
                 }
                 case BIGINTEGER: {
                     int min = c1 < c2 ? c1 : c2;
-                    if(min == DOUBLE || min == FLOAT) {
+                    if (min == DOUBLE || min == FLOAT) {
                         return BIGDECIMAL;
                     }
                     break;

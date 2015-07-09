@@ -37,7 +37,7 @@ public class _FreeMarkerPageContext2 extends FreeMarkerPageContext {
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
 
     static {
-        if(JspFactory.getDefaultFactory() == null) {
+        if (JspFactory.getDefaultFactory() == null) {
             JspFactory.setDefaultFactory(new FreeMarkerJspFactory2());
         }
         LOG.debug("Using JspFactory implementation class " + 

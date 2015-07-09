@@ -33,8 +33,7 @@ import freemarker.template.utility.ClassUtil;
  * This class is used for as a base for non-overloaded method models and for constructors.
  * (For overloaded methods and constructors see {@link OverloadedMethods}.)
  */
-class SimpleMethod
-{
+class SimpleMethod {
     private final Member member;
     private final Class[] argTypes;
     
@@ -44,23 +43,21 @@ class SimpleMethod
         this.argTypes = argTypes;
     }
     
-    Object[] unwrapArguments(List arguments, BeansWrapper wrapper) throws TemplateModelException
-    {
-        if(arguments == null) {
+    Object[] unwrapArguments(List arguments, BeansWrapper wrapper) throws TemplateModelException {
+        if (arguments == null) {
             arguments = Collections.EMPTY_LIST;
         }
         boolean isVarArg = _MethodUtil.isVarargs(member);
         int typesLen = argTypes.length;
-        if(isVarArg) {
-            if(typesLen - 1 > arguments.size()) {
+        if (isVarArg) {
+            if (typesLen - 1 > arguments.size()) {
                 throw new _TemplateModelException(new Object[] {
                         _MethodUtil.invocationErrorMessageStart(member),
                         " takes at least ", Integer.valueOf(typesLen - 1),
                         typesLen - 1 == 1 ? " argument" : " arguments", ", but ",
                         Integer.valueOf(arguments.size()), " was given." });
             }
-        }
-        else if(typesLen != arguments.size()) {
+        } else if (typesLen != arguments.size()) {
             throw new _TemplateModelException(new Object[] {
                     _MethodUtil.invocationErrorMessageStart(member), 
                     " takes ", Integer.valueOf(typesLen), typesLen == 1 ? " argument" : " arguments", ", but ",
@@ -74,7 +71,7 @@ class SimpleMethod
     private Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,
             BeansWrapper w) 
     throws TemplateModelException {
-        if(args == null) return null;
+        if (args == null) return null;
         
         int typesLen = argTypes.length;
         int argsLen = args.size();
@@ -89,7 +86,7 @@ class SimpleMethod
             Class argType = argTypes[argIdx];
             TemplateModel argVal = (TemplateModel) it.next();
             Object unwrappedArgVal = w.tryUnwrapTo(argVal, argType);
-            if(unwrappedArgVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
+            if (unwrappedArgVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                 throw createArgumentTypeMismarchException(argIdx, argVal, argType);
             }
             if (unwrappedArgVal == null && argType.isPrimitive()) {
@@ -124,7 +121,7 @@ class SimpleMethod
                     for (int varargIdx = 0; varargIdx < varargArrayLen; varargIdx++) {
                         TemplateModel varargVal = (TemplateModel) (varargIdx == 0 ? argVal : it.next());
                         Object unwrappedVarargVal = w.tryUnwrapTo(varargVal, varargItemType);
-                        if(unwrappedVarargVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
+                        if (unwrappedVarargVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                             throw createArgumentTypeMismarchException(
                                     argIdx + varargIdx, varargVal, varargItemType);
                         }

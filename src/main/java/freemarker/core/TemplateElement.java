@@ -155,7 +155,7 @@ abstract public class TemplateElement extends TemplateObject {
     
     public String getNodeName() {
         String classname = this.getClass().getName();
-        int shortNameOffset = classname.lastIndexOf('.')+1;
+        int shortNameOffset = classname.lastIndexOf('.') + 1;
         return classname.substring(shortNameOffset);
     }
     
@@ -210,8 +210,7 @@ abstract public class TemplateElement extends TemplateObject {
         }
         if (nestedBlock != null) {
             return Collections.enumeration(Collections.singletonList(nestedBlock));
-        }
-        else if (regulatedChildBuffer != null) {
+        } else if (regulatedChildBuffer != null) {
             return new _ArrayEnumeration(regulatedChildBuffer, regulatedChildCount);
         }
         return Collections.enumeration(Collections.EMPTY_LIST);
@@ -226,8 +225,7 @@ abstract public class TemplateElement extends TemplateObject {
                 return nestedBlock;
             }
             throw new ArrayIndexOutOfBoundsException("invalid index");
-        }
-        else if (regulatedChildCount != 0) {
+        } else if (regulatedChildCount != 0) {
             try {
                 return regulatedChildBuffer[index];
             } catch (ArrayIndexOutOfBoundsException e) {
@@ -239,25 +237,21 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     public void setChildAt(int index, TemplateElement element) {
-        if(nestedBlock instanceof MixedContent) {
+        if (nestedBlock instanceof MixedContent) {
             nestedBlock.setChildAt(index, element);
-        }
-        else if(nestedBlock != null) {
-            if(index == 0) {
+        } else if (nestedBlock != null) {
+            if (index == 0) {
                 nestedBlock = element;
                 element.index = 0;
                 element.parent = this;
-            }
-            else {
+            } else {
                 throw new IndexOutOfBoundsException("invalid index");
             }
-        }
-        else if(regulatedChildBuffer != null) {
+        } else if (regulatedChildBuffer != null) {
             regulatedChildBuffer[index] = element;
             element.index = index;
             element.parent = this;
-        }
-        else {
+        } else {
             throw new IndexOutOfBoundsException("element has no children");
         }
     }
@@ -415,8 +409,7 @@ abstract public class TemplateElement extends TemplateObject {
         TemplateElement prev = previousSibling();
         if (prev != null) {
             return prev.getLastLeaf();
-        }
-        else if (parent != null) {
+        } else if (parent != null) {
             return parent.prevTerminalNode();
         }
         return null;
@@ -426,8 +419,7 @@ abstract public class TemplateElement extends TemplateObject {
         TemplateElement next = nextSibling();
         if (next != null) {
             return next.getFirstLeaf();
-        }
-        else if (parent != null) {
+        } else if (parent != null) {
             return parent.nextTerminalNode();
         }
         return null;

@@ -40,8 +40,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
-class JspTagModelBase
-{
+class JspTagModelBase {
     protected final String tagName;
     private final Class tagClass;
     private final Method dynaSetter;
@@ -55,7 +54,7 @@ class JspTagModelBase
         for (int i = 0; i < pda.length; i++) {
             PropertyDescriptor pd = pda[i];
             Method m = pd.getWriteMethod();
-            if(m != null) {
+            if (m != null) {
                 propertySetters.put(pd.getName(), m);
             }
         }
@@ -77,37 +76,32 @@ class JspTagModelBase
     }
     
     void setupTag(Object tag, Map args, ObjectWrapper wrapper)
-    throws 
-        TemplateModelException, 
+    throws TemplateModelException, 
         InvocationTargetException, 
-        IllegalAccessException
-    {
-        if(args != null && !args.isEmpty()) {
+        IllegalAccessException {
+        if (args != null && !args.isEmpty()) {
             ObjectWrapperAndUnwrapper unwrapper = 
                     wrapper instanceof ObjectWrapperAndUnwrapper ? (ObjectWrapperAndUnwrapper) wrapper
                             : BeansWrapper.getDefaultInstance();  // [2.4] Throw exception in this case
             final Object[] argArray = new Object[1];
-            for (Iterator iter = args.entrySet().iterator(); iter.hasNext();)
-            {
+            for (Iterator iter = args.entrySet().iterator(); iter.hasNext(); ) {
                 final Map.Entry entry = (Map.Entry) iter.next();
                 final Object arg = unwrapper.unwrap((TemplateModel) entry.getValue());
                 argArray[0] = arg;
                 final Object paramName = entry.getKey();
-                Method setterMethod = (Method)propertySetters.get(paramName);
+                Method setterMethod = (Method) propertySetters.get(paramName);
                 if (setterMethod == null) {
                     if (dynaSetter == null) {
                         throw new TemplateModelException("Unknown property "
                                 + StringUtil.jQuote(paramName.toString())
                                 + " on instance of " + tagClass.getName());
-                    }
-                    else {
+                    } else {
                         dynaSetter.invoke(tag, new Object[] {null, paramName, argArray[0]});
                     }
-                }
-                else {
-                    if(arg instanceof BigDecimal) {
+                } else {
+                    if (arg instanceof BigDecimal) {
                         argArray[0] = BeansWrapper.coerceBigDecimal(
-                                (BigDecimal)arg, setterMethod.getParameterTypes()[0]);
+                                (BigDecimal) arg, setterMethod.getParameterTypes()[0]);
                     }
                     try {
                         setterMethod.invoke(tag, argArray);

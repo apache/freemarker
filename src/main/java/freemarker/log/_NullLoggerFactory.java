@@ -20,73 +20,58 @@ package freemarker.log;
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
-public class _NullLoggerFactory implements LoggerFactory
-{
+public class _NullLoggerFactory implements LoggerFactory {
     _NullLoggerFactory()
     {
     }
     
-    public Logger getLogger(String category)
-    {
+    public Logger getLogger(String category) {
         return INSTANCE;
     }
 
     private static final Logger INSTANCE = new Logger()
     {
-        public void debug(String message)
-        {
+        public void debug(String message) {
         }
 
-        public void debug(String message, Throwable t)
-        {
+        public void debug(String message, Throwable t) {
         }
 
-        public void error(String message)
-        {
+        public void error(String message) {
         }
 
-        public void error(String message, Throwable t)
-        {
+        public void error(String message, Throwable t) {
         }
 
-        public void info(String message)
-        {
+        public void info(String message) {
         }
 
-        public void info(String message, Throwable t)
-        {
+        public void info(String message, Throwable t) {
         }
 
-        public void warn(String message)
-        {
+        public void warn(String message) {
         }
 
-        public void warn(String message, Throwable t)
-        {
+        public void warn(String message, Throwable t) {
         }
 
-        public boolean isDebugEnabled()
-        {
+        public boolean isDebugEnabled() {
             return false;
         }
 
-        public boolean isInfoEnabled()
-        {
+        public boolean isInfoEnabled() {
             return false;
         }
 
-        public boolean isWarnEnabled()
-        {
+        public boolean isWarnEnabled() {
             return false;
         }
 
-        public boolean isErrorEnabled()
-        {
+        public boolean isErrorEnabled() {
             return false;
         }
 
-        public boolean isFatalEnabled()
-        {
+        public boolean isFatalEnabled() {
             return false;
         }
     };
