@@ -77,15 +77,12 @@ class Interpret extends BuiltIn {
         Template parentTemplate = env.getTemplate();
         
         final Template interpretedTemplate;
-        try
-        {
+        try {
             interpretedTemplate = new Template(
                     (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
                     templateSource,
                     parentTemplate.getConfiguration());
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             throw new _MiscTemplateException(this, e, env, new Object[] {
                         "Template parsing with \"?", key, "\" has failed with this error:\n\n",
                         MessageUtil.EMBEDDED_MESSAGE_BEGIN,
@@ -103,14 +100,12 @@ class Interpret extends BuiltIn {
         TemplateTransformModel {
         private final Template template;
         
-        TemplateProcessorModel(Template template)
-        {
+        TemplateProcessorModel(Template template) {
             this.template = template;
         }
         
         public Writer getWriter(final Writer out, Map args) throws TemplateModelException, IOException {
-            try
-            {
+            try {
                 Environment env = Environment.getCurrentEnvironment();
                 boolean lastFIRE = env.setFastInvalidReferenceExceptions(false);
                 try {
@@ -118,9 +113,7 @@ class Interpret extends BuiltIn {
                 } finally {
                     env.setFastInvalidReferenceExceptions(lastFIRE);
                 }
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 throw new _TemplateModelException(e, new Object[] {
                         "Template created with \"?", key, "\" has stopped with this error:\n\n",
                         MessageUtil.EMBEDDED_MESSAGE_BEGIN,

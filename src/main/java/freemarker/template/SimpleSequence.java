@@ -237,8 +237,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
             TemplateModel tm = wrap(value);
             list.set(index, tm);
             return tm;
-        }
-        catch(IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             return null;
         }
     }

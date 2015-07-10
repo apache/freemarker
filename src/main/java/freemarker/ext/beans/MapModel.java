@@ -60,8 +60,7 @@ implements
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public MapModel(Map map, BeansWrapper wrapper)
-    {
+    public MapModel(Map map, BeansWrapper wrapper) {
         super(map, wrapper);
     }
 

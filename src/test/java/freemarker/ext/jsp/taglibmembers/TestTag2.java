@@ -29,8 +29,7 @@ public class TestTag2 extends TagSupport {
         try {
             pageContext.getOut().println("TestTag2.doStartTag() called here");
             return Tag.EVAL_BODY_INCLUDE;
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new JspException(e);
         }
     }
@@ -39,8 +38,7 @@ public class TestTag2 extends TagSupport {
         try {
             pageContext.getOut().println("TestTag2.doEndTag() called here");
             return Tag.EVAL_PAGE;
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new JspException(e);
         }
     }

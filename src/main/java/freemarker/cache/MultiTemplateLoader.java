@@ -44,8 +44,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
      * @param loaders
      *            the loaders that are used to load templates.
      */
-    public MultiTemplateLoader(TemplateLoader[] loaders)
-    {
+    public MultiTemplateLoader(TemplateLoader[] loaders) {
         this.loaders = (TemplateLoader[]) loaders.clone();
     }
 
@@ -117,8 +116,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
         private final Object source;
         private final TemplateLoader loader;
 
-        MultiSource(Object source, TemplateLoader loader)
-        {
+        MultiSource(Object source, TemplateLoader loader) {
             this.source = source;
             this.loader = loader;
         }

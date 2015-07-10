@@ -99,11 +99,9 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
             if (concurrent) {
                 try {
                     atomicRemove.invoke(map, new Object[] { key, ref });
-                }
-                catch(IllegalAccessException e) {
+                } catch (IllegalAccessException e) {
                     throw new UndeclaredThrowableException(e);
-                }
-                catch(InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             } else if (map.get(key) == ref) {
@@ -128,11 +126,9 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
     private static Method getAtomicRemoveMethod() {
         try {
             return Class.forName("java.util.concurrent.ConcurrentMap").getMethod("remove", new Class[] { Object.class, Object.class });
-        }
-        catch(ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             return null;
-        }
-        catch(NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             throw new UndeclaredThrowableException(e);
         }
     }

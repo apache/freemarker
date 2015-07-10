@@ -56,16 +56,12 @@ extends
     private final RmiDebuggerImpl debugger;
     private DebuggerServer server;
 
-    RmiDebuggerService()
-    {
-        try
-        {
+    RmiDebuggerService() {
+        try {
             debugger = new RmiDebuggerImpl(this);
             server = new DebuggerServer((Serializable) RemoteObject.toStub(debugger));
             server.start();
-        }
-        catch(RemoteException e)
-        {
+        } catch (RemoteException e) {
             e.printStackTrace();
             throw new UndeclaredThrowableException(e);
         }
@@ -101,8 +97,7 @@ extends
         {
             suspendedEnvironments.add(denv);
         }
-        try
-        {
+        try {
             EnvironmentSuspendedEvent breakpointEvent = 
                 new EnvironmentSuspendedEvent(this, templateName, line, denv);
     
@@ -115,19 +110,14 @@ extends
             }
             synchronized(denv)
             {
-                try
-                {
+                try {
                     denv.wait();
-                }
-                catch(InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                     ;// Intentionally ignored
                 }
             }
             return denv.isStopped();
-        }
-        finally
-        {
+        } finally {
             synchronized(suspendedEnvironments)
             {
                 suspendedEnvironments.remove(denv);
@@ -370,8 +360,7 @@ extends
     private static final class TemplateReference extends WeakReference {
         final String templateName;
          
-        TemplateReference(String templateName, Template template, ReferenceQueue queue)
-        {
+        TemplateReference(String templateName, Template template, ReferenceQueue queue) {
             super(template, queue);
             this.templateName = templateName;
         }
@@ -399,12 +388,9 @@ extends
 
     void shutdownSpi() {
         server.stop();
-        try
-        {
+        try {
             UnicastRemoteObject.unexportObject(this.debugger, true);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
         }
 
         RmiDebuggedEnvironmentImpl.cleanup();

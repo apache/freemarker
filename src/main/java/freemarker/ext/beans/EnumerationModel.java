@@ -50,8 +50,7 @@ implements
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public EnumerationModel(Enumeration enumeration, BeansWrapper wrapper)
-    {
+    public EnumerationModel(Enumeration enumeration, BeansWrapper wrapper) {
         super(enumeration, wrapper);
     }
 
@@ -86,8 +85,7 @@ implements
     throws TemplateModelException {
         try {
             return wrap(((Enumeration) object).nextElement());
-        }
-        catch(NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             throw new TemplateModelException(
                 "No more elements in the enumeration.");
         }

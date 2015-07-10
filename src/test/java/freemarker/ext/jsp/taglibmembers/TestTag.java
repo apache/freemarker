@@ -46,8 +46,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
                 throw new JspException("throwException==true");
             }
             return repeatCount == 0 ? Tag.SKIP_BODY : BodyTag.EVAL_BODY_BUFFERED;
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new JspException(e);
         }
     }
@@ -58,8 +57,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
             getBodyContent().writeOut(getPreviousOut());
             getBodyContent().clear();
             return --repeatCount == 0 ? Tag.SKIP_BODY : IterationTag.EVAL_BODY_AGAIN;
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new JspException(e);
         }
     }
@@ -68,8 +66,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
         try {
             pageContext.getOut().println("doEndTag() called here");
             return Tag.EVAL_PAGE;
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new JspException(e);
         }
     }
@@ -81,8 +78,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
     public void doFinally() {
         try {
             pageContext.getOut().println("doFinally() called here");
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new Error(); // Shouldn't happen
         }
     }

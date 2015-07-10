@@ -32,8 +32,7 @@ public class _AvalonLoggerFactory implements LoggerFactory {
         Logger {
         private final org.apache.log.Logger logger;
         
-        AvalonLogger(org.apache.log.Logger logger)
-        {
+        AvalonLogger(org.apache.log.Logger logger) {
             this.logger = logger;
         }
         

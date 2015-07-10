@@ -285,8 +285,7 @@ public class _DomNavigator extends Navigator {
     XPathEx createXPathEx(String xpathString) throws TemplateModelException {
         try {
             return new DomXPathEx(xpathString);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             throw new TemplateModelException(e);
         }
     }
@@ -297,8 +296,7 @@ public class _DomNavigator extends Navigator {
     implements
         XPathEx {
         DomXPathEx(String path)
-        throws Exception
-        {
+        throws Exception {
             super(path);
         }
 
@@ -308,8 +306,7 @@ public class _DomNavigator extends Navigator {
             context.getContextSupport().setNamespaceContext(namespaces);
             try {
                 return selectNodesForContext(context);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 throw new TemplateModelException(e);
             }
         } 

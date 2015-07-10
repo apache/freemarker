@@ -90,24 +90,21 @@ public class TemplateCache {
      * @deprecated Use {@link #TemplateCache(TemplateLoader)} instead. The default loader is useless in most
      *     applications, also it can mean a security risk.
      */
-    public TemplateCache()
-    {
+    public TemplateCache() {
         this(_TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0));
     }
 
     /**
      * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
-    public TemplateCache(TemplateLoader templateLoader)
-    {
+    public TemplateCache(TemplateLoader templateLoader) {
         this(templateLoader, (Configuration) null);
     }
 
     /**
      * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
-    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage)
-    {
+    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage) {
         this(templateLoader, cacheStorage, null);
     }
 
@@ -406,12 +403,12 @@ public class TemplateCache {
             cachedTemplate.lastModified = lastModified;
             storeCached(tk, cachedTemplate);
             return template;
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             if (cachedTemplate != null) {
                 storeNegativeLookup(tk, cachedTemplate, e);
             }
             throw e;
-        } catch(IOException e) {
+        } catch (IOException e) {
             if (!rethrown) {
                 storeNegativeLookup(tk, cachedTemplate, e);
             }
@@ -428,7 +425,7 @@ public class TemplateCache {
     private static final Method getInitCauseMethod() {
         try {
             return Throwable.class.getMethod("initCause", new Class[] { Throwable.class });
-        } catch(NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             return null;
         }
     }
@@ -440,9 +437,9 @@ public class TemplateCache {
                 "template on an earlier attempt; it's attached as a cause");
             try {
                 INIT_CAUSE.invoke(ioe, new Object[] { e });
-            } catch(RuntimeException ex) {
+            } catch (RuntimeException ex) {
                 throw ex;
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 throw new UndeclaredThrowableException(ex);
             }
         } else {
@@ -764,8 +761,7 @@ public class TemplateCache {
         private final String encoding;
         private final boolean parse;
 
-        TemplateKey(String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
-        {
+        TemplateKey(String name, Locale locale, Object customLookupCondition, String encoding, boolean parse) {
             this.name = name;
             this.locale = locale;
             this.customLookupCondition = customLookupCondition;
@@ -821,8 +817,7 @@ public class TemplateCache {
         public CachedTemplate cloneCachedTemplate() {
             try {
                 return (CachedTemplate) super.clone();
-            }
-            catch(CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 throw new UndeclaredThrowableException(e);
             }
         }

@@ -30,8 +30,7 @@ public class OptimizerUtil {
     private static final BigInteger LONG_MIN = new BigInteger(Long.toString(Long.MIN_VALUE));
     private static final BigInteger LONG_MAX = new BigInteger(Long.toString(Long.MAX_VALUE));
 
-    private OptimizerUtil()
-    {
+    private OptimizerUtil() {
     }
     
     public static List optimizeListStorage(List list) {

@@ -257,8 +257,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
         /**
          * Used solely to construct the head element
          */
-        MruEntry()
-        {
+        MruEntry() {
             makeHead();
             key = value = null;
         }

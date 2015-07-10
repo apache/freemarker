@@ -53,8 +53,7 @@ WrapperTemplateModel, TemplateModelWithAPISupport {
 
     private final Map map;
     
-    public SimpleMapModel(Map map, BeansWrapper wrapper)
-    {
+    public SimpleMapModel(Map map, BeansWrapper wrapper) {
         super(wrapper);
         this.map = map;
     }

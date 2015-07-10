@@ -548,7 +548,7 @@ public abstract class Logger {
                             return System.getProperty(key, null);
                         }
                     });
-        } catch(AccessControlException e) {
+        } catch (AccessControlException e) {
             logWarnInLogger("Insufficient permissions to read system property \"" + key + "\".");
             return null;
         } catch (Throwable e) {

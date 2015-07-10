@@ -46,8 +46,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
     private final TemplateModel model;
     private final int type;
     
-    RmiDebugModelImpl(TemplateModel model, int extraTypes) throws RemoteException
-    {
+    RmiDebugModelImpl(TemplateModel model, int extraTypes) throws RemoteException {
         super();
         this.model = model;
         type = calculateType(model) + extraTypes;

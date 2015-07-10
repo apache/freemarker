@@ -21,8 +21,7 @@ package freemarker.log;
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
 public class _NullLoggerFactory implements LoggerFactory {
-    _NullLoggerFactory()
-    {
+    _NullLoggerFactory() {
     }
     
     public Logger getLogger(String category) {

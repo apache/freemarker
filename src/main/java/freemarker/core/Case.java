@@ -30,8 +30,7 @@ final class Case extends TemplateElement {
     
     Expression condition;
 
-    Case(Expression matchingValue, TemplateElement nestedBlock) 
-    {
+    Case(Expression matchingValue, TemplateElement nestedBlock) {
         this.condition = matchingValue;
         setNestedBlock(nestedBlock);
     }

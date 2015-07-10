@@ -60,8 +60,7 @@ public class JythonWrapper implements ObjectWrapper {
 
     private boolean attributesShadowItems = true;
 
-    public JythonWrapper()
-    {
+    public JythonWrapper() {
     }
     
     /**
@@ -170,8 +169,7 @@ public class JythonWrapper implements ObjectWrapper {
     implements TemplateModelAdapter {
         private final TemplateModel model;
         
-        TemplateModelToJythonAdapter(TemplateModel model)
-        {
+        TemplateModelToJythonAdapter(TemplateModel model) {
             this.model = model;
         }
         
@@ -188,12 +186,9 @@ public class JythonWrapper implements ObjectWrapper {
 
         public PyObject __finditem__(String key) {
             if (model instanceof TemplateHashModel) {
-                try
-                {
+                try {
                     return unwrap(((TemplateHashModel) model).get(key));
-                }
-                catch(TemplateModelException e)
-                {
+                } catch (TemplateModelException e) {
                     throw Py.JavaError(e);
                 }
             }
@@ -202,12 +197,9 @@ public class JythonWrapper implements ObjectWrapper {
         
         public PyObject __finditem__(int index) {
             if (model instanceof TemplateSequenceModel) {
-                try
-                {
+                try {
                     return unwrap(((TemplateSequenceModel) model).get(index));
-                }
-                catch(TemplateModelException e)
-                {
+                } catch (TemplateModelException e) {
                     throw Py.JavaError(e);
                 }
             }
@@ -218,8 +210,7 @@ public class JythonWrapper implements ObjectWrapper {
             if (model instanceof TemplateMethodModel) {
                 boolean isEx = model instanceof TemplateMethodModelEx;
                 List list = new ArrayList(args.length);
-                try
-                {
+                try {
                     for (int i = 0; i < args.length; ++i) {
                         list.add(
                             isEx 
@@ -230,9 +221,7 @@ public class JythonWrapper implements ObjectWrapper {
                                 : args[i].toString()));
                     }
                     return unwrap((TemplateModel) ((TemplateMethodModelEx) model).exec(list));
-                }
-                catch(TemplateModelException e)
-                {
+                } catch (TemplateModelException e) {
                     throw Py.JavaError(e);
                 }
             }
@@ -240,17 +229,14 @@ public class JythonWrapper implements ObjectWrapper {
         }
         
         public int __len__() {
-            try
-            {
+            try {
                 if (model instanceof TemplateSequenceModel) {
                     return ((TemplateSequenceModel) model).size();
                 }
                 if (model instanceof TemplateHashModelEx) {
                     return ((TemplateHashModelEx) model).size();
                 }
-            }
-            catch(TemplateModelException e)
-            {
+            } catch (TemplateModelException e) {
                 throw Py.JavaError(e);
             }
             
@@ -258,8 +244,7 @@ public class JythonWrapper implements ObjectWrapper {
         }
         
         public boolean __nonzero__() {
-            try
-            {
+            try {
                 if (model instanceof TemplateBooleanModel) {
                     return ((TemplateBooleanModel) model).getAsBoolean();
                 }
@@ -269,9 +254,7 @@ public class JythonWrapper implements ObjectWrapper {
                 if (model instanceof TemplateHashModel) {
                     return !((TemplateHashModelEx) model).isEmpty();
                 }
-            }
-            catch(TemplateModelException e)
-            {
+            } catch (TemplateModelException e) {
                 throw Py.JavaError(e);
             }
             return false;

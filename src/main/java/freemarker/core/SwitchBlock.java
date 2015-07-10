@@ -75,8 +75,7 @@ final class SwitchBlock extends TemplateElement {
             if (!processedCase && defaultCase != null) {
                 env.visitByHiddingParent(defaultCase);
             }
-        }
-        catch (BreakInstruction.Break br) {}
+        } catch (BreakInstruction.Break br) {}
     }
 
     protected String dump(boolean canonical) {

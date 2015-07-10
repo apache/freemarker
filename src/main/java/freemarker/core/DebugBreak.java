@@ -28,8 +28,7 @@ import freemarker.template.TemplateException;
  *             it.
  */
 public class DebugBreak extends TemplateElement {
-    public DebugBreak(TemplateElement nestedBlock)
-    {
+    public DebugBreak(TemplateElement nestedBlock) {
         setNestedBlock(nestedBlock);
         copyLocationFrom(nestedBlock);
     }

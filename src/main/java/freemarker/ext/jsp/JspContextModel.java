@@ -35,8 +35,7 @@ implements
     private final PageContext pageContext;
     private final int scope;
 
-    public JspContextModel(PageContext pageContext, int scope)
-    {
+    public JspContextModel(PageContext pageContext, int scope) {
         this.pageContext = pageContext;
         this.scope = scope;
     }

@@ -39,8 +39,7 @@ public class HttpRequestParametersHashModel
     private final HttpServletRequest request;
     private List keys;
         
-    public HttpRequestParametersHashModel(HttpServletRequest request)
-    {
+    public HttpRequestParametersHashModel(HttpServletRequest request) {
         this.request = request;
     }
 

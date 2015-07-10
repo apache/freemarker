@@ -51,8 +51,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
             }
         };
         
-    public JythonModel(PyObject object, JythonWrapper wrapper)
-    {
+    public JythonModel(PyObject object, JythonWrapper wrapper) {
         this.object = object;
         this.wrapper = wrapper;
     }
@@ -61,12 +60,9 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
      * Returns the value of {@link PyObject#__nonzero__()}.
      */
     public boolean getAsBoolean() throws TemplateModelException {
-        try
-        {
+        try {
             return object.__nonzero__();
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }
@@ -75,12 +71,9 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
      * Returns the value of {@link Object#toString()}.
      */
     public String getAsString() throws TemplateModelException {
-        try
-        {
+        try {
             return object.toString();
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }
@@ -100,8 +93,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
         
         PyObject obj = null;
         
-        try
-        {
+        try {
             if (wrapper.isAttributesShadowItems()) {
                 obj = object.__findattr__(key);
                 if (obj == null) {
@@ -113,9 +105,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
                     obj = object.__findattr__(key);
                 }
             }
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
 
@@ -126,12 +116,9 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
      * Returns {@link PyObject#__len__()}<code> == 0</code>.
      */
     public boolean isEmpty() throws TemplateModelException {
-        try
-        {
+        try {
             return object.__len__() == 0;
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }
@@ -141,8 +128,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
      */
     public Object exec(List arguments) throws TemplateModelException {
         int size = arguments.size();
-        try
-        {
+        try {
             switch(size)
             {
                 case 0:
@@ -165,9 +151,7 @@ TemplateMethodModelEx, AdapterTemplateModel, WrapperTemplateModel {
                     return wrapper.wrap(object.__call__(pyargs));
                 }
             }
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }

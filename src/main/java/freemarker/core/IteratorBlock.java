@@ -52,8 +52,7 @@ final class IteratorBlock extends TemplateElement {
     IteratorBlock(Expression listExp,
                   String loopVarName,
                   TemplateElement nestedBlock,
-                  boolean isForEach) 
-    {
+                  boolean isForEach) {
         this.listExp = listExp;
         this.loopVarName = loopVarName;
         setNestedBlock(nestedBlock);

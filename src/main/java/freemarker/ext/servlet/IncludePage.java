@@ -154,8 +154,7 @@ public class IncludePage implements TemplateDirectiveModel {
         try {
             request.getRequestDispatcher(strPath).include(wrappedRequest, 
                     wrappedResponse);
-        }
-        catch (ServletException e) {
+        } catch (ServletException e) {
             throw new _MiscTemplateException(e, env);
         }
     }

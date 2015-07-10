@@ -101,8 +101,7 @@ final class DynamicKeyName extends Expression {
             return index < size ? tsm.get(index) : null;
         } 
         
-        try
-        {
+        try {
             String s = target.evalAndCoerceToString(env);
             try {
                 return new SimpleScalar(s.substring(index, index + 1));
@@ -119,9 +118,7 @@ final class DynamicKeyName extends Expression {
                 }
                 throw new RuntimeException("Can't explain exception", e);
             }
-        }
-        catch(NonStringException e)
-        {
+        } catch (NonStringException e) {
             throw new UnexpectedTypeException(
                     target, targetModel,
                     "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
@@ -154,7 +151,7 @@ final class DynamicKeyName extends Expression {
             targetSeq = null;
             try {
                 targetStr = target.evalAndCoerceToString(env);
-            } catch(NonStringException e) {
+            } catch (NonStringException e) {
                 throw new UnexpectedTypeException(
                         target, target.eval(env),
                         "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,

@@ -46,8 +46,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
      * @param session the session
      * @param wrapper an object wrapper used to wrap session attributes
      */
-    public HttpSessionHashModel(HttpSession session, ObjectWrapper wrapper)
-    {
+    public HttpSessionHashModel(HttpSession session, ObjectWrapper wrapper) {
         this.session = session;
         this.wrapper = wrapper;
 
@@ -67,8 +66,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
      * @param response the actual response
      * @param wrapper an object wrapper used to wrap session attributes
      */
-    public HttpSessionHashModel(FreemarkerServlet servlet, HttpServletRequest request, HttpServletResponse response, ObjectWrapper wrapper)
-    {
+    public HttpSessionHashModel(FreemarkerServlet servlet, HttpServletRequest request, HttpServletResponse response, ObjectWrapper wrapper) {
         this.wrapper = wrapper;
         
         this.servlet = servlet;
@@ -88,11 +86,9 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
                 try {
                     servlet.initializeSessionAndInstallModel(request, response, 
                             this, session);
-                }
-                catch(RuntimeException e) {
+                } catch (RuntimeException e) {
                     throw e;
-                }
-                catch(Exception e) {
+                } catch (Exception e) {
                     throw new TemplateModelException(e);
                 }
             }

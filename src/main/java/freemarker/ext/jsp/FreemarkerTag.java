@@ -93,8 +93,7 @@ public class FreemarkerTag implements BodyTag {
         if (bodyContent == null)
             return EVAL_PAGE;
 
-        try
-        {
+        try {
             if (template == null) {
                 template = new Template(name, bodyContent.getReader());
             }
@@ -108,24 +107,15 @@ public class FreemarkerTag implements BodyTag {
                 root.put("any", new JspContextModel(pageContext, JspContextModel.ANY_SCOPE));
             }
             template.process(root, pageContext.getOut());
-        }
-        catch(Exception e)
-        {
-            try
-            {
+        } catch (Exception e) {
+            try {
                 pageContext.handlePageException(e);
-            }
-            catch(ServletException e2)
-            {
+            } catch (ServletException e2) {
+                throw new JspException(e2.getMessage());
+            } catch (IOException e2) {
                 throw new JspException(e2.getMessage());
             }
-            catch(IOException e2)
-            {
-                throw new JspException(e2.getMessage());
-            }
-        }
-        finally
-        {
+        } finally {
             if (!caching) {
                 template = null;
             }

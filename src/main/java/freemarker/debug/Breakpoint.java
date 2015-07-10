@@ -32,8 +32,7 @@ public class Breakpoint implements Serializable, Comparable {
      * @param templateName the name of the template
      * @param line the line number in the template where to put the breakpoint
      */
-    public Breakpoint(String templateName, int line)
-    {
+    public Breakpoint(String templateName, int line) {
         this.templateName = templateName;
         this.line = line;
     }
