@@ -76,8 +76,7 @@ public class IdentityHashMap
      * @throws     IllegalArgumentException  if the initial capacity is less
      *               than zero, or if the load factor is nonpositive.
      */
-    public IdentityHashMap(int initialCapacity, float loadFactor)
-    {
+    public IdentityHashMap(int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException(
                 "Illegal Initial Capacity: " + initialCapacity);
@@ -99,8 +98,7 @@ public class IdentityHashMap
      * @throws    IllegalArgumentException if the initial capacity is less
      *              than zero.
      */
-    public IdentityHashMap(int initialCapacity)
-    {
+    public IdentityHashMap(int initialCapacity) {
         this(initialCapacity, 0.75f);
     }
 
@@ -108,8 +106,7 @@ public class IdentityHashMap
      * Constructs a new, empty map with a default capacity and load
      * factor, which is <tt>0.75</tt>.
      */
-    public IdentityHashMap()
-    {
+    public IdentityHashMap() {
         this(11, 0.75f);
     }
 
@@ -121,8 +118,7 @@ public class IdentityHashMap
      *
      * @param t the map whose mappings are to be placed in this map.
      */
-    public IdentityHashMap(Map t)
-    {
+    public IdentityHashMap(Map t) {
         this(Math.max(2 * t.size(), 11), 0.75f);
         putAll(t);
     }
@@ -395,8 +391,7 @@ public class IdentityHashMap
      * @return a shallow copy of this map.
      */
     public Object clone() {
-        try
-        {
+        try {
             IdentityHashMap t = (IdentityHashMap) super.clone();
             t.table = new Entry[table.length];
             for (int i = table.length; i-- > 0; ) {
@@ -408,9 +403,7 @@ public class IdentityHashMap
             t.values = null;
             t.modCount = 0;
             return t;
-        }
-        catch (CloneNotSupportedException e)
-        {
+        } catch (CloneNotSupportedException e) {
             // this shouldn't happen, since we are Cloneable
             throw new InternalError();
         }
@@ -584,8 +577,7 @@ public class IdentityHashMap
         Object value;
         Entry next;
 
-        Entry(int hash, Object key, Object value, Entry next)
-        {
+        Entry(int hash, Object key, Object value, Entry next) {
             this.hash = hash;
             this.key = key;
             this.value = value;
@@ -646,8 +638,7 @@ public class IdentityHashMap
 
     private static class EmptyHashIterator implements Iterator {
 
-        EmptyHashIterator()
-        {
+        EmptyHashIterator() {
 
         }
 
@@ -679,8 +670,7 @@ public class IdentityHashMap
          */
         private int expectedModCount = modCount;
 
-        HashIterator(int type)
-        {
+        HashIterator(int type) {
             this.type = type;
         }
 

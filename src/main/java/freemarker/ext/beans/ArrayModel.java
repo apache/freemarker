@@ -57,8 +57,7 @@ implements
      * behavior, method exposure level, method-over-item shadowing policy etc.
      * @throws IllegalArgumentException if the passed object is not a Java array.
      */
-    public ArrayModel(Object array, BeansWrapper wrapper)
-    {
+    public ArrayModel(Object array, BeansWrapper wrapper) {
         super(array, wrapper);
         Class clazz = array.getClass();
         if (!clazz.isArray())
@@ -73,12 +72,9 @@ implements
 
     public TemplateModel get(int index)
     throws TemplateModelException {
-        try
-        {
+        try {
             return wrap(Array.get(object, index));
-        }
-        catch(IndexOutOfBoundsException e)
-        {
+        } catch (IndexOutOfBoundsException e) {
             return null; 
 //            throw new TemplateModelException("Index out of bounds: " + index);
         }

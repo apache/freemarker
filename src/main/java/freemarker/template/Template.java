@@ -91,8 +91,7 @@ public class Template extends Configurable {
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    private Template(String name, String sourceName, Configuration cfg, boolean overloadSelector)
-    {
+    private Template(String name, String sourceName, Configuration cfg, boolean overloadSelector) {
         super(toNonNull(cfg));
         this.name = name;
         this.sourceName = sourceName;
@@ -219,21 +218,17 @@ public class Template extends Configurable {
                 }
                 this.actualTagSyntax = parser._getLastTagSyntax();
                 this.actualNamingConvention = parser._getLastNamingConvention();
-            }
-            catch (TokenMgrError exc) {
+            } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
                 throw exc.toParseException(this);
-            }
-            finally {
+            } finally {
                 parser = null;
             }
-        }
-        catch(ParseException e) {
+        } catch (ParseException e) {
             e.setTemplateName(getSourceName());
             throw e;
-        }
-        finally {
+        } finally {
             reader.close();
         }
         

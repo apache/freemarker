@@ -80,8 +80,7 @@ public class FileTemplateLoader implements TemplateLoader {
      *             {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
      */
     public FileTemplateLoader()
-    throws IOException
-    {
+    throws IOException {
         this(new File(SecurityUtilities.getSystemProperty("user.dir")));
     }
 
@@ -93,8 +92,7 @@ public class FileTemplateLoader implements TemplateLoader {
      * @param baseDir the base directory for loading templates
      */
     public FileTemplateLoader(final File baseDir)
-    throws IOException
-    {
+    throws IOException {
         this(baseDir, false);
     }
 
@@ -115,8 +113,7 @@ public class FileTemplateLoader implements TemplateLoader {
      *            template paths that are supplied by the visitor or an external system.
      */
     public FileTemplateLoader(final File baseDir, final boolean disableCanonicalPathCheck)
-    throws IOException
-    {
+    throws IOException {
         try {
             Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction() {
                 public Object run() throws IOException {
@@ -147,9 +144,7 @@ public class FileTemplateLoader implements TemplateLoader {
             this.canonicalBasePath = (String) retval[1];
             
             setEmulateCaseSensitiveFileSystem(getEmulateCaseSensitiveFileSystemDefault());
-        }
-        catch(PrivilegedActionException e)
-        {
+        } catch (PrivilegedActionException e) {
             throw (IOException) e.getException();
         }
     }
@@ -183,9 +178,7 @@ public class FileTemplateLoader implements TemplateLoader {
                     return source;
                 }
             });
-        }
-        catch(PrivilegedActionException e)
-        {
+        } catch (PrivilegedActionException e) {
             throw (IOException) e.getException();
         }
     }
@@ -203,8 +196,7 @@ public class FileTemplateLoader implements TemplateLoader {
     
     public Reader getReader(final Object templateSource, final String encoding)
     throws IOException {
-        try
-        {
+        try {
             return (Reader) AccessController.doPrivileged(new PrivilegedExceptionAction()
             {
                 public Object run()
@@ -217,9 +209,7 @@ public class FileTemplateLoader implements TemplateLoader {
                     return new InputStreamReader(new FileInputStream((File) templateSource), encoding);
                 }
             });
-        }
-        catch(PrivilegedActionException e)
-        {
+        } catch (PrivilegedActionException e) {
             throw (IOException) e.getException();
         }
     }

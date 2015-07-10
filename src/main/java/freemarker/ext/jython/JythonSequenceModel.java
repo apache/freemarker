@@ -44,8 +44,7 @@ implements
             }
         };
         
-    public JythonSequenceModel(PyObject object, JythonWrapper wrapper)
-    {
+    public JythonSequenceModel(PyObject object, JythonWrapper wrapper) {
         super(object, wrapper);
     }
 
@@ -53,12 +52,9 @@ implements
      * Returns {@link PyObject#__finditem__(int)}.
      */
     public TemplateModel get(int index) throws TemplateModelException {
-        try
-        {
+        try {
             return wrapper.wrap(object.__finditem__(index));
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }
@@ -67,12 +63,9 @@ implements
      * Returns {@link PyObject#__len__()}.
      */
     public int size() throws TemplateModelException {
-        try
-        {
+        try {
             return object.__len__();
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }

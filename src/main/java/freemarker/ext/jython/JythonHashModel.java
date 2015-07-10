@@ -55,8 +55,7 @@ implements
             }
         };
         
-    public JythonHashModel(PyObject object, JythonWrapper wrapper)
-    {
+    public JythonHashModel(PyObject object, JythonWrapper wrapper) {
         super(object, wrapper);
     }
     
@@ -64,12 +63,9 @@ implements
      * Returns {@link PyObject#__len__()}.
      */
     public int size() throws TemplateModelException {
-        try
-        {
+        try {
             return object.__len__();
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }
@@ -79,8 +75,7 @@ implements
      * or <code>object.__findattr__("keySet").__call__()</code>.
      */
     public TemplateCollectionModel keys() throws TemplateModelException {
-        try
-        {
+        try {
             PyObject method = object.__findattr__(KEYS);
             if (method == null) {
                 method = object.__findattr__(KEYSET);
@@ -88,9 +83,7 @@ implements
             if (method != null) {
                 return (TemplateCollectionModel) wrapper.wrap(method.__call__());
             }
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
         throw new TemplateModelException(
@@ -102,15 +95,12 @@ implements
      * Returns <code>object.__findattr__("values").__call__()</code>.
      */
     public TemplateCollectionModel values() throws TemplateModelException {
-        try
-        {
+        try {
             PyObject method = object.__findattr__(VALUES);
             if (method != null) {
                 return (TemplateCollectionModel) wrapper.wrap(method.__call__());
             }
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
         throw new TemplateModelException(

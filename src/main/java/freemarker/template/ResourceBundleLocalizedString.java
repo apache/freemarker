@@ -43,8 +43,7 @@ public class ResourceBundleLocalizedString extends LocalizedString {
 		try {
 			ResourceBundle rb = ResourceBundle.getBundle(resourceBundleLookupKey, locale);
 			return rb.getString(resourceKey);
-		}
-		catch (MissingResourceException mre) {
+		} catch (MissingResourceException mre) {
 			throw new TemplateModelException("missing resource", mre);
 		}
 	}

@@ -44,11 +44,9 @@ public class RhinoWrapper extends BeansWrapper {
                     return Undefined.class.getField("instance").get(null);
                 }
             });
-        }
-        catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             throw new UndeclaredThrowableException(e);
         }
     }

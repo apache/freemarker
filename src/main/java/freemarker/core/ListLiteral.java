@@ -142,8 +142,7 @@ final class ListLiteral extends Expression {
                 try {
                     Environment.Namespace ns = env.importLib(s, null);
                     result.add(ns);
-                } 
-                catch (IOException ioe) {
+                } catch (IOException ioe) {
                     throw new _MiscTemplateException(((StringLiteral) itemExpr), new Object[] {
                             "Couldn't import library ", new _DelayedJQuote(s), ": ",
                             new _DelayedGetMessage(ioe) });

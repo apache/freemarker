@@ -54,8 +54,7 @@ abstract class Navigator {
     List applyXPath(List nodes, String xpathString, Object namespaces)
     throws TemplateModelException {
         XPathEx xpath = null;
-        try
-        {
+        try {
             synchronized(xpathCache)
             {
                 xpath = (XPathEx) xpathCache.get(xpathString);
@@ -65,9 +64,7 @@ abstract class Navigator {
                 }
             }
             return xpath.selectNodes(nodes, (NamespaceContext) namespaces);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw new TemplateModelException("Could not evaulate XPath expression " + xpathString, e);
         }
     }

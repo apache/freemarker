@@ -55,8 +55,7 @@ implements
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public CollectionModel(Collection collection, BeansWrapper wrapper)
-    {
+    public CollectionModel(Collection collection, BeansWrapper wrapper) {
         super(collection, wrapper);
     }
 
@@ -69,12 +68,9 @@ implements
     throws TemplateModelException {
         // Don't forget to keep getSupportsIndexedAccess in sync with this!
         if (object instanceof List) {
-            try
-            {
+            try {
                 return wrap(((List) object).get(index));
-            }
-            catch(IndexOutOfBoundsException e)
-            {
+            } catch (IndexOutOfBoundsException e) {
                 return null;
 //                throw new TemplateModelException("Index out of bounds: " + index);
             }

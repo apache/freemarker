@@ -63,8 +63,7 @@ implements
     private boolean stopped = false;
     private final long id;
     
-    private RmiDebuggedEnvironmentImpl(Environment env) throws RemoteException
-    {
+    private RmiDebuggedEnvironmentImpl(Environment env) throws RemoteException {
         super(new DebugEnvironmentModel(env), DebugModel.TYPE_ENVIRONMENT);
         synchronized(idLock)
         {
@@ -170,8 +169,7 @@ implements
 
         final Configurable configurable;
         
-        DebugConfigurableModel(Configurable configurable)
-        {
+        DebugConfigurableModel(Configurable configurable) {
             this.configurable = configurable;
         }
         
@@ -200,8 +198,7 @@ implements
             }
         };
         
-        DebugConfigurationModel(Configuration config)
-        {
+        DebugConfigurationModel(Configuration config) {
             super(config);
         }
         
@@ -227,8 +224,7 @@ implements
     
         private final SimpleScalar name;
 
-        DebugTemplateModel(Template template)
-        {
+        DebugTemplateModel(Template template) {
             super(template);
             this.name = new SimpleScalar(template.getName());
         }
@@ -239,12 +235,9 @@ implements
 
         public TemplateModel get(String key) throws TemplateModelException {
             if ("configuration".equals(key)) {
-                try
-                {
+                try {
                     return (TemplateModel) getCachedWrapperFor(((Template) configurable).getConfiguration());
-                }
-                catch (RemoteException e)
-                {
+                } catch (RemoteException e) {
                     throw new TemplateModelException(e);
                 }
             }
@@ -269,12 +262,9 @@ implements
         private TemplateModel knownVariables = new DebugMapModel()
         {
             Collection keySet() {
-                try
-                {
+                try {
                     return ((Environment) configurable).getKnownVariableNames();
-                }
-                catch (TemplateModelException e)
-                {
+                } catch (TemplateModelException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             }
@@ -284,8 +274,7 @@ implements
             }
         };
          
-        DebugEnvironmentModel(Environment env)
-        {
+        DebugEnvironmentModel(Environment env) {
             super(env);
         }
 
@@ -310,12 +299,9 @@ implements
                 return ((Environment) configurable).getMainNamespace();
             }
             if ("template".equals(key)) {
-                try
-                {
+                try {
                     return (TemplateModel) getCachedWrapperFor(((Environment) configurable).getTemplate());
-                }
-                catch (RemoteException e)
-                {
+                } catch (RemoteException e) {
                     throw new TemplateModelException(e);
                 }
             }
@@ -326,12 +312,9 @@ implements
     public static void cleanup() {
         for (Iterator i = remotes.iterator(); i.hasNext(); ) {
             Object remoteObject = i.next();
-            try
-            {
+            try {
                 UnicastRemoteObject.unexportObject((Remote) remoteObject, true);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
             }
         }
     }

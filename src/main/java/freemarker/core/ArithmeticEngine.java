@@ -467,8 +467,7 @@ public abstract class ArithmeticEngine {
         private static int getClassCode(Number num) throws TemplateException {
             try {
                 return ((Integer) classCodes.get(num.getClass())).intValue();
-            }
-            catch(NullPointerException e) {
+            } catch (NullPointerException e) {
                 if (num == null) {
                     throw new _MiscTemplateException("The Number object was null.");
                 } else {

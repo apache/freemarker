@@ -691,7 +691,7 @@ public class Configuration extends Configurable implements Cloneable {
             }
             try {
                 return new LegacyDefaultFileTemplateLoader();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 CACHE_LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
                         + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
                 return null;
@@ -2303,7 +2303,7 @@ public class Configuration extends Configurable implements Cloneable {
             } else {
                 unknown = true;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw settingValueAssignmentException(name, value, e);
         }
         if (unknown) {

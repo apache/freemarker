@@ -40,8 +40,7 @@ public final class LibraryLoad extends TemplateElement {
      */
     LibraryLoad(Template template,
             Expression templateName,
-            String namespace)
-    {
+            String namespace) {
         this.namespace = namespace;
         this.importedTemplateNameExp = templateName;
     }

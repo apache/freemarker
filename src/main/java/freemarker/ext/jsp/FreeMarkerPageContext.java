@@ -78,8 +78,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final ObjectWrapperAndUnwrapper unwrapper;
     private JspWriter jspOut;
     
-    protected FreeMarkerPageContext() throws TemplateModelException
-    {
+    protected FreeMarkerPageContext() throws TemplateModelException {
         environment = Environment.getCurrentEnvironment();
         incompatibleImprovements = environment.getConfiguration().getIncompatibleImprovements().intValue();
 
@@ -156,8 +155,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                 try {
                     environment.setGlobalVariable(name, wrapper.wrap(value));
                     break;
-                }
-                catch(TemplateModelException e) {
+                } catch (TemplateModelException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             }
@@ -212,8 +210,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                         }
                         return tm;
                     }
-                }
-                catch (TemplateModelException e) {
+                } catch (TemplateModelException e) {
                     throw new UndeclaredThrowableException("Failed to unwrapp FTL global variable", e);
                 }
             }
@@ -294,8 +291,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                 try {
                     return 
                         new TemplateHashModelExEnumeration(environment.getGlobalNamespace());
-                }
-                catch(TemplateModelException e) {
+                } catch (TemplateModelException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             }

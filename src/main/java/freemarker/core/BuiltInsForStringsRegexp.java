@@ -197,8 +197,7 @@ class BuiltInsForStringsRegexp {
                     public int size() throws TemplateModelException {
                         try {
                             return firedEntireInputMatcher.groupCount() + 1;
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             throw new _TemplateModelException(e, "Failed to get match group count");
                         }
                     }

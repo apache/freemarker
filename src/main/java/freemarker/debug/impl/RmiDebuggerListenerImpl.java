@@ -42,19 +42,15 @@ implements
     private final DebuggerListener listener;
 
     public void unreferenced() {
-        try
-        {
+        try {
             UnicastRemoteObject.unexportObject(this, false);
-        }
-        catch (NoSuchObjectException e)
-        {
+        } catch (NoSuchObjectException e) {
             LOG.warn("Failed to unexport RMI debugger listener", e);
         }
     }
     
     public RmiDebuggerListenerImpl(DebuggerListener listener) 
-    throws RemoteException
-    {
+    throws RemoteException {
         this.listener = listener;
     }
 

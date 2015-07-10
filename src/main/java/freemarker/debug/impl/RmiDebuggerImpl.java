@@ -36,8 +36,7 @@ implements
 
     private final RmiDebuggerService service;
     
-    protected RmiDebuggerImpl(RmiDebuggerService service) throws RemoteException
-    {
+    protected RmiDebuggerImpl(RmiDebuggerService service) throws RemoteException {
         this.service = service;
     }
 

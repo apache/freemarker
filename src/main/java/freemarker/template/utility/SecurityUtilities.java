@@ -26,8 +26,7 @@ import freemarker.log.Logger;
  */
 public class SecurityUtilities {
     private static final Logger LOG = Logger.getLogger("freemarker.security");
-    private SecurityUtilities()
-    {
+    private SecurityUtilities() {
     }
     
     public static String getSystemProperty(final String key) {
@@ -41,8 +40,7 @@ public class SecurityUtilities {
     }
 
     public static String getSystemProperty(final String key, final String defValue) {
-        try
-        {
+        try {
             return (String) AccessController.doPrivileged(
                 new PrivilegedAction()
                 {
@@ -50,9 +48,7 @@ public class SecurityUtilities {
                         return System.getProperty(key, defValue);
                     }
                 });
-        }
-        catch(AccessControlException e)
-        {
+        } catch (AccessControlException e) {
             LOG.warn("Insufficient permissions to read system property " + 
                     StringUtil.jQuoteNoXSS(key) + ", using default value " +
                     StringUtil.jQuoteNoXSS(defValue));
@@ -61,8 +57,7 @@ public class SecurityUtilities {
     }
 
     public static Integer getSystemProperty(final String key, final int defValue) {
-        try
-        {
+        try {
             return (Integer) AccessController.doPrivileged(
                 new PrivilegedAction()
                 {
@@ -70,9 +65,7 @@ public class SecurityUtilities {
                         return Integer.getInteger(key, defValue);
                     }
                 });
-        }
-        catch(AccessControlException e)
-        {
+        } catch (AccessControlException e) {
             LOG.warn("Insufficient permissions to read system property " + 
                     StringUtil.jQuote(key) + ", using default value " + defValue);
             return Integer.valueOf(defValue);

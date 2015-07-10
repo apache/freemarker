@@ -37,8 +37,7 @@ class SimpleMethod {
     private final Member member;
     private final Class[] argTypes;
     
-    protected SimpleMethod(Member member, Class[] argTypes)
-    {
+    protected SimpleMethod(Member member, Class[] argTypes) {
         this.member = member;
         this.argTypes = argTypes;
     }

@@ -53,8 +53,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     Macro(String name, List argumentNames, Map args, 
             String catchAllParamName, boolean function,
-            TemplateElement nestedBlock) 
-    {
+            TemplateElement nestedBlock) {
         this.name = name;
         this.paramNames = (String[]) argumentNames.toArray(
                 new String[argumentNames.size()]);
@@ -162,8 +161,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         
         Context(Environment env, 
                 TemplateElement nestedContent,
-                List nestedContentParameterNames) 
-        {
+                List nestedContentParameterNames) {
             this.localVars = env.new Namespace();
             this.nestedContent = nestedContent;
             this.nestedContentNamespace = env.getCurrentNamespace();
@@ -210,8 +208,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                     localVars.put(argName, tm);
                                     resolvedAnArg = true;
                                 }
-                            }
-                            catch(InvalidReferenceException e) {
+                            } catch (InvalidReferenceException e) {
                                 if (!hasUnresolvedArg) {
                                     hasUnresolvedArg = true;
                                     firstReferenceException = e;
@@ -241,8 +238,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                         }
                     }
                 }
-            }
-            while(resolvedAnArg && hasUnresolvedArg);
+            } while (resolvedAnArg && hasUnresolvedArg);
             if (hasUnresolvedArg) {
                 if (firstReferenceException != null) {
                     throw firstReferenceException;

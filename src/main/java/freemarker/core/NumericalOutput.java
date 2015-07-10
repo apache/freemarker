@@ -43,8 +43,7 @@ final class NumericalOutput extends Interpolation {
 
     NumericalOutput(Expression expression,
                     int minFracDigits,
-                    int maxFracDigits) 
-    {
+                    int maxFracDigits) {
         this.expression = expression;
         hasFormat = true;
         this.minFracDigits = minFracDigits;

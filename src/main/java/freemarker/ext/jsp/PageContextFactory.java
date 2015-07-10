@@ -33,18 +33,15 @@ class PageContextFactory {
             try {
                 PageContext.class.getMethod("getELContext", (Class[]) null);
                 return Class.forName("freemarker.ext.jsp._FreeMarkerPageContext21");
-            }
-            catch(NoSuchMethodException e1) {
+            } catch (NoSuchMethodException e1) {
                 try {
                     PageContext.class.getMethod("getExpressionEvaluator", (Class[]) null);
                     return Class.forName("freemarker.ext.jsp._FreeMarkerPageContext2");
-                }
-                catch(NoSuchMethodException e2) {
+                } catch (NoSuchMethodException e2) {
                     return Class.forName("freemarker.ext.jsp._FreeMarkerPageContext1");
                 }
             }
-        }
-        catch(ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw new NoClassDefFoundError(e.getMessage());
         }
     }
@@ -60,11 +57,9 @@ class PageContextFactory {
                 (FreeMarkerPageContext) pageContextImpl.newInstance();
             env.setGlobalVariable(PageContext.PAGECONTEXT, pageContext);
             return pageContext;
-        }
-        catch(IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new IllegalAccessError(e.getMessage());
-        }
-        catch(InstantiationException e) {
+        } catch (InstantiationException e) {
             throw new UndeclaredThrowableException(e);
         }
     }

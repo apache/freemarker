@@ -122,8 +122,7 @@ implements
             	return (Namespaces)
             			Class.forName("freemarker.ext.xml._JaxenNamespaces")
             			.newInstance();
-            }
-            catch(Throwable t) {
+            } catch (Throwable t) {
                 useJaxenNamespaces = false;
             }
         }
@@ -420,8 +419,7 @@ implements
         for (Iterator iter = nodes.iterator(); iter.hasNext(); ) {
             try {
                 op.process(iter.next(), localName, namespaceUri, result);
-            }
-            catch(RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw new TemplateModelException(e);
             }
         }
@@ -481,8 +479,7 @@ implements
     private static Class getClass(String className) {
         try {
             return ClassUtil.forName(className);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Couldn't load class " + className, e);
             }
@@ -494,8 +491,7 @@ implements
         try {
             return (Navigator) ClassUtil.forName("freemarker.ext.xml._" + 
                     navType + "Navigator").newInstance();
-        }
-        catch(Throwable t) {
+        } catch (Throwable t) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Could not load navigator for " + navType, t);
             }

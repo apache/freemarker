@@ -56,8 +56,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             parser.setTemplate(getTemplate());
             try {
                 dynamicValue = parser.FreeMarkerText();
-            }
-            catch(ParseException e) {
+            } catch (ParseException e) {
                 e.setTemplateName(getTemplate().getSourceName());
                 throw e;
             }
@@ -93,11 +92,9 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             env.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             try {
                return env.renderElementToString(dynamicValue);
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 throw new _MiscTemplateException(ioe, env);
-            }
-            finally {
+            } finally {
                 env.setTemplateExceptionHandler(teh);
             }
         }

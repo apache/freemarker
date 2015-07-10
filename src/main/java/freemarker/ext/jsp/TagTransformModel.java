@@ -257,8 +257,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
         private boolean needPop = true;
         private final boolean needDoublePop;
         
-        TagWriter(Writer out, Tag tag, FreeMarkerPageContext pageContext, boolean needDoublePop)
-        {
+        TagWriter(Writer out, Tag tag, FreeMarkerPageContext pageContext, boolean needDoublePop) {
             super((JspWriter) out, false);
             this.needDoublePop = needDoublePop;
             this.tag = tag;
@@ -366,8 +365,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 }
                 // No pooling yet
                 tag.release();
-            }
-            finally {
+            } finally {
                 if (needDoublePop) {
                     pageContext.popWriter();
                 }

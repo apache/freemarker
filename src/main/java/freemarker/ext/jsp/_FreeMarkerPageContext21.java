@@ -69,8 +69,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
                     })).loadClass
                     ("org.apache.commons.el.ExpressionEvaluatorImpl");
             return (ExpressionEvaluator) type.newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new UnsupportedOperationException("In order for the getExpressionEvaluator() " +
                 "method to work, you must have downloaded the apache commons-el jar and " +
                 "made it available in the classpath.");

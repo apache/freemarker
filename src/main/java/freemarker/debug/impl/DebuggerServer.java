@@ -46,15 +46,11 @@ class DebuggerServer {
     private boolean stop = false;
     private ServerSocket serverSocket;
     
-    public DebuggerServer(Serializable debuggerStub)
-    {
+    public DebuggerServer(Serializable debuggerStub) {
         port = SecurityUtilities.getSystemProperty("freemarker.debug.port", Debugger.DEFAULT_PORT).intValue();
-        try
-        {
+        try {
             password = SecurityUtilities.getSystemProperty("freemarker.debug.password", "").getBytes("UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             throw new UndeclaredThrowableException(e);
         }
         this.debuggerStub = debuggerStub;
@@ -70,16 +66,13 @@ class DebuggerServer {
     }
     
     private void startInternal() {
-        try
-        {
+        try {
             serverSocket = new ServerSocket(port);
             while (!stop) {
                 Socket s = serverSocket.accept();
                 new Thread(new DebuggerAuthProtocol(s)).start();
             }
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             LOG.error("Debugger server shut down.", e);
         }
     }
@@ -87,14 +80,12 @@ class DebuggerServer {
     private class DebuggerAuthProtocol implements Runnable {
         private final Socket s;
         
-        DebuggerAuthProtocol(Socket s)
-        {
+        DebuggerAuthProtocol(Socket s) {
             this.s = s;
         }
         
         public void run() {
-            try
-            {
+            try {
                 ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(s.getInputStream());
                 byte[] challenge = new byte[512];
@@ -110,9 +101,7 @@ class DebuggerServer {
                 } else {
                     out.writeObject(null);
                 }
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 LOG.warn("Connection to " + s.getInetAddress().getHostAddress() + " abruply broke", e);
             }
         }
@@ -122,12 +111,9 @@ class DebuggerServer {
     public void stop() {
         this.stop = true;
         if (serverSocket != null) {
-            try
-            {
+            try {
                 serverSocket.close();
-            }
-            catch(IOException e)
-            {
+            } catch (IOException e) {
                 LOG.error("Unable to close server socket.", e);
             }
         }

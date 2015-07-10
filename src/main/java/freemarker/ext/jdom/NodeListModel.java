@@ -116,8 +116,7 @@ implements
     /**
      * Creates a node list that holds a single {@link Document} node.
      */
-    public NodeListModel(Document document)
-    {
+    public NodeListModel(Document document) {
         nodes = document == null ? Collections.EMPTY_LIST : Collections.singletonList(document);
         namespaces = new HashMap();
     }
@@ -125,14 +124,12 @@ implements
     /**
      * Creates a node list that holds a single {@link Element} node.
      */
-    public NodeListModel(Element element)
-    {
+    public NodeListModel(Element element) {
         nodes = element == null ? Collections.EMPTY_LIST : Collections.singletonList(element);
         namespaces = new HashMap();
     }
 
-    private NodeListModel(Object object, Map namespaces)
-    {
+    private NodeListModel(Object object, Map namespaces) {
         nodes = object == null ? Collections.EMPTY_LIST : Collections.singletonList(object);
         this.namespaces = namespaces;
     }
@@ -143,8 +140,7 @@ implements
      * will copy the passed nodes list, so changes to the passed list will not affect
      * the model.
      */
-    public NodeListModel(List nodes)
-    {
+    public NodeListModel(List nodes) {
         this(nodes, true);
     }
 
@@ -156,14 +152,12 @@ implements
      * will reference the passed list and will sense changes in it, although no
      * operations on the list will be synchronized.
      */
-    public NodeListModel(List nodes, boolean copy)
-    {
+    public NodeListModel(List nodes, boolean copy) {
         this.nodes = copy && nodes != null ? new ArrayList(nodes) : (nodes == null ? Collections.EMPTY_LIST : nodes);
         namespaces = new HashMap();
     }
 
-    private NodeListModel(List nodes, Map namespaces)
-    {
+    private NodeListModel(List nodes, Map namespaces) {
         this.nodes = nodes == null ? Collections.EMPTY_LIST : nodes;
         this.namespaces = namespaces;
     }
@@ -541,8 +535,7 @@ implements
 
         String xpathString = (String) arguments.get(0);
         JDOMXPathEx xpath = null;
-        try
-        {
+        try {
             synchronized(XPATH_CACHE)
             {
                 xpath = (JDOMXPathEx) XPATH_CACHE.get(xpathString);
@@ -552,9 +545,7 @@ implements
                 }
             }
             return createNodeListModel(xpath.selectNodes(nodes, namespaces), namespaces);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw new TemplateModelException("Could not evaulate XPath expression " + xpathString, e);
         }
     }
@@ -804,8 +795,7 @@ implements
             do {
                 list.addFirst(parent);
                 parent = parent.getParent();
-            }
-            while (parent != null);
+            } while (parent != null);
             return list;
         }
     }
@@ -819,8 +809,7 @@ implements
             do {
                 list.addFirst(parent);
                 parent = parent.getParent();
-            }
-            while (parent != null);
+            } while (parent != null);
             return list;
         }
     }
@@ -1174,8 +1163,7 @@ implements
     extends
         JDOMXPath {
         JDOMXPathEx(String path)
-        throws JaxenException
-        {
+        throws JaxenException {
             super(path);
         }
 
@@ -1191,8 +1179,7 @@ implements
             NamespaceContext {
             private final Map namespaces;
             
-            NamespaceContextImpl(Map namespaces)
-            {
+            NamespaceContextImpl(Map namespaces) {
                 this.namespaces = namespaces;
             }
             

@@ -133,8 +133,7 @@ class JaxenXPathSupport implements XPathSupport {
                 if (model instanceof TemplateBooleanModel) {
                     return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
                 }
-            }
-            catch(TemplateModelException e) {
+            } catch (TemplateModelException e) {
                 throw new UndeclaredThrowableException(e);
             }
             throw new UnresolvableException("Variable " + localName + " is not a string, number, date, or boolean");
@@ -146,8 +145,7 @@ class JaxenXPathSupport implements XPathSupport {
         throws UnresolvableException {
             try {
                 return super.getFunction(namespaceURI, prefix, localName);
-            } 
-            catch(UnresolvableException e) {
+            } catch (UnresolvableException e) {
                 return super.getFunction(null, null, localName);
             }
         }
@@ -157,8 +155,7 @@ class JaxenXPathSupport implements XPathSupport {
      
     private static final Navigator fmDomNavigator = new DocumentNavigator() {
         public Object getDocument(String uri) throws FunctionCallException {
-            try
-            {
+            try {
                 Template raw = getTemplate(uri);
                 Document doc = (Document) cachedTree.get(raw);
                 if (doc == null) {
@@ -175,9 +172,7 @@ class JaxenXPathSupport implements XPathSupport {
                     }
                 }
                 return doc;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 throw new FunctionCallException("Failed to parse document for URI: " + uri, e);
             }
         }
@@ -201,8 +196,7 @@ class JaxenXPathSupport implements XPathSupport {
         StringWriter sw = new StringWriter();
         try {
             raw.process(Collections.EMPTY_MAP, sw);
-        }
-        catch(TemplateException e) {
+        } catch (TemplateException e) {
             throw new SAXException(e);
         }
         InputSource is = new InputSource();

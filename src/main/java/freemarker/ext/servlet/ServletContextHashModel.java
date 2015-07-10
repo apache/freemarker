@@ -33,8 +33,7 @@ public final class ServletContextHashModel implements TemplateHashModel {
     private final ObjectWrapper wrapper;
 
     public ServletContextHashModel(
-        GenericServlet servlet, ObjectWrapper wrapper)
-    {
+        GenericServlet servlet, ObjectWrapper wrapper) {
         this.servlet = servlet;
         this.servletctx = servlet.getServletContext();
         this.wrapper = wrapper;
@@ -45,8 +44,7 @@ public final class ServletContextHashModel implements TemplateHashModel {
      * {@link #ServletContextHashModel(GenericServlet, ObjectWrapper)} instead.
      */
     public ServletContextHashModel(
-        ServletContext servletctx, ObjectWrapper wrapper)
-    {
+        ServletContext servletctx, ObjectWrapper wrapper) {
         this.servlet = null;
         this.servletctx = servletctx;
         this.wrapper = wrapper;

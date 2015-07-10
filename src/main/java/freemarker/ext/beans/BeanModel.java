@@ -94,8 +94,7 @@ implements
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public BeanModel(Object object, BeansWrapper wrapper)
-    {
+    public BeanModel(Object object, BeansWrapper wrapper) {
         // [2.4]: All models were introspected here, then the results was discareded, and get() will just do the
         // introspection again. So is this necessary? (The inrospectNow parameter was added in 2.3.21 to allow
         // lazy-introspecting BeansWrapper.trueModel|falseModel.)
@@ -103,8 +102,7 @@ implements
     }
 
     /** @since 2.3.21 */
-    BeanModel(Object object, BeansWrapper wrapper, boolean inrospectNow)
-    {
+    BeanModel(Object object, BeansWrapper wrapper, boolean inrospectNow) {
         this.object = object;
         this.wrapper = wrapper;
         if (inrospectNow && object != null) {
@@ -145,8 +143,7 @@ implements
         Map classInfo = wrapper.getClassIntrospector().get(clazz);
         TemplateModel retval = null;
         
-        try
-        {
+        try {
             if (wrapper.isMethodsShadowItems()) {
                 Object fd = classInfo.get(key);
                 if (fd != null) {
@@ -180,13 +177,9 @@ implements
                 retval = wrapper.wrap(null);
             }
             return retval;
-        }
-        catch(TemplateModelException e)
-        {
+        } catch (TemplateModelException e) {
             throw e;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw new _TemplateModelException(e, new Object [] {
                     "An error has occurred when reading existing sub-variable ", new _DelayedJQuote(key),
                     "; see cause exception! The type of the containing value was: ",

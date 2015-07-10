@@ -51,8 +51,7 @@ public final class SimpleMethodModel extends SimpleMethod
      *          or reuse an earlier result of that call (for speed). Not {@code null}.
      */
     SimpleMethodModel(Object object, Method method, Class[] argTypes, 
-            BeansWrapper wrapper)
-    {
+            BeansWrapper wrapper) {
         super(method, argTypes);
         this.object = object;
         this.wrapper = wrapper;
@@ -63,17 +62,12 @@ public final class SimpleMethodModel extends SimpleMethod
      */
     public Object exec(List arguments)
         throws TemplateModelException {
-        try
-        {
+        try {
             return wrapper.invokeMethod(object, (Method) getMember(), 
                     unwrapArguments(arguments, wrapper));
-        }
-        catch(TemplateModelException e)
-        {
+        } catch (TemplateModelException e) {
             throw e;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
         }
     }
