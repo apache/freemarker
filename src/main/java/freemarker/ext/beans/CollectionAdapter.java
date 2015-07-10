@@ -55,8 +55,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                 public boolean hasNext() {
                     try {
                         return i.hasNext();
-                    }
-                    catch(TemplateModelException e) {
+                    } catch (TemplateModelException e) {
                         throw new UndeclaredThrowableException(e);
                     }
                 }
@@ -64,8 +63,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                 public Object next() {
                     try {
                         return wrapper.unwrap(i.next());
-                    }
-                    catch(TemplateModelException e) {
+                    } catch (TemplateModelException e) {
                         throw new UndeclaredThrowableException(e);
                     }
                 }
@@ -74,8 +72,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                     throw new UnsupportedOperationException();
                 }
             };
-        }
-        catch(TemplateModelException e) {
+        } catch (TemplateModelException e) {
             throw new UndeclaredThrowableException(e);
         }
     }

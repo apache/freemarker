@@ -126,8 +126,7 @@ TemplateBooleanModel, TemplateNumberModel {
         // FIXME: This does LS3 conversion, which is not very useful for us. Like it won't convert to List, Map, etc.  
         try {
             return NativeJavaObject.coerceType(hint, scriptable);
-        }
-        catch(EvaluatorException e) {
+        } catch (EvaluatorException e) {
             return NativeJavaObject.coerceType(Object.class, scriptable);
         }
     }

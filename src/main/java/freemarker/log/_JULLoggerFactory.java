@@ -32,8 +32,7 @@ public class _JULLoggerFactory implements LoggerFactory {
         Logger {
         private final java.util.logging.Logger logger;
         
-        JULLogger(java.util.logging.Logger logger)
-        {
+        JULLogger(java.util.logging.Logger logger) {
             this.logger = logger;
         }
         

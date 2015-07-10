@@ -38,8 +38,7 @@ implements
     private final OverloadedMethods overloadedMethods;
     private final BeansWrapper wrapper;
     
-    OverloadedMethodsModel(Object object, OverloadedMethods overloadedMethods, BeansWrapper wrapper)
-    {
+    OverloadedMethodsModel(Object object, OverloadedMethods overloadedMethods, BeansWrapper wrapper) {
         this.object = object;
         this.overloadedMethods = overloadedMethods;
         this.wrapper = wrapper;
@@ -57,9 +56,7 @@ implements
         MemberAndArguments maa = overloadedMethods.getMemberAndArguments(arguments, wrapper);
         try {
             return maa.invokeMethod(wrapper, object);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             if (e instanceof TemplateModelException) throw (TemplateModelException) e;
             
             throw _MethodUtil.newInvocationTemplateModelException(

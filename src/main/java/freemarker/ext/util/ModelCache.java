@@ -32,8 +32,7 @@ public abstract class ModelCache {
     private Map modelCache = null;
     private ReferenceQueue refQueue = null;
     
-    protected ModelCache()
-    {
+    protected ModelCache() {
     }
     
     /**
@@ -128,8 +127,7 @@ public abstract class ModelCache {
     private static final class ModelReference extends SoftReference {
         Object object;
 
-        ModelReference(TemplateModel ref, Object object, ReferenceQueue refQueue)
-        {
+        ModelReference(TemplateModel ref, Object object, ReferenceQueue refQueue) {
             super(ref, refQueue);
             this.object = object;
         }

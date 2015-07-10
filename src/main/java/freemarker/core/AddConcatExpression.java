@@ -145,8 +145,7 @@ final class AddConcatExpression extends Expression {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
 
-        ConcatenatedSequence(TemplateSequenceModel left, TemplateSequenceModel right)
-        {
+        ConcatenatedSequence(TemplateSequenceModel left, TemplateSequenceModel right) {
             this.left = left;
             this.right = right;
         }
@@ -168,8 +167,7 @@ final class AddConcatExpression extends Expression {
         protected final TemplateHashModel left;
         protected final TemplateHashModel right;
 
-        ConcatenatedHash(TemplateHashModel left, TemplateHashModel right)
-        {
+        ConcatenatedHash(TemplateHashModel left, TemplateHashModel right) {
             this.left = left;
             this.right = right;
         }
@@ -193,8 +191,7 @@ final class AddConcatExpression extends Expression {
         private CollectionAndSequence values;
         private int size;
 
-        ConcatenatedHashEx(TemplateHashModelEx left, TemplateHashModelEx right)
-        {
+        ConcatenatedHashEx(TemplateHashModelEx left, TemplateHashModelEx right) {
             super(left, right);
         }
         

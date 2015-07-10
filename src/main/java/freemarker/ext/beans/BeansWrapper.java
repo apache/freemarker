@@ -95,8 +95,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         Class iterable;
         try {
             iterable = Class.forName("java.lang.Iterable");
-        }
-        catch(ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             // We're running on a pre-1.5 JRE
             iterable = null;
         }
@@ -1495,8 +1494,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     public Object newInstance(Class clazz, List/*<TemplateModel>*/ arguments)
     throws TemplateModelException {
-        try
-        {
+        try {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
             if (ctors == null) {
                 throw new TemplateModelException("Class " + clazz.getName() + 
@@ -1527,13 +1525,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 // Cannot happen
                 throw new BugException();
             }
-        }
-        catch (TemplateModelException e)
-        {
+        } catch (TemplateModelException e) {
             throw e;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new TemplateModelException(
                     "Error while creating new instance of class " + clazz.getName() + "; see cause exception", e);
         }
@@ -1689,7 +1683,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             try {
                 return (ClassBasedModelFactory) ENUMS_MODEL_CTOR.newInstance(
                         new Object[] { wrapper });
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new UndeclaredThrowableException(e);
             }
         } else {
@@ -1705,8 +1699,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             return Class.forName(
                 "freemarker.ext.beans._EnumModels").getDeclaredConstructor(
                         new Class[] { BeansWrapper.class });
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             // Otherwise, return null
             return null;
         }

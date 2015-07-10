@@ -43,8 +43,7 @@ implements
             }
         };
         
-    public JythonNumberModel(PyObject object, JythonWrapper wrapper)
-    {
+    public JythonNumberModel(PyObject object, JythonWrapper wrapper) {
         super(object, wrapper);
     }
 
@@ -54,16 +53,13 @@ implements
      * {@link PyObject#__float__()}.
      */
     public Number getAsNumber() throws TemplateModelException {
-        try
-        {
+        try {
             Object value = object.__tojava__(java.lang.Number.class);
             if (value == null || value == Py.NoConversion) {
                 return Double.valueOf(object.__float__().getValue());
             }
             return (Number) value;
-        }
-        catch(PyException e)
-        {
+        } catch (PyException e) {
             throw new TemplateModelException(e);
         }
     }

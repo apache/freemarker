@@ -32,8 +32,7 @@ public class _Log4jLoggerFactory implements LoggerFactory {
         Logger {
         private final org.apache.log4j.Logger logger;
         
-        Log4jLogger(org.apache.log4j.Logger logger)
-        {
+        Log4jLogger(org.apache.log4j.Logger logger) {
             this.logger = logger;
         }
         

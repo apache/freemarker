@@ -43,8 +43,7 @@ final class StaticModel implements TemplateHashModelEx {
     private final BeansWrapper wrapper;
     private final Map map = new HashMap();
 
-    StaticModel(Class clazz, BeansWrapper wrapper) throws TemplateModelException
-    {
+    StaticModel(Class clazz, BeansWrapper wrapper) throws TemplateModelException {
         this.clazz = clazz;
         this.wrapper = wrapper;
         populate();
@@ -62,12 +61,9 @@ final class StaticModel implements TemplateHashModelEx {
             return (TemplateModel) model;
         // Non-final field; this must be evaluated on each call.
         if (model instanceof Field) {
-            try
-            {
+            try {
                 return wrapper.getOuterIdentity().wrap(((Field) model).get(null));
-            }
-            catch (IllegalAccessException e)
-            {
+            } catch (IllegalAccessException e) {
                 throw new TemplateModelException(
                     "Illegal access for field " + key + " of class " + clazz.getName());
             }
@@ -113,14 +109,11 @@ final class StaticModel implements TemplateHashModelEx {
             int mod = field.getModifiers();
             if (Modifier.isPublic(mod) && Modifier.isStatic(mod)) {
                 if (Modifier.isFinal(mod))
-                    try
-                    {
+                    try {
                         // public static final fields are evaluated once and
                         // stored in the map
                         map.put(field.getName(), wrapper.getOuterIdentity().wrap(field.get(null)));
-                    }
-                    catch (IllegalAccessException e)
-                    {
+                    } catch (IllegalAccessException e) {
                         // Intentionally ignored
                     } else
                     // This is a special flagging value: Field in the map means

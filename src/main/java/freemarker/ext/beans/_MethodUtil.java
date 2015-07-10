@@ -210,8 +210,7 @@ public final class _MethodUtil {
         }
         try {
             return ((Boolean) isVarArgsMethod.invoke(member, (Object[]) null)).booleanValue();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             throw new UndeclaredThrowableException(e);
         }
     }
@@ -219,8 +218,7 @@ public final class _MethodUtil {
     private static Method getIsVarArgsMethod(Class memberClass) {
         try {
             return memberClass.getMethod("isVarArgs", (Class[]) null);
-        }
-        catch(NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             return null; // pre 1.5 JRE
         }
     }

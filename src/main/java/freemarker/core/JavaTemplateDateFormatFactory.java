@@ -108,7 +108,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
                 if (jDateFormat == null) {
                     try {
                         jDateFormat = new SimpleDateFormat(nameOrPattern, cacheKey.locale);
-                    } catch(IllegalArgumentException e) {
+                    } catch (IllegalArgumentException e) {
                         final String msg = e.getMessage();
                         throw new ParseException(msg != null ? msg : "Illegal SimpleDateFormat pattern", 0);
                     }

@@ -44,15 +44,13 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
      *            declared as {@link ObjectWrapper} only for backward compatibility.)
      */
     public HttpRequestHashModel(
-        HttpServletRequest request, ObjectWrapper wrapper)
-    {
+        HttpServletRequest request, ObjectWrapper wrapper) {
         this(request, null, wrapper);
     }
 
     public HttpRequestHashModel(
         HttpServletRequest request, HttpServletResponse response, 
-        ObjectWrapper wrapper)
-    {
+        ObjectWrapper wrapper) {
         this.request = request;
         this.response = response;
         this.wrapper = wrapper;

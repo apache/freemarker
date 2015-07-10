@@ -195,8 +195,7 @@ public final class Environment extends Configurable {
         threadEnv.set(env);
     }
 
-    public Environment(Template template, final TemplateHashModel rootDataModel, Writer out)
-    {
+    public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
@@ -323,11 +322,9 @@ public final class Environment extends Configurable {
         pushElement(element);
         try {
             element.accept(this);
-        }
-        catch (TemplateException te) {
+        } catch (TemplateException te) {
             handleTemplateException(te);
-        }
-        finally {
+        } finally {
             popElement();
         }
     }
@@ -386,8 +383,7 @@ public final class Environment extends Configurable {
         }
         try {
             directiveModel.execute(this, args, outArgs, nested);
-        }
-        finally {
+        } finally {
             if (outArgs.length > 0) {
                 popLocalContext();
             }
@@ -422,39 +418,31 @@ public final class Environment extends Configurable {
                         if (element != null) {
                             visitByHiddingParent(element);
                         }
-                    } while(tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
+                    } while (tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
                 }
-            }
-            catch(Throwable t) {
+            } catch (Throwable t) {
                 try {
                     if (tc != null) {
                         tc.onError(t);
                     } else {
                         throw t;
                     }
-                }
-                catch(TemplateException e) {
+                } catch (TemplateException e) {
                     throw e;
-                }
-                catch(IOException e) {
+                } catch (IOException e) {
                     throw e;
-                }
-                catch(RuntimeException e) {
+                } catch (RuntimeException e) {
                     throw e;
-                }
-                catch(Error e) {
+                } catch (Error e) {
                     throw e;
-                }
-                catch(Throwable e) {
+                } catch (Throwable e) {
                     throw new UndeclaredThrowableException(e);
                 }
-            }
-            finally {
+            } finally {
                 out = prevOut;
                 tw.close();
             }
-        }
-        catch(TemplateException te) {
+        } catch (TemplateException te) {
             handleTemplateException(te);
         }
     }
@@ -546,8 +534,7 @@ public final class Environment extends Configurable {
             }
             try {
                 visit(nestedContent);
-            }
-            finally {
+            } finally {
                 if (invokingMacroContext.nestedContentParameterNames != null) {
                     popLocalContext();
                 }
@@ -572,12 +559,10 @@ public final class Environment extends Configurable {
         pushLocalContext(ictxt);
         try {
             return ictxt.accept(this);
-        }
-        catch (TemplateException te) {
+        } catch (TemplateException te) {
             handleTemplateException(te);
             return true;
-        }
-        finally {
+        } finally {
             popLocalContext();
         }
     }
@@ -629,8 +614,7 @@ public final class Environment extends Configurable {
                             this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), "default"));
                 }
             }
-        } 
-        finally {
+        } finally {
             this.currentVisitorNode = prevVisitorNode;
             this.nodeNamespaceIndex = prevNodeNamespaceIndex;
             this.currentNodeName = prevNodeName;
@@ -2174,8 +2158,7 @@ public final class Environment extends Configurable {
             this.out = sw;
             visit(te);
             return sw.toString();
-        } 
-        finally {
+        } finally {
             this.out = prevOut;
         }
     }
@@ -2239,8 +2222,7 @@ public final class Environment extends Configurable {
             out = newOut;
             try {
                 Environment.this.visit(element);
-            }
-            finally {
+            } finally {
                 out = prevOut;
             }
         }
@@ -2255,8 +2237,7 @@ public final class Environment extends Configurable {
         private final String pattern;
         private final Locale locale;
 
-        NumberFormatKey(String pattern, Locale locale)
-        {
+        NumberFormatKey(String pattern, Locale locale) {
             this.pattern = pattern;
             this.locale = locale;
         }

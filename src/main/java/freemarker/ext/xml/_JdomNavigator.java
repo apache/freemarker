@@ -77,8 +77,7 @@ public class _JdomNavigator extends Navigator {
             } else {
                 throw new TemplateModelException(node.getClass().getName() + " is not a core JDOM class");
             }
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new TemplateModelException(e);
         }
     }
@@ -301,8 +300,7 @@ public class _JdomNavigator extends Navigator {
     XPathEx createXPathEx(String xpathString) throws TemplateModelException {
         try {
             return new JDOMXPathEx(xpathString);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             throw new TemplateModelException(e);
         }
     }
@@ -313,8 +311,7 @@ public class _JdomNavigator extends Navigator {
     implements
         XPathEx {
         JDOMXPathEx(String path)
-        throws Exception
-        {
+        throws Exception {
             super(path);
         }
 
@@ -324,8 +321,7 @@ public class _JdomNavigator extends Navigator {
             context.getContextSupport().setNamespaceContext(namespaces);
             try {
                 return selectNodesForContext(context);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 throw new TemplateModelException(e);
             }
         } 

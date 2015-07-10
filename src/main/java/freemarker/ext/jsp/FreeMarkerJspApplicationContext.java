@@ -89,10 +89,8 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
             }
             LOG.warn("Class " + className + " does not implement " + 
                     ExpressionFactory.class.getName());
-        }
-        catch(ClassNotFoundException e) {
-        }
-        catch(Exception e) {
+        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             LOG.error("Failed to instantiate " + className, e);
         }
         return null;

@@ -231,8 +231,7 @@ class BuiltInsForSequences {
         private static class ReverseSequence implements TemplateSequenceModel {
             private final TemplateSequenceModel seq;
 
-            ReverseSequence(TemplateSequenceModel seq)
-            {
+            ReverseSequence(TemplateSequenceModel seq) {
                 this.seq = seq;
             }
 

@@ -46,8 +46,7 @@ implements
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public NumberModel(Number number, BeansWrapper wrapper)
-    {
+    public NumberModel(Number number, BeansWrapper wrapper) {
         super(number, wrapper);
     }
 

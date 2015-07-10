@@ -30,8 +30,7 @@ import freemarker.template.TemplateNotFoundException;
 import freemarker.template.Version;
 
 public class TemplateCacheTest extends TestCase {
-    public TemplateCacheTest(String name)
-    {
+    public TemplateCacheTest(String name) {
         super(name);
     }
 
@@ -40,35 +39,26 @@ public class TemplateCacheTest extends TestCase {
         TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage());
         cache.setDelay(1000L);
         loader.setThrowException(true);
-        try
-        {
+        try {
             cache.getTemplate("t", Locale.getDefault(), "", true);
             fail();
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             assertEquals("mock IO exception", e.getMessage());
             assertEquals(1, loader.getFindCount());
-            try
-            {
+            try {
                 cache.getTemplate("t", Locale.getDefault(), "", true);
                 fail();
-            }
-            catch(IOException e2)
-            {
+            } catch (IOException e2) {
                 // Still 1 - returned cached exception
                 assertEquals("There was an error loading the template on an " +
                         "earlier attempt; it's attached as a cause", e2.getMessage());
                 assertSame(e, e2.getCause());
                 assertEquals(1, loader.getFindCount());
-                try
-                {
+                try {
                     Thread.sleep(1100L);
                     cache.getTemplate("t", Locale.getDefault(), "", true);
                     fail();
-                }
-                catch(IOException e3)
-                {
+                } catch (IOException e3) {
                     // Cache had to retest
                     assertEquals("mock IO exception", e.getMessage());
                     assertEquals(2, loader.getFindCount());

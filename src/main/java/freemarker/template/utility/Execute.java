@@ -93,8 +93,7 @@ public class Execute implements freemarker.template.TemplateMethodModel {
             } finally {
                 execOut.close();
             }
-        }
-        catch( IOException ioe ) {
+        } catch ( IOException ioe ) {
             throw new TemplateModelException( ioe.getMessage() );
         }
         return aOutputBuffer.toString();

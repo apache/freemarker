@@ -27,8 +27,7 @@ import freemarker.template.TemplateException;
  */
 final class IfBlock extends TemplateElement {
 
-    IfBlock(ConditionalBlock block)
-    {
+    IfBlock(ConditionalBlock block) {
         setRegulatedChildBufferCapacity(1);
         addBlock(block);
     }

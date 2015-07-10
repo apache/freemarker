@@ -44,8 +44,7 @@ public class ObjectConstructor implements TemplateMethodModelEx {
         Class cl = null;
         try {
             cl = ClassUtil.forName(classname);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new TemplateModelException(e.getMessage());
         }
         BeansWrapper bw = BeansWrapper.getDefaultInstance();

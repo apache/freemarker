@@ -101,8 +101,7 @@ public class ParseException extends IOException implements FMParserConstants {
     public ParseException(Token currentTokenVal,
             int[][] expectedTokenSequencesVal,
             String[] tokenImageVal
-            )
-    {
+            ) {
         super("");
         currentToken = currentTokenVal;
         specialConstructor = true;

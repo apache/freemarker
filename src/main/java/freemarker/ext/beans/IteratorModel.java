@@ -54,8 +54,7 @@ implements
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public IteratorModel(Iterator iterator, BeansWrapper wrapper)
-    {
+    public IteratorModel(Iterator iterator, BeansWrapper wrapper) {
         super(iterator, wrapper);
     }
 
@@ -90,8 +89,7 @@ implements
     throws TemplateModelException {
         try {
             return wrap(((Iterator) object).next());
-        }
-        catch(NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             throw new TemplateModelException(
                 "No more elements in the iterator.", e);
         }

@@ -140,8 +140,7 @@ class BuiltInsForMultipleTypes {
             private Date cachedValue;
             
             DateParser(String text, Environment env)
-            throws TemplateModelException
-            {
+            throws TemplateModelException {
                 this.text = text;
                 this.env = env;
                 // Deliberately creating a snapshot here:
@@ -178,8 +177,7 @@ class BuiltInsForMultipleTypes {
             throws TemplateModelException {
                 try {
                     return df.parse(text);
-                }
-                catch(java.text.ParseException e) {
+                } catch (java.text.ParseException e) {
                     throw new _TemplateModelException(e, new Object[] {
                             "The string doesn't match the expected date/time/date-time format. "
                             + "The string to parse was: ", new _DelayedJQuote(text), ". ",
@@ -492,8 +490,7 @@ class BuiltInsForMultipleTypes {
             private String cachedValue;
     
             DateFormatter(TemplateDateModel dateModel, Environment env)
-            throws TemplateModelException
-            {
+            throws TemplateModelException {
                 this.dateModel = dateModel;
                 this.env = env;
                 
@@ -548,8 +545,7 @@ class BuiltInsForMultipleTypes {
             private final NumberFormat defaultFormat;
             private String cachedValue;
     
-            NumberFormatter(Number number, Environment env)
-            {
+            NumberFormatter(Number number, Environment env) {
                 this.number = number;
                 this.env = env;
                 defaultFormat = env.getNumberFormatObject(env.getNumberFormat());

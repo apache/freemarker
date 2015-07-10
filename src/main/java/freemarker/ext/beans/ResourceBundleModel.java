@@ -64,8 +64,7 @@ public class ResourceBundleModel
 
     private Hashtable formats = null;
 
-    public ResourceBundleModel(ResourceBundle bundle, BeansWrapper wrapper)
-    {
+    public ResourceBundleModel(ResourceBundle bundle, BeansWrapper wrapper) {
         super(bundle, wrapper);
     }
 
@@ -74,12 +73,9 @@ public class ResourceBundleModel
      */
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
     throws TemplateModelException {
-        try
-        {
+        try {
             return wrap(((ResourceBundle) object).getObject(key));
-        }
-        catch(MissingResourceException e)
-        {
+        } catch (MissingResourceException e) {
             throw new _TemplateModelException(e,
                     new Object[] { "No ", new _DelayedJQuote(key), " key in the ResourceBundle. "
                             + "Note that conforming to the ResourceBundle Java API, this is an error and not just "
@@ -121,8 +117,7 @@ public class ResourceBundleModel
         // Read it
         Iterator it = arguments.iterator();
         String key = unwrap((TemplateModel) it.next()).toString();
-        try
-        {
+        try {
             if (!it.hasNext()) {
                 return wrap(((ResourceBundle) object).getObject(key));
             }
@@ -135,13 +130,9 @@ public class ResourceBundleModel
     
             // Invoke format
             return new StringModel(format(key, params), wrapper);
-        }
-        catch(MissingResourceException e)
-        {
+        } catch (MissingResourceException e) {
             throw new TemplateModelException("No such key: " + key);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw new TemplateModelException(e.getMessage());
         }
     }

@@ -90,7 +90,7 @@ class BuiltInsForStringsMisc {
         TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
             try {
                 return new SimpleNumber(env.getArithmeticEngine().toNumber(s));
-            } catch(NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 throw NonNumericalException.newMalformedNumberException(this, s, env);
             }
         }

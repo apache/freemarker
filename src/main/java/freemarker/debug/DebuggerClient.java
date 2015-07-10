@@ -35,8 +35,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * running on a specific host and port. 
  */
 public class DebuggerClient {
-    private DebuggerClient()
-    {
+    private DebuggerClient() {
     }
     
     /**
@@ -57,11 +56,9 @@ public class DebuggerClient {
      */
     public static Debugger getDebugger(InetAddress host, int port, String password)
     throws IOException {
-        try
-        {
+        try {
             Socket s = new Socket(host, port);
-            try
-            {
+            try {
                 ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(s.getInputStream());
                 int protocolVersion = in.readInt();
@@ -77,18 +74,12 @@ public class DebuggerClient {
                 out.writeObject(md.digest());
                 return new LocalDebuggerProxy((Debugger) in.readObject());
                 //return (Debugger)in.readObject();
-            }
-            finally
-            {
+            } finally {
                 s.close();
             }
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             throw e;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw new UndeclaredThrowableException(e); 
         }
     }
@@ -96,8 +87,7 @@ public class DebuggerClient {
     private static class LocalDebuggerProxy implements Debugger {
         private final Debugger remoteDebugger;
 
-        LocalDebuggerProxy(Debugger remoteDebugger)
-        {
+        LocalDebuggerProxy(Debugger remoteDebugger) {
             this.remoteDebugger = remoteDebugger;
         }
 

@@ -345,8 +345,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         
         try {
             bi = (BuiltIn) bi.clone();
-        }
-        catch (CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError();
         }
         bi.key = key;
@@ -435,8 +434,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 	    	BuiltIn clone = (BuiltIn) clone();
 	    	clone.target = target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
 	    	return clone;
-        }
-        catch (CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new RuntimeException("Internal error: " + e);
         }
     }

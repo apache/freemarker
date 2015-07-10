@@ -288,8 +288,7 @@ extends
     /**
      * Constructor creates the SAXBuilder.
      */
-    public FreemarkerXmlTask()
-    {
+    public FreemarkerXmlTask() {
         builderFactory = DocumentBuilderFactory.newInstance();
         builderFactory.setNamespaceAware(true);
     }
@@ -406,8 +405,7 @@ extends
             if (templateName != null) {
                 parsedTemplate = cfg.getTemplate(templateName, templateEncoding);
             }
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             throw new BuildException(ioe.toString());
         }
         // get the last modification of the template
@@ -434,12 +432,9 @@ extends
         userPropertiesTemplate = wrapMap(project.getUserProperties());
 
         builderFactory.setValidating(validation);
-        try
-        {
+        try {
             builder = builderFactory.newDocumentBuilder();
-        }
-        catch(ParserConfigurationException e)
-        {
+        } catch (ParserConfigurationException e) {
             throw new BuildException("Could not create document builder", e, getLocation());
         }
 
@@ -471,8 +466,7 @@ extends
     throws BuildException {
         File outFile = null;
         File inFile = null;
-        try
-        {
+        try {
             // the current input file relative to the baseDir
             inFile = new File(baseDir,xmlFile);
             // the output file relative to basedir
@@ -508,8 +502,7 @@ extends
                 // Process the template and write out
                 // the result as the outFile.
                 Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), encoding));
-                try
-                {
+                try {
                     if (parsedTemplate == null) {
                         throw new BuildException("No template file specified in build script or in XML file");
                     }
@@ -535,18 +528,14 @@ extends
                     }
                     env.process();
                     writer.flush();
-                }
-                finally
-                {
+                } finally {
                     writer.close();
                 }
 
                 log("Output: " + outFile, Project.MSG_INFO );
                 
             }
-        }
-        catch (SAXParseException spe)
-        {
+        } catch (SAXParseException spe) {
             Throwable rootCause = spe;
             if (spe.getException() != null)
                 rootCause = spe.getException();
@@ -554,9 +543,7 @@ extends
             log("Line number " + spe.getLineNumber());
             log("Column number " + spe.getColumnNumber());
             throw new BuildException(rootCause, getLocation());
-        }
-        catch (Throwable e)
-        {
+        } catch (Throwable e) {
             if (outFile != null ) {
                 if (!outFile.delete() && outFile.exists()) {
                     log("Failed to delete " + outFile, Project.MSG_WARN);
@@ -589,12 +576,9 @@ extends
                 name = modelSpec.substring(0, sep);
                 clazz = modelSpec.substring(sep + 1);
             }
-            try
-            {
+            try {
                 modelsMap.put(name, ClassUtil.forName(clazz).newInstance());
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 throw new BuildException(e);
             }
         }

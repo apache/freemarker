@@ -51,8 +51,7 @@ implements
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public DateModel(Date date, BeansWrapper wrapper)
-    {
+    public DateModel(Date date, BeansWrapper wrapper) {
         super(date, wrapper);
         if (date instanceof java.sql.Date) {
             type = DATE;

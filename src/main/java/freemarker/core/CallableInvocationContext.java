@@ -44,8 +44,7 @@ class CallableInvocationContext implements LocalContext {
     CallableInvocationContext(UnboundCallable callableDefinition,
             Environment env, 
             TemplateElement nestedContent,
-            List nestedContentParameterNames) 
-    {
+            List nestedContentParameterNames) {
         this.callableDefinition = callableDefinition;
         this.localVars = env.new Namespace();
         this.nestedContent = nestedContent;
@@ -93,8 +92,7 @@ class CallableInvocationContext implements LocalContext {
                                 localVars.put(argName, tm);
                                 resolvedAnArg = true;
                             }
-                        }
-                        catch(InvalidReferenceException e) {
+                        } catch (InvalidReferenceException e) {
                             if (!hasUnresolvedArg) {
                                 hasUnresolvedArg = true;
                                 firstReferenceException = e;
@@ -124,8 +122,7 @@ class CallableInvocationContext implements LocalContext {
                     }
                 }
             }
-        }
-        while(resolvedAnArg && hasUnresolvedArg);
+        } while (resolvedAnArg && hasUnresolvedArg);
         if (hasUnresolvedArg) {
             if (firstReferenceException != null) {
                 throw firstReferenceException;

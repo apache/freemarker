@@ -44,14 +44,10 @@ class UnsafeMethods {
         InputStream in = BeansWrapper.class.getResourceAsStream("unsafeMethods.txt");
         if (in != null) {
             String methodSpec = null;
-            try
-            {
-                try
-                {
+            try {
+                try {
                     props.load(in);
-                }
-                finally
-                {
+                } finally {
                     in.close();
                 }
                 Set set = new HashSet(props.size() * 4 / 3, 1f);
@@ -60,22 +56,18 @@ class UnsafeMethods {
                     methodSpec = (String) iterator.next();
                     try {
                         set.add(parseMethodSpec(methodSpec, primClasses));
-                    }
-                    catch(ClassNotFoundException e) {
+                    } catch (ClassNotFoundException e) {
                         if (ClassIntrospector.DEVELOPMENT_MODE) {
                             throw e;
                         }
-                    }
-                    catch(NoSuchMethodException e) {
+                    } catch (NoSuchMethodException e) {
                         if (ClassIntrospector.DEVELOPMENT_MODE) {
                             throw e;
                         }
                     }
                 }
                 return set;
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 throw new RuntimeException("Could not load unsafe method " + methodSpec + " " + e.getClass().getName() + " " + e.getMessage());
             }
         }

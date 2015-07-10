@@ -81,7 +81,7 @@ final class Include extends TemplateElement {
                     } else {
                         try {
                             parse = Boolean.valueOf(parseExp.evalToBoolean(unboundTemplate.getConfiguration()));
-                        } catch(NonBooleanException e) {
+                        } catch (NonBooleanException e) {
                             throw new ParseException("Expected a boolean or string as the value of the parse attribute",
                                     parseExp, e);
                         }
@@ -101,7 +101,7 @@ final class Include extends TemplateElement {
                 try {
                     ignoreMissingExpPrecalcedValue = Boolean.valueOf(
                             ignoreMissingExp.evalToBoolean(unboundTemplate.getConfiguration()));
-                } catch(NonBooleanException e) {
+                } catch (NonBooleanException e) {
                     throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
                             ignoreMissingExp, e);
                 }
@@ -222,8 +222,7 @@ final class Include extends TemplateElement {
     private boolean getYesNo(Expression exp, String s) throws TemplateException {
         try {
            return StringUtil.getYesNo(s);
-        }
-        catch (IllegalArgumentException iae) {
+        } catch (IllegalArgumentException iae) {
             throw new _MiscTemplateException(exp, new Object[] {
                      "Value must be boolean (or one of these strings: "
                      + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",

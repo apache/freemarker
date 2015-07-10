@@ -45,8 +45,7 @@ implements TemplateScalarModel {
      * model gains many attributes from its wrapper, including the caching 
      * behavior, method exposure level, method-over-item shadowing policy etc.
      */
-    public StringModel(Object object, BeansWrapper wrapper)
-    {
+    public StringModel(Object object, BeansWrapper wrapper) {
         super(object, wrapper);
     }
 

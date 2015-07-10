@@ -35,8 +35,7 @@ final class ConditionalBlock extends TemplateElement {
     private final int type;
     boolean isLonelyIf;
 
-    ConditionalBlock(Expression condition, TemplateElement nestedBlock, int type)
-    {
+    ConditionalBlock(Expression condition, TemplateElement nestedBlock, int type) {
         this.condition = condition;
         setNestedBlock(nestedBlock);
         this.type = type;

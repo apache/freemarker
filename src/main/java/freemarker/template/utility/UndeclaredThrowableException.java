@@ -22,16 +22,14 @@ package freemarker.template.utility;
  */
 public class UndeclaredThrowableException extends RuntimeException {
     
-    public UndeclaredThrowableException(Throwable t)
-    {
+    public UndeclaredThrowableException(Throwable t) {
         super(t);
     }
 
     /**
      * @since 2.3.22
      */
-    public UndeclaredThrowableException(String message, Throwable t)
-    {
+    public UndeclaredThrowableException(String message, Throwable t) {
         super(message, t);
     }
     

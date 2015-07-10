@@ -44,8 +44,7 @@ implements
             clone.namespaces = (HashMap) namespaces.clone();
             clone.shared = false;
             return clone;
-        }
-        catch(CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new Error(); // Cannot happen
         }
     }

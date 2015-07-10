@@ -70,8 +70,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                         public void invoke(Writer out) throws JspException, IOException {
                             try {
                                 body.render(out == null ? pageContext.getOut() : out);
-                            }
-                            catch(TemplateException e) {
+                            } catch (TemplateException e) {
                                 throw new TemplateExceptionWrapperJspException(e);
                             }
                         }
@@ -79,15 +78,13 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                     pageContext.pushTopTag(tag);
                     try {
                         tag.doTag();
-                    }
-                    finally {
+                    } finally {
                         pageContext.popTopTag();
                     }
                 } else {
                     tag.doTag();
                 }
-            }
-            finally {
+            } finally {
                 pageContext.popWriter();
             }
         } catch (Exception e) {

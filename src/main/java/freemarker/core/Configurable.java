@@ -1630,7 +1630,7 @@ public class Configurable {
             } else {
                 unknown = true;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw settingValueAssignmentException(name, value, e);
         }
         if (unknown) {

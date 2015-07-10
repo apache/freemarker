@@ -48,8 +48,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     UnifiedCall(Expression nameExp,
          Map namedArgs,
          TemplateElement nestedBlock,
-         List bodyParameterNames) 
-    {
+         List bodyParameterNames) {
         this.nameExp = nameExp;
         this.namedArgs = namedArgs;
         setNestedBlock(nestedBlock);
@@ -59,8 +58,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     UnifiedCall(Expression nameExp,
          List positionalArgs,
          TemplateElement nestedBlock,
-         List bodyParameterNames) 
-    {
+         List bodyParameterNames) {
         this.nameExp = nameExp;
         this.positionalArgs = positionalArgs;
         if (nestedBlock == TextBlock.EMPTY_BLOCK) {

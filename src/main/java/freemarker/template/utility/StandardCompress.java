@@ -73,16 +73,14 @@ public class StandardCompress implements TemplateTransformModel {
 
     public static final StandardCompress INSTANCE = new StandardCompress();
     
-    public StandardCompress()
-    {
+    public StandardCompress() {
         this(2048);
     }
 
     /**
      * @param defaultBufferSize the default amount of characters to buffer
      */
-    public StandardCompress(int defaultBufferSize)
-    {
+    public StandardCompress(int defaultBufferSize) {
         this.defaultBufferSize = defaultBufferSize;
     }
 

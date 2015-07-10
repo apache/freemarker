@@ -55,8 +55,7 @@ class UnboundCallable extends Macro {
 
     UnboundCallable(String name, List argumentNames, Map args, 
             String catchAllParamName, boolean function,
-            TemplateElement nestedBlock) 
-    {
+            TemplateElement nestedBlock) {
         this.name = name;
         this.paramNames = (String[]) argumentNames.toArray(
                 new String[argumentNames.size()]);

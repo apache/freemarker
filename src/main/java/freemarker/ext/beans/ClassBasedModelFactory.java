@@ -42,7 +42,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     public TemplateModel get(String key) throws TemplateModelException {
         try {
             return getInternal(key);
-        } catch(Exception e) {
+        } catch (Exception e) {
             if (e instanceof TemplateModelException) {
                 throw (TemplateModelException) e;
             } else {
