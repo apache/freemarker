@@ -91,9 +91,6 @@ public interface DirectiveCallPlace {
      * of directive executions already running in parallel, and because of memory synchronization delays (hardware
      * dependent) between the threads.
      * 
-     * <p>
-     * Note that this feature will only work on Java 5 or later.
-     * 
      * @param providerIdentity
      *            This is usually the class of the {@link TemplateDirectiveModel} that creates (and uses) the custom
      *            data, or if you are using your own class for the custom data object (as opposed to a class from some

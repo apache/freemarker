@@ -20,17 +20,16 @@ import java.util.Iterator;
 import java.util.Set;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-//[Java 5] Make this generic
-public class _UnmodifiableCompositeSet extends _UnmodifiableSet {
+public class _UnmodifiableCompositeSet<E> extends _UnmodifiableSet<E> {
     
-    private final Set set1, set2;
+    private final Set<E> set1, set2;
     
-    public _UnmodifiableCompositeSet(Set set1, Set set2) {
+    public _UnmodifiableCompositeSet(Set<E> set1, Set<E> set2) {
         this.set1 = set1;
         this.set2 = set2;
     }
 
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         return new CompositeIterator();
     }
     
@@ -42,9 +41,9 @@ public class _UnmodifiableCompositeSet extends _UnmodifiableSet {
         return set1.size() + set2.size();
     }
     
-    private class CompositeIterator implements Iterator {
+    private class CompositeIterator implements Iterator<E> {
 
-        private Iterator it1, it2;
+        private Iterator<E> it1, it2;
         private boolean it1Deplected;
         
         public boolean hasNext() {
@@ -64,7 +63,7 @@ public class _UnmodifiableCompositeSet extends _UnmodifiableSet {
             return it2.hasNext();
         }
 
-        public Object next() {
+        public E next() {
             if (!it1Deplected) {
                 if (it1 == null) {
                     it1 = set1.iterator();

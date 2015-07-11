@@ -19,10 +19,9 @@ package freemarker.core;
 import java.util.AbstractSet;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-//[Java 5] Make this generic
-public abstract class _UnmodifiableSet extends AbstractSet {
+public abstract class _UnmodifiableSet<E> extends AbstractSet<E> {
 
-    public boolean add(Object o) {
+    public boolean add(E o) {
         throw new UnsupportedOperationException();
     }
 

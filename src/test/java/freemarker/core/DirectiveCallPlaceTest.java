@@ -131,9 +131,9 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             if (callPlace.isNestedOutputCacheable()) {
                 try {
                     convertedText = (String) callPlace.getOrCreateCustomData(
-                            getTextConversionIdentity(), new ObjectFactory/* <String> */() {
+                            getTextConversionIdentity(), new ObjectFactory<String>() {
 
-                                public Object createObject() throws TemplateException, IOException {
+                                public String createObject() throws TemplateException, IOException {
                                     return convertBodyText(body)
                                             + "[cached " + cacheRecreationCount.incrementAndGet() + "]";
                                 }

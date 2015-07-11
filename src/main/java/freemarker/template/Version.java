@@ -42,7 +42,7 @@ public final class Version implements Serializable {
     private final Date buildDate;
     
     private final int intValue;
-    private String calculatedStringValue;  // not final because it's calculated on demand
+    private volatile String calculatedStringValue;  // not final because it's calculated on demand
     private int hashCode;  // not final because it's calculated on demand
 
     /**
@@ -146,14 +146,19 @@ public final class Version implements Serializable {
     
     private String getStringValue() {
         if (originalStringValue != null) return originalStringValue;
-        // Switch to double-check + volatile with Java 5
-        synchronized (this) {
-            if (calculatedStringValue == null) {
-                calculatedStringValue = major + "." + minor + "." + micro;
-                if (extraInfo != null) calculatedStringValue += "-" + extraInfo; 
+        
+        String calculatedStringValue = this.calculatedStringValue;
+        if (calculatedStringValue == null) {
+            synchronized (this) {
+                calculatedStringValue = this.calculatedStringValue;
+                if (calculatedStringValue == null) {
+                    calculatedStringValue = major + "." + minor + "." + micro;
+                    if (extraInfo != null) calculatedStringValue += "-" + extraInfo;
+                    this.calculatedStringValue = calculatedStringValue;
+                }
             }
-            return calculatedStringValue;
         }
+        return calculatedStringValue;
     }
     
     /**

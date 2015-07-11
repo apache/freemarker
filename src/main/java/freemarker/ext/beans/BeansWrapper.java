@@ -1304,7 +1304,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                             && listItem instanceof String) {
                         String listItemStr = (String) listItem;
                         if (listItemStr.length() == 1) {
-                            // Java 5: use Character.valueOf
                             listItem = Character.valueOf(listItemStr.charAt(0));
                         }
                     } else if (componentType.isArray()) {

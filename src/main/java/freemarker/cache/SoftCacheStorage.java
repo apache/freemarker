@@ -28,13 +28,10 @@ import java.util.concurrent.ConcurrentMap;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * Soft cache storage is a cache storage that uses {@link SoftReference} 
- * objects to hold the objects it was passed, therefore allows the garbage
- * collector to purge the cache when it determines that it wants to free up
- * memory.
- * This class is thread-safe to the extent that its underlying map is. The 
- * default implementation uses a concurrent map on Java 5 and above, so it's
- * thread-safe in that case.
+ * Soft cache storage is a cache storage that uses {@link SoftReference} objects to hold the objects it was passed,
+ * therefore allows the garbage collector to purge the cache when it determines that it wants to free up memory. This
+ * class is thread-safe to the extent that its underlying map is. The parameterless constructor uses a thread-safe map
+ * since 2.3.24, and earlier if you are on Java 5 or later.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
@@ -45,10 +42,16 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
     private final Map map;
     private final boolean concurrent;
     
+    /**
+     * Creates an instance that uses a {@link ConcurrentMap} internally.
+     */
     public SoftCacheStorage() {
         this(new ConcurrentHashMap());
     }
     
+    /**
+     * Returns true if the underlying Map is a {@code ConcurrentMap}.
+     */
     public boolean isConcurrent() {
         return concurrent;
     }

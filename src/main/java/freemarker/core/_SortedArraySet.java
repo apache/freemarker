@@ -21,12 +21,11 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-// [Java 5] Make this generic
-public class _SortedArraySet extends _UnmodifiableSet {
+public class _SortedArraySet<E> extends _UnmodifiableSet<E> {
 
-    private final Object[] array;
+    private final E[] array;
 
-    public _SortedArraySet(Object[] array) {
+    public _SortedArraySet(E[] array) {
         this.array = array;
     }
 
@@ -38,11 +37,11 @@ public class _SortedArraySet extends _UnmodifiableSet {
         return Arrays.binarySearch(array, o) >= 0;
     }
 
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         return new _ArrayIterator(array);
     }
 
-    public boolean add(Object o) {
+    public boolean add(E o) {
         throw new UnsupportedOperationException();
     }
 
@@ -50,15 +49,15 @@ public class _SortedArraySet extends _UnmodifiableSet {
         throw new UnsupportedOperationException();
     }
 
-    public boolean addAll(Collection c) {
+    public boolean addAll(Collection<? extends E> c) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean removeAll(Collection c) {
+    public boolean removeAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean retainAll(Collection c) {
+    public boolean retainAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
