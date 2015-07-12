@@ -23,6 +23,7 @@ public class _DelayedOrdinal extends _DelayedConversionToString {
         super(object);
     }
 
+    @Override
     protected String doConversion(Object obj) {
         if (obj instanceof Number) {
             long n = ((Number) obj).longValue();

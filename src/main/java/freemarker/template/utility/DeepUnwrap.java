@@ -85,6 +85,7 @@ public class DeepUnwrap {
      * @deprecated the name of this method is mistyped. Use 
      * {@link #permissiveUnwrap(TemplateModel)} instead.
      */
+    @Deprecated
     public static Object premissiveUnwrap(TemplateModel model) throws TemplateModelException {
         return unwrap(model, true);
     }

@@ -125,6 +125,7 @@ public class StringTemplateLoader implements TemplateLoader {
             this.lastModified = lastModified;
         }
         
+        @Override
         public boolean equals(Object obj) {
             if (obj instanceof StringTemplateSource) {
                 return name.equals(((StringTemplateSource) obj).name);
@@ -132,6 +133,7 @@ public class StringTemplateLoader implements TemplateLoader {
             return false;
         }
         
+        @Override
         public int hashCode() {
             return name.hashCode();
         }
@@ -142,6 +144,7 @@ public class StringTemplateLoader implements TemplateLoader {
      * 
      * @since 2.3.21
      */
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(TemplateLoaderUtils.getClassNameForToString(this));

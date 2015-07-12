@@ -23,6 +23,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
 abstract class BuiltInForDate extends BuiltIn {
+    @Override
     TemplateModel _eval(Environment env)
             throws TemplateException {
         TemplateModel model = target.eval(env);

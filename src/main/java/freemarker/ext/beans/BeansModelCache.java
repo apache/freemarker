@@ -36,10 +36,12 @@ public class BeansModelCache extends ModelCache {
         this.wrapper = wrapper;
     }
     
+    @Override
     protected boolean isCacheable(Object object) {
         return object.getClass() != Boolean.class; 
     }
     
+    @Override
     @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER", justification="Locks for factory creation only")
     protected TemplateModel create(Object object) {
         Class clazz = object.getClass();

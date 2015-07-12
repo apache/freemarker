@@ -64,6 +64,7 @@ class JaxenXPathSupport implements XPathSupport {
     
     private static final CustomAttribute cache = 
         new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE) {
+            @Override
             protected Object create() {
                 return new HashMap();
             }
@@ -141,6 +142,7 @@ class JaxenXPathSupport implements XPathSupport {
     };
      
     private static final FunctionContext fmFunctionContext = new XPathFunctionContext() {
+        @Override
         public Function getFunction(String namespaceURI, String prefix, String localName)
         throws UnresolvableException {
             try {
@@ -154,6 +156,7 @@ class JaxenXPathSupport implements XPathSupport {
     private static final CustomAttribute cachedTree = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
      
     private static final Navigator fmDomNavigator = new DocumentNavigator() {
+        @Override
         public Object getDocument(String uri) throws FunctionCallException {
             try {
                 Template raw = getTemplate(uri);

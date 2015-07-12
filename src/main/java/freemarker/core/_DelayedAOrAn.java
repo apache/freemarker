@@ -23,6 +23,7 @@ public class _DelayedAOrAn extends _DelayedConversionToString {
         super(object);
     }
 
+    @Override
     protected String doConversion(Object obj) {
         String s = obj.toString();
         return MessageUtil.getAOrAn(s) + " " + s;

@@ -36,6 +36,7 @@ import freemarker.template.TemplateSequenceModel;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 abstract public class TemplateElement extends TemplateObject implements TreeNode {
 
     private static final int INITIAL_REGULATED_CHILD_BUFFER_CAPACITY = 6;
@@ -94,6 +95,7 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     /**
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      */
+    @Override
     public final String getCanonicalForm() {
         return dump(true);
     }
@@ -170,6 +172,7 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     /**
      * @deprecated Meaningless; simply returns if the node currently has any child nodes.
      */
+    @Deprecated
     public boolean getAllowsChildren() {
         return !isLeaf();
     }
@@ -177,6 +180,7 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
     /**
      * @deprecated Starting from 2.4, we won't use {@link TreeNode} API, as it requires Swing.
      */
+    @Deprecated
     public int getIndex(TreeNode node) {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.getIndex(node);
@@ -225,6 +229,7 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
      * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
      * don't use it.
      */
+    @Deprecated
     public TreeNode getChildAt(int index) {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.getChildAt(index);
@@ -269,6 +274,7 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
      * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
      * don't use it.
      */
+    @Deprecated
     public TreeNode getParent() {
         return parent;
     }

@@ -54,22 +54,27 @@ final class ComparisonExpression extends BooleanExpression {
      * WARNING! This algorithm is duplicated in SequenceBuiltins.modelsEqual.
      * Thus, if you update this method, then you have to update that too!
      */
+    @Override
     boolean evalToBoolean(Environment env) throws TemplateException {
         return EvalUtil.compare(left, operation, opString, right, this, env);
     }
 
+    @Override
     public String getCanonicalForm() {
         return left.getCanonicalForm() + ' ' + opString + ' ' + right.getCanonicalForm();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return opString;
     }
 
+    @Override
     boolean isLiteral() {
         return constantValue != null || (left.isLiteral() && right.isLiteral());
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new ComparisonExpression(
@@ -78,14 +83,17 @@ final class ComparisonExpression extends BooleanExpression {
     	        opString);
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         return idx == 0 ? left : right;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }

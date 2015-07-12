@@ -32,6 +32,7 @@ class StaticModels extends ClassBasedModelFactory {
         super(wrapper);
     }
 
+    @Override
     protected TemplateModel createModel(Class clazz) 
     throws TemplateModelException {
         return new StaticModel(clazz, getWrapper());

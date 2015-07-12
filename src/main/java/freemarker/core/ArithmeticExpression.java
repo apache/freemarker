@@ -43,6 +43,7 @@ final class ArithmeticExpression extends Expression {
         this.operator = operator;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         return _eval(env, this, lho.evalToNumber(env), operator, rho.evalToNumber(env));
     }
@@ -73,10 +74,12 @@ final class ArithmeticExpression extends Expression {
         }
     }
 
+    @Override
     public String getCanonicalForm() {
         return lho.getCanonicalForm() + ' ' + getOperatorSymbol(operator) + ' ' + rho.getCanonicalForm();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return String.valueOf(getOperatorSymbol(operator));
     }
@@ -85,10 +88,12 @@ final class ArithmeticExpression extends Expression {
         return OPERATOR_IMAGES[operator];
     }
     
+    @Override
     boolean isLiteral() {
         return constantValue != null || (lho.isLiteral() && rho.isLiteral());
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new ArithmeticExpression(
@@ -97,10 +102,12 @@ final class ArithmeticExpression extends Expression {
     	        operator);
     }
     
+    @Override
     int getParameterCount() {
         return 3;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return lho;
@@ -110,6 +117,7 @@ final class ArithmeticExpression extends Expression {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.LEFT_HAND_OPERAND;

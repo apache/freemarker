@@ -20,6 +20,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
 abstract class BuiltInForString extends BuiltIn {
+    @Override
     TemplateModel _eval(Environment env)
     throws TemplateException {
         return calculateResult(target.evalAndCoerceToString(env), env);

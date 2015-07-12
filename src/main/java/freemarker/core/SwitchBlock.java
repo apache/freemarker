@@ -46,6 +46,7 @@ final class SwitchBlock extends TemplateElement {
         addRegulatedChild(cas);
     }
 
+    @Override
     void accept(Environment env) 
         throws TemplateException, IOException {
         boolean processedCase = false;
@@ -78,6 +79,7 @@ final class SwitchBlock extends TemplateElement {
         } catch (BreakInstruction.Break br) {}
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
@@ -96,24 +98,29 @@ final class SwitchBlock extends TemplateElement {
         return buf.toString();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#switch";
     }
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return searched;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.VALUE;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

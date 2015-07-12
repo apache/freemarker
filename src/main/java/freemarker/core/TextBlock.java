@@ -50,11 +50,13 @@ public final class TextBlock extends TemplateElement {
     /**
      * Simply outputs the text.
      */
+    @Override
     public void accept(Environment env) 
     throws IOException {
         env.getOut().write(text);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (canonical) {
             String text = new String(this.text);
@@ -67,24 +69,29 @@ public final class TextBlock extends TemplateElement {
         }
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#text";
     }
     
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return new String(text);
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.CONTENT;
     }
 
+    @Override
     TemplateElement postParseCleanup(boolean stripWhitespace) {
         if (text.length == 0) return this;
         int openingCharsToStrip = 0, trailingCharsToStrip = 0;
@@ -289,6 +296,7 @@ public final class TextBlock extends TemplateElement {
         return text.length - (lastNewlineIndex + 1);
     }
 
+    @Override
     boolean heedsTrailingWhitespace() {
         if (isIgnorable()) {
             return false;
@@ -305,6 +313,7 @@ public final class TextBlock extends TemplateElement {
         return true;
     }
 
+    @Override
     boolean heedsOpeningWhitespace() {
         if (isIgnorable()) {
             return false;
@@ -321,6 +330,7 @@ public final class TextBlock extends TemplateElement {
         return true;
     }
 
+    @Override
     boolean isIgnorable() {
         if (text == null || text.length == 0) {
             return true;
@@ -362,10 +372,12 @@ public final class TextBlock extends TemplateElement {
         return c;
     }
     
+    @Override
     boolean isOutputCacheable() {
         return true;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

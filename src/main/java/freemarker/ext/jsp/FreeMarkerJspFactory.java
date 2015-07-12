@@ -28,14 +28,17 @@ import javax.servlet.jsp.PageContext;
 abstract class FreeMarkerJspFactory extends JspFactory {
     protected abstract String getSpecificationVersion();
     
+    @Override
     public JspEngineInfo getEngineInfo() {
         return new JspEngineInfo() {
+            @Override
             public String getSpecificationVersion() {
                 return FreeMarkerJspFactory.this.getSpecificationVersion();
             }
         };
     }
 
+    @Override
     public PageContext getPageContext(Servlet servlet, ServletRequest request, 
             ServletResponse response, String errorPageURL, 
             boolean needsSession, int bufferSize, boolean autoFlush) {
@@ -46,6 +49,7 @@ abstract class FreeMarkerJspFactory extends JspFactory {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void releasePageContext(PageContext ctx) {
         // This is never meant to be called. JSP pages compiled to Java 
         // bytecode use this API, but in FreeMarker, we're running templates,

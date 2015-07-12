@@ -39,6 +39,7 @@ class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
         return model;
     }
     
+    @Override
     public int size() {
         try {
             return model.size();
@@ -47,6 +48,7 @@ class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
         }
     }
     
+    @Override
     public Object get(int index) {
         try {
             return wrapper.unwrap(model.get(index));

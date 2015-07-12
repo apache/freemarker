@@ -25,6 +25,7 @@ public class _DelayedJQuote extends _DelayedConversionToString {
         super(object);
     }
 
+    @Override
     protected String doConversion(Object obj) {
         return StringUtil.jQuote(_ErrorDescriptionBuilder.toString(obj));
     }

@@ -95,6 +95,7 @@ final class RegexpHelper {
             hashCode = patternString.hashCode() + 31 * flags;
         }
         
+        @Override
         public boolean equals(Object that) {
             if (that instanceof PatternCacheKey) {
                 PatternCacheKey thatPCK = (PatternCacheKey) that; 
@@ -105,6 +106,7 @@ final class RegexpHelper {
             }
         }
 
+        @Override
         public int hashCode() {
             return hashCode;
         }

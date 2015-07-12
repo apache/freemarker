@@ -37,6 +37,7 @@ class DocumentTypeModel extends NodeModel {
         throw new TemplateModelException("entering the child nodes of a DTD node is not currently supported");
     }
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         throw new TemplateModelException("accessing properties of a DTD is not currently supported");
     }

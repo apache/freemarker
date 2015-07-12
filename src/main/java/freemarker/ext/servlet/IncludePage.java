@@ -101,6 +101,7 @@ public class IncludePage implements TemplateDirectiveModel {
             // env writer, potentially first wrapping it in a print
             // writer when it ain't one already.
             wrappedResponse = new HttpServletResponseWrapper(response) {
+                @Override
                 public PrintWriter getWriter() {
                     return printWriter;
                 }
@@ -220,20 +221,24 @@ public class IncludePage implements TemplateDirectiveModel {
             }
         }
 
+        @Override
         public String[] getParameterValues(String name) {
             String[] value = ((String[]) paramsMap.get(name));
             return value != null ? (String[]) value.clone() : null;
         }
 
+        @Override
         public String getParameter(String name) {
             String[] values = (String[]) paramsMap.get(name);
             return values != null && values.length > 0 ? values[0] : null;
         }
 
+        @Override
         public Enumeration getParameterNames() {
             return Collections.enumeration(paramsMap.keySet());
         }
 
+        @Override
         public Map getParameterMap() {
             HashMap clone = (HashMap) paramsMap.clone();
             for (Iterator it = clone.entrySet().iterator(); it.hasNext(); ) {

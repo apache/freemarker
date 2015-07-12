@@ -225,6 +225,7 @@ import freemarker.template.utility.SecurityUtilities;
  * </table>
  * @deprecated <a href="http://fmpp.sourceforge.net">FMPP</a> is a more complete solution.
  */
+@Deprecated
 public class FreemarkerXmlTask
 extends
     MatchingTask {
@@ -365,6 +366,7 @@ extends
         this.models = models;
     }
     
+    @Override
     public void execute() throws BuildException {
         DirectoryScanner scanner;
         String[]         list;

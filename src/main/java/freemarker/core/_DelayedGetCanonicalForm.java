@@ -24,6 +24,7 @@ public class _DelayedGetCanonicalForm extends _DelayedConversionToString {
         super(obj);
     }
 
+    @Override
     protected String doConversion(Object obj) {
         try {
             return ((TemplateObject) obj).getCanonicalForm();

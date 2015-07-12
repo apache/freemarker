@@ -31,6 +31,7 @@ public class _EnumModels extends ClassBasedModelFactory {
         super(wrapper);
     }
     
+    @Override
     protected TemplateModel createModel(Class clazz) {
         Object[] obj = clazz.getEnumConstants();
         if (obj == null) {

@@ -29,14 +29,17 @@ public class _UnmodifiableCompositeSet<E> extends _UnmodifiableSet<E> {
         this.set2 = set2;
     }
 
+    @Override
     public Iterator<E> iterator() {
         return new CompositeIterator();
     }
     
+    @Override
     public boolean contains(Object o) {
         return set1.contains(o) || set2.contains(o);
     }
 
+    @Override
     public int size() {
         return set1.size() + set2.size();
     }

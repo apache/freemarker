@@ -38,6 +38,7 @@ implements
         shared = false;
     }
         
+    @Override
     public Object clone() {
         try {
             Namespaces clone = (Namespaces) super.clone();

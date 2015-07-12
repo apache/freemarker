@@ -30,6 +30,7 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
     /**
      * @deprecated Use {@link #SimpleObjectWrapper(Version)} instead.
      */
+    @Deprecated
     public SimpleObjectWrapper() {
         super();
     }
@@ -47,11 +48,13 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
      * Called if a type other than the simple ones we know about is passed in. 
      * In this implementation, this just throws an exception.
      */
+    @Override
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
         throw new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: " 
                                          + obj.getClass().getName());
     }
 
+    @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
         throw new TemplateModelException("SimpleObjectWrapper deliberately doesn't allow ?api.");
     }

@@ -58,6 +58,7 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
         this.forceLegacyNonListCollections = legacyNonListCollectionWrapping;
     }
     
+    @Override
     public int hashCode() {
         int result = super.hashCode();
         final int prime = 31;
@@ -66,6 +67,7 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
         return result;
     }
 
+    @Override
     public boolean equals(Object that) {
         if (!super.equals(that)) return false;
         final DefaultObjectWrapperConfiguration thatDowCfg = (DefaultObjectWrapperConfiguration) that;

@@ -26,12 +26,14 @@ final class RecoveryBlock extends TemplateElement {
         setNestedBlock(block);
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visitByHiddingParent(getNestedBlock());
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
@@ -45,22 +47,27 @@ final class RecoveryBlock extends TemplateElement {
         }
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#recover";
     }
     
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

@@ -26,6 +26,7 @@ package freemarker.template;
  * @see SimpleSequence
  */
 
+@Deprecated
 public class SimpleList extends SimpleSequence {
 
     public SimpleList() {

@@ -36,6 +36,7 @@ import freemarker.template.TemplateSequenceModel;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 abstract public class Expression extends TemplateObject {
 
     /**
@@ -53,6 +54,7 @@ abstract public class Expression extends TemplateObject {
 
     // Hook in here to set the constant value if possible.
     
+    @Override
     void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
     throws ParseException {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
@@ -68,6 +70,7 @@ abstract public class Expression extends TemplateObject {
     /**
      * @deprecated At the moment FreeMarker has no API for this with backward-compatibility promises.
      */
+    @Deprecated
     public final TemplateModel getAsTemplateModel(Environment env) throws TemplateException {
         return eval(env);
     }

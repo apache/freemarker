@@ -51,6 +51,7 @@ public class RhinoWrapper extends BeansWrapper {
         }
     }
     
+    @Override
     public TemplateModel wrap(Object obj) throws TemplateModelException {
         // So our existence builtins work as expected.
         if (obj == UNDEFINED_INSTANCE || obj == UniqueTag.NOT_FOUND) {
@@ -73,6 +74,7 @@ public class RhinoWrapper extends BeansWrapper {
         return super.wrap(obj);
     }
 
+    @Override
     protected ModelFactory getModelFactory(Class clazz) {
         if (Scriptable.class.isAssignableFrom(clazz)) {
             return RhinoScriptableModel.FACTORY;

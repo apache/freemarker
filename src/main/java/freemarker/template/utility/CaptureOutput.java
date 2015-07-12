@@ -55,6 +55,7 @@ import freemarker.template.TemplateTransformModel;
  *
  * @deprecated Use block-assignments instead, like <code>&lt;assign x&gt;...&lt;/assign&gt;</code>.
  */
+@Deprecated
 public class CaptureOutput implements TemplateTransformModel {
 
     public Writer getWriter(final Writer out, final Map args) throws TemplateModelException {
@@ -108,14 +109,17 @@ public class CaptureOutput implements TemplateTransformModel {
 
         return new Writer() {
 
+            @Override
             public void write(char cbuf[], int off, int len) {
                 buf.append(cbuf, off, len);
             }
 
+            @Override
             public void flush() throws IOException {
                 out.flush();
             }
 
+            @Override
             public void close() throws IOException {
                 SimpleScalar result = new SimpleScalar(buf.toString());
                 try {

@@ -28,6 +28,7 @@ public abstract class _DelayedConversionToString {
         this.object = object;
     }
 
+    @Override
     public String toString() {
         String stringValue = this.stringValue;
         if (stringValue == NOT_SET) {

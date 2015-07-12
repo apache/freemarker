@@ -128,6 +128,7 @@ public class IdentityHashMap
      *
      * @return the number of key-value mappings in this map.
      */
+    @Override
     public int size() {
         return count;
     }
@@ -137,6 +138,7 @@ public class IdentityHashMap
      *
      * @return <tt>true</tt> if this map contains no key-value mappings.
      */
+    @Override
     public boolean isEmpty() {
         return count == 0;
     }
@@ -149,6 +151,7 @@ public class IdentityHashMap
      * @return <tt>true</tt> if this map maps one or more keys to the
      *         specified value.
      */
+    @Override
     public boolean containsValue(Object value) {
         Entry tab[] = table;
 
@@ -175,6 +178,7 @@ public class IdentityHashMap
      * key.
      * @param key key whose presence in this Map is to be tested.
      */
+    @Override
     public boolean containsKey(Object key) {
         Entry tab[] = table;
         if (key != null) {
@@ -203,6 +207,7 @@ public class IdentityHashMap
      * @return the value to which this map maps the specified key.
      * @param key key whose associated value is to be returned.
      */
+    @Override
     public Object get(Object key) {
         Entry tab[] = table;
 
@@ -261,6 +266,7 @@ public class IdentityHashMap
      *	       also indicate that the IdentityHashMap previously associated
      *	       <tt>null</tt> with the specified key.
      */
+    @Override
     public Object put(Object key, Object value) {
         // Makes sure the key is not already in the IdentityHashMap.
         Entry tab[] = table;
@@ -312,6 +318,7 @@ public class IdentityHashMap
      *	       also indicate that the map previously associated <tt>null</tt>
      *	       with the specified key.
      */
+    @Override
     public Object remove(Object key) {
         Entry tab[] = table;
 
@@ -365,6 +372,7 @@ public class IdentityHashMap
      *
      * @param t Mappings to be stored in this map.
      */
+    @Override
     public void putAll(Map t) {
         Iterator i = t.entrySet().iterator();
         while (i.hasNext()) {
@@ -376,6 +384,7 @@ public class IdentityHashMap
     /**
      * Removes all mappings from this map.
      */
+    @Override
     public void clear() {
         Entry tab[] = table;
         modCount++;
@@ -390,6 +399,7 @@ public class IdentityHashMap
      *
      * @return a shallow copy of this map.
      */
+    @Override
     public Object clone() {
         try {
             IdentityHashMap t = (IdentityHashMap) super.clone();
@@ -426,24 +436,30 @@ public class IdentityHashMap
      *
      * @return a set view of the keys contained in this map.
      */
+    @Override
     public Set keySet() {
         if (keySet == null) {
             keySet = new AbstractSet()
             {
+                @Override
                 public Iterator iterator() {
                     return getHashIterator(KEYS);
                 }
+                @Override
                 public int size() {
                     return count;
                 }
+                @Override
                 public boolean contains(Object o) {
                     return containsKey(o);
                 }
+                @Override
                 public boolean remove(Object o) {
                     int oldSize = count;
                     IdentityHashMap.this.remove(o);
                     return count != oldSize;
                 }
+                @Override
                 public void clear() {
                     IdentityHashMap.this.clear();
                 }
@@ -463,19 +479,24 @@ public class IdentityHashMap
      *
      * @return a collection view of the values contained in this map.
      */
+    @Override
     public Collection values() {
         if (values == null) {
             values = new AbstractCollection()
             {
+                @Override
                 public Iterator iterator() {
                     return getHashIterator(VALUES);
                 }
+                @Override
                 public int size() {
                     return count;
                 }
+                @Override
                 public boolean contains(Object o) {
                     return containsValue(o);
                 }
+                @Override
                 public void clear() {
                     IdentityHashMap.this.clear();
                 }
@@ -497,14 +518,17 @@ public class IdentityHashMap
      * @return a collection view of the mappings contained in this map.
      * @see java.util.Map.Entry
      */
+    @Override
     public Set entrySet() {
         if (entrySet == null) {
             entrySet = new AbstractSet()
             {
+                @Override
                 public Iterator iterator() {
                     return getHashIterator(ENTRIES);
                 }
 
+                @Override
                 public boolean contains(Object o) {
                     if (!(o instanceof Map.Entry))
                         return false;
@@ -520,6 +544,7 @@ public class IdentityHashMap
                     return false;
                 }
 
+                @Override
                 public boolean remove(Object o) {
                     if (!(o instanceof Map.Entry))
                         return false;
@@ -547,10 +572,12 @@ public class IdentityHashMap
                     return false;
                 }
 
+                @Override
                 public int size() {
                     return count;
                 }
 
+                @Override
                 public void clear() {
                     IdentityHashMap.this.clear();
                 }
@@ -584,6 +611,7 @@ public class IdentityHashMap
             this.next = next;
         }
 
+        @Override
         protected Object clone() {
             return new Entry(
                 hash,
@@ -608,6 +636,7 @@ public class IdentityHashMap
             return oldValue;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -619,10 +648,12 @@ public class IdentityHashMap
                     : value.equals(e.getValue()));
         }
 
+        @Override
         public int hashCode() {
             return hash ^ (value == null ? 0 : value.hashCode());
         }
 
+        @Override
         public String toString() {
             return key + "=" + value;
         }

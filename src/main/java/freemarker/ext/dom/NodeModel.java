@@ -360,10 +360,12 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         return result;
     }
     
+    @Override
     public final int hashCode() {
         return node.hashCode();
     }
     
+    @Override
     public boolean equals(Object other) {
         if (other == null) return false;
         return other.getClass() == this.getClass() 

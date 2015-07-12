@@ -81,6 +81,7 @@ import freemarker.template.TemplateSequenceModel;
  * 
  * @deprecated Use {@link freemarker.ext.dom.NodeModel} instead.
  */
+@Deprecated
 public class NodeListModel
 implements
     TemplateHashModel,
@@ -840,6 +841,7 @@ implements
     }
 
     private static final class DescendantOrSelfOp extends DescendantOp {
+        @Override
         public List operate(Object node) {
             LinkedList list = (LinkedList) super.operate(node);
             list.addFirst(node);
@@ -1128,6 +1130,7 @@ implements
      * 
      * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
      */
+    @Deprecated
     public static void main(String[] args)
     throws Exception {
         org.jdom.input.SAXBuilder builder = new org.jdom.input.SAXBuilder();

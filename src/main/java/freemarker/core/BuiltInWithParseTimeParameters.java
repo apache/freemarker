@@ -23,6 +23,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
     abstract void bindToParameters(List/*<Expression>*/ parameters, Token openParen, Token closeParen)
             throws ParseException;
 
+    @Override
     public String getCanonicalForm() {
         StringBuilder buf = new StringBuilder();
         
@@ -43,14 +44,17 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         return buf.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return super.getNodeTypeSymbol() + "(...)";
     }        
     
+    @Override
     int getParameterCount() {
         return super.getParameterCount() + getArgumentsCount();
     }
 
+    @Override
     Object getParameterValue(int idx) {
         final int superParamCnt = super.getParameterCount();
         if (idx < superParamCnt) {
@@ -61,6 +65,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
         return getArgumentParameterValue(argIdx);
     }
     
+    @Override
     ParameterRole getParameterRole(int idx) {
         final int superParamCnt = super.getParameterCount();
         if (idx < superParamCnt) {
@@ -81,6 +86,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
                 closeParen.endLine, closeParen.endColumn);
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         final Expression clone = super.deepCloneWithIdentifierReplaced_inner(replacedIdentifier, replacement, replacementState);

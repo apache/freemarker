@@ -368,9 +368,11 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String ATTR_SESSION_MODEL = ".freemarker.Session";
     
     /** @deprecated We only keeps this attribute for backward compatibility, but actually aren't using it. */
+    @Deprecated
     private static final String ATTR_APPLICATION_MODEL = ".freemarker.Application";
     
     /** @deprecated We only keeps this attribute for backward compatibility, but actually aren't using it. */
+    @Deprecated
     private static final String ATTR_JSP_TAGLIBS_MODEL = ".freemarker.JspTaglibs";
 
     private static final String ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
@@ -399,6 +401,7 @@ public class FreemarkerServlet extends HttpServlet {
      * @deprecated Not used anymore; to enable/disable debug logging, just set the logging level of the logging library
      *             used by {@link Logger}.
      */
+    @Deprecated
     protected boolean debug;
     
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
@@ -424,6 +427,7 @@ public class FreemarkerServlet extends HttpServlet {
      * etc. Also note that lot of things can be changed with init-params instead of overriding methods, so if you
      * override settings, usually you should only override their defaults.
      */
+    @Override
     public void init() throws ServletException {
         try {
             initialize();
@@ -640,11 +644,13 @@ public class FreemarkerServlet extends HttpServlet {
         return InitParamParser.createTemplateLoader(templatePath, getConfiguration(), getClass(), getServletContext());
     }
     
+    @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
         process(request, response);
     }
 
+    @Override
     public void doPost(
         HttpServletRequest request,
         HttpServletResponse response)
@@ -1161,6 +1167,7 @@ public class FreemarkerServlet extends HttpServlet {
      * 
      * @deprecated Not called by FreeMarker code, and there's no point to override this (unless to cause confusion).
      */
+    @Deprecated
     protected final String getTemplatePath() {
         return templatePath;
     }

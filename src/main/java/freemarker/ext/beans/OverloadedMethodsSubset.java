@@ -80,17 +80,17 @@ abstract class OverloadedMethodsSubset {
         // Merge these unwrapping hints with the existing table of hints:
         if (unwrappingHintsByParamCount == null) {
             unwrappingHintsByParamCount = new Class[paramCount + 1][];
-            unwrappingHintsByParamCount[paramCount] = (Class[]) prepedParamTypes.clone();
+            unwrappingHintsByParamCount[paramCount] = prepedParamTypes.clone();
         } else if (unwrappingHintsByParamCount.length <= paramCount) {
             Class[][] newUnwrappingHintsByParamCount = new Class[paramCount + 1][];
             System.arraycopy(unwrappingHintsByParamCount, 0, newUnwrappingHintsByParamCount, 0,
                     unwrappingHintsByParamCount.length);
             unwrappingHintsByParamCount = newUnwrappingHintsByParamCount;
-            unwrappingHintsByParamCount[paramCount] = (Class[]) prepedParamTypes.clone();
+            unwrappingHintsByParamCount[paramCount] = prepedParamTypes.clone();
         } else {
             Class[] unwrappingHints = unwrappingHintsByParamCount[paramCount]; 
             if (unwrappingHints == null) {
-                unwrappingHintsByParamCount[paramCount] = (Class[]) prepedParamTypes.clone();
+                unwrappingHintsByParamCount[paramCount] = prepedParamTypes.clone();
             } else {
                 for (int paramIdx = 0; paramIdx < prepedParamTypes.length; paramIdx++) {
                     // For each parameter list length, we merge the argument type arrays into a single Class[] that

@@ -37,10 +37,12 @@ final class DollarVariable extends Interpolation {
     /**
      * Outputs the string value of the enclosed expression.
      */
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         env.getOut().write(escapedExpression.evalAndCoerceToString(env));
     }
 
+    @Override
     protected String dump(boolean canonical, boolean inStringLiteral) {
         StringBuilder sb = new StringBuilder();
         sb.append("${");
@@ -53,32 +55,39 @@ final class DollarVariable extends Interpolation {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "${...}";
     }
 
+    @Override
     boolean heedsOpeningWhitespace() {
         return true;
     }
 
+    @Override
     boolean heedsTrailingWhitespace() {
         return true;
     }
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return expression;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.CONTENT;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

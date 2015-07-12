@@ -27,22 +27,27 @@ final class ParentheticalExpression extends Expression {
         this.nested = nested;
     }
 
+    @Override
     boolean evalToBoolean(Environment env) throws TemplateException {
         return nested.evalToBoolean(env);
     }
 
+    @Override
     public String getCanonicalForm() {
         return "(" + nested.getCanonicalForm() + ")";
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "(...)";
     }
     
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         return nested.eval(env);
     }
     
+    @Override
     public boolean isLiteral() {
         return nested.isLiteral();
     }
@@ -51,21 +56,25 @@ final class ParentheticalExpression extends Expression {
         return nested;
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new ParentheticalExpression(
                 nested.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
     
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return nested;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.ENCLOSED_OPERAND;

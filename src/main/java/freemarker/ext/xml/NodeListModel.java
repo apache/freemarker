@@ -60,6 +60,7 @@ import freemarker.template.utility.ClassUtil;
  *
  * @deprecated Use {@link freemarker.ext.dom.NodeModel} instead.
  */
+@Deprecated
 public class NodeListModel
 implements
     TemplateHashModel,

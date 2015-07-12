@@ -22,6 +22,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 
 abstract class BuiltInForSequence extends BuiltIn {
+    @Override
     TemplateModel _eval(Environment env)
             throws TemplateException {
         TemplateModel model = target.eval(env);

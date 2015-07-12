@@ -103,6 +103,7 @@ public abstract class Logger {
      * 
      * @deprecated Avalon LogKit support will be removed sometimes in the future.
      */
+    @Deprecated
     public static final int LIBRARY_AVALON = 2;
 
     /**
@@ -112,6 +113,7 @@ public abstract class Logger {
      * @deprecated Avalon LogKit support will be removed sometimes in the future.
      */
     // This value is also used as part of the factory class name.
+    @Deprecated
     public static final String LIBRARY_NAME_AVALON = "Avalon";
 
     /**
@@ -220,6 +222,7 @@ public abstract class Logger {
      *             {@code java ... -Dorg.freemarker.loggerLibrary=slf4j}. See
      *             {@link #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} for more.
      */
+    @Deprecated
     public static void selectLoggerLibrary(int libraryEnum) throws ClassNotFoundException {
         if (libraryEnum < MIN_LIBRARY_ENUM || libraryEnum > MAX_LIBRARY_ENUM) {
             throw new IllegalArgumentException("Library enum value out of range");
@@ -263,6 +266,7 @@ public abstract class Logger {
      * @deprecated This wasn't reliable, unless you can somehow ensure that you access the FreeMarker classes first. As
      *             it's not known to be useful for users, consider it removed.
      */
+    @Deprecated
     public static void setCategoryPrefix(String prefix) {
         synchronized (Logger.class) {
             if (prefix == null) {

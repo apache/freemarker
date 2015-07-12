@@ -22,18 +22,22 @@ abstract class RightUnboundedRangeModel extends RangeModel {
         super(begin);
     }
 
+    @Override
     final int getStep() {
         return 1;
     }
 
+    @Override
     final boolean isRightUnbounded() {
         return true;
     }
     
+    @Override
     final boolean isRightAdaptive() {
         return true;
     }
 
+    @Override
     final boolean isAffactedByStringSlicingBug() {
         return false;
     }

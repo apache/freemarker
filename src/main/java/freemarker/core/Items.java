@@ -32,6 +32,7 @@ class Items extends TemplateElement {
         setNestedBlock(nestedBlock);
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         final IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, null);
         if (iterCtx == null) {
@@ -43,10 +44,12 @@ class Items extends TemplateElement {
         iterCtx.loopForItemsElement(env, getNestedBlock(), loopVarName);
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return true;
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -63,18 +66,22 @@ class Items extends TemplateElement {
         return sb.toString();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#items";
     }
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         return loopVarName;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx == 0) return ParameterRole.TARGET_LOOP_VARIABLE;
         else

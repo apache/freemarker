@@ -44,10 +44,12 @@ class JythonModelCache extends ModelCache {
         this.wrapper = wrapper;
     }
 
+    @Override
     protected boolean isCacheable(Object object) {
         return true;
     }
     
+    @Override
     protected TemplateModel create(Object obj) {
         boolean asHash = false;
         boolean asSequence = false;

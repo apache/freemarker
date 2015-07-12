@@ -29,6 +29,7 @@ final class StopInstruction extends TemplateElement {
         this.exp = exp;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException {
         if (exp == null) {
             throw new StopException(env);
@@ -36,6 +37,7 @@ final class StopInstruction extends TemplateElement {
         throw new StopException(env, exp.evalAndCoerceToString(env));
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -48,24 +50,29 @@ final class StopInstruction extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#stop";
     }
     
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return exp;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.MESSAGE;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

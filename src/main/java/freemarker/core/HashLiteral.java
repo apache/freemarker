@@ -41,10 +41,12 @@ final class HashLiteral extends Expression {
         values.trimToSize();
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         return new SequenceHash(env);
     }
 
+    @Override
     public String getCanonicalForm() {
         StringBuilder buf = new StringBuilder("{");
         for (int i = 0; i < size; i++) {
@@ -61,10 +63,12 @@ final class HashLiteral extends Expression {
         return buf.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "{...}";
     }
 
+    @Override
     boolean isLiteral() {
         if (constantValue != null) {
             return true;
@@ -80,6 +84,7 @@ final class HashLiteral extends Expression {
     }
 
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
 		ArrayList clonedKeys = (ArrayList) keys.clone();
@@ -164,21 +169,25 @@ final class HashLiteral extends Expression {
             return size == 0;
         }
         
+        @Override
         public String toString() {
             return getCanonicalForm();
         }
         
     }
 
+    @Override
     int getParameterCount() {
         return size * 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         checkIndex(idx);
         return idx % 2 == 0 ? keys.get(idx / 2) : values.get(idx / 2);
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         checkIndex(idx);
         return idx % 2 == 0 ? ParameterRole.ITEM_KEY : ParameterRole.ITEM_VALUE;

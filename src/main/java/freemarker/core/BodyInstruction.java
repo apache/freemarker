@@ -51,11 +51,13 @@ final class BodyInstruction extends TemplateElement {
      * what it was before macro invocation to implement this properly.
      * I (JR) realized this thanks to some incisive comments from Daniel Dekany.
      */
+    @Override
     void accept(Environment env) throws IOException, TemplateException {
         Context bodyContext = new Context(env);
         env.invokeNestedContent(bodyContext);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -70,19 +72,23 @@ final class BodyInstruction extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#nested";
     }
     
+    @Override
     int getParameterCount() {
         return bodyParameters != null ? bodyParameters.size() : 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         checkIndex(idx);
         return bodyParameters.get(idx);
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         checkIndex(idx);
         return ParameterRole.PASSED_VALUE;
@@ -136,6 +142,7 @@ final class BodyInstruction extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

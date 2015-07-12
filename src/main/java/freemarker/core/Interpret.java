@@ -55,6 +55,7 @@ class Interpret extends BuiltIn {
      * a <tt>&lt;transform></tt> block will process the generated template
      * just as if it had been <tt>&lt;transform></tt>-ed at that point.
      */
+    @Override
     TemplateModel _eval(Environment env)
             throws TemplateException {
         TemplateModel model = target.eval(env);
@@ -123,13 +124,16 @@ class Interpret extends BuiltIn {
     
             return new Writer(out)
             {
+                @Override
                 public void close() {
                 }
                 
+                @Override
                 public void flush() throws IOException {
                     out.flush();
                 }
                 
+                @Override
                 public void write(char[] cbuf, int off, int len) throws IOException {
                     out.write(cbuf, off, len);
                 }

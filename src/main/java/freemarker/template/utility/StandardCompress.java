@@ -132,6 +132,7 @@ public class StandardCompress implements TemplateTransformModel {
             buf = new char[bufSize];
         }
 
+        @Override
         public void write(char[] cbuf, int off, int len) throws IOException {
             for (; ; ) {
                 // Need to reserve space for the EOL potentially left in the state machine
@@ -219,11 +220,13 @@ public class StandardCompress implements TemplateTransformModel {
             pos = 0;
         }
 
+        @Override
         public void flush() throws IOException {
             flushInternal();
             out.flush();
         }
 
+        @Override
         public void close() throws IOException {
             flushInternal();
         }

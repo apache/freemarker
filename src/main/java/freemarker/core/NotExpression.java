@@ -26,37 +26,45 @@ final class NotExpression extends BooleanExpression {
         this.target = target;
     }
 
+    @Override
     boolean evalToBoolean(Environment env) throws TemplateException {
         return (!target.evalToBoolean(env));
     }
 
+    @Override
     public String getCanonicalForm() {
         return "!" + target.getCanonicalForm();
     }
  
+    @Override
     String getNodeTypeSymbol() {
         return "!";
     }
     
+    @Override
     boolean isLiteral() {
         return target.isLiteral();
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new NotExpression(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return target;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.RIGHT_HAND_OPERAND;

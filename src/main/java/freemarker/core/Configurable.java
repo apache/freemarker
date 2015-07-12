@@ -211,6 +211,7 @@ public class Configurable {
     public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE;
     
     /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
+    @Deprecated
     public static final String STRICT_BEAN_MODELS = STRICT_BEAN_MODELS_KEY;
     
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
@@ -295,6 +296,7 @@ public class Configurable {
      * 
      * @deprecated This shouldn't even be public; don't use it.
      */
+    @Deprecated
     public Configurable() {
         this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
@@ -382,6 +384,7 @@ public class Configurable {
         customAttributes = new HashMap();
     }
     
+    @Override
     protected Object clone() throws CloneNotSupportedException {
         Configurable copy = (Configurable) super.clone();
         copy.properties = new Properties(properties);
@@ -1678,6 +1681,7 @@ public class Configurable {
      *     and thus it's impossible to ensure that {@link #setSetting(String, String)} will work with
      *     the returned value correctly.
      */
+    @Deprecated
     public String getSetting(String key) {
         return properties.getProperty(key);
     }
@@ -1693,6 +1697,7 @@ public class Configurable {
      *     convert setting values to text in a way that ensures that
      *     {@link #setSettings(Properties)} will work with them correctly.)
      */
+    @Deprecated
     public Map getSettings() {
         return Collections.unmodifiableMap(properties);
     }

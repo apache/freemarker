@@ -50,10 +50,12 @@ public class Breakpoint implements Serializable, Comparable {
         return templateName;
     }
 
+    @Override
     public int hashCode() {
         return templateName.hashCode() + 31 * line;
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Breakpoint) {
             Breakpoint b = (Breakpoint) o;

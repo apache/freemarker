@@ -42,6 +42,7 @@ class DocumentModel extends NodeModel implements TemplateHashModel {
         return "@document";
     }
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         if (key.equals("*")) {
             return getRootElement();

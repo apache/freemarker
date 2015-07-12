@@ -43,10 +43,12 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
         return model;
     }
     
+    @Override
     public int size() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Iterator iterator() {
         try {
             return new Iterator() {

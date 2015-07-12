@@ -75,6 +75,7 @@ final class ArgumentTypes {
         this.bugfixed = bugfixed;
     }
     
+    @Override
     public int hashCode() {
         int hash = 0;
         for (int i = 0; i < types.length; ++i) {
@@ -83,6 +84,7 @@ final class ArgumentTypes {
         return hash;
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o instanceof ArgumentTypes) {
             ArgumentTypes cs = (ArgumentTypes) o;
@@ -644,38 +646,46 @@ final class ArgumentTypes {
             this.callableMemberDesc = callableMemberDesc;
         }
 
+        @Override
         TemplateModel invokeMethod(BeansWrapper bw, Object obj, Object[] args) throws TemplateModelException,
                 InvocationTargetException, IllegalAccessException {
             convertArgsToReflectionCompatible(bw, args);
             return callableMemberDesc.invokeMethod(bw, obj, args);
         }
 
+        @Override
         Object invokeConstructor(BeansWrapper bw, Object[] args) throws IllegalArgumentException,
                 InstantiationException, IllegalAccessException, InvocationTargetException, TemplateModelException {
             convertArgsToReflectionCompatible(bw, args);
             return callableMemberDesc.invokeConstructor(bw, args);
         }
 
+        @Override
         String getDeclaration() {
             return callableMemberDesc.getDeclaration();
         }
 
+        @Override
         boolean isConstructor() {
             return callableMemberDesc.isConstructor();
         }
 
+        @Override
         boolean isStatic() {
             return callableMemberDesc.isStatic();
         }
 
+        @Override
         boolean isVarargs() {
             return callableMemberDesc.isVarargs();
         }
 
+        @Override
         Class[] getParamTypes() {
             return callableMemberDesc.getParamTypes();
         }
         
+        @Override
         String getName() {
             return callableMemberDesc.getName();
         }

@@ -96,6 +96,7 @@ implements
         return new IteratorModel(((Collection) object).iterator(), wrapper);
     }
 
+    @Override
     public int size() {
         return ((Collection) object).size();
     }
