@@ -49,6 +49,7 @@ public class TreeView {
         JTree tree = new FreeMarkerTree(t);
         JFrame jf = new JFrame(t.getName());
         jf.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 System.exit(0);
             }

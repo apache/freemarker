@@ -26,10 +26,12 @@ public class StringContainsIgnoringCase extends SubstringMatcher {
         super(substring);
     }
 
+    @Override
     protected boolean evalSubstringOf(String s) {
         return s.toLowerCase().contains(this.substring.toLowerCase());
     }
 
+    @Override
     protected String relationship() {
         return "containing ignoring case";
     }
