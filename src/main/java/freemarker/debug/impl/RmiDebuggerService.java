@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.core.DebugBreak;
 import freemarker.core.Environment;
 import freemarker.core.TemplateElement;
@@ -87,6 +88,8 @@ extends
         return sumlist;
     }
 
+    // TODO See in SuppressFBWarnings
+    @SuppressFBWarnings(value={ "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" }, justification="Will have to be re-desigend; postponed.")
     boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
     throws RemoteException {
         RmiDebuggedEnvironmentImpl denv = 

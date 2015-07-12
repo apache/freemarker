@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.template.EmptyMap;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -42,7 +43,6 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     private List positionalArgs, bodyParameterNames;
     boolean legacySyntax;
     private transient volatile SoftReference/*List<Map.Entry<String,Expression>>*/ sortedNamedArgsCache;
-    // Java 5: Use double check locking with volatile
     private CustomDataHolder customDataHolder;
 
     UnifiedCall(Expression nameExp,
@@ -243,26 +243,28 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return res;
     }
 
-    public Object getOrCreateCustomData(Object provierIdentity, ObjectFactory objectFactory)
+    @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
+    public Object getOrCreateCustomData(Object providerIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException {
         // We are using double-checked locking, utilizing Java memory model "final" trick.
+        // Note that this.customDataHolder is NOT volatile.
         
         CustomDataHolder customDataHolder = this.customDataHolder;  // Findbugs false alarm
         if (customDataHolder == null) {  // Findbugs false alarm
             synchronized (this) {
                 customDataHolder = this.customDataHolder;
-                if (customDataHolder == null || customDataHolder.providerIdentity != provierIdentity) {
-                    customDataHolder = createNewCustomData(provierIdentity, objectFactory);
+                if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
+                    customDataHolder = createNewCustomData(providerIdentity, objectFactory);
                     this.customDataHolder = customDataHolder; 
                 }
             }
         }
         
-        if (customDataHolder.providerIdentity != provierIdentity) {
+        if (customDataHolder.providerIdentity != providerIdentity) {
             synchronized (this) {
                 customDataHolder = this.customDataHolder;
-                if (customDataHolder == null || customDataHolder.providerIdentity != provierIdentity) {
-                    customDataHolder = createNewCustomData(provierIdentity, objectFactory);
+                if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
+                    customDataHolder = createNewCustomData(providerIdentity, objectFactory);
                     this.customDataHolder = customDataHolder;
                 }
             }

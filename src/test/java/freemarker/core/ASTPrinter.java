@@ -128,6 +128,9 @@ public class ASTPrinter {
     
     private void recurse(File srcDir, Pattern fnPattern, File dstDir) throws IOException {
         File[] files = srcDir.listFiles();
+        if (files == null) {
+            throw new IOException("Failed to kust directory: " + srcDir);
+        }
         for (File file : files) {
             if (file.isDirectory()) {
                 recurse(file, fnPattern, new File(dstDir, file.getName()));

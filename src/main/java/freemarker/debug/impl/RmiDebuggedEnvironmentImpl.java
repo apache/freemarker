@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.CacheStorage;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.core.Configurable;
@@ -102,6 +103,8 @@ implements
         return value;
     }
 
+    // TODO See in SuppressFBWarnings
+    @SuppressFBWarnings(value="NN_NAKED_NOTIFY", justification="Will have to be re-desigend; postponed.")
     public void resume() {
         synchronized(this)
         {
