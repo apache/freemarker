@@ -28,9 +28,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.template.utility.StringUtil;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import freemarker.template.utility.StringUtil;
 
 /**
  * Test case that needs to compare a string to a reference (expected) text file, or two text files. 
@@ -132,10 +133,9 @@ public abstract class FileTestCase extends TestCase {
         return getExpectedFileDirectory();
     }
 
-    // Findbugs annotation, try to put back on Java 1.6:
-    // @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE")
+    @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
     protected final File getTestClassDirectory() throws IOException {
-        URL url = this.getClass().getResource(".");  // Deliberately gets the package URL of the subclass
+        URL url = this.getClass().getResource(".");
         if (url == null) throw new IOException("Couldn't get resource URL for \".\"");
         return new File(url.getFile());
     }

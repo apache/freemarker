@@ -456,9 +456,6 @@ public class _ObjectBuilderSettingEvaluator {
                 }
                 sb.append(StringUtil.jQuote(expectedChars.substring(i, i + 1)));
             }
-            if (optional) {
-                sb.append(" or end-of-string");
-            }
             throw new _ObjectBuilderSettingEvaluationException(
                     sb.toString(),
                     src, pos);

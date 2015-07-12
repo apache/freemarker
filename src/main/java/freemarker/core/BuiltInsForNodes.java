@@ -18,6 +18,7 @@ package freemarker.core;
 
 import java.util.List;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateMethodModel;
@@ -91,9 +92,10 @@ class BuiltInsForNodes {
     // Can't be instantiated
     private BuiltInsForNodes() { }
 
-
     static class AncestorSequence extends SimpleSequence implements TemplateMethodModel {
         
+        @SuppressFBWarnings(value="SE_BAD_FIELD",
+                justification="Can't make this Serializable, and not extneding SimpleSequence would be non-BC.")
         private Environment env;
         
         AncestorSequence(Environment env) {

@@ -19,6 +19,7 @@ package freemarker.template;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -35,6 +36,7 @@ import freemarker.ext.util.WrapperTemplateModel;
  * 
  * @see Configuration#setObjectWrapper(ObjectWrapper)
  */
+@SuppressFBWarnings(value="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION", justification="BC")
 public interface ObjectWrapper {
     
     /**

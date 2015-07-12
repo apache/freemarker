@@ -87,7 +87,7 @@ import freemarker.template.Version;
  *       <li><p>
  *         Static model caches: These are used by the hash returned by {@link BeansWrapper#getEnumModels()} and
  *         {@link BeansWrapper#getStaticModels()}, for caching {@link TemplateModel}-s for the static methods/fields
- *         and Java 5 enums that were accessed through them. To use said hashes, you have to put them
+ *         and Java enums that were accessed through them. To use said hashes, you have to put them
  *         explicitly into the data-model or expose them to the template explicitly otherwise, so in most applications
  *         these caches aren't unused.
  *       </li>

@@ -38,6 +38,8 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class WebAppTestCase {
     
     public static final String IGNORED_MASK = "[IGNORED]";
@@ -235,6 +237,7 @@ public class WebAppTestCase {
         LOG.info("Deployed web app.: {}", webAppName);
     }
 
+    @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
     private String getWebAppDirURL(String webAppName) throws IOException {
         final URL webXmlURL;
         {

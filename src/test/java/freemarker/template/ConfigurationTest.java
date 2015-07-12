@@ -34,6 +34,7 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.NullCacheStorage;
@@ -913,8 +914,7 @@ public class ConfigurationTest extends TestCase {
         assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
     }
 
-    // Findbugs annotation, try to put back on Java 1.6:
-    // @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Meant to fail")
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Expected to fail")
     private void setTimeZoneToNull(Environment env2) {
         env2.setTimeZone(null);
     }

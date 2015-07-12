@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
 import freemarker.template.TemplateModel;
@@ -39,13 +40,15 @@ public class BeansModelCache extends ModelCache {
         return object.getClass() != Boolean.class; 
     }
     
+    @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER", justification="Locks for factory creation only")
     protected TemplateModel create(Object object) {
         Class clazz = object.getClass();
         
         ModelFactory factory = (ModelFactory) classToFactory.get(clazz);
         
         if (factory == null) {
-            synchronized(classToFactory) {
+            // Synchronized so that we won't unnecessarily create the same factory for multiple times in parallel.
+            synchronized (classToFactory) {
                 factory = (ModelFactory) classToFactory.get(clazz);
                 if (factory == null) {
                     String className = clazz.getName();

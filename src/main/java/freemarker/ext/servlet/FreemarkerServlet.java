@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
@@ -400,7 +401,9 @@ public class FreemarkerServlet extends HttpServlet {
      */
     protected boolean debug;
     
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Configuration config;
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ObjectWrapper wrapper;
     private String contentType;
     private boolean noCharsetInContentType;
@@ -408,7 +411,9 @@ public class FreemarkerServlet extends HttpServlet {
     private List/*<String>*/ classpathTlds;
 
     private Object lazyInitFieldsLock = new Object();
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ServletContextHashModel servletContextModel;
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private TaglibFactory taglibFactory;
     
     private boolean objectWrapperMismatchWarnLogged;
@@ -755,6 +760,7 @@ public class FreemarkerServlet extends HttpServlet {
         throw e;
     }
     
+    @SuppressFBWarnings(value={ "MSF_MUTABLE_SERVLET_FIELD", "DC_DOUBLECHECK" }, justification="Performance trick")
     private void logWarnOnObjectWrapperMismatch() {
         // Deliberately uses double check locking.
         if (wrapper != config.getObjectWrapper() && !objectWrapperMismatchWarnLogged && LOG.isWarnEnabled()) {
