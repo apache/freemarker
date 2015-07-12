@@ -82,8 +82,7 @@ public abstract class ModelCache {
     
     public void clearCache() {
         if (modelCache != null) {
-            synchronized(modelCache)
-            {
+            synchronized (modelCache) {
                 modelCache.clear();
             }
         }
@@ -94,8 +93,7 @@ public abstract class ModelCache {
         // NOTE: we're doing minimal synchronizations -- which can lead to
         // duplicate wrapper creation. However, this has no harmful side-effects and
         // is a lesser performance hit.
-        synchronized (modelCache)
-        {
+        synchronized (modelCache) {
             ref = (ModelReference) modelCache.get(object);
         }
 

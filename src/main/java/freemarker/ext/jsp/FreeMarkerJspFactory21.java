@@ -33,7 +33,7 @@ class FreeMarkerJspFactory21 extends FreeMarkerJspFactory {
         JspApplicationContext jspctx = (JspApplicationContext) ctx.getAttribute(
                 JSPCTX_KEY);
         if (jspctx == null) {
-            synchronized(ctx) {
+            synchronized (ctx) {
                 jspctx = (JspApplicationContext) ctx.getAttribute(JSPCTX_KEY);
                 if (jspctx == null) {
                     jspctx = new FreeMarkerJspApplicationContext();

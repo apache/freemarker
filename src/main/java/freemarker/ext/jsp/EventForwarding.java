@@ -89,15 +89,13 @@ public class EventForwarding
         return (EventForwarding) context.getAttribute(ATTR_NAME);
     }
     private void addListener(List listeners, EventListener listener) {
-        synchronized(listeners)
-        {
+        synchronized (listeners) {
             listeners.add(listener);
         }
     }
     
     public void attributeAdded(ServletContextAttributeEvent arg0) {
-        synchronized(servletContextAttributeListeners)
-        {
+        synchronized (servletContextAttributeListeners) {
             int s = servletContextAttributeListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((ServletContextAttributeListener) servletContextAttributeListeners.get(i)).attributeAdded(arg0);
@@ -106,8 +104,7 @@ public class EventForwarding
     }
 
     public void attributeRemoved(ServletContextAttributeEvent arg0) {
-        synchronized(servletContextAttributeListeners)
-        {
+        synchronized (servletContextAttributeListeners) {
             int s = servletContextAttributeListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((ServletContextAttributeListener) servletContextAttributeListeners.get(i)).attributeRemoved(arg0);
@@ -116,8 +113,7 @@ public class EventForwarding
     }
 
     public void attributeReplaced(ServletContextAttributeEvent arg0) {
-        synchronized(servletContextAttributeListeners)
-        {
+        synchronized (servletContextAttributeListeners) {
             int s = servletContextAttributeListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((ServletContextAttributeListener) servletContextAttributeListeners.get(i)).attributeReplaced(arg0);
@@ -128,8 +124,7 @@ public class EventForwarding
     public void contextInitialized(ServletContextEvent arg0) {
         arg0.getServletContext().setAttribute(ATTR_NAME, this);
         
-        synchronized(servletContextListeners)
-        {
+        synchronized (servletContextListeners) {
             int s = servletContextListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((ServletContextListener) servletContextListeners.get(i)).contextInitialized(arg0);
@@ -138,8 +133,7 @@ public class EventForwarding
     }
 
     public void contextDestroyed(ServletContextEvent arg0) {
-        synchronized(servletContextListeners)
-        {
+        synchronized (servletContextListeners) {
             int s = servletContextListeners.size();
             for (int i = s - 1; i >= 0; --i) {
                 ((ServletContextListener) servletContextListeners.get(i)).contextDestroyed(arg0);
@@ -148,8 +142,7 @@ public class EventForwarding
     }
 
     public void sessionCreated(HttpSessionEvent arg0) {
-        synchronized(httpSessionListeners)
-        {
+        synchronized (httpSessionListeners) {
             int s = httpSessionListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((HttpSessionListener) httpSessionListeners.get(i)).sessionCreated(arg0);
@@ -158,8 +151,7 @@ public class EventForwarding
     }
 
     public void sessionDestroyed(HttpSessionEvent arg0) {
-        synchronized(httpSessionListeners)
-        {
+        synchronized (httpSessionListeners) {
             int s = httpSessionListeners.size();
             for (int i = s - 1; i >= 0; --i) {
                 ((HttpSessionListener) httpSessionListeners.get(i)).sessionDestroyed(arg0);
@@ -168,8 +160,7 @@ public class EventForwarding
     }
 
     public void attributeAdded(HttpSessionBindingEvent arg0) {
-        synchronized(httpSessionAttributeListeners)
-        {
+        synchronized (httpSessionAttributeListeners) {
             int s = httpSessionAttributeListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((HttpSessionAttributeListener) httpSessionAttributeListeners.get(i)).attributeAdded(arg0);
@@ -178,8 +169,7 @@ public class EventForwarding
     }
 
     public void attributeRemoved(HttpSessionBindingEvent arg0) {
-        synchronized(httpSessionAttributeListeners)
-        {
+        synchronized (httpSessionAttributeListeners) {
             int s = httpSessionAttributeListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((HttpSessionAttributeListener) httpSessionAttributeListeners.get(i)).attributeRemoved(arg0);
@@ -188,8 +178,7 @@ public class EventForwarding
     }
 
     public void attributeReplaced(HttpSessionBindingEvent arg0) {
-        synchronized(httpSessionAttributeListeners)
-        {
+        synchronized (httpSessionAttributeListeners) {
             int s = httpSessionAttributeListeners.size();
             for (int i = 0; i < s; ++i) {
                 ((HttpSessionAttributeListener) httpSessionAttributeListeners.get(i)).attributeReplaced(arg0);

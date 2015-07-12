@@ -61,7 +61,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
     }
     
     public void addELContextListener(ELContextListener listener) {
-        synchronized(listeners) {
+        synchronized (listeners) {
             listeners.addLast(listener);
         }
     }
@@ -107,7 +107,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
     ELContext createNewELContext(final FreeMarkerPageContext pageCtx) {
         ELContext ctx = new FreeMarkerELContext(pageCtx);
         ELContextEvent event = new ELContextEvent(ctx);
-        synchronized(listeners) {
+        synchronized (listeners) {
             for (Iterator iter = listeners.iterator(); iter.hasNext(); ) {
                 ELContextListener l = (ELContextListener) iter.next();
                 l.contextCreated(event);

@@ -66,8 +66,7 @@ implements
     
     private RmiDebuggedEnvironmentImpl(Environment env) throws RemoteException {
         super(new DebugEnvironmentModel(env), DebugModel.TYPE_ENVIRONMENT);
-        synchronized(idLock)
-        {
+        synchronized (idLock) {
             id = nextId++;
         }
     }
@@ -106,8 +105,7 @@ implements
     // TODO See in SuppressFBWarnings
     @SuppressFBWarnings(value="NN_NAKED_NOTIFY", justification="Will have to be re-desigend; postponed.")
     public void resume() {
-        synchronized(this)
-        {
+        synchronized (this) {
             notify();
         }
     }

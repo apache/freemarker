@@ -118,13 +118,13 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     }
     
     void clearCache() {
-        synchronized(wrapper.getSharedIntrospectionLock()) {
+        synchronized (wrapper.getSharedIntrospectionLock()) {
             cache.clear();
         }
     }
     
     void removeFromCache(Class clazz) {
-        synchronized(wrapper.getSharedIntrospectionLock()) {
+        synchronized (wrapper.getSharedIntrospectionLock()) {
             cache.remove(clazz.getName());
         }
     }

@@ -292,7 +292,7 @@ public class TemplateCache {
         if (isStorageConcurrent) {
             cachedTemplate = (CachedTemplate) storage.get(tk);
         } else {
-            synchronized(storage) {
+            synchronized (storage) {
                 cachedTemplate = (CachedTemplate) storage.get(tk);
             }
         }
@@ -462,7 +462,7 @@ public class TemplateCache {
         if (isStorageConcurrent) {
             storage.put(tk, cachedTemplate);
         } else {
-            synchronized(storage) {
+            synchronized (storage) {
                 storage.put(tk, cachedTemplate);
             }
         }
@@ -625,7 +625,7 @@ public class TemplateCache {
             if (isStorageConcurrent) {
                 storage.remove(tk);
             } else {
-                synchronized(storage) {
+                synchronized (storage) {
                     storage.remove(tk);
                 }
             }

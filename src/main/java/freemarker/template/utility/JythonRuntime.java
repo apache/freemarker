@@ -51,7 +51,7 @@ public class JythonRuntime extends PythonInterpreter
             }
 
             private void interpretBuffer() {
-                synchronized(JythonRuntime.this) {
+                synchronized (JythonRuntime.this) {
                     PyObject prevOut = systemState.stdout;
                     try {
                         setOut(out);
