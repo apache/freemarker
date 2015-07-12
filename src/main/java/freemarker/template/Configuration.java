@@ -359,7 +359,7 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     private final static Object defaultConfigLock = new Object();
-    private static Configuration defaultConfig;
+    private static volatile Configuration defaultConfig;
 
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
@@ -912,13 +912,17 @@ public class Configuration extends Configurable implements Cloneable {
      * is initialized.
      */
     static public Configuration getDefaultConfiguration() {
-        // Java 5: use volatile + double check
-        synchronized (defaultConfigLock) {
-            if (defaultConfig == null) {
-                defaultConfig = new Configuration();
+        Configuration defaultConfig = Configuration.defaultConfig;
+        if (defaultConfig == null) {
+            synchronized (defaultConfigLock) {
+                defaultConfig = Configuration.defaultConfig;
+                if (defaultConfig == null) {
+                    defaultConfig = new Configuration();
+                    Configuration.defaultConfig = defaultConfig; 
+                }
             }
-            return defaultConfig;
         }
+        return defaultConfig;
     }
 
     /**

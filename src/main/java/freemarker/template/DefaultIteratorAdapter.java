@@ -19,6 +19,7 @@ package freemarker.template;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.util.WrapperTemplateModel;
 
 /**
@@ -39,6 +40,7 @@ import freemarker.ext.util.WrapperTemplateModel;
 public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
         AdapterTemplateModel, WrapperTemplateModel, Serializable {
 
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
     private final Iterator iterator;
     private boolean iteratorOwned;
 

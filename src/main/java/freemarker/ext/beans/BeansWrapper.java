@@ -1047,7 +1047,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         // know what is expected as the return type.
         if (targetClass != Object.class) {
 
-            // Java 5: Also should check for CharSequence at the end
+            // [2.4][IcI]: Should also check for CharSequence at the end
             if (String.class == targetClass) {
                 if (model instanceof TemplateScalarModel) {
                     return ((TemplateScalarModel) model).getAsString();

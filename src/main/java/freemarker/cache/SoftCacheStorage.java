@@ -31,7 +31,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * Soft cache storage is a cache storage that uses {@link SoftReference} objects to hold the objects it was passed,
  * therefore allows the garbage collector to purge the cache when it determines that it wants to free up memory. This
  * class is thread-safe to the extent that its underlying map is. The parameterless constructor uses a thread-safe map
- * since 2.3.24, and earlier if you are on Java 5 or later.
+ * since 2.3.24 or Java 5.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */

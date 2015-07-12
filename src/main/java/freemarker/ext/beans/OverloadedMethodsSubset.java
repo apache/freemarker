@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
@@ -129,12 +130,15 @@ abstract class OverloadedMethodsSubset {
         return unwrappingHintsByParamCount;
     }
     
+    @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER",
+            justification="Locks for member descriptor creation only")
     final MaybeEmptyCallableMemberDescriptor getMemberDescriptorForArgs(Object[] args, boolean varArg) {
         ArgumentTypes argTypes = new ArgumentTypes(args, bugfixed);
         MaybeEmptyCallableMemberDescriptor memberDesc
                 = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
         if (memberDesc == null) {
-            synchronized(argTypesToMemberDescCache) {
+            // Synchronized so that we won't unnecessarily create the same member desc. for multiple times in parallel.
+            synchronized (argTypesToMemberDescCache) {
                 memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
                 if (memberDesc == null) {
                     memberDesc = argTypes.getMostSpecific(memberDescs, varArg);

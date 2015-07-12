@@ -51,8 +51,8 @@ import freemarker.template.utility.SecurityUtilities;
 
 /**
  * Returns information about a {@link Class} that's useful for FreeMarker. Encapsulates a cache for this. Thread-safe,
- * doesn't require "proper publishing" starting from 2.3.24 or Java 5. Immutable, with the exception of the internal
- * caches.
+ * doesn't even require "proper publishing" starting from 2.3.24 or Java 5. Immutable, with the exception of the
+ * internal caches.
  * 
  * <p>
  * Note that instances of this are cached on the level of FreeMarker's defining class loader. Hence, it must not do
