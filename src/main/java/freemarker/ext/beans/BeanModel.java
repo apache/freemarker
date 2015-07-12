@@ -209,7 +209,7 @@ implements
         // See if this particular instance has a cached implementation
         // for the requested feature descriptor
         TemplateModel member;
-        synchronized(this) {
+        synchronized (this) {
             if (memberMap != null) {
                 member = (TemplateModel) memberMap.get(desc);
             } else {
@@ -245,7 +245,7 @@ implements
         
         // If new cacheable member was created, cache it
         if (member != null) {
-            synchronized(this) {
+            synchronized (this) {
                 if (memberMap == null) {
                     memberMap = new HashMap();
                 }
@@ -256,7 +256,7 @@ implements
     }
     
     void clearMemberCache() {
-        synchronized(this) {
+        synchronized (this) {
             memberMap = null;
         }
     }

@@ -55,7 +55,7 @@ final class NumericalOutput extends Interpolation {
         
         FormatHolder fmth = formatCache;  // atomic sampling
         if (fmth == null || !fmth.locale.equals(env.getLocale())) {
-            synchronized(this) {
+            synchronized (this) {
                 fmth = formatCache;
                 if (fmth == null || !fmth.locale.equals(env.getLocale())) {
                     NumberFormat fmt = NumberFormat.getNumberInstance(env.getLocale());

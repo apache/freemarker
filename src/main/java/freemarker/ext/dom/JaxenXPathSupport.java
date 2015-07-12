@@ -75,7 +75,7 @@ class JaxenXPathSupport implements XPathSupport {
         try {
             BaseXPath xpath;
             Map xpathCache = (Map) cache.get();
-            synchronized(xpathCache) {
+            synchronized (xpathCache) {
                 xpath = (BaseXPath) xpathCache.get(xpathQuery);
                 if (xpath == null) {
                     xpath = new BaseXPath(xpathQuery, fmDomNavigator);

@@ -1111,8 +1111,7 @@ public final class Environment extends Configurable {
         }
 
         // Get format from global format cache
-        synchronized(JAVA_NUMBER_FORMATS)
-        {
+        synchronized (JAVA_NUMBER_FORMATS) {
             Locale locale = getLocale();
             NumberFormatKey fk = new NumberFormatKey(pattern, locale);
             format = (NumberFormat) JAVA_NUMBER_FORMATS.get(fk);

@@ -385,8 +385,7 @@ implements
                             switch (specop.intValue()) {
                                 case SPECIAL_OPERATION_COPY:
                                 {
-                                    synchronized(namespaces)
-                                    {
+                                    synchronized (namespaces) {
                                         return new NodeListModel(nodes, (Map) ((HashMap) namespaces).clone());
                                     }
                                 }
@@ -424,8 +423,7 @@ implements
             if (colon != -1) {
                 localName = name.substring(colon + 1);
                 String nsPrefix = name.substring(0, colon);
-                synchronized(namespaces)
-                {
+                synchronized (namespaces) {
                     namespace = (Namespace) namespaces.get(nsPrefix);
                 }
                 if (namespace == null) {
@@ -533,8 +531,7 @@ implements
         String xpathString = (String) arguments.get(0);
         JDOMXPathEx xpath = null;
         try {
-            synchronized(XPATH_CACHE)
-            {
+            synchronized (XPATH_CACHE) {
                 xpath = (JDOMXPathEx) XPATH_CACHE.get(xpathString);
                 if (xpath == null) {
                     xpath = new JDOMXPathEx(xpathString);
@@ -573,8 +570,7 @@ implements
      * thereon.
      */
     public void registerNamespace(String prefix, String uri) {
-        synchronized(namespaces)
-        {
+        synchronized (namespaces) {
             namespaces.put(prefix, Namespace.getNamespace(prefix, uri));
         }
     }
@@ -1163,8 +1159,7 @@ implements
                 if (prefix.length() == 0) {
                     return prefix;
                 }
-                synchronized(namespaces)
-                {
+                synchronized (namespaces) {
                     Namespace ns = (Namespace) namespaces.get(prefix);
                     return ns == null ? null : ns.getURI();
                 }   

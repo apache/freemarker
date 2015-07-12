@@ -171,8 +171,7 @@ public class ResourceBundleModel
 
         // Perform the formatting. We synchronize on it in case it
         // contains date formatting, which is not thread-safe.
-        synchronized(format)
-        {
+        synchronized (format) {
             return format.format(params);
         }
     }

@@ -1864,7 +1864,7 @@ public class Configurable {
      * undefined.  
      */
     public String[] getCustomAttributeNames() {
-        synchronized(customAttributesLock) {
+        synchronized (customAttributesLock) {
             final LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             if (customAttributes == null) {
                 return getInitialCustomAttributeNames();
@@ -1904,7 +1904,7 @@ public class Configurable {
      * @param name the name of the custom attribute
      */
     public void removeCustomAttribute(String name) {
-        synchronized(customAttributesLock) {
+        synchronized (customAttributesLock) {
             LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             if (customAttributes != null) {
                 customAttributes.remove(name);

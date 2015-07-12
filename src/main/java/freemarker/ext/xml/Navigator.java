@@ -55,8 +55,7 @@ abstract class Navigator {
     throws TemplateModelException {
         XPathEx xpath = null;
         try {
-            synchronized(xpathCache)
-            {
+            synchronized (xpathCache) {
                 xpath = (XPathEx) xpathCache.get(xpathString);
                 if (xpath == null) {
                     xpath = createXPathEx(xpathString);
