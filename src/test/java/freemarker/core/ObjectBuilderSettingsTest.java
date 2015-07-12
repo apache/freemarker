@@ -378,14 +378,14 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper(2.3.21)");
-            props.setProperty(Configuration.ARITHMETIC_ENGINE_KEY,
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper(2.3.21)");
+            props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY,
                     "freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine");
-            props.setProperty(Configuration.TEMPLATE_EXCEPTION_HANDLER_KEY,
+            props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY,
                     "freemarker.core.ObjectBuilderSettingsTest$DummyTemplateExceptionHandler");
             props.setProperty(Configuration.CACHE_STORAGE_KEY,
                     "freemarker.core.ObjectBuilderSettingsTest$DummyCacheStorage()");
-            props.setProperty(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
+            props.setProperty(Configurable.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "freemarker.core.ObjectBuilderSettingsTest$DummyNewBuiltinClassResolver()");
             props.setProperty(Configuration.DEFAULT_ENCODING_KEY, "utf-8");
             props.setProperty(Configuration.TEMPLATE_LOADER_KEY,
@@ -404,14 +404,14 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "defAult");
-            props.setProperty(Configuration.ARITHMETIC_ENGINE_KEY,
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "defAult");
+            props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY,
                     "freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine(x = 1)");
-            props.setProperty(Configuration.TEMPLATE_EXCEPTION_HANDLER_KEY,
+            props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY,
                     "freemarker.core.ObjectBuilderSettingsTest$DummyTemplateExceptionHandler(x = 1)");
             props.setProperty(Configuration.CACHE_STORAGE_KEY,
                     "soft: 500, strong: 100");
-            props.setProperty(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
+            props.setProperty(Configurable.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "safer");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
@@ -426,9 +426,9 @@ public class ObjectBuilderSettingsTest {
 
         {
             Properties props = new Properties();
-            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "Beans");
-            props.setProperty(Configuration.ARITHMETIC_ENGINE_KEY, "bigdecimal");
-            props.setProperty(Configuration.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "Beans");
+            props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY, "bigdecimal");
+            props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
             assertSame(ArithmeticEngine.BIGDECIMAL_ENGINE, cfg.getArithmeticEngine());
@@ -439,7 +439,7 @@ public class ObjectBuilderSettingsTest {
 
         {
             Properties props = new Properties();
-            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper");
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper");
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
             assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
@@ -448,7 +448,7 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(2.3.19)");
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(2.3.19)");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
@@ -926,30 +926,37 @@ public class ObjectBuilderSettingsTest {
         
         private int x;
 
+        @Override
         public int compareNumbers(Number first, Number second) throws TemplateException {
             return 0;
         }
 
+        @Override
         public Number add(Number first, Number second) throws TemplateException {
             return null;
         }
 
+        @Override
         public Number subtract(Number first, Number second) throws TemplateException {
             return null;
         }
 
+        @Override
         public Number multiply(Number first, Number second) throws TemplateException {
             return null;
         }
 
+        @Override
         public Number divide(Number first, Number second) throws TemplateException {
             return null;
         }
 
+        @Override
         public Number modulus(Number first, Number second) throws TemplateException {
             return null;
         }
 
+        @Override
         public Number toNumber(String s) {
             return null;
         }

@@ -25,6 +25,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 /**
  */
 public class TestTag3 extends TagSupport {
+    @Override
     public int doStartTag() throws JspException {
         try {
             pageContext.getOut().println("TestTag3.doStartTag() called here");
@@ -34,6 +35,7 @@ public class TestTag3 extends TagSupport {
         }
     }
 
+    @Override
     public int doEndTag() throws JspException {
         try {
             pageContext.getOut().println("TestTag3.doEndTag() called here");

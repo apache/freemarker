@@ -30,6 +30,7 @@ public class PrallelObjectIntrospectionTest extends AbstractParallelIntrospectio
                 .testReliability(Integer.MAX_VALUE);
     }
     
+    @Override
     protected TemplateHashModel getWrappedEntity(int objIdx)
     throws TemplateModelException {
         return (TemplateHashModel) getBeansWrapper().wrap(

@@ -281,6 +281,7 @@ public class RealServletContainertTest extends WebAppTestCase {
 
     public static class AllKindOfContainersModel2Action extends DefaultModel2TesterAction {
 
+        @Override
         public String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
             req.setAttribute("linkedList", initTestCollection(new LinkedList<Integer>()));
             req.setAttribute("arrayList", initTestCollection(new ArrayList<Integer>()));
@@ -378,6 +379,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     
     public static class AssertDefaultsFreemarkerServlet extends AssertingFreemarkerServlet {
 
+        @Override
         protected void doAssertions(Configuration cfg) {
             assertEquals(Configuration.VERSION_2_3_22, cfg.getIncompatibleImprovements());
             
@@ -423,6 +425,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             return cfg;
         }
 
+        @Override
         protected void doAssertions(Configuration cfg) {
             assertEquals(Configuration.VERSION_2_3_20, cfg.getIncompatibleImprovements());
             

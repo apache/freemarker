@@ -102,10 +102,10 @@ public class ExceptionTest extends TestCase {
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             assertEquals("foo_en.ftl", e.getTemplateName());
-            assertEquals(3, (int) e.getLineNumber());
-            assertEquals(5, (int) e.getColumnNumber());
-            assertEquals(3, (int) e.getEndLineNumber());
-            assertEquals(20, (int) e.getEndColumnNumber());
+            assertEquals(3, e.getLineNumber());
+            assertEquals(5, e.getColumnNumber());
+            assertEquals(3, e.getEndLineNumber());
+            assertEquals(20, e.getEndColumnNumber());
             assertThat(e.getMessage(), containsString("foo_en.ftl"));
             assertThat(e.getMessage(), containsString("noSuchDirective"));
         }

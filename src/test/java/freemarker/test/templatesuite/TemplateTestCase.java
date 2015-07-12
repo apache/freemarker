@@ -171,6 +171,7 @@ public class TemplateTestCase extends FileTestCase {
      * We really might as well just expose pretty much 
      * the same tree to all our tests. (JR)
      */
+    @Override
     @SuppressWarnings("boxing")
     public void setUp() throws Exception {
         conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
@@ -264,6 +265,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
             dataModel.put("adaptedToStringScalar", new Object() {
+                @Override
                 public String toString() {
                     return "GMT+02";
                 }
@@ -434,6 +436,7 @@ public class TemplateTestCase extends FileTestCase {
         }
     }
     
+    @Override
     public void runTest() throws IOException {
         Template template;
         try {
