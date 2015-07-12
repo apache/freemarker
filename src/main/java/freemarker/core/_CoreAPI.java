@@ -115,13 +115,6 @@ public class _CoreAPI {
             TemplateElement[] instructionStackSnapshot, boolean terseMode, Writer pw) {
         Environment.outputInstructionStack(instructionStackSnapshot, terseMode, pw);
     }
-    
-    /**
-     * [FM 2.4] getSettingNames() becomes to public; remove this.
-     */
-    public static Set<String> getConfigurableSettingNames(Configurable cfgable, boolean camelCase) {
-        return cfgable.getSettingNames(camelCase);
-    }
 
     public static Map<String, ?> getCustomAttributes(UnboundTemplate unboundTemplate) {
         return unboundTemplate.getCustomAttributes();

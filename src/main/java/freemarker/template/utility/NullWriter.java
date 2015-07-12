@@ -59,8 +59,6 @@ public final class NullWriter extends Writer {
         // Do nothing
     }
 
-    // Put these back in Java 5:
-    /*
     public Writer append(CharSequence csq) throws IOException {
         // Do nothing
         return this;
@@ -75,6 +73,5 @@ public final class NullWriter extends Writer {
         // Do nothing
         return this;
     }
-    */
 
 }

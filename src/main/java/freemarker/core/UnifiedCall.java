@@ -246,21 +246,13 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     public Object getOrCreateCustomData(Object provierIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException {
-        // We are using double-checked locking, utilizing Java 5 memory model "final" trick.
+        // We are using double-checked locking, utilizing Java memory model "final" trick.
         
         CustomDataHolder customDataHolder = this.customDataHolder;  // Findbugs false alarm
         if (customDataHolder == null) {  // Findbugs false alarm
             synchronized (this) {
                 customDataHolder = this.customDataHolder;
                 if (customDataHolder == null || customDataHolder.providerIdentity != provierIdentity) {
-                    if (customDataHolder == null) {
-                        try {
-                            Class.forName("java.util.concurrent.atomic.AtomicInteger");
-                        } catch (ClassNotFoundException e) {
-                            throw new CallPlaceCustomDataInitializationException("Feature requires at least Java 5", e);
-                        }
-                    }
-                    
                     customDataHolder = createNewCustomData(provierIdentity, objectFactory);
                     this.customDataHolder = customDataHolder; 
                 }

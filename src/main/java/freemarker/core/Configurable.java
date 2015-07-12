@@ -1638,10 +1638,19 @@ public class Configurable {
         }
     }
     
-    /** Returns the possible setting names. */
-    // [FM 2.4] Add public parameterless version the returns the camelCase names.
-    Set<String> getSettingNames(boolean camelCase) {
-        return new _SortedArraySet(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE); 
+    /**
+     * Returns the valid setting names that aren't {@link Configuration}-only.
+     *
+     * @param camelCase
+     *            If we want the setting names with camel case naming convention, or with snake case (legacy) naming
+     *            convention.
+     * 
+     * @see Configuration#getSettingNames(boolean)
+     * 
+     * @since 2.3.24
+     */
+    public Set<String> getSettingNames(boolean camelCase) {
+        return new _SortedArraySet<String>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE); 
     }
 
     private TimeZone parseTimeZoneSettingValue(String value) {

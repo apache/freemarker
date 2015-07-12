@@ -25,12 +25,10 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -1001,7 +999,7 @@ public class TaglibFactory implements TemplateHashModel {
         String filePath;
         try {
             // Using URI instead of URL, so we get an URL-decoded path.
-            filePath = toUri(url).getSchemeSpecificPart();
+            filePath = url.toURI().getSchemeSpecificPart();
         } catch (URISyntaxException e) { // Can happen, as URI-s are stricter than legacy URL-s.
             // URL.getFile() doesn't decode %XX-s (used for spaces and non-US-ASCII letters usually), so we do.
             // As it was originally created for a file somewhere, we hope that it uses the platform default encoding.
@@ -1012,42 +1010,6 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
         return new File(filePath);
-    }
-
-    private static final Method toURIMethod;
-    static {
-        Method m;
-        try {
-            m = URL.class.getMethod("toURI", new Class[] { });
-        } catch (Exception e) {
-            m = null;
-        }
-        toURIMethod = m;
-    }
-    
-    // Java 5: remove
-    /**
-     * Calls Java 5 URL.toURI() on Java 1.4. 
-     */
-    private static URI toUri(URL url) throws URISyntaxException {
-        if (toURIMethod != null) {
-            try {
-                return (URI) toURIMethod.invoke(url, new Object[] { });
-            } catch (InvocationTargetException e) {
-                final Throwable targetE = e.getTargetException();
-                if (targetE instanceof URISyntaxException) {
-                    throw (URISyntaxException) targetE;
-                }
-                if (targetE instanceof RuntimeException) {
-                    throw (RuntimeException) targetE;
-                }
-                throw new RuntimeException("toURI() call failed", e);
-            } catch (Exception e) {
-                throw new RuntimeException("toURI() call failed", e);
-            }
-        } else {
-            return new URI(url.toString());
-        }
     }
 
     /**
@@ -1086,7 +1048,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
             return new URL(
                     "jar:"
-                    + toUri(jarFileUrl)
+                    + jarFileUrl.toURI()
                     + JAR_URL_ENTRY_PATH_START
                     + URLEncoder.encode(
                             entryPath.startsWith("/") ? entryPath.substring(1) : entryPath,
@@ -1436,27 +1398,18 @@ public class TaglibFactory implements TemplateHashModel {
         private ServletContextJarEntryTldLocation(final String servletContextJarFilePath, final String entryPath) {
             super(
                     tryCreateServletContextJarEntryUrl(servletContext, servletContextJarFilePath, entryPath),
-                    new SerlvetContextInputStreamFactory(servletContextJarFilePath),
+                    new InputStreamFactory() {
+                        public InputStream getInputStream() {
+                            return servletContext.getResourceAsStream(servletContextJarFilePath);
+                        }
+
+                        public String toString() {
+                            return "servletContext:" + servletContextJarFilePath;
+                        }
+                    },
                     entryPath);
         }
         
-    }
-    
-    // Java 5: Make it an anonymous class 
-    private final class SerlvetContextInputStreamFactory implements InputStreamFactory {
-        private final String servletContextJarFilePath;
-
-        private SerlvetContextInputStreamFactory(String servletContextJarFilePath) {
-            this.servletContextJarFilePath = servletContextJarFilePath;
-        }
-
-        public InputStream getInputStream() {
-            return servletContext.getResourceAsStream(servletContextJarFilePath);
-        }
-
-        public String toString() {
-            return "servletContext:" + servletContextJarFilePath;
-        }
     }
 
     private static class FileTldLocation implements TldLocation {

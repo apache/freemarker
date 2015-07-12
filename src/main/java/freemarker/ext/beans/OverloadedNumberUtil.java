@@ -90,7 +90,6 @@ class OverloadedNumberUtil {
      *     indicated in the {@code targetNumTypes} parameter.
      */
     static Number addFallbackType(final Number num, final int typeFlags) {
-        // Java 5: use valueOf where possible
         final Class numClass = num.getClass();
         if (numClass == BigDecimal.class) {
             // For now we only support the backward-compatible mode that doesn't prevent roll overs and magnitude loss.
@@ -178,10 +177,9 @@ class OverloadedNumberUtil {
                 } else if ((typeFlags & TypeFlags.INTEGER) != 0
                         && longN <= Integer.MAX_VALUE && longN >= Integer.MIN_VALUE) {
                     final int intN = (int) longN; 
-                    // Java 5: remove the "? (Number)" and ": (Number)" casts
                     return (typeFlags & TypeFlags.FLOAT) != 0 && intN >= MIN_FLOAT_OR_INT && intN <= MAX_FLOAT_OR_INT
-                                    ? (Number) new DoubleOrIntegerOrFloat((Double) num, intN)
-                                    : (Number) new DoubleOrInteger((Double) num, intN);
+                                    ? new DoubleOrIntegerOrFloat((Double) num, intN)
+                                    : new DoubleOrInteger((Double) num, intN);
                 } else if ((typeFlags & TypeFlags.LONG) != 0) {
                     if (exact) {
                         return new DoubleOrLong((Double) num, longN);
@@ -257,8 +255,8 @@ class OverloadedNumberUtil {
                 } else if ((typeFlags & TypeFlags.LONG) != 0) {
                     // We can't even go outside the range of integers, so we don't need Long variation:
                     return exact
-                            ? (Number) new FloatOrInteger((Float) num, intN)
-                            : (Number) new FloatOrByte((Float) num, (byte) intN);  // as !exact implies (-128..127)
+                            ? new FloatOrInteger((Float) num, intN)
+                            : new FloatOrByte((Float) num, (byte) intN);  // as !exact implies (-128..127)
                 }
                 // This point is reached if the float value was out of the range of target integer type(s). 
                 // Falls through!
