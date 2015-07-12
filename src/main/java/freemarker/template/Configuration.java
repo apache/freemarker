@@ -779,7 +779,7 @@ public class Configuration extends Configurable implements Cloneable {
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new BugException(e.getMessage());  // Java 5: use cause exc.
+            throw new BugException("Cloning failed", e);
         }
     }
     
@@ -2319,11 +2319,22 @@ public class Configuration extends Configurable implements Cloneable {
         return s.substring(0, ln);
     }
 
-    // [Java 5] Add type param. [FM 2.4] Add public parameterless version the returns the camelCase names.
-    Set/*<String>*/ getSettingNames(boolean camelCase) {
-        return new _UnmodifiableCompositeSet(
-                _CoreAPI.getConfigurableSettingNames(this, camelCase),
-                new _SortedArraySet(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE)); 
+    /**
+     * Returns the valid {@link Configuration} setting names. Naturally, this includes the {@link Configurable} setting
+     * names too.
+     * 
+     * @param camelCase
+     *            If we want the setting names with camel case naming convention, or with snake case (legacy) naming
+     *            convention.
+     * 
+     * @see Configurable#getSettingNames(boolean)
+     * 
+     * @since 2.3.24
+     */
+    public Set<String> getSettingNames(boolean camelCase) {
+        return new _UnmodifiableCompositeSet<String>(
+                super.getSettingNames(camelCase),
+                new _SortedArraySet<String>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE)); 
     }
     
     protected String getCorrectedNameForUnknownSetting(String name) {

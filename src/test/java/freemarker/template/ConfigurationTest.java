@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 
 import freemarker.cache.CacheStorageWithGetSize;
@@ -51,12 +49,12 @@ import freemarker.core.Configurable;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
 import freemarker.core.Environment;
-import freemarker.core._CoreAPI;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullWriter;
+import junit.framework.TestCase;
 
 public class ConfigurationTest extends TestCase {
 
@@ -1058,7 +1056,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         for (boolean camelCase : new boolean[] { false, true }) {
             List<String> names = new ArrayList<String>(cfg.getSettingNames(camelCase)); 
-            List<String> cfgableNames = new ArrayList<String>(_CoreAPI.getConfigurableSettingNames(cfg, camelCase));
+            List<String> cfgableNames = new ArrayList<String>(cfg.getSettingNames(camelCase));
             assertStartsWith(names, cfgableNames);
             
             String prevName = null;
@@ -1084,7 +1082,7 @@ public class ConfigurationTest extends TestCase {
     public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         List<String> names = new ArrayList<String>(cfg.getSettingNames(false)); 
-        List<String> cfgableNames = new ArrayList<String>(_CoreAPI.getConfigurableSettingNames(cfg, false));
+        List<String> cfgableNames = new ArrayList<String>(cfg.getSettingNames(false));
         assertStartsWith(names, cfgableNames);
         
         for (int i = cfgableNames.size(); i < names.size(); i++) {

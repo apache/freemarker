@@ -29,7 +29,6 @@ import freemarker.core._DelayedJQuote;
 import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -38,10 +37,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */ 
 public final class _MethodUtil {
     
-    // Get rid of these on Java 5
-    private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
-    private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
-
     private _MethodUtil() {
         // Not meant to be instantiated
     }
@@ -196,31 +191,12 @@ public final class _MethodUtil {
 
     public static boolean isVarargs(Member member) {
         if (member instanceof Method) { 
-            return isVarargs(member, METHOD_IS_VARARGS);
+            return ((Method) member).isVarArgs();
         }
         if (member instanceof Constructor) {
-            return isVarargs(member, CONSTRUCTOR_IS_VARARGS);
+            return ((Constructor) member).isVarArgs();
         }
         throw new BugException();
-    }
-
-    private static boolean isVarargs(Member member, Method isVarArgsMethod) {
-        if (isVarArgsMethod == null) {
-            return false;
-        }
-        try {
-            return ((Boolean) isVarArgsMethod.invoke(member, (Object[]) null)).booleanValue();
-        } catch (Exception e) {
-            throw new UndeclaredThrowableException(e);
-        }
-    }
-
-    private static Method getIsVarArgsMethod(Class memberClass) {
-        try {
-            return memberClass.getMethod("isVarArgs", (Class[]) null);
-        } catch (NoSuchMethodException e) {
-            return null; // pre 1.5 JRE
-        }
     }
 
     /**

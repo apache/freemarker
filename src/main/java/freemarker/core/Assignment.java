@@ -44,7 +44,6 @@ final class Assignment extends TemplateElement {
     static final int LOCAL = 2;
     static final int GLOBAL = 3;
     
-    // Java 5: Integer.valueOf(1)
     private static final Number ONE = Integer.valueOf(1);
 
     /**

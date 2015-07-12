@@ -23647,12 +23647,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Raised minimum required Java version from 1.4 to 5</para>
+              <para><emphasis role="strong">Attention!</emphasis> Raised
+              minimum required Java version from 1.4 to 1.5 (aka. Java
+              5)</para>
             </listitem>
 
             <listitem>
-              <para>Upgraded JavaCC (used during build to generate the parser)
-              from 3.2 to 6.1.2.</para>
+              <para>Upgraded JavaCC (used during build to generate the FTL
+              parser) from 3.2 to 6.1.2.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Configurable.getSettingNames(camelCase)</literal>,
+              which returns the set of valid setting names. This can be useful
+              for auto-completion and such.</para>
             </listitem>
           </itemizedlist>
         </section>
