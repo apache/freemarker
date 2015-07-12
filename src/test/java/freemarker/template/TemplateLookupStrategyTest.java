@@ -594,6 +594,7 @@ public class TemplateLookupStrategyTest {
         
         private MyTemplateLookupStrategy() { }
 
+        @Override
         public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
             String lang = ctx.getTemplateLocale().getLanguage().toLowerCase();
             TemplateLookupResult lookupResult = ctx.lookupWithAcquisitionStrategy(lang + "/" + ctx.getTemplateName());
@@ -610,6 +611,7 @@ public class TemplateLookupStrategyTest {
         
         public static final DomainTemplateLookupStrategy INSTANCE = new DomainTemplateLookupStrategy();
 
+        @Override
         public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
             String domain = (String) ctx.getCustomLookupCondition();
             if (domain == null) {

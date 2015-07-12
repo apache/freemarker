@@ -39,6 +39,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
         this.throwException = throwException;
     }
 
+    @Override
     public int doStartTag() throws JspException {
         try {
             pageContext.getOut().println("doStartTag() called here");
@@ -51,6 +52,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
         }
     }
 
+    @Override
     public int doAfterBody() throws JspException {
         try {
             getPreviousOut().println("doAfterBody() called here");
@@ -62,6 +64,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
         }
     }
     
+    @Override
     public int doEndTag() throws JspException {
         try {
             pageContext.getOut().println("doEndTag() called here");

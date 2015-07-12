@@ -43,13 +43,16 @@ public class TransformModel1 implements TemplateTransformModel {
                             final Map args) {
         final StringBuilder buf = new StringBuilder();
         return new Writer(out) {
+            @Override
             public void write(char cbuf[], int off, int len) {
                 buf.append(cbuf, off, len);
             }
 
+            @Override
             public void flush() {
             }
 
+            @Override
             public void close() throws IOException {
                 StringReader sr = new StringReader(buf.toString());
                 StringWriter sw = new StringWriter();

@@ -720,7 +720,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
         
         {
-            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult");
             assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
         }
         
@@ -733,12 +733,12 @@ public class ConfigurationTest extends TestCase {
         }
         
         {
-            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult_2_3_0");
+            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult_2_3_0");
             assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
         }
         
         {
-            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY,
+            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY,
                     "DefaultObjectWrapper(2.3.21, useAdaptersForContainers=true, forceLegacyNonListCollections=false)");
             DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
             assertEquals(Configuration.VERSION_2_3_21, dow.getIncompatibleImprovements());
@@ -746,7 +746,7 @@ public class ConfigurationTest extends TestCase {
         }
         
         {
-            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult");
             DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
             assertEquals(Configuration.VERSION_2_3_22, dow.getIncompatibleImprovements());
             assertTrue(dow.getForceLegacyNonListCollections());
@@ -770,6 +770,7 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1, cache.getSize());
         
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
+            @Override
             public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
                 return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
             }
@@ -929,7 +930,7 @@ public class ConfigurationTest extends TestCase {
     public void testSetLogTemplateExceptionsViaSetSettingAPI() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         assertEquals(true, cfg.getLogTemplateExceptions());
-        cfg.setSetting(Configuration.LOG_TEMPLATE_EXCEPTIONS_KEY, "false");
+        cfg.setSetting(Configurable.LOG_TEMPLATE_EXCEPTIONS_KEY, "false");
         assertEquals(false, cfg.getLogTemplateExceptions());
     }
     
@@ -1133,7 +1134,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY_SNAKE_CASE, "UTF-8");
         assertEquals("UTF-8", cfg.getDefaultEncoding());
         
-        for (String nameCC : (Set<String>) cfg.getSettingNames(true)) {
+        for (String nameCC : cfg.getSettingNames(true)) {
             for (String value : new String[] { "1", "default", "true" }) {
                 Exception resultCC = null;
                 try {
