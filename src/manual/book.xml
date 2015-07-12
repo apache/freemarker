@@ -3958,50 +3958,54 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <primary>${...}</primary>
         </indexterm>
 
-        <para>The format of interpolations is
-        <literal>${<replaceable>expression</replaceable>}</literal>, where
-        <literal><replaceable>expression</replaceable></literal> can be all
-        kind of expression (e.g. <literal>${100 + x}</literal>).</para>
+        <section>
+          <title>Overview</title>
 
-        <para>The interpolation is used to insert the value of the
-        <literal><replaceable>expression</replaceable></literal> converted to
-        text (to string). Interpolations can be used only on two places: in
-        <link linkend="dgui_template_overallstructure"><phrase
-        role="markedText">text</phrase> sections</link> (e.g.,
-        <literal>&lt;h1&gt;Hello ${name}!&lt;/h1&gt;</literal>) and <link
-        linkend="dgui_template_exp_stringop_interpolation">in string literal
-        expressions</link> (e.g., <literal>&lt;#include
-        "/footer/${company}.html"&gt;</literal>).</para>
+          <para>The format of interpolations is
+          <literal>${<replaceable>expression</replaceable>}</literal>, where
+          <literal><replaceable>expression</replaceable></literal> can be all
+          kind of expression (e.g. <literal>${100 + x}</literal>).</para>
 
-        <warning>
-          <para>A frequent mistake of users is the usage of interpolations in
-          places where they needn't/shouldn't/can't be used. Interpolations
-          work <emphasis>only</emphasis> in <link
-          linkend="dgui_template_overallstructure"><phrase
-          role="markedText">text</phrase> sections</link> (e.g.
-          <literal>&lt;h1&gt;Hello ${name}!&lt;/h1&gt;</literal>) and in <link
-          linkend="dgui_template_exp_direct_string">string literals</link>
-          (e.g. <literal>&lt;#include
-          "/footer/${company}.html"&gt;</literal>). A typical
-          <emphasis>WRONG</emphasis> usage is <literal>&lt;#if
-          ${big}&gt;...&lt;/#if&gt;</literal>, which will give syntactical
-          error. You should simply write <literal>&lt;#if
-          big&gt;...&lt;/#if&gt;</literal>. Also, <literal>&lt;#if
-          "${big}"&gt;...&lt;/#if&gt;</literal> is <emphasis>WRONG</emphasis>,
-          since it converts the parameter value to string and the
-          <literal>if</literal> directive wants a boolean value, so it will
-          cause a runtime error.</para>
-        </warning>
+          <para>The interpolation is used to insert the value of the
+          <literal><replaceable>expression</replaceable></literal> converted
+          to text (to string). Interpolations can be used only on two places:
+          in <link linkend="dgui_template_overallstructure"><phrase
+          role="markedText">text</phrase> sections</link> (e.g.,
+          <literal>&lt;h1&gt;Hello ${name}!&lt;/h1&gt;</literal>) and <link
+          linkend="dgui_template_exp_stringop_interpolation">in string literal
+          expressions</link> (e.g., <literal>&lt;#include
+          "/footer/${company}.html"&gt;</literal>).</para>
 
-        <para>The result of the expression must be a string, number or
-        date/time/date-time value. This is because only numbers and
-        date/time/date-time values are converted to string by interpolation
-        automatically, values of other types (such as booleans, sequences)
-        must be converted to string "manually" somehow (see some advices
-        later), or an error will stop the template processing.</para>
+          <para>The result of the expression must be a string, number or
+          date/time/date-time value, because (by default) only these types are
+          converted to string by interpolation automatically. Values of other
+          types (such as booleans, sequences) must be converted to string
+          <quote>manually</quote> (see some advices later), or an error will
+          stop the template processing.</para>
 
-        <simplesect>
-          <title>Guide for inserting strings; don't forget escaping!</title>
+          <warning>
+            <para>It's a frequent mistake to use interpolations on places
+            where they needn't/shouldn't/can't be used. Interpolations work
+            <emphasis>only</emphasis> in <link
+            linkend="dgui_template_overallstructure"><phrase
+            role="markedText">text</phrase> sections</link> (e.g.
+            <literal>&lt;h1&gt;Hello ${name}!&lt;/h1&gt;</literal>) and in
+            <link linkend="dgui_template_exp_direct_string">string
+            literals</link> (e.g. <literal>&lt;#include
+            "/footer/${company}.html"&gt;</literal>). A typical
+            <emphasis>WRONG</emphasis> usage is <literal>&lt;#if
+            ${big}&gt;...&lt;/#if&gt;</literal>, which will give syntactical
+            error. You should simply write <literal>&lt;#if
+            big&gt;...&lt;/#if&gt;</literal>. Also, <literal>&lt;#if
+            "${big}"&gt;...&lt;/#if&gt;</literal> is
+            <emphasis>WRONG</emphasis>, since it converts the parameter value
+            to string and the <literal>if</literal> directive wants a boolean
+            value, so it will cause a runtime error.</para>
+          </warning>
+        </section>
+
+        <section>
+          <title>Guide to inserting strings; don't forget escaping!</title>
 
           <para>If the interpolation is in a <link
           linkend="dgui_template_overallstructure"><phrase
@@ -4059,10 +4063,10 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           the earlier example you may forget some
           <literal>noescape</literal>-s, which gives bad output too, but it's
           at least no a security risk.</para>
-        </simplesect>
+        </section>
 
-        <simplesect>
-          <title>Guide for inserting numerical values</title>
+        <section>
+          <title>Guide to inserting numerical values</title>
 
           <para>If the expression evaluates to a number then the numerical
           value will be converted to string according the default number
@@ -4110,10 +4114,10 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
 
             <programlisting role="template">&lt;a href="/shop/productdetails?id=${product.id?c}"&gt;Details...&lt;/a&gt;</programlisting>
           </warning>
-        </simplesect>
+        </section>
 
-        <simplesect xml:id="dgui_template_valueinserion_universal_date">
-          <title>Guide for inserting date/time/date-time values</title>
+        <section xml:id="dgui_template_valueinserion_universal_date">
+          <title>Guide to inserting date/time/date-time values</title>
 
           <para>If the expression evaluates to a date-like value then that
           will be transformed to a text according to a default format. Usually
@@ -4144,10 +4148,10 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
             built-ins (like <literal>${lastUpdated?datetime}</literal>), or it
             will stop with error.</para>
           </warning>
-        </simplesect>
+        </section>
 
-        <simplesect>
-          <title>Guide for inserting boolean values</title>
+        <section>
+          <title>Guide to inserting boolean values</title>
 
           <para>By default an attempt to print boolean values with
           interpolation causes an error and aborts template processing. For
@@ -4176,10 +4180,10 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           (<quote>c</quote> stands for computer audience) should be used to
           print true/false. (Remember that <literal>?c</literal> was also used
           to print numbers for computer audience.)</para>
-        </simplesect>
+        </section>
 
-        <simplesect>
-          <title>The exact conversion rules</title>
+        <section>
+          <title>Exact conversion rules</title>
 
           <para>For those who are interested, the exact rules of conversion
           from the expression value to string (which is then still subject to
@@ -4236,7 +4240,7 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
               <para>Else an error will abort the template processing.</para>
             </listitem>
           </orderedlist>
-        </simplesect>
+        </section>
       </section>
     </chapter>
 
