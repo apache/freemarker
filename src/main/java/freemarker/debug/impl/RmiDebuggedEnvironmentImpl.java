@@ -174,6 +174,7 @@ implements
             this.configurable = configurable;
         }
         
+        @Override
         Collection keySet() {
             return KEYS;
         }
@@ -190,6 +191,7 @@ implements
 
         private TemplateModel sharedVariables = new DebugMapModel()
         {
+            @Override
             Collection keySet() {
                 return ((Configuration) configurable).getSharedVariableNames();
             }
@@ -203,10 +205,12 @@ implements
             super(config);
         }
         
+        @Override
         Collection keySet() {
             return KEYS;
         }
 
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             if ("sharedVariables".equals(key)) {
                 return sharedVariables; 
@@ -230,10 +234,12 @@ implements
             this.name = new SimpleScalar(template.getName());
         }
 
+        @Override
         Collection keySet() {
             return KEYS;
         }
 
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             if ("configuration".equals(key)) {
                 try {
@@ -262,6 +268,7 @@ implements
     
         private TemplateModel knownVariables = new DebugMapModel()
         {
+            @Override
             Collection keySet() {
                 try {
                     return ((Environment) configurable).getKnownVariableNames();
@@ -279,10 +286,12 @@ implements
             super(env);
         }
 
+        @Override
         Collection keySet() {
             return KEYS;
         }
 
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             if ("currentNamespace".equals(key)) {
                 return ((Environment) configurable).getCurrentNamespace();

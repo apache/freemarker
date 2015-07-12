@@ -27,12 +27,14 @@ import freemarker.template.TemplateException;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 public class DebugBreak extends TemplateElement {
     public DebugBreak(TemplateElement nestedBlock) {
         setNestedBlock(nestedBlock);
         copyLocationFrom(nestedBlock);
     }
     
+    @Override
     protected void accept(Environment env) throws TemplateException, IOException {
         if (!DebuggerService.suspendEnvironment(
                 env, this.getTemplate().getSourceName(), getNestedBlock().getBeginLine())) {
@@ -42,6 +44,7 @@ public class DebugBreak extends TemplateElement {
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuilder sb = new StringBuilder();
@@ -60,22 +63,27 @@ public class DebugBreak extends TemplateElement {
         }
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#debug_break";
     }
 
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

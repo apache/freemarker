@@ -37,15 +37,18 @@ public class JythonRuntime extends PythonInterpreter
         final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
         return new Writer() {
+            @Override
             public void write(char cbuf[], int off, int len) {
                 buf.append(cbuf, off, len);
             }
 
+            @Override
             public void flush() throws IOException {
                 interpretBuffer();
                 out.flush();
             }
 
+            @Override
             public void close() {
                 interpretBuffer();
             }

@@ -59,29 +59,29 @@ final class Assignment extends TemplateElement {
         
         this.variableName = variableName;
         
-        if (operator == FMParserTokenManager.EQUALS) {
+        if (operator == FMParserConstants.EQUALS) {
             operatorType = OPERATOR_TYPE_EQUALS;
         } else {
             switch (operator) {
-            case FMParserTokenManager.PLUS_PLUS:
+            case FMParserConstants.PLUS_PLUS:
                 operatorType = OPERATOR_TYPE_PLUS_PLUS;
                 break;
-            case FMParserTokenManager.MINUS_MINUS:
+            case FMParserConstants.MINUS_MINUS:
                 operatorType = OPERATOR_TYPE_MINUS_MINUS;
                 break;
-            case FMParserTokenManager.PLUS_EQUALS:
+            case FMParserConstants.PLUS_EQUALS:
                 operatorType = OPERATOR_TYPE_PLUS_EQUALS;
                 break;
-            case FMParserTokenManager.MINUS_EQUALS:
+            case FMParserConstants.MINUS_EQUALS:
                 operatorType = ArithmeticExpression.TYPE_SUBSTRACTION;
                 break;
-            case FMParserTokenManager.TIMES_EQUALS:
+            case FMParserConstants.TIMES_EQUALS:
                 operatorType = ArithmeticExpression.TYPE_MULTIPLICATION;
                 break;
-            case FMParserTokenManager.DIV_EQUALS:
+            case FMParserConstants.DIV_EQUALS:
                 operatorType = ArithmeticExpression.TYPE_DIVISION;
                 break;
-            case FMParserTokenManager.MOD_EQUALS:
+            case FMParserConstants.MOD_EQUALS:
                 operatorType = ArithmeticExpression.TYPE_MODULO;
                 break;
             default:
@@ -97,6 +97,7 @@ final class Assignment extends TemplateElement {
         this.namespaceExp =  namespaceExp;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException {
         final Environment.Namespace namespace;
         if (namespaceExp == null) {
@@ -191,6 +192,7 @@ final class Assignment extends TemplateElement {
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         String dn = getParentElement() instanceof AssignmentInstruction ? null : getNodeTypeSymbol();
@@ -221,6 +223,7 @@ final class Assignment extends TemplateElement {
         return result;
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return getDirectiveName(scope);
     }
@@ -237,10 +240,12 @@ final class Assignment extends TemplateElement {
         }
     }
     
+    @Override
     int getParameterCount() {
         return 5;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return variableName;
@@ -252,6 +257,7 @@ final class Assignment extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.ASSIGNMENT_TARGET;
@@ -263,6 +269,7 @@ final class Assignment extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

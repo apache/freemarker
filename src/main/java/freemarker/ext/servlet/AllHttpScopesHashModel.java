@@ -70,6 +70,7 @@ public class AllHttpScopesHashModel extends SimpleHash {
         unlistedModels.put(key, model);
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         // Lookup in page scope
         TemplateModel model = super.get(key);

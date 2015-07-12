@@ -32,14 +32,17 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         super(bugfixed);
     }
 
+    @Override
     Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
         return memberDesc.getParamTypes();
     }
     
+    @Override
     void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
         // Do nothing
     }
 
+    @Override
     MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         if (tmArgs == null) {

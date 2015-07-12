@@ -43,6 +43,7 @@ public final class ServletContextHashModel implements TemplateHashModel {
      * @deprecated use 
      * {@link #ServletContextHashModel(GenericServlet, ObjectWrapper)} instead.
      */
+    @Deprecated
     public ServletContextHashModel(
         ServletContext servletctx, ObjectWrapper wrapper) {
         this.servlet = null;

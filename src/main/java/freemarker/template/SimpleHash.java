@@ -80,6 +80,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      * 
      * @deprecated Use {@link #SimpleHash(ObjectWrapper)}
      */
+    @Deprecated
     public SimpleHash() {
         this((ObjectWrapper) null);
     }
@@ -95,6 +96,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      * 
      * @deprecated Use {@link #SimpleHash(Map, ObjectWrapper)}
      */
+    @Deprecated
     public SimpleHash(Map map) {
         this(map, null);
     }
@@ -323,6 +325,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     /**
      * Returns the {@code toString()} of the underlying {@link Map}.
      */
+    @Override
     public String toString() {
         return map.toString();
     }
@@ -349,48 +352,56 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     
     private class SynchronizedHash extends SimpleHash {
 
+        @Override
         public boolean isEmpty() {
             synchronized (SimpleHash.this) {
                 return SimpleHash.this.isEmpty();
             }
         }
         
+        @Override
         public void put(String key, Object obj) {
             synchronized (SimpleHash.this) {
                 SimpleHash.this.put(key, obj);
             }
         }
 
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             synchronized (SimpleHash.this) {
                 return SimpleHash.this.get(key);
             }
         }
 
+        @Override
         public void remove(String key) {
             synchronized (SimpleHash.this) {
                 SimpleHash.this.remove(key);
             }
         }
 
+        @Override
         public int size() {
             synchronized (SimpleHash.this) {
                 return SimpleHash.this.size();
             }
         }
 
+        @Override
         public TemplateCollectionModel keys() {
             synchronized (SimpleHash.this) {
                 return SimpleHash.this.keys();
             }
         }
 
+        @Override
         public TemplateCollectionModel values() {
             synchronized (SimpleHash.this) {
                 return SimpleHash.this.values();
             }
         }
         
+        @Override
         public Map toMap() throws TemplateModelException {
             synchronized (SimpleHash.this) {
                 return SimpleHash.this.toMap();

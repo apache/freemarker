@@ -88,6 +88,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @deprecated Use {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} instead. It's not a public field
      *             anyway.
      */
+    @Deprecated
     static final Object CAN_NOT_UNWRAP = ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
     
     private static final Class ITERABLE_CLASS;
@@ -203,6 +204,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * 
      * @deprecated Use {@link BeansWrapperBuilder} or, in rare cases, {@link #BeansWrapper(Version)} instead.
      */
+    @Deprecated
     public BeansWrapper() {
         this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
         // Attention! Don't change fields here, as the instance is possibly already visible to other threads.  
@@ -765,6 +767,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * 
      * @deprecated Changing the {@code null} model can cause a lot of confusion; don't do it.
      */
+    @Deprecated
     public void setNullModel(TemplateModel nullModel) {
         checkModifiable();
         this.nullModel = nullModel;
@@ -814,6 +817,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @deprecated Use {@link BeansWrapperBuilder} instead. The instance returned here is not read-only, so it's
      *     dangerous to use.
      */
+    @Deprecated
     public static final BeansWrapper getDefaultInstance() {
         return BeansWrapperSingletonHolder.INSTANCE;
     }
@@ -875,6 +879,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @param object The object to wrap
      * @param factory The factory that wraps the object
      */
+    @Deprecated
     protected TemplateModel getInstance(Object object, ModelFactory factory) {
         return factory.create(object, this);
     }
@@ -1569,6 +1574,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *     Note that if the {@code methodAppearanceFineTuner} property is set to non-{@code null}, this method is not
      *     called anymore.
      */
+    @Deprecated
     protected void finetuneMethodAppearance(
             Class clazz, Method m, MethodAppearanceDecision decision) {
         // left everything on its default; do nothing
@@ -1652,6 +1658,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *  
      * @since 2.3.21
      */
+    @Override
     public String toString() {
         final String propsStr = toPropertiesString();
         return ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)

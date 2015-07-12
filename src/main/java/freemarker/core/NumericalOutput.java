@@ -50,6 +50,7 @@ final class NumericalOutput extends Interpolation {
         this.maxFracDigits = maxFracDigits;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         Number num = expression.evalToNumber(env);
         
@@ -78,6 +79,7 @@ final class NumericalOutput extends Interpolation {
         env.getOut().write(fmth.format.format(num));
     }
 
+    @Override
     protected String dump(boolean canonical, boolean inStringLiteral) {
         StringBuilder buf = new StringBuilder("#{");
         final String exprCF = expression.getCanonicalForm();
@@ -93,14 +95,17 @@ final class NumericalOutput extends Interpolation {
         return buf.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#{...}";
     }
 
+    @Override
     boolean heedsOpeningWhitespace() {
         return true;
     }
 
+    @Override
     boolean heedsTrailingWhitespace() {
         return true;
     }
@@ -115,10 +120,12 @@ final class NumericalOutput extends Interpolation {
         }
     }
 
+    @Override
     int getParameterCount() {
         return 3;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return expression;
@@ -128,6 +135,7 @@ final class NumericalOutput extends Interpolation {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.CONTENT;
@@ -137,6 +145,7 @@ final class NumericalOutput extends Interpolation {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

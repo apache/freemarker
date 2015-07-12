@@ -28,12 +28,14 @@ class NoEscapeBlock extends TemplateElement {
         setNestedBlock(nestedBlock);
     }
     
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visit(getNestedBlock());
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (canonical) {
             return "<" + getNodeTypeSymbol() + '>' + getNestedBlock().getCanonicalForm()
@@ -43,26 +45,32 @@ class NoEscapeBlock extends TemplateElement {
         }
     }
 
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#noescape";
     }
 
+    @Override
     boolean isOutputCacheable() {
         return true;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

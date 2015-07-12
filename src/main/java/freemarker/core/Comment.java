@@ -24,6 +24,7 @@ import freemarker.template.utility.StringUtil;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 public final class Comment extends TemplateElement {
 
     private final String text;
@@ -32,10 +33,12 @@ public final class Comment extends TemplateElement {
         this.text = text;
     }
 
+    @Override
     void accept(Environment env) {
         // do nothing, skip the body
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (canonical) {
             return "<#--" + text + "-->";
@@ -44,20 +47,24 @@ public final class Comment extends TemplateElement {
         }
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#--...--";
     }
     
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return text;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.CONTENT;
@@ -67,10 +74,12 @@ public final class Comment extends TemplateElement {
         return text;
     }
 
+    @Override
     boolean isOutputCacheable() {
         return true;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

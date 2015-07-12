@@ -135,6 +135,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         return wrapper;
     }
     
+    @Override
     public void initialize(
         Servlet servlet, ServletRequest request, ServletResponse response,
         String errorPageURL, boolean needsSession, int bufferSize, 
@@ -142,13 +143,16 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void release() {
     }
 
+    @Override
     public void setAttribute(String name, Object value) {
         setAttribute(name, value, PAGE_SCOPE);
     }
 
+    @Override
     public void setAttribute(String name, Object value, int scope) {
         switch(scope) {
             case PAGE_SCOPE: {
@@ -177,10 +181,12 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
     }
 
+    @Override
     public Object getAttribute(String name) {
         return getAttribute(name, PAGE_SCOPE);
     }
 
+    @Override
     public Object getAttribute(String name, int scope) {
         switch (scope) {
             case PAGE_SCOPE: {
@@ -233,6 +239,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
     }
 
+    @Override
     public Object findAttribute(String name) {
         Object retval = getAttribute(name, PAGE_SCOPE);
         if (retval != null) return retval;
@@ -243,6 +250,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         return getAttribute(name, APPLICATION_SCOPE);
     }
 
+    @Override
     public void removeAttribute(String name) {
         removeAttribute(name, PAGE_SCOPE);
         removeAttribute(name, REQUEST_SCOPE);
@@ -250,6 +258,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         removeAttribute(name, APPLICATION_SCOPE);
     }
 
+    @Override
     public void removeAttribute(String name, int scope) {
         switch(scope) {
             case PAGE_SCOPE: {
@@ -277,6 +286,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
     }
 
+    @Override
     public int getAttributesScope(String name) {
         if (getAttribute(name, PAGE_SCOPE) != null) return PAGE_SCOPE;
         if (getAttribute(name, REQUEST_SCOPE) != null) return REQUEST_SCOPE;
@@ -285,6 +295,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         return 0;
     }
 
+    @Override
     public Enumeration getAttributeNamesInScope(int scope) {
         switch(scope) {
             case PAGE_SCOPE: {
@@ -314,6 +325,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
     }
 
+    @Override
     public JspWriter getOut() {
         return jspOut;
     }
@@ -328,54 +340,66 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         return session;
     }
 
+    @Override
     public HttpSession getSession() {
         return getSession(false);
     }
     
+    @Override
     public Object getPage() {
         return servlet;
     }
 
+    @Override
     public ServletRequest getRequest() {
         return request;
     }
 
+    @Override
     public ServletResponse getResponse() {
         return response;
     }
 
+    @Override
     public Exception getException() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public ServletConfig getServletConfig() {
         return servlet.getServletConfig();
     }
 
+    @Override
     public ServletContext getServletContext() {
         return servlet.getServletContext();
     }
 
+    @Override
     public void forward(String url) throws ServletException, IOException {
         //TODO: make sure this is 100% correct by looking at Jasper output 
         request.getRequestDispatcher(url).forward(request, response);
     }
 
+    @Override
     public void include(String url) throws ServletException, IOException {
         jspOut.flush();
         request.getRequestDispatcher(url).include(request, response);
     }
 
+    @Override
     public void include(String url, boolean flush) throws ServletException, IOException {
         if (flush) {
             jspOut.flush();
         }
         final PrintWriter pw = new PrintWriter(jspOut);
         request.getRequestDispatcher(url).include(request, new HttpServletResponseWrapper(response) {
+            @Override
             public PrintWriter getWriter() {
                 return pw;
             }
             
+            @Override
             public ServletOutputStream getOutputStream() {
                 throw new UnsupportedOperationException("JSP-included resource must use getWriter()");
             }
@@ -383,22 +407,27 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         pw.flush();
     }
 
+    @Override
     public void handlePageException(Exception e) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void handlePageException(Throwable e) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public BodyContent pushBody() {
       return (BodyContent) pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
   }
 
-  public JspWriter pushBody(Writer w) {
+  @Override
+public JspWriter pushBody(Writer w) {
       return pushWriter(new JspWriterAdapter(w));
   }
 
+    @Override
     public JspWriter popBody() {
         popWriter();
         return (JspWriter) getAttribute(OUT);

@@ -65,7 +65,8 @@ class DefaultToExpression extends Expression {
 		this.rho = rho;
 	}
 
-	TemplateModel _eval(Environment env) throws TemplateException {
+	@Override
+    TemplateModel _eval(Environment env) throws TemplateException {
 		TemplateModel left;
 		if (lho instanceof ParentheticalExpression) {
             boolean lastFIRE = env.setFastInvalidReferenceExceptions(true);
@@ -85,11 +86,13 @@ class DefaultToExpression extends Expression {
 		else return rho.eval(env);
 	}
 
-	boolean isLiteral() {
+	@Override
+    boolean isLiteral() {
 		return false;
 	}
 
-	protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+	@Override
+    protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new DefaultToExpression(
                 lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
                 rho != null
@@ -97,21 +100,25 @@ class DefaultToExpression extends Expression {
                         : null);
 	}
 
-	public String getCanonicalForm() {
+	@Override
+    public String getCanonicalForm() {
 		if (rho == null) {
 			return lho.getCanonicalForm() + '!';
 		}
 		return lho.getCanonicalForm() + '!' + rho.getCanonicalForm();
 	}
 	
-	String getNodeTypeSymbol() {
+	@Override
+    String getNodeTypeSymbol() {
         return "...!...";
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return lho;
@@ -120,6 +127,7 @@ class DefaultToExpression extends Expression {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }

@@ -39,6 +39,7 @@ class BuiltInsForNumbers {
 
     private static abstract class abcBI extends BuiltInForNumber {
 
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             final int n;
             try {
@@ -63,6 +64,7 @@ class BuiltInsForNumbers {
 
     static class lower_abcBI extends abcBI {
 
+        @Override
         protected String toABC(int n) {
             return StringUtil.toLowerABC(n);
         }
@@ -71,6 +73,7 @@ class BuiltInsForNumbers {
 
     static class upper_abcBI extends abcBI {
 
+        @Override
         protected String toABC(int n) {
             return StringUtil.toUpperABC(n);
         }
@@ -78,6 +81,7 @@ class BuiltInsForNumbers {
     }
     
     static class absBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             if (num instanceof Integer) {
                 int n = ((Integer) num).intValue();
@@ -143,6 +147,7 @@ class BuiltInsForNumbers {
     }
     
     static class byteBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             if (num instanceof Byte) {
                 return model;
@@ -152,12 +157,14 @@ class BuiltInsForNumbers {
     }
 
     static class ceilingBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             return new SimpleNumber(new BigDecimal(num.doubleValue()).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_CEILING));
         }
     }
 
     static class doubleBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             if (num instanceof Double) {
                 return model;
@@ -167,6 +174,7 @@ class BuiltInsForNumbers {
     }
 
     static class floatBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             if (num instanceof Float) {
                 return model;
@@ -176,12 +184,14 @@ class BuiltInsForNumbers {
     }
 
     static class floorBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             return new SimpleNumber(new BigDecimal(num.doubleValue()).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_FLOOR));
         }
     }
 
     static class intBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             if (num instanceof Integer) {
                 return model;
@@ -191,6 +201,7 @@ class BuiltInsForNumbers {
     }
 
     static class is_infiniteBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             return NumberUtil.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
@@ -198,6 +209,7 @@ class BuiltInsForNumbers {
 
 
     static class is_nanBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             return NumberUtil.isNaN(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
@@ -205,6 +217,7 @@ class BuiltInsForNumbers {
 
     // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
     static class longBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env)
                 throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -230,6 +243,7 @@ class BuiltInsForNumbers {
             this.dateType = dateType;
         }
         
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model)
         throws TemplateModelException {
             return new SimpleDate(new Date(safeToLong(num)), dateType);
@@ -238,12 +252,14 @@ class BuiltInsForNumbers {
 
     static class roundBI extends BuiltInForNumber {
         private static final BigDecimal half = new BigDecimal("0.5");
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             return new SimpleNumber(new BigDecimal(num.doubleValue()).add(half).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_FLOOR));
         }
     }
     
     static class shortBI extends BuiltInForNumber {
+        @Override
         TemplateModel calculateResult(Number num, TemplateModel model) {
             if (num instanceof Short) {
                 return model;

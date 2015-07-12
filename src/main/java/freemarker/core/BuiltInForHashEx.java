@@ -23,6 +23,7 @@ import freemarker.template.TemplateModelException;
 
 abstract class BuiltInForHashEx extends BuiltIn {
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel model = target.eval(env);
         if (model instanceof TemplateHashModelEx) {

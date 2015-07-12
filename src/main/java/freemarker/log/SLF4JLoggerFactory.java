@@ -22,6 +22,7 @@ import org.slf4j.spi.LocationAwareLogger;
  * @deprecated Don't use it, meant to be internal.
  */
 // 2.4: Remove
+@Deprecated
 public class SLF4JLoggerFactory implements LoggerFactory {
 
     public Logger getLogger(String category) {
@@ -48,58 +49,71 @@ public class SLF4JLoggerFactory implements LoggerFactory {
                     this.logger = logger;
             }
 
+            @Override
             public void debug(String message) {
                     debug(message, null);
             }
 
+            @Override
             public void debug(String message, Throwable t) {
                     logger.log(null, ADAPTER_FQCN,
                                     LocationAwareLogger.DEBUG_INT, message, null, t);
             }
 
+            @Override
             public void info(String message) {
                     info(message, null);
             }
 
+            @Override
             public void info(String message, Throwable t) {
                     logger.log(null, ADAPTER_FQCN,
                                     LocationAwareLogger.INFO_INT, message, null, t);
             }
 
+            @Override
             public void warn(String message) {
                     warn(message, null);
             }
 
+            @Override
             public void warn(String message, Throwable t) {
                     logger.log(null, ADAPTER_FQCN,
                                     LocationAwareLogger.WARN_INT, message, null, t);
             }
 
+            @Override
             public void error(String message) {
                     error(message, null);
             }
 
+            @Override
             public void error(String message, Throwable t) {
                     logger.log(null, ADAPTER_FQCN,
                                     LocationAwareLogger.ERROR_INT, message, null, t);
             }
 
+            @Override
             public boolean isDebugEnabled() {
                     return logger.isDebugEnabled();
             }
 
+            @Override
             public boolean isInfoEnabled() {
                     return logger.isInfoEnabled();
             }
 
+            @Override
             public boolean isWarnEnabled() {
                     return logger.isWarnEnabled();
             }
 
+            @Override
             public boolean isErrorEnabled() {
                     return logger.isErrorEnabled();
             }
 
+            @Override
             public boolean isFatalEnabled() {
                     return logger.isErrorEnabled();
             }
@@ -118,54 +132,67 @@ public class SLF4JLoggerFactory implements LoggerFactory {
                     this.logger = logger;
             }
 
+            @Override
             public void debug(String message) {
                     logger.debug(message);
             }
 
+            @Override
             public void debug(String message, Throwable t) {
                     logger.debug(message, t);
             }
 
+            @Override
             public void info(String message) {
                     logger.info(message);
             }
 
+            @Override
             public void info(String message, Throwable t) {
                     logger.info(message, t);
             }
 
+            @Override
             public void warn(String message) {
                     logger.warn(message);
             }
 
+            @Override
             public void warn(String message, Throwable t) {
                     logger.warn(message, t);
             }
 
+            @Override
             public void error(String message) {
                     logger.error(message);
             }
 
+            @Override
             public void error(String message, Throwable t) {
                     logger.error(message, t);
             }
 
+            @Override
             public boolean isDebugEnabled() {
                     return logger.isDebugEnabled();
             }
 
+            @Override
             public boolean isInfoEnabled() {
                     return logger.isInfoEnabled();
             }
 
+            @Override
             public boolean isWarnEnabled() {
                     return logger.isWarnEnabled();
             }
 
+            @Override
             public boolean isErrorEnabled() {
                     return logger.isErrorEnabled();
             }
 
+            @Override
             public boolean isFatalEnabled() {
                     return logger.isErrorEnabled();
             }

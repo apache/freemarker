@@ -26,6 +26,7 @@ import freemarker.template.utility.DateUtil;
  * 
  * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
  */
+@Deprecated
 public class CommandLine {
     
     public static void main(String[] args) {

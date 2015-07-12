@@ -139,7 +139,8 @@ public class TokenMgrError extends Error {
     *
     * from this method for such cases in the release version of your parser.
     */
-   public String getMessage() {
+   @Override
+public String getMessage() {
       return super.getMessage();
    }
 
@@ -161,7 +162,8 @@ public class TokenMgrError extends Error {
     * 
     * @deprecated If you know the end position, use {@link #TokenMgrError(String, int, int, int, int, int)} instead.
     */
-   public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) {
+   @Deprecated
+public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) {
        this(detail, reason, errorLine, errorColumn, 0, 0);
        this.endLineNumber = null; 
        this.endColumnNumber = null; 

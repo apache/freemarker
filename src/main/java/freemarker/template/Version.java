@@ -164,6 +164,7 @@ public final class Version implements Serializable {
     /**
      * Contains the major.minor.micor numbers and the extraInfo part, not the other information.
      */
+    @Override
     public String toString() {
         return getStringValue();
     }
@@ -220,6 +221,7 @@ public final class Version implements Serializable {
         return intValue;
     }
 
+    @Override
     public int hashCode() {
         int r = hashCode;
         if (r != 0) return r;
@@ -238,6 +240,7 @@ public final class Version implements Serializable {
         }
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;

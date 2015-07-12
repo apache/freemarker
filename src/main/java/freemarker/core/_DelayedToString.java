@@ -26,6 +26,7 @@ public class _DelayedToString extends _DelayedConversionToString {
         super(Integer.valueOf(object));
     }
     
+    @Override
     protected String doConversion(Object obj) {
         return String.valueOf(obj);
     }

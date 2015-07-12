@@ -30,7 +30,8 @@ class ExistsExpression extends Expression {
 		this.exp = exp;
 	}
 
-	TemplateModel _eval(Environment env) throws TemplateException {
+	@Override
+    TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel tm;
 	    if (exp instanceof ParentheticalExpression) {
             boolean lastFIRE = env.setFastInvalidReferenceExceptions(true);
@@ -47,31 +48,38 @@ class ExistsExpression extends Expression {
 		return tm == null ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
 	}
 
-	boolean isLiteral() {
+	@Override
+    boolean isLiteral() {
 		return false;
 	}
 
-	protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+	@Override
+    protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
 		return new ExistsExpression(
 		        exp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
 	}
 
-	public String getCanonicalForm() {
+	@Override
+    public String getCanonicalForm() {
 		return exp.getCanonicalForm() + getNodeTypeSymbol();
 	}
 	
-	String getNodeTypeSymbol() {
+	@Override
+    String getNodeTypeSymbol() {
         return "??";
     }
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         return exp;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.LEFT_HAND_OPERAND;
     }

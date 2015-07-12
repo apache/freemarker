@@ -34,6 +34,7 @@ import freemarker.template.Template;
  * 
  * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
  */
+@Deprecated
 public class Transform {
 
     private File inputFile, ftlFile, outputFile;
@@ -44,6 +45,7 @@ public class Transform {
     /**
      * @deprecated Will be removed (main method in a library, often classified as CWE-489 "Leftover Debug Code").
      */
+    @Deprecated
     static public void main(String[] args) {
         try {
             Transform proc = transformFromArgs(args);

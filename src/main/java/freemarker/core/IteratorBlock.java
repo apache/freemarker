@@ -59,6 +59,7 @@ final class IteratorBlock extends TemplateElement {
         this.isForEach = isForEach;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         acceptWithResult(env);
     }
@@ -98,6 +99,7 @@ final class IteratorBlock extends TemplateElement {
         return null;
     }
     
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
@@ -128,10 +130,12 @@ final class IteratorBlock extends TemplateElement {
         return buf.toString();
     }
     
+    @Override
     int getParameterCount() {
         return loopVarName != null ? 2 : 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0:
@@ -143,6 +147,7 @@ final class IteratorBlock extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0:
@@ -154,10 +159,12 @@ final class IteratorBlock extends TemplateElement {
         }
     }    
     
+    @Override
     String getNodeTypeSymbol() {
         return isForEach ? "#foreach" : "#list";
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return loopVarName != null;
     }

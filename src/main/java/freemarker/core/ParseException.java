@@ -77,6 +77,7 @@ public class ParseException extends IOException implements FMParserConstants {
     protected String eol = SecurityUtilities.getSystemProperty("line.separator", "\n");
 
     /** @deprecated Will be remove without replacement in 2.4. */
+    @Deprecated
     protected boolean specialConstructor;  
 
     private String templateName;
@@ -117,6 +118,7 @@ public class ParseException extends IOException implements FMParserConstants {
      * 
      * @deprecated Use a constructor to which you pass description, template, and positions.
      */
+    @Deprecated
     protected ParseException() {
         super();
     }
@@ -124,6 +126,7 @@ public class ParseException extends IOException implements FMParserConstants {
     /**
      * @deprecated Use a constructor to which you can also pass the template, and the end positions.
      */
+    @Deprecated
     public ParseException(String description, int lineNumber, int columnNumber) {
         this(description, (Template) null, lineNumber, columnNumber, null);
     }
@@ -154,6 +157,7 @@ public class ParseException extends IOException implements FMParserConstants {
      * position of the error too.
      * @since 2.3.20
      */
+    @Deprecated
     public ParseException(String description, Template template, int lineNumber, int columnNumber) {
         this(description, template, lineNumber, columnNumber, null);      
     }
@@ -163,6 +167,7 @@ public class ParseException extends IOException implements FMParserConstants {
      * the end position of the error too.
      * @since 2.3.20
      */
+    @Deprecated
     public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
         this(description,
                 template == null ? null : template.getSourceName(),
@@ -241,6 +246,7 @@ public class ParseException extends IOException implements FMParserConstants {
      * @see #getLineNumber()
      * @see #getColumnNumber()
      */
+    @Override
     public String getMessage() {
         synchronized (this) {
             if (messageAndDescriptionRendered) return message;

@@ -23,30 +23,37 @@ import java.io.IOException;
  */
 final class FlushInstruction extends TemplateElement {
 
+    @Override
     void accept(Environment env) throws IOException {
         env.getOut().flush();
     }
 
+    @Override
     protected String dump(boolean canonical) {
         return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#flush";
     }
  
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

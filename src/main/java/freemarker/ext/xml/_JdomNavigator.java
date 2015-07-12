@@ -48,6 +48,7 @@ public class _JdomNavigator extends Navigator {
     public _JdomNavigator() {
     } 
 
+    @Override
     void getAsString(Object node, StringWriter sw)
     throws TemplateModelException {
         try {
@@ -82,6 +83,7 @@ public class _JdomNavigator extends Navigator {
         }
     }
 
+    @Override
     void getChildren(Object node, String localName, String namespaceUri, List result) {
         if (node instanceof Element) {
             Element e = (Element) node;
@@ -98,6 +100,7 @@ public class _JdomNavigator extends Navigator {
         }
     }
     
+    @Override
     void getAttributes(Object node, String localName, String namespaceUri, List result) {
         if (node instanceof Element) {
             Element e = (Element) node;
@@ -130,6 +133,7 @@ public class _JdomNavigator extends Navigator {
         } 
     }
 
+    @Override
     void getDescendants(Object node, List result) {
         if (node instanceof Document) {
             Element root = ((Document) node).getRootElement();
@@ -148,6 +152,7 @@ public class _JdomNavigator extends Navigator {
         }
     }
 
+    @Override
     Object getParent(Object node) {
         if (node instanceof Element) {
             return((Element) node).getParent();
@@ -170,6 +175,7 @@ public class _JdomNavigator extends Navigator {
         return null;
     }
 
+    @Override
     Object getDocument(Object node) {
         if (node instanceof Element) {
             return ((Element) node).getDocument();
@@ -191,6 +197,7 @@ public class _JdomNavigator extends Navigator {
         return null;
     }
 
+    @Override
     Object getDocumentType(Object node) {
         return 
             node instanceof Document 
@@ -198,6 +205,7 @@ public class _JdomNavigator extends Navigator {
             : null; 
     }
     
+    @Override
     void getContent(Object node, List result) {
         if (node instanceof Element)
             result.addAll(((Element) node).getContent());
@@ -205,6 +213,7 @@ public class _JdomNavigator extends Navigator {
             result.addAll(((Document) node).getContent());
     }
 
+    @Override
     String getText(Object node) {
         if (node instanceof Element) {
             return ((Element) node).getTextTrim();
@@ -224,6 +233,7 @@ public class _JdomNavigator extends Navigator {
         return null;
     }
 
+    @Override
     String getLocalName(Object node) {
         if (node instanceof Element) {
             return ((Element) node).getName();
@@ -243,6 +253,7 @@ public class _JdomNavigator extends Navigator {
         return null;
     }
 
+    @Override
     String getNamespacePrefix(Object node) {
         if (node instanceof Element) {
             return ((Element) node).getNamespacePrefix();
@@ -253,6 +264,7 @@ public class _JdomNavigator extends Navigator {
         return null;
     }
 
+    @Override
     String getNamespaceUri(Object node) {
         if (node instanceof Element) {
             return ((Element) node).getNamespaceURI();
@@ -263,6 +275,7 @@ public class _JdomNavigator extends Navigator {
         return null;
     }
 
+    @Override
     String getType(Object node) {
         if (node instanceof Attribute) {
             return "attribute";
@@ -297,6 +310,7 @@ public class _JdomNavigator extends Navigator {
         return "unknown";
     }
 
+    @Override
     XPathEx createXPathEx(String xpathString) throws TemplateModelException {
         try {
             return new JDOMXPathEx(xpathString);

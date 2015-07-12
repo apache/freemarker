@@ -41,6 +41,7 @@ import freemarker.template.utility.StringUtil;
 class BuiltInsForStringsRegexp {
 
     static class groupsBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel targetModel = target.eval(env);
             assertNonNull(targetModel, env);
@@ -80,6 +81,7 @@ class BuiltInsForStringsRegexp {
             }
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new MatcherBuilder(s);
         }
@@ -119,6 +121,7 @@ class BuiltInsForStringsRegexp {
 
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new ReplaceMethod(s);
         }

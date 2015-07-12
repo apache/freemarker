@@ -25,6 +25,7 @@ public class _DelayedGetMessageWithoutStackTop extends _DelayedConversionToStrin
         super(exception);
     }
 
+    @Override
     protected String doConversion(Object obj) {
         return ((TemplateException) obj).getMessageWithoutStackTop();
     }

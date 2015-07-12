@@ -44,6 +44,7 @@ final class DynamicKeyName extends Expression {
         this.keyExpression = keyExpression;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel targetModel = target.eval(env);
         if (targetModel == null) {
@@ -263,6 +264,7 @@ final class DynamicKeyName extends Expression {
                 : TemplateScalarModel.EMPTY_STRING;
     }
 
+    @Override
     public String getCanonicalForm() {
         return target.getCanonicalForm() 
                + "[" 
@@ -270,26 +272,32 @@ final class DynamicKeyName extends Expression {
                + "]";
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "...[...]";
     }
     
+    @Override
     boolean isLiteral() {
         return constantValue != null || (target.isLiteral() && keyExpression.isLiteral());
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         return idx == 0 ? target : keyExpression;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return idx == 0 ? ParameterRole.LEFT_HAND_OPERAND : ParameterRole.ENCLOSED_OPERAND;
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new DynamicKeyName(

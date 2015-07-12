@@ -140,6 +140,7 @@ final class OverloadedMethods {
     private _DelayedConversionToString memberListToString() {
         return new _DelayedConversionToString(null) {
             
+            @Override
             protected String doConversion(Object obj) {
                 final Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
                 final Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
@@ -182,6 +183,7 @@ final class OverloadedMethods {
         
         return new DelayedCallSignatureToString(argumentTypeDescs) {
 
+            @Override
             String argumentToString(Object argType) {
                 return (String) argType;
             }
@@ -198,6 +200,7 @@ final class OverloadedMethods {
         
         return new DelayedCallSignatureToString(argumentTypes) {
 
+            @Override
             String argumentToString(Object argType) {
                 return argType != null
                         ? ClassUtil.getShortClassName((Class) argType)
@@ -213,6 +216,7 @@ final class OverloadedMethods {
             super(argTypeArray);
         }
 
+        @Override
         protected String doConversion(Object obj) {
             Object[] argTypes = (Object[]) obj;
             

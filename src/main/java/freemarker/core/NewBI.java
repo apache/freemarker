@@ -42,6 +42,7 @@ class NewBI extends BuiltIn {
         }
     }
     
+    @Override
     TemplateModel _eval(Environment env)
             throws TemplateException {
         return new ConstructorFunction(target.evalAndCoerceToString(env), env, target.getTemplate());

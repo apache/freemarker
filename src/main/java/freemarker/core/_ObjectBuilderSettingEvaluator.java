@@ -576,6 +576,7 @@ public class _ObjectBuilderSettingEvaluator {
     private class BuilderExpression extends ExpressionWithParameters {
         private String className;
         
+        @Override
         Object eval() throws _ObjectBuilderSettingEvaluationException {
             Class cl;
             try {
@@ -693,6 +694,7 @@ public class _ObjectBuilderSettingEvaluator {
             return positionalParamValues.isEmpty() && namedParamValues.isEmpty();
         }
 
+        @Override
         protected boolean getAllowPositionalParameters() {
             return true;
         }
@@ -707,11 +709,13 @@ public class _ObjectBuilderSettingEvaluator {
             this.bean = bean;
         }
 
+        @Override
         Object eval() throws _ObjectBuilderSettingEvaluationException {
             setJavaBeanProperties(bean, namedParamNames, namedParamValues);
             return bean;
         }
 
+        @Override
         protected boolean getAllowPositionalParameters() {
             return false;
         }
@@ -722,6 +726,7 @@ public class _ObjectBuilderSettingEvaluator {
         
         static final NullExpression INSTANCE = new NullExpression();
 
+        @Override
         Object eval() throws _ObjectBuilderSettingEvaluationException {
             return null;
         }

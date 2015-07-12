@@ -109,6 +109,7 @@ public abstract class ArithmeticEngine {
     public static class BigDecimalEngine
     extends
         ArithmeticEngine {
+        @Override
         public int compareNumbers(Number first, Number second) {
             // We try to find the result based on the sign (+/-/0) first, because:
             // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
@@ -126,18 +127,21 @@ public abstract class ArithmeticEngine {
             }
         }
     
+        @Override
         public Number add(Number first, Number second) {
             BigDecimal left = toBigDecimal(first);
             BigDecimal right = toBigDecimal(second);
             return left.add(right);
         }
     
+        @Override
         public Number subtract(Number first, Number second) {
             BigDecimal left = toBigDecimal(first);
             BigDecimal right = toBigDecimal(second);
             return left.subtract(right);
         }
     
+        @Override
         public Number multiply(Number first, Number second) {
             BigDecimal left = toBigDecimal(first);
             BigDecimal right = toBigDecimal(second);
@@ -148,18 +152,21 @@ public abstract class ArithmeticEngine {
             return result;
         }
     
+        @Override
         public Number divide(Number first, Number second) {
             BigDecimal left = toBigDecimal(first);
             BigDecimal right = toBigDecimal(second);
             return divide(left, right);
         }
     
+        @Override
         public Number modulus(Number first, Number second) {
             long left = first.longValue();
             long right = second.longValue();
             return Long.valueOf(left % right);
         }
     
+        @Override
         public Number toNumber(String s) {
             return toBigDecimalOrDouble(s);
         }
@@ -201,6 +208,7 @@ public abstract class ArithmeticEngine {
         
         private static final Map classCodes = createClassCodesMap();
         
+        @Override
         public int compareNumbers(Number first, Number second) throws TemplateException {
             switch(getCommonClassCode(first, second)) {
                 case INTEGER: {
@@ -239,6 +247,7 @@ public abstract class ArithmeticEngine {
             throw new Error();
         }
     
+        @Override
         public Number add(Number first, Number second) throws TemplateException {
             switch(getCommonClassCode(first, second)) {
                 case INTEGER: {
@@ -281,6 +290,7 @@ public abstract class ArithmeticEngine {
             throw new Error();
         }
     
+        @Override
         public Number subtract(Number first, Number second) throws TemplateException {
             switch(getCommonClassCode(first, second)) {
                 case INTEGER: {
@@ -323,6 +333,7 @@ public abstract class ArithmeticEngine {
             throw new Error();
         }
     
+        @Override
         public Number multiply(Number first, Number second) throws TemplateException {
             switch(getCommonClassCode(first, second)) {
                 case INTEGER: {
@@ -366,6 +377,7 @@ public abstract class ArithmeticEngine {
             throw new Error();
         }
     
+        @Override
         public Number divide(Number first, Number second) throws TemplateException {
             switch(getCommonClassCode(first, second)) {
                 case INTEGER: {
@@ -417,6 +429,7 @@ public abstract class ArithmeticEngine {
             throw new Error();
         }
     
+        @Override
         public Number modulus(Number first, Number second) throws TemplateException {
             switch(getCommonClassCode(first, second)) {
                 case INTEGER: {
@@ -445,6 +458,7 @@ public abstract class ArithmeticEngine {
             throw new BugException();
         }
     
+        @Override
         public Number toNumber(String s) {
             Number n = toBigDecimalOrDouble(s);
             return n instanceof BigDecimal ? OptimizerUtil.optimizeNumberRepresentation(n) : n;

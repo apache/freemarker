@@ -26,10 +26,12 @@ class NonPrimitiveArrayBackedReadOnlyList extends AbstractList {
         this.array = array;
     }
 
+    @Override
     public Object get(int index) {
         return array[index];
     }
 
+    @Override
     public int size() {
         return array.length;
     }

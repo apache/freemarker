@@ -31,10 +31,12 @@ class PrimtiveArrayBackedReadOnlyList extends AbstractList {
         this.array = array;
     }
 
+    @Override
     public Object get(int index) {
         return Array.get(array, index);
     }
 
+    @Override
     public int size() {
         return Array.getLength(array);
     }

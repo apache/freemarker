@@ -46,6 +46,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      * @deprecated It's a confusing constructor, and seldom useful; use {@link #ClassTemplateLoader(Class, String)}
      *             instead.
      */
+    @Deprecated
     public ClassTemplateLoader() {
         this(null, true, null, "/");
     }
@@ -61,6 +62,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      * @deprecated It's confusing that the base path is {@code ""}; use {@link #ClassTemplateLoader(Class, String)}
      *             instead.
      */
+    @Deprecated
     public ClassTemplateLoader(Class resourceLoaderClass) {
         this(resourceLoaderClass, "");
     }
@@ -129,6 +131,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
         this.basePackagePath = canonBasePackagePath;
     }
 
+    @Override
     protected URL getURL(String name) {
         String fullPath = basePackagePath + name;
 
@@ -164,6 +167,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      * 
      * @since 2.3.21
      */
+    @Override
     public String toString() {
         return TemplateLoaderUtils.getClassNameForToString(this) + "("
                 + (resourceLoaderClass != null

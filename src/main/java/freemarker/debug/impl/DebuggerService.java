@@ -69,17 +69,21 @@ public abstract class DebuggerService {
     }
 
     private static class NoOpDebuggerService extends DebuggerService {
+        @Override
         List getBreakpointsSpi(String templateName) {
             return Collections.EMPTY_LIST;
         }
         
+        @Override
         boolean suspendEnvironmentSpi(Environment env, String templateName, int line) {
             throw new UnsupportedOperationException();
         }
         
+        @Override
         void registerTemplateSpi(Template template) {
         }
 
+        @Override
         void shutdownSpi() {
         }
     }

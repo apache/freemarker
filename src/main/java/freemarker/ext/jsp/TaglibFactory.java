@@ -908,6 +908,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     private static FilterInputStream toCloseIgnoring(InputStream in) {
         return new FilterInputStream(in) {
+            @Override
             public void close() {
                 // Do nothing 
             }
@@ -1212,6 +1213,7 @@ public class TaglibFactory implements TemplateHashModel {
             return new IOException("Resource not found: servletContext:" + fileResourcePath);
         }
         
+        @Override
         public final String toString() {
             return "servletContext:" + fileResourcePath;
         }
@@ -1233,6 +1235,7 @@ public class TaglibFactory implements TemplateHashModel {
             this.resourcePath = resourcePath;
         }
     
+        @Override
         public String toString() {
             return "classpath:" + resourcePath;
         }
@@ -1372,6 +1375,7 @@ public class TaglibFactory implements TemplateHashModel {
             return entryUrl != null ? entryUrl.toExternalForm() : null;
         }
     
+        @Override
         public String toString() {
             return entryUrl != null
                     ? entryUrl.toExternalForm()
@@ -1406,6 +1410,7 @@ public class TaglibFactory implements TemplateHashModel {
                             return servletContext.getResourceAsStream(servletContextJarFilePath);
                         }
 
+                        @Override
                         public String toString() {
                             return "servletContext:" + servletContextJarFilePath;
                         }
@@ -1431,6 +1436,7 @@ public class TaglibFactory implements TemplateHashModel {
             return file.toURI().toURL().toExternalForm();
         }
 
+        @Override
         public String toString() {
             return file.toString();
         }
@@ -1490,10 +1496,12 @@ public class TaglibFactory implements TemplateHashModel {
         private String taglibLocationCData;
         private Locator locator;
 
+        @Override
         public void setDocumentLocator(Locator locator) {
             this.locator = locator;
         }
 
+        @Override
         public void startElement(
                 String nsuri,
                 String localName,
@@ -1504,12 +1512,14 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
+        @Override
         public void characters(char[] chars, int off, int len) {
             if (cDataCollector != null) {
                 cDataCollector.append(chars, off, len);
             }
         }
 
+        @Override
         public void endElement(String nsUri, String localName, String qName) throws TldParsingSAXException {
             if (E_TAGLIB_URI.equals(qName)) {
                 taglibUriCData = cDataCollector.toString().trim();
@@ -1552,6 +1562,7 @@ public class TaglibFactory implements TemplateHashModel {
             return uri;
         }
 
+        @Override
         public void startElement(
                 String nsuri,
                 String localName,
@@ -1562,12 +1573,14 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
+        @Override
         public void characters(char[] chars, int off, int len) {
             if (cDataCollector != null) {
                 cDataCollector.append(chars, off, len);
             }
         }
 
+        @Override
         public void endElement(String nsuri, String localName, String qName) {
             if (E_URI.equals(qName)) {
                 uri = cDataCollector.toString().trim();
@@ -1629,10 +1642,12 @@ public class TaglibFactory implements TemplateHashModel {
             return listeners;
         }
 
+        @Override
         public void setDocumentLocator(Locator locator) {
             this.locator = locator;
         }
 
+        @Override
         public void startElement(String nsUri, String localName, String qName, Attributes atts) {
             stack.push(qName);
             if (stack.size() == 3) {
@@ -1644,12 +1659,14 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
+        @Override
         public void characters(char[] chars, int off, int len) {
             if (cDataCollector != null) {
                 cDataCollector.append(chars, off, len);
             }
         }
 
+        @Override
         public void endElement(String nsuri, String localName, String qName) throws TldParsingSAXException {
             if (!stack.peek().equals(qName)) {
                 throw new TldParsingSAXException("Unbalanced tag nesting at \"" + qName + "\" end-tag.", locator);
@@ -1867,6 +1884,7 @@ public class TaglibFactory implements TemplateHashModel {
             cause = e;
         }
     
+        @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(getClass().getName());
             sb.append(": ");
@@ -1913,6 +1931,7 @@ public class TaglibFactory implements TemplateHashModel {
             return sb.toString();
         }
     
+        @Override
         public Throwable getCause() {
             Throwable superCause = super.getCause();
             return superCause == null ? this.cause : superCause;
@@ -1938,10 +1957,12 @@ public class TaglibFactory implements TemplateHashModel {
             return externalForm;
         }
 
+        @Override
         public int hashCode() {
             return externalForm.hashCode();
         }
 
+        @Override
         public boolean equals(Object that) {
             if (this == that) return true;
             if (that == null) return false;
@@ -1949,6 +1970,7 @@ public class TaglibFactory implements TemplateHashModel {
             return !externalForm.equals(((URLWithExternalForm) that).externalForm);
         }
 
+        @Override
         public String toString() {
             return "URLWithExternalForm(" + externalForm + ")";
         }

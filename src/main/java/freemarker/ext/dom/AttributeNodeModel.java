@@ -43,6 +43,7 @@ class AttributeNodeModel extends NodeModel implements TemplateScalarModel {
         return true;
     }
     
+    @Override
     String getQualifiedName() {
         String nsURI = node.getNamespaceURI();
         if (nsURI == null || nsURI.equals(""))

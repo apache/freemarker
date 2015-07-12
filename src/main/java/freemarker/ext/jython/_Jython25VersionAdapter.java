@@ -27,14 +27,17 @@ import org.python.core.PyObject;
  */
 public class _Jython25VersionAdapter extends JythonVersionAdapter {
 
+    @Override
     public boolean isPyInstance(Object obj) {
         return obj instanceof PyInstance;
     }
 
+    @Override
     public Object pyInstanceToJava(Object pyInstance) {
         return ((PyInstance) pyInstance).__tojava__(java.lang.Object.class);
     }
 
+    @Override
     public String getPythonClassName(PyObject pyObject) {
         return pyObject.getType().getName();
     }

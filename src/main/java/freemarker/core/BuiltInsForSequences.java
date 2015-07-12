@@ -129,6 +129,7 @@ class BuiltInsForSequences {
             
         }
         
+        @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm) throws TemplateModelException {
             return new BIMethod(tsm);
         }
@@ -136,6 +137,7 @@ class BuiltInsForSequences {
     }
     
     static class firstBI extends BuiltInForSequence {
+        @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm)
         throws TemplateModelException {
             if (tsm.size() == 0) {
@@ -200,6 +202,7 @@ class BuiltInsForSequences {
 
         }
 
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateCollectionModel) {
@@ -218,6 +221,7 @@ class BuiltInsForSequences {
     }
 
     static class lastBI extends BuiltInForSequence {
+        @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm)
         throws TemplateModelException {
             if (tsm.size() == 0) {
@@ -244,6 +248,7 @@ class BuiltInsForSequences {
             }
         }
 
+        @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm) {
             if (tsm instanceof ReverseSequence) {
                 return ((ReverseSequence) tsm).seq;
@@ -302,6 +307,7 @@ class BuiltInsForSequences {
 
         }
     
+        @Override
         TemplateModel _eval(Environment env)
                 throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -472,6 +478,7 @@ class BuiltInsForSequences {
             m_dir = dir;
         }
 
+        @Override
         TemplateModel _eval(Environment env)
                 throws TemplateException {
             return new BIMethod(env);
@@ -524,6 +531,7 @@ class BuiltInsForSequences {
             }
         }
         
+        @Override
         TemplateModel calculateResult(TemplateSequenceModel seq) {
             return new BIMethod(seq);
         }
@@ -786,6 +794,7 @@ class BuiltInsForSequences {
         
         static final int KEY_TYPE_BOOLEAN = 4;
         
+        @Override
         TemplateModel calculateResult(TemplateSequenceModel seq)
                 throws TemplateModelException {
             return sort(seq, null);

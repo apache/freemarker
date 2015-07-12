@@ -21,26 +21,32 @@ package freemarker.core;
  */
 final class BreakInstruction extends TemplateElement {
 
+    @Override
     void accept(Environment env) {
         throw Break.INSTANCE;
     }
 
+    @Override
     protected String dump(boolean canonical) {
         return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#break";
     }
 
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
@@ -51,6 +57,7 @@ final class BreakInstruction extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

@@ -177,6 +177,7 @@ public class JythonWrapper implements ObjectWrapper {
             return model;
         }
         
+        @Override
         public PyObject __finditem__(PyObject key) {
             if (key instanceof PyInteger) {
                 return __finditem__(((PyInteger) key).getValue());
@@ -184,6 +185,7 @@ public class JythonWrapper implements ObjectWrapper {
             return __finditem__(key.toString());
         }
 
+        @Override
         public PyObject __finditem__(String key) {
             if (model instanceof TemplateHashModel) {
                 try {
@@ -195,6 +197,7 @@ public class JythonWrapper implements ObjectWrapper {
             throw Py.TypeError("item lookup on non-hash model (" + getModelClass() + ")");
         }
         
+        @Override
         public PyObject __finditem__(int index) {
             if (model instanceof TemplateSequenceModel) {
                 try {
@@ -206,6 +209,7 @@ public class JythonWrapper implements ObjectWrapper {
             throw Py.TypeError("item lookup on non-sequence model (" + getModelClass() + ")");
         }
         
+        @Override
         public PyObject __call__(PyObject args[], String keywords[]) {
             if (model instanceof TemplateMethodModel) {
                 boolean isEx = model instanceof TemplateMethodModelEx;
@@ -228,6 +232,7 @@ public class JythonWrapper implements ObjectWrapper {
             throw Py.TypeError("call of non-method model (" + getModelClass() + ")");
         }
         
+        @Override
         public int __len__() {
             try {
                 if (model instanceof TemplateSequenceModel) {
@@ -243,6 +248,7 @@ public class JythonWrapper implements ObjectWrapper {
             return 0;
         }
         
+        @Override
         public boolean __nonzero__() {
             try {
                 if (model instanceof TemplateBooleanModel) {

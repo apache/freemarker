@@ -34,6 +34,7 @@ import freemarker.template.TemplateModelIterator;
  * 
  * @deprecated Subject to be changed or renamed any time; no "stable" replacement exists yet.
  */
+@Deprecated
 public final class Macro extends TemplateElement implements TemplateModel {
 
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
@@ -70,7 +71,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
     
     public String[] getArgumentNames() {
-        return (String[]) paramNames.clone();
+        return paramNames.clone();
     }
 
     String[] getArgumentNamesInternal() {
@@ -85,10 +86,12 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return name;
     }
 
+    @Override
     void accept(Environment env) {
         env.visitMacroDef(this);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -139,10 +142,12 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return function ? "#function" : "#macro";
     }
     
+    @Override
     boolean isShownInStackTrace() {
         return false;
     }
@@ -276,10 +281,12 @@ public final class Macro extends TemplateElement implements TemplateModel {
         }
     }
 
+    @Override
     int getParameterCount() {
         return 1/*name*/ + paramNames.length * 2/*name=default*/ + 1/*catchAll*/ + 1/*type*/;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx == 0) {
             return name;
@@ -302,6 +309,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx == 0) {
             return ParameterRole.ASSIGNMENT_TARGET;
@@ -323,6 +331,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         // Because of recursive calls
         return true;

@@ -28,6 +28,7 @@ import freemarker.template.TemplateException;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 public final class LibraryLoad extends TemplateElement {
 
     private Expression importedTemplateNameExp;
@@ -45,6 +46,7 @@ public final class LibraryLoad extends TemplateElement {
         this.importedTemplateNameExp = templateName;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         final String importedTemplateName = importedTemplateNameExp.evalAndCoerceToString(env);
         final String fullImportedTemplateName;
@@ -68,6 +70,7 @@ public final class LibraryLoad extends TemplateElement {
         env.importLib(importedTemplate, namespace);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
@@ -80,14 +83,17 @@ public final class LibraryLoad extends TemplateElement {
         return buf.toString();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#import";
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return importedTemplateNameExp;
@@ -96,6 +102,7 @@ public final class LibraryLoad extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.TEMPLATE_NAME;
@@ -108,6 +115,7 @@ public final class LibraryLoad extends TemplateElement {
         return importedTemplateNameExp.toString();
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

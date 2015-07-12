@@ -64,6 +64,7 @@ public final class SimpleNumber implements TemplateNumberModel, Serializable {
         return value;
     }
 
+    @Override
     public String toString() {
         return value.toString();
     }

@@ -28,6 +28,7 @@ import freemarker.template.Template;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 public abstract class TemplateObject {
     
     private Template template;
@@ -123,6 +124,7 @@ public abstract class TemplateObject {
         return s != null ? s : getCanonicalForm();
     }
 
+    @Override
     public String toString() {
         String s;
     	try {
@@ -157,6 +159,7 @@ public abstract class TemplateObject {
     /**
      * @deprecated This method will be removed in FreeMarker 2.4 because of architectural changes!
      */
+    @Deprecated
     public Template getTemplate() {
         return template;
     }

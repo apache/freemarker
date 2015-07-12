@@ -38,6 +38,7 @@ final class VisitNode extends TemplateElement {
         this.namespaces = namespaces;
     }
 
+    @Override
     void accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
@@ -67,6 +68,7 @@ final class VisitNode extends TemplateElement {
         env.invokeNodeHandlerFor((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -81,14 +83,17 @@ final class VisitNode extends TemplateElement {
         return sb.toString();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#visit";
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return targetNode;
@@ -97,6 +102,7 @@ final class VisitNode extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.NODE;
@@ -105,6 +111,7 @@ final class VisitNode extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return true;
     }

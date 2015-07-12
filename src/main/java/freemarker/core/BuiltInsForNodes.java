@@ -33,7 +33,8 @@ import freemarker.template.utility.StringUtil;
 class BuiltInsForNodes {
     
     static class ancestorsBI extends BuiltInForNode {
-       TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+       @Override
+    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
            AncestorSequence result = new AncestorSequence(env);
            TemplateNodeModel parent = nodeModel.getParentNode();
            while (parent != null) {
@@ -45,19 +46,22 @@ class BuiltInsForNodes {
     }
     
     static class childrenBI extends BuiltInForNode {
-       TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+       @Override
+    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return nodeModel.getChildNodes();
        }
     }
     
     static class node_nameBI extends BuiltInForNode {
-       TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+       @Override
+    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return new SimpleScalar(nodeModel.getNodeName());
        }
     }
     
     
     static class node_namespaceBI extends BuiltInForNode {
+        @Override
         TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             String nsURI = nodeModel.getNodeNamespace();
             return nsURI == null ? null : new SimpleScalar(nsURI);
@@ -65,19 +69,22 @@ class BuiltInsForNodes {
     }
     
     static class node_typeBI extends BuiltInForNode {
-       TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+       @Override
+    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return new SimpleScalar(nodeModel.getNodeType());
         }
     }
 
     static class parentBI extends BuiltInForNode {
-       TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+       @Override
+    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return nodeModel.getParentNode();
        }
     }
     
     static class rootBI extends BuiltInForNode {
-       TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+       @Override
+    TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             TemplateNodeModel result = nodeModel;
             TemplateNodeModel parent = nodeModel.getParentNode();
             while (parent != null) {

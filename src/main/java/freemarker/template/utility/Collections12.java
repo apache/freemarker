@@ -27,6 +27,7 @@ import freemarker.template.EmptyMap;
  * 
  * @deprecated Not needed anymore, as FreeMarker now requires higher than Java 1.3
  */
+@Deprecated
 public class Collections12 {
     public static final Map EMPTY_MAP = new EmptyMap();
     

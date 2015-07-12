@@ -31,6 +31,7 @@ class BuiltInsForLoopVariables {
     
     static class indexBI extends BuiltInForLoopVariable {
 
+        @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
             return new SimpleNumber(iterCtx.getIndex());
         }
@@ -39,6 +40,7 @@ class BuiltInsForLoopVariables {
     
     static class counterBI extends BuiltInForLoopVariable {
 
+        @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
             return new SimpleNumber(iterCtx.getIndex() + 1);
         }
@@ -47,6 +49,7 @@ class BuiltInsForLoopVariables {
 
     static abstract class BooleanBuiltInForLoopVariable extends BuiltInForLoopVariable {
 
+        @Override
         final TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
             return calculateBooleanResult(iterCtx, env) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
@@ -57,6 +60,7 @@ class BuiltInsForLoopVariables {
     
     static class has_nextBI extends BooleanBuiltInForLoopVariable {
 
+        @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
             return iterCtx.hasNext();
         }
@@ -65,6 +69,7 @@ class BuiltInsForLoopVariables {
 
     static class is_lastBI extends BooleanBuiltInForLoopVariable {
 
+        @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
             return !iterCtx.hasNext();
         }
@@ -73,6 +78,7 @@ class BuiltInsForLoopVariables {
 
     static class is_firstBI extends BooleanBuiltInForLoopVariable {
 
+        @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
             return iterCtx.getIndex() == 0;
         }
@@ -81,6 +87,7 @@ class BuiltInsForLoopVariables {
 
     static class is_odd_itemBI extends BooleanBuiltInForLoopVariable {
 
+        @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
             return iterCtx.getIndex() % 2 == 0;
         }
@@ -89,6 +96,7 @@ class BuiltInsForLoopVariables {
 
     static class is_even_itemBI extends BooleanBuiltInForLoopVariable {
 
+        @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
             return iterCtx.getIndex() % 2 != 0;
         }
@@ -100,6 +108,7 @@ class BuiltInsForLoopVariables {
         private static final SimpleScalar ODD = new SimpleScalar("odd");
         private static final SimpleScalar EVEN = new SimpleScalar("even");
 
+        @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
             return iterCtx.getIndex() % 2 == 0 ? ODD: EVEN;
         }
@@ -111,6 +120,7 @@ class BuiltInsForLoopVariables {
         private static final SimpleScalar ODD = new SimpleScalar("Odd");
         private static final SimpleScalar EVEN = new SimpleScalar("Even");
 
+        @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
             return iterCtx.getIndex() % 2 == 0 ? ODD: EVEN;
         }
@@ -133,6 +143,7 @@ class BuiltInsForLoopVariables {
             }
         }
         
+        @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
             return new BIMethod(iterCtx);
         }

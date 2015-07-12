@@ -55,6 +55,7 @@ class BuiltInsForMultipleTypes {
         
         static class BIBeforeICE2d3d21 extends AbstractCBI {
 
+            @Override
             protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
                 Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
                 if (num instanceof Integer || num instanceof Long) {
@@ -69,6 +70,7 @@ class BuiltInsForMultipleTypes {
         
         private final BIBeforeICE2d3d21 prevICIObj = new BIBeforeICE2d3d21();
 
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
@@ -84,6 +86,7 @@ class BuiltInsForMultipleTypes {
             }
         }
 
+        @Override
         protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
             Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
             if (num instanceof Integer || num instanceof Long) {
@@ -195,6 +198,7 @@ class BuiltInsForMultipleTypes {
             this.dateType = dateType;
         }
         
+        @Override
         TemplateModel _eval(Environment env)
                 throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -222,6 +226,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class apiBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             if (!env.isAPIBuiltinEnabled()) {
                 throw new _MiscTemplateException(this, new Object[] {
@@ -239,6 +244,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class has_apiBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             final TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -247,6 +253,7 @@ class BuiltInsForMultipleTypes {
     }
     
     static class is_booleanBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -256,6 +263,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_collectionBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -264,6 +272,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_collection_exBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -272,6 +281,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_dateLikeBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -288,6 +298,7 @@ class BuiltInsForMultipleTypes {
             this.dateType = dateType;
         }
 
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -297,6 +308,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_directiveBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -307,6 +319,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_enumerableBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -319,6 +332,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_hash_exBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -327,6 +341,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_hashBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -335,6 +350,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_indexableBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -343,6 +359,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_macroBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -353,6 +370,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_methodBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -362,6 +380,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_nodeBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -371,6 +390,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_numberBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -380,6 +400,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_sequenceBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -388,6 +409,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_stringBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -397,6 +419,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class is_transformBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
@@ -406,6 +429,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class namespaceBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             if (!(tm instanceof Macro)) {
@@ -420,6 +444,7 @@ class BuiltInsForMultipleTypes {
     }
 
     static class sizeBI extends BuiltIn {
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
 
@@ -571,6 +596,7 @@ class BuiltInsForMultipleTypes {
             }
         }
     
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
@@ -604,6 +630,7 @@ class BuiltInsForMultipleTypes {
 
     static abstract class AbstractCBI extends BuiltIn {
         
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {

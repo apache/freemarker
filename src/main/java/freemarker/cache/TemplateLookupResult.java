@@ -90,14 +90,17 @@ public abstract class TemplateLookupResult {
             this.templateSource = templateSource;
         }
 
+        @Override
         public String getTemplateSourceName() {
             return templateSourceName;
         }
 
+        @Override
         Object getTemplateSource() {
             return templateSource;
         }
 
+        @Override
         public boolean isPositive() {
             return true;
         }
@@ -111,14 +114,17 @@ public abstract class TemplateLookupResult {
             // nop
         }
 
+        @Override
         public String getTemplateSourceName() {
             return null;
         }
 
+        @Override
         Object getTemplateSource() {
             return null;
         }
 
+        @Override
         public boolean isPositive() {
             return false;
         }

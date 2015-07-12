@@ -29,6 +29,7 @@ class BuiltInsForHashes {
 
     static class keysBI extends BuiltInForHashEx {
 
+        @Override
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
                 throws TemplateModelException, InvalidReferenceException {
             TemplateCollectionModel keys = hashExModel.keys();
@@ -39,6 +40,7 @@ class BuiltInsForHashes {
     }
     
     static class valuesBI extends BuiltInForHashEx {
+        @Override
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
                 throws TemplateModelException, InvalidReferenceException {
             TemplateCollectionModel values = hashExModel.values();

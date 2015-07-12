@@ -49,6 +49,7 @@ implements TemplateScalarModel, Serializable {
         return (value == null) ? "" : value;
     }
 
+    @Override
     public String toString() {
         // [2.4] Shouldn't return null
         return value;

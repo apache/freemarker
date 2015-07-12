@@ -44,6 +44,7 @@ import freemarker.template.TemplateException;
  */
 class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcessor {
 
+    @Override
     public void postProcess(Template t) throws TemplatePostProcessorException {
         final TemplateElement te = t.getRootTreeNode();
         addInterruptionChecks(te);
@@ -105,6 +106,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
             setLocation(te.getTemplate(), te.beginColumn, te.beginLine, te.beginColumn, te.beginLine);
         }
 
+        @Override
         void accept(Environment env) throws TemplateException, IOException {
             // As the API doesn't allow throwing InterruptedException here (nor anywhere else, most importantly,
             // Template.process can't throw it), we must not clear the "interrupted" flag of the thread.
@@ -113,26 +115,32 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
             }
         }
 
+        @Override
         protected String dump(boolean canonical) {
             return canonical ? "" : "<#--" + getNodeTypeSymbol() + "--#>";
         }
 
+        @Override
         String getNodeTypeSymbol() {
             return "##threadInterruptionCheck";
         }
 
+        @Override
         int getParameterCount() {
             return 0;
         }
 
+        @Override
         Object getParameterValue(int idx) {
             throw new IndexOutOfBoundsException();
         }
 
+        @Override
         ParameterRole getParameterRole(int idx) {
             throw new IndexOutOfBoundsException();
         }
 
+        @Override
         boolean isNestedBlockRepeater() {
             return false;
         }

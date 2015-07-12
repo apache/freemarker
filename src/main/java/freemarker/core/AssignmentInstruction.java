@@ -47,6 +47,7 @@ final class AssignmentInstruction extends TemplateElement {
         }
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         int ln = getRegulatedChildCount();
         for (int i = 0; i < ln; i++) {
@@ -55,6 +56,7 @@ final class AssignmentInstruction extends TemplateElement {
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
@@ -80,10 +82,12 @@ final class AssignmentInstruction extends TemplateElement {
         return buf.toString();
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return Integer.valueOf(scope);
@@ -92,6 +96,7 @@ final class AssignmentInstruction extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.VARIABLE_SCOPE;
@@ -100,15 +105,18 @@ final class AssignmentInstruction extends TemplateElement {
         }
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return Assignment.getDirectiveName(scope);
     }
 
+    @Override
     public TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
         super.postParseCleanup(stripWhitespace);
         return this;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

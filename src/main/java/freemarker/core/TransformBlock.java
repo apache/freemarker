@@ -51,6 +51,7 @@ final class TransformBlock extends TemplateElement {
         setNestedBlock(nestedBlock);
     }
 
+    @Override
     void accept(Environment env) 
     throws TemplateException, IOException {
         TemplateTransformModel ttm = env.getTransform(transformExpression);
@@ -77,6 +78,7 @@ final class TransformBlock extends TemplateElement {
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -102,14 +104,17 @@ final class TransformBlock extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#transform";
     }
     
+    @Override
     int getParameterCount() {
         return 1/*nameExp*/ + (namedArgs != null ? namedArgs.size() * 2 : 0);
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx == 0) {
             return transformExpression;
@@ -121,6 +126,7 @@ final class TransformBlock extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx == 0) {
             return ParameterRole.CALLEE;
@@ -147,6 +153,7 @@ final class TransformBlock extends TemplateElement {
         return res;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

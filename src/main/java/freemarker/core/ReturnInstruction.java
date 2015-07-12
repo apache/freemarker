@@ -29,6 +29,7 @@ public final class ReturnInstruction extends TemplateElement {
         this.exp = exp;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException {
         if (exp != null) {
             env.setLastReturnValue(exp.eval(env));
@@ -43,6 +44,7 @@ public final class ReturnInstruction extends TemplateElement {
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -55,6 +57,7 @@ public final class ReturnInstruction extends TemplateElement {
         return sb.toString();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#return";
     }
@@ -65,20 +68,24 @@ public final class ReturnInstruction extends TemplateElement {
         }
     }
     
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return exp;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.VALUE;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

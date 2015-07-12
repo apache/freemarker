@@ -48,6 +48,7 @@ final class AddConcatExpression extends Expression {
         this.right = right;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         return _eval(env, this, left, left.eval(env), right, right.eval(env));
     }
@@ -108,10 +109,12 @@ final class AddConcatExpression extends Expression {
         return new SimpleNumber(ae.add(first, second));
     }
 
+    @Override
     boolean isLiteral() {
         return constantValue != null || (left.isLiteral() && right.isLiteral());
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new AddConcatExpression(
@@ -119,22 +122,27 @@ final class AddConcatExpression extends Expression {
     	right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
+    @Override
     public String getCanonicalForm() {
         return left.getCanonicalForm() + " + " + right.getCanonicalForm();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "+";
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         return idx == 0 ? left : right;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }

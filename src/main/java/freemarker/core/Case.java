@@ -35,6 +35,7 @@ final class Case extends TemplateElement {
         setNestedBlock(nestedBlock);
     }
 
+    @Override
     void accept(Environment env) 
         throws TemplateException, IOException {
         if (getNestedBlock() != null) {
@@ -42,6 +43,7 @@ final class Case extends TemplateElement {
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -57,14 +59,17 @@ final class Case extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return condition != null ? "#case" : "#default";
     }
 
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return condition;
@@ -73,6 +78,7 @@ final class Case extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.CONDITION;
@@ -81,6 +87,7 @@ final class Case extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

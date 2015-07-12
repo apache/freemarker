@@ -35,6 +35,7 @@ final class MixedContent extends TemplateElement {
         addRegulatedChild(index, element);
     }
     
+    @Override
     TemplateElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
         super.postParseCleanup(stripWhitespace);
@@ -45,6 +46,7 @@ final class MixedContent extends TemplateElement {
      * Processes the contents of the internal <tt>TemplateElement</tt> list,
      * and outputs the resulting text.
      */
+    @Override
     void accept(Environment env) 
         throws TemplateException, IOException {
         int ln = getRegulatedChildCount();
@@ -53,6 +55,7 @@ final class MixedContent extends TemplateElement {
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
@@ -69,6 +72,7 @@ final class MixedContent extends TemplateElement {
         }
     }
 
+    @Override
     protected boolean isOutputCacheable() {
         int ln = getRegulatedChildCount();
         for (int i = 0; i < ln; i++) {
@@ -79,30 +83,37 @@ final class MixedContent extends TemplateElement {
         return true;
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#mixed_content";
     }
     
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
     
+    @Override
     boolean isShownInStackTrace() {
         return false;
     }
     
+    @Override
     boolean isIgnorable() {
         return getRegulatedChildCount() == 0;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

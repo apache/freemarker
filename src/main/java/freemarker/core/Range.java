@@ -44,6 +44,7 @@ final class Range extends Expression {
         return endType;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         final int begin = lho.evalToNumber(env).intValue();
         if (endType != END_UNBOUND) {
@@ -59,15 +60,18 @@ final class Range extends Expression {
     }
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
+    @Override
     boolean evalToBoolean(Environment env) throws TemplateException {
         throw new NonBooleanException(this, new BoundedRangeModel(0, 0, false, false), env);
     }
 
+    @Override
     public String getCanonicalForm() {
         String rhs = rho != null ? rho.getCanonicalForm() : "";
         return lho.getCanonicalForm() + getNodeTypeSymbol() + rhs;
     }
     
+    @Override
     String getNodeTypeSymbol() {
         switch (endType) {
         case END_EXCLUSIVE: return "..<";
@@ -78,11 +82,13 @@ final class Range extends Expression {
         }
     }
     
+    @Override
     boolean isLiteral() {
         boolean rightIsLiteral = rho == null || rho.isLiteral();
         return constantValue != null || (lho.isLiteral() && rightIsLiteral);
     }
     
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new Range(
@@ -91,10 +97,12 @@ final class Range extends Expression {
                 endType);
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return lho;
@@ -103,6 +111,7 @@ final class Range extends Expression {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }

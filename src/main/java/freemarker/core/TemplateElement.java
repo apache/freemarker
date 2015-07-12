@@ -34,6 +34,7 @@ import freemarker.template.TemplateSequenceModel;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 abstract public class TemplateElement extends TemplateObject {
 
     private static final int INITIAL_REGULATED_CHILD_BUFFER_CAPACITY = 6;
@@ -92,6 +93,7 @@ abstract public class TemplateElement extends TemplateObject {
     /**
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      */
+    @Override
     public final String getCanonicalForm() {
         return dump(true);
     }
@@ -168,6 +170,7 @@ abstract public class TemplateElement extends TemplateObject {
     /**
      * @deprecated Meaningless; simply returns if the node currently has any child nodes.
      */
+    @Deprecated
     public boolean getAllowsChildren() {
         return !isLeaf();
     }
@@ -261,6 +264,7 @@ abstract public class TemplateElement extends TemplateObject {
      * 
      * @deprecated Don't use in internal code either; use {@link #getParentElement()} there.
      */
+    @Deprecated
     public TemplateElement getParent() {
         return parent;
     }

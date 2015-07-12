@@ -36,10 +36,12 @@ final class AttemptBlock extends TemplateElement {
         addRegulatedChild(recoveryBlock);
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         env.visitAttemptRecover(attemptBlock, recoveryBlock);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (!canonical) {
             return getNodeTypeSymbol();
@@ -57,28 +59,34 @@ final class AttemptBlock extends TemplateElement {
         }
     }
     
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return recoveryBlock;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.ERROR_HANDLER;
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#attempt";
     }
     
+    @Override
     boolean isShownInStackTrace() {
         return false;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }
