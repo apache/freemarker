@@ -1801,7 +1801,7 @@ public class Configurable {
      * Internal entry point for setting unnamed custom attributes
      */
     void setCustomAttribute(Object key, Object value) {
-        synchronized(customAttributes) {
+        synchronized (customAttributes) {
             customAttributes.put(key, value);
         }
     }
@@ -1810,7 +1810,7 @@ public class Configurable {
      * Internal entry point for getting unnamed custom attributes
      */
     Object getCustomAttribute(Object key, CustomAttribute attr) {
-        synchronized(customAttributes) {
+        synchronized (customAttributes) {
             Object o = customAttributes.get(key);
             if (o == null && !customAttributes.containsKey(key)) {
                 o = attr.create();
@@ -1830,7 +1830,7 @@ public class Configurable {
      * {@link #removeCustomAttribute(String)}.
      */
     public void setCustomAttribute(String name, Object value) {
-        synchronized(customAttributes) {
+        synchronized (customAttributes) {
             customAttributes.put(name, value);
         }
     }
@@ -1844,7 +1844,7 @@ public class Configurable {
      * between invocations.  
      */
     public String[] getCustomAttributeNames() {
-        synchronized(customAttributes) {
+        synchronized (customAttributes) {
             Collection names = new LinkedList(customAttributes.keySet());
             for (Iterator iter = names.iterator(); iter.hasNext(); ) {
                 if (!(iter.next() instanceof String)) {
@@ -1866,7 +1866,7 @@ public class Configurable {
      * @param name the name of the custom attribute
      */
     public void removeCustomAttribute(String name) {
-        synchronized(customAttributes) {
+        synchronized (customAttributes) {
             customAttributes.remove(name);
         }
     }
@@ -1885,7 +1885,7 @@ public class Configurable {
      */
     public Object getCustomAttribute(String name) {
         Object retval;
-        synchronized(customAttributes) {
+        synchronized (customAttributes) {
             retval = customAttributes.get(name);
             if (retval == null && customAttributes.containsKey(name)) {
                 return null;

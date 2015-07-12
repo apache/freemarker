@@ -50,7 +50,7 @@ implements
     }
     
     public String translateNamespacePrefixToUri(String prefix) {
-        synchronized(namespaces) {
+        synchronized (namespaces) {
             return (String) namespaces.get(prefix);
         }   
     }
@@ -64,7 +64,7 @@ implements
     }
     
     void registerNamespace(String prefix, String uri) {
-        synchronized(namespaces) {
+        synchronized (namespaces) {
             namespaces.put(prefix, uri);
         }   
     }

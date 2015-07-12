@@ -59,7 +59,7 @@ implements
      * @return "this"
      */
     public TemplateModelIterator iterator() throws TemplateModelException {
-        synchronized(this) {
+        synchronized (this) {
             if (accessed) {
                 throw new TemplateModelException(
                     "This collection is stateful and can not be iterated over the" +

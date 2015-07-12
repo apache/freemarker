@@ -69,8 +69,7 @@ extends
     }
     
     List getBreakpointsSpi(String templateName) {
-        synchronized(templateDebugInfos)
-        {
+        synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = findTemplateDebugInfo(templateName);
             return tdi == null ? Collections.EMPTY_LIST : tdi.breakpoints;
         }
@@ -78,8 +77,7 @@ extends
 
     List getBreakpointsSpi() {
         List sumlist = new ArrayList();
-        synchronized(templateDebugInfos)
-        {
+        synchronized (templateDebugInfos) {
             for (Iterator iter = templateDebugInfos.values().iterator(); iter.hasNext(); ) {
                 sumlist.addAll(((TemplateDebugInfo) iter.next()).breakpoints);
             }
@@ -96,23 +94,20 @@ extends
             (RmiDebuggedEnvironmentImpl)
                 RmiDebuggedEnvironmentImpl.getCachedWrapperFor(env);
                 
-        synchronized(suspendedEnvironments)
-        {
+        synchronized (suspendedEnvironments) {
             suspendedEnvironments.add(denv);
         }
         try {
             EnvironmentSuspendedEvent breakpointEvent = 
                 new EnvironmentSuspendedEvent(this, templateName, line, denv);
     
-            synchronized(listeners)
-            {
+            synchronized (listeners) {
                 for (Iterator iter = listeners.values().iterator(); iter.hasNext(); ) {
                     DebuggerListener listener = (DebuggerListener) iter.next();
                     listener.environmentSuspended(breakpointEvent);
                 }
             }
-            synchronized(denv)
-            {
+            synchronized (denv) {
                 try {
                     denv.wait();
                 } catch (InterruptedException e) {
@@ -121,8 +116,7 @@ extends
             }
             return denv.isStopped();
         } finally {
-            synchronized(suspendedEnvironments)
-            {
+            synchronized (suspendedEnvironments) {
                 suspendedEnvironments.remove(denv);
             }
         }
@@ -130,8 +124,7 @@ extends
     
     void registerTemplateSpi(Template template) {
         String templateName = template.getName();
-        synchronized(templateDebugInfos)
-        {
+        synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = createTemplateDebugInfo(templateName);
             tdi.templates.add(new TemplateReference(templateName, template, refQueue));
             // Inject already defined breakpoints into the template
@@ -148,8 +141,7 @@ extends
 
     Object addDebuggerListener(DebuggerListener listener) {
         Object id; 
-        synchronized(listeners)
-        {
+        synchronized (listeners) {
             id = Long.valueOf(System.currentTimeMillis());
             listeners.put(id, listener);
         }
@@ -157,16 +149,14 @@ extends
     }
     
     void removeDebuggerListener(Object id) {
-        synchronized(listeners)
-        {
+        synchronized (listeners) {
             listeners.remove(id);
         }
     }
 
     void addBreakpoint(Breakpoint breakpoint) {
         String templateName = breakpoint.getTemplateName();
-        synchronized(templateDebugInfos)
-        {
+        synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = createTemplateDebugInfo(templateName);
             List breakpoints = tdi.breakpoints;
             int pos = Collections.binarySearch(breakpoints, breakpoint);
@@ -254,8 +244,7 @@ extends
     
     void removeBreakpoint(Breakpoint breakpoint) {
         String templateName = breakpoint.getTemplateName();
-        synchronized(templateDebugInfos)
-        {
+        synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = findTemplateDebugInfo(templateName);
             if (tdi != null) {
                 List breakpoints = tdi.breakpoints;
@@ -300,8 +289,7 @@ extends
     }
     
     void removeBreakpoints(String templateName) {
-        synchronized(templateDebugInfos)
-        {
+        synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = findTemplateDebugInfo(templateName);
             if (tdi != null) {
                 removeBreakpoints(tdi);
@@ -313,8 +301,7 @@ extends
     }
 
     void removeBreakpoints() {
-        synchronized(templateDebugInfos)
-        {
+        synchronized (templateDebugInfos) {
             for (Iterator iter = templateDebugInfos.values().iterator(); iter.hasNext(); ) {
                 TemplateDebugInfo tdi = (TemplateDebugInfo) iter.next(); 
                 removeBreakpoints(tdi);
