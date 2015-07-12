@@ -230,6 +230,7 @@ public class TemplateException extends Exception {
      * @deprecated Java 1.4 has introduced {@link #getCause()} - use that instead, especially as this can't return
      * runtime exceptions and errors as is.
      */
+    @Deprecated
     public Exception getCauseException() {
         return getCause() instanceof Exception
                 ? (Exception) getCause()
@@ -324,6 +325,7 @@ public class TemplateException extends Exception {
     /**
      * Overrides {@link Throwable#printStackTrace(PrintStream)} so that it will include the FTL stack trace.
      */
+    @Override
     public void printStackTrace(PrintStream out) {
         printStackTrace(out, true, true, true);
     }
@@ -331,6 +333,7 @@ public class TemplateException extends Exception {
     /**
      * Overrides {@link Throwable#printStackTrace(PrintWriter)} so that it will include the FTL stack trace.
      */
+    @Override
     public void printStackTrace(PrintWriter out) {
         printStackTrace(out, true, true, true);
     }
@@ -440,6 +443,7 @@ public class TemplateException extends Exception {
         super.printStackTrace(pw);
     }
 
+    @Override
     public String getMessage() {
         if (messageWasAlreadyPrintedForThisTrace != null
                 && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
@@ -488,6 +492,7 @@ public class TemplateException extends Exception {
      * 
      * @since 2.3.21
      */
+    @Deprecated
     public String getTemplateName() {
         synchronized (lock) {
             if (!positionsCalculated) {

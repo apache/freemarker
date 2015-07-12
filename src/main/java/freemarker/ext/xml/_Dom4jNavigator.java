@@ -43,10 +43,12 @@ public class _Dom4jNavigator extends Navigator {
     public _Dom4jNavigator() {
     } 
 
+    @Override
     void getAsString(Object node, StringWriter sw) {
         sw.getBuffer().append(((Node) node).asXML());
     }
 
+    @Override
     void getChildren(Object node, String localName, String namespaceUri, List result) {
         if (node instanceof Element) {
             Element e = (Element) node;
@@ -63,6 +65,7 @@ public class _Dom4jNavigator extends Navigator {
         }
     }
     
+    @Override
     void getAttributes(Object node, String localName, String namespaceUri, List result) {
         if (node instanceof Element) {
             Element e = (Element) node;
@@ -95,6 +98,7 @@ public class _Dom4jNavigator extends Navigator {
         } 
     }
 
+    @Override
     void getDescendants(Object node, List result) {
         if (node instanceof Branch) {
             getDescendants((Branch) node, result);
@@ -112,14 +116,17 @@ public class _Dom4jNavigator extends Navigator {
         }
     }
 
+    @Override
     Object getParent(Object node) {
         return ((Node) node).getParent();
     }
 
+    @Override
     Object getDocument(Object node) {
         return ((Node) node).getDocument();
     }
 
+    @Override
     Object getDocumentType(Object node) {
         return 
             node instanceof Document 
@@ -127,20 +134,24 @@ public class _Dom4jNavigator extends Navigator {
             : null; 
     }
     
+    @Override
     void getContent(Object node, List result) {
         if (node instanceof Branch) {
             result.addAll(((Branch) node).content());
         }
     }
 
+    @Override
     String getText(Object node) {
         return ((Node) node).getText();
     }
 
+    @Override
     String getLocalName(Object node) {
         return ((Node) node).getName();
     }
 
+    @Override
     String getNamespacePrefix(Object node) {
         if (node instanceof Element) {
             return ((Element) node).getNamespacePrefix();
@@ -151,6 +162,7 @@ public class _Dom4jNavigator extends Navigator {
         return null;
     }
 
+    @Override
     String getNamespaceUri(Object node) {
         if (node instanceof Element) {
             return ((Element) node).getNamespaceURI();
@@ -161,6 +173,7 @@ public class _Dom4jNavigator extends Navigator {
         return null;
     }
 
+    @Override
     String getType(Object node) {
         switch(((Node) node).getNodeType()) {
             case Node.ATTRIBUTE_NODE: {
@@ -197,6 +210,7 @@ public class _Dom4jNavigator extends Navigator {
         return "unknown";
     }
 
+    @Override
     XPathEx createXPathEx(String xpathString) throws TemplateModelException {
         try {
             return new Dom4jXPathEx(xpathString);

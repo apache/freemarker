@@ -77,6 +77,7 @@ implements
      * Overridden to invoke the generic get method by casting to Map instead of 
      * through reflection - should yield better performance.
      */
+    @Override
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
     throws TemplateModelException {
         Map map = (Map) object;
@@ -96,14 +97,17 @@ implements
         return wrap(val);
     }
 
+    @Override
     public boolean isEmpty() {
         return ((Map) object).isEmpty() && super.isEmpty();
     }
 
+    @Override
     public int size() {
         return keySet().size();
     }
 
+    @Override
     protected Set keySet() {
         Set set = super.keySet();
         set.addAll(((Map) object).keySet());

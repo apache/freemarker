@@ -80,6 +80,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * 
      * @deprecated Use {@link #SimpleSequence(ObjectWrapper)} instead.
      */
+    @Deprecated
     public SimpleSequence() {
         this((ObjectWrapper) null);
     }
@@ -91,6 +92,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * 
      * @deprecated Use {@link #SimpleSequence(Collection, ObjectWrapper)}.
      */
+    @Deprecated
     public SimpleSequence(int capacity) {
         list = new ArrayList(capacity);
     }
@@ -106,6 +108,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * 
      * @deprecated Use {@link #SimpleSequence(Collection, ObjectWrapper)}.
      */
+    @Deprecated
     public SimpleSequence(Collection collection) {
         this(collection, null);
     }
@@ -190,6 +193,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * 
      * @deprecated Use {@link #add(Object)} instead, as this bypasses the {@link ObjectWrapper}.
      */
+    @Deprecated
     public void add(boolean b) {
         add(b ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE);
     }
@@ -201,6 +205,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * 
      * @deprecated No replacement exists; not a reliable way of getting back the original list elemnts.
      */
+    @Deprecated
     public List toList() throws TemplateModelException {
         if (unwrappedList == null) {
             Class listClass = list.getClass();
@@ -253,30 +258,35 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
         return new SynchronizedSequence();
     }
     
+    @Override
     public String toString() {
         return list.toString();
     }
 
     private class SynchronizedSequence extends SimpleSequence {
 
+        @Override
         public void add(Object obj) {
             synchronized (SimpleSequence.this) {
                 SimpleSequence.this.add(obj);
             }
         }
 
+        @Override
         public TemplateModel get(int i) throws TemplateModelException {
             synchronized (SimpleSequence.this) {
                 return SimpleSequence.this.get(i);
             }
         }
         
+        @Override
         public int size() {
             synchronized (SimpleSequence.this) {
                 return SimpleSequence.this.size();
             }
         }
         
+        @Override
         public List toList() throws TemplateModelException {
             synchronized (SimpleSequence.this) {
                 return SimpleSequence.this.toList();

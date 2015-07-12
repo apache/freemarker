@@ -51,6 +51,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
      * The special key "@@" returns a hash of all the element's attributes.
      * The special key "/" returns the root document node associated with this element.
      */
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         if (key.equals("*")) {
             NodeListModel ns = new NodeListModel(this);
@@ -130,6 +131,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         return result;
     }
     
+    @Override
     String getQualifiedName() {
         String nodeName = getNodeName();
         String nsURI = getNodeNamespace();

@@ -45,6 +45,7 @@ implements TemplateCollectionModel, Serializable {
     /**
      * @deprecated Use {@link #SimpleCollection(Iterator, ObjectWrapper)}
      */
+    @Deprecated
     public SimpleCollection(Iterator iterator) {
         this.iterator = iterator;
         collection = null;
@@ -53,6 +54,7 @@ implements TemplateCollectionModel, Serializable {
     /**
      * @deprecated Use {@link #SimpleCollection(Collection, ObjectWrapper)}
      */
+    @Deprecated
     public SimpleCollection(Collection collection) {
         this.collection = collection;
         iterator = null;

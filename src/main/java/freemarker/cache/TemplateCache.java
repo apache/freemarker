@@ -90,6 +90,7 @@ public class TemplateCache {
      * @deprecated Use {@link #TemplateCache(TemplateLoader)} instead. The default loader is useless in most
      *     applications, also it can mean a security risk.
      */
+    @Deprecated
     public TemplateCache() {
         this(_TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0));
     }
@@ -97,6 +98,7 @@ public class TemplateCache {
     /**
      * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
+    @Deprecated
     public TemplateCache(TemplateLoader templateLoader) {
         this(templateLoader, (Configuration) null);
     }
@@ -104,6 +106,7 @@ public class TemplateCache {
     /**
      * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
+    @Deprecated
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage) {
         this(templateLoader, cacheStorage, null);
     }
@@ -171,6 +174,7 @@ public class TemplateCache {
      * 
      * @deprecated Use the {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} constructor.
      */
+    @Deprecated
     public void setConfiguration(Configuration config) {
         this.config = config;
         clear();
@@ -264,6 +268,7 @@ public class TemplateCache {
      * @deprecated Use {@link #getTemplate(String, Locale, Object, String, boolean)}, which can return more detailed
      *             result when the template is missing.
      */
+    @Deprecated
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
     throws IOException {
         return getTemplate(name, locale, null, encoding, parseAsFTL).getTemplate();
@@ -274,6 +279,7 @@ public class TemplateCache {
      * 
      * @deprecated The {@link TemplateLoader} should be always specified by the constructor caller.
      */
+    @Deprecated
     protected static TemplateLoader createLegacyDefaultTemplateLoader() {
         return _TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0);        
     }
@@ -649,6 +655,7 @@ public class TemplateCache {
      *             If the {@code baseName} or {@code targetName} is malformed according the {@link TemplateNameFormat}
      *             in use.
      */
+    @Deprecated
     public static String getFullTemplatePath(Environment env, String baseName, String targetName) {
         try {
             return env.toFullTemplateName(baseName, targetName);
@@ -768,6 +775,7 @@ public class TemplateCache {
             this.parse = parse;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o instanceof TemplateKey) {
                 TemplateKey tk = (TemplateKey) o;
@@ -787,6 +795,7 @@ public class TemplateCache {
                 : o2 == null;
         }
 
+        @Override
         public int hashCode() {
             return
                 name.hashCode() ^
@@ -828,6 +837,7 @@ public class TemplateCache {
             super(templateName, localizedLookup ? templateLocale : null, customLookupCondition);
         }
 
+        @Override
         public TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException {
             // Only one of the possible ways of making a name non-normalized, but is the easiest mistake to do:
             if (name.startsWith("/")) {
@@ -837,6 +847,7 @@ public class TemplateCache {
             return TemplateCache.this.lookupTemplateWithAcquisitionStrategy(name);
         }
 
+        @Override
         public TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(final String templateName,
                 final Locale templateLocale) throws IOException {
             

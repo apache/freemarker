@@ -46,6 +46,7 @@ public class StringUtil {
      *    
      *  @deprecated Use {@link #XHTMLEnc(String)} instead, because it escapes apostrophe-quote too.
      */
+    @Deprecated
     public static String HTMLEnc(String s) {
         return XMLEncNA(s);
     }

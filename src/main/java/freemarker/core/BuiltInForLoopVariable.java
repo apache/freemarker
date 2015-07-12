@@ -28,6 +28,7 @@ abstract class BuiltInForLoopVariable extends SpecialBuiltIn {
         this.loopVarName = loopVarName;
     }
     
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, loopVarName);
         if (iterCtx == null) {

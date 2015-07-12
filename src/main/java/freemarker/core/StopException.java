@@ -34,6 +34,7 @@ public class StopException extends TemplateException {
         super(s, env);
     }
 
+    @Override
     public void printStackTrace(PrintWriter pw) {
         synchronized (pw) {
             String msg = this.getMessage();
@@ -45,6 +46,7 @@ public class StopException extends TemplateException {
         }
     }
 
+    @Override
     public void printStackTrace(PrintStream ps) {
         synchronized (ps) {
             String msg = this.getMessage();

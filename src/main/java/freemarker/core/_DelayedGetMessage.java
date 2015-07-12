@@ -23,6 +23,7 @@ public class _DelayedGetMessage extends _DelayedConversionToString {
         super(exception);
     }
 
+    @Override
     protected String doConversion(Object obj) {
         final String message = ((Throwable) obj).getMessage();
         return message == null || message.length() == 0 ? "[No exception message]" : message;

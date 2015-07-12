@@ -43,18 +43,22 @@ final class BoundedRangeModel extends RangeModel {
         return size;
     }
     
+    @Override
     int getStep() {
         return step;
     }
 
+    @Override
     boolean isRightUnbounded() {
         return false;
     }
 
+    @Override
     boolean isRightAdaptive() {
         return rightAdaptive;
     }
 
+    @Override
     boolean isAffactedByStringSlicingBug() {
         return affectedByStringSlicingBug;
     }

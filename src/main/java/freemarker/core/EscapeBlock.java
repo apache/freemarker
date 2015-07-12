@@ -43,6 +43,7 @@ class EscapeBlock extends TemplateElement {
         this.escapedExpr = null;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visit(getNestedBlock());
@@ -53,6 +54,7 @@ class EscapeBlock extends TemplateElement {
         return escapedExpr.deepCloneWithIdentifierReplaced(variable, expression, new ReplacemenetState());
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -69,18 +71,22 @@ class EscapeBlock extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#escape";
     }
     
+    @Override
     boolean isShownInStackTrace() {
         return false;
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return variable;
@@ -89,6 +95,7 @@ class EscapeBlock extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.PLACEHOLDER_VARIABLE;
@@ -97,10 +104,12 @@ class EscapeBlock extends TemplateElement {
         }
     }    
 
+    @Override
     boolean isOutputCacheable() {
         return true;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

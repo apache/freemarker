@@ -39,6 +39,7 @@ final class ListLiteral extends Expression {
         items.trimToSize();
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         SimpleSequence list = new SimpleSequence(items.size());
         for (Iterator it = items.iterator(); it.hasNext(); ) {
@@ -99,6 +100,7 @@ final class ListLiteral extends Expression {
         }
     }
 
+    @Override
     public String getCanonicalForm() {
         StringBuilder buf = new StringBuilder("[");
         int size = items.size();
@@ -113,10 +115,12 @@ final class ListLiteral extends Expression {
         return buf.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "[...]";
     }
     
+    @Override
     boolean isLiteral() {
         if (constantValue != null) {
             return true;
@@ -154,6 +158,7 @@ final class ListLiteral extends Expression {
         return result;
     }
     
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
 		ArrayList clonedValues = (ArrayList) items.clone();
@@ -164,15 +169,18 @@ final class ListLiteral extends Expression {
         return new ListLiteral(clonedValues);
     }
 
+    @Override
     int getParameterCount() {
         return items != null ? items.size() : 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         checkIndex(idx);
         return items.get(idx);
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         checkIndex(idx);
         return ParameterRole.ITEM_VALUE;

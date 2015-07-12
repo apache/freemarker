@@ -27,6 +27,7 @@ package freemarker.core;
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
  */
+@Deprecated
 public abstract class TemplateObject {
     
     private UnboundTemplate unboundTemplate;
@@ -145,6 +146,7 @@ public abstract class TemplateObject {
         return s != null ? s : getCanonicalForm();
     }
 
+    @Override
     public String toString() {
         String s;
     	try {

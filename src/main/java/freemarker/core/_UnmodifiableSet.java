@@ -21,10 +21,12 @@ import java.util.AbstractSet;
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
 public abstract class _UnmodifiableSet<E> extends AbstractSet<E> {
 
+    @Override
     public boolean add(E o) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean remove(Object o) {
         if (contains(o)) {
             throw new UnsupportedOperationException();
@@ -32,6 +34,7 @@ public abstract class _UnmodifiableSet<E> extends AbstractSet<E> {
         return false;
     }
 
+    @Override
     public void clear() {
         if (!isEmpty()) {
             throw new UnsupportedOperationException();

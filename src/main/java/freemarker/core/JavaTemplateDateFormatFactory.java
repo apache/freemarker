@@ -41,6 +41,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
         this.locale = locale;
     }
 
+    @Override
     public boolean isLocaleBound() {
         return true;
     }
@@ -48,6 +49,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     /**
      * @param zonelessInput Has no effect in this implementation.
      */
+    @Override
     public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
             throws ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         Map/*<TemplateDateFormat>*/[] formatCache = this.formatCache;
@@ -136,6 +138,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
             this.timeZone = timeZone;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o instanceof DateFormatKey) {
                 DateFormatKey fk = (DateFormatKey) o;
@@ -145,6 +148,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
             return false;
         }
 
+        @Override
         public int hashCode() {
             return dateType ^ pattern.hashCode() ^ locale.hashCode() ^ timeZone.hashCode();
         }

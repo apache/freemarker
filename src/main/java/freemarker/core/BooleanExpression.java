@@ -22,6 +22,7 @@ import freemarker.template.TemplateModel;
 
 abstract class BooleanExpression extends Expression {
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         return evalToBoolean(env) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
     }

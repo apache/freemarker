@@ -75,10 +75,12 @@ class UnboundCallable extends Macro {
         return paramDefaults;
     }
 
+    @Override
     public String getCatchAll() {
         return catchAllParamName;
     }
     
+    @Override
     public String[] getArgumentNames() {
         return paramNames.clone();
     }
@@ -91,14 +93,17 @@ class UnboundCallable extends Macro {
         return paramDefaults.containsKey(name);
     }
     
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     void accept(Environment env) {
         env.visitCallableDefinition(this);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -149,26 +154,32 @@ class UnboundCallable extends Macro {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return function ? "#function" : "#macro";
     }
     
+    @Override
     boolean isShownInStackTrace() {
         return false;
     }
     
+    @Override
     boolean isNestedBlockRepeater() {
         // Because of recursive calls
         return true;
     }
+    @Override
     public boolean isFunction() {
         return function;
     }
 
+    @Override
     int getParameterCount() {
         return 1/*name*/ + paramNames.length * 2/*name=default*/ + 1/*catchAll*/ + 1/*type*/;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx == 0) {
             return name;
@@ -191,6 +202,7 @@ class UnboundCallable extends Macro {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx == 0) {
             return ParameterRole.ASSIGNMENT_TARGET;

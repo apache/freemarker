@@ -79,6 +79,7 @@ public class FileTemplateLoader implements TemplateLoader {
      * @deprecated Relying on what the current directory is is a bad practice; use
      *             {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
      */
+    @Deprecated
     public FileTemplateLoader()
     throws IOException {
         this(new File(SecurityUtilities.getSystemProperty("user.dir")));
@@ -328,6 +329,7 @@ public class FileTemplateLoader implements TemplateLoader {
      * 
      * @since 2.3.21
      */
+    @Override
     public String toString() {
         // We don't StringUtil.jQuote paths here, because on Windows there will be \\-s then that some may find
         // confusing.

@@ -59,6 +59,7 @@ public class HtmlEscape implements TemplateTransformModel {
     public Writer getWriter(final Writer out, Map args) {
         return new Writer()
         {
+            @Override
             public void write(int c)
             throws IOException {
                 switch(c)
@@ -71,6 +72,7 @@ public class HtmlEscape implements TemplateTransformModel {
                 }
             }
 
+            @Override
             public void write(char cbuf[], int off, int len)
             throws IOException {
                 int lastoff = off;
@@ -89,10 +91,12 @@ public class HtmlEscape implements TemplateTransformModel {
                     out.write(cbuf, lastoff, remaining);
                 }
             }
+            @Override
             public void flush() throws IOException {
                 out.flush();
             }
 
+            @Override
             public void close() {
             }
         };

@@ -78,6 +78,7 @@ import freemarker.template.TemplateSequenceModel;
  * 
  * @deprecated Use {@link freemarker.ext.dom.NodeModel} instead.
  */
+@Deprecated
 public class NodeListModel
 implements
     TemplateHashModel,
@@ -837,6 +838,7 @@ implements
     }
 
     private static final class DescendantOrSelfOp extends DescendantOp {
+        @Override
         public List operate(Object node) {
             LinkedList list = (LinkedList) super.operate(node);
             list.addFirst(node);

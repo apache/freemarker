@@ -47,36 +47,44 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
         this.paramTypes = paramTypes;
     }
 
+    @Override
     TemplateModel invokeMethod(BeansWrapper bw, Object obj, Object[] args)
             throws TemplateModelException, InvocationTargetException, IllegalAccessException {
         return bw.invokeMethod(obj, (Method) member, args);
     }
 
+    @Override
     Object invokeConstructor(BeansWrapper bw, Object[] args)
             throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
         return ((Constructor) member).newInstance(args);
     }
 
+    @Override
     String getDeclaration() {
         return _MethodUtil.toString(member);
     }
     
+    @Override
     boolean isConstructor() {
         return member instanceof Constructor;
     }
     
+    @Override
     boolean isStatic() {
         return (member.getModifiers() & Modifier.STATIC) != 0;
     }
 
+    @Override
     boolean isVarargs() {
         return _MethodUtil.isVarargs(member);
     }
 
+    @Override
     Class[] getParamTypes() {
         return paramTypes;
     }
 
+    @Override
     String getName() {
         return member.getName();
     }

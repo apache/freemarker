@@ -23,6 +23,7 @@ public class _DelayedJoinWithComma extends _DelayedConversionToString {
         super(items);
     }
 
+    @Override
     protected String doConversion(Object obj) {
         String[] items = (String[]) obj;
         

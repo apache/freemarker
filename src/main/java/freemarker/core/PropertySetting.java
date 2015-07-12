@@ -106,6 +106,7 @@ final class PropertySetting extends TemplateElement {
         this.value = value;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException {
         TemplateModel mval = value.eval(env);
         String strval;
@@ -121,6 +122,7 @@ final class PropertySetting extends TemplateElement {
         env.setSetting(key, strval);
     }
     
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -133,14 +135,17 @@ final class PropertySetting extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#setting";
     }
 
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return key;
@@ -149,6 +154,7 @@ final class PropertySetting extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.ITEM_KEY;
@@ -157,6 +163,7 @@ final class PropertySetting extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

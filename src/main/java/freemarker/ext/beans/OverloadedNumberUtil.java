@@ -329,34 +329,42 @@ class OverloadedNumberUtil {
         
         protected abstract Number getSourceNumber();
 
+        @Override
         public int intValue() {
             return getSourceNumber().intValue();
         }
 
+        @Override
         public long longValue() {
             return getSourceNumber().longValue();
         }
 
+        @Override
         public float floatValue() {
             return getSourceNumber().floatValue();
         }
 
+        @Override
         public double doubleValue() {
             return getSourceNumber().doubleValue();
         }
 
+        @Override
         public byte byteValue() {
             return getSourceNumber().byteValue();
         }
 
+        @Override
         public short shortValue() {
             return getSourceNumber().shortValue();
         }
 
+        @Override
         public int hashCode() {
             return getSourceNumber().hashCode();
         }
 
+        @Override
         public boolean equals(Object obj) {
             if (obj != null && this.getClass() == obj.getClass()) {
                 return getSourceNumber().equals(((NumberWithFallbackType) obj).getSourceNumber());
@@ -365,6 +373,7 @@ class OverloadedNumberUtil {
             }
         }
 
+        @Override
         public String toString() {
             return getSourceNumber().toString();
         }
@@ -397,6 +406,7 @@ class OverloadedNumberUtil {
             this.n = n;
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
@@ -415,10 +425,12 @@ class OverloadedNumberUtil {
             this.n = n;
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
 
+        @Override
         public long longValue() {
             return n.longValue();
         }
@@ -434,6 +446,7 @@ class OverloadedNumberUtil {
             this.w = w;
         }
 
+        @Override
         public byte byteValue() {
             return w;
         }
@@ -449,6 +462,7 @@ class OverloadedNumberUtil {
             this.w = w;
         }
 
+        @Override
         public short shortValue() {
             return w;
         }
@@ -464,6 +478,7 @@ class OverloadedNumberUtil {
             this.w = w;
         }
 
+        @Override
         public int intValue() {
             return w;
         }
@@ -478,10 +493,12 @@ class OverloadedNumberUtil {
             this.n = n;
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
 
+        @Override
         public int intValue() {
             return n.intValue();
         }
@@ -497,6 +514,7 @@ class OverloadedNumberUtil {
             this.w = w;
         }
 
+        @Override
         public byte byteValue() {
             return w;
         }
@@ -512,6 +530,7 @@ class OverloadedNumberUtil {
             this.w = w;
         }
 
+        @Override
         public short shortValue() {
             return w;
         }
@@ -528,14 +547,17 @@ class OverloadedNumberUtil {
             this.w = w;
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
 
+        @Override
         public short shortValue() {
             return n.shortValue();
         }
 
+        @Override
         public byte byteValue() {
             return w;
         }
@@ -550,10 +572,12 @@ class OverloadedNumberUtil {
             this.n = n;
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
         
+        @Override
         public double doubleValue() {
             return n.doubleValue();
         }
@@ -569,18 +593,22 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public byte byteValue() {
             return w;
         }
         
+        @Override
         public short shortValue() {
             return w;
         }
         
+        @Override
         public int intValue() {
             return w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -596,14 +624,17 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public short shortValue() {
             return w;
         }
         
+        @Override
         public int intValue() {
             return w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -619,10 +650,12 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public int intValue() {
             return w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -638,10 +671,12 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public int intValue() {
             return w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -657,6 +692,7 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -671,14 +707,17 @@ class OverloadedNumberUtil {
             this.n = n;
         }
         
+        @Override
         public float floatValue() {
             return n.floatValue();
         }
         
+        @Override
         public double doubleValue() {
             return n.doubleValue();
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
@@ -693,10 +732,12 @@ class OverloadedNumberUtil {
             this.n = n;
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
         
+        @Override
         public float floatValue() {
             return n.floatValue();
         }
@@ -712,18 +753,22 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public byte byteValue() {
             return w;
         }
         
+        @Override
         public short shortValue() {
             return w;
         }
         
+        @Override
         public int intValue() {
             return w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -739,14 +784,17 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public short shortValue() {
             return w;
         }
         
+        @Override
         public int intValue() {
             return w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -762,10 +810,12 @@ class OverloadedNumberUtil {
             this.w = w;
         }
         
+        @Override
         public int intValue() {
             return w;
         }
         
+        @Override
         public long longValue() {
             return w;
         }
@@ -780,6 +830,7 @@ class OverloadedNumberUtil {
             this.n = n;
         }
 
+        @Override
         protected Number getSourceNumber() {
             return n;
         }
@@ -825,11 +876,13 @@ class OverloadedNumberUtil {
         }
 
         /** Faster version of {@link BigDecimal#floatValue()}, utilizes that the number known to fit into a long. */
+        @Override
         public float floatValue() {
             return n.longValue(); 
         }
         
         /** Faster version of {@link BigDecimal#doubleValue()}, utilizes that the number known to fit into a long. */
+        @Override
         public double doubleValue() {
             return n.longValue(); 
         }

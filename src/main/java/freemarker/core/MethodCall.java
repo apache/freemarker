@@ -50,6 +50,7 @@ final class MethodCall extends Expression {
         this.arguments = arguments;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel targetModel = target.eval(env);
         if (targetModel instanceof TemplateMethodModel) {
@@ -83,6 +84,7 @@ final class MethodCall extends Expression {
         }
     }
 
+    @Override
     public String getCanonicalForm() {
         StringBuilder buf = new StringBuilder();
         buf.append(target.getCanonicalForm());
@@ -93,6 +95,7 @@ final class MethodCall extends Expression {
         return buf.toString();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "...(...)";
     }
@@ -101,10 +104,12 @@ final class MethodCall extends Expression {
         return null;
     }
 
+    @Override
     boolean isLiteral() {
         return false;
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new MethodCall(
@@ -112,10 +117,12 @@ final class MethodCall extends Expression {
                 (ListLiteral) arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
+    @Override
     int getParameterCount() {
         return 1 + arguments.items.size();
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx == 0) {
             return target;
@@ -126,6 +133,7 @@ final class MethodCall extends Expression {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx == 0) {
             return ParameterRole.CALLEE;

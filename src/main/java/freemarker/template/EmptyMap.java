@@ -28,6 +28,7 @@ import java.util.Set;
  * 
  * @deprecated Use {@link Collections#EMPTY_MAP} on J2SE 1.3 or later.   
  */
+@Deprecated
 public class EmptyMap implements Map, Cloneable {
     public static final EmptyMap instance = new EmptyMap(); 
     

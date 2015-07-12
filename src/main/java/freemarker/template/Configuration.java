@@ -226,8 +226,10 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
     
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
+    @Deprecated
     public static final String INCOMPATIBLE_IMPROVEMENTS = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
+    @Deprecated
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
     
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
@@ -298,8 +300,10 @@ public class Configuration extends Configurable implements Cloneable {
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    @Deprecated
     public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    @Deprecated
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
     private static final String DEFAULT = "default";
@@ -402,6 +406,7 @@ public class Configuration extends Configurable implements Cloneable {
      *     {@link Configuration#setIncompatibleImprovements(Version)} (or
      *     {@link Configuration#setSettings(Properties)}).  
      */
+    @Deprecated
     public Configuration() {
         this(DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
@@ -769,6 +774,7 @@ public class Configuration extends Configurable implements Cloneable {
         return true;
     }
     
+    @Override
     public Object clone() {
         try {
             Configuration copy = (Configuration) super.clone();
@@ -914,6 +920,7 @@ public class Configuration extends Configurable implements Cloneable {
      * typically creates with <code>new Configuration()</code> when the component
      * is initialized.
      */
+    @Deprecated
     static public Configuration getDefaultConfiguration() {
         Configuration defaultConfig = Configuration.defaultConfig;
         if (defaultConfig == null) {
@@ -936,6 +943,7 @@ public class Configuration extends Configurable implements Cloneable {
      * easily lead to erroneous, unpredictable behaviour.
      * See more {@link Configuration#getDefaultConfiguration() here...}.
      */
+    @Deprecated
     static public void setDefaultConfiguration(Configuration config) {
         synchronized (defaultConfigLock) {
             defaultConfig = config;
@@ -1264,6 +1272,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @deprecated Use {@link #setTemplateUpdateDelayMilliseconds(long)} instead, because the time granularity of this method
      *             is often misunderstood to be milliseconds.
      */
+    @Deprecated
     public void setTemplateUpdateDelay(int seconds) {
         cache.setDelay(1000L * seconds);
     }
@@ -1307,10 +1316,12 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @deprecated Only {@code true} (the default) value will be supported sometimes in the future.
      */
+    @Deprecated
     public void setStrictSyntaxMode(boolean b) {
         strictSyntax = b;
     }
 
+    @Override
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         ObjectWrapper prevObjectWrapper = getObjectWrapper();
         super.setObjectWrapper(objectWrapper);
@@ -1349,6 +1360,7 @@ public class Configuration extends Configurable implements Cloneable {
         return objectWrapperExplicitlySet;
     }
     
+    @Override
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         super.setTemplateExceptionHandler(templateExceptionHandler);
         templateExceptionHandlerExplicitlySet = true;
@@ -1381,6 +1393,7 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * @since 2.3.22
      */
+    @Override
     public void setLogTemplateExceptions(boolean value) {
         super.setLogTemplateExceptions(value);
         logTemplateExceptionsExplicitlySet = true;
@@ -1487,6 +1500,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @deprecated Use {@link #Configuration(Version)}, or
      *    as last chance, {@link #setIncompatibleImprovements(Version)} instead.
      */
+    @Deprecated
     public void setIncompatibleEnhancements(String version) {
         setIncompatibleImprovements(new Version(version));
     }
@@ -1494,6 +1508,7 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * @deprecated Use {@link #getIncompatibleImprovements()} instead.
      */
+    @Deprecated
     public String getIncompatibleEnhancements() {
         return incompatibleImprovements.toString();
     }
@@ -1501,6 +1516,7 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * @deprecated Use {@link #getIncompatibleImprovements()} instead.
      */
+    @Deprecated
     public int getParsedIncompatibleEnhancements() {
         return getIncompatibleImprovements().intValue();
     }
@@ -2178,6 +2194,7 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setLocalizedLookup(localizedLookup);
     }
     
+    @Override
     public void setSetting(String name, String value) throws TemplateException {
         boolean unknown = false;
         try {
@@ -2338,12 +2355,14 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @since 2.3.24
      */
+    @Override
     public Set<String> getSettingNames(boolean camelCase) {
         return new _UnmodifiableCompositeSet<String>(
                 super.getSettingNames(camelCase),
                 new _SortedArraySet<String>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE)); 
     }
     
+    @Override
     protected String getCorrectedNameForUnknownSetting(String name) {
         if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
             // [2.4] Default might changes to camel-case
@@ -2400,6 +2419,7 @@ public class Configuration extends Configurable implements Cloneable {
         }
     }
     
+    @Override
     protected void doAutoImportsAndIncludes(Environment env)
     throws TemplateException, IOException {
         for (int i = 0; i < autoImports.size(); i++) {
@@ -2460,6 +2480,7 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @deprecated Use {@link #getVersion()} instead.
      */
+    @Deprecated
     public static String getVersionNumber() {
         return VERSION.toString();
     }

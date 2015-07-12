@@ -40,39 +40,47 @@ final class XSTemplateDateFormat extends ISOLikeTemplateDateFormat {
         super(settingValue, parsingStart, dateType, zonelessInput, timeZone, factory);
     }
     
+    @Override
     protected String format(Date date, boolean datePart, boolean timePart, boolean offsetPart, int accuracy,
             TimeZone timeZone, DateToISO8601CalendarFactory calendarFactory) {
         return DateUtil.dateToXSString(
                 date, datePart, timePart, offsetPart, accuracy, timeZone, calendarFactory);
     }
 
+    @Override
     protected Date parseDate(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
         return DateUtil.parseXSDate(s, tz, calToDateConverter);
     }
 
+    @Override
     protected Date parseTime(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
         return DateUtil.parseXSTime(s, tz, calToDateConverter);
     }
 
+    @Override
     protected Date parseDateTime(String s, TimeZone tz,
             CalendarFieldsToDateConverter calToDateConverter) throws DateParseException {
         return DateUtil.parseXSDateTime(s, tz, calToDateConverter);
     }
 
+    @Override
     protected String getDateDescription() {
         return "W3C XML Schema date";
     }
 
+    @Override
     protected String getTimeDescription() {
         return "W3C XML Schema time";
     }
 
+    @Override
     protected String getDateTimeDescription() {
         return "W3C XML Schema dateTime";
     }
 
+    @Override
     protected boolean isXSMode() {
         return true;
     }

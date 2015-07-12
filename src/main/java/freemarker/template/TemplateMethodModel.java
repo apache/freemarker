@@ -33,6 +33,7 @@ import freemarker.core.Environment;
  * @deprecated Use {@link TemplateMethodModelEx} instead. This interface is from the old times when the only kind of
  *    value you could pass in was string.
  */
+@Deprecated
 public interface TemplateMethodModel extends TemplateModel {
 
     /**

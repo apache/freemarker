@@ -279,10 +279,12 @@ public class _CoreAPI {
             return new AdapterMacroMapEntrySet(adapted.entrySet());
         }
 
+        @Override
         public boolean equals(Object o) {
             return adapted.equals(o);
         }
 
+        @Override
         public int hashCode() {
             return adapted.hashCode();
         }
@@ -352,10 +354,12 @@ public class _CoreAPI {
             adapted.clear();
         }
 
+        @Override
         public boolean equals(Object o) {
             return adapted.equals(o);
         }
 
+        @Override
         public int hashCode() {
             return adapted.hashCode();
         }
@@ -406,10 +410,12 @@ public class _CoreAPI {
             return adapted.setValue(macroToUnboundCallable(value));
         }
 
+        @Override
         public boolean equals(Object o) {
             return adapted.equals(o);
         }
 
+        @Override
         public int hashCode() {
             return adapted.hashCode();
         }

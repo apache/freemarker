@@ -43,6 +43,7 @@ public class _DomNavigator extends Navigator {
     public _DomNavigator() {
     } 
 
+    @Override
     void getAsString(Object node, StringWriter sw) {
         outputContent((Node) node, sw);
     }
@@ -123,6 +124,7 @@ public class _DomNavigator extends Navigator {
         }
     }
     
+    @Override
     void getChildren(Object node, String localName, String namespaceUri, List result) {
         if ("".equals(namespaceUri)) {
             namespaceUri = null;
@@ -139,6 +141,7 @@ public class _DomNavigator extends Navigator {
         }
     }
     
+    @Override
     void getAttributes(Object node, String localName, String namespaceUri, List result) {
         if (node instanceof Element) {
             Element e = (Element) node;
@@ -185,6 +188,7 @@ public class _DomNavigator extends Navigator {
         return attr;
     }
     
+    @Override
     void getDescendants(Object node, List result) {
         NodeList children = ((Node) node).getChildNodes();
         for (int i = 0; i < children.getLength(); ++i) {
@@ -196,14 +200,17 @@ public class _DomNavigator extends Navigator {
         }
     }
 
+    @Override
     Object getParent(Object node) {
         return ((Node) node).getParentNode();
     }
 
+    @Override
     Object getDocument(Object node) {
         return ((Node) node).getOwnerDocument();
     }
 
+    @Override
     Object getDocumentType(Object node) {
         return 
             node instanceof Document
@@ -211,6 +218,7 @@ public class _DomNavigator extends Navigator {
             : null;
     }
 
+    @Override
     void getContent(Object node, List result) {
         NodeList children = ((Node) node).getChildNodes();
         for (int i = 0; i < children.getLength(); ++i) {
@@ -218,6 +226,7 @@ public class _DomNavigator extends Navigator {
         }
     }
 
+    @Override
     String getText(Object node) {
         StringBuilder buf = new StringBuilder();
         if (node instanceof Element) {
@@ -234,18 +243,22 @@ public class _DomNavigator extends Navigator {
         }
     }
 
+    @Override
     String getLocalName(Object node) {
         return ((Node) node).getNodeName();
     }
 
+    @Override
     String getNamespacePrefix(Object node) {
         return ((Node) node).getPrefix();
     }
 
+    @Override
     String getNamespaceUri(Object node) {
         return ((Node) node).getNamespaceURI();
     }
 
+    @Override
     String getType(Object node) {
         switch(((Node) node).getNodeType()) {
             case Node.ATTRIBUTE_NODE: {
@@ -282,6 +295,7 @@ public class _DomNavigator extends Navigator {
         return "unknown";
     }
 
+    @Override
     XPathEx createXPathEx(String xpathString) throws TemplateModelException {
         try {
             return new DomXPathEx(xpathString);

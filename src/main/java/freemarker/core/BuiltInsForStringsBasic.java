@@ -31,11 +31,13 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
 
 class BuiltInsForStringsBasic {
 
     static class cap_firstBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             int i = 0;
             int ln = s.length();
@@ -52,12 +54,14 @@ class BuiltInsForStringsBasic {
     }
 
     static class capitalizeBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.capitalize(s));
         }
     }
 
     static class chop_linebreakBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.chomp(s));
         }
@@ -80,6 +84,7 @@ class BuiltInsForStringsBasic {
             }
         }
     
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             return new BIMethod(target.evalAndCoerceToString(env,
                     "For sequences/collections (lists and such) use \"?seq_contains\" instead."));
@@ -102,6 +107,7 @@ class BuiltInsForStringsBasic {
             }
         }
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
@@ -123,6 +129,7 @@ class BuiltInsForStringsBasic {
             }
         }
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
@@ -170,6 +177,7 @@ class BuiltInsForStringsBasic {
             }
         }
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
@@ -204,6 +212,7 @@ class BuiltInsForStringsBasic {
             this.findLast = findLast;
         }
         
+        @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             return new BIMethod(target.evalAndCoerceToString(env,
                     "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
@@ -244,10 +253,11 @@ class BuiltInsForStringsBasic {
                         startIndex = -1;
                     }
                 } 
-                return startIndex == -1 ? SimpleScalar.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
+                return startIndex == -1 ? TemplateScalarModel.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
             }
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new KeepAfterMethod(s);
         }
@@ -295,10 +305,11 @@ class BuiltInsForStringsBasic {
                         }
                     }
                 } 
-                return startIndex == -1 ? SimpleScalar.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
+                return startIndex == -1 ? TemplateScalarModel.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
             }
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new KeepAfterMethod(s);
         }
@@ -340,6 +351,7 @@ class BuiltInsForStringsBasic {
             }
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new KeepUntilMethod(s);
         }
@@ -389,6 +401,7 @@ class BuiltInsForStringsBasic {
             }
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new KeepUntilMethod(s);
         }
@@ -397,6 +410,7 @@ class BuiltInsForStringsBasic {
     
     static class lengthBI extends BuiltInForString {
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new SimpleNumber(s.length());
         }
@@ -404,6 +418,7 @@ class BuiltInsForStringsBasic {
     }    
 
     static class lower_caseBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.toLowerCase(env.getLocale()));
         }
@@ -453,6 +468,7 @@ class BuiltInsForStringsBasic {
             this.leftPadder = leftPadder;
         }
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
@@ -474,6 +490,7 @@ class BuiltInsForStringsBasic {
             }
         }
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
@@ -495,6 +512,7 @@ class BuiltInsForStringsBasic {
             }
         }
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
@@ -526,6 +544,7 @@ class BuiltInsForStringsBasic {
             }
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new SplitMethod(s);
         }
@@ -548,6 +567,7 @@ class BuiltInsForStringsBasic {
             }
         }
     
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
@@ -555,6 +575,7 @@ class BuiltInsForStringsBasic {
 
     static class substringBI extends BuiltInForString {
         
+        @Override
         TemplateModel calculateResult(final String s, final Environment env) throws TemplateException {
             return new TemplateMethodModelEx() {
                 
@@ -614,12 +635,14 @@ class BuiltInsForStringsBasic {
     }
 
     static class trimBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.trim());
         }
     }
 
     static class uncap_firstBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             int i = 0;
             int ln = s.length();
@@ -636,12 +659,14 @@ class BuiltInsForStringsBasic {
     }
 
     static class upper_caseBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(s.toUpperCase(env.getLocale()));
         }
     }
 
     static class word_listBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             SimpleSequence result = new SimpleSequence();
             StringTokenizer st = new StringTokenizer(s);

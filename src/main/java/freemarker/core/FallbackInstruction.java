@@ -22,30 +22,37 @@ import freemarker.template.TemplateException;
 
 final class FallbackInstruction extends TemplateElement {
 
+    @Override
     void accept(Environment env) throws IOException, TemplateException {
         env.fallback();
     }
 
+    @Override
     protected String dump(boolean canonical) {
         return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#fallback";
     }
     
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

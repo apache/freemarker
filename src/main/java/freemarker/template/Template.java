@@ -113,6 +113,7 @@ public class Template extends Configurable {
      * @deprecated In most applications, use {@link #Template(String, Reader, Configuration)} instead, which doesn't
      *             specify the encoding.
      */
+    @Deprecated
     public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
         this(name, null, reader, cfg, encoding);
     }
@@ -171,6 +172,7 @@ public class Template extends Configurable {
      * 
      * @since 2.3.22
      */
+    @Deprecated
     public Template(
             String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
         this(_CoreAPI.newUnboundTemplate(
@@ -187,6 +189,7 @@ public class Template extends Configurable {
      * instance, which can easily lead to erroneous, unpredictable behavior.
      * See more {@link Configuration#getDefaultConfiguration() here...}.
      */
+    @Deprecated
     public Template(String name, Reader reader) throws IOException {
         this(name, reader, (Configuration) null);
     }
@@ -366,6 +369,7 @@ public class Template extends Configurable {
      * Returns a string representing the raw template
      * text in canonical form.
      */
+    @Override
     public String toString() {
         StringWriter sw = new StringWriter();
         try {
@@ -454,6 +458,7 @@ public class Template extends Configurable {
     /**
      * @deprecated Should only be used internally, and might will be removed later.
      */
+    @Deprecated
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
@@ -540,6 +545,7 @@ public class Template extends Configurable {
     /**
      * @deprecated Should only be used internally, and might will be removed later.
      */
+    @Deprecated
     public void addMacro(Macro macro) {
         _CoreAPI.addMacro(unboundTemplate, macro);
     }
@@ -547,6 +553,7 @@ public class Template extends Configurable {
     /**
      * @deprecated Should only be used internally, and might will be removed later.
      */
+    @Deprecated
     public void addImport(LibraryLoad libLoad) {
         _CoreAPI.addImport(unboundTemplate, libLoad);
     }
@@ -566,6 +573,7 @@ public class Template extends Configurable {
     /**
      * @deprecated Should only be used internally, and might will be removed later.
      */
+    @Deprecated
     public TemplateElement getRootTreeNode() {
         return _CoreAPI.getRootTreeNode(unboundTemplate);
     }
@@ -583,6 +591,7 @@ public class Template extends Configurable {
      * 
      * @deprecated Should only be used internally, and might will be removed later.
      */
+    @Deprecated
     public Map getMacros() {
         Map<String, Macro> legacyMacroMap = this.legacyMacroMap;
         if (legacyMacroMap == null) {
@@ -600,6 +609,7 @@ public class Template extends Configurable {
     /**
      * @deprecated Should only be used internally, and might will be removed later.
      */
+    @Deprecated
     public List getImports() {
         return _CoreAPI.getImports(unboundTemplate);
     }
@@ -609,6 +619,7 @@ public class Template extends Configurable {
      * 
      * @deprecated Should only be used internally, and might will be removed later.
      */
+    @Deprecated
     public void addPrefixNSMapping(String prefix, String nsURI) {
         _CoreAPI.addPrefixNSMapping(unboundTemplate, prefix, nsURI);
     }
@@ -646,6 +657,7 @@ public class Template extends Configurable {
      * 
      * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
      */
+    @Deprecated
     public List containingElements(int column, int line) {
         return _CoreAPI.containingElements(unboundTemplate, column, line);
     }
@@ -663,6 +675,7 @@ public class Template extends Configurable {
         private static final long serialVersionUID = 1L;
 
         /** @deprecated Use {@link #getTemplateSpecifiedEncoding()} instead. */
+        @Deprecated
         public String specifiedEncoding;
         
         private final String constructorSpecifiedEncoding;
@@ -670,6 +683,7 @@ public class Template extends Configurable {
         /**
          * @deprecated Use {@link #WrongEncodingException(String, String)}.
          */
+        @Deprecated
         public WrongEncodingException(String templateSpecifiedEncoding) {
             this(templateSpecifiedEncoding, null);
         }
@@ -682,6 +696,7 @@ public class Template extends Configurable {
             this.constructorSpecifiedEncoding = constructorSpecifiedEncoding;
         }
         
+        @Override
         public String getMessage() {
             return "Encoding specified inside the template (" + specifiedEncoding
                     + ") doesn't match the encoding specified for the Template constructor"

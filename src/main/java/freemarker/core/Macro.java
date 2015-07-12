@@ -32,6 +32,7 @@ import freemarker.template.TemplateModel;
  * 
  * @deprecated Subject to be changed or renamed any time; no "stable" replacement exists yet.
  */
+@Deprecated
 public abstract class Macro extends TemplateElement implements TemplateModel {
     
     // Not public

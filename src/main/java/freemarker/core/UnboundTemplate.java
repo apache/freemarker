@@ -185,6 +185,7 @@ public final class UnboundTemplate {
     /**
      * Returns a string representing the raw template text in canonical form.
      */
+    @Override
     public String toString() {
         StringWriter sw = new StringWriter();
         try {
@@ -490,6 +491,7 @@ public final class UnboundTemplate {
             }
         }
 
+        @Override
         public int read() throws IOException {
             try {
                 int c = in.read();
@@ -514,6 +516,7 @@ public final class UnboundTemplate {
             throw new UndeclaredThrowableException(e);
         }
 
+        @Override
         public int read(char cbuf[], int off, int len) throws IOException {
             try {
                 int numchars = in.read(cbuf, off, len);
@@ -527,6 +530,7 @@ public final class UnboundTemplate {
             }
         }
 
+        @Override
         public void close() throws IOException {
             if (lineBuf.length() > 0) {
                 lines.add(lineBuf.toString());

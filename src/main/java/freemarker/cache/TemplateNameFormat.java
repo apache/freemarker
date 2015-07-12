@@ -109,6 +109,7 @@ public abstract class TemplateNameFormat {
     abstract String normalizeAbsoluteName(String name) throws MalformedTemplateNameException;
 
     private static final class Default020300 extends TemplateNameFormat {
+        @Override
         String toAbsoluteName(String baseName, String targetName) {
             if (baseName == null) {
                 return targetName;
@@ -131,6 +132,7 @@ public abstract class TemplateNameFormat {
             }
         }
     
+        @Override
         String normalizeAbsoluteName(final String name) throws MalformedTemplateNameException {
             // Disallow 0 for security reasons.
             checkNameHasNoNullCharacter(name);
@@ -174,6 +176,7 @@ public abstract class TemplateNameFormat {
             return path;
         }
         
+        @Override
         public String toString() {
             return "TemplateNameFormat.DEFAULT_2_3_0";
         }
@@ -181,6 +184,7 @@ public abstract class TemplateNameFormat {
     }
 
     private static final class Default020400 extends TemplateNameFormat {
+        @Override
         String toAbsoluteName(String baseName, String targetName) {
             if (baseName == null) {
                 return targetName;
@@ -211,6 +215,7 @@ public abstract class TemplateNameFormat {
             }
         }
     
+        @Override
         String normalizeAbsoluteName(final String name) throws MalformedTemplateNameException {
             // Disallow 0 for security reasons.
             checkNameHasNoNullCharacter(name);
@@ -404,6 +409,7 @@ public abstract class TemplateNameFormat {
             return path;
         }
         
+        @Override
         public String toString() {
             return "TemplateNameFormat.DEFAULT_2_4_0";
         }

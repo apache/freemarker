@@ -37,8 +37,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
     /**
      * Replaces the last parameter type with the array component type of it.
      */
+    @Override
     Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
-        final Class[] preprocessedParamTypes = (Class[]) memberDesc.getParamTypes().clone();
+        final Class[] preprocessedParamTypes = memberDesc.getParamTypes().clone();
         int ln = preprocessedParamTypes.length;
         final Class varArgsCompType = preprocessedParamTypes[ln - 1].getComponentType();
         if (varArgsCompType == null) {
@@ -48,6 +49,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
         return preprocessedParamTypes;
     }
 
+    @Override
     void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
         // Overview
         // --------
@@ -133,6 +135,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
         }
     }
     
+    @Override
     MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         if (tmArgs == null) {

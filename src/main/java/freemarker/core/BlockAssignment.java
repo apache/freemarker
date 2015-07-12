@@ -42,6 +42,7 @@ final class BlockAssignment extends TemplateElement {
         this.scope = scope;
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visitAndTransform(getNestedBlock(), new CaptureOutput(env), null);
@@ -78,6 +79,7 @@ final class BlockAssignment extends TemplateElement {
         
         public Writer getWriter(Writer out, Map args) {
             return new StringWriter() {
+                @Override
                 public void close() {
                     SimpleScalar result = new SimpleScalar(toString());
                     switch(scope) {
@@ -103,6 +105,7 @@ final class BlockAssignment extends TemplateElement {
         }
     }
     
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append("<");
@@ -125,14 +128,17 @@ final class BlockAssignment extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return Assignment.getDirectiveName(scope);
     }
     
+    @Override
     int getParameterCount() {
         return 3;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return varName;
@@ -142,6 +148,7 @@ final class BlockAssignment extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.ASSIGNMENT_TARGET;
@@ -151,6 +158,7 @@ final class BlockAssignment extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

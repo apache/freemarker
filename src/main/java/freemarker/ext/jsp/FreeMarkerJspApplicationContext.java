@@ -123,16 +123,20 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
             this.pageCtx = pageCtx;
         }
         
+        @Override
         public ELResolver getELResolver() {
             return elResolver;
         }
 
+        @Override
         public FunctionMapper getFunctionMapper() {
             return null;
         }
 
+        @Override
         public VariableMapper getVariableMapper() {
             return new VariableMapper() {
+                @Override
                 public ValueExpression resolveVariable(String name) {
                     Object obj = pageCtx.findAttribute(name);
                     if (obj == null) {
@@ -142,6 +146,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
                             obj.getClass());
                 }
 
+                @Override
                 public ValueExpression setVariable(String name, 
                         ValueExpression value) {
                     ValueExpression prev = resolveVariable(name);

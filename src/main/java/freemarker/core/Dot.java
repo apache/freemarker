@@ -33,6 +33,7 @@ final class Dot extends Expression {
         this.key = key;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel leftModel = target.eval(env);
         if (leftModel instanceof TemplateHashModel) {
@@ -44,18 +45,22 @@ final class Dot extends Expression {
         throw new NonHashException(target, leftModel, env);
     }
 
+    @Override
     public String getCanonicalForm() {
         return target.getCanonicalForm() + getNodeTypeSymbol() + _CoreStringUtils.toFTLIdentifierReferenceAfterDot(key);
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return ".";
     }
     
+    @Override
     boolean isLiteral() {
         return target.isLiteral();
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new Dot(
@@ -63,14 +68,17 @@ final class Dot extends Expression {
     	        key);
     }
     
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         return idx == 0 ? (Object) target : (Object) key;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }

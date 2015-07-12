@@ -88,6 +88,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         this(incompatibleImprovements, false);
     }
 
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -105,6 +106,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      * Two {@link BeansWrapperConfiguration}-s are equal exactly if their classes are identical ({@code ==}), and their
      * field values are equal.
      */
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;

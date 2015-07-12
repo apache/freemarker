@@ -32,12 +32,14 @@ final class CompressedBlock extends TemplateElement {
         setNestedBlock(nestedBlock);
     }
 
+    @Override
     void accept(Environment env) throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visitAndTransform(getNestedBlock(), StandardCompress.INSTANCE, null);
         }
     }
 
+    @Override
     protected String dump(boolean canonical) {
         if (canonical) {
             String nested = getNestedBlock() != null ? getNestedBlock().getCanonicalForm() : "";
@@ -47,26 +49,32 @@ final class CompressedBlock extends TemplateElement {
         }
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "#compress";
     }
     
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     boolean isIgnorable() {
         return getNestedBlock() == null || getNestedBlock().isIgnorable();
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

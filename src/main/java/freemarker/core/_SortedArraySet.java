@@ -29,38 +29,47 @@ public class _SortedArraySet<E> extends _UnmodifiableSet<E> {
         this.array = array;
     }
 
+    @Override
     public int size() {
         return array.length;
     }
 
+    @Override
     public boolean contains(Object o) {
         return Arrays.binarySearch(array, o) >= 0;
     }
 
+    @Override
     public Iterator<E> iterator() {
         return new _ArrayIterator(array);
     }
 
+    @Override
     public boolean add(E o) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean remove(Object o) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean addAll(Collection<? extends E> c) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean removeAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean retainAll(Collection<?> c) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }

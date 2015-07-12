@@ -565,6 +565,7 @@ class ClassIntrospector {
             this(method.getName(), method.getParameterTypes());
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o instanceof MethodSignature) {
                 MethodSignature ms = (MethodSignature) o;
@@ -573,6 +574,7 @@ class ClassIntrospector {
             return false;
         }
 
+        @Override
         public int hashCode() {
             return name.hashCode() ^ args.length; // TODO That's a poor quality hash... isn't this a problem?
         }

@@ -53,6 +53,7 @@ import freemarker.log.Logger;
 public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     /** @deprecated Use {@link DefaultObjectWrapperBuilder} instead, but mind its performance */
+    @Deprecated
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
     
     static final private Class JYTHON_OBJ_CLASS;
@@ -69,6 +70,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * @deprecated Use {@link DefaultObjectWrapperBuilder}, or in rare cases,
      *          {@link #DefaultObjectWrapper(Version)} instead.
      */
+    @Deprecated
     public DefaultObjectWrapper() {
         this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
@@ -151,6 +153,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * {@link #getForceLegacyNonListCollections()}. After that, the wrapping is handled by
      * {@link #handleUnknownType(Object)}, so see more there.
      */
+    @Override
     public TemplateModel wrap(Object obj) throws TemplateModelException {
         if (obj == null) {
             return super.wrap(null);
@@ -335,6 +338,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /**
      * @since 2.3.22
      */
+    @Override
     protected String toPropertiesString() {
         String bwProps = super.toPropertiesString();
         

@@ -24,6 +24,7 @@ class XSTemplateDateFormatFactory extends ISOLikeTemplateDateFormatFactory {
         super(timeZone);
     }
 
+    @Override
     public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
             throws java.text.ParseException, UnknownDateTypeFormattingUnsupportedException {
         // We don't cache these as creating them is cheap (only 10% speedup of ${d?string.xs} with caching)

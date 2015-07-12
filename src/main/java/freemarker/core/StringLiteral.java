@@ -68,6 +68,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         }
     }
     
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         return new SimpleScalar(evalAndCoerceToString(env));
     }
@@ -84,6 +85,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 && dynamicValue.getChildAt(0) instanceof DollarVariable;
     }
     
+    @Override
     String evalAndCoerceToString(Environment env) throws TemplateException {
         if (dynamicValue == null) {
             return value;
@@ -100,6 +102,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         }
     }
 
+    @Override
     public String getCanonicalForm() {
         if (dynamicValue == null) {
             return StringUtil.ftlQuote(value);
@@ -119,14 +122,17 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         }
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return dynamicValue == null ? getCanonicalForm() : "dynamic \"...\"";
     }
     
+    @Override
     boolean isLiteral() {
         return dynamicValue == null;
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         StringLiteral cloned = new StringLiteral(value);
@@ -135,15 +141,18 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         return cloned;
     }
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return dynamicValue;
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.EMBEDDED_TEMPLATE;

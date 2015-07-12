@@ -135,6 +135,7 @@ final class BuiltinVariable extends Expression {
         this.name = name.intern();
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         if (name == NAMESPACE) {
             return env.getCurrentNamespace();
@@ -204,22 +205,27 @@ final class BuiltinVariable extends Expression {
         throw new _MiscTemplateException(this, new Object[] { "Invalid built-in variable: ", name });
     }
 
+    @Override
     public String toString() {
         return "." + name;
     }
 
+    @Override
     public String getCanonicalForm() {
         return "." + name;
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return getCanonicalForm();
     }
 
+    @Override
     boolean isLiteral() {
         return false;
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return this;
@@ -242,14 +248,17 @@ final class BuiltinVariable extends Expression {
         }
     }
     
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }

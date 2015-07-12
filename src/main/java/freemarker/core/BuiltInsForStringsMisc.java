@@ -27,6 +27,7 @@ import freemarker.template.TemplateModel;
 class BuiltInsForStringsMisc {
 
     static class booleanBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
             final boolean b;
             if (s.equals("true")) {
@@ -46,6 +47,7 @@ class BuiltInsForStringsMisc {
     }
 
     static class evalBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             SimpleCharStream scs = new SimpleCharStream(
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
@@ -87,6 +89,7 @@ class BuiltInsForStringsMisc {
     }
 
     static class numberBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
             try {
                 return new SimpleNumber(env.getArithmeticEngine().toNumber(s));

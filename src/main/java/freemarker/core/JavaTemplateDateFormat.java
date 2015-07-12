@@ -35,20 +35,24 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
         this.javaDateFormat = javaDateFormat;
     }
     
+    @Override
     public String format(TemplateDateModel dateModel) throws TemplateModelException {
         return javaDateFormat.format(dateModel.getAsDate());
     }
 
+    @Override
     public Date parse(String s) throws ParseException {
         return javaDateFormat.parse(s);
     }
 
+    @Override
     public String getDescription() {
         return javaDateFormat instanceof SimpleDateFormat
                 ? ((SimpleDateFormat) javaDateFormat).toPattern()
                 : javaDateFormat.toString();
     }
 
+    @Override
     public boolean isLocaleBound() {
         return true;
     }

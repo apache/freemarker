@@ -45,7 +45,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
      *            the loaders that are used to load templates.
      */
     public MultiTemplateLoader(TemplateLoader[] loaders) {
-        this.loaders = (TemplateLoader[]) loaders.clone();
+        this.loaders = loaders.clone();
     }
 
     public Object findTemplateSource(String name)
@@ -139,6 +139,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
             return source;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o instanceof MultiSource) {
                 MultiSource m = (MultiSource) o;
@@ -147,10 +148,12 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
             return false;
         }
 
+        @Override
         public int hashCode() {
             return loader.hashCode() + 31 * source.hashCode();
         }
 
+        @Override
         public String toString() {
             return source.toString();
         }
@@ -161,6 +164,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
      * 
      * @since 2.3.21
      */
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("MultiTemplateLoader(");

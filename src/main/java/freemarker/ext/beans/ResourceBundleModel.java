@@ -71,6 +71,7 @@ public class ResourceBundleModel
     /**
      * Overridden to invoke the getObject method of the resource bundle.
      */
+    @Override
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
     throws TemplateModelException {
         try {
@@ -86,15 +87,18 @@ public class ResourceBundleModel
     /**
      * Returns true if this bundle contains no objects.
      */
+    @Override
     public boolean isEmpty() {
         return !((ResourceBundle) object).getKeys().hasMoreElements() &&
             super.isEmpty();
     }
 
+    @Override
     public int size() {
         return keySet().size();
     }
 
+    @Override
     protected Set keySet() {
         Set set = super.keySet();
         Enumeration e = ((ResourceBundle) object).getKeys();

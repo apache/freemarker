@@ -49,6 +49,7 @@ public interface ObjectWrapper {
      * @deprecated Use {@link BeansWrapperBuilder#build()} instead; this instance isn't read-only
      *    and thus can't be trusted.
      */
+    @Deprecated
     ObjectWrapper BEANS_WRAPPER = BeansWrapper.getDefaultInstance();
 
     /**
@@ -58,6 +59,7 @@ public interface ObjectWrapper {
      * @deprecated Use {@link DefaultObjectWrapperBuilder#build()} instead; this instance isn't read-only and thus can't
      *             be trusted.
      */
+    @Deprecated
     ObjectWrapper DEFAULT_WRAPPER = DefaultObjectWrapper.instance;
 
     /**
@@ -70,6 +72,7 @@ public interface ObjectWrapper {
      * @deprecated No replacement as it was seldom if ever used by anyone; this instance isn't
      *    read-only and thus can't be trusted.
      */
+    @Deprecated
     ObjectWrapper SIMPLE_WRAPPER = SimpleObjectWrapper.instance;
     
     /**

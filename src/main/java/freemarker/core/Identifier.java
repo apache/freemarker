@@ -30,6 +30,7 @@ final class Identifier extends Expression {
         this.name = name;
     }
 
+    @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         try {
             return env.getVariable(name);
@@ -44,6 +45,7 @@ final class Identifier extends Expression {
         }
     }
 
+    @Override
     public String getCanonicalForm() {
         return _CoreStringUtils.toFTLTopLevelIdentifierReference(name);
     }
@@ -55,26 +57,32 @@ final class Identifier extends Expression {
         return name;
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return getCanonicalForm();
     }
 
+    @Override
     boolean isLiteral() {
         return false;
     }
     
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         if (this.name.equals(replacedIdentifier)) {

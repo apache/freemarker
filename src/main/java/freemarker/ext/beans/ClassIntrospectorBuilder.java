@@ -58,6 +58,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         bugfixed = BeansWrapper.is2321Bugfixed(incompatibleImprovements);
     }
     
+    @Override
     protected Object clone() {
         try {
             return super.clone();
@@ -66,6 +67,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         }
     }
 
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -77,6 +79,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         return result;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;

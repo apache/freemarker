@@ -353,14 +353,17 @@ abstract class BuiltIn extends Expression implements Cloneable {
         return bi;
     }
 
+    @Override
     public String getCanonicalForm() {
         return target.getCanonicalForm() + "?" + key;
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "?" + key;
     }
 
+    @Override
     boolean isLiteral() {
         return false; // be on the safe side.
     }
@@ -428,6 +431,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         return MessageUtil.newMethodArgsInvalidValueException("?" + key, details);
     }
     
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	try {
@@ -439,10 +443,12 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
 
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return target;
@@ -451,6 +457,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.LEFT_HAND_OPERAND;

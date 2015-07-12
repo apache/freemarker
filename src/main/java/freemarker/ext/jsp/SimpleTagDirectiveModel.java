@@ -63,10 +63,12 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                 setupTag(tag, args, pageContext.getObjectWrapper());
                 if (body != null) {
                     tag.setJspBody(new JspFragment() {
+                        @Override
                         public JspContext getJspContext() {
                             return pageContext;
                         }
                         
+                        @Override
                         public void invoke(Writer out) throws JspException, IOException {
                             try {
                                 body.render(out == null ? pageContext.getOut() : out);

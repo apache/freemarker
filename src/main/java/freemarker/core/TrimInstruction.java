@@ -34,10 +34,12 @@ final class TrimInstruction extends TemplateElement {
         this.right = right;
     }
 
+    @Override
     void accept(Environment env) {
         // This instruction does nothing at render-time, only parse-time.
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -46,6 +48,7 @@ final class TrimInstruction extends TemplateElement {
         return sb.toString();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         if (left && right) {
             return "#t";
@@ -58,14 +61,17 @@ final class TrimInstruction extends TemplateElement {
         }
     }
     
+    @Override
     boolean isIgnorable() {
         return true;
     }
 
+    @Override
     int getParameterCount() {
         return 1;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         int type;
@@ -81,15 +87,18 @@ final class TrimInstruction extends TemplateElement {
         return Integer.valueOf(type);
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.AST_NODE_SUBTYPE;
     }
 
+    @Override
     boolean isOutputCacheable() {
         return true;
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

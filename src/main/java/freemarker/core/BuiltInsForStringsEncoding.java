@@ -32,6 +32,7 @@ class BuiltInsForStringsEncoding {
     static class htmlBI extends BuiltInForString implements ICIChainMember {
         
         static class BIBeforeICI2d3d20 extends BuiltInForString {
+            @Override
             TemplateModel calculateResult(String s, Environment env) {
                 return new SimpleScalar(StringUtil.HTMLEnc(s));
             }
@@ -39,6 +40,7 @@ class BuiltInsForStringsEncoding {
         
         private final BIBeforeICI2d3d20 prevICIObj = new BIBeforeICI2d3d20();
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XHTMLEnc(s));
         }
@@ -53,24 +55,28 @@ class BuiltInsForStringsEncoding {
     }
 
     static class j_stringBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.javaStringEnc(s));
         }
     }
 
     static class js_stringBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.javaScriptStringEnc(s));
         }
     }
 
     static class json_stringBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.jsonStringEnc(s));
         }
     }
 
     static class rtfBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.RTFEnc(s));
         }
@@ -84,12 +90,14 @@ class BuiltInsForStringsEncoding {
                 super(parent, target, env);
             }
     
+            @Override
             protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
                 return StringUtil.URLEnc(targetAsString, cs);
             }
             
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new UrlBIResult(this, s, env);
         }
@@ -104,12 +112,14 @@ class BuiltInsForStringsEncoding {
                 super(parent, target, env);
             }
     
+            @Override
             protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
                 return StringUtil.URLPathEnc(targetAsString, cs);
             }
             
         }
         
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new UrlPathBIResult(this, s, env);
         }
@@ -117,12 +127,14 @@ class BuiltInsForStringsEncoding {
     }
 
     static class xhtmlBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XHTMLEnc(s));
         }
     }
 
     static class xmlBI extends BuiltInForString {
+        @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XMLEnc(s));
         }

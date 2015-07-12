@@ -44,6 +44,7 @@ class URLTemplateSource {
         }
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof URLTemplateSource) {
             return url.equals(((URLTemplateSource) o).url);
@@ -52,10 +53,12 @@ class URLTemplateSource {
         }
     }
 
+    @Override
     public int hashCode() {
         return url.hashCode();
     }
 
+    @Override
     public String toString() {
         return url.toString();
     }

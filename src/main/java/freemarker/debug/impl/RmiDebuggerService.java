@@ -68,6 +68,7 @@ extends
         }
     }
     
+    @Override
     List getBreakpointsSpi(String templateName) {
         synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = findTemplateDebugInfo(templateName);
@@ -87,6 +88,7 @@ extends
     }
 
     // TODO See in SuppressFBWarnings
+    @Override
     @SuppressFBWarnings(value={ "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" }, justification="Will have to be re-desigend; postponed.")
     boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
     throws RemoteException {
@@ -122,6 +124,7 @@ extends
         }
     }
     
+    @Override
     void registerTemplateSpi(Template template) {
         String templateName = template.getName();
         synchronized (templateDebugInfos) {
@@ -182,7 +185,7 @@ extends
         if (te == null) {
             return;
         }
-        TemplateElement parent = (TemplateElement) te.getParent();
+        TemplateElement parent = te.getParent();
         DebugBreak db = new DebugBreak(te);
         // TODO: Ensure there always is a parent by making sure
         // that the root element in the template is always a MixedContent
@@ -279,13 +282,13 @@ extends
                 db = (DebugBreak) te;
                 break;
             }
-            te = (TemplateElement) te.getParent();
+            te = te.getParent();
         }
         if (db == null) {
             return;
         }
-        TemplateElement parent = (TemplateElement) db.getParent(); 
-        parent.setChildAt(parent.getIndex(db), (TemplateElement) db.getChildAt(0));
+        TemplateElement parent = db.getParent(); 
+        parent.setChildAt(parent.getIndex(db), db.getChildAt(0));
     }
     
     void removeBreakpoints(String templateName) {
@@ -328,9 +331,9 @@ extends
     private void removeDebugBreaks(TemplateElement te) {
         int count = te.getChildCount();
         for (int i = 0; i < count; ++i) {
-            TemplateElement child = (TemplateElement) te.getChildAt(i);
+            TemplateElement child = te.getChildAt(i);
             while (child instanceof DebugBreak) {
-                TemplateElement dbchild = (TemplateElement) child.getChildAt(0); 
+                TemplateElement dbchild = child.getChildAt(0); 
                 te.setChildAt(i, dbchild);
                 child = dbchild;
             }
@@ -376,6 +379,7 @@ extends
         }
     }
 
+    @Override
     void shutdownSpi() {
         server.stop();
         try {

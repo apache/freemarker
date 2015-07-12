@@ -28,22 +28,27 @@ final class OrExpression extends BooleanExpression {
         this.rho = rho;
     }
 
+    @Override
     boolean evalToBoolean(Environment env) throws TemplateException {
         return lho.evalToBoolean(env) || rho.evalToBoolean(env);
     }
 
+    @Override
     public String getCanonicalForm() {
         return lho.getCanonicalForm() + " || " + rho.getCanonicalForm();
     }
     
+    @Override
     String getNodeTypeSymbol() {
         return "||";
     }
 
+    @Override
     boolean isLiteral() {
         return constantValue != null || (lho.isLiteral() && rho.isLiteral());
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new OrExpression(
@@ -51,10 +56,12 @@ final class OrExpression extends BooleanExpression {
     	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return lho;
@@ -63,6 +70,7 @@ final class OrExpression extends BooleanExpression {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }

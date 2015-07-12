@@ -19,6 +19,7 @@ abstract class Interpolation extends TemplateElement {
 
     protected abstract String dump(boolean canonical, boolean inStringLiteral);
 
+    @Override
     protected final String dump(boolean canonical) {
         return dump(canonical, false);
     }

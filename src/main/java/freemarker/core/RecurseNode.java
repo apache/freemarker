@@ -39,6 +39,7 @@ final class RecurseNode extends TemplateElement {
         this.namespaces = namespaces;
     }
 
+    @Override
     void accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.eval(env);
         if (node != null && !(node instanceof TemplateNodeModel)) {
@@ -69,6 +70,7 @@ final class RecurseNode extends TemplateElement {
         env.recurse((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
+    @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
@@ -85,14 +87,17 @@ final class RecurseNode extends TemplateElement {
         return sb.toString();
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return "#recurse";
     }
 
+    @Override
     int getParameterCount() {
         return 2;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return targetNode;
@@ -101,6 +106,7 @@ final class RecurseNode extends TemplateElement {
         }
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.NODE;
@@ -109,6 +115,7 @@ final class RecurseNode extends TemplateElement {
         }
     }
 
+    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

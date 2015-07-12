@@ -258,6 +258,7 @@ public final class _MethodUtil {
         return newInvocationTemplateModelException(
                 object,
                 new _DelayedConversionToString(callableMemberDescriptor) {
+                    @Override
                     protected String doConversion(Object callableMemberDescriptor) {
                         return ((CallableMemberDescriptor) callableMemberDescriptor).getDeclaration();
                     }

@@ -215,6 +215,7 @@ public final class Environment extends Configurable {
      *             {@link #getCurrentNamespace()} and then {@link Namespace#getTemplate()}); the value returned by this
      *             method is often not what you expect when it comes to macro/function invocations.
      */
+    @Deprecated
     public Template getTemplate() {
         return (Template) getParent();
     }
@@ -822,11 +823,13 @@ public final class Environment extends Configurable {
         getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
     }
 
+    @Override
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         super.setTemplateExceptionHandler(templateExceptionHandler);
         lastThrowable = null;
     }
     
+    @Override
     public void setLocale(Locale locale) {
         Locale prevLocale = getLocale();
         super.setLocale(locale);
@@ -868,6 +871,7 @@ public final class Environment extends Configurable {
         }
     }
 
+    @Override
     public void setTimeZone(TimeZone timeZone) {
         TimeZone prevTimeZone = getTimeZone();
         super.setTimeZone(timeZone);
@@ -887,6 +891,7 @@ public final class Environment extends Configurable {
         }
     }
     
+    @Override
     public void setSQLDateAndTimeTimeZone(TimeZone timeZone) {
         TimeZone prevTimeZone = getSQLDateAndTimeTimeZone();
         super.setSQLDateAndTimeTimeZone(timeZone);
@@ -926,6 +931,7 @@ public final class Environment extends Configurable {
         return cachedSQLDateAndTimeTimeZoneSameAsNormal.booleanValue();
     }
     
+    @Override
     public void setURLEscapingCharset(String urlEscapingCharset) {
         cachedURLEscapingCharsetSet = false;
         super.setURLEscapingCharset(urlEscapingCharset);
@@ -937,6 +943,7 @@ public final class Environment extends Configurable {
      * code while the template executes, since some frameworks allow templates
      * to actually change the output encoding on-the-fly.
      */
+    @Override
     public void setOutputEncoding(String outputEncoding) {
         cachedURLEscapingCharsetSet = false;
         super.setOutputEncoding(outputEncoding);
@@ -1043,11 +1050,13 @@ public final class Environment extends Configurable {
         return cachedNumberFormat.format(number);
     }
 
+    @Override
     public void setNumberFormat(String formatName) {
         super.setNumberFormat(formatName);
         cachedNumberFormat = null;
     }
 
+    @Override
     public void setTimeFormat(String timeFormat) {
         String prevTimeFormat = getTimeFormat();
         super.setTimeFormat(timeFormat);
@@ -1060,6 +1069,7 @@ public final class Environment extends Configurable {
         }
     }
 
+    @Override
     public void setDateFormat(String dateFormat) {
         String prevDateFormat = getDateFormat();
         super.setDateFormat(dateFormat);
@@ -1072,6 +1082,7 @@ public final class Environment extends Configurable {
         }
     }
 
+    @Override
     public void setDateTimeFormat(String dateTimeFormat) {
         String prevDateTimeFormat = getDateTimeFormat();
         super.setDateTimeFormat(dateTimeFormat);
@@ -1206,15 +1217,15 @@ public final class Environment extends Configurable {
             final String settingValue;
             switch (dateType) {
             case TemplateDateModel.TIME:
-                settingName = Configuration.TIME_FORMAT_KEY;
+                settingName = Configurable.TIME_FORMAT_KEY;
                 settingValue = getTimeFormat();
                 break;
             case TemplateDateModel.DATE:
-                settingName = Configuration.DATE_FORMAT_KEY;
+                settingName = Configurable.DATE_FORMAT_KEY;
                 settingValue = getDateFormat();
                 break;
             case TemplateDateModel.DATETIME:
-                settingName = Configuration.DATETIME_FORMAT_KEY;
+                settingName = Configurable.DATETIME_FORMAT_KEY;
                 settingValue = getDateTimeFormat();
                 break;
             default:
@@ -2241,6 +2252,7 @@ public final class Environment extends Configurable {
             this.locale = locale;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o instanceof NumberFormatKey) {
                 NumberFormatKey fk = (NumberFormatKey) o;
@@ -2249,6 +2261,7 @@ public final class Environment extends Configurable {
             return false;
         }
 
+        @Override
         public int hashCode() {
             return pattern.hashCode() ^ locale.hashCode();
         }
@@ -2273,6 +2286,7 @@ public final class Environment extends Configurable {
             return template == null ? Environment.this.getTemplate() : template;
         }
         
+        @Override
         public String toString() {
             return StringUtil.jQuote(template.getName()) + super.toString();
         }
@@ -2281,6 +2295,7 @@ public final class Environment extends Configurable {
 
      private static final Writer EMPTY_BODY_WRITER = new Writer() {
     
+        @Override
         public void write(char[] cbuf, int off, int len) throws IOException {
             if (len > 0) {
                 throw new IOException(
@@ -2288,9 +2303,11 @@ public final class Environment extends Configurable {
             }
         }
     
+        @Override
         public void flush() {
         }
     
+        @Override
         public void close() {
         }
     };

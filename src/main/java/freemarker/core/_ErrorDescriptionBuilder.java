@@ -60,6 +60,7 @@ public class _ErrorDescriptionBuilder {
         this.description = null;
     }
 
+    @Override
     public String toString() {
         return toString(null, true);
     }

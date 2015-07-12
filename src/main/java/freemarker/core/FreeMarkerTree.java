@@ -31,6 +31,7 @@ import freemarker.template.Template;
  * 
  * @deprecated Will be removed, as Swing classes aren't accessible on Google App Engine.
  */
+@Deprecated
 public class FreeMarkerTree extends JTree {
     private static final long serialVersionUID = 1L;
 
@@ -55,6 +56,7 @@ public class FreeMarkerTree extends JTree {
         this.invalidate();
     }
 
+    @Override
     public String convertValueToText(Object value, boolean selected,
                                      boolean expanded, boolean leaf, int row,
                                      boolean hasFocus) {

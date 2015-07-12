@@ -69,6 +69,7 @@ public class SimpleDate implements TemplateDateModel {
         return type;
     }
     
+    @Override
     public String toString() {
         return date.toString();
     }

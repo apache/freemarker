@@ -31,43 +31,53 @@ final class BooleanLiteral extends Expression {
         return b? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
     }
 
+    @Override
     boolean evalToBoolean(Environment env) {
         return val;
     }
 
+    @Override
     public String getCanonicalForm() {
         return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
     }
 
+    @Override
     String getNodeTypeSymbol() {
         return getCanonicalForm();
     }
     
+    @Override
     public String toString() {
         return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
     }
 
+    @Override
     TemplateModel _eval(Environment env) {
         return val ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
     }
     
+    @Override
     boolean isLiteral() {
         return true;
     }
 
+    @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new BooleanLiteral(val);
     }
     
+    @Override
     int getParameterCount() {
         return 0;
     }
 
+    @Override
     Object getParameterValue(int idx) {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
     }
