@@ -65,11 +65,10 @@ final class ArithmeticExpression extends Expression {
                 return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
             default:
                 if (parent instanceof Expression) {
-                    throw new _MiscTemplateException((Expression) parent, new Object[] {
-                            "Unknown operation: ", Integer.valueOf(operator) });
+                    throw new _MiscTemplateException((Expression) parent,
+                            "Unknown operation: ", Integer.valueOf(operator));
                 } else {
-                    throw new _MiscTemplateException(new Object[] {
-                            "Unknown operation: ", Integer.valueOf(operator) });
+                    throw new _MiscTemplateException("Unknown operation: ", Integer.valueOf(operator));
                 }
         }
     }

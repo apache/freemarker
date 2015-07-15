@@ -181,12 +181,12 @@ class BuiltInsForMultipleTypes {
                 try {
                     return df.parse(text);
                 } catch (java.text.ParseException e) {
-                    throw new _TemplateModelException(e, new Object[] {
+                    throw new _TemplateModelException(e,
                             "The string doesn't match the expected date/time/date-time format. "
                             + "The string to parse was: ", new _DelayedJQuote(text), ". ",
                             "The expected format was: ", new _DelayedJQuote(df.getDescription()), ".",
                             e.getMessage() != null ? "\nThe nested reason given follows:\n" : "",
-                            e.getMessage() != null ? e.getMessage() : "" });
+                            e.getMessage() != null ? e.getMessage() : "");
                 }
             }
             
@@ -213,9 +213,9 @@ class BuiltInsForMultipleTypes {
                 if (dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATETIME) {
                     return new SimpleDate(dmodel.getAsDate(), dateType);
                 }
-                throw new _MiscTemplateException(this, new Object[] {
+                throw new _MiscTemplateException(this,
                             "Cannot convert ", TemplateDateModel.TYPE_NAMES.get(dtype),
-                            " to ", TemplateDateModel.TYPE_NAMES.get(dateType) });
+                            " to ", TemplateDateModel.TYPE_NAMES.get(dateType));
             }
             // Otherwise, interpret as a string and attempt 
             // to parse it into a date.
@@ -229,10 +229,10 @@ class BuiltInsForMultipleTypes {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             if (!env.isAPIBuiltinEnabled()) {
-                throw new _MiscTemplateException(this, new Object[] {
+                throw new _MiscTemplateException(this,
                         "Can't use ?api, because the \"", Configurable.API_BUILTIN_ENABLED_KEY,
                         "\" configuration setting is false. Think twice before you set it to true though. Especially, "
-                        + "it shouldn't abussed for modifying Map-s and Collection-s." });
+                        + "it shouldn't abussed for modifying Map-s and Collection-s.");
             }
             final TemplateModel tm = target.eval(env);
             if (!(tm instanceof TemplateModelWithAPISupport)) {

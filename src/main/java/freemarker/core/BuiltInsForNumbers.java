@@ -45,15 +45,13 @@ class BuiltInsForNumbers {
             try {
                 n = NumberUtil.toIntExact(num);
             } catch (ArithmeticException e) {
-                throw new _TemplateModelException(target, new Object[] {
-                        "The left side operand value isn't compatible with ?", key, ": ",
-                        e.getMessage() });
+                throw new _TemplateModelException(target,
+                        "The left side operand value isn't compatible with ?", key, ": ", e.getMessage());
          
             }
             if (n <= 0) {
-                throw new _TemplateModelException(target, new Object[] {
-                        "The left side operand of to ?", key, " must be at least 1, but was ",
-                        Integer.valueOf(n), "." });
+                throw new _TemplateModelException(target,
+                        "The left side operand of to ?", key, " must be at least 1, but was ", Integer.valueOf(n), ".");
             }
             return new SimpleScalar(toABC(n));
         }
@@ -140,8 +138,7 @@ class BuiltInsForNumbers {
                     return model;
                 }
             } else {
-                throw new _TemplateModelException(new Object[] {
-                        "Unsupported number class: ", num.getClass() });
+                throw new _TemplateModelException("Unsupported number class: ", num.getClass());
             }            
         }
     }
@@ -272,32 +269,30 @@ class BuiltInsForNumbers {
         if (num instanceof Double) {
             double d = Math.round(((Double) num).doubleValue());
             if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
-                throw new _TemplateModelException(new Object[] {
-                        "Number doesn't fit into a 64 bit signed integer (long): ", Double.valueOf(d) });
+                throw new _TemplateModelException(
+                        "Number doesn't fit into a 64 bit signed integer (long): ", Double.valueOf(d));
             } else {
                 return (long) d;
             }
         } else if (num instanceof Float) {
             float f = Math.round(((Float) num).floatValue());
             if (f > Long.MAX_VALUE || f < Long.MIN_VALUE) {
-                throw new _TemplateModelException(new Object[] {
-                        "Number doesn't fit into a 64 bit signed integer (long): ", Float.valueOf(f) });
+                throw new _TemplateModelException(
+                        "Number doesn't fit into a 64 bit signed integer (long): ", Float.valueOf(f));
             } else {
                 return (long) f;
             }
         } else if (num instanceof BigDecimal) {
             BigDecimal bd = ((BigDecimal) num).setScale(0, BigDecimal.ROUND_HALF_UP);
             if (bd.compareTo(BIG_DECIMAL_LONG_MAX) > 0 || bd.compareTo(BIG_DECIMAL_LONG_MIN) < 0) {
-                throw new _TemplateModelException(new Object[] {
-                        "Number doesn't fit into a 64 bit signed integer (long): ", bd });
+                throw new _TemplateModelException("Number doesn't fit into a 64 bit signed integer (long): ", bd);
             } else {
                 return bd.longValue();
             }
         } else if (num instanceof BigInteger) {
             BigInteger bi = (BigInteger) num;
             if (bi.compareTo(BIG_INTEGER_LONG_MAX) > 0 || bi.compareTo(BIG_INTEGER_LONG_MIN) < 0) {
-                throw new _TemplateModelException(new Object[] {
-                        "Number doesn't fit into a 64 bit signed integer (long): ", bi });
+                throw new _TemplateModelException("Number doesn't fit into a 64 bit signed integer (long): ", bi);
             } else {
                 return bi.longValue();
             }
@@ -305,7 +300,7 @@ class BuiltInsForNumbers {
             return num.longValue();
         } else {
             // Should add Atomic* types in 2.4...
-            throw new _TemplateModelException(new Object[] { "Unsupported number type: ", num.getClass() });
+            throw new _TemplateModelException("Unsupported number type: ", num.getClass());
         }
     }
     

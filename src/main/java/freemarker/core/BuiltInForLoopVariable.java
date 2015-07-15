@@ -35,10 +35,7 @@ abstract class BuiltInForLoopVariable extends SpecialBuiltIn {
             // The parser should prevent this situation
             throw new _MiscTemplateException(
                     this, env,
-                    new Object[] {
-                            "There's no iteration in context that uses loop variable ",
-                            new _DelayedJQuote(loopVarName), "."
-                    });
+                    "There's no iteration in context that uses loop variable ", new _DelayedJQuote(loopVarName), ".");
         }
         
         return calculateResult(iterCtx, env);

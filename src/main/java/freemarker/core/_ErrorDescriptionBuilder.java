@@ -55,7 +55,7 @@ public class _ErrorDescriptionBuilder {
      *      {@link String} array items that look like FTL tag (must start with {@code "&lt;"} and end with {@code ">"})
      *      will be converted to the actual template syntax if {@link #blamed} or {@link #template} was set.
      */
-    public _ErrorDescriptionBuilder(Object[] descriptionParts) {
+    public _ErrorDescriptionBuilder(Object... descriptionParts) {
         this.descriptionParts = descriptionParts;
         this.description = null;
     }
@@ -299,7 +299,7 @@ public class _ErrorDescriptionBuilder {
         return this;
     }
     
-    public _ErrorDescriptionBuilder tip(Object tip[]) {
+    public _ErrorDescriptionBuilder tip(Object... tip) {
         tip((Object) tip);
         return this;
     }
@@ -324,7 +324,7 @@ public class _ErrorDescriptionBuilder {
         return this;
     }
     
-    public _ErrorDescriptionBuilder tips(Object[] tips) {
+    public _ErrorDescriptionBuilder tips(Object... tips) {
         if (this.tips == null) {
             this.tips = tips;
         } else {

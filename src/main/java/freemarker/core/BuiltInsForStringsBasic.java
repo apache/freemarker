@@ -449,11 +449,11 @@ class BuiltInsForStringsBasic {
                                         : StringUtil.rightPad(s, width, filling));
                     } catch (IllegalArgumentException e) {
                         if (filling.length() == 0) {
-                            throw new _TemplateModelException(new Object[] {
-                                    "?", key, "(...) argument #2 can't be a 0-length string." });
+                            throw new _TemplateModelException(
+                                    "?", key, "(...) argument #2 can't be a 0-length string.");
                         } else {
-                            throw new _TemplateModelException(e, new Object[] {
-                                    "?", key, "(...) failed: ", e });
+                            throw new _TemplateModelException(e,
+                                    "?", key, "(...) failed: ", e);
                         }
                     }
                 } else {
@@ -601,11 +601,10 @@ class BuiltInsForStringsBasic {
                             throw newIndexGreaterThanLengthException(1, endIdx, len);
                         }
                         if (beginIdx > endIdx) {
-                            throw MessageUtil.newMethodArgsInvalidValueException(
-                                    "?" + key, new Object[] {
-                                            "The begin index argument, ", Integer.valueOf(beginIdx),
-                                            ", shouldn't be greater than the end index argument, ",
-                                            Integer.valueOf(endIdx), "." });
+                            throw MessageUtil.newMethodArgsInvalidValueException("?" + key,
+                                    "The begin index argument, ", Integer.valueOf(beginIdx),
+                                    ", shouldn't be greater than the end index argument, ",
+                                    Integer.valueOf(endIdx), ".");
                         }
                         return new SimpleScalar(s.substring(beginIdx, endIdx));
                     } else {
@@ -616,18 +615,17 @@ class BuiltInsForStringsBasic {
                 private TemplateModelException newIndexGreaterThanLengthException(
                         int argIdx, int idx, final int len) throws TemplateModelException {
                     return MessageUtil.newMethodArgInvalidValueException(
-                            "?" + key, argIdx, new Object[] {
-                                    "The index mustn't be greater than the length of the string, ",
-                                    Integer.valueOf(len),
-                                    ", but it was ", Integer.valueOf(idx), "." });
+                            "?" + key, argIdx,
+                            "The index mustn't be greater than the length of the string, ",
+                            Integer.valueOf(len),
+                            ", but it was ", Integer.valueOf(idx), ".");
                 }
     
                 private TemplateModelException newIndexLessThan0Exception(
                         int argIdx, int idx) throws TemplateModelException {
                     return MessageUtil.newMethodArgInvalidValueException(
-                            "?" + key, argIdx, new Object[] {
-                                    "The index must be at least 0, but was ",
-                                    Integer.valueOf(idx), "." });
+                            "?" + key, argIdx,
+                            "The index must be at least 0, but was ", Integer.valueOf(idx), ".");
                 }
                 
             };

@@ -485,8 +485,7 @@ public abstract class ArithmeticEngine {
                 if (num == null) {
                     throw new _MiscTemplateException("The Number object was null.");
                 } else {
-                    throw new _MiscTemplateException(new Object[] {
-                            "Unknown number type ", num.getClass().getName() });
+                    throw new _MiscTemplateException("Unknown number type ", num.getClass().getName());
                 }
             }
         }

@@ -95,11 +95,11 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
             return TemplateClassResolver.SAFER_RESOLVER.resolve(className, env, template);
         } else {
             if (!allowedClasses.contains(className)) {
-                throw new _MiscTemplateException(env, new Object[] {
+                throw new _MiscTemplateException(env,
                         "Instantiating ", className, " is not allowed in the template for security reasons. (If you "
                         + "run into this problem when using ?new in a template, you may want to check the \"",
                         Configurable.NEW_BUILTIN_CLASS_RESOLVER_KEY,
-                        "\" setting in the FreeMarker configuration.)" });
+                        "\" setting in the FreeMarker configuration.)");
             } else {
                 try {
                     return ClassUtil.forName(className);

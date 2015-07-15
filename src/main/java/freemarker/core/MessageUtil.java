@@ -35,7 +35,7 @@ class MessageUtil {
     static final String UNKNOWN_DATE_TYPE_ERROR_TIP = 
             "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
     
-    static final String[] UNKNOWN_DATE_TO_STRING_TIPS = new String[] {
+    static final Object[] UNKNOWN_DATE_TO_STRING_TIPS = {
             UNKNOWN_DATE_TYPE_ERROR_TIP,
             "If you need a particular format only once, use ?string(pattern), like ?string('dd.MM.yyyy HH:mm:ss'), "
             + "to specify which fields to display. "
@@ -254,33 +254,32 @@ class MessageUtil {
     
     static TemplateModelException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
-        return new _TemplateModelException(new Object[] {
+        return new _TemplateModelException(
                 methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", Integer.valueOf(argIdx + 1),
-                ", but received ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(arg)), "." });
+                ", but received ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(arg)), ".");
     }
     
     /**
      * The type of the argument was good, but it's value wasn't.
      */
     static TemplateModelException newMethodArgInvalidValueException(
-            String methodName, int argIdx, Object[] details) {
-        return new _TemplateModelException(new Object[] {
+            String methodName, int argIdx, Object... details) {
+        return new _TemplateModelException(
                 methodName, "(...) argument #", Integer.valueOf(argIdx + 1),
-                " had invalid value: ", details });
+                " had invalid value: ", details);
     }
 
     /**
      * The type of the argument was good, but the values of two or more arguments are inconsistent with each other.
      */
     static TemplateModelException newMethodArgsInvalidValueException(
-            String methodName, Object[] details) {
-        return new _TemplateModelException(new Object[] {
-                methodName, "(...) arguments have invalid value: ", details });
+            String methodName, Object... details) {
+        return new _TemplateModelException(methodName, "(...) arguments have invalid value: ", details);
     }
     
     static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
-        return new _MiscTemplateException(env, new Object[] {
-                "Instantiating ", className, " is not allowed in the template for security reasons." });
+        return new _MiscTemplateException(env,
+                "Instantiating ", className, " is not allowed in the template for security reasons.");
     }
     
     static _TemplateModelException newCantFormatUnknownTypeDateException(

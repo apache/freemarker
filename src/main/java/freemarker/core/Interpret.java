@@ -115,11 +115,11 @@ class Interpret extends BuiltIn {
                     env.setFastInvalidReferenceExceptions(lastFIRE);
                 }
             } catch (Exception e) {
-                throw new _TemplateModelException(e, new Object[] {
+                throw new _TemplateModelException(e,
                         "Template created with \"?", key, "\" has stopped with this error:\n\n",
                         MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END });
+                        MessageUtil.EMBEDDED_MESSAGE_END);
             }
     
             return new Writer(out)

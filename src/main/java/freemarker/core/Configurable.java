@@ -736,19 +736,20 @@ public class Configurable {
     }
 
     private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
-        return new _ErrorDescriptionBuilder(new Object[] {
+        return new _ErrorDescriptionBuilder(
                 "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
                 new _DelayedJQuote(getBooleanFormat()), 
                 (getBooleanFormat().equals(C_TRUE_FALSE)
                     ? ", which is the legacy default computer-language format, and hence isn't accepted."
-                    : ".") }).tips(new Object[] {
-                 "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
-                 + "use \"?c\", like ${myBool?c}.",
-                 "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
-                 new Object[] {
-                     "If you need the same two values on most places, the programmers should set the \"",
-                     BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
-                 });
+                    : ".")
+                ).tips(
+                     "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
+                     + "use \"?c\", like ${myBool?c}.",
+                     "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
+                     new Object[] {
+                         "If you need the same two values on most places, the programmers should set the \"",
+                         BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
+                 );
     }
 
     /**
@@ -1735,9 +1736,8 @@ public class Configurable {
     }
     
     protected TemplateException invalidSettingValueException(String name, String value) {
-        return new _MiscTemplateException(getEnvironment(), new Object[] {
-                "Invalid value for setting ", new _DelayedJQuote(name), ": ",
-                new _DelayedJQuote(value) });
+        return new _MiscTemplateException(getEnvironment(),
+                "Invalid value for setting ", new _DelayedJQuote(name), ": ", new _DelayedJQuote(value));
     }
     
     /**
@@ -1746,10 +1746,10 @@ public class Configurable {
     public static class UnknownSettingException extends _MiscTemplateException {
 
         private UnknownSettingException(Environment env, String name, String correctedName) {
-            super(env, new Object[] {
+            super(env,
                     "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     correctedName == null
-                            ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
+                            ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) });
         }
         
     }
@@ -1763,9 +1763,9 @@ public class Configurable {
     public static class SettingValueAssignmentException extends _MiscTemplateException {
         
         private SettingValueAssignmentException(Environment env, String name, String value, Throwable cause) {
-            super(cause, env, new Object[] {
+            super(cause, env,
                     "Failed to set FreeMarker configuration setting ", new _DelayedJQuote(name),
-                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
+                    " to value ", new _DelayedJQuote(value), "; see cause exception.");
         }
         
     }

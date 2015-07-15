@@ -26,9 +26,6 @@ import freemarker.template.TemplateException;
  */
 public class _MiscTemplateException extends TemplateException {
 
-    // Note: On Java 5 we will use `String descPart1, Object... furtherDescParts` instead of `Object[] descriptionParts`
-    //       and `String description`. That's why these are at the end of the parameter list.
-    
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
@@ -77,34 +74,34 @@ public class _MiscTemplateException extends TemplateException {
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public _MiscTemplateException(Object[] descriptionParts) {
+    public _MiscTemplateException(Object... descriptionParts) {
         this((Environment) null, descriptionParts);
     }
 
-    public _MiscTemplateException(Environment env, Object[] descriptionParts) {
+    public _MiscTemplateException(Environment env, Object... descriptionParts) {
         this((Throwable) null, env, descriptionParts);
     }
 
-    public _MiscTemplateException(Throwable cause, Object[] descriptionParts) {
+    public _MiscTemplateException(Throwable cause, Object... descriptionParts) {
         this(cause, null, descriptionParts);
     }
 
-    public _MiscTemplateException(Throwable cause, Environment env, Object[] descriptionParts) {
+    public _MiscTemplateException(Throwable cause, Environment env, Object... descriptionParts) {
         super(cause, env, null, new _ErrorDescriptionBuilder(descriptionParts));
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public _MiscTemplateException(Expression blamed, Object[] descriptionParts) {
+    public _MiscTemplateException(Expression blamed, Object... descriptionParts) {
         this(blamed, null, descriptionParts);
     }
 
-    public _MiscTemplateException(Expression blamed, Environment env, Object[] descriptionParts) {
+    public _MiscTemplateException(Expression blamed, Environment env, Object... descriptionParts) {
         this(blamed, null, env, descriptionParts);
     }
 
-    public _MiscTemplateException(Expression blamed, Throwable cause, Environment env, Object[] descriptionParts) {
+    public _MiscTemplateException(Expression blamed, Throwable cause, Environment env, Object... descriptionParts) {
         super(cause, env, blamed, new _ErrorDescriptionBuilder(descriptionParts).blame(blamed));
     }
 
