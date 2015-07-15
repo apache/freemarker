@@ -69,17 +69,13 @@ public class DefaultMapAdapter extends WrappingTemplateModel
         try {
             val = map.get(key);
         } catch (ClassCastException e) {
-            throw new _TemplateModelException(
-                    e, new Object[] {
-                            "ClassCastException while getting Map entry with String key ",
-                            new _DelayedJQuote(key)
-                    });
+            throw new _TemplateModelException(e,
+                    "ClassCastException while getting Map entry with String key ",
+                    new _DelayedJQuote(key));
         } catch (NullPointerException e) {
-            throw new _TemplateModelException(
-                    e, new Object[] {
-                            "NullPointerException while getting Map entry with String key ",
-                            new _DelayedJQuote(key)
-                    });
+            throw new _TemplateModelException(e,
+                    "NullPointerException while getting Map entry with String key ",
+                    new _DelayedJQuote(key));
         }
             
         if (val == null) {
@@ -98,17 +94,13 @@ public class DefaultMapAdapter extends WrappingTemplateModel
                         }
                     } 
                 } catch (ClassCastException e) {
-                    throw new _TemplateModelException(
-                            e, new Object[] {
+                    throw new _TemplateModelException(e,
                                     "Class casting exception while getting Map entry with Character key ",
-                                    new _DelayedJQuote(charKey)
-                            });
+                                    new _DelayedJQuote(charKey));
                 } catch (NullPointerException e) {
-                    throw new _TemplateModelException(
-                            e, new Object[] {
+                    throw new _TemplateModelException(e,
                                     "NullPointerException while getting Map entry with Character key ",
-                                    new _DelayedJQuote(charKey)
-                            });
+                                    new _DelayedJQuote(charKey));
                 }
             } else {  // No char key fallback was possible
                 TemplateModel wrappedNull = wrap(null);

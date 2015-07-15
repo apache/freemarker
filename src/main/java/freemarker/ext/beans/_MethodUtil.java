@@ -279,14 +279,13 @@ public final class _MethodUtil {
             }
         }
 
-        return new _TemplateModelException(e, new Object[] {
+        return new _TemplateModelException(e,
                 invocationErrorMessageStart(member, isConstructor),
                 " threw an exception",
                 isStatic || isConstructor ? (Object) "" : new Object[] {
                     " when invoked on ", parentObject.getClass(), " object ", new _DelayedJQuote(parentObject) 
                 },
-                "; see cause exception in the Java stack trace."
-        });
+                "; see cause exception in the Java stack trace.");
     }
 
 }

@@ -180,11 +180,11 @@ implements
         } catch (TemplateModelException e) {
             throw e;
         } catch (Exception e) {
-            throw new _TemplateModelException(e, new Object [] {
+            throw new _TemplateModelException(e,
                     "An error has occurred when reading existing sub-variable ", new _DelayedJQuote(key),
                     "; see cause exception! The type of the containing value was: ",
                     new _DelayedFTLTypeDescription(this)
-            });
+            );
         }
     }
 

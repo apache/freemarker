@@ -40,7 +40,7 @@ class BuiltInsForStringsMisc {
                 b = false;
             } else {
                 throw new _MiscTemplateException(this, env,
-                        new Object[] { "Can't convert this string to boolean: ", new _DelayedJQuote(s) });
+                        "Can't convert this string to boolean: ", new _DelayedJQuote(s));
             }
             return b ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
@@ -68,22 +68,22 @@ class BuiltInsForStringsMisc {
                     throw e.toParseException(getTemplate());
                 }
             } catch (ParseException e) {
-                throw new _MiscTemplateException(this, env, new Object[] {
+                throw new _MiscTemplateException(this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
                         MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
                         MessageUtil.EMBEDDED_MESSAGE_END,
-                        "\n\nThe failing expression:" });
+                        "\n\nThe failing expression:");
             }
             try {
                 return exp.eval(env);
             } catch (TemplateException e) {
-                throw new _MiscTemplateException(this, env, new Object[] {
+                throw new _MiscTemplateException(this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
                         MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessageWithoutStackTop(e),
                         MessageUtil.EMBEDDED_MESSAGE_END,
-                        "\n\nThe failing expression:" });
+                        "\n\nThe failing expression:");
             }
         }
     }

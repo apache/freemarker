@@ -38,7 +38,7 @@ public class InvalidReferenceException extends TemplateException {
         }
     }
     
-    private static final String[] TIP = new String[] {
+    private static final Object[] TIP = {
         "If the failing expression is known to be legally refer to something that's sometimes null or missing, "
         + "either specify a default value like myOptionalVar!myDefault, or use ",
         "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
@@ -46,7 +46,7 @@ public class InvalidReferenceException extends TemplateException {
         + "use parenthesis: (myOptionalVar.foo)!myDefault, (myOptionalVar.foo)??"
     };
 
-    private static final String[] TIP_MISSING_ASSIGNMENT_TARGET = {
+    private static final Object[] TIP_MISSING_ASSIGNMENT_TARGET = {
             "If the target variable is known to be legally null or missing sometimes, instead of something like ",
             "<#assign x += 1>", ", you could write ", "<#if x??>", "<#assign x += 1>", "</#if>",
             " or ", "<#assign x = (x!0) + 1>"
@@ -107,7 +107,7 @@ public class InvalidReferenceException extends TemplateException {
                 final _ErrorDescriptionBuilder errDescBuilder
                         = new _ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(blamed);
                 if (endsWithDollarVariable(blamed)) {
-                    errDescBuilder.tips(new Object[] { TIP_NO_DOLLAR, TIP });
+                    errDescBuilder.tips(TIP_NO_DOLLAR, TIP);
                 } else if (blamed instanceof Dot) {
                     final String rho = ((Dot) blamed).getRHO();
                     String nameFixTip = null;
@@ -121,10 +121,10 @@ public class InvalidReferenceException extends TemplateException {
                                     ? new Object[] { TIP_LAST_STEP_DOT, TIP }
                                     : new Object[] { TIP_LAST_STEP_DOT, nameFixTip, TIP });
                 } else if (blamed instanceof DynamicKeyName) {
-                    errDescBuilder.tips(new Object[] { TIP_LAST_STEP_SQUARE_BRACKET, TIP });
+                    errDescBuilder.tips(TIP_LAST_STEP_SQUARE_BRACKET, TIP);
                 } else if (blamed instanceof Identifier
                         && ((Identifier) blamed).getName().equals("JspTaglibs")) {
-                    errDescBuilder.tips(new Object[] { TIP_JSP_TAGLIBS, TIP });
+                    errDescBuilder.tips(TIP_JSP_TAGLIBS, TIP);
                 } else {
                     errDescBuilder.tip(TIP);
                 }
@@ -143,14 +143,14 @@ public class InvalidReferenceException extends TemplateException {
         if (env != null && env.getFastInvalidReferenceExceptions()) {
             return FAST_INSTANCE;
         } else {
-            final _ErrorDescriptionBuilder errDescBuilder = new _ErrorDescriptionBuilder(new Object[] {
+            final _ErrorDescriptionBuilder errDescBuilder = new _ErrorDescriptionBuilder(
                             "The target variable of the assignment, ",
                             new _DelayedJQuote(missingAssignedVarName),
                             ", was null or missing, but the \"",
                             assignmentOperator, "\" operator needs to get its value before assigning to it."
-                    });
+                    );
             if (missingAssignedVarName.startsWith("$")) {
-                errDescBuilder.tips(new Object[] { TIP_NO_DOLLAR, TIP_MISSING_ASSIGNMENT_TARGET });
+                errDescBuilder.tips(TIP_NO_DOLLAR, TIP_MISSING_ASSIGNMENT_TARGET);
             } else {
                 errDescBuilder.tip(TIP_MISSING_ASSIGNMENT_TARGET);
             }

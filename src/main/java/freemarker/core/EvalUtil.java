@@ -86,7 +86,8 @@ class EvalUtil {
     /** Signals the buggy case where we have a non-null model, but it wraps a null. */
     private static TemplateModelException newModelHasStoredNullException(
             Class expected, TemplateModel model, Expression expr) {
-        return new _TemplateModelException(expr, _TemplateModelException.modelHasStoredNullDescription(expected, model));
+        return new _TemplateModelException(expr,
+                _TemplateModelException.modelHasStoredNullDescription(expected, model));
     }
 
     /**
@@ -249,16 +250,16 @@ class EvalUtil {
                     sideExp = rightExp;
                 }
                 
-                throw new _MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env, new Object[] {
-                        "The ", sideName, " ", VALUE_OF_THE_COMPARISON_IS_UNKNOWN_DATE_LIKE });
+                throw new _MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env,
+                        "The ", sideName, " ", VALUE_OF_THE_COMPARISON_IS_UNKNOWN_DATE_LIKE);
             }
             
             if (leftDateType != rightDateType) {
                 ;
-                throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
+                throw new _MiscTemplateException(defaultBlamed, env,
                         "Can't compare dates of different types. Left date type is ",
                         TemplateDateModel.TYPE_NAMES.get(leftDateType), ", right date type is ",
-                        TemplateDateModel.TYPE_NAMES.get(rightDateType), "." });
+                        TemplateDateModel.TYPE_NAMES.get(rightDateType), ".");
             }
 
             Date leftDate = EvalUtil.modelToDate(leftDateModel, leftExp);
@@ -266,8 +267,8 @@ class EvalUtil {
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
-                        "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values." });
+                throw new _MiscTemplateException(defaultBlamed, env,
+                        "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values.");
             }
             String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
             String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
@@ -275,8 +276,8 @@ class EvalUtil {
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
-                        "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on boolean values." });
+                throw new _MiscTemplateException(defaultBlamed, env,
+                        "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on boolean values.");
             }
             boolean leftBool = ((TemplateBooleanModel) leftValue).getAsBoolean();
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
@@ -294,20 +295,20 @@ class EvalUtil {
                 }
                 // Falls through
             }
-            throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
-                            "Can't compare values of these types. ",
-                            "Allowed comparisons are between two numbers, two strings, two dates, or two booleans.\n",
-                            "Left hand operand ",
-                            (quoteOperandsInErrors && leftExp != null
-                                    ? new Object[] { "(", new _DelayedGetCanonicalForm(leftExp), ") value " }
-                                    : (Object) ""),
-                            "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
-                            "Right hand operand ",
-                            (quoteOperandsInErrors && rightExp != null
-                                    ? new Object[] { "(", new _DelayedGetCanonicalForm(rightExp), ") value " }
-                                    : (Object) ""),
-                            "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)),
-                            "." });
+            throw new _MiscTemplateException(defaultBlamed, env,
+                    "Can't compare values of these types. ",
+                    "Allowed comparisons are between two numbers, two strings, two dates, or two booleans.\n",
+                    "Left hand operand ",
+                    (quoteOperandsInErrors && leftExp != null
+                            ? new Object[] { "(", new _DelayedGetCanonicalForm(leftExp), ") value " }
+                            : (Object) ""),
+                    "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
+                    "Right hand operand ",
+                    (quoteOperandsInErrors && rightExp != null
+                            ? new Object[] { "(", new _DelayedGetCanonicalForm(rightExp), ") value " }
+                            : (Object) ""),
+                    "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)),
+                    ".");
         }
 
         switch (operator) {

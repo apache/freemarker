@@ -142,9 +142,10 @@ final class BuiltInsWithParseTimeParameters {
             }
             
             if (paramCnt % 2 == 0) {
-                throw new _MiscTemplateException(target, new Object[] { "The value before ?", key,
-                        "(case1, value1, case2, value2, ...) didn't match any of the case parameters, and there "
-                        + "was no default value parameter (an additional last parameter) eihter. "});
+                throw new _MiscTemplateException(target,
+                        "The value before ?", key, "(case1, value1, case2, value2, ...) didn't match any of the "
+                        + "case parameters, and there was no default value parameter (an additional last parameter) "
+                        + "eithter. ");
             }
             return ((Expression) parameters.get(paramCnt - 1)).evalToNonMissing(env);
         }

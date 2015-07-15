@@ -49,7 +49,7 @@ public class UnexpectedTypeException extends TemplateException {
     }
 
     UnexpectedTypeException(
-            Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String[] tips,
+            Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Object[] tips,
             Environment env)
             throws InvalidReferenceException {
         super(null, env, blamed, newDesciptionBuilder(blamed, null, model, expectedTypesDesc, expectedTypes, env)
@@ -58,7 +58,7 @@ public class UnexpectedTypeException extends TemplateException {
 
     UnexpectedTypeException(
             String blamedAssignmentTargetVarName, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes,
-            String[] tips,
+            Object[] tips,
             Environment env)
             throws InvalidReferenceException {
         super(null, env, null, newDesciptionBuilder(

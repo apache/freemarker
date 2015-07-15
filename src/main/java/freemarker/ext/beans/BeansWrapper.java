@@ -1251,11 +1251,11 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                     if (tryOnly) {
                         return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
                     } else {
-                        throw new _TemplateModelException(new Object[] {
+                        throw new _TemplateModelException(
                                 "Failed to convert ",  new _DelayedFTLTypeDescription(seq),
                                 " object to ", new _DelayedShortClassName(array.getClass()),
                                 ": Problematic sequence item at index ", Integer.valueOf(i) ," with value type: ",
-                                new _DelayedFTLTypeDescription(seqItem)});
+                                new _DelayedFTLTypeDescription(seqItem));
                     }
                     
                 }

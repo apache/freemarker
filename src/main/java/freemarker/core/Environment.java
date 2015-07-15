@@ -713,9 +713,9 @@ public final class Environment extends Configurable {
                         catchAllParamValue.put(argName, argValue);
                     }
                 } else {
-                    throw new _MiscTemplateException(this, new Object[] {
+                    throw new _MiscTemplateException(this,
                             (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
-                            " has no parameter with name ", new _DelayedJQuote(argName), "." });
+                            " has no parameter with name ", new _DelayedJQuote(argName), ".");
                 }
             }
         } else if (positionalArgs != null) {
@@ -730,10 +730,10 @@ public final class Environment extends Configurable {
             String[] argNames = macro.getArgumentNamesInternal();
             final int argsCnt = positionalArgs.size();
             if (argNames.length < argsCnt && catchAllParamName == null) {
-                throw new _MiscTemplateException(this, new Object[] { 
+                throw new _MiscTemplateException(this, 
                         (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
                         " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
-                        new _DelayedToString(argsCnt), "."});
+                        new _DelayedToString(argsCnt), ".");
             }
             for (int i = 0; i < argsCnt; i++) {
                 Expression argValueExp = (Expression) positionalArgs.get(i);
@@ -1218,8 +1218,7 @@ public final class Environment extends Configurable {
                 settingValue = getDateTimeFormat();
                 break;
             default:
-                throw new _TemplateModelException(new Object[] {
-                        "Invalid date type enum: ", Integer.valueOf(dateType) });
+                throw new _TemplateModelException("Invalid date type enum: ", Integer.valueOf(dateType));
             } // switch
 
             f = getTemplateDateFormat(
@@ -1307,7 +1306,7 @@ public final class Environment extends Configurable {
         try {
             return templateDateFormatFactory.get(dateType, zonelessInput, formatDescriptor);
         } catch (ParseException e) {
-            throw new _TemplateModelException(e.getCause(), new Object[] {
+            throw new _TemplateModelException(e.getCause(),
                     (sourceCfgSetting == null
                             ? (Object) "Malformed date/time format descriptor: "
                             : new Object[] {
@@ -1315,7 +1314,7 @@ public final class Environment extends Configurable {
                                     "\" FreeMarker configuration setting is a malformed date/time format descriptor: "
                             }),
                     new _DelayedJQuote(formatDescriptor), ". Reason given: ",
-                    e.getMessage() });
+                    e.getMessage());
         }
     }
     

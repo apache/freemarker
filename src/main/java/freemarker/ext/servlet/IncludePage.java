@@ -74,9 +74,8 @@ public class IncludePage implements TemplateDirectiveModel {
             throw new _MiscTemplateException(env, "Missing required parameter \"path\"");
         }
         if (!(path instanceof TemplateScalarModel)) {
-            throw new _MiscTemplateException(env, new Object[] {
-                    "Expected a scalar model. \"path\" is instead ",
-                    new _DelayedFTLTypeDescription(path) });
+            throw new _MiscTemplateException(env,
+                    "Expected a scalar model. \"path\" is instead ", new _DelayedFTLTypeDescription(path));
         }
         final String strPath = ((TemplateScalarModel) path).getAsString();
         if (strPath == null) {
@@ -116,9 +115,9 @@ public class IncludePage implements TemplateDirectiveModel {
             inheritParams = true; 
         } else {
             if (!(inheritParamsModel instanceof TemplateBooleanModel)) {
-                throw new _MiscTemplateException(env, new Object[] {
+                throw new _MiscTemplateException(env,
                         "\"inherit_params\" should be a boolean but it's a(n) ",
-                        inheritParamsModel.getClass().getName(), " instead" });
+                        inheritParamsModel.getClass().getName(), " instead");
             }
             inheritParams = ((TemplateBooleanModel) inheritParamsModel).getAsBoolean();
         }
@@ -139,9 +138,9 @@ public class IncludePage implements TemplateDirectiveModel {
                 // Convert params to a Map
                 final Object unwrapped = DeepUnwrap.unwrap(paramsModel);
                 if (!(unwrapped instanceof Map)) {
-                    throw new _MiscTemplateException(env, new Object[] {
+                    throw new _MiscTemplateException(env,
                             "Expected \"params\" to unwrap into a java.util.Map. It unwrapped into ",
-                            unwrapped.getClass().getName(), " instead." });
+                            unwrapped.getClass().getName(), " instead.");
                 }
                 paramsMap = (Map) unwrapped;
             } else {

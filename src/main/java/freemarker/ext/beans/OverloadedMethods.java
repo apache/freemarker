@@ -88,13 +88,13 @@ final class OverloadedMethods {
             varargsRes = null;
         }
         
-        _ErrorDescriptionBuilder edb = new _ErrorDescriptionBuilder(new Object[] {
+        _ErrorDescriptionBuilder edb = new _ErrorDescriptionBuilder(
                 toCompositeErrorMessage(
                         (EmptyMemberAndArguments) fixArgsRes,
                         (EmptyMemberAndArguments) varargsRes,
                         tmArgs),
                 "\nThe matching overload was searched among these members:\n",
-                memberListToString()});
+                memberListToString());
         if (!bugfixed) {
             edb.tip("You seem to use BeansWrapper with incompatibleImprovements set below 2.3.21. If you think this "
                     + "error is unfounded, enabling 2.3.21 fixes may helps. See version history for more.");
