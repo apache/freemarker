@@ -35,12 +35,12 @@ class APINotSupportedTemplateException extends TemplateException {
 
     protected static _ErrorDescriptionBuilder buildDescription(Environment env, Expression blamedExpr,
             TemplateModel tm) {
-        final _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(new Object[] {
+        final _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "The value doesn't support ?api. See requirements in the FreeMarker Manual. ("
                 + "FTL type: ", new _DelayedFTLTypeDescription(tm),
                 ", TemplateModel class: ", new _DelayedShortClassName(tm.getClass()),
                 ", ObjectWapper: ", new _DelayedToString(env.getObjectWrapper()), ")"
-        }).blame(blamedExpr);
+        ).blame(blamedExpr);
 
         if (blamedExpr.isLiteral()) {
             desc.tip("Only adapted Java objects can possibly have API, not values created inside templates.");
@@ -50,21 +50,19 @@ class APINotSupportedTemplateException extends TemplateException {
                     && (tm instanceof SimpleHash || tm instanceof SimpleSequence)) {
                 DefaultObjectWrapper dow = (DefaultObjectWrapper) ow;
                 if (!dow.getUseAdaptersForContainers()) {
-                    desc.tip(new Object[] {
-                            "In the FreeMarker configuration, \"", Configurable.OBJECT_WRAPPER_KEY,
+                    desc.tip("In the FreeMarker configuration, \"", Configurable.OBJECT_WRAPPER_KEY,
                             "\" is a DefaultObjectWrapper with its \"useAdaptersForContainers\" property set to "
-                            + "false. Setting it to true might solves this problem." });
+                            + "false. Setting it to true might solves this problem.");
                     if (dow.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22) {
                         desc.tip("Setting DefaultObjectWrapper's \"incompatibleImprovements\" to 2.3.22 or higher will "
                                 + "change the default value of \"useAdaptersForContainers\" to true.");
                     }
                 } else if (tm instanceof SimpleSequence && dow.getForceLegacyNonListCollections()) {
-                    desc.tip(new Object[] {
-                            "In the FreeMarker configuration, \"",
+                    desc.tip("In the FreeMarker configuration, \"",
                             Configurable.OBJECT_WRAPPER_KEY,
                             "\" is a DefaultObjectWrapper with its \"forceLegacyNonListCollections\" property set "
                             + "to true. If you are trying to access the API of a non-List Collection, setting the "
-                            + "\"forceLegacyNonListCollections\" property to false might solves this problem." });
+                            + "\"forceLegacyNonListCollections\" property to false might solves this problem.");
                 }
             }
         }

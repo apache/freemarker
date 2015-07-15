@@ -41,10 +41,10 @@ abstract class BuiltInForHashEx extends BuiltIn {
             return InvalidReferenceException.FAST_INSTANCE;
         } else {
             return new InvalidReferenceException(
-                    new _ErrorDescriptionBuilder(new Object[] {
+                    new _ErrorDescriptionBuilder(
                         "The exteneded hash (of class ", tm.getClass().getName(), ") has returned null for its \"",
                         propertyName,
-                        "\" property. This is maybe a bug. The extended hash was returned by this expression:" })
+                        "\" property. This is maybe a bug. The extended hash was returned by this expression:")
                     .blame(target),
                     env, this);
         }

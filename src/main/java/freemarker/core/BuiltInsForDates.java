@@ -102,10 +102,10 @@ class BuiltInsForDates {
                     try {
                         tzArg = DateUtil.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
-                        throw new _TemplateModelException(new Object[] {
+                        throw new _TemplateModelException(
                                 "The time zone string specified for ?", key,
                                 "(...) is not recognized as a valid time zone name: ",
-                                new _DelayedJQuote(tzName) });
+                                new _DelayedJQuote(tzName));
                     }
                 } else {
                     throw MessageUtil.newMethodArgUnexpectedTypeException(
@@ -187,10 +187,10 @@ class BuiltInsForDates {
         protected void checkDateTypeNotUnknown(int dateType)
         throws TemplateException {
             if (dateType == TemplateDateModel.UNKNOWN) {
-                throw new _MiscTemplateException(new _ErrorDescriptionBuilder(new Object[] {
+                throw new _MiscTemplateException(new _ErrorDescriptionBuilder(
                             "The value of the following has unknown date type, but ?", key,
                             " needs a value where it's known if it's a date (no time part), time, or date-time value:"                        
-                        }).blame(target).tip(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
+                        ).blame(target).tip(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
             }
         }
     

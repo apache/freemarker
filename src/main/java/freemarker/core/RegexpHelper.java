@@ -75,8 +75,8 @@ final class RegexpHelper {
         try {
             result = Pattern.compile(patternString, flags);
         } catch (PatternSyntaxException e) {
-            throw new _TemplateModelException(e, new Object[] {
-                    "Malformed regular expression: ", new _DelayedGetMessage(e) });
+            throw new _TemplateModelException(e,
+                    "Malformed regular expression: ", new _DelayedGetMessage(e));
         }
         synchronized (patternCache) {
             patternCache.put(patternKey, result);
@@ -190,7 +190,7 @@ final class RegexpHelper {
             return;
         }
 
-        final Object[] msg = new Object[] { "?", biName ," doesn't support the \"", flag, "\" flag "
+        final Object[] msg = { "?", biName ," doesn't support the \"", flag, "\" flag "
                 + "without the \"r\" flag." };
         if (strict) {
             throw new _TemplateModelException(msg);

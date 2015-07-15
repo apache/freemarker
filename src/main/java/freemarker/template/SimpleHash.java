@@ -191,17 +191,13 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
         try {
             result = map.get(key);
         } catch (ClassCastException e) {
-            throw new _TemplateModelException(
-                    e, new Object[] {
-                            "ClassCastException while getting Map entry with String key ",
-                            new _DelayedJQuote(key)
-                    });
+            throw new _TemplateModelException(e,
+                    "ClassCastException while getting Map entry with String key ",
+                    new _DelayedJQuote(key));
         } catch (NullPointerException e) {
-            throw new _TemplateModelException(
-                    e, new Object[] {
-                            "NullPointerException while getting Map entry with String key ",
-                            new _DelayedJQuote(key)
-                    });
+            throw new _TemplateModelException(e,
+                    "NullPointerException while getting Map entry with String key ",
+                    new _DelayedJQuote(key));
         }
         // The key to use for putting -- it's the key that already exists in
         // the map (either key or charKey below). This way, we'll never put a 
@@ -220,17 +216,13 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
                         putKey = charKey;
                     }
                 } catch (ClassCastException e) {
-                    throw new _TemplateModelException(
-                            e, new Object[] {
-                                    "ClassCastException while getting Map entry with Character key ",
-                                    new _DelayedJQuote(key)
-                            });
+                    throw new _TemplateModelException(e,
+                            "ClassCastException while getting Map entry with Character key ",
+                            new _DelayedJQuote(key));
                 } catch (NullPointerException e) {
-                    throw new _TemplateModelException(
-                            e, new Object[] {
-                                    "NullPointerException while getting Map entry with Character key ",
-                                    new _DelayedJQuote(key)
-                            });
+                    throw new _TemplateModelException(e,
+                            "NullPointerException while getting Map entry with Character key ",
+                            new _DelayedJQuote(key));
                 }
             }
             if (putKey == null) {

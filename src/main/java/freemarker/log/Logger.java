@@ -487,7 +487,7 @@ public abstract class Logger {
         } catch (ClassNotFoundException e) {
             try {
                 Object r = Class.forName(LOG4J_OVER_SLF4J_TESTER_CLASS)
-                        .getMethod("test", new Class[] {}).invoke(null, new Object[] {});
+                        .getMethod("test", new Class[] {}).invoke(null);
                 return ((Boolean) r).booleanValue();
             } catch (Throwable e2) {
                 return false;

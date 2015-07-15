@@ -53,19 +53,19 @@ public final class LibraryLoad extends TemplateElement {
         try {
             fullImportedTemplateName = env.toFullTemplateName(getTemplate().getName(), importedTemplateName);
         } catch (MalformedTemplateNameException e) {
-            throw new _MiscTemplateException(e, env, new Object[] {
+            throw new _MiscTemplateException(e, env,
                     "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",
-                    e.getMalformednessDescription() });
+                    e.getMalformednessDescription());
         }
         
         final Template importedTemplate;
         try {
             importedTemplate = env.getTemplateForImporting(fullImportedTemplateName);
         } catch (IOException e) {
-            throw new _MiscTemplateException(e, env, new Object[] {
+            throw new _MiscTemplateException(e, env,
                     "Template importing failed (for parameter value ",
                     new _DelayedJQuote(importedTemplateName),
-                    "):\n", new _DelayedGetMessage(e) });
+                    "):\n", new _DelayedGetMessage(e));
         }
         env.importLib(importedTemplate, namespace);
     }

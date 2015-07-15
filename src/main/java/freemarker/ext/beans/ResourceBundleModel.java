@@ -78,9 +78,9 @@ public class ResourceBundleModel
             return wrap(((ResourceBundle) object).getObject(key));
         } catch (MissingResourceException e) {
             throw new _TemplateModelException(e,
-                    new Object[] { "No ", new _DelayedJQuote(key), " key in the ResourceBundle. "
-                            + "Note that conforming to the ResourceBundle Java API, this is an error and not just "
-                            + "a missing sub-variable (a null)." });
+                    "No ", new _DelayedJQuote(key), " key in the ResourceBundle. "
+                    + "Note that conforming to the ResourceBundle Java API, this is an error and not just "
+                    + "a missing sub-variable (a null).");
         }
     }
 

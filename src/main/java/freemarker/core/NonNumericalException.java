@@ -63,8 +63,7 @@ public class NonNumericalException extends UnexpectedTypeException {
     }
     static NonNumericalException newMalformedNumberException(Expression blamed, String text, Environment env) {
         return new NonNumericalException(
-                new _ErrorDescriptionBuilder(new Object[] {
-                        "Can't convert this string to number: ", new _DelayedJQuote(text) })
+                new _ErrorDescriptionBuilder("Can't convert this string to number: ", new _DelayedJQuote(text))
                 .blame(blamed),
                 env);
     }

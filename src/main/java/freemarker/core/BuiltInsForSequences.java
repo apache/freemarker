@@ -83,8 +83,7 @@ class BuiltInsForSequences {
                     TemplateSequenceModel wrappedTsm, int chunkSize, TemplateModel fillerItem)
                     throws TemplateModelException {
                 if (chunkSize < 1) {
-                    throw new _TemplateModelException(new Object[] {
-                            "The 1st argument to ?', key, ' (...) must be at least 1." });
+                    throw new _TemplateModelException("The 1st argument to ?', key, ' (...) must be at least 1.");
                 }
                 this.wrappedTsm = wrappedTsm;
                 this.chunkSize = chunkSize;
@@ -183,11 +182,11 @@ class BuiltInsForSequences {
                         try {
                             sb.append(EvalUtil.coerceModelToString(item, null, null, env));
                         } catch (TemplateException e) {
-                            throw new _TemplateModelException(e, new Object[] {
+                            throw new _TemplateModelException(e,
                                     "\"?", key, "\" failed at index ", Integer.valueOf(idx), " with this error:\n\n",
                                     MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                                     new _DelayedGetMessageWithoutStackTop(e),
-                                    MessageUtil.EMBEDDED_MESSAGE_END });
+                                    MessageUtil.EMBEDDED_MESSAGE_END);
                         }
                     }
                     idx++;
@@ -515,17 +514,17 @@ class BuiltInsForSequences {
                                     .getAsString();
                         } catch (ClassCastException e) {
                             if (!(item instanceof TemplateScalarModel)) {
-                                throw new _TemplateModelException(new Object[] {
+                                throw new _TemplateModelException(
                                         "The argument to ?", key, "(key), when it's a sequence, must be a "
                                         + "sequence of strings, but the item at index ", Integer.valueOf(i),
-                                        " is not a string."});
+                                        " is not a string.");
                             }
                         }
                     }
                 } else {
-                    throw new _TemplateModelException(new Object[] {
+                    throw new _TemplateModelException(
                             "The argument to ?", key, "(key) must be a string (the name of the subvariable), or a "
-                            + "sequence of strings (the \"path\" to the subvariable)." });
+                            + "sequence of strings (the \"path\" to the subvariable).");
                 }
                 return sort(seq, subvars); 
             }
@@ -613,13 +612,13 @@ class BuiltInsForSequences {
                 valueInMsg  = "key value";
                 valuesInMsg  = "key values";
             }
-            return new _TemplateModelException(new Object[] {
+            return new _TemplateModelException(
                     startErrorMessage(keyNamesLn, index),
                     "All ", valuesInMsg, " in the sequence must be ",
                     firstTypePlural, ", because the first ", valueInMsg,
                     " was that. However, the ", valueInMsg,
                     " of the current item isn't a ", firstType, " but a ",
-                    new _DelayedFTLTypeDescription(key), "."});
+                    new _DelayedFTLTypeDescription(key), ".");
         }
 
         /**
@@ -655,7 +654,7 @@ class BuiltInsForSequences {
                         key = ((TemplateHashModel) key).get(keyNames[keyNameI]);
                     } catch (ClassCastException e) {
                         if (!(key instanceof TemplateHashModel)) {
-                            throw new _TemplateModelException(new Object[] {
+                            throw new _TemplateModelException(
                                     startErrorMessage(keyNamesLn, i),
                                     (keyNameI == 0
                                             ? "Sequence items must be hashes when using ?sort_by. "
@@ -663,15 +662,15 @@ class BuiltInsForSequences {
                                     " subvariable is not a hash, so ?sort_by ",
                                     "can't proceed with getting the ",
                                     new _DelayedJQuote(keyNames[keyNameI]),
-                                    " subvariable." });
+                                    " subvariable.");
                         } else {
                             throw e;
                         }
                     }
                     if (key == null) {
-                        throw new _TemplateModelException(new Object[] {
+                        throw new _TemplateModelException(
                                 startErrorMessage(keyNamesLn, i),
-                                "The " + StringUtil.jQuote(keyNames[keyNameI]), " subvariable was not found." });
+                                "The " + StringUtil.jQuote(keyNames[keyNameI]), " subvariable was not found.");
                     }
                 } // for each key
                 
@@ -692,9 +691,9 @@ class BuiltInsForSequences {
                         keyType = KEY_TYPE_BOOLEAN;
                         keyComparator = new BooleanKVPComparator();
                     } else {
-                        throw new _TemplateModelException(new Object[] {
+                        throw new _TemplateModelException(
                                 startErrorMessage(keyNamesLn, i),
-                                "Values used for sorting must be numbers, strings, date/times or booleans." });
+                                "Values used for sorting must be numbers, strings, date/times or booleans.");
                     }
                 }
                 switch(keyType) {
@@ -761,8 +760,8 @@ class BuiltInsForSequences {
             try {
                 Collections.sort(res, keyComparator);
             } catch (Exception exc) {
-                throw new _TemplateModelException(exc, new Object[] {
-                        startErrorMessage(keyNamesLn), "Unexpected error while sorting:" + exc });
+                throw new _TemplateModelException(exc,
+                        startErrorMessage(keyNamesLn), "Unexpected error while sorting:" + exc);
             }
 
             // Convert the List[KVP] to List[V]:
@@ -822,9 +821,9 @@ class BuiltInsForSequences {
                     true, true, true, // The last one is true to emulate an old bug for BC 
                     env);
         } catch (TemplateException ex) {
-            throw new _TemplateModelException(ex, new Object[] {
+            throw new _TemplateModelException(ex,
                     "This error has occurred when comparing sequence item at 0-based index ", Integer.valueOf(seqItemIndex),
-                    " to the searched item:\n", new _DelayedGetMessage(ex) });
+                    " to the searched item:\n", new _DelayedGetMessage(ex));
         }
     }
  

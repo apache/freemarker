@@ -95,7 +95,7 @@ class JspTagModelBase {
                                 + StringUtil.jQuote(paramName.toString())
                                 + " on instance of " + tagClass.getName());
                     } else {
-                        dynaSetter.invoke(tag, new Object[] {null, paramName, argArray[0]});
+                        dynaSetter.invoke(tag, null, paramName, argArray[0]);
                     }
                 } else {
                     if (arg instanceof BigDecimal) {
@@ -106,18 +106,16 @@ class JspTagModelBase {
                         setterMethod.invoke(tag, argArray);
                     } catch (Exception e) {
                         final Class setterType = setterMethod.getParameterTypes()[0];
-                        final _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(new Object[] {
+                        final _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                                 "Failed to set JSP tag parameter ", new _DelayedJQuote(paramName),
                                 " (declared type: ", new _DelayedShortClassName(setterType)
                                 + ", actual value's type: ",
                                 (argArray[0] != null
                                         ? (Object) new _DelayedShortClassName(argArray[0].getClass()) : "Null"),
-                                "). See cause exception for the more specific cause..."
-                                });
+                                "). See cause exception for the more specific cause...");
                         if (e instanceof IllegalArgumentException && !(setterType.isAssignableFrom(String.class))
                                 && argArray[0] != null && argArray[0] instanceof String) {
-                            desc.tip(new Object[] {
-                                    "This problem is often caused by unnecessary parameter quotation. Paramters "
+                            desc.tip("This problem is often caused by unnecessary parameter quotation. Paramters "
                                     + "aren't quoted in FTL, similarly as they aren't quoted in most languages. "
                                     + "For example, these parameter assignments are wrong: ",
                                     "<@my.tag p1=\"true\" p2=\"10\" p3=\"${someVariable}\" p4=\"${x+1}\" />",
@@ -125,7 +123,7 @@ class JspTagModelBase {
                                     "<@my.tag p1=true p2=10 p3=someVariable p4=x+1 />",
                                     ". Only string literals are quoted (regardless of where they occur): ",
                                     "<@my.box style=\"info\" message=\"Hello ${name}!\" width=200 />",
-                                    "."});
+                                    ".");
                         }
                         throw new _TemplateModelException(e, null, desc);
                     }
@@ -144,8 +142,8 @@ class JspTagModelBase {
         if (e instanceof TemplateExceptionWrapperJspException) {
             return (TemplateModelException) e.getCause();
         }
-        return new _TemplateModelException(e, new Object[] {
-                "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception" });
+        return new _TemplateModelException(e,
+                "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception");
     }
 
     /**
