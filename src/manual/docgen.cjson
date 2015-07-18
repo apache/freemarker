@@ -14,10 +14,19 @@ generateEclipseTOC
 //  link_to: "freemarker-toc.xml#ManualLink"
 // }
 
+removeNodesWhenOnline: [ "preface" ]
+
 copyrightHolder: "The FreeMarker Project"
 copyrightStartYear: 1999
 
-removeNodesWhenOnline: [ "preface" ]
+seoMeta: {
+  "dgui_quickstart": {
+    "title": "Getting Started with template writing"
+  }
+  "pgui_quickstart": {
+    "title": "Getting Started with the Java API"
+  }
+}
 
 logo: {
   href: "http://freemarker.org"
