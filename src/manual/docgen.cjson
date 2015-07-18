@@ -17,6 +17,8 @@ generateEclipseTOC
 copyrightHolder: "The FreeMarker Project"
 copyrightStartYear: 1999
 
+removeNodesWhenOnline: [ "preface" ]
+
 logo: {
   href: "http://freemarker.org"
   src: logo.png,
