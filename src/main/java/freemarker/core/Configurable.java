@@ -527,10 +527,11 @@ public class Configurable {
     }
 
     /**
-     * The getter pair of {@link #setTimeZone(TimeZone)}. 
+     * Returns the assumed locale when searching for template files with no
+     * explicit requested locale. Defaults to system locale.
      */
-    public TimeZone getTimeZone() {
-        return timeZone != null ? timeZone : parent.getTimeZone();
+    public Locale getLocale() {
+        return locale != null ? locale : parent.getLocale();
     }
 
     /**
@@ -550,6 +551,13 @@ public class Configurable {
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
     }
 
+    /**
+     * The getter pair of {@link #setTimeZone(TimeZone)}. 
+     */
+    public TimeZone getTimeZone() {
+        return timeZone != null ? timeZone : parent.getTimeZone();
+    }
+    
     /**
      * Sets the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. It defaults to {@code null} for backward compatibility, but in most
@@ -630,14 +638,6 @@ public class Configurable {
         return sqlDataAndTimeTimeZoneSet
                 ? sqlDataAndTimeTimeZone
                 : (parent != null ? parent.getSQLDateAndTimeTimeZone() : null);
-    }
-
-    /**
-     * Returns the assumed locale when searching for template files with no
-     * explicit requested locale. Defaults to system locale.
-     */
-    public Locale getLocale() {
-        return locale != null ? locale : parent.getLocale();
     }
 
     /**
