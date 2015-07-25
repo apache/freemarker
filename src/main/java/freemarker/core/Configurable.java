@@ -381,7 +381,7 @@ public class Configurable {
         classicCompatible = null;
         templateExceptionHandler = null;
         properties = new Properties(parent.properties);
-        customAttributes = new HashMap();
+        customAttributes = new HashMap(0);
     }
     
     @Override
@@ -515,6 +515,15 @@ public class Configurable {
     }
     
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isClassicCompatibleSet() {
+        return classicCompatible != null;
+    }
+    
+    /**
      * Sets the default locale used for number and date formatting (among others), also the locale used for searching
      * localized template variations when no locale was explicitly requested.
      * 
@@ -534,6 +543,15 @@ public class Configurable {
         return locale != null ? locale : parent.getLocale();
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isLocaleSet() {
+        return locale != null;
+    }
+    
     /**
      * Sets the time zone to use when formatting date/time values.
      * Defaults to the system time zone ({@link TimeZone#getDefault()}), regardless of the "locale" FreeMarker setting,
@@ -556,6 +574,15 @@ public class Configurable {
      */
     public TimeZone getTimeZone() {
         return timeZone != null ? timeZone : parent.getTimeZone();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isTimeZoneSet() {
+        return timeZone != null;
     }
     
     /**
@@ -639,6 +666,15 @@ public class Configurable {
                 ? sqlDataAndTimeTimeZone
                 : (parent != null ? parent.getSQLDateAndTimeTimeZone() : null);
     }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isSQLDateAndTimeTimeZoneSet() {
+        return sqlDataAndTimeTimeZoneSet;
+    }
 
     /**
      * Sets the default number format used to convert numbers to strings. Currently, this is either a
@@ -664,6 +700,15 @@ public class Configurable {
         return numberFormat != null ? numberFormat : parent.getNumberFormat();
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isNumberFormatSet() {
+        return numberFormat != null;
+    }
+            
     /**
      * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
      * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
@@ -707,6 +752,15 @@ public class Configurable {
         return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
     }
     
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isBooleanFormatSet() {
+        return booleanFormat != null;
+    }
+        
     String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
         if (value) {
             String s = getTrueStringValue();
@@ -798,6 +852,15 @@ public class Configurable {
     }
 
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isTimeFormatSet() {
+        return timeFormat != null;
+    }
+    
+    /**
      * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values,
      * also the format that {@code someString?date} will use to parse strings.
      * 
@@ -818,6 +881,15 @@ public class Configurable {
         return dateFormat != null ? dateFormat : parent.getDateFormat();
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isDateFormatSet() {
+        return dateFormat != null;
+    }
+    
     /**
      * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values,
      * also the format that {@code someString?datetime} will use to parse strings.
@@ -908,7 +980,16 @@ public class Configurable {
     public String getDateTimeFormat() {
         return dateTimeFormat != null ? dateTimeFormat : parent.getDateTimeFormat();
     }
-
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isDateTimeFormatSet() {
+        return dateTimeFormat != null;
+    }
+    
     /**
      * Sets the exception handler used to handle exceptions occurring inside templates.
      * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:
@@ -944,6 +1025,15 @@ public class Configurable {
     }
 
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isTemplateExceptionHandlerSet() {
+        return templateExceptionHandler != null;
+    }
+
+    /**
      * Sets the arithmetic engine used to perform arithmetic operations.
      * The default is {@link ArithmeticEngine#BIGDECIMAL_ENGINE}.
      */
@@ -962,6 +1052,15 @@ public class Configurable {
     }
 
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isArithmeticEngineSet() {
+        return arithmeticEngine != null;
+    }
+
+    /**
      * Sets the object wrapper used to wrap objects to {@link TemplateModel}-s.
      * The default is {@link ObjectWrapper#DEFAULT_WRAPPER}.
      */
@@ -977,6 +1076,15 @@ public class Configurable {
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper != null
                 ? objectWrapper : parent.getObjectWrapper();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isObjectWrapperSet() {
+        return objectWrapper != null;
     }
     
     /**
@@ -1003,6 +1111,15 @@ public class Configurable {
                 ? outputEncoding
                 : (parent != null ? parent.getOutputEncoding() : null);
     }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isOutputEncodingSet() {
+        return outputEncodingSet;
+    }
     
     /**
      * Sets the URL escaping charset. If not set ({@code null}), the output encoding
@@ -1026,7 +1143,16 @@ public class Configurable {
                 ? urlEscapingCharset
                 : (parent != null ? parent.getURLEscapingCharset() : null);
     }
-    
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isURLEscapingCharsetSet() {
+        return urlEscapingCharsetSet;
+    }
+
     /**
      * Sets the {@link TemplateClassResolver} that is used when the
      * <code>new</code> built-in is called in a template. That is, when
@@ -1056,6 +1182,15 @@ public class Configurable {
     public TemplateClassResolver getNewBuiltinClassResolver() {
         return newBuiltinClassResolver != null
                 ? newBuiltinClassResolver : parent.getNewBuiltinClassResolver();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isNewBuiltinClassResolverSet() {
+        return newBuiltinClassResolver != null;
     }
     
     /**
@@ -1089,6 +1224,15 @@ public class Configurable {
             ? autoFlush.booleanValue()
             : (parent != null ? parent.getAutoFlush() : true);
     }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isAutoFlushSet() {
+        return autoFlush != null;
+    }
     
     /**
      * Sets if tips should be shown in error messages of errors arising during template processing.
@@ -1111,6 +1255,15 @@ public class Configurable {
             ? showErrorTips.booleanValue()
             : (parent != null ? parent.getShowErrorTips() : true);
     }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isShowErrorTipsSet() {
+        return showErrorTips != null;
+    }
     
     /**
      * Specifies if {@code ?api} can be used in templates. Defaults to {@code false} so that updating FreeMarker won't
@@ -1132,6 +1285,15 @@ public class Configurable {
         return apiBuiltinEnabled != null 
                 ? apiBuiltinEnabled.booleanValue()
                 : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isAPIBuiltinEnabledSet() {
+        return apiBuiltinEnabled != null;
     }
     
     /**
@@ -1159,6 +1321,15 @@ public class Configurable {
         return logTemplateExceptions != null 
                 ? logTemplateExceptions.booleanValue()
                 : (parent != null ? parent.getLogTemplateExceptions() : true);
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isLogTemplateExceptionsSet() {
+        return logTemplateExceptions != null;
     }
     
     private static final String ALLOWED_CLASSES = "allowed_classes";
@@ -1665,6 +1836,10 @@ public class Configurable {
         return tz;
     }
 
+    /**
+     * @deprecated Set this on the {@link ObjectWrapper} itself. 
+     */
+    @Deprecated
     public void setStrictBeanModels(boolean strict) {
 	if (!(objectWrapper instanceof BeansWrapper)) {
 	    throw new IllegalStateException("The value of the " + OBJECT_WRAPPER_KEY +

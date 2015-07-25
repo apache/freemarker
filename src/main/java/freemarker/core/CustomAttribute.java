@@ -144,7 +144,6 @@ public class CustomAttribute {
         return ((Configurable) cfg).getCustomAttribute(key, this);
     }
     
-    
     /**
      * Sets the attribute inside the appropriate scope that's accessible through the specified {@link Environment}. If
      * the attribute has {@link #SCOPE_ENVIRONMENT} scope, it will be set in the given {@link Environment} directly. If

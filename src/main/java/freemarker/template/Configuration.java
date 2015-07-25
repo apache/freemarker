@@ -27,14 +27,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -55,6 +54,7 @@ import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
+import freemarker.core.ParserConfiguration;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
@@ -121,7 +121,7 @@ import freemarker.template.utility.XmlEscape;
  * anymore, so then it's safe to make it accessible (again, via a "safe publication" technique) from multiple threads.
  * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
-public class Configuration extends Configurable implements Cloneable {
+public class Configuration extends Configurable implements Cloneable, ParserConfiguration {
     
     private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
     
@@ -395,8 +395,8 @@ public class Configuration extends Configurable implements Cloneable {
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
-    private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
-    private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
+    private LinkedHashMap<String, String> autoImports = new LinkedHashMap<String, String>(0);
+    private ArrayList<String> autoIncludes = new ArrayList<String>(0);
 
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
@@ -777,9 +777,8 @@ public class Configuration extends Configurable implements Cloneable {
             Configuration copy = (Configuration) super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
             copy.localeToCharsetMap = new ConcurrentHashMap(localeToCharsetMap);
-            copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
-            copy.autoImports = (ArrayList) autoImports.clone();
-            copy.autoIncludes = (ArrayList) autoIncludes.clone();
+            copy.autoImports = (LinkedHashMap<String, String>) autoImports.clone();
+            copy.autoIncludes = (ArrayList<String>) autoIncludes.clone();
             copy.recreateTemplateCacheWith(
                     cache.getTemplateLoader(), cache.getCacheStorage(),
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
@@ -2378,9 +2377,9 @@ public class Configuration extends Configurable implements Cloneable {
     public void addAutoImport(String namespaceVarName, String templateName) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
+            // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
             autoImports.remove(namespaceVarName);
-            autoImports.add(namespaceVarName);
-            autoImportNsToTmpMap.put(namespaceVarName, templateName);
+            autoImports.put(namespaceVarName, templateName);
         }
     }
     
@@ -2392,7 +2391,6 @@ public class Configuration extends Configurable implements Cloneable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             autoImports.remove(namespaceVarName);
-            autoImportNsToTmpMap.remove(namespaceVarName);
         }
     }
     
@@ -2405,13 +2403,18 @@ public class Configuration extends Configurable implements Cloneable {
     public void setAutoImports(Map map) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            autoImports = new ArrayList(map.keySet());
-            if (map instanceof HashMap) {
-                autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
-            } else if (map instanceof SortedMap) {
-                autoImportNsToTmpMap = new TreeMap(map);             
-            } else {
-                autoImportNsToTmpMap = new HashMap(map);
+            for (Map.Entry entry : ((Map<?, ?>) map).entrySet()) {
+                Object key = entry.getKey();
+                if (!(key instanceof String)) {
+                    throw new IllegalArgumentException(
+                            "Key in map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                }
+                Object value = entry.getValue();
+                if (!(value instanceof String)) {
+                    throw new IllegalArgumentException(
+                            "Value in map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                }
+                addAutoImport((String) key, (String) value);
             }
         }
     }
@@ -2419,13 +2422,12 @@ public class Configuration extends Configurable implements Cloneable {
     @Override
     protected void doAutoImportsAndIncludes(Environment env)
     throws TemplateException, IOException {
-        for (int i = 0; i < autoImports.size(); i++) {
-            String namespace = (String) autoImports.get(i);
-            String templateName = (String) autoImportNsToTmpMap.get(namespace);
-            env.importLib(templateName, namespace);
+        for (Map.Entry<String, String> autoImport : autoImports.entrySet()) {
+            // Template name 1st, namespace var 2nd.
+            env.importLib(autoImport.getValue(), autoImport.getKey());
         }
         for (int i = 0; i < autoIncludes.size(); i++) {
-            String templateName = (String) autoIncludes.get(i);
+            String templateName = autoIncludes.get(i);
             Template template = getTemplate(templateName, env.getLocale());
             env.include(template);
         }
@@ -2450,13 +2452,11 @@ public class Configuration extends Configurable implements Cloneable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             autoIncludes.clear();
-            Iterator it = templateNames.iterator();
-            while (it.hasNext()) {
-                Object o = it.next();
-                if (!(o instanceof String)) {
+            for (Object templateName : templateNames) {
+                if (!(templateName instanceof String)) {
                     throw new IllegalArgumentException("List items must be String-s.");
                 }
-                autoIncludes.add(o);
+                autoIncludes.add((String) templateName);
             }
         }
     }
