@@ -264,7 +264,7 @@ public class Configurable {
 
     private Configurable parent;
     private Properties properties;
-    private HashMap customAttributes;
+    private HashMap<Object, Object> customAttributes;
     
     private Locale locale;
     private String numberFormat;
@@ -1978,7 +1978,9 @@ public class Configurable {
     }
 
     /**
-     * Internal entry point for setting unnamed custom attributes
+     * Internal entry point for setting unnamed custom attributes.
+     * 
+     * @see CustomAttribute
      */
     void setCustomAttribute(Object key, Object value) {
         synchronized (customAttributes) {
@@ -1987,7 +1989,9 @@ public class Configurable {
     }
 
     /**
-     * Internal entry point for getting unnamed custom attributes
+     * Internal entry point for getting unnamed custom attributes.
+     * 
+     * @see CustomAttribute
      */
     Object getCustomAttribute(Object key, CustomAttribute attr) {
         synchronized (customAttributes) {
@@ -1998,6 +2002,13 @@ public class Configurable {
             }
             return o;
         }
+    }
+    
+    /**
+     * For internal usage only, returns the custom attributes set directly on this objects as a {@link Map}. 
+     */
+    Map<Object, Object> getCustomAttributes() {
+        return customAttributes;
     }
     
     /**

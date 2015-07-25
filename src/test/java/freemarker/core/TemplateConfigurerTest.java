@@ -108,7 +108,7 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
     }
-
+    
     public static String getIsSetMethodName(String readMethodName) {
         String isSetMethodName = (readMethodName.startsWith("get") ? "is" + readMethodName.substring(3)
                 : readMethodName)
@@ -179,6 +179,11 @@ public class TemplateConfigurerTest {
         // Add extra compiler settings here.
         COMPILER_PROP_NAMES.add("encoding");
     }
+    
+    private static final CustomAttribute CA1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
+    private static final CustomAttribute CA2 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
+    private static final CustomAttribute CA3 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
+    private static final CustomAttribute CA4 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
 
     @Test
     public void testMergeBasicFunctionality() throws Exception {
@@ -203,11 +208,113 @@ public class TemplateConfigurerTest {
     }
     
     @Test
+    public void testMergePriority() throws Exception {
+        TemplateConfigurer tc1 = new TemplateConfigurer();
+        tc1.setDateFormat("1");
+        tc1.setTimeFormat("1");
+        tc1.setDateTimeFormat("1");
+
+        TemplateConfigurer tc2 = new TemplateConfigurer();
+        tc2.setDateFormat("2");
+        tc2.setTimeFormat("2");
+
+        TemplateConfigurer tc3 = new TemplateConfigurer();
+        tc3.setDateFormat("3");
+
+        TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2, tc3);
+
+        assertEquals("3", tcm.getDateFormat());
+        assertEquals("2", tcm.getTimeFormat());
+        assertEquals("1", tcm.getDateTimeFormat());
+    }
+    
+    @Test
+    public void testMergeCustomAttributes() throws Exception {
+        TemplateConfigurer tc1 = new TemplateConfigurer();
+        tc1.setCustomAttribute("k1", "v1");
+        tc1.setCustomAttribute("k2", "v1");
+        tc1.setCustomAttribute("k3", "v1");
+        CA1.set("V1", tc1);
+        CA2.set("V1", tc1);
+        CA3.set("V1", tc1);
+
+        TemplateConfigurer tc2 = new TemplateConfigurer();
+        tc2.setCustomAttribute("k1", "v2");
+        tc2.setCustomAttribute("k2", "v2");
+        CA1.set("V2", tc2);
+        CA2.set("V2", tc2);
+
+        TemplateConfigurer tc3 = new TemplateConfigurer();
+        tc3.setCustomAttribute("k1", "v3");
+        CA1.set("V3", tc2);
+
+        TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2, tc3);
+
+        assertEquals("v3", tcm.getCustomAttribute("k1"));
+        assertEquals("v2", tcm.getCustomAttribute("k2"));
+        assertEquals("v1", tcm.getCustomAttribute("k3"));
+        assertEquals("V3", CA1.get(tcm));
+        assertEquals("V2", CA2.get(tcm));
+        assertEquals("V1", CA3.get(tcm));
+    }
+    
+    @Test
+    public void testMergeNullCustomAttributes() throws Exception {
+        TemplateConfigurer tc1 = new TemplateConfigurer();
+        tc1.setCustomAttribute("k1", "v1");
+        tc1.setCustomAttribute("k2", "v1");
+        tc1.setCustomAttribute(null, "v1");
+        CA1.set("V1", tc1);
+        CA2.set("V1", tc1);
+        CA3.set(null, tc1);
+        
+        assertEquals("v1", tc1.getCustomAttribute("k1"));
+        assertEquals("v1", tc1.getCustomAttribute("k2"));
+        assertNull("v1", tc1.getCustomAttribute("k3"));
+        assertEquals("V1", CA1.get(tc1));
+        assertEquals("V1", CA2.get(tc1));
+        assertNull(CA3.get(tc1));
+
+        TemplateConfigurer tc2 = new TemplateConfigurer();
+        tc2.setCustomAttribute("k1", "v2");
+        tc2.setCustomAttribute("k2", null);
+        CA1.set("V2", tc2);
+        CA2.set(null, tc2);
+
+        TemplateConfigurer tc3 = new TemplateConfigurer();
+        tc3.setCustomAttribute("k1", null);
+        CA1.set(null, tc2);
+
+        TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2, tc3);
+
+        assertNull(tcm.getCustomAttribute("k1"));
+        assertNull(tcm.getCustomAttribute("k2"));
+        assertNull(tcm.getCustomAttribute("k3"));
+        assertNull(CA1.get(tcm));
+        assertNull(CA2.get(tcm));
+        assertNull(CA3.get(tcm));
+        
+        TemplateConfigurer tc4 = new TemplateConfigurer();
+        tc4.setCustomAttribute("k1", "v4");
+        CA1.set("V4", tc4);
+        
+        tcm = TemplateConfigurer.merge(tcm, tc4);
+        
+        assertEquals("v4", tcm.getCustomAttribute("k1"));
+        assertNull(tcm.getCustomAttribute("k2"));
+        assertNull(tcm.getCustomAttribute("k3"));
+        assertEquals("V4", CA1.get(tcm));
+        assertNull(CA2.get(tcm));
+        assertNull(CA3.get(tcm));
+    }
+    
+
+    @Test
     public void testConfigureNonParserConfig() throws Exception {
         for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(false)) {
             TemplateConfigurer tc = new TemplateConfigurer();
             tc.setParentConfiguration(DEFAULT_CFG);
-
+    
             Object newValue = SETTING_ASSIGNMENTS.get(pd.getName());
             pd.getWriteMethod().invoke(tc, newValue);
             
@@ -219,27 +326,45 @@ public class TemplateConfigurerTest {
             assertEquals("For \"" + pd.getName() + "\"", newValue, tReaderMethod.invoke(t));
         }
     }
-
+    
     @Test
-    public void testMergePriority() throws Exception {
-        TemplateConfigurer tc1 = new TemplateConfigurer();
-        tc1.setDateFormat("1");
-        tc1.setTimeFormat("1");
-        tc1.setDateTimeFormat("1");
-
-        TemplateConfigurer tc2 = new TemplateConfigurer();
-        tc1.setDateFormat("2");
-        tc1.setTimeFormat("2");
-
-        TemplateConfigurer tc3 = new TemplateConfigurer();
-        tc1.setDateFormat("3");
-
-        TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2, tc3);
-
-        assertEquals("3", tcm.getDateFormat());
-        assertEquals("2", tcm.getTimeFormat());
-        assertEquals("1", tcm.getDateTimeFormat());
+    public void testConfigureCustomAttributes() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        cfg.setCustomAttribute("k5", "c");
+        cfg.setCustomAttribute("k6", "c");
+        
+        TemplateConfigurer tc = new TemplateConfigurer();
+        tc.setCustomAttribute("k1", "v");
+        tc.setCustomAttribute("k2", "v");
+        tc.setCustomAttribute("k3", null);
+        tc.setCustomAttribute("k6", null);
+        CA1.set("V", tc);
+        CA2.set("V", tc);
+        CA3.set(null, tc);
+        
+        tc.setParentConfiguration(cfg);
+        
+        Template t = new Template(null, "", cfg);
+        t.setCustomAttribute("k2", "t");
+        t.setCustomAttribute("k3", "t");
+        t.setCustomAttribute("k4", "t");
+        CA2.set("T", t);
+        CA4.set("T", t);
+        
+        tc.configure(t);
+        
+        assertEquals("v", t.getCustomAttribute("k1"));
+        assertEquals("v", t.getCustomAttribute("k2"));
+        assertNull(t.getCustomAttribute("k3"));
+        assertEquals("t", t.getCustomAttribute("k4"));
+        assertEquals("c", t.getCustomAttribute("k5"));
+        assertNull(t.getCustomAttribute("k6"));
+        assertEquals("V", CA1.get(t));
+        assertEquals("V", CA2.get(t));
+        assertNull(CA3.get(t));
+        assertEquals("T", CA4.get(t));
     }
+    
 
     @Test
     public void testIsSet() throws Exception {
@@ -303,5 +428,6 @@ public class TemplateConfigurerTest {
             }
         }
     }
-
+    
+    
 }
