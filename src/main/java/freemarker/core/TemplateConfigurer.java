@@ -1,7 +1,5 @@
 package freemarker.core;
 
-import java.util.Map;
-
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.utility.NullArgumentException;
@@ -134,8 +132,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
                 mergedTC.setWhitespaceStripping(tc.getWhitespaceStripping());
             }
             
-            // Custom attributes are merged on the Map-level:
-            mergedTC.getCustomAttributes().putAll(tc.getCustomAttributes());
+            tc.copyDirectCustomAttributes(mergedTC);
         }
         return mergedTC;
     }
@@ -208,16 +205,8 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (isTimeZoneSet()) {
             template.setTimeZone(getTimeZone());
         }
-        
-        // Custom attributes are merged on the Map-level:
-        for (Map.Entry<Object, Object> custAttrEnt : getCustomAttributes().entrySet()) {
-            Object custAttrKey = custAttrEnt.getKey();
-            if (custAttrKey instanceof String) {
-                template.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
-            } else {
-                ((Configurable) template).setCustomAttribute(custAttrKey, custAttrEnt.getValue());
-            }
-        }
+
+        copyDirectCustomAttributes(template);
     }
 
     /**

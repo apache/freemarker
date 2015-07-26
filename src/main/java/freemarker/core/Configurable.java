@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
@@ -2005,10 +2006,24 @@ public class Configurable {
     }
     
     /**
-     * For internal usage only, returns the custom attributes set directly on this objects as a {@link Map}. 
+     * For internal usage only, copies the custom attributes set directly on this objects into another
+     * {@link Configurable}. The target {@link Configurable} is assumed to be not seen be other thread than the current
+     * one yet. (That is, the operation is not synchronized on the target {@link Configurable}, only on the source 
+     * {@link Configurable})
+     * 
+     * @since 2.3.24
      */
-    Map<Object, Object> getCustomAttributes() {
-        return customAttributes;
+    void copyDirectCustomAttributes(Configurable target) {
+        synchronized (customAttributes) {
+            for (Entry<? extends Object, ? extends Object> custAttrEnt : customAttributes.entrySet()) {
+                Object custAttrKey = custAttrEnt.getKey();
+                if (custAttrKey instanceof String) {
+                    target.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
+                } else {
+                    target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
+                }
+            }
+        }
     }
     
     /**
