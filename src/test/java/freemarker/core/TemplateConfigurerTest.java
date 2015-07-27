@@ -106,6 +106,7 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);
         SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
+        SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
     }
     
@@ -201,8 +202,8 @@ public class TemplateConfigurerTest {
                 Object mValue1 = propDesc1.getReadMethod().invoke(tcm);
                 Object mValue2 = propDesc2.getReadMethod().invoke(tcm);
 
-                assertEquals(value1, mValue1);
-                assertEquals(value2, mValue2);
+                assertEquals("For " + propDesc1.getName(), value1, mValue1);
+                assertEquals("For " + propDesc2.getName(), value2, mValue2);
             }
         }
     }

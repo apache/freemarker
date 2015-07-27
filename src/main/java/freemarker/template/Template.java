@@ -42,6 +42,8 @@ import freemarker.core.FMParser;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
 import freemarker.core.ParseException;
+import freemarker.core.ParserConfiguration;
+import freemarker.core.TemplateConfigurer;
 import freemarker.core.TemplateElement;
 import freemarker.core.TextBlock;
 import freemarker.core.TokenMgrError;
@@ -183,9 +185,35 @@ public class Template extends Configurable {
      * 
      * @since 2.3.22
      */
-    @Deprecated
+   @Deprecated
+   public Template(
+           String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
+       this(name, sourceName, reader, cfg, null, encoding);
+   }
+   
+    /**
+     * Same as {@link #Template(String, String, Reader, Configuration, String)}, but also specifies a
+     * {@link TemplateConfigurer}. This is mostly meant to be used by FreeMarker internally, but advanced users might
+     * still find this useful.
+     * 
+     * @param templateConfigurer
+     *            Adjusts the configuration settings compared to that given in the {@link Configuration} parameter. This
+     *            is useful as the {@link Configuration} is normally a singleton shared by all templates, and so it's
+     *            not good for specifying template-specific settings. Surely {@link Template} itself has methods to
+     *            specify settings just for that template, however that doesn't also specifying settings that influence
+     *            the parsing, as you can only start setting them after the parsing. Last not least,
+     *            {@link TemplateConfigurer}-s can be practical to hold the common settings of a group of templates. Can
+     *            be {@code null}.
+     * @param encoding
+     *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
+     *            null}, it overrides the value coming from the {@code TemplateConfigurer#getEncoding()} method of the
+     *            {@code templateConfigurer} parameter.
+     * 
+     * @since 2.3.24
+     */
     public Template(
-            String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
+            String name, String sourceName, Reader reader, Configuration cfg, TemplateConfigurer templateConfigurer,
+            String encoding) throws IOException {
         this(name, sourceName, cfg, true);
         
         this.encoding = encoding;
@@ -198,13 +226,14 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                final Configuration actualCfg = getConfiguration();
+                final ParserConfiguration parserCfg
+                        = templateConfigurer != null ? templateConfigurer : getConfiguration();
                 parser = new FMParser(this, reader,
-                        actualCfg.getStrictSyntaxMode(),
-                        actualCfg.getWhitespaceStripping(),
-                        actualCfg.getTagSyntax(),
-                        actualCfg.getNamingConvention(),
-                        actualCfg.getIncompatibleImprovements().intValue());
+                        parserCfg.getStrictSyntaxMode(),
+                        parserCfg.getWhitespaceStripping(),
+                        parserCfg.getTagSyntax(),
+                        parserCfg.getNamingConvention(),
+                        parserCfg.getIncompatibleImprovements().intValue());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
