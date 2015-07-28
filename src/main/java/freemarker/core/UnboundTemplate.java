@@ -79,10 +79,11 @@ public final class UnboundTemplate {
      * @param cfg
      *            The FreeMarker configuration settings; the resulting {@link UnboundTemplate} will be bound to this.
      * @param parserCfg
-     *            The settings that influence the parsing. In many cases, the caller will just pass in the
-     *            {@code Configuration} here again, as that implements the {@link TemplateConfigurer} interface. In
-     *            other cases, it will pass in a {@link TemplateConfigurer}, which also implements that interface. Can't
-     *            be {@code null}.
+     *            The settings that influence the parsing; can't be {@code null}. In most cases, the caller will just
+     *            pass in the {@code Configuration} here again, as that implements the {@link ParserConfiguration}
+     *            interface. In cases where a template has be parsed differently than the {@code Configuration}-level
+     *            default dictates, it will pass in a {@link TemplateConfigurer}, which also implements the
+     *            {@link ParserConfiguration} interface.
      * @param assumedEncoding
      *            This is the name of the charset that we are supposed to be using. This is only needed to check if the
      *            encoding specified in the {@code #ftl} header (if any) matches this. If this is non-{@code null} and
