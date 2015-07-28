@@ -77,8 +77,12 @@ public final class UnboundTemplate {
      * @param reader
      *            Reads the template source code
      * @param cfg
-     *            The FreeMarker configuration settings; some of them influences parsing, also the resulting
-     *            {@link UnboundTemplate} will be bound to this.
+     *            The FreeMarker configuration settings; the resulting {@link UnboundTemplate} will be bound to this.
+     * @param parserCfg
+     *            The settings that influence the parsing. In many cases, the caller will just pass in the
+     *            {@code Configuration} here again, as that implements the {@link TemplateConfigurer} interface. In
+     *            other cases, it will pass in a {@link TemplateConfigurer}, which also implements that interface. Can't
+     *            be {@code null}.
      * @param assumedEncoding
      *            This is the name of the charset that we are supposed to be using. This is only needed to check if the
      *            encoding specified in the {@code #ftl} header (if any) matches this. If this is non-{@code null} and
@@ -86,12 +90,14 @@ public final class UnboundTemplate {
      * @param sourceName
      *            Shown in error messages as the template "file" location.
      */
-    UnboundTemplate(Reader reader, String sourceName, Configuration cfg, String assumedEncoding)
+    UnboundTemplate(Reader reader, String sourceName, Configuration cfg, ParserConfiguration parserCfg,
+            String assumedEncoding)
             throws IOException {
         NullArgumentException.check(cfg);
+        NullArgumentException.check(parserCfg);
         this.cfg = cfg;
         this.sourceName = sourceName;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(parserCfg.getIncompatibleImprovements());
 
         LineTableBuilder ltbReader;
         try {
@@ -104,11 +110,11 @@ public final class UnboundTemplate {
             try {
                 FMParser parser = new FMParser(this,
                         reader, assumedEncoding,
-                        cfg.getStrictSyntaxMode(),
-                        cfg.getWhitespaceStripping(),
-                        cfg.getTagSyntax(),
-                        cfg.getNamingConvention(),
-                        cfg.getIncompatibleImprovements().intValue());
+                        parserCfg.getStrictSyntaxMode(),
+                        parserCfg.getWhitespaceStripping(),
+                        parserCfg.getTagSyntax(),
+                        parserCfg.getNamingConvention(),
+                        parserCfg.getIncompatibleImprovements().intValue());
                 
                 TemplateElement rootElement;
                 try {

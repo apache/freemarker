@@ -1,7 +1,10 @@
 package freemarker.core;
 
+import java.io.Reader;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.Version;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -13,6 +16,8 @@ import freemarker.template.utility.NullArgumentException;
  * that setting was already set on this object. Otherwise you will get the value from the parent {@link Configuration},
  * which is {@link Configuration#getDefaultConfiguration()} before this object is added to a {@link Configuration}.
  * 
+ * @see Template#Template(String, String, Reader, Configuration, TemplateConfigurer, String)
+ * 
  * @since 2.3.24
  */
 public final class TemplateConfigurer extends Configurable implements ParserConfiguration {
@@ -21,12 +26,13 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Integer tagSyntax;
     private Integer namingConvention;
     private Boolean whitespaceStripping;
+    private Boolean strictSyntaxMode;
     private String encoding;
 
     /**
      * Creates a new instance. The parent will be {@link Configuration#getDefaultConfiguration()} initially, but it will
      * be changed to the real parent {@link Configuration} when this object is added to the {@link Configuration}. (It's
-     * not allowed to add tge same instance to multiple {@link Configuration}-s).
+     * not allowed to add the same instance to multiple {@link Configuration}-s).
      */
     public TemplateConfigurer() {
         super(Configuration.getDefaultConfiguration());
@@ -52,10 +58,11 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
 
     /**
      * Creates a {@link TemplateConfigurer} that contains an union of the setting that were set in the parameter
-     * {@link TemplateConfigurer}-s. If a setting is set in multiple parameter {@link TemplateConfigurer}-s, the one
-     * that occurs later in the parameter list wins. If a setting is not set in any of the {@link TemplateConfigurer}
-     * -s, it will remain unset in the result. The result won't have {@link #setParentConfiguration(Configuration)}
-     * called yet.
+     * {@link TemplateConfigurer}-s. (A setting is said to be set in a {@link TemplateConfigurer} if it was explicitly
+     * set via a setter method, as opposed to be inherited.) If a setting is set in multiple parameter
+     * {@link TemplateConfigurer}-s, the value of the one that occurs later in the parameter list wins. If a setting is
+     * not set in any of the {@link TemplateConfigurer} -s, it will remain unset in the result. The result won't have
+     * {@link #setParentConfiguration(Configuration)} called yet.
      */
     public static TemplateConfigurer merge(TemplateConfigurer... templateConfigurers) {
         TemplateConfigurer mergedTC = new TemplateConfigurer();
@@ -64,12 +71,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
 
             if (tc.isAPIBuiltinEnabledSet()) {
                 mergedTC.setAPIBuiltinEnabled(tc.isAPIBuiltinEnabled());
-            }
-            if (tc.isSQLDateAndTimeTimeZoneSet()) {
-                mergedTC.setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
-            }
-            if (tc.isURLEscapingCharsetSet()) {
-                mergedTC.setURLEscapingCharset(tc.getURLEscapingCharset());
             }
             if (tc.isArithmeticEngineSet()) {
                 mergedTC.setArithmeticEngine(tc.getArithmeticEngine());
@@ -116,6 +117,12 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
             if (tc.isShowErrorTipsSet()) {
                 mergedTC.setShowErrorTips(tc.getShowErrorTips());
             }
+            if (tc.isSQLDateAndTimeTimeZoneSet()) {
+                mergedTC.setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
+            }
+            if (tc.isStrictSyntaxModeSet()) {
+                mergedTC.setStrictSyntaxMode(tc.getStrictSyntaxMode());
+            }
             if (tc.isTagSyntaxSet()) {
                 mergedTC.setTagSyntax(tc.getTagSyntax());
             }
@@ -128,6 +135,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
             if (tc.isTimeZoneSet()) {
                 mergedTC.setTimeZone(tc.getTimeZone());
             }
+            if (tc.isURLEscapingCharsetSet()) {
+                mergedTC.setURLEscapingCharset(tc.getURLEscapingCharset());
+            }
             if (tc.isWhitespaceStrippingSet()) {
                 mergedTC.setWhitespaceStripping(tc.getWhitespaceStripping());
             }
@@ -137,10 +147,16 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         return mergedTC;
     }
 
+    /**
+     * Sets the settings of the {@link Template} which are set in this {@link TemplateConfigurer}, leaves the other
+     * settings as is. A setting is said to be set in a {@link TemplateConfigurer} if it was explicitly set via a setter
+     * method, as opposed to be inherited.
+     *
+     * @throws IllegalStateException
+     *             If the parent configuration wasn't yet set.
+     */
     public void configure(Template template) {
-        if (!parentConfigurationSet) {
-            throw new IllegalStateException("The TemplateConfigurer wasn't associated with a Configuration yet.");
-        }
+        checkParentConfigurationSet();
         Configuration cfg = getParentConfiguration();
         if (template.getConfiguration() != cfg) {
             // This is actually not a problem right now, but for future BC we enforce this.
@@ -150,15 +166,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
 
         if (isAPIBuiltinEnabledSet()) {
             template.setAPIBuiltinEnabled(isAPIBuiltinEnabled());
-        }
-        if (isSQLDateAndTimeTimeZoneSet()) {
-            template.setSQLDateAndTimeTimeZone(getSQLDateAndTimeTimeZone());
-        }
-        if (isURLEscapingCharsetSet()) {
-            template.setURLEscapingCharset(getURLEscapingCharset());
-        }
-        if (isArithmeticEngineSet()) {
-            template.setArithmeticEngine(getArithmeticEngine());
         }
         if (isAutoFlushSet()) {
             template.setAutoFlush(getAutoFlush());
@@ -196,6 +203,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (isShowErrorTipsSet()) {
             template.setShowErrorTips(getShowErrorTips());
         }
+        if (isSQLDateAndTimeTimeZoneSet()) {
+            template.setSQLDateAndTimeTimeZone(getSQLDateAndTimeTimeZone());
+        }
         if (isTemplateExceptionHandlerSet()) {
             template.setTemplateExceptionHandler(getTemplateExceptionHandler());
         }
@@ -204,6 +214,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (isTimeZoneSet()) {
             template.setTimeZone(getTimeZone());
+        }
+        if (isURLEscapingCharsetSet()) {
+            template.setURLEscapingCharset(getURLEscapingCharset());
         }
         
         copyDirectCustomAttributes(template);
@@ -231,14 +244,14 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * See {@link Configuration#setTagSyntax(int)}.
+     * See {@link Configuration#setNamingConvention(int)}.
      */
     public void setNamingConvention(int namingConvention) {
         this.namingConvention = Integer.valueOf(namingConvention);
     }
 
     /**
-     * The getter pair of {@link #setTagSyntax(int)}.
+     * The getter pair of {@link #setNamingConvention(int)}.
      */
     public int getNamingConvention() {
         return namingConvention != null ? namingConvention.intValue() : getParentConfiguration().getNamingConvention();
@@ -252,14 +265,14 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * See {@link Configuration#setTagSyntax(int)}.
+     * See {@link Configuration#setWhitespaceStripping(boolean)}.
      */
     public void setWhitespaceStripping(boolean whitespaceStripping) {
         this.whitespaceStripping = Boolean.valueOf(whitespaceStripping);
     }
 
     /**
-     * The getter pair of {@link #setTagSyntax(int)}.
+     * The getter pair of {@link #getWhitespaceStripping()}.
      */
     public boolean getWhitespaceStripping() {
         return whitespaceStripping != null ? whitespaceStripping.booleanValue()
@@ -271,6 +284,28 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      */
     public boolean isWhitespaceStrippingSet() {
         return whitespaceStripping != null;
+    }
+
+    /**
+     * See {@link Configuration#setStrictSyntaxMode(boolean)}.
+     */
+    public void setStrictSyntaxMode(boolean strictSyntaxMode) {
+        this.strictSyntaxMode = Boolean.valueOf(strictSyntaxMode);
+    }
+
+    /**
+     * The getter pair of {@link #setStrictSyntaxMode(boolean)}.
+     */
+    public boolean getStrictSyntaxMode() {
+        return strictSyntaxMode != null ? strictSyntaxMode.booleanValue()
+                : getParentConfiguration().getStrictSyntaxMode();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     */
+    public boolean isStrictSyntaxModeSet() {
+        return strictSyntaxMode != null;
     }
 
     public Configuration getParentConfiguration() {
@@ -300,6 +335,23 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
 
     public boolean isEncodingSet() {
         return encoding != null;
+    }
+
+    /**
+     * Returns {@link Configuration#getIncompatibleImprovements()} from the parent configuration.
+     * 
+     * @throws IllegalStateException
+     *             If the parent configuration wasn't yet set.
+     */
+    public Version getIncompatibleImprovements() {
+        checkParentConfigurationSet();
+        return getParentConfiguration().getIncompatibleImprovements();
+    }
+
+    private void checkParentConfigurationSet() {
+        if (!parentConfigurationSet) {
+            throw new IllegalStateException("The TemplateConfigurer wasn't associated with a Configuration yet.");
+        }
     }
     
 }

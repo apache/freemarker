@@ -152,8 +152,9 @@ public class _CoreAPI {
         unboundTemplate.addImport(libLoad);
     }
     
-    public static UnboundTemplate newUnboundTemplate(Reader reader, String sourceName, Configuration cfg, String assumedEncoding) throws IOException {
-        return new UnboundTemplate(reader, sourceName, cfg, assumedEncoding);
+    public static UnboundTemplate newUnboundTemplate(Reader reader, String sourceName,
+            Configuration cfg, ParserConfiguration parserCfg, String assumedEncoding) throws IOException {
+        return new UnboundTemplate(reader, sourceName, cfg, parserCfg, assumedEncoding);
     }
     
     public static boolean isBoundCallable(Object obj) {

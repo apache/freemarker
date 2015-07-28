@@ -34,6 +34,7 @@ import freemarker.core.Environment;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
 import freemarker.core.ParseException;
+import freemarker.core.TemplateConfigurer;
 import freemarker.core.TemplateElement;
 import freemarker.core.UnboundTemplate;
 import freemarker.core._CoreAPI;
@@ -175,12 +176,44 @@ public class Template extends Configurable {
     @Deprecated
     public Template(
             String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(_CoreAPI.newUnboundTemplate(
-                reader, sourceName != null ? sourceName : name, toNonNull(cfg), encoding), name, cfg);
+        this(name, sourceName, reader, cfg, null, encoding);
+    }
+
+    /**
+     * Same as {@link #Template(String, String, Reader, Configuration, String)}, but also specifies a
+     * {@link TemplateConfigurer}. This is mostly meant to be used by FreeMarker internally, but advanced users might
+     * still find this useful.
+     * 
+     * @param templateConfigurer
+     *            Adjusts the configuration settings compared to that given in the {@link Configuration} parameter. This
+     *            is useful as the {@link Configuration} is normally a singleton shared by all templates, and so it's
+     *            not good for specifying template-specific settings. Surely {@link Template} itself has methods to
+     *            specify settings just for that template, however that doesn't also specifying settings that influence
+     *            the parsing, as you can only start setting them after the parsing. Last not least,
+     *            {@link TemplateConfigurer}-s can be practical to hold the common settings of a group of templates. Can
+     *            be {@code null}.
+     * @param encoding
+     *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
+     *            null}, it overrides the value coming from the {@code TemplateConfigurer#getEncoding()} method of the
+     *            {@code templateConfigurer} parameter.
+     * 
+     * @since 2.3.24
+     */
+    public Template(
+            String name, String sourceName, Reader reader, Configuration cfg, TemplateConfigurer templateConfigurer,
+            String encoding) throws IOException {
+        this(
+                _CoreAPI.newUnboundTemplate(
+                        reader,
+                        sourceName != null ? sourceName : name,
+                        toNonNull(cfg),
+                        templateConfigurer != null ? templateConfigurer : toNonNull(cfg),
+                        encoding),
+                name, cfg);
         this.encoding = encoding;
         DebuggerService.registerTemplate(this);
     }
-
+    
     /**
      * Equivalent to {@link #Template(String, Reader, Configuration)
      * Template(name, reader, null)}.
