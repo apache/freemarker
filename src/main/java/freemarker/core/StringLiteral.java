@@ -54,6 +54,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getTemplate());
+            parser.setArithmeticEngine(getTemplate().getArithmeticEngine());
             try {
                 dynamicValue = parser.FreeMarkerText();
             } catch (ParseException e) {

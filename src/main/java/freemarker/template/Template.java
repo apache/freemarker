@@ -42,7 +42,6 @@ import freemarker.core.FMParser;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
 import freemarker.core.ParseException;
-import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
 import freemarker.core.TemplateElement;
 import freemarker.core.TextBlock;
@@ -226,14 +225,8 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                final ParserConfiguration parserCfg
-                        = templateConfigurer != null ? templateConfigurer : getConfiguration();
                 parser = new FMParser(this, reader,
-                        parserCfg.getStrictSyntaxMode(),
-                        parserCfg.getWhitespaceStripping(),
-                        parserCfg.getTagSyntax(),
-                        parserCfg.getNamingConvention(),
-                        parserCfg.getIncompatibleImprovements().intValue());
+                        templateConfigurer != null ? templateConfigurer : getConfiguration());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
