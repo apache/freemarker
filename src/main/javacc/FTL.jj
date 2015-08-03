@@ -128,7 +128,7 @@ public class FMParser {
                         strictSyntaxMode, whitespaceStripping,
                         tagSyntax, namingConvention,
                         new Version(incompatibleImprovements),
-                        template.getArithmeticEngine(), null));
+                        template != null ? template.getArithmeticEngine() : null, null));
     }
         
     /**
@@ -136,7 +136,7 @@ public class FMParser {
      * 
      * @since 2.3.24
      */
-    FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
+    public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
         this(reader);
         
         setTemplate(template);
@@ -188,6 +188,8 @@ public class FMParser {
 
     void setTemplate(Template template) {
         this.template = template;
+        if (template != null && arithmeticEngine == null) {            arithmeticEngine = template.getArithmeticEngine();
+        }
     }
 
     Template getTemplate() {
@@ -1757,9 +1759,6 @@ Expression NumberLiteral() :
     )
     {
         String s = t.image;
-        if (arithmeticEngine == null) {
-            throw new RuntimeException("x");        }
-          
         Expression result = new NumberLiteral(arithmeticEngine.toNumber(s));
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
