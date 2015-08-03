@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import freemarker.template.Configuration;
@@ -348,7 +347,6 @@ public class TemplateConfigurerTest {
         assertNull(CA2.get(tcm));
         assertNull(CA3.get(tcm));
     }
-    
 
     @Test
     public void testConfigureNonParserConfig() throws Exception {
@@ -470,7 +468,6 @@ public class TemplateConfigurerTest {
                 "1 2", "11 22");
     }
 
-    @Ignore
     @Test
     public void testInterpret() throws TemplateException, IOException {
         TemplateConfigurer tc = new TemplateConfigurer();
@@ -479,11 +476,24 @@ public class TemplateConfigurerTest {
         assertOutputWithoutAndWithTC(tc,
                 "<#setting locale='en_US'><#assign src = r'${1} <#assign x = 1>${x + x}'><@src?interpret />",
                 "1 2", "11 22");
+        
+        tc.setWhitespaceStripping(false);
+        assertOutputWithoutAndWithTC(tc,
+                "<#if true>\nX</#if><#assign src = r'<#if true>\nY</#if>'><@src?interpret />",
+                "XY", "\nX\nY");
     }
 
     @Test
     public void testEval() throws TemplateException, IOException {
-        // TODO
+        TemplateConfigurer tc = new TemplateConfigurer();
+        tc.setParentConfiguration(DEFAULT_CFG);
+        tc.setArithmeticEngine(new DummyArithmeticEngine());
+        assertOutputWithoutAndWithTC(tc,
+                "<#assign x = 1>${r'1 + x'?eval?c}",
+                "2", "22");
+        assertOutputWithoutAndWithTC(tc,
+                "${r'1?c'?eval}",
+                "1", "11");
     }
     
     private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,

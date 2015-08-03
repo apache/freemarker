@@ -83,6 +83,7 @@ public class Template extends Configurable {
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
+    private final ParserConfiguration parserConfigurationCustomization;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
     private Version templateLanguageVersion;
@@ -91,11 +92,12 @@ public class Template extends Configurable {
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    private Template(String name, String sourceName, Configuration cfg, boolean overloadSelector) {
+    private Template(String name, String sourceName, Configuration cfg, ParserConfiguration parserConfiguration) {
         super(toNonNull(cfg));
         this.name = name;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
+        this.parserConfigurationCustomization = parserConfiguration; 
     }
 
     private static Configuration toNonNull(Configuration cfg) {
@@ -196,7 +198,7 @@ public class Template extends Configurable {
      * {@link TemplateConfigurer}. This is mostly meant to be used by FreeMarker internally, but advanced users might
      * still find this useful.
      * 
-     * @param parserConfiguration
+     * @param parserCfgCustomization
      *            Adjusts the parsing related configuration settings compared to that given in the {@link Configuration}
      *            parameter; can be {@code null}. This is useful as the {@link Configuration} is normally a singleton
      *            shared by all templates, and so it's not good for specifying template-specific settings. (While
@@ -210,9 +212,10 @@ public class Template extends Configurable {
      * @since 2.3.24
      */
     public Template(
-            String name, String sourceName, Reader reader, Configuration cfg, ParserConfiguration parserConfiguration,
+            String name, String sourceName, Reader reader,
+            Configuration cfg, ParserConfiguration parserCfgCustomization,
             String encoding) throws IOException {
-        this(name, sourceName, cfg, true);
+        this(name, sourceName, cfg, parserCfgCustomization);
         
         this.encoding = encoding;
         LineTableBuilder ltbReader;
@@ -225,7 +228,7 @@ public class Template extends Configurable {
             
             try {
                 parser = new FMParser(this, reader,
-                        parserConfiguration != null ? parserConfiguration : getConfiguration());
+                        parserCfgCustomization != null ? parserCfgCustomization : getConfiguration());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -282,7 +285,7 @@ public class Template extends Configurable {
     @Deprecated
     // [2.4] remove this
     Template(String name, TemplateElement root, Configuration cfg) {
-        this(name, null, cfg, true);
+        this(name, null, cfg, (ParserConfiguration) null);
         this.rootElement = root;
         DebuggerService.registerTemplate(this);
     }
@@ -310,7 +313,7 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        Template template = new Template(name, sourceName, config, true);
+        Template template = new Template(name, sourceName, config, (ParserConfiguration) null);
         template.rootElement = new TextBlock(content);
         template.actualTagSyntax = config.getTagSyntax();
         DebuggerService.registerTemplate(template);
@@ -541,6 +544,17 @@ public class Template extends Configurable {
         return (Configuration) getParent();
     }
     
+    /**
+     * The parser setting customizations used for creating this {@link Template}, if any (can be {@code null}).
+     * This is the value passed in as the parameter of
+     * {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}.
+     * 
+     * @since 2.3.24
+     */
+    public ParserConfiguration getParserConfigurationCustomization() {
+        return parserConfigurationCustomization;
+    }
+
     /**
      * Return the template language (FTL) version used by this template.
      * For now (2.3.21) this is the same as {@link Configuration#getIncompatibleImprovements()}, except

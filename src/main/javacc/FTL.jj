@@ -173,6 +173,8 @@ public class FMParser {
         }
 
         this.arithmeticEngine = pCfg.getArithmeticEngine();
+        if (template != null) {            template.setArithmeticEngine(this.arithmeticEngine);
+        }
 
         int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
         token_source.incompatibleImprovements = incompatibleImprovements;
