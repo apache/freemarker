@@ -34,12 +34,49 @@ import freemarker.template.Version;
 @SuppressWarnings("boxing")
 public class TemplateConfigurerTest {
 
+    private final class DummyArithmeticEngine extends ArithmeticEngine {
+
+        @Override
+        public int compareNumbers(Number first, Number second) throws TemplateException {
+            return 0;
+        }
+
+        @Override
+        public Number add(Number first, Number second) throws TemplateException {
+            return 22;
+        }
+
+        @Override
+        public Number subtract(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        @Override
+        public Number multiply(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        @Override
+        public Number divide(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        @Override
+        public Number modulus(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        @Override
+        public Number toNumber(String s) {
+            return 11;
+        }
+    }
+
     private static final Version ICI = Configuration.VERSION_2_3_22;
 
     private static final Configuration DEFAULT_CFG = new Configuration(ICI);
 
     private static final TimeZone NON_DEFAULT_TZ;
-
     static {
         TimeZone defaultTZ = DEFAULT_CFG.getTimeZone();
         TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -53,7 +90,6 @@ public class TemplateConfigurerTest {
     }
 
     private static final Locale NON_DEFAULT_LOCALE;
-
     static {
         Locale defaultLocale = DEFAULT_CFG.getLocale();
         Locale locale = Locale.GERMAN;
@@ -90,13 +126,13 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE_HANDLER);
         SETTING_ASSIGNMENTS.put("timeFormat", "@HH:mm");
         SETTING_ASSIGNMENTS.put("timeZone", NON_DEFAULT_TZ);
+        SETTING_ASSIGNMENTS.put("arithmeticEngine", ArithmeticEngine.CONSERVATIVE_ENGINE);
 
-        // Parser settings:
+        // Parser-only settings:
         SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);
         SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
-        SETTING_ASSIGNMENTS.put("arithmeticEngine", ArithmeticEngine.CONSERVATIVE_ENGINE);
     }
     
     public static String getIsSetMethodName(String readMethodName) {
@@ -117,7 +153,8 @@ public class TemplateConfigurerTest {
         for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
             String name = pd.getName();
             if (pd.getWriteMethod() != null && !IGNORED_PROP_NAMES.contains(name)
-                    && !(!includeCompilerSettings && COMPILER_PROP_NAMES.contains(name))) {
+                    && (includeCompilerSettings
+                            || (CONFIGURABLE_PROP_NAMES.contains(name) || !PARSER_PROP_NAMES.contains(name)))) {
                 if (pd.getReadMethod() == null) {
                     throw new AssertionError("Property has no read method: " + pd);
                 }
@@ -146,9 +183,25 @@ public class TemplateConfigurerTest {
         IGNORED_PROP_NAMES.add("classicCompatible");
     }
 
-    private static final Set<String> COMPILER_PROP_NAMES;
+    private static final Set<String> CONFIGURABLE_PROP_NAMES;
     static {
-        COMPILER_PROP_NAMES = new HashSet();
+        CONFIGURABLE_PROP_NAMES = new HashSet<String>();
+        try {
+            for (PropertyDescriptor propDesc : Introspector.getBeanInfo(Configurable.class).getPropertyDescriptors()) {
+                String propName = propDesc.getName();
+                if (!IGNORED_PROP_NAMES.contains(propName)) {
+                    CONFIGURABLE_PROP_NAMES.add(propName);
+                }
+            }
+        } catch (IntrospectionException e) {
+            throw new IllegalStateException("Failed to init static field", e);
+        }
+    }
+    
+    private static final Set<String> PARSER_PROP_NAMES;
+    static {
+        PARSER_PROP_NAMES = new HashSet<String>();
+        // It's an interface; can't use standard Inrospector
         for (Method m : ParserConfiguration.class.getMethods()) {
             String propertyName;
             if (m.getName().startsWith("get")) {
@@ -162,7 +215,7 @@ public class TemplateConfigurerTest {
                 if (!Character.isUpperCase(propertyName.charAt(1))) {
                     propertyName = Character.toLowerCase(propertyName.charAt(0)) + propertyName.substring(1);
                 }
-                COMPILER_PROP_NAMES.add(propertyName);
+                PARSER_PROP_NAMES.add(propertyName);
             }
         }
     }
@@ -384,44 +437,7 @@ public class TemplateConfigurerTest {
         {
             TemplateConfigurer tc = new TemplateConfigurer();
             tc.setParentConfiguration(DEFAULT_CFG);
-            tc.setArithmeticEngine(new ArithmeticEngine() {
-
-                @Override
-                public int compareNumbers(Number first, Number second) throws TemplateException {
-                    return 0;
-                }
-
-                @Override
-                public Number add(Number first, Number second) throws TemplateException {
-                    return 22;
-                }
-
-                @Override
-                public Number subtract(Number first, Number second) throws TemplateException {
-                    return null;
-                }
-
-                @Override
-                public Number multiply(Number first, Number second) throws TemplateException {
-                    return null;
-                }
-
-                @Override
-                public Number divide(Number first, Number second) throws TemplateException {
-                    return null;
-                }
-
-                @Override
-                public Number modulus(Number first, Number second) throws TemplateException {
-                    return null;
-                }
-
-                @Override
-                public Number toNumber(String s) {
-                    return 11;
-                }
-                
-            });
+            tc.setArithmeticEngine(new DummyArithmeticEngine());
             assertOutputWithoutAndWithTC(tc, "${1} ${1+1}", "1 2", "11 22");
             testedProps.add(Configuration.ARITHMETIC_ENGINE_KEY_CAMEL_CASE);
         }
@@ -441,12 +457,16 @@ public class TemplateConfigurerTest {
             testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
         }
         
-        assertEquals(COMPILER_PROP_NAMES, testedProps);
+        assertEquals(PARSER_PROP_NAMES, testedProps);
     }
     
     @Test
-    public void testArithmeticEngine() {
-        // TODO
+    public void testArithmeticEngine() throws TemplateException, IOException {
+        TemplateConfigurer tc = new TemplateConfigurer();
+        tc.setParentConfiguration(DEFAULT_CFG);
+        tc.setArithmeticEngine(new DummyArithmeticEngine());
+        assertOutputWithoutAndWithTC(tc, "<#setting locale='en_US'>${1} <#assign x = 1>${x + x}",
+                "1 2", "11 22");
     }
     
     private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,

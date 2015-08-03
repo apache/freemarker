@@ -163,6 +163,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (isAPIBuiltinEnabledSet()) {
             template.setAPIBuiltinEnabled(isAPIBuiltinEnabled());
         }
+        if (isArithmeticEngineSet()) {
+            template.setArithmeticEngine(getArithmeticEngine());
+        }
         if (isAutoFlushSet()) {
             template.setAutoFlush(getAutoFlush());
         }
