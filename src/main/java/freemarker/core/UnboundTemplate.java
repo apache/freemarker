@@ -54,6 +54,7 @@ public final class UnboundTemplate {
 
     private final String sourceName;
     private final Configuration cfg;
+    private final ParserConfiguration parserCfg;
     private final Version templateLanguageVersion;
     
     /** Attributes added via {@code <#ftl attributes=...>}. */
@@ -79,11 +80,8 @@ public final class UnboundTemplate {
      * @param cfg
      *            The FreeMarker configuration settings; the resulting {@link UnboundTemplate} will be bound to this.
      * @param parserCfg
-     *            The settings that influence the parsing; can't be {@code null}. In most cases, the caller will just
-     *            pass in the {@code Configuration} here again, as that implements the {@link ParserConfiguration}
-     *            interface. In cases where a template has be parsed differently than the {@code Configuration}-level
-     *            default dictates, it will pass in a {@link TemplateConfigurer}, which also implements the
-     *            {@link ParserConfiguration} interface.
+     *            The settings that directly influence parsing (syntax); not {@code null}. Of the same as the
+     *            {@code cfg} parameter. 
      * @param assumedEncoding
      *            This is the name of the charset that we are supposed to be using. This is only needed to check if the
      *            encoding specified in the {@code #ftl} header (if any) matches this. If this is non-{@code null} and
@@ -97,6 +95,7 @@ public final class UnboundTemplate {
         NullArgumentException.check(cfg);
         NullArgumentException.check(parserCfg);
         this.cfg = cfg;
+        this.parserCfg = parserCfg;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(parserCfg.getIncompatibleImprovements());
 
@@ -162,6 +161,7 @@ public final class UnboundTemplate {
     private UnboundTemplate(String content, String sourceName, Configuration cfg) {
         NullArgumentException.check(cfg);
         this.cfg = cfg;
+        this.parserCfg = null;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
         this.templateSpecifiedEncoding = null;
@@ -232,6 +232,14 @@ public final class UnboundTemplate {
     
     public Configuration getConfiguration() {
         return cfg;
+    }
+    
+    /**
+     * Returns the value passed in as the parameter of
+     * {@link #UnboundTemplate(Reader, String, Configuration, ParserConfiguration, String)}.
+     */
+    public ParserConfiguration getParserConfiguration() {
+        return parserCfg;
     }
 
     /**

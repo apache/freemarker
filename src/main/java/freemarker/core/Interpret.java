@@ -17,6 +17,7 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.Map;
 
@@ -81,8 +82,10 @@ class Interpret extends BuiltIn {
         try {
             interpretedTemplate = new Template(
                     (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
-                    templateSource,
-                    parentTemplate.getConfiguration());
+                    null,
+                    new StringReader(templateSource),
+                    parentTemplate.getConfiguration(), parentTemplate.getCustomParserConfiguration(),
+                    null);
         } catch (IOException e) {
             throw new _MiscTemplateException(this, e, env, new Object[] {
                         "Template parsing with \"?", key, "\" has failed with this error:\n\n",

@@ -60,6 +60,7 @@ class BuiltInsForStringsMisc {
             token_source.namingConvention = namingConvention;
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getUnboundTemplate());
+            parser.setArithmeticEngine(getUnboundTemplate().getParserConfiguration().getArithmeticEngine());
             Expression exp = null;
             try {
                 try {
