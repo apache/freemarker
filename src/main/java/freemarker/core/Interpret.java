@@ -84,7 +84,7 @@ class Interpret extends BuiltIn {
                     (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
                     null,
                     new StringReader(templateSource),
-                    parentTemplate.getConfiguration(), parentTemplate.getParserConfigurationCustomization(),
+                    parentTemplate.getConfiguration(), parentTemplate.getCustomParserConfiguration(),
                     null);
         } catch (IOException e) {
             throw new _MiscTemplateException(this, e, env, new Object[] {

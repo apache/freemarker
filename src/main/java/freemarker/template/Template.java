@@ -83,7 +83,7 @@ public class Template extends Configurable {
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
-    private final ParserConfiguration parserConfigurationCustomization;
+    private final ParserConfiguration customParserConfiguration;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
     private Version templateLanguageVersion;
@@ -92,12 +92,12 @@ public class Template extends Configurable {
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    private Template(String name, String sourceName, Configuration cfg, ParserConfiguration parserConfiguration) {
+    private Template(String name, String sourceName, Configuration cfg, ParserConfiguration customParserConfiguration) {
         super(toNonNull(cfg));
         this.name = name;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
-        this.parserConfigurationCustomization = parserConfiguration; 
+        this.customParserConfiguration = customParserConfiguration; 
     }
 
     private static Configuration toNonNull(Configuration cfg) {
@@ -198,12 +198,14 @@ public class Template extends Configurable {
      * {@link TemplateConfigurer}. This is mostly meant to be used by FreeMarker internally, but advanced users might
      * still find this useful.
      * 
-     * @param parserCfgCustomization
-     *            Adjusts the parsing related configuration settings compared to that given in the {@link Configuration}
-     *            parameter; can be {@code null}. This is useful as the {@link Configuration} is normally a singleton
-     *            shared by all templates, and so it's not good for specifying template-specific settings. (While
+     * @param customParserConfiguration
+     *            Overrides the parsing related configuration settings of the {@link Configuration} parameter; can be
+     *            {@code null}. This is useful as the {@link Configuration} is normally a singleton shared by all
+     *            templates, and so it's not good for specifying template-specific settings. (While
      *            {@link Template} itself has methods to specify settings just for that template, those don't influence
-     *            the parsing, and you only have opportunity to call them after the parsing anyway.)
+     *            the parsing, and you only have opportunity to call them after the parsing anyway.) This objects is
+     *            often a {@link TemplateConfigurer} whose parent is the {@link Configuration} parameter, and then it
+     *            practically just overrides some of the parser settings.
      * @param encoding
      *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
      *            null}, it overrides the value coming from the {@code TemplateConfigurer#getEncoding()} method of the
@@ -213,9 +215,9 @@ public class Template extends Configurable {
      */
     public Template(
             String name, String sourceName, Reader reader,
-            Configuration cfg, ParserConfiguration parserCfgCustomization,
+            Configuration cfg, ParserConfiguration customParserConfiguration,
             String encoding) throws IOException {
-        this(name, sourceName, cfg, parserCfgCustomization);
+        this(name, sourceName, cfg, customParserConfiguration);
         
         this.encoding = encoding;
         LineTableBuilder ltbReader;
@@ -228,7 +230,7 @@ public class Template extends Configurable {
             
             try {
                 parser = new FMParser(this, reader,
-                        parserCfgCustomization != null ? parserCfgCustomization : getConfiguration());
+                        customParserConfiguration != null ? customParserConfiguration : getConfiguration());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -545,14 +547,13 @@ public class Template extends Configurable {
     }
     
     /**
-     * The parser setting customizations used for creating this {@link Template}, if any (can be {@code null}).
-     * This is the value passed in as the parameter of
+     * Returns the value passed in as the parameter of
      * {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}.
      * 
      * @since 2.3.24
      */
-    public ParserConfiguration getParserConfigurationCustomization() {
-        return parserConfigurationCustomization;
+    public ParserConfiguration getCustomParserConfiguration() {
+        return customParserConfiguration;
     }
 
     /**
