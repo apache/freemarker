@@ -53,6 +53,8 @@ public class FMParser {
     private String assumedEncoding, templateSpecifiedEncoding;
 
     private boolean stripWhitespace, stripText;
+    private int incompatibleImprovements;
+    private ArithmeticEngine arithmeticEngine;
 
     /** Keeps track of #list and #foreach nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
@@ -70,7 +72,6 @@ public class FMParser {
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
-    private int incompatibleImprovements;
 
     /**
      * Create an FM expression parser using a string.
@@ -88,21 +89,19 @@ public class FMParser {
 
     FMParser(
             UnboundTemplate unboundTemplate,
-            Reader reader, String assumedEncoding,
-            boolean strictEscapeSyntax, boolean stripWhitespace,
-            int tagSyntax, int namingConvention, int incompatibleImprovements) {
+            Reader reader, String assumedEncoding, ParserConfiguration pCfg) {
         this(reader);
         this.assumedEncoding = assumedEncoding;
-        
+
         setTemplate(unboundTemplate);
-        
+
         token_source.setParser(this);
-        
-        token_source.strictEscapeSyntax = strictEscapeSyntax;
-        
-        this.stripWhitespace = stripWhitespace;
-        
-        switch (tagSyntax) {
+
+        token_source.strictEscapeSyntax = pCfg.getStrictSyntaxMode();
+
+        this.stripWhitespace = pCfg.getWhitespaceStripping();
+
+        switch (pCfg.getTagSyntax()) {
         case Configuration.AUTO_DETECT_TAG_SYNTAX:
             token_source.autodetectTagSyntax = true;
             break;
@@ -115,31 +114,40 @@ public class FMParser {
         default:
             throw new IllegalArgumentException("Illegal argument for tagSyntax");
         }
-        
-        switch (namingConvention) {
+
+        switch (pCfg.getNamingConvention()) {
         case Configuration.AUTO_DETECT_NAMING_CONVENTION:
         case Configuration.CAMEL_CASE_NAMING_CONVENTION:
         case Configuration.LEGACY_NAMING_CONVENTION:
-            token_source.initialNamingConvention = namingConvention;
-            token_source.namingConvention = namingConvention;
+            token_source.initialNamingConvention = pCfg.getNamingConvention();
+            token_source.namingConvention = pCfg.getNamingConvention();
             break;
         default:
             throw new IllegalArgumentException("Illegal argument for namingConvention");
         }
+
+        this.arithmeticEngine = pCfg.getArithmeticEngine();
         
+        int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
     }
 
-    void setTemplate(UnboundTemplate unboundTemplate)
-    {
+    void setTemplate(UnboundTemplate unboundTemplate) {
         this.unboundTemplate = unboundTemplate;
     }
 
-    UnboundTemplate getTemplate()
-    {
+    UnboundTemplate getTemplate() {
         return unboundTemplate;
     }
+
+    void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
+        this.arithmeticEngine = arithmeticEngine;
+    }
+
+    ArithmeticEngine getArithmeticEngine() {
+        return arithmeticEngine;
+    }    
 
     /**
      * Don't use it, unless you are developing FreeMarker itself.
@@ -1705,7 +1713,7 @@ Expression NumberLiteral() :
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(unboundTemplate.getConfiguration().getArithmeticEngine().toNumber(s));
+        Expression result = new NumberLiteral(arithmeticEngine.toNumber(s));
         Token startToken = (op != null) ? op : t;
         result.setLocation(unboundTemplate, startToken, t);
         return result;
@@ -1994,7 +2002,7 @@ StringLiteral StringLiteral(boolean interpolate) :
         result.setLocation(unboundTemplate, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source);
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(this, token_source);
         }
         return result;
     }

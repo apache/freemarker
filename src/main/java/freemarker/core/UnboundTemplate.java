@@ -109,13 +109,7 @@ public final class UnboundTemplate {
             reader = ltbReader;
 
             try {
-                FMParser parser = new FMParser(this,
-                        reader, assumedEncoding,
-                        parserCfg.getStrictSyntaxMode(),
-                        parserCfg.getWhitespaceStripping(),
-                        parserCfg.getTagSyntax(),
-                        parserCfg.getNamingConvention(),
-                        parserCfg.getIncompatibleImprovements().intValue());
+                FMParser parser = new FMParser(this, reader, assumedEncoding, parserCfg);
                 
                 TemplateElement rootElement;
                 try {

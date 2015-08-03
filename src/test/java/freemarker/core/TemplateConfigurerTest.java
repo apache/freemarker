@@ -6,6 +6,9 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import org.junit.Test;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
 
@@ -158,7 +162,6 @@ public class TemplateConfigurerTest {
     }
 
     private static final Set<String> COMPILER_PROP_NAMES;
-
     static {
         COMPILER_PROP_NAMES = new HashSet();
         for (Method m : ParserConfiguration.class.getMethods()) {
@@ -366,6 +369,132 @@ public class TemplateConfigurerTest {
         assertEquals("T", CA4.get(t));
     }
     
+    
+    @Test
+    public void testConfigureParser() throws Exception {
+        Set<String> testedProps = new HashSet<String>();
+        
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+            assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
+            testedProps.add(Configuration.TAG_SYNTAX_KEY_CAMEL_CASE);
+        }
+        
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+            assertOutputWithoutAndWithTC(tc, "<#if true>y<#elseif false>n</#if>", "y", null);
+            testedProps.add(Configuration.NAMING_CONVENTION_KEY_CAMEL_CASE);
+        }
+        
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setWhitespaceStripping(false);
+            assertOutputWithoutAndWithTC(tc, "<#if true>\nx\n</#if>\n", "x\n", "\nx\n\n");
+            testedProps.add(Configuration.WHITESPACE_STRIPPING_KEY_CAMEL_CASE);
+        }
+
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setArithmeticEngine(new ArithmeticEngine() {
+
+                @Override
+                public int compareNumbers(Number first, Number second) throws TemplateException {
+                    return 0;
+                }
+
+                @Override
+                public Number add(Number first, Number second) throws TemplateException {
+                    return 22;
+                }
+
+                @Override
+                public Number subtract(Number first, Number second) throws TemplateException {
+                    return null;
+                }
+
+                @Override
+                public Number multiply(Number first, Number second) throws TemplateException {
+                    return null;
+                }
+
+                @Override
+                public Number divide(Number first, Number second) throws TemplateException {
+                    return null;
+                }
+
+                @Override
+                public Number modulus(Number first, Number second) throws TemplateException {
+                    return null;
+                }
+
+                @Override
+                public Number toNumber(String s) {
+                    return 11;
+                }
+                
+            });
+            assertOutputWithoutAndWithTC(tc, "${1} ${1+1}", "1 2", "11 22");
+            testedProps.add(Configuration.ARITHMETIC_ENGINE_KEY_CAMEL_CASE);
+        }
+        
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setStrictSyntaxMode(false);
+            assertOutputWithoutAndWithTC(tc, "<if true>y</if>", "<if true>y</if>", "y");
+            testedProps.add("strictSyntaxMode");
+        }
+
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
+            assertOutputWithoutAndWithTC(tc, "<#foo>", null, "<#foo>");
+            testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
+        }
+        
+        // Has its own test:
+        testedProps.add("encoding");
+        
+        assertEquals(COMPILER_PROP_NAMES, testedProps);
+    }
+    
+    @Test
+    public void testArithmeticEngine() {
+        // TODO
+    }
+    
+    @Test
+    public void testEncoding() {
+        // TODO
+    }
+
+    private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,
+            String expectedConfiguredOutput) throws TemplateException, IOException {
+        assertOutput(tc, ftl, expectedConfiguredOutput);
+        assertOutput(null, ftl, expectedDefaultOutput);
+    }
+
+    private void assertOutput(TemplateConfigurer tc, String ftl, String expectedConfiguredOutput)
+            throws TemplateException, IOException {
+        StringWriter sw = new StringWriter();
+        try {
+            new Template(null, null, new StringReader(ftl), DEFAULT_CFG, tc, null).process(null, sw);
+            if (expectedConfiguredOutput == null) {
+                fail("Templat parsing should have fail.");
+            }
+        } catch (ParseException e) {
+            assertNull("Not expeced a parsing exception here;", expectedConfiguredOutput);
+        }
+        if (expectedConfiguredOutput != null) {
+            assertEquals(expectedConfiguredOutput, sw.toString());
+        }
+    }
 
     @Test
     public void testIsSet() throws Exception {
