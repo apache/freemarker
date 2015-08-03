@@ -66,30 +66,15 @@ public class TemplateConfigurerTest {
         NON_DEFAULT_LOCALE = locale;
     }
 
-    private static final String NON_DEFAULT_ENCODING;
-
-    static {
-        String defaultEncoding = DEFAULT_CFG.getDefaultEncoding();
-        String encoding = "UTF-16";
-        if (encoding.equals(defaultEncoding)) {
-            encoding = "UTF-8";
-            if (encoding.equals(defaultEncoding)) {
-                throw new AssertionError("Couldn't chose a non-default locale");
-            }
-        }
-        NON_DEFAULT_ENCODING = encoding;
-    }
-
     private static final Map<String, Object> SETTING_ASSIGNMENTS;
 
     static {
         SETTING_ASSIGNMENTS = new HashMap<String, Object>();
 
-        // Non-parser settings:
+        // "Configurable" settings:
         SETTING_ASSIGNMENTS.put("APIBuiltinEnabled", true);
         SETTING_ASSIGNMENTS.put("SQLDateAndTimeTimeZone", NON_DEFAULT_TZ);
         SETTING_ASSIGNMENTS.put("URLEscapingCharset", "utf-16");
-        SETTING_ASSIGNMENTS.put("arithmeticEngine", ArithmeticEngine.CONSERVATIVE_ENGINE);
         SETTING_ASSIGNMENTS.put("autoFlush", false);
         SETTING_ASSIGNMENTS.put("booleanFormat", "J,N");
         SETTING_ASSIGNMENTS.put("classicCompatibleAsInt", 2);
@@ -111,7 +96,7 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
-        SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
+        SETTING_ASSIGNMENTS.put("arithmeticEngine", ArithmeticEngine.CONSERVATIVE_ENGINE);
     }
     
     public static String getIsSetMethodName(String readMethodName) {
@@ -180,8 +165,6 @@ public class TemplateConfigurerTest {
                 COMPILER_PROP_NAMES.add(propertyName);
             }
         }
-        // Add extra compiler settings here.
-        COMPILER_PROP_NAMES.add("encoding");
     }
     
     private static final CustomAttribute CA1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
@@ -458,9 +441,6 @@ public class TemplateConfigurerTest {
             testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
         }
         
-        // Has its own test:
-        testedProps.add("encoding");
-        
         assertEquals(COMPILER_PROP_NAMES, testedProps);
     }
     
@@ -469,11 +449,6 @@ public class TemplateConfigurerTest {
         // TODO
     }
     
-    @Test
-    public void testEncoding() {
-        // TODO
-    }
-
     private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,
             String expectedConfiguredOutput) throws TemplateException, IOException {
         assertOutput(tc, ftl, expectedConfiguredOutput);
@@ -558,6 +533,5 @@ public class TemplateConfigurerTest {
             }
         }
     }
-    
     
 }

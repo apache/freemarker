@@ -27,7 +27,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Integer namingConvention;
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
-    private String encoding;
 
     /**
      * Creates a new instance. The parent will be {@link Configuration#getDefaultConfiguration()} initially, but it will
@@ -89,9 +88,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
             }
             if (tc.isDateTimeFormatSet()) {
                 mergedTC.setDateTimeFormat(tc.getDateTimeFormat());
-            }
-            if (tc.isEncodingSet()) {
-                mergedTC.setEncoding(tc.getEncoding());
             }
             if (tc.isLocaleSet()) {
                 mergedTC.setLocale(tc.getLocale());
@@ -316,25 +312,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     public void setStrictBeanModels(boolean strict) {
         throw new UnsupportedOperationException(
                 "Setting strictBeanModels on " + TemplateConfigurer.class.getSimpleName() + " level isn't supported.");
-    }
-
-    public String getEncoding() {
-        return encoding != null ? encoding : getParentConfiguration().getDefaultEncoding();
-    }
-
-    /**
-     * Specifies the charset used for reading template "file". This is very similar to
-     * {@link Configuration#setDefaultEncoding(String)}, but this setting also overrides the locale-specific encodings
-     * set via {@link Configuration#setEncoding(java.util.Locale, String)}. This setting can only be overridden in the
-     * {@code #ftl} header of the template (like {@code <#ftl encoding="ISO-8859-1">}).
-     */
-    public void setEncoding(String encoding) {
-        NullArgumentException.check("encoding", encoding);
-        this.encoding = encoding;
-    }
-
-    public boolean isEncodingSet() {
-        return encoding != null;
     }
 
     /**
