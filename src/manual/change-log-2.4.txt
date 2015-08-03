@@ -23,6 +23,8 @@ Non-backward compatible (all are unlikely to affect real world applications):
   subclass), which contains the string description of the original exception in its getMessage() value.
 - Removed deprecated *package visible* method:
   Template#Template(String name, TemplateElement root, Configuration cfg)
+- freemarker.core.FMParser API constructors. These were marked as internal and deprecated for a while,
+  and are very unlikely to be used. They could be exploited for tools that try to tokenize String-s as FTL or such.
 
 New features:  
 - There are no separate org.freemarker:freemarker-gae and org.freemarker:freemarker artifacts any more.
