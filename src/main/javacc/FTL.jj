@@ -73,20 +73,6 @@ public class FMParser {
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
 
-    /**
-     * Create an FM expression parser using a string.
-     *
-     * @Deprecated This is an internal API of FreeMarker; can be removed any time.
-     */
-    static public FMParser createExpressionParser(String s) {
-        SimpleCharStream scs = new SimpleCharStream(new StringReader(s), 1, 1, s.length());
-        FMParserTokenManager token_source = new FMParserTokenManager(scs);
-        token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
-        FMParser parser = new FMParser(token_source);
-        token_source.setParser(parser);
-        return parser;
-    }
-
     FMParser(
             UnboundTemplate unboundTemplate,
             Reader reader, String assumedEncoding, ParserConfiguration pCfg) {

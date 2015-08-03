@@ -126,7 +126,7 @@ public final class Version implements Serializable {
     }
 
     /**
-     * Creates an object based on the int value that uses the same kind of encoding as {@link #intValue()}.
+     * Creates an object based on the {@code int} value that uses the same kind of encoding as {@link #intValue()}.
      * 
      * @since 2.3.24
      */
@@ -134,10 +134,8 @@ public final class Version implements Serializable {
         this.intValue = intValue;
         
         this.micro = intValue % 1000;
-        int n = intValue / 1000;
-        this.minor = n % 1000;
-        n = intValue / 1000;
-        this.major = n;
+        this.minor = (intValue / 1000) % 1000;
+        this.major = intValue / 1000000;
         
         this.extraInfo = null;
         this.gaeCompliant = null;
