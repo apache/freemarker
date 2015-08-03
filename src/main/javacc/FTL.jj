@@ -98,11 +98,7 @@ public class FMParser {
      * @Deprecated This is an internal API of FreeMarker; will be removed in 2.4.
      */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
-        this(reader);
-        setTemplate(template);
-        token_source.setParser(this);
-        token_source.strictEscapeSyntax = strictEscapeSyntax;
-        this.stripWhitespace = stripWhitespace;
+        this(template, reader, strictEscapeSyntax, stripWhitespace, Configuration.AUTO_DETECT_TAG_SYNTAX);
     }
 
     /**
@@ -140,8 +136,16 @@ public class FMParser {
      * 
      * @since 2.3.24
      */
-    public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
-        this(template, reader, pCfg.getStrictSyntaxMode(), pCfg.getWhitespaceStripping());
+    FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
+        this(reader);
+        
+        setTemplate(template);
+        
+        token_source.setParser(this);
+        
+        token_source.strictEscapeSyntax = pCfg.getStrictSyntaxMode();
+        
+        this.stripWhitespace = pCfg.getWhitespaceStripping();
 
         switch (pCfg.getTagSyntax()) {
         case Configuration.AUTO_DETECT_TAG_SYNTAX:
