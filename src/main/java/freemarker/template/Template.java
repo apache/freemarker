@@ -42,6 +42,7 @@ import freemarker.core.FMParser;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
 import freemarker.core.ParseException;
+import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
 import freemarker.core.TemplateElement;
 import freemarker.core.TextBlock;
@@ -195,14 +196,12 @@ public class Template extends Configurable {
      * {@link TemplateConfigurer}. This is mostly meant to be used by FreeMarker internally, but advanced users might
      * still find this useful.
      * 
-     * @param templateConfigurer
-     *            Adjusts the configuration settings compared to that given in the {@link Configuration} parameter. This
-     *            is useful as the {@link Configuration} is normally a singleton shared by all templates, and so it's
-     *            not good for specifying template-specific settings. Surely {@link Template} itself has methods to
-     *            specify settings just for that template, however that doesn't also specifying settings that influence
-     *            the parsing, as you can only start setting them after the parsing. Last not least,
-     *            {@link TemplateConfigurer}-s can be practical to hold the common settings of a group of templates. Can
-     *            be {@code null}.
+     * @param parserConfiguration
+     *            Adjusts the parsing related configuration settings compared to that given in the {@link Configuration}
+     *            parameter; can be {@code null}. This is useful as the {@link Configuration} is normally a singleton
+     *            shared by all templates, and so it's not good for specifying template-specific settings. (While
+     *            {@link Template} itself has methods to specify settings just for that template, those don't influence
+     *            the parsing, and you only have opportunity to call them after the parsing anyway.)
      * @param encoding
      *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
      *            null}, it overrides the value coming from the {@code TemplateConfigurer#getEncoding()} method of the
@@ -211,7 +210,7 @@ public class Template extends Configurable {
      * @since 2.3.24
      */
     public Template(
-            String name, String sourceName, Reader reader, Configuration cfg, TemplateConfigurer templateConfigurer,
+            String name, String sourceName, Reader reader, Configuration cfg, ParserConfiguration parserConfiguration,
             String encoding) throws IOException {
         this(name, sourceName, cfg, true);
         
@@ -226,7 +225,7 @@ public class Template extends Configurable {
             
             try {
                 parser = new FMParser(this, reader,
-                        templateConfigurer != null ? templateConfigurer : getConfiguration());
+                        parserConfiguration != null ? parserConfiguration : getConfiguration());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {

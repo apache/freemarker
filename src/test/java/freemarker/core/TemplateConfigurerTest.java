@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import freemarker.template.Configuration;
@@ -468,6 +469,22 @@ public class TemplateConfigurerTest {
         assertOutputWithoutAndWithTC(tc, "<#setting locale='en_US'>${1} <#assign x = 1>${x + x}",
                 "1 2", "11 22");
     }
+
+    @Ignore
+    @Test
+    public void testInterpret() throws TemplateException, IOException {
+        TemplateConfigurer tc = new TemplateConfigurer();
+        tc.setParentConfiguration(DEFAULT_CFG);
+        tc.setArithmeticEngine(new DummyArithmeticEngine());
+        assertOutputWithoutAndWithTC(tc,
+                "<#setting locale='en_US'><#assign src = r'${1} <#assign x = 1>${x + x}'><@src?interpret />",
+                "1 2", "11 22");
+    }
+
+    @Test
+    public void testEval() throws TemplateException, IOException {
+        // TODO
+    }
     
     private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,
             String expectedConfiguredOutput) throws TemplateException, IOException {
@@ -479,7 +496,8 @@ public class TemplateConfigurerTest {
             throws TemplateException, IOException {
         StringWriter sw = new StringWriter();
         try {
-            new Template(null, null, new StringReader(ftl), DEFAULT_CFG, tc, null).process(null, sw);
+            Configuration cfg = tc != null ? tc.getParentConfiguration() : DEFAULT_CFG;
+            new Template(null, null, new StringReader(ftl), cfg, tc, null).process(null, sw);
             if (expectedConfiguredOutput == null) {
                 fail("Templat parsing should have fail.");
             }
