@@ -54,7 +54,7 @@ public final class UnboundTemplate {
 
     private final String sourceName;
     private final Configuration cfg;
-    private final ParserConfiguration parserCfg;
+    private final ParserConfiguration customParserCfg;
     private final Version templateLanguageVersion;
     
     /** Attributes added via {@code <#ftl attributes=...>}. */
@@ -79,9 +79,11 @@ public final class UnboundTemplate {
      *            Reads the template source code
      * @param cfg
      *            The FreeMarker configuration settings; the resulting {@link UnboundTemplate} will be bound to this.
-     * @param parserCfg
-     *            The settings that directly influence parsing (syntax); not {@code null}. Of the same as the
-     *            {@code cfg} parameter. 
+     * @param customParserCfg
+     *            Overrides the parsing related configuration settings of the {@link Configuration} parameter; can be
+     *            {@code null}. See the similar paramter of
+     *            {@link Template#Template(String, String, Reader, Configuration, ParserConfiguration, String)} for more
+     *            details.
      * @param assumedEncoding
      *            This is the name of the charset that we are supposed to be using. This is only needed to check if the
      *            encoding specified in the {@code #ftl} header (if any) matches this. If this is non-{@code null} and
@@ -89,15 +91,15 @@ public final class UnboundTemplate {
      * @param sourceName
      *            Shown in error messages as the template "file" location.
      */
-    UnboundTemplate(Reader reader, String sourceName, Configuration cfg, ParserConfiguration parserCfg,
+    UnboundTemplate(Reader reader, String sourceName, Configuration cfg, ParserConfiguration customParserCfg,
             String assumedEncoding)
             throws IOException {
         NullArgumentException.check(cfg);
-        NullArgumentException.check(parserCfg);
         this.cfg = cfg;
-        this.parserCfg = parserCfg;
+        this.customParserCfg = customParserCfg;
+        ParserConfiguration actualParserCfg = getParserConfiguration();
         this.sourceName = sourceName;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(parserCfg.getIncompatibleImprovements());
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(actualParserCfg.getIncompatibleImprovements());
 
         LineTableBuilder ltbReader;
         try {
@@ -108,7 +110,7 @@ public final class UnboundTemplate {
             reader = ltbReader;
 
             try {
-                FMParser parser = new FMParser(this, reader, assumedEncoding, parserCfg);
+                FMParser parser = new FMParser(this, reader, assumedEncoding, actualParserCfg);
                 
                 TemplateElement rootElement;
                 try {
@@ -161,7 +163,7 @@ public final class UnboundTemplate {
     private UnboundTemplate(String content, String sourceName, Configuration cfg) {
         NullArgumentException.check(cfg);
         this.cfg = cfg;
-        this.parserCfg = null;
+        this.customParserCfg = null;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
         this.templateSpecifiedEncoding = null;
@@ -235,11 +237,18 @@ public final class UnboundTemplate {
     }
     
     /**
-     * Returns the value passed in as the parameter of
+     * Returns the value passed in as the similarly named parameter of
      * {@link #UnboundTemplate(Reader, String, Configuration, ParserConfiguration, String)}.
      */
-    public ParserConfiguration getParserConfiguration() {
-        return parserCfg;
+    public ParserConfiguration getCustomParserConfiguration() {
+        return customParserCfg;
+    }
+
+    /**
+     * Returns the parser configuration that was in effect when creating this template; never {@code null}.
+     */
+    ParserConfiguration getParserConfiguration() {
+        return customParserCfg != null ? customParserCfg : cfg;
     }
 
     /**

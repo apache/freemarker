@@ -208,7 +208,7 @@ public class Template extends Configurable {
                         reader,
                         sourceName != null ? sourceName : name,
                         toNonNull(cfg),
-                        customParserCfg != null ? customParserCfg : toNonNull(cfg),
+                        customParserCfg,
                         encoding),
                 name, cfg);
         this.encoding = encoding;
@@ -479,10 +479,13 @@ public class Template extends Configurable {
     }
     
     /**
-     * See {@link UnboundTemplate#getParserConfiguration()}.
+     * Returns the value passed in as the parameter of
+     * {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}.
+     * 
+     * @since 2.3.24
      */
     public ParserConfiguration getCustomParserConfiguration() {
-        return getUnboundTemplate().getParserConfiguration();
+        return getUnboundTemplate().getCustomParserConfiguration();
     }
 
     /**
