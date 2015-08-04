@@ -40,7 +40,6 @@ import freemarker.template.utility.CollectionUtils;
  */
 public class TemplateException extends Exception {
 
-    private static final int FTL_STACK_TOP_FEW_MAX_LINES = 6;
     private static final String FTL_INSTRUCTION_STACK_TRACE_TITLE
             = "FTL stack trace (\"~\" means nesting-related):";
 
