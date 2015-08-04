@@ -18,8 +18,8 @@ package freemarker.core;
 
 import java.io.StringReader;
 
-import freemarker.template.Configuration;
 import freemarker.template.SimpleNumber;
+import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -51,21 +51,22 @@ class BuiltInsForStringsMisc {
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             SimpleCharStream scs = new SimpleCharStream(
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
+            Template parentTemplate = getTemplate();
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            final Configuration cfg = env.getConfiguration();
-            token_source.incompatibleImprovements = cfg.getIncompatibleImprovements().intValue();
+            ParserConfiguration pCfg = parentTemplate.getEffectiveParserConfiguration();
+            token_source.incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
-            int namingConvention = cfg.getNamingConvention();
+            int namingConvention = pCfg.getNamingConvention();
             token_source.initialNamingConvention = namingConvention;
             token_source.namingConvention = namingConvention;
             FMParser parser = new FMParser(token_source);
-            parser.setTemplate(getTemplate());
+            parser.setTemplate(parentTemplate);
             Expression exp = null;
             try {
                 try {
                     exp = parser.Expression();
                 } catch (TokenMgrError e) {
-                    throw e.toParseException(getTemplate());
+                    throw e.toParseException(parentTemplate);
                 }
             } catch (ParseException e) {
                 throw new _MiscTemplateException(this, env,
