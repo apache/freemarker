@@ -97,7 +97,7 @@ public final class UnboundTemplate {
         NullArgumentException.check(cfg);
         this.cfg = cfg;
         this.customParserCfg = customParserCfg;
-        ParserConfiguration actualParserCfg = getParserConfiguration();
+        ParserConfiguration actualParserCfg = getEffectiveParserConfiguration();
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(actualParserCfg.getIncompatibleImprovements());
 
@@ -246,8 +246,9 @@ public final class UnboundTemplate {
 
     /**
      * Returns the parser configuration that was in effect when creating this template; never {@code null}.
+     * See {@link Template#getEffectiveParserConfiguration()} for details.
      */
-    ParserConfiguration getParserConfiguration() {
+    public ParserConfiguration getEffectiveParserConfiguration() {
         return customParserCfg != null ? customParserCfg : cfg;
     }
 

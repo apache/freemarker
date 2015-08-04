@@ -489,6 +489,18 @@ public class Template extends Configurable {
     }
 
     /**
+     * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
+     * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfigurer}, or something else. It's
+     * never {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    public ParserConfiguration getEffectiveParserConfiguration() {
+        ParserConfiguration customParserCfg = unboundTemplate.getCustomParserConfiguration();
+        return customParserCfg != null ? customParserCfg : getConfiguration();
+    }
+    
+    /**
      * Return the template language (FTL) version used by this template.
      * For now (2.4.0) this is the same as {@link Configuration#getIncompatibleImprovements()}, except
      * that it's normalized to the lowest version where the template language was changed.

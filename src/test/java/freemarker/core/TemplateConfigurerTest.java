@@ -485,15 +485,41 @@ public class TemplateConfigurerTest {
 
     @Test
     public void testEval() throws TemplateException, IOException {
-        TemplateConfigurer tc = new TemplateConfigurer();
-        tc.setParentConfiguration(DEFAULT_CFG);
-        tc.setArithmeticEngine(new DummyArithmeticEngine());
-        assertOutputWithoutAndWithTC(tc,
-                "<#assign x = 1>${r'1 + x'?eval?c}",
-                "2", "22");
-        assertOutputWithoutAndWithTC(tc,
-                "${r'1?c'?eval}",
-                "1", "11");
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setArithmeticEngine(new DummyArithmeticEngine());
+            assertOutputWithoutAndWithTC(tc,
+                    "<#assign x = 1>${r'1 + x'?eval?c}",
+                    "2", "22");
+            assertOutputWithoutAndWithTC(tc,
+                    "${r'1?c'?eval}",
+                    "1", "11");
+        }
+        
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            String outputEncoding = "ISO-8859-2";
+            tc.setOutputEncoding(outputEncoding);
+
+            String legacyNCFtl = "${r'.output_encoding!\"null\"'?eval}";
+            String camelCaseNCFtl = "${r'.outputEncoding!\"null\"'?eval}";
+
+            // Default is re-auto-detecting in ?eval:
+            assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding);
+            assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding);
+            
+            // Force camelCase:
+            tc.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+            assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", null);
+            assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding);
+            
+            // Force legacy:
+            tc.setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+            assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding);
+            assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", null);
+        }
     }
     
     private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,
@@ -507,12 +533,22 @@ public class TemplateConfigurerTest {
         StringWriter sw = new StringWriter();
         try {
             Configuration cfg = tc != null ? tc.getParentConfiguration() : DEFAULT_CFG;
-            new Template(null, null, new StringReader(ftl), cfg, tc, null).process(null, sw);
+            Template t = new Template(null, null, new StringReader(ftl), cfg, tc, null);
+            if (tc != null) {
+                tc.configure(t);
+            }
+            t.process(null, sw);
             if (expectedConfiguredOutput == null) {
-                fail("Templat parsing should have fail.");
+                fail("Template should have fail.");
+            }
+        } catch (TemplateException e) {
+            if (expectedConfiguredOutput != null) {
+                throw e;
             }
         } catch (ParseException e) {
-            assertNull("Not expeced a parsing exception here;", expectedConfiguredOutput);
+            if (expectedConfiguredOutput != null) {
+                throw e;
+            }
         }
         if (expectedConfiguredOutput != null) {
             assertEquals(expectedConfiguredOutput, sw.toString());
