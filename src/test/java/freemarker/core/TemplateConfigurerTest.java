@@ -1,5 +1,6 @@
 package freemarker.core;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.beans.BeanInfo;
@@ -404,7 +405,6 @@ public class TemplateConfigurerTest {
         assertEquals("T", CA4.get(t));
     }
     
-    
     @Test
     public void testConfigureParser() throws Exception {
         Set<String> testedProps = new HashSet<String>();
@@ -457,6 +457,40 @@ public class TemplateConfigurerTest {
         }
         
         assertEquals(PARSER_PROP_NAMES, testedProps);
+    }
+    
+    @Test
+    public void testConfigureParserToLowIcI() throws Exception {
+        Configuration cfgWithTooLowIcI = new Configuration(Configuration.VERSION_2_3_21);
+        for (PropertyDescriptor propDesc : getTemplateConfigurerSettingPropDescs(true)) {
+            TemplateConfigurer tc = new TemplateConfigurer();
+
+            String propName = propDesc.getName();
+            Object value = SETTING_ASSIGNMENTS.get(propName);
+            propDesc.getWriteMethod().invoke(tc, value);
+            
+            boolean shouldFail;
+            if (CONFIGURABLE_PROP_NAMES.contains(propName)) {
+                shouldFail = true;
+            } else if (PARSER_PROP_NAMES.contains(propName)) {
+                shouldFail = false;
+            } else {
+                fail("Uncategorized property: " + propName);
+                return;
+            }
+            
+            try {
+                tc.setParentConfiguration(cfgWithTooLowIcI);
+                if (shouldFail) {
+                    fail("Should fail with property: " + propName);
+                }
+            } catch (IllegalStateException e) {
+                if (!shouldFail) {
+                    throw e;
+                }
+                assertThat(e.getMessage(), containsString("2.3.22"));
+            }
+        }
     }
     
     @Test

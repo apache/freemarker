@@ -2,21 +2,34 @@ package freemarker.core;
 
 import java.io.Reader;
 
+import freemarker.cache.TemplateCache;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used with the standard template loader mechanism to customize the configuration settings of the individual
- * {@link Template}-s, relatively to the setting values coming from the {@link Configuration}.
+ * Used for customizing the configuration settings of the individual {@link Template}-s, relatively to the common
+ * setting values coming from the {@link Configuration}. This was designed with the standard template loading mechanism
+ * of FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}), though can also be
+ * reused for custom template loading and caching solutions.
+ * 
+ * <p>
+ * If you are using this class for your own template loading and caching solution, rather than with the standard one,
+ * you should be aware of the details described in this paragraph. This class implements both {@link Configurable} and
+ * {@link ParserConfiguration}. This means that it can influence both the template parsing phase and the runtime
+ * settings. For both aspects (i.e., {@link Configurable} and {@link ParserConfiguration}) to take effect, you have
+ * first pass this object to the {@link Template} constructor (this is where the {@link ParserConfiguration} interface
+ * is used), and then you have to call {@link #configure(Template)} on the resulting {@link Template} object (this is
+ * where the {@link Configurable} is used).
  * 
  * <p>
  * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
  * that setting was already set on this object. Otherwise you will get the value from the parent {@link Configuration},
- * which is {@link Configuration#getDefaultConfiguration()} before this object is added to a {@link Configuration}.
+ * which is {@link Configuration#getDefaultConfiguration()} before this object is associated to a {@link Configuration}.
  * 
- * @see Template#Template(String, String, Reader, Configuration, TemplateConfigurer, String)
+ * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, String)
  * 
  * @since 2.3.24
  */
@@ -38,21 +51,53 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
+     * Same as {@link #setParentConfiguration(Configuration)}.
+     * 
+     * @throws IllegalArgumentException
+     *             if the argument is {@code null} or not a {@link Configuration}.
+     */
+    @Override
+    void setParent(Configurable cfg) {
+        NullArgumentException.check("cfg", cfg);
+        if (!(cfg instanceof Configuration)) {
+            throw new IllegalArgumentException("The parent of a TemplateConfigurer can only be a Configuration");
+        }
+        
+        if (parentConfigurationSet) {
+            if (getParent() != cfg) {
+                throw new IllegalStateException(
+                        "This TemplateConfigurer is already associated with a different Configuration instance.");
+            }
+            return;
+        }
+        
+        if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22
+                && hasAnyConfigurableSet()) {
+            throw new IllegalStateException(
+                    "This TemplateConfigurer can't be associated to a Configuration that has incompatibleImprovements "
+                    + "less than 2.3.22, because it changes non-parser settings.");
+        }
+        
+        super.setParent(cfg);
+        parentConfigurationSet = true;
+    }
+
+    /**
      * Associates this instance with a {@link Configuration}; usually you don't call this, as it's called internally
      * when this instance is added to a {@link Configuration}. This method can be called only once (except with the same
      * {@link Configuration} parameter again, as that changes nothing anyway).
      * 
      * @throws IllegalStateException
      *             If the parent configuration was already set to a different {@link Configuration} instance.
+     * @throws IllegalArgumentException
+     *             if the argument is {@code null}.
      */
     public void setParentConfiguration(Configuration cfg) {
-        NullArgumentException.check("cfg", cfg);
-        if (parentConfigurationSet && getParent() != cfg) {
-            throw new IllegalStateException(
-                    "This TemplateConfigurer is already associated with a different Configuration instance.");
-        }
         setParent(cfg);
-        parentConfigurationSet = true;
+    }
+    
+    public Configuration getParentConfiguration() {
+        return (Configuration) getParent();
     }
 
     /**
@@ -307,10 +352,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         return strictSyntaxMode != null;
     }
 
-    public Configuration getParentConfiguration() {
-        return (Configuration) getParent();
-    }
-
     @Override
     public void setStrictBeanModels(boolean strict) {
         throw new UnsupportedOperationException(
@@ -318,7 +359,8 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Returns {@link Configuration#getIncompatibleImprovements()} from the parent configuration.
+     * Returns {@link Configuration#getIncompatibleImprovements()} from the parent {@link Configuration}. This mostly
+     * just exist to satisfy the {@link ParserConfiguration} interface.
      * 
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
@@ -332,6 +374,29 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (!parentConfigurationSet) {
             throw new IllegalStateException("The TemplateConfigurer wasn't associated with a Configuration yet.");
         }
+    }
+
+    private boolean hasAnyConfigurableSet() {
+        return
+                isAPIBuiltinEnabledSet()
+                || isArithmeticEngineSet()
+                || isAutoFlushSet()
+                || isBooleanFormatSet()
+                || isClassicCompatibleSet()
+                || isDateFormatSet()
+                || isDateTimeFormatSet()
+                || isLocaleSet()
+                || isLogTemplateExceptionsSet()
+                || isNewBuiltinClassResolverSet()
+                || isNumberFormatSet()
+                || isObjectWrapperSet()
+                || isOutputEncodingSet()
+                || isShowErrorTipsSet()
+                || isSQLDateAndTimeTimeZoneSet()
+                || isTemplateExceptionHandlerSet()
+                || isTimeFormatSet()
+                || isTimeZoneSet()
+                || isURLEscapingCharsetSet();
     }
     
 }
