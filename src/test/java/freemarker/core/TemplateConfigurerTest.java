@@ -31,6 +31,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
+import freemarker.template.utility.NullArgumentException;
 
 @SuppressWarnings("boxing")
 public class TemplateConfigurerTest {
@@ -554,6 +555,47 @@ public class TemplateConfigurerTest {
             assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding);
             assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", null);
         }
+    }
+    
+    @Test
+    public void testSetParentConfiguration() throws IOException {
+        TemplateConfigurer tc = new TemplateConfigurer();
+        
+        Template t = new Template(null, "", DEFAULT_CFG);
+        try {
+            tc.configure(t);
+            fail();
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), containsString("Configuration"));
+        }
+        
+        tc.setParent(DEFAULT_CFG);
+        
+        try {
+            tc.setParentConfiguration(new Configuration());
+            fail();
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), containsString("Configuration"));
+        }
+
+        try {
+            // Same as setParentConfiguration
+            tc.setParent(new Configuration());
+            fail();
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), containsString("Configuration"));
+        }
+        
+        try {
+            tc.setParentConfiguration(null);
+            fail();
+        } catch (NullArgumentException e) {
+            // exected
+        }
+        
+        tc.setParent(DEFAULT_CFG);
+        
+        tc.configure(t);
     }
     
     private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,
