@@ -6,6 +6,7 @@ import freemarker.cache.TemplateCache;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -59,12 +60,27 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      */
     public void setParentConfiguration(Configuration cfg) {
         NullArgumentException.check("cfg", cfg);
-        if (parentConfigurationSet && getParent() != cfg) {
-            throw new IllegalStateException(
-                    "This TemplateConfigurer is already associated with a different Configuration instance.");
+        
+        if (parentConfigurationSet) {
+            if (getParent() != cfg) {
+                throw new IllegalStateException(
+                        "This TemplateConfigurer is already associated with a different Configuration instance.");
+            }
+            return;
         }
+        
+        if (cfg.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22 && hasAnyConfigurableSet()) {
+            throw new IllegalStateException(
+                    "This TemplateConfigurer can't be associated to a Configuration that has incompatibleImprovements "
+                    + "less than 2.3.22, because it changes non-parser settings.");
+        }
+        
         setParent(cfg);
         parentConfigurationSet = true;
+    }
+
+    public Configuration getParentConfiguration() {
+        return (Configuration) getParent();
     }
 
     /**
@@ -319,10 +335,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         return strictSyntaxMode != null;
     }
 
-    public Configuration getParentConfiguration() {
-        return (Configuration) getParent();
-    }
-
     @Override
     public void setStrictBeanModels(boolean strict) {
         throw new UnsupportedOperationException(
@@ -345,6 +357,29 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (!parentConfigurationSet) {
             throw new IllegalStateException("The TemplateConfigurer wasn't associated with a Configuration yet.");
         }
+    }
+
+    private boolean hasAnyConfigurableSet() {
+        return
+                isAPIBuiltinEnabledSet()
+                || isArithmeticEngineSet()
+                || isAutoFlushSet()
+                || isBooleanFormatSet()
+                || isClassicCompatibleSet()
+                || isDateFormatSet()
+                || isDateTimeFormatSet()
+                || isLocaleSet()
+                || isLogTemplateExceptionsSet()
+                || isNewBuiltinClassResolverSet()
+                || isNumberFormatSet()
+                || isObjectWrapperSet()
+                || isOutputEncodingSet()
+                || isShowErrorTipsSet()
+                || isSQLDateAndTimeTimeZoneSet()
+                || isTemplateExceptionHandlerSet()
+                || isTimeFormatSet()
+                || isTimeZoneSet()
+                || isURLEscapingCharsetSet();
     }
     
 }
