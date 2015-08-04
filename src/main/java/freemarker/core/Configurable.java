@@ -420,7 +420,7 @@ public class Configurable {
      * template - the included template becomes the parent configurable during
      * its evaluation.
      */
-    final void setParent(Configurable parent) {
+    void setParent(Configurable parent) {
         this.parent = parent;
     }
     

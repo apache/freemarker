@@ -51,15 +51,17 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Associates this instance with a {@link Configuration}; usually you don't call this, as it's called internally
-     * when this instance is added to a {@link Configuration}. This method can be called only once (except with the same
-     * {@link Configuration} parameter again, as that changes nothing anyway).
+     * Same as {@link #setParentConfiguration(Configuration)}.
      * 
-     * @throws IllegalStateException
-     *             If the parent configuration was already set to a different {@link Configuration} instance.
+     * @throws IllegalArgumentException
+     *             if the argument is {@code null} or not a {@link Configuration}.
      */
-    public void setParentConfiguration(Configuration cfg) {
+    @Override
+    void setParent(Configurable cfg) {
         NullArgumentException.check("cfg", cfg);
+        if (!(cfg instanceof Configuration)) {
+            throw new IllegalArgumentException("The parent of a TemplateConfigurer can only be a Configuration");
+        }
         
         if (parentConfigurationSet) {
             if (getParent() != cfg) {
@@ -69,16 +71,31 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
             return;
         }
         
-        if (cfg.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22 && hasAnyConfigurableSet()) {
+        if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22
+                && hasAnyConfigurableSet()) {
             throw new IllegalStateException(
                     "This TemplateConfigurer can't be associated to a Configuration that has incompatibleImprovements "
                     + "less than 2.3.22, because it changes non-parser settings.");
         }
         
-        setParent(cfg);
+        super.setParent(cfg);
         parentConfigurationSet = true;
     }
 
+    /**
+     * Associates this instance with a {@link Configuration}; usually you don't call this, as it's called internally
+     * when this instance is added to a {@link Configuration}. This method can be called only once (except with the same
+     * {@link Configuration} parameter again, as that changes nothing anyway).
+     * 
+     * @throws IllegalStateException
+     *             If the parent configuration was already set to a different {@link Configuration} instance.
+     * @throws IllegalArgumentException
+     *             if the argument is {@code null}.
+     */
+    public void setParentConfiguration(Configuration cfg) {
+        setParent(cfg);
+    }
+    
     public Configuration getParentConfiguration() {
         return (Configuration) getParent();
     }
