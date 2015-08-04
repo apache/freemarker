@@ -2,21 +2,33 @@ package freemarker.core;
 
 import java.io.Reader;
 
+import freemarker.cache.TemplateCache;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used with the standard template loader mechanism to customize the configuration settings of the individual
- * {@link Template}-s, relatively to the setting values coming from the {@link Configuration}.
+ * Used for customizing the configuration settings of the individual {@link Template}-s, relatively to the common
+ * setting values coming from the {@link Configuration}. This was designed with the standard template loading mechanism
+ * of FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}), though can also be
+ * reused for custom template loading and caching solutions.
+ * 
+ * <p>
+ * If you are using this class for your own template loading and caching solution, rather than with the standard one,
+ * you should be aware of the details described in this paragraph. This class implements both {@link Configurable} and
+ * {@link ParserConfiguration}. This means that it can influence both the template parsing phase and the runtime
+ * settings. For both aspects (i.e., {@link Configurable} and {@link ParserConfiguration}) to take effect, you have
+ * first pass this object to the {@link Template} constructor (this is where the {@link ParserConfiguration} interface
+ * is used), and then you have to call {@link #configure(Template)} on the resulting {@link Template} object (this is
+ * where the {@link Configurable} is used).
  * 
  * <p>
  * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
  * that setting was already set on this object. Otherwise you will get the value from the parent {@link Configuration},
- * which is {@link Configuration#getDefaultConfiguration()} before this object is added to a {@link Configuration}.
+ * which is {@link Configuration#getDefaultConfiguration()} before this object is associated to a {@link Configuration}.
  * 
- * @see Template#Template(String, String, Reader, Configuration, TemplateConfigurer, String)
+ * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, String)
  * 
  * @since 2.3.24
  */
@@ -318,7 +330,8 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Returns {@link Configuration#getIncompatibleImprovements()} from the parent configuration.
+     * Returns {@link Configuration#getIncompatibleImprovements()} from the parent {@link Configuration}. This mostly
+     * just exist to satisfy the {@link ParserConfiguration} interface.
      * 
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
