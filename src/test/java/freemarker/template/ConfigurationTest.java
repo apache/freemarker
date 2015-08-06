@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.junit.Test;
@@ -1057,7 +1056,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         for (boolean camelCase : new boolean[] { false, true }) {
             List<String> names = new ArrayList<String>(cfg.getSettingNames(camelCase)); 
-            List<String> cfgableNames = new ArrayList<String>(cfg.getSettingNames(camelCase));
+            List<String> cfgableNames = new ArrayList<String>(new Template(null, "", cfg).getSettingNames(camelCase));
             assertStartsWith(names, cfgableNames);
             
             String prevName = null;
