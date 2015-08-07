@@ -35,6 +35,15 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 
+import freemarker.cache.AndMatcher;
+import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.NotMatcher;
+import freemarker.cache.OrMatcher;
+import freemarker.cache.PathGlobMatcher;
+import freemarker.cache.PathRegexMatcher;
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -1627,7 +1636,9 @@ public class Configurable {
      *      set. After that, the public <tt>build()</tt> method of the instance will be called, whose return value
      *      will be the value of the whole expression. (The builder class and the <tt>build()</tt> method is simply
      *      found by name, there's no special interface to implement.) Note that if you use the backward compatible
-     *      syntax, where these's no parenthesis after the class name, then it will not look for builder class.
+     *      syntax, where these's no parenthesis after the class name, then it will not look for builder class. Note
+     *      that if you have a builder class, you don't actually need a <tt><i>className</i></tt> class (since 2.3.24);
+     *      after all, <tt><i>className</i>Builder.build()</tt> can return any kind of object. 
      *   </li>
      *   <li>
      *      <p>Currently, the values of arguments and properties can only be one of these:
@@ -1646,6 +1657,17 @@ public class Configurable {
      *     the {@code INSTANCE} field and the builder class is not searched, so the instance will be always
      *     created with its parameterless constructor. (This behavior will possibly change in 2.4.) The {@code ()}
      *     can't be omitted for nested expressions.
+     *   </li>
+     *   <li>
+     *     <p>The following classes can be referred to with short class name instead of full qualified name:
+     *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
+     *     {@link TemplateConfigurer}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
+     *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurerFactory},
+     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory}.
+     *   </li>
+     *   <li>
+     *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
+     *     constructor (since 2.3.24).
      *   </li>
      *   <li>
      *     <p>The classes and methods that the expression meant to access must be all public.

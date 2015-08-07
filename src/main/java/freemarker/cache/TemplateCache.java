@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
+import freemarker.core.TemplateConfigurer;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
@@ -73,6 +74,7 @@ public class TemplateCache {
     private final CacheStorage storage;
     private final TemplateLookupStrategy templateLookupStrategy;
     private final TemplateNameFormat templateNameFormat;
+    private final TemplateConfigurerFactory templateConfigurers;
     
     private final boolean isStorageConcurrent;
     /** {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} */
@@ -136,20 +138,39 @@ public class TemplateCache {
     }
     
     /**
+     * Same as
+     * {@link TemplateCache#TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat,
+     * TemplateConfigurerFactory, Configuration)} with {@code null} for {@code templateConfigurer}-s.
+     * 
+     * @since 2.3.22
+     */
+    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage,
+            TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
+            Configuration config) {
+        this(templateLoader, cacheStorage, templateLookupStrategy, templateNameFormat, null, config);
+    }
+
+    /**
      * @param templateLoader
      *            The {@link TemplateLoader} to use. Can't be {@code null}.
      * @param cacheStorage
      *            The {@link CacheStorage} to use. Can't be {@code null}.
      * @param templateLookupStrategy
      *            The {@link TemplateLookupStrategy} to use. Can't be {@code null}.
+     * @param templateNameFormat
+     *            The {@link TemplateNameFormat} to use. Can't be {@code null}.
+     * @param templateConfigurers
+     *            The {@link TemplateConfigurerFactory} to use. Can be {@code null} (then all templates will use the
+     *            settings coming from the {@link Configuration} as is).
      * @param config
      *            The {@link Configuration} this cache will be used for. Can be {@code null} for backward compatibility,
      *            as it can be set with {@link #setConfiguration(Configuration)} later.
      * 
-     * @since 2.3.22
+     * @since 2.3.24
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage,
             TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
+            TemplateConfigurerFactory templateConfigurers,
             Configuration config) {
         this.templateLoader = templateLoader;
         
@@ -163,10 +184,13 @@ public class TemplateCache {
 
         NullArgumentException.check("templateNameFormat", templateNameFormat);
         this.templateNameFormat = templateNameFormat;
+
+        // Can be null
+        this.templateConfigurers = templateConfigurers;
         
         this.config = config;
     }
-
+    
     /**
      * Sets the configuration object to which this cache belongs. This
      * method is called by the configuration itself to establish the
@@ -200,6 +224,13 @@ public class TemplateCache {
      */
     public TemplateNameFormat getTemplateNameFormat() {
         return templateNameFormat;
+    }
+    
+    /**
+     * @since 2.3.24
+     */
+    public TemplateConfigurerFactory getTemplateConfigurers() {
+        return templateConfigurers;
     }
 
     /**
@@ -436,24 +467,35 @@ public class TemplateCache {
         }
     }
     
-    private void throwLoadFailedException(Exception e) throws IOException {
+    /**
+     * Creates an {@link IOException} that has a cause exception.
+     */
+    // [Java 6] Remove
+    private IOException newIOException(String message, Throwable cause) {
+        if (cause == null) {
+            return new IOException(message);
+        }
+        
         IOException ioe;
         if (INIT_CAUSE != null) {
-            ioe = new IOException("There was an error loading the " +
-                "template on an earlier attempt; it's attached as a cause");
+            ioe = new IOException(message + " See cause excetion.");
             try {
-                INIT_CAUSE.invoke(ioe, new Object[] { e });
+                INIT_CAUSE.invoke(ioe, cause);
             } catch (RuntimeException ex) {
                 throw ex;
             } catch (Exception ex) {
                 throw new UndeclaredThrowableException(ex);
             }
         } else {
-            ioe = new IOException("There was an error loading the " +
-            "template on an earlier attempt: " + e.getClass().getName() + 
-            ": " + e.getMessage());
+            ioe = new IOException(message + "\nCaused by: " + cause.getClass().getName() + 
+            ": " + cause.getMessage());
         }
-        throw ioe;
+        return ioe;
+    }
+    
+    private void throwLoadFailedException(Throwable e) throws IOException {
+        throw newIOException("There was an error loading the " +
+                "template on an earlier attempt.", e);
     }
 
     private void storeNegativeLookup(TemplateKey tk, 
@@ -481,10 +523,20 @@ public class TemplateCache {
         Template template;
         {
             if (parseAsFTL) {
+                final TemplateConfigurer tc;
+                try {
+                    tc = templateConfigurers != null ? templateConfigurers.get(sourceName, source) : null;
+                } catch (TemplateConfigurerFactoryException e) {
+                    throw newIOException("Error while getting TemplateConfigurer; see cause exception.", e);
+                }
+                if (tc != null) {
+                    tc.setParentConfiguration(config);
+                }
+                
                 try {
                     final Reader reader = templateLoader.getReader(source, initialEncoding);
                     try {
-                        template = new Template(name, sourceName, reader, config, initialEncoding);
+                        template = new Template(name, sourceName, reader, config, tc, initialEncoding);
                     } finally {
                         reader.close();
                     }
@@ -497,10 +549,14 @@ public class TemplateCache {
                     
                     final Reader reader = templateLoader.getReader(source, actualEncoding);
                     try {
-                        template = new Template(name, sourceName, reader, config, actualEncoding);
+                        template = new Template(name, sourceName, reader, config, tc, actualEncoding);
                     } finally {
                         reader.close();
                     }
+                }
+                
+                if (tc != null) {
+                    tc.configure(template);
                 }
             } else {
                 // Read the contents into a StringWriter, then construct a single-text-block template from it.

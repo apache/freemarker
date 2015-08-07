@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.junit.Test;
@@ -50,6 +49,7 @@ import freemarker.core.Configurable;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
 import freemarker.core.Environment;
+import freemarker.core.ParseException;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.StringModel;
@@ -788,6 +788,62 @@ public class ConfigurationTest extends TestCase {
         assertEquals(0, cache.getSize());
     }
     
+    public void testSetTemplateConfigurers() throws TemplateException, TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
+        assertNull(cfg.getTemplateConfigurers());
+
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("t.de.ftlh", "");
+        tl.putTemplate("t.fr.ftlx", "");
+        tl.putTemplate("t.ftlx", "");
+        tl.putTemplate("stat/t.de.ftlx", "");
+        cfg.setTemplateLoader(tl);
+        
+        cfg.setTimeZone(TimeZone.getTimeZone("GMT+09"));
+        
+        cfg.setSetting(Configuration.TEMPLATE_CONFIGURERS_KEY,
+                "MergingTemplateConfigurerFactory("
+                    + "FirstMatchTemplateConfigurerFactory("
+                        + "ConditionalTemplateConfigurerFactory("
+                            + "FileNameGlobMatcher('*.de.*'), TemplateConfigurer(timeZone=TimeZone('GMT+01'))), "
+                        + "ConditionalTemplateConfigurerFactory("
+                            + "FileNameGlobMatcher('*.fr.*'), TemplateConfigurer(timeZone=TimeZone('GMT'))), "
+                        + "allowNoMatch=true"
+                    + "), "
+                    + "FirstMatchTemplateConfigurerFactory("
+                        + "ConditionalTemplateConfigurerFactory("
+                            + "FileNameGlobMatcher('*.ftlh'), TemplateConfigurer(booleanFormat='TODO,HTML')), "
+                        + "ConditionalTemplateConfigurerFactory("
+                            + "FileNameGlobMatcher('*.ftlx'), TemplateConfigurer(booleanFormat='TODO,XML')), "
+                        + "noMatchErrorDetails='Unrecognized template file extension'"
+                    + "), "
+                    + "ConditionalTemplateConfigurerFactory("
+                        + "PathGlobMatcher('stat/**'), TemplateConfigurer(timeZone=TimeZone('UTC'))"
+                    + ")"
+                + ")");
+        
+        {
+            Template t = cfg.getTemplate("t.de.ftlh");
+            assertEquals("TODO,HTML", t.getBooleanFormat());
+            assertEquals(TimeZone.getTimeZone("GMT+01"), t.getTimeZone());
+        }
+        {
+            Template t = cfg.getTemplate("t.fr.ftlx");
+            assertEquals("TODO,XML", t.getBooleanFormat());
+            assertEquals(TimeZone.getTimeZone("GMT"), t.getTimeZone());
+        }
+        {
+            Template t = cfg.getTemplate("t.ftlx");
+            assertEquals("TODO,XML", t.getBooleanFormat());
+            assertEquals(TimeZone.getTimeZone("GMT+09"), t.getTimeZone());
+        }
+        {
+            Template t = cfg.getTemplate("stat/t.de.ftlx");
+            assertEquals("TODO,XML", t.getBooleanFormat());
+            assertEquals(DateUtil.UTC, t.getTimeZone());
+        }
+    }
+    
     public void testSetTimeZone() throws TemplateException {
         TimeZone origSysDefTZ = TimeZone.getDefault();
         try {
@@ -1057,7 +1113,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         for (boolean camelCase : new boolean[] { false, true }) {
             List<String> names = new ArrayList<String>(cfg.getSettingNames(camelCase)); 
-            List<String> cfgableNames = new ArrayList<String>(cfg.getSettingNames(camelCase));
+            List<String> cfgableNames = new ArrayList<String>(new Template(null, "", cfg).getSettingNames(camelCase));
             assertStartsWith(names, cfgableNames);
             
             String prevName = null;

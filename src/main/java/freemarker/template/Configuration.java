@@ -45,6 +45,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateCache.MaybeMissingTemplate;
+import freemarker.cache.TemplateConfigurerFactory;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupStrategy;
@@ -217,6 +218,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE = "templateNameFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TEMPLATE_NAME_FORMAT_KEY = TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+    public static final String TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE = "template_configurers";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+    public static final String TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE = "templateConfigurers";
+    /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.24 */
+    public static final String TEMPLATE_CONFIGURERS_KEY = TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE = "incompatible_improvements";
@@ -243,6 +251,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
+        TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE,
         TEMPLATE_LOADER_KEY_SNAKE_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE,
         TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE,
@@ -261,6 +270,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
+        TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE,
         TEMPLATE_LOADER_KEY_CAMEL_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE,
         TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE,
@@ -668,16 +678,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 getDefaultCacheStorage(),
                 getDefaultTemplateLookupStrategy(),
                 getDefaultTemplateNameFormat(),
+                null,
                 this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(5000);
     }
     
     private void recreateTemplateCacheWith(
-            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy,
-            TemplateNameFormat templateNameFormat) {
+            TemplateLoader loader, CacheStorage storage,
+            TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
+            TemplateConfigurerFactory templateConfigurers) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage, templateLookupStrategy, templateNameFormat, this);
+        cache = new TemplateCache(
+                loader, storage, templateLookupStrategy, templateNameFormat, templateConfigurers, this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
@@ -784,7 +797,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             copy.autoIncludes = (ArrayList<String>) autoIncludes.clone();
             copy.recreateTemplateCacheWith(
                     cache.getTemplateLoader(), cache.getCacheStorage(),
-                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                    cache.getTemplateConfigurers());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException("Cloning failed", e);
@@ -973,7 +987,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         synchronized (this) {
             if (cache.getTemplateLoader() != templateLoader) {
                 recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(),
-                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                        cache.getTemplateConfigurers());
             }
             templateLoaderExplicitlySet = true;
         }
@@ -1021,7 +1036,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
         if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                    templateLookupStrategy, cache.getTemplateNameFormat());
+                    templateLookupStrategy, cache.getTemplateNameFormat(),
+                    cache.getTemplateConfigurers());
         }
         templateLookupStrategyExplicitlySet = true;
     }
@@ -1069,7 +1085,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void setTemplateNameFormat(TemplateNameFormat templateNameFormat) {
         if (cache.getTemplateNameFormat() != templateNameFormat) {
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                    cache.getTemplateLookupStrategy(), templateNameFormat);
+                    cache.getTemplateLookupStrategy(), templateNameFormat,
+                    cache.getTemplateConfigurers());
         }
         templateNameFormatExplicitlySet = true;
     }
@@ -1106,6 +1123,30 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         return cache.getTemplateNameFormat();
     }
+    
+    /**
+     * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
+     * from those coming from the common {@link Configuration}.
+     * 
+     * @since 2.3.24
+     */
+    public void setTemplateConfigurers(TemplateConfigurerFactory templateConfigurers) {
+        if (cache.getTemplateConfigurers() != templateConfigurers) {
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                    templateConfigurers);
+        }
+    }
+    
+    /**
+     * The getter pair of {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
+     */
+    public TemplateConfigurerFactory getTemplateConfigurers() {
+        if (cache == null) {
+            return null;
+        }
+        return cache.getTemplateConfigurers();
+    }
 
     /**
      * Sets the {@link CacheStorage} used for caching {@link Template}-s;
@@ -1124,7 +1165,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         synchronized (this) {
             if (getCacheStorage() != cacheStorage) {
                 recreateTemplateCacheWith(cache.getTemplateLoader(), cacheStorage,
-                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                        cache.getTemplateConfigurers());
             }
             cacheStorageExplicitlySet = true;
         }
@@ -2323,6 +2365,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
+            } else if (TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE.equals(name)
+                    || TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE.equals(name)) {
+                setTemplateConfigurers((TemplateConfigurerFactory) _ObjectBuilderSettingEvaluator.eval(
+                        value, TemplateConfigurerFactory.class, _SettingEvaluationEnvironment.getCurrent()));
             } else {
                 unknown = true;
             }
