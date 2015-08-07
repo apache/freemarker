@@ -11,7 +11,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.23</productname>
+    <productname>Freemarker 2.3.24</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -23666,6 +23666,36 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Configurable.getSettingNames(camelCase)</literal>,
               which returns the set of valid setting names. This can be useful
               for auto-completion and such.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixes and improvements in the <quote>object
+              builder</quote> syntax used for configuring FreeMarker from
+              <literal>Properties</literal> or other sting-only
+              sources:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>For nested builder expressions, the top-level result
+                  class restriction were applied accidentally. </para>
+                </listitem>
+
+                <listitem>
+                  <para>When resolving an expression like
+                  <literal>com.example.Foo()</literal>, if there's a builder
+                  class (<literal>com.example.FooBuilder</literal>), the
+                  non-builder class (<literal>com.example.Foo</literal>) need
+                  not exist anymore. After all,
+                  <literal>FooBuilder.build()</literal> instantiates from any
+                  class it wants to anyway. </para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>TimeZone</literal> objects can be created
+                  like <literal>TimeZone("UTC")</literal>, despite that
+                  there's no a such constructor.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
