@@ -16,7 +16,6 @@
 package freemarker.core;
 
 import java.io.Reader;
-import java.util.List;
 
 import freemarker.cache.TemplateCache;
 import freemarker.template.Configuration;
@@ -56,6 +55,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Integer namingConvention;
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
+    private String encoding;
 
     /**
      * Creates a new instance. The parent will be {@link Configuration#getDefaultConfiguration()} initially, but it will
@@ -116,6 +116,11 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         return (Configuration) getParent();
     }
     
+    /**
+     * Set all settings in this {@link TemplateConfigurer} that that were set in the parameter
+     * {@link TemplateConfigurer}, possibly overwriting the earlier value in this object. (A setting is said to be set
+     * in a {@link TemplateConfigurer} if it was explicitly set via a setter method, as opposed to be inherited.)
+     */
     public void merge(TemplateConfigurer tc) {
         if (tc.isAPIBuiltinEnabledSet()) {
             setAPIBuiltinEnabled(tc.isAPIBuiltinEnabled());
@@ -137,6 +142,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (tc.isDateTimeFormatSet()) {
             setDateTimeFormat(tc.getDateTimeFormat());
+        }
+        if (tc.isEncodingSet()) {
+            setEncoding(tc.getEncoding());
         }
         if (tc.isLocaleSet()) {
             setLocale(tc.getLocale());
@@ -191,93 +199,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Creates a {@link TemplateConfigurer} that contains an union of the setting that were set in the parameter
-     * {@link TemplateConfigurer}-s. (A setting is said to be set in a {@link TemplateConfigurer} if it was explicitly
-     * set via a setter method, as opposed to be inherited.) If a setting is set in multiple parameter
-     * {@link TemplateConfigurer}-s, the value of the one that occurs later in the parameter list wins. If a setting is
-     * not set in any of the {@link TemplateConfigurer} -s, it will remain unset in the result. The result won't have
-     * {@link #setParentConfiguration(Configuration)} called yet.
-     */
-    public static TemplateConfigurer merge(List<TemplateConfigurer> templateConfigurers) {
-        TemplateConfigurer mergedTC = new TemplateConfigurer();
-        
-        for (TemplateConfigurer tc : templateConfigurers) {
-            if (tc.isAPIBuiltinEnabledSet()) {
-                mergedTC.setAPIBuiltinEnabled(tc.isAPIBuiltinEnabled());
-            }
-            if (tc.isArithmeticEngineSet()) {
-                mergedTC.setArithmeticEngine(tc.getArithmeticEngine());
-            }
-            if (tc.isAutoFlushSet()) {
-                mergedTC.setAutoFlush(tc.getAutoFlush());
-            }
-            if (tc.isBooleanFormatSet()) {
-                mergedTC.setBooleanFormat(tc.getBooleanFormat());
-            }
-            if (tc.isClassicCompatibleSet()) {
-                mergedTC.setClassicCompatibleAsInt(tc.getClassicCompatibleAsInt());
-            }
-            if (tc.isDateFormatSet()) {
-                mergedTC.setDateFormat(tc.getDateFormat());
-            }
-            if (tc.isDateTimeFormatSet()) {
-                mergedTC.setDateTimeFormat(tc.getDateTimeFormat());
-            }
-            if (tc.isLocaleSet()) {
-                mergedTC.setLocale(tc.getLocale());
-            }
-            if (tc.isLogTemplateExceptionsSet()) {
-                mergedTC.setLogTemplateExceptions(tc.getLogTemplateExceptions());
-            }
-            if (tc.isNamingConventionSet()) {
-                mergedTC.setNamingConvention(tc.getNamingConvention());
-            }
-            if (tc.isNewBuiltinClassResolverSet()) {
-                mergedTC.setNewBuiltinClassResolver(tc.getNewBuiltinClassResolver());
-            }
-            if (tc.isNumberFormatSet()) {
-                mergedTC.setNumberFormat(tc.getNumberFormat());
-            }
-            if (tc.isObjectWrapperSet()) {
-                mergedTC.setObjectWrapper(tc.getObjectWrapper());
-            }
-            if (tc.isOutputEncodingSet()) {
-                mergedTC.setOutputEncoding(tc.getOutputEncoding());
-            }
-            if (tc.isShowErrorTipsSet()) {
-                mergedTC.setShowErrorTips(tc.getShowErrorTips());
-            }
-            if (tc.isSQLDateAndTimeTimeZoneSet()) {
-                mergedTC.setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
-            }
-            if (tc.isStrictSyntaxModeSet()) {
-                mergedTC.setStrictSyntaxMode(tc.getStrictSyntaxMode());
-            }
-            if (tc.isTagSyntaxSet()) {
-                mergedTC.setTagSyntax(tc.getTagSyntax());
-            }
-            if (tc.isTemplateExceptionHandlerSet()) {
-                mergedTC.setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
-            }
-            if (tc.isTimeFormatSet()) {
-                mergedTC.setTimeFormat(tc.getTimeFormat());
-            }
-            if (tc.isTimeZoneSet()) {
-                mergedTC.setTimeZone(tc.getTimeZone());
-            }
-            if (tc.isURLEscapingCharsetSet()) {
-                mergedTC.setURLEscapingCharset(tc.getURLEscapingCharset());
-            }
-            if (tc.isWhitespaceStrippingSet()) {
-                mergedTC.setWhitespaceStripping(tc.getWhitespaceStripping());
-            }
-            
-            tc.copyDirectCustomAttributes(mergedTC);
-        }
-        return mergedTC;
-    }
-
-    /**
      * Sets the settings of the {@link Template} which are set in this {@link TemplateConfigurer}, leaves the other
      * settings as is. A setting is said to be set in a {@link TemplateConfigurer} if it was explicitly set via a setter
      * method, as opposed to be inherited.
@@ -314,6 +235,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (isDateTimeFormatSet()) {
             template.setDateTimeFormat(getDateTimeFormat());
+        }
+        if (isEncodingSet()) {
+            template.setEncoding(getEncoding());
         }
         if (isLocaleSet()) {
             template.setLocale(getLocale());
@@ -447,6 +371,25 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
                 "Setting strictBeanModels on " + TemplateConfigurer.class.getSimpleName() + " level isn't supported.");
     }
 
+    public String getEncoding() {
+        return encoding != null ? encoding : getParentConfiguration().getDefaultEncoding();
+    }
+
+    /**
+     * Specifies the charset used for reading template "file". This is very similar to
+     * {@link Configuration#setDefaultEncoding(String)}, but this setting also overrides the locale-specific encodings
+     * set via {@link Configuration#setEncoding(java.util.Locale, String)}. This setting can only be overridden in the
+     * {@code #ftl} header of the template (like {@code <#ftl encoding="ISO-8859-1">}).
+     */
+    public void setEncoding(String encoding) {
+        NullArgumentException.check("encoding", encoding);
+        this.encoding = encoding;
+    }
+
+    public boolean isEncodingSet() {
+        return encoding != null;
+    }
+    
     /**
      * Returns {@link Configuration#getIncompatibleImprovements()} from the parent {@link Configuration}. This mostly
      * just exist to satisfy the {@link ParserConfiguration} interface.

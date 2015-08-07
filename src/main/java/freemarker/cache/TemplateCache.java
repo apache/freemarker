@@ -518,22 +518,30 @@ public class TemplateCache {
 
     private Template loadTemplate(
             final TemplateLoader templateLoader, final Object source,
-            final String name, final String sourceName, final Locale locale, final Object customLookupCondition,
-            final String initialEncoding, final boolean parseAsFTL) throws IOException {
+            final String name, final String sourceName, Locale locale, final Object customLookupCondition,
+            String initialEncoding, final boolean parseAsFTL) throws IOException {
         Template template;
         String actualEncoding;
         {
-            if (parseAsFTL) {
-                final TemplateConfigurer tc;
-                try {
-                    tc = templateConfigurers != null ? templateConfigurers.get(sourceName, source) : null;
-                } catch (TemplateConfigurerFactoryException e) {
-                    throw newIOException("Error while getting TemplateConfigurer; see cause exception.", e);
-                }
-                if (tc != null) {
-                    tc.setParentConfiguration(config);
-                }
+            final TemplateConfigurer tc;
+            try {
+                tc = templateConfigurers != null ? templateConfigurers.get(sourceName, source) : null;
+            } catch (TemplateConfigurerFactoryException e) {
+                throw newIOException("Error while getting TemplateConfigurer; see cause exception.", e);
+            }
+            if (tc != null) {
+                tc.setParentConfiguration(config);
                 
+                // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
+                if (tc.isEncodingSet()) {
+                    initialEncoding = tc.getEncoding();
+                }
+                if (tc.isLocaleSet()) {
+                    locale = tc.getLocale();
+                }
+            }
+            
+            if (parseAsFTL) {
                 try {
                     final Reader reader = templateLoader.getReader(source, initialEncoding);
                     try {
