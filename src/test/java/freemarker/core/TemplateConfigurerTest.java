@@ -40,6 +40,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 import freemarker.template.Configuration;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
@@ -254,7 +256,7 @@ public class TemplateConfigurerTest {
                 Object value2 = SETTING_ASSIGNMENTS.get(propDesc2.getName());
                 propDesc2.getWriteMethod().invoke(tc2, value2);
 
-                TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2);
+                TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2));
                 Object mValue1 = propDesc1.getReadMethod().invoke(tcm);
                 Object mValue2 = propDesc2.getReadMethod().invoke(tcm);
 
@@ -278,7 +280,7 @@ public class TemplateConfigurerTest {
         TemplateConfigurer tc3 = new TemplateConfigurer();
         tc3.setDateFormat("3");
 
-        TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2, tc3);
+        TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2, tc3));
 
         assertEquals("3", tcm.getDateFormat());
         assertEquals("2", tcm.getTimeFormat());
@@ -305,7 +307,7 @@ public class TemplateConfigurerTest {
         tc3.setCustomAttribute("k1", "v3");
         CA1.set("V3", tc2);
 
-        TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2, tc3);
+        TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2, tc3));
 
         assertEquals("v3", tcm.getCustomAttribute("k1"));
         assertEquals("v2", tcm.getCustomAttribute("k2"));
@@ -342,7 +344,7 @@ public class TemplateConfigurerTest {
         tc3.setCustomAttribute("k1", null);
         CA1.set(null, tc2);
 
-        TemplateConfigurer tcm = TemplateConfigurer.merge(tc1, tc2, tc3);
+        TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2, tc3));
 
         assertNull(tcm.getCustomAttribute("k1"));
         assertNull(tcm.getCustomAttribute("k2"));
@@ -355,7 +357,7 @@ public class TemplateConfigurerTest {
         tc4.setCustomAttribute("k1", "v4");
         CA1.set("V4", tc4);
         
-        tcm = TemplateConfigurer.merge(tcm, tc4);
+        tcm = TemplateConfigurer.merge(ImmutableList.of(tcm, tc4));
         
         assertEquals("v4", tcm.getCustomAttribute("k1"));
         assertNull(tcm.getCustomAttribute("k2"));

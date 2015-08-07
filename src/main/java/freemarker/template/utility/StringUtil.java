@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import freemarker.core.BugException;
 import freemarker.core.Environment;
@@ -1983,6 +1984,104 @@ public class StringUtil {
             }
         }
         return true;
+    }
+    
+    /**
+     * Creates a regular expression from a glob. The glob must use {@code /} for as file separator, not {@code \}
+     * (backslash), and is always case sensitive.
+     *
+     * <p>This glob implementation recognizes these special characters:
+     * <ul>
+     *   <li>{@code ?}: Wildcard that matches exactly one character, other than {@code /} 
+     *   <li>{@code *}: Wildcard that matches zero, one or multiple characters, other than {@code /}
+     *   <li>{@code **}: Wildcard that matches zero, one or multiple directories. For example, {@code **}{@code /head.ftl}
+     *       matches {@code foo/bar/head.ftl}, {@code foo/head.ftl} and {@code head.ftl} too. {@code **} must be either
+     *       preceded by {@code /} or be at the beginning of the glob. {@code **} must be either followed by {@code /} or be
+     *       at the end of the glob. When {@code **} is at the end of the glob, it also matches file names, like
+     *       {@code a/**} matches {@code a/b/c.ftl}. If the glob only consist of a {@code **}, it will be a match for
+     *       everything.
+     *   <li>{@code \} (backslash): Makes the next character non-special (a literal). For example {@code How\?.ftl} will
+     *       match {@code How?.ftl}, but not {@code HowX.ftl}. Naturally, two backslashes produce one literal backslash. 
+     *   <li>{@code [}: Reserved for future purposes; can't be used
+     *   <li><code>{</code>: Reserved for future purposes; can't be used
+     * </ul>
+     */
+    public static Pattern globToRegularExpression(String glob) {
+        StringBuilder regex = new StringBuilder();
+        
+        int nextStart = 0;
+        boolean escaped = false;
+        int ln = glob.length();
+        for (int idx = 0; idx < ln; idx++) {
+            char c = glob.charAt(idx);
+            if (!escaped) {
+                if (c == '?') {
+                    appendLiteralGlobSection(regex, glob, nextStart, idx);
+                    regex.append("[^/]");
+                    nextStart = idx + 1;
+                } else if (c == '*') {
+                    appendLiteralGlobSection(regex, glob, nextStart, idx);
+                    if (idx + 1 < ln && glob.charAt(idx + 1) == '*') {
+                        if (!(idx == 0 || glob.charAt(idx - 1) == '/')) {
+                            throw new IllegalArgumentException(
+                                    "The \"**\" wildcard must be directly after a \"/\" or it must be at the "
+                                    + "beginning, in this glob: " + glob);
+                        }
+                        
+                        if (idx + 2 == ln) { // trailing "**"
+                            regex.append(".*");
+                            idx++;
+                        } else { // "**/"
+                            if (!(idx + 2 < ln && glob.charAt(idx + 2) == '/')) {
+                                throw new IllegalArgumentException(
+                                        "The \"**\" wildcard must be followed by \"/\", or must be at tehe end, "
+                                        + "in this glob: " + glob);
+                            }
+                            regex.append("(.*?/)*");
+                            idx += 2;  // "*/".length()
+                        }
+                    } else {
+                        regex.append("[^/]*");
+                    }
+                    nextStart = idx + 1;
+                } else if (c == '\\') {
+                    escaped = true;
+                } else if (c == '[' || c == '{') {
+                    throw new IllegalArgumentException(
+                            "The \"" + c + "\" glob operator is currently unsupported, "
+                            + "in this glob: " + glob);
+                }
+            } else {
+                escaped = false;
+            }
+        }
+        appendLiteralGlobSection(regex, glob, nextStart, glob.length());
+        
+        return Pattern.compile(regex.toString());
+    }
+
+    private static void appendLiteralGlobSection(StringBuilder regex, String glob, int start, int end) {
+        if (start == end) return;
+        String part = unescapeLiteralGlobSection(glob.substring(start, end));
+        regex.append(Pattern.quote(part));
+    }
+
+    private static String unescapeLiteralGlobSection(String s) {
+        int backslashIdx = s.indexOf('\\');
+        if (backslashIdx == -1) {
+            return s;
+        }
+        int ln = s.length();
+        StringBuilder sb = new StringBuilder(ln - 1);
+        int nextStart = 0; 
+        do {
+            sb.append(s, nextStart, backslashIdx);
+            nextStart = backslashIdx + 1;
+        } while ((backslashIdx = s.indexOf('\\', nextStart + 1)) != -1);
+        if (nextStart < ln) {
+            sb.append(s, nextStart, ln);
+        }
+        return sb.toString();
     }
     
 }

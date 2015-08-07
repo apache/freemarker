@@ -16,6 +16,7 @@
 package freemarker.core;
 
 import java.io.Reader;
+import java.util.List;
 
 import freemarker.cache.TemplateCache;
 import freemarker.template.Configuration;
@@ -114,6 +115,80 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     public Configuration getParentConfiguration() {
         return (Configuration) getParent();
     }
+    
+    public void merge(TemplateConfigurer tc) {
+        if (tc.isAPIBuiltinEnabledSet()) {
+            setAPIBuiltinEnabled(tc.isAPIBuiltinEnabled());
+        }
+        if (tc.isArithmeticEngineSet()) {
+            setArithmeticEngine(tc.getArithmeticEngine());
+        }
+        if (tc.isAutoFlushSet()) {
+            setAutoFlush(tc.getAutoFlush());
+        }
+        if (tc.isBooleanFormatSet()) {
+            setBooleanFormat(tc.getBooleanFormat());
+        }
+        if (tc.isClassicCompatibleSet()) {
+            setClassicCompatibleAsInt(tc.getClassicCompatibleAsInt());
+        }
+        if (tc.isDateFormatSet()) {
+            setDateFormat(tc.getDateFormat());
+        }
+        if (tc.isDateTimeFormatSet()) {
+            setDateTimeFormat(tc.getDateTimeFormat());
+        }
+        if (tc.isLocaleSet()) {
+            setLocale(tc.getLocale());
+        }
+        if (tc.isLogTemplateExceptionsSet()) {
+            setLogTemplateExceptions(tc.getLogTemplateExceptions());
+        }
+        if (tc.isNamingConventionSet()) {
+            setNamingConvention(tc.getNamingConvention());
+        }
+        if (tc.isNewBuiltinClassResolverSet()) {
+            setNewBuiltinClassResolver(tc.getNewBuiltinClassResolver());
+        }
+        if (tc.isNumberFormatSet()) {
+            setNumberFormat(tc.getNumberFormat());
+        }
+        if (tc.isObjectWrapperSet()) {
+            setObjectWrapper(tc.getObjectWrapper());
+        }
+        if (tc.isOutputEncodingSet()) {
+            setOutputEncoding(tc.getOutputEncoding());
+        }
+        if (tc.isShowErrorTipsSet()) {
+            setShowErrorTips(tc.getShowErrorTips());
+        }
+        if (tc.isSQLDateAndTimeTimeZoneSet()) {
+            setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
+        }
+        if (tc.isStrictSyntaxModeSet()) {
+            setStrictSyntaxMode(tc.getStrictSyntaxMode());
+        }
+        if (tc.isTagSyntaxSet()) {
+            setTagSyntax(tc.getTagSyntax());
+        }
+        if (tc.isTemplateExceptionHandlerSet()) {
+            setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
+        }
+        if (tc.isTimeFormatSet()) {
+            setTimeFormat(tc.getTimeFormat());
+        }
+        if (tc.isTimeZoneSet()) {
+            setTimeZone(tc.getTimeZone());
+        }
+        if (tc.isURLEscapingCharsetSet()) {
+            setURLEscapingCharset(tc.getURLEscapingCharset());
+        }
+        if (tc.isWhitespaceStrippingSet()) {
+            setWhitespaceStripping(tc.getWhitespaceStripping());
+        }
+        
+        tc.copyDirectCustomAttributes(this);
+    }
 
     /**
      * Creates a {@link TemplateConfigurer} that contains an union of the setting that were set in the parameter
@@ -123,11 +198,10 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * not set in any of the {@link TemplateConfigurer} -s, it will remain unset in the result. The result won't have
      * {@link #setParentConfiguration(Configuration)} called yet.
      */
-    public static TemplateConfigurer merge(TemplateConfigurer... templateConfigurers) {
+    public static TemplateConfigurer merge(List<TemplateConfigurer> templateConfigurers) {
         TemplateConfigurer mergedTC = new TemplateConfigurer();
-        for (int i = 0; i < templateConfigurers.length; i++) {
-            TemplateConfigurer tc = templateConfigurers[i];
-
+        
+        for (TemplateConfigurer tc : templateConfigurers) {
             if (tc.isAPIBuiltinEnabledSet()) {
                 mergedTC.setAPIBuiltinEnabled(tc.isAPIBuiltinEnabled());
             }

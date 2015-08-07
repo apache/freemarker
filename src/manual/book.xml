@@ -23651,6 +23651,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Added new configuration setting:
+              <literal>templateConfigurers</literal>. This allows altering the
+              shared <literal>Configuration</literal> for individual templates
+              based on template name patterns. [TODO describe this
+              more]</para>
+            </listitem>
+
+            <listitem>
               <para><emphasis role="strong">Attention!</emphasis> Raised
               minimum required Java version from 1.4 to 1.5 (aka. Java
               5)</para>

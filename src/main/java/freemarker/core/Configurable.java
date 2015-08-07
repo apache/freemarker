@@ -36,6 +36,15 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 
+import freemarker.cache.AndMatcher;
+import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.NotMatcher;
+import freemarker.cache.OrMatcher;
+import freemarker.cache.PathGlobMatcher;
+import freemarker.cache.PathRegexMatcher;
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -1649,7 +1658,10 @@ public class Configurable {
      *   </li>
      *   <li>
      *     <p>The following classes can be referred to with short class name instead of full qualified name:
-     *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale}.
+     *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
+     *     {@link TemplateConfigurer}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
+     *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurerFactory},
+     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
