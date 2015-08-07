@@ -25,7 +25,7 @@ import java.util.Map;
 import freemarker.template.utility.StringUtil;
 
 /**
- * A {@link TemplateLoader} that uses a Map with Strings as its source of 
+ * A {@link TemplateLoader} that uses a {@link Map} with {@link String}-s as its source of 
  * templates.
  *
  * In most case the regular way of loading templates from files will be fine.
@@ -58,7 +58,8 @@ import freemarker.template.utility.StringUtil;
  * do so using a {@link freemarker.cache.MultiTemplateLoader}.
  */
 public class StringTemplateLoader implements TemplateLoader {
-    private final Map templates = new HashMap();
+    
+    private final Map<String, StringTemplateSource> templates = new HashMap<String, StringTemplateSource>();
     
     /**
      * Puts a template into the loader. A call to this method is identical to 
