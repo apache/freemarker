@@ -520,27 +520,27 @@ public class TemplateCache {
             final TemplateLoader templateLoader, final Object source,
             final String name, final String sourceName, Locale locale, final Object customLookupCondition,
             String initialEncoding, final boolean parseAsFTL) throws IOException {
+        final TemplateConfigurer tc;
+        try {
+            tc = templateConfigurers != null ? templateConfigurers.get(sourceName, source) : null;
+        } catch (TemplateConfigurerFactoryException e) {
+            throw newIOException("Error while getting TemplateConfigurer; see cause exception.", e);
+        }
+        if (tc != null) {
+            tc.setParentConfiguration(config);
+            
+            // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
+            if (tc.isEncodingSet()) {
+                initialEncoding = tc.getEncoding();
+            }
+            if (tc.isLocaleSet()) {
+                locale = tc.getLocale();
+            }
+        }
+        
         Template template;
         String actualEncoding;
         {
-            final TemplateConfigurer tc;
-            try {
-                tc = templateConfigurers != null ? templateConfigurers.get(sourceName, source) : null;
-            } catch (TemplateConfigurerFactoryException e) {
-                throw newIOException("Error while getting TemplateConfigurer; see cause exception.", e);
-            }
-            if (tc != null) {
-                tc.setParentConfiguration(config);
-                
-                // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
-                if (tc.isEncodingSet()) {
-                    initialEncoding = tc.getEncoding();
-                }
-                if (tc.isLocaleSet()) {
-                    locale = tc.getLocale();
-                }
-            }
-            
             if (parseAsFTL) {
                 try {
                     final Reader reader = templateLoader.getReader(source, initialEncoding);
@@ -564,10 +564,6 @@ public class TemplateCache {
                         reader.close();
                     }
                 }
-                
-                if (tc != null) {
-                    tc.configure(template);
-                }
             } else {
                 // Read the contents into a StringWriter, then construct a single-text-block template from it.
                 final StringWriter sw = new StringWriter();
@@ -586,13 +582,16 @@ public class TemplateCache {
                     reader.close();
                 }
                 template = Template.getPlainTextTemplate(name, sourceName, sw.toString(), config);
-                actualEncoding = initialEncoding;
+                template.setEncoding(initialEncoding);
             }
+        }
+
+        if (tc != null) {
+            tc.configure(template);
         }
         
         template.setLocale(locale);
         template.setCustomLookupCondition(customLookupCondition);
-        template.setEncoding(actualEncoding);
         return template;
     }
 
@@ -659,6 +658,10 @@ public class TemplateCache {
         }
     }
 
+    /**
+     * Same as {@link #removeTemplate(String, Locale, Object, String, boolean)} with {@code null}
+     * {@code customLookupCondition}.
+     */
     public void removeTemplate(
             String name, Locale locale, String encoding, boolean parse) throws IOException {
         removeTemplate(name, locale, null, encoding, parse);

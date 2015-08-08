@@ -202,6 +202,13 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * Sets the settings of the {@link Template} which are set in this {@link TemplateConfigurer}, leaves the other
      * settings as is. A setting is said to be set in a {@link TemplateConfigurer} if it was explicitly set via a setter
      * method, as opposed to be inherited.
+     * 
+     * <p>
+     * Note that the {@code encoding} setting is only applied on the {@link Template} if it's still {@code null} there.
+     * Otherwise it's assumed that the encoding that the {@link Template} has is the actually used one, and so it won't
+     * be overwritten. (This is not to be confused with the encoding parameter of
+     * {@link Configuration#getTemplate(String, java.util.Locale, String)} and of its overloads, which are weaker than
+     * that suggested by the {@link TemplateConfigurer}).
      *
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
@@ -236,7 +243,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (isDateTimeFormatSet()) {
             template.setDateTimeFormat(getDateTimeFormat());
         }
-        if (isEncodingSet()) {
+        if (isEncodingSet() && template.getEncoding() == null) {
             template.setEncoding(getEncoding());
         }
         if (isLocaleSet()) {
