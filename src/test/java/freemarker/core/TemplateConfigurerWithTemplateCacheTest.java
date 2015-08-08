@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
 import org.junit.Test;
@@ -27,6 +28,7 @@ import freemarker.cache.ByteArrayTemplateLoader;
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
 import freemarker.cache.FileNameGlobMatcher;
 import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.MergingTemplateConfigurerFactory;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -38,28 +40,7 @@ public class TemplateConfigurerWithTemplateCacheTest {
 
     @Test
     public void testEncoding() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
-        cfg.setDefaultEncoding("iso-8859-1");
-        
-        ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
-        tl.putTemplate("utf8.ftl", TEXT_WITH_ACCENTS.getBytes("utf-8"));
-        tl.putTemplate("utf16.ftl", TEXT_WITH_ACCENTS.getBytes("utf-16"));
-        tl.putTemplate("default.ftl", TEXT_WITH_ACCENTS.getBytes("iso-8859-2"));
-        tl.putTemplate("utf8-latin2.ftl",
-                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes("iso-8859-2"));
-        tl.putTemplate("default-latin2.ftl",
-                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes("iso-8859-2"));
-        cfg.setTemplateLoader(tl);
-        
-        TemplateConfigurer tcUtf8 = new TemplateConfigurer();
-        tcUtf8.setEncoding("utf-8");
-        TemplateConfigurer tcUtf16 = new TemplateConfigurer();
-        tcUtf16.setEncoding("utf-16");
-        cfg.setTemplateConfigurers(
-                new FirstMatchTemplateConfigurerFactory(
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8),
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf16*"), tcUtf16)
-                ).allowsNoMatch(true));
+        Configuration cfg = createCommonEncodingTesterConfig();
         
         {
             Template t = cfg.getTemplate("utf8.ftl");
@@ -100,6 +81,29 @@ public class TemplateConfigurerWithTemplateCacheTest {
     }
     
     @Test
+    public void testIncludeAndEncoding() throws Exception {
+        Configuration cfg = createCommonEncodingTesterConfig();
+        ByteArrayTemplateLoader tl = (ByteArrayTemplateLoader) cfg.getTemplateLoader();
+        tl.putTemplate("main.ftl", (
+                        "<#include 'utf8.ftl'>"
+                        + "<#include 'utf16.ftl'>"
+                        + "<#include 'default.ftl'>"
+                        + "<#include 'utf8-latin2.ftl'>"
+                        // With mostly ignored encoding params:
+                        + "<#include 'utf8.ftl' encoding='utf-16'>"
+                        + "<#include 'utf16.ftl' encoding='iso-8859-5'>"
+                        + "<#include 'default.ftl' encoding='iso-8859-5'>"
+                        + "<#include 'utf8-latin2.ftl' encoding='iso-8859-5'>"
+                ).getBytes("iso-8859-1"));
+        assertEquals(
+                TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS
+                + TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS
+                + new String(TEXT_WITH_ACCENTS.getBytes("iso-8859-1"), "iso-8859-5")
+                + TEXT_WITH_ACCENTS,
+                getTemplateOutput(cfg.getTemplate("main.ftl")));
+    }
+
+    @Test
     public void testLocale() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
         cfg.setLocale(Locale.US);
@@ -138,11 +142,114 @@ public class TemplateConfigurerWithTemplateCacheTest {
             assertEquals("it_IT", getTemplateOutput(t));
         }
     }
+
+    @Test
+    public void testPlainText() throws Exception {
+        Configuration cfg = createCommonEncodingTesterConfig();
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
+        
+        TemplateConfigurer tcDE = new TemplateConfigurer();
+        tcDE.setLocale(Locale.GERMANY);
+        TemplateConfigurer tcYN = new TemplateConfigurer();
+        tcYN.setBooleanFormat("Y,N");
+        cfg.setTemplateConfigurers(
+                    new MergingTemplateConfigurerFactory(
+                            cfg.getTemplateConfigurers(),
+                            new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("utf16.ftl"), tcDE),
+                            new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("utf16.ftl"), tcYN)
+                    )
+                );
+        
+        {
+            Template t = cfg.getTemplate("utf8.ftl", null, null, false);
+            assertEquals("utf-8", t.getEncoding());
+            assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
+            assertEquals(Locale.US, t.getLocale());
+            assertEquals("true,false", t.getBooleanFormat());
+        }
+        {
+            Template t = cfg.getTemplate("utf8.ftl", null, "iso-8859-1", false);
+            assertEquals("utf-8", t.getEncoding());
+            assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
+        }
+        {
+            Template t = cfg.getTemplate("utf16.ftl", null, null, false);
+            assertEquals("utf-16", t.getEncoding());
+            assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
+            assertEquals(Locale.GERMANY, t.getLocale());
+            assertEquals("Y,N", t.getBooleanFormat());
+        }
+        {
+            Template t = cfg.getTemplate("default.ftl", null, null, false);
+            assertEquals("iso-8859-1", t.getEncoding());
+            assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
+        }
+    }
+
+    @Test
+    public void testConfigurableSettings() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        cfg.setLocale(Locale.US);
+        
+        TemplateConfigurer tcFR = new TemplateConfigurer();
+        tcFR.setLocale(Locale.FRANCE);
+        TemplateConfigurer tcYN = new TemplateConfigurer();
+        tcYN.setBooleanFormat("Y,N");
+        TemplateConfigurer tc00 = new TemplateConfigurer();
+        tc00.setNumberFormat("0.00");
+        cfg.setTemplateConfigurers(
+                new MergingTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(fr)*"), tcFR),
+                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(yn)*"), tcYN),
+                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(00)*"), tc00)
+                )
+        );
+        
+        String commonFTL = "${.locale} ${true?string} ${1.2}";
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("default", commonFTL);
+        tl.putTemplate("(fr)", commonFTL);
+        tl.putTemplate("(yn)(00)", commonFTL);
+        tl.putTemplate("(00)(fr)", commonFTL);
+        cfg.setTemplateLoader(tl);
+        
+        assertEquals("en_US true 1.2", getTemplateOutput(cfg.getTemplate("default")));
+        assertEquals("fr_FR true 1,2", getTemplateOutput(cfg.getTemplate("(fr)")));
+        assertEquals("en_US Y 1.20", getTemplateOutput(cfg.getTemplate("(yn)(00)")));
+        assertEquals("fr_FR true 1,20", getTemplateOutput(cfg.getTemplate("(00)(fr)")));
+    }
     
     private String getTemplateOutput(Template t) throws TemplateException, IOException {
         StringWriter sw = new StringWriter();
         t.process(null, sw);
         return sw.toString();
+    }
+
+    private Configuration createCommonEncodingTesterConfig() throws UnsupportedEncodingException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        cfg.setDefaultEncoding("iso-8859-1");
+        cfg.setLocale(Locale.US);
+        
+        ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
+        tl.putTemplate("utf8.ftl", TEXT_WITH_ACCENTS.getBytes("utf-8"));
+        tl.putTemplate("utf16.ftl", TEXT_WITH_ACCENTS.getBytes("utf-16"));
+        tl.putTemplate("default.ftl", TEXT_WITH_ACCENTS.getBytes("iso-8859-2"));
+        tl.putTemplate("utf8-latin2.ftl",
+                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes("iso-8859-2"));
+        tl.putTemplate("default-latin2.ftl",
+                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes("iso-8859-2"));
+        cfg.setTemplateLoader(tl);
+        
+        TemplateConfigurer tcUtf8 = new TemplateConfigurer();
+        tcUtf8.setEncoding("utf-8");
+        TemplateConfigurer tcUtf16 = new TemplateConfigurer();
+        tcUtf16.setEncoding("utf-16");
+        cfg.setTemplateConfigurers(
+                new FirstMatchTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8),
+                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf16*"), tcUtf16)
+                ).allowNoMatch(true));
+        return cfg;
     }
 
 }

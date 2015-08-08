@@ -192,7 +192,11 @@ public class Template extends Configurable {
      *            {@link Template} itself has methods to specify settings just for that template, those don't influence
      *            the parsing, and you only have opportunity to call them after the parsing anyway.) This objects is
      *            often a {@link TemplateConfigurer} whose parent is the {@link Configuration} parameter, and then it
-     *            practically just overrides some of the parser settings.
+     *            practically just overrides some of the parser settings, as the others are inherited from the
+     *            {@link Configuration}. Note that if this is a {@link TemplateConfigurer}, you will also want to call
+     *            {@link TemplateConfigurer#configure(Template)} on the resulting {@link Template} so that
+     *            {@link Configurable} settings will be set too, because this constructor only uses it as a
+     *            {@link ParserConfiguration}.  
      * @param encoding
      *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
      *            null}, it overrides the value coming from the {@code TemplateConfigurer#getEncoding()} method of the

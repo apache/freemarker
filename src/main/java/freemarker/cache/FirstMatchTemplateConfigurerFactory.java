@@ -51,7 +51,7 @@ public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFacto
                     + (noMatchErrorDetails != null
                             ? "Error details: " + noMatchErrorDetails 
                             : "(Set the noMatchErrorDetails property of the factory bean to give a more specific error "
-                                    + "message. Set allowsNoMatch to true if this shouldn't be an error.)"));
+                                    + "message. Set allowNoMatch to true if this shouldn't be an error.)"));
         }
         return null;
     }
@@ -91,7 +91,7 @@ public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFacto
     /**
      * Same as {@link #setAllowNoMatch(boolean)}, but return this object to support "fluent API" style. 
      */
-    public FirstMatchTemplateConfigurerFactory allowsNoMatch(boolean allow) {
+    public FirstMatchTemplateConfigurerFactory allowNoMatch(boolean allow) {
         setAllowNoMatch(allow);
         return this;
     }

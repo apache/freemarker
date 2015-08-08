@@ -2048,7 +2048,8 @@ public class StringUtil {
                     escaped = true;
                 } else if (c == '[' || c == '{') {
                     throw new IllegalArgumentException(
-                            "The \"" + c + "\" glob operator is currently unsupported, "
+                            "The \"" + c + "\" glob operator is currently unsupported "
+                            + "(precede it with \\ for literal matching), "
                             + "in this glob: " + glob);
                 }
             } else {

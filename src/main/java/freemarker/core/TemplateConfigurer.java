@@ -31,6 +31,20 @@ import freemarker.template.utility.NullArgumentException;
  * reused for custom template loading and caching solutions.
  * 
  * <p>
+ * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism
+ * ({@link Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale}
+ * here could have any effect. The {@code locale} will be only set in the template that the localized looks has already
+ * found.
+ * 
+ * <p>
+ * Note on encoding setting {@code encoding}: See {@link #setEncoding(String)}.
+ * 
+ * <p>
+ * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
+ * that setting was already set on this object. Otherwise you will get the value from the parent {@link Configuration},
+ * which is {@link Configuration#getDefaultConfiguration()} before this object is associated to a {@link Configuration}.
+ * 
+ * <p>
  * If you are using this class for your own template loading and caching solution, rather than with the standard one,
  * you should be aware of the details described in this paragraph. This class implements both {@link Configurable} and
  * {@link ParserConfiguration}. This means that it can influence both the template parsing phase and the runtime
@@ -38,11 +52,6 @@ import freemarker.template.utility.NullArgumentException;
  * first pass this object to the {@link Template} constructor (this is where the {@link ParserConfiguration} interface
  * is used), and then you have to call {@link #configure(Template)} on the resulting {@link Template} object (this is
  * where the {@link Configurable} is used).
- * 
- * <p>
- * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
- * that setting was already set on this object. Otherwise you will get the value from the parent {@link Configuration},
- * which is {@link Configuration#getDefaultConfiguration()} before this object is associated to a {@link Configuration}.
  * 
  * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, String)
  * 
@@ -383,10 +392,19 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Specifies the charset used for reading template "file". This is very similar to
-     * {@link Configuration#setDefaultEncoding(String)}, but this setting also overrides the locale-specific encodings
-     * set via {@link Configuration#setEncoding(java.util.Locale, String)}. This setting can only be overridden in the
-     * {@code #ftl} header of the template (like {@code <#ftl encoding="ISO-8859-1">}).
+     * Forces the charset used for reading template "file", overriding everything but the encoding coming from the
+     * {@code #ftl} header. This is similar to {@link Configuration#setDefaultEncoding(String)} in its meaning. This
+     * setting overrides the locale-specific encodings set via
+     * {@link Configuration#setEncoding(java.util.Locale, String)}, overrides the {@code encoding} parameter of
+     * {@link Configuration#getTemplate(String, String)} (and of its overloads) and the {@code encoding} parameter of
+     * the {@code #include} directive. This setting can only be overridden in the {@code #ftl} header of the template
+     * (like {@code <#ftl encoding="ISO-8859-1">}). This works like that because specifying the encoding when requesting
+     * the template is error prone and deprecated.
+     * 
+     * <p>
+     * If you are developing your own template loading/caching mechanism instead of the standard one, note that the
+     * above behavior is not guaranteed by this class; you have to ensure it. Also, read the note on {@code encoding}
+     * in the documentation of {@link #configure(Template)}.
      */
     public void setEncoding(String encoding) {
         NullArgumentException.check("encoding", encoding);

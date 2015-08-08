@@ -56,6 +56,7 @@ import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
+import freemarker.core.TemplateConfigurer;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
@@ -1126,7 +1127,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
-     * from those coming from the common {@link Configuration}.
+     * from those coming from the common {@link Configuration} object. 
      * 
      * @since 2.3.24
      */
@@ -1786,15 +1787,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *
      * @param locale
      *            The requested locale of the template. This is what {@link Template#getLocale()} on the resulting
-     *            {@link Template} will return. This parameter can be {@code null} since 2.3.22, in which case it
-     *            defaults to {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the
-     *            default value, not {@code null}). This parameter also drives localized template lookup. Assuming that
-     *            you have specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template,
-     *            and the default {@link TemplateLookupStrategy} is used and
+     *            {@link Template} will return (unless it's overridden via {@link #getTemplateConfigurers()}). This
+     *            parameter can be {@code null} since 2.3.22, in which case it defaults to
+     *            {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the default value,
+     *            not {@code null}). This parameter also drives localized template lookup. Assuming that you have
+     *            specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template, and the
+     *            default {@link TemplateLookupStrategy} is used and
      *            {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first try to
      *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
      *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
-     *            finds {@code myTemplate.ftl}.
+     *            finds {@code myTemplate.ftl}. Note that when the {@code locale} setting is overridden with a
+     *            {@link TemplateConfigurer} provided by {@link #getTemplateConfigurers()}, that overrides the
+     *            value specified here, but only after the localized lookup, that is, it modifies the template
+     *            found by the localized lookup.
      * 
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
@@ -1806,10 +1811,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *            {@link TemplateLookupContext#getCustomLookupCondition()}.
      *
      * @param encoding
-     *            The charset used to interpret the template source code bytes (if it's read from a binary source). Can
-     *            be {@code null} since 2.3.22, will default to {@link Configuration#getEncoding(Locale)} where
-     *            {@code Locale} is the {@code locale} parameter (when {@code locale} was {@code null} too, the its
-     *            default value is used instead).
+     *            Deprecated mechanism, {@code null} is the recommended; the charset used to interpret the template
+     *            source code bytes (if it's read from a binary source). Can be {@code null} since 2.3.22, in which case
+     *            it will default to {@link Configuration#getEncoding(Locale)} where {@code Locale} is the
+     *            {@code locale} parameter (when {@code locale} was {@code null} too, the its default value is used
+     *            instead). Why is this deprecated: It doesn't make sense to get the <em>same</em> template with
+     *            different encodings, hence, it's error prone to specify the encoding where you get the template.
+     *            Instead, if you have template "files" with different charsets, you should use
+     *            {@link #setTemplateConfigurers(TemplateConfigurerFactory)}, where you can associate encodings to
+     *            individual templates based on their names (like which "directory" are they in, what's their file
+     *            extension, etc.). The encoding associated with the templates that way overrides the encoding that you
+     *            specify here.
      *
      * @param parseAsFTL
      *            If {@code true}, the loaded template is parsed and interpreted normally, as a regular FreeMarker

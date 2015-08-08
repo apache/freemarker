@@ -109,7 +109,7 @@ public class TemplateConfigurerFactoryTest {
         assertApplicable(tcf, "ab.ftl", tc2);
         assertApplicable(tcf, "ab.ftlx", tc1);
         
-        assertNotApplicable(new FirstMatchTemplateConfigurerFactory().allowsNoMatch(true), "x.ftl");
+        assertNotApplicable(new FirstMatchTemplateConfigurerFactory().allowNoMatch(true), "x.ftl");
     }
 
     @Test
@@ -129,12 +129,12 @@ public class TemplateConfigurerFactoryTest {
                                 new MergingTemplateConfigurerFactory(
                                     new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*"), tcBCommon),
                                     new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.s.*"), tcBSpec))))
-                        .allowsNoMatch(true),
+                        .allowNoMatch(true),
                 new FirstMatchTemplateConfigurerFactory(
                         new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.hh"), tcHH),
                         new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.*h"), tcHtml),
                         new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.*x"), tcXml))
-                        .allowsNoMatch(true),
+                        .allowNoMatch(true),
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.nws.*"), tcNWS));
         
         assertNotApplicable(tcf, "x.ftl");
