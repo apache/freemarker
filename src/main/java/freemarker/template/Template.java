@@ -50,20 +50,24 @@ import freemarker.core.TokenMgrError;
 import freemarker.debug.impl.DebuggerService;
 
 /**
- * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
- * multiple threads.
+ * <p>
+ * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
+ * threads.
  * 
- * <p>Typically, you will use {@link Configuration#getTemplate(String)} to create/get {@link Template} objects, so
- * you don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String}
- * that contains the template source code. But then it's
- * important to know that while the resulting {@link Template} is efficient for later processing, creating a new
- * {@link Template} itself is relatively expensive. So try to re-use {@link Template} objects if possible.
- * {@link Configuration#getTemplate(String)} does that (caching {@link Template}-s) for you, but the constructor of
- * course doesn't, so it's up to you to solve then.
+ * <p>
+ * Typically, you will use {@link Configuration#getTemplate(String)} to create/get {@link Template} objects, so you
+ * don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String} that
+ * contains the template source code. But then it's important to know that while the resulting {@link Template} is
+ * efficient for later processing, creating a new {@link Template} itself is relatively expensive. So try to re-use
+ * {@link Template} objects if possible. {@link Configuration#getTemplate(String)} (and its overloads) does that
+ * (caching {@link Template}-s) for you, but the constructor of course doesn't, so it's up to you to solve then.
  * 
- * <p>Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods
- * for changing FreeMarker settings. Those must not be used while the template is being processed, or if the
- * template object is already accessible from multiple threads.
+ * <p>
+ * Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods for
+ * changing FreeMarker settings. Those must not be used while the template is being processed, or if the template object
+ * is already accessible from multiple threads. If some templates need different settings that those coming from the
+ * shared {@link Configuration}, and you are using {@link Configuration#getTemplate(String)} (or its overloads), then
+ * see {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
  */
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
