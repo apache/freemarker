@@ -539,7 +539,6 @@ public class TemplateCache {
         }
         
         Template template;
-        String actualEncoding;
         {
             if (parseAsFTL) {
                 try {
@@ -549,9 +548,8 @@ public class TemplateCache {
                     } finally {
                         reader.close();
                     }
-                    actualEncoding = initialEncoding;
                 } catch (Template.WrongEncodingException wee) {
-                    actualEncoding = wee.getTemplateSpecifiedEncoding();
+                    String actualEncoding = wee.getTemplateSpecifiedEncoding();
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Initial encoding \"" + initialEncoding + "\" was incorrect, re-reading with \""
                                 + actualEncoding + "\". Template: " + sourceName);
