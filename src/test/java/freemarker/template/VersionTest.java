@@ -16,16 +16,16 @@
 
 package freemarker.template;
 
+import static org.junit.Assert.*;
+
 import java.sql.Date;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class VersionTest extends TestCase {
+@SuppressWarnings("boxing")
+public class VersionTest {
 
-    public VersionTest(String name) {
-        super(name);
-    }
-    
+    @Test
     public void testFromNumber() {
         Version v = new Version(1, 2, 3);
         assertEquals("1.2.3", v.toString());
@@ -38,6 +38,7 @@ public class VersionTest extends TestCase {
         assertNull(v.getBuildDate());
     }
 
+    @Test
     public void testFromNumber2() {
         Version v = new Version(1, 2, 3, "beta8", Boolean.TRUE, new Date(5000));
         assertEquals("1.2.3-beta8", v.toString());
@@ -45,7 +46,16 @@ public class VersionTest extends TestCase {
         assertTrue(v.isGAECompliant().booleanValue());
         assertEquals(new Date(5000), v.getBuildDate());
     }
+
+    @Test
+    public void testFromNumber3() {
+        Version v = new Version(new Version(1, 2, 3).intValue());
+        assertEquals(1, v.getMajor());
+        assertEquals(2, v.getMinor());
+        assertEquals(3, v.getMicro());
+    }
     
+    @Test
     public void testFromString() {
         Version v = new Version("1.2.3-beta2");
         assertEquals("1.2.3-beta2", v.toString());
@@ -58,6 +68,7 @@ public class VersionTest extends TestCase {
         assertNull(v.getBuildDate());
     }
 
+    @Test
     public void testFromString2() {
         Version v = new Version("10.20.30", Boolean.TRUE, new Date(5000));
         assertEquals("10.20.30", v.toString());
@@ -70,6 +81,7 @@ public class VersionTest extends TestCase {
         assertEquals(new Date(5000), v.getBuildDate());
     }
 
+    @Test
     public void testFromString3() {
         Version v = new Version("01.002.0003-20130524");
         assertEquals("01.002.0003-20130524", v.toString());
@@ -98,7 +110,7 @@ public class VersionTest extends TestCase {
         
     }
     
-    @SuppressWarnings("boxing")
+    @Test
     public void testHashAndEquals() {
         Version v1 = new Version("1.2.3-beta2");
         Version v2 = new Version(1, 2, 3, "beta2", null, null);
@@ -134,6 +146,7 @@ public class VersionTest extends TestCase {
         assertTrue(v1.hashCode() != v2.hashCode());
     }
 
+    @Test
     public void testShortForms() {
         Version v = new Version("1.0.0-beta2");
         assertEquals(v, new Version("1.0-beta2"));
@@ -144,6 +157,7 @@ public class VersionTest extends TestCase {
         assertEquals(v, new Version("1"));
     }
     
+    @Test
     public void testMalformed() {
         try {
             new Version("1.2.");

@@ -27,14 +27,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -46,6 +45,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateCache.MaybeMissingTemplate;
+import freemarker.cache.TemplateConfigurerFactory;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupStrategy;
@@ -55,6 +55,8 @@ import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
+import freemarker.core.ParserConfiguration;
+import freemarker.core.TemplateConfigurer;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
@@ -121,7 +123,7 @@ import freemarker.template.utility.XmlEscape;
  * anymore, so then it's safe to make it accessible (again, via a "safe publication" technique) from multiple threads.
  * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
-public class Configuration extends Configurable implements Cloneable {
+public class Configuration extends Configurable implements Cloneable, ParserConfiguration {
     
     private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
     
@@ -217,6 +219,13 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE = "templateNameFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TEMPLATE_NAME_FORMAT_KEY = TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+    public static final String TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE = "template_configurers";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+    public static final String TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE = "templateConfigurers";
+    /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.24 */
+    public static final String TEMPLATE_CONFIGURERS_KEY = TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE = "incompatible_improvements";
@@ -243,6 +252,7 @@ public class Configuration extends Configurable implements Cloneable {
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
+        TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE,
         TEMPLATE_LOADER_KEY_SNAKE_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE,
         TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE,
@@ -261,6 +271,7 @@ public class Configuration extends Configurable implements Cloneable {
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
+        TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE,
         TEMPLATE_LOADER_KEY_CAMEL_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE,
         TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE,
@@ -395,8 +406,8 @@ public class Configuration extends Configurable implements Cloneable {
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
-    private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
-    private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
+    private LinkedHashMap<String, String> autoImports = new LinkedHashMap<String, String>(0);
+    private ArrayList<String> autoIncludes = new ArrayList<String>(0);
 
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
@@ -665,16 +676,19 @@ public class Configuration extends Configurable implements Cloneable {
                 getDefaultCacheStorage(),
                 getDefaultTemplateLookupStrategy(),
                 getDefaultTemplateNameFormat(),
+                null,
                 this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(5000);
     }
     
     private void recreateTemplateCacheWith(
-            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy,
-            TemplateNameFormat templateNameFormat) {
+            TemplateLoader loader, CacheStorage storage,
+            TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
+            TemplateConfigurerFactory templateConfigurers) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage, templateLookupStrategy, templateNameFormat, this);
+        cache = new TemplateCache(
+                loader, storage, templateLookupStrategy, templateNameFormat, templateConfigurers, this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
@@ -777,12 +791,12 @@ public class Configuration extends Configurable implements Cloneable {
             Configuration copy = (Configuration) super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
             copy.localeToCharsetMap = new ConcurrentHashMap(localeToCharsetMap);
-            copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
-            copy.autoImports = (ArrayList) autoImports.clone();
-            copy.autoIncludes = (ArrayList) autoIncludes.clone();
+            copy.autoImports = (LinkedHashMap<String, String>) autoImports.clone();
+            copy.autoIncludes = (ArrayList<String>) autoIncludes.clone();
             copy.recreateTemplateCacheWith(
                     cache.getTemplateLoader(), cache.getCacheStorage(),
-                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                    cache.getTemplateConfigurers());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException("Cloning failed", e);
@@ -971,7 +985,8 @@ public class Configuration extends Configurable implements Cloneable {
         synchronized (this) {
             if (cache.getTemplateLoader() != templateLoader) {
                 recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(),
-                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                        cache.getTemplateConfigurers());
             }
             templateLoaderExplicitlySet = true;
         }
@@ -1019,7 +1034,8 @@ public class Configuration extends Configurable implements Cloneable {
     public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
         if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                    templateLookupStrategy, cache.getTemplateNameFormat());
+                    templateLookupStrategy, cache.getTemplateNameFormat(),
+                    cache.getTemplateConfigurers());
         }
         templateLookupStrategyExplicitlySet = true;
     }
@@ -1067,7 +1083,8 @@ public class Configuration extends Configurable implements Cloneable {
     public void setTemplateNameFormat(TemplateNameFormat templateNameFormat) {
         if (cache.getTemplateNameFormat() != templateNameFormat) {
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                    cache.getTemplateLookupStrategy(), templateNameFormat);
+                    cache.getTemplateLookupStrategy(), templateNameFormat,
+                    cache.getTemplateConfigurers());
         }
         templateNameFormatExplicitlySet = true;
     }
@@ -1104,6 +1121,31 @@ public class Configuration extends Configurable implements Cloneable {
         }
         return cache.getTemplateNameFormat();
     }
+    
+    /**
+     * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
+     * from those coming from the common {@link Configuration} object. 
+     * 
+     * @since 2.3.24
+     */
+    public void setTemplateConfigurers(TemplateConfigurerFactory templateConfigurers) {
+        if (cache.getTemplateConfigurers() != templateConfigurers) {
+            templateConfigurers.setConfiguration(this);
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                    templateConfigurers);
+        }
+    }
+    
+    /**
+     * The getter pair of {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
+     */
+    public TemplateConfigurerFactory getTemplateConfigurers() {
+        if (cache == null) {
+            return null;
+        }
+        return cache.getTemplateConfigurers();
+    }
 
     /**
      * Sets the {@link CacheStorage} used for caching {@link Template}-s;
@@ -1122,7 +1164,8 @@ public class Configuration extends Configurable implements Cloneable {
         synchronized (this) {
             if (getCacheStorage() != cacheStorage) {
                 recreateTemplateCacheWith(cache.getTemplateLoader(), cacheStorage,
-                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                        cache.getTemplateConfigurers());
             }
             cacheStorageExplicitlySet = true;
         }
@@ -1742,15 +1785,19 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * @param locale
      *            The requested locale of the template. This is what {@link Template#getLocale()} on the resulting
-     *            {@link Template} will return. This parameter can be {@code null} since 2.3.22, in which case it
-     *            defaults to {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the
-     *            default value, not {@code null}). This parameter also drives localized template lookup. Assuming that
-     *            you have specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template,
-     *            and the default {@link TemplateLookupStrategy} is used and
+     *            {@link Template} will return (unless it's overridden via {@link #getTemplateConfigurers()}). This
+     *            parameter can be {@code null} since 2.3.22, in which case it defaults to
+     *            {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the default value,
+     *            not {@code null}). This parameter also drives localized template lookup. Assuming that you have
+     *            specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template, and the
+     *            default {@link TemplateLookupStrategy} is used and
      *            {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first try to
      *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
      *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
-     *            finds {@code myTemplate.ftl}.
+     *            finds {@code myTemplate.ftl}. Note that when the {@code locale} setting is overridden with a
+     *            {@link TemplateConfigurer} provided by {@link #getTemplateConfigurers()}, that overrides the
+     *            value specified here, but only after the localized lookup, that is, it modifies the template
+     *            found by the localized lookup.
      * 
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
@@ -1762,10 +1809,17 @@ public class Configuration extends Configurable implements Cloneable {
      *            {@link TemplateLookupContext#getCustomLookupCondition()}.
      *
      * @param encoding
-     *            The charset used to interpret the template source code bytes (if it's read from a binary source). Can
-     *            be {@code null} since 2.3.22, will default to {@link Configuration#getEncoding(Locale)} where
-     *            {@code Locale} is the {@code locale} parameter (when {@code locale} was {@code null} too, the its
-     *            default value is used instead).
+     *            Deprecated mechanism, {@code null} is the recommended; the charset used to interpret the template
+     *            source code bytes (if it's read from a binary source). Can be {@code null} since 2.3.22, in which case
+     *            it will default to {@link Configuration#getEncoding(Locale)} where {@code Locale} is the
+     *            {@code locale} parameter (when {@code locale} was {@code null} too, the its default value is used
+     *            instead). Why is this deprecated: It doesn't make sense to get the <em>same</em> template with
+     *            different encodings, hence, it's error prone to specify the encoding where you get the template.
+     *            Instead, if you have template "files" with different charsets, you should use
+     *            {@link #setTemplateConfigurers(TemplateConfigurerFactory)}, where you can associate encodings to
+     *            individual templates based on their names (like which "directory" are they in, what's their file
+     *            extension, etc.). The encoding associated with the templates that way overrides the encoding that you
+     *            specify here.
      *
      * @param parseAsFTL
      *            If {@code true}, the loaded template is parsed and interpreted normally, as a regular FreeMarker
@@ -2321,6 +2375,10 @@ public class Configuration extends Configurable implements Cloneable {
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
+            } else if (TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE.equals(name)
+                    || TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE.equals(name)) {
+                setTemplateConfigurers((TemplateConfigurerFactory) _ObjectBuilderSettingEvaluator.eval(
+                        value, TemplateConfigurerFactory.class, _SettingEvaluationEnvironment.getCurrent()));
             } else {
                 unknown = true;
             }
@@ -2378,9 +2436,9 @@ public class Configuration extends Configurable implements Cloneable {
     public void addAutoImport(String namespaceVarName, String templateName) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
+            // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
             autoImports.remove(namespaceVarName);
-            autoImports.add(namespaceVarName);
-            autoImportNsToTmpMap.put(namespaceVarName, templateName);
+            autoImports.put(namespaceVarName, templateName);
         }
     }
     
@@ -2392,7 +2450,6 @@ public class Configuration extends Configurable implements Cloneable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             autoImports.remove(namespaceVarName);
-            autoImportNsToTmpMap.remove(namespaceVarName);
         }
     }
     
@@ -2405,13 +2462,18 @@ public class Configuration extends Configurable implements Cloneable {
     public void setAutoImports(Map map) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            autoImports = new ArrayList(map.keySet());
-            if (map instanceof HashMap) {
-                autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
-            } else if (map instanceof SortedMap) {
-                autoImportNsToTmpMap = new TreeMap(map);             
-            } else {
-                autoImportNsToTmpMap = new HashMap(map);
+            for (Map.Entry entry : ((Map<?, ?>) map).entrySet()) {
+                Object key = entry.getKey();
+                if (!(key instanceof String)) {
+                    throw new IllegalArgumentException(
+                            "Key in map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                }
+                Object value = entry.getValue();
+                if (!(value instanceof String)) {
+                    throw new IllegalArgumentException(
+                            "Value in map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                }
+                addAutoImport((String) key, (String) value);
             }
         }
     }
@@ -2419,13 +2481,12 @@ public class Configuration extends Configurable implements Cloneable {
     @Override
     protected void doAutoImportsAndIncludes(Environment env)
     throws TemplateException, IOException {
-        for (int i = 0; i < autoImports.size(); i++) {
-            String namespace = (String) autoImports.get(i);
-            String templateName = (String) autoImportNsToTmpMap.get(namespace);
-            env.importLib(templateName, namespace);
+        for (Map.Entry<String, String> autoImport : autoImports.entrySet()) {
+            // Template name 1st, namespace var 2nd.
+            env.importLib(autoImport.getValue(), autoImport.getKey());
         }
         for (int i = 0; i < autoIncludes.size(); i++) {
-            String templateName = (String) autoIncludes.get(i);
+            String templateName = autoIncludes.get(i);
             Template template = getTemplate(templateName, env.getLocale());
             env.include(template);
         }
@@ -2450,13 +2511,11 @@ public class Configuration extends Configurable implements Cloneable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             autoIncludes.clear();
-            Iterator it = templateNames.iterator();
-            while (it.hasNext()) {
-                Object o = it.next();
-                if (!(o instanceof String)) {
+            for (Object templateName : templateNames) {
+                if (!(templateName instanceof String)) {
                     throw new IllegalArgumentException("List items must be String-s.");
                 }
-                autoIncludes.add(o);
+                autoIncludes.add((String) templateName);
             }
         }
     }

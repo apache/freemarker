@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -453,6 +454,26 @@ public class ObjectBuilderSettingsTest {
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+        }
+    }
+    
+    @Test
+    public void timeZoneTest() throws _ObjectBuilderSettingEvaluationException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        for (String timeZoneId : new String[] { "GMT+01", "GMT", "UTC" }) {
+            TestBean8 result = (TestBean8) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean8(timeZone=TimeZone('" + timeZoneId + "'))",
+                    TestBean8.class, new _SettingEvaluationEnvironment());
+            assertEquals(TimeZone.getTimeZone(timeZoneId), result.getTimeZone());
+        }
+        
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean8(timeZone=TimeZone('foobar'))",
+                    TestBean8.class, new _SettingEvaluationEnvironment());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getCause().getMessage(),
+                    allOf(containsStringIgnoringCase("unrecognized"), containsString("foobar")));
         }
     }
 
@@ -920,7 +941,29 @@ public class ObjectBuilderSettingsTest {
             return "TestBean [s=" + s + ", x=" + x + ", b=" + b + "]";
         }
 
-    }    
+    }
+    
+    public static class TestBean8 {
+        private TimeZone timeZone;
+        private Object anyObject;
+        
+        public TimeZone getTimeZone() {
+            return timeZone;
+        }
+        
+        public void setTimeZone(TimeZone timeZone) {
+            this.timeZone = timeZone;
+        }
+        
+        public Object getAnyObject() {
+            return anyObject;
+        }
+        
+        public void setAnyObject(Object anyObject) {
+            this.anyObject = anyObject;
+        }
+        
+    }
     
     public static class DummyArithmeticEngine extends ArithmeticEngine {
         

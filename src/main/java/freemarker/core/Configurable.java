@@ -31,10 +31,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 
+import freemarker.cache.AndMatcher;
+import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.NotMatcher;
+import freemarker.cache.OrMatcher;
+import freemarker.cache.PathGlobMatcher;
+import freemarker.cache.PathRegexMatcher;
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -264,7 +274,7 @@ public class Configurable {
 
     private Configurable parent;
     private Properties properties;
-    private HashMap customAttributes;
+    private HashMap<Object, Object> customAttributes;
     
     private Locale locale;
     private String numberFormat;
@@ -381,7 +391,7 @@ public class Configurable {
         classicCompatible = null;
         templateExceptionHandler = null;
         properties = new Properties(parent.properties);
-        customAttributes = new HashMap();
+        customAttributes = new HashMap(0);
     }
     
     @Override
@@ -419,7 +429,7 @@ public class Configurable {
      * template - the included template becomes the parent configurable during
      * its evaluation.
      */
-    final void setParent(Configurable parent) {
+    void setParent(Configurable parent) {
         this.parent = parent;
     }
     
@@ -515,6 +525,15 @@ public class Configurable {
     }
     
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isClassicCompatibleSet() {
+        return classicCompatible != null;
+    }
+    
+    /**
      * Sets the default locale used for number and date formatting (among others), also the locale used for searching
      * localized template variations when no locale was explicitly requested.
      * 
@@ -527,12 +546,22 @@ public class Configurable {
     }
 
     /**
-     * The getter pair of {@link #setTimeZone(TimeZone)}. 
+     * Returns the assumed locale when searching for template files with no
+     * explicit requested locale. Defaults to system locale.
      */
-    public TimeZone getTimeZone() {
-        return timeZone != null ? timeZone : parent.getTimeZone();
+    public Locale getLocale() {
+        return locale != null ? locale : parent.getLocale();
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isLocaleSet() {
+        return locale != null;
+    }
+    
     /**
      * Sets the time zone to use when formatting date/time values.
      * Defaults to the system time zone ({@link TimeZone#getDefault()}), regardless of the "locale" FreeMarker setting,
@@ -550,6 +579,22 @@ public class Configurable {
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
     }
 
+    /**
+     * The getter pair of {@link #setTimeZone(TimeZone)}. 
+     */
+    public TimeZone getTimeZone() {
+        return timeZone != null ? timeZone : parent.getTimeZone();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isTimeZoneSet() {
+        return timeZone != null;
+    }
+    
     /**
      * Sets the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. It defaults to {@code null} for backward compatibility, but in most
@@ -631,13 +676,14 @@ public class Configurable {
                 ? sqlDataAndTimeTimeZone
                 : (parent != null ? parent.getSQLDateAndTimeTimeZone() : null);
     }
-
+    
     /**
-     * Returns the assumed locale when searching for template files with no
-     * explicit requested locale. Defaults to system locale.
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
      */
-    public Locale getLocale() {
-        return locale != null ? locale : parent.getLocale();
+    public boolean isSQLDateAndTimeTimeZoneSet() {
+        return sqlDataAndTimeTimeZoneSet;
     }
 
     /**
@@ -664,6 +710,15 @@ public class Configurable {
         return numberFormat != null ? numberFormat : parent.getNumberFormat();
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isNumberFormatSet() {
+        return numberFormat != null;
+    }
+            
     /**
      * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
      * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
@@ -707,6 +762,15 @@ public class Configurable {
         return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
     }
     
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isBooleanFormatSet() {
+        return booleanFormat != null;
+    }
+        
     String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
         if (value) {
             String s = getTrueStringValue();
@@ -798,6 +862,15 @@ public class Configurable {
     }
 
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isTimeFormatSet() {
+        return timeFormat != null;
+    }
+    
+    /**
      * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values,
      * also the format that {@code someString?date} will use to parse strings.
      * 
@@ -818,6 +891,15 @@ public class Configurable {
         return dateFormat != null ? dateFormat : parent.getDateFormat();
     }
 
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isDateFormatSet() {
+        return dateFormat != null;
+    }
+    
     /**
      * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values,
      * also the format that {@code someString?datetime} will use to parse strings.
@@ -908,7 +990,16 @@ public class Configurable {
     public String getDateTimeFormat() {
         return dateTimeFormat != null ? dateTimeFormat : parent.getDateTimeFormat();
     }
-
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isDateTimeFormatSet() {
+        return dateTimeFormat != null;
+    }
+    
     /**
      * Sets the exception handler used to handle exceptions occurring inside templates.
      * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:
@@ -944,6 +1035,15 @@ public class Configurable {
     }
 
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isTemplateExceptionHandlerSet() {
+        return templateExceptionHandler != null;
+    }
+
+    /**
      * Sets the arithmetic engine used to perform arithmetic operations.
      * The default is {@link ArithmeticEngine#BIGDECIMAL_ENGINE}.
      */
@@ -962,6 +1062,15 @@ public class Configurable {
     }
 
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isArithmeticEngineSet() {
+        return arithmeticEngine != null;
+    }
+
+    /**
      * Sets the object wrapper used to wrap objects to {@link TemplateModel}-s.
      * The default is {@link ObjectWrapper#DEFAULT_WRAPPER}.
      */
@@ -977,6 +1086,15 @@ public class Configurable {
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper != null
                 ? objectWrapper : parent.getObjectWrapper();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isObjectWrapperSet() {
+        return objectWrapper != null;
     }
     
     /**
@@ -1003,6 +1121,15 @@ public class Configurable {
                 ? outputEncoding
                 : (parent != null ? parent.getOutputEncoding() : null);
     }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isOutputEncodingSet() {
+        return outputEncodingSet;
+    }
     
     /**
      * Sets the URL escaping charset. If not set ({@code null}), the output encoding
@@ -1026,7 +1153,16 @@ public class Configurable {
                 ? urlEscapingCharset
                 : (parent != null ? parent.getURLEscapingCharset() : null);
     }
-    
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isURLEscapingCharsetSet() {
+        return urlEscapingCharsetSet;
+    }
+
     /**
      * Sets the {@link TemplateClassResolver} that is used when the
      * <code>new</code> built-in is called in a template. That is, when
@@ -1056,6 +1192,15 @@ public class Configurable {
     public TemplateClassResolver getNewBuiltinClassResolver() {
         return newBuiltinClassResolver != null
                 ? newBuiltinClassResolver : parent.getNewBuiltinClassResolver();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isNewBuiltinClassResolverSet() {
+        return newBuiltinClassResolver != null;
     }
     
     /**
@@ -1089,6 +1234,15 @@ public class Configurable {
             ? autoFlush.booleanValue()
             : (parent != null ? parent.getAutoFlush() : true);
     }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isAutoFlushSet() {
+        return autoFlush != null;
+    }
     
     /**
      * Sets if tips should be shown in error messages of errors arising during template processing.
@@ -1111,6 +1265,15 @@ public class Configurable {
             ? showErrorTips.booleanValue()
             : (parent != null ? parent.getShowErrorTips() : true);
     }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isShowErrorTipsSet() {
+        return showErrorTips != null;
+    }
     
     /**
      * Specifies if {@code ?api} can be used in templates. Defaults to {@code false} so that updating FreeMarker won't
@@ -1132,6 +1295,15 @@ public class Configurable {
         return apiBuiltinEnabled != null 
                 ? apiBuiltinEnabled.booleanValue()
                 : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isAPIBuiltinEnabledSet() {
+        return apiBuiltinEnabled != null;
     }
     
     /**
@@ -1159,6 +1331,15 @@ public class Configurable {
         return logTemplateExceptions != null 
                 ? logTemplateExceptions.booleanValue()
                 : (parent != null ? parent.getLogTemplateExceptions() : true);
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.24
+     */
+    public boolean isLogTemplateExceptionsSet() {
+        return logTemplateExceptions != null;
     }
     
     private static final String ALLOWED_CLASSES = "allowed_classes";
@@ -1403,6 +1584,10 @@ public class Configurable {
      *       See: {@link Configuration#setIncompatibleEnhancements(String)}.
      *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
      *       
+     *   <li><p>{@code "template_configurers"}:
+     *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
+     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
@@ -1453,7 +1638,9 @@ public class Configurable {
      *      set. After that, the public <tt>build()</tt> method of the instance will be called, whose return value
      *      will be the value of the whole expression. (The builder class and the <tt>build()</tt> method is simply
      *      found by name, there's no special interface to implement.) Note that if you use the backward compatible
-     *      syntax, where these's no parenthesis after the class name, then it will not look for builder class.
+     *      syntax, where these's no parenthesis after the class name, then it will not look for builder class. Note
+     *      that if you have a builder class, you don't actually need a <tt><i>className</i></tt> class (since 2.3.24);
+     *      after all, <tt><i>className</i>Builder.build()</tt> can return any kind of object. 
      *   </li>
      *   <li>
      *      <p>Currently, the values of arguments and properties can only be one of these:
@@ -1472,6 +1659,17 @@ public class Configurable {
      *     the {@code INSTANCE} field and the builder class is not searched, so the instance will be always
      *     created with its parameterless constructor. (This behavior will possibly change in 2.4.) The {@code ()}
      *     can't be omitted for nested expressions.
+     *   </li>
+     *   <li>
+     *     <p>The following classes can be referred to with short class name instead of full qualified name:
+     *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
+     *     {@link TemplateConfigurer}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
+     *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurerFactory},
+     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory}.
+     *   </li>
+     *   <li>
+     *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
+     *     constructor (since 2.3.24).
      *   </li>
      *   <li>
      *     <p>The classes and methods that the expression meant to access must be all public.
@@ -1665,6 +1863,10 @@ public class Configurable {
         return tz;
     }
 
+    /**
+     * @deprecated Set this on the {@link ObjectWrapper} itself. 
+     */
+    @Deprecated
     public void setStrictBeanModels(boolean strict) {
 	if (!(objectWrapper instanceof BeansWrapper)) {
 	    throw new IllegalStateException("The value of the " + OBJECT_WRAPPER_KEY +
@@ -1803,7 +2005,9 @@ public class Configurable {
     }
 
     /**
-     * Internal entry point for setting unnamed custom attributes
+     * Internal entry point for setting unnamed custom attributes.
+     * 
+     * @see CustomAttribute
      */
     void setCustomAttribute(Object key, Object value) {
         synchronized (customAttributes) {
@@ -1812,7 +2016,9 @@ public class Configurable {
     }
 
     /**
-     * Internal entry point for getting unnamed custom attributes
+     * Internal entry point for getting unnamed custom attributes.
+     * 
+     * @see CustomAttribute
      */
     Object getCustomAttribute(Object key, CustomAttribute attr) {
         synchronized (customAttributes) {
@@ -1822,6 +2028,27 @@ public class Configurable {
                 customAttributes.put(key, o);
             }
             return o;
+        }
+    }
+    
+    /**
+     * For internal usage only, copies the custom attributes set directly on this objects into another
+     * {@link Configurable}. The target {@link Configurable} is assumed to be not seen be other thread than the current
+     * one yet. (That is, the operation is not synchronized on the target {@link Configurable}, only on the source 
+     * {@link Configurable})
+     * 
+     * @since 2.3.24
+     */
+    void copyDirectCustomAttributes(Configurable target) {
+        synchronized (customAttributes) {
+            for (Entry<? extends Object, ? extends Object> custAttrEnt : customAttributes.entrySet()) {
+                Object custAttrKey = custAttrEnt.getKey();
+                if (custAttrKey instanceof String) {
+                    target.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
+                } else {
+                    target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
+                }
+            }
         }
     }
     

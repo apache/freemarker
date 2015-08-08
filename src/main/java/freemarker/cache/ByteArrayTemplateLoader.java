@@ -16,8 +16,10 @@
 
 package freemarker.cache;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,50 +27,23 @@ import java.util.Map;
 import freemarker.template.utility.StringUtil;
 
 /**
- * A {@link TemplateLoader} that uses a {@link Map} with {@link String}-s as its source of 
- * templates.
- *
- * In most case the regular way of loading templates from files will be fine.
- * However, there can be situations where you don't want to or can't load a
- * template from a file, e.g. if you have to deploy a single jar for 
- * JavaWebStart or if they are contained within a database.
- * A single template can be created manually
- * e.g.
- * <pre>
- *   String templateStr="Hello ${user}";
- *   Template t = new Template("name", new StringReader(templateStr),
- *               new Configuration());
- * </pre>
- * If, however, you want to create templates from strings which import other 
- * templates this method doesn't work.
- *
- * In that case you can create a StringTemplateLoader and add each template to 
- * it:
- * <pre>
- *   StringTemplateLoader stringLoader = new StringTemplateLoader();
- *   stringLoader.putTemplate("greetTemplate", "&lt;#macro greet&gt;Hello&lt;/#macro&gt;");
- *   stringLoader.putTemplate("myTemplate", "&lt;#include \"greetTemplate\"&gt;&lt;@greet/&gt; World!");
- * </pre>
- * Then you tell your Configuration object to use it:
- * <pre>
- *   cfg.setTemplateLoader(stringLoader);
- * </pre>
- * After that you should be able to use the templates as usual. Often you will
- * want to combine a <tt>StringTemplateLoader</tt> with another loader. You can
- * do so using a {@link freemarker.cache.MultiTemplateLoader}.
+ * A {@link TemplateLoader} that uses a {@link Map} with {@code byte[]} as its source of templates. This is similar to
+ * {@link StringTemplateLoader}, but uses {@code byte[]} instead of {@link String}; see more details there.
+ * 
+ * @since 2.3.24
  */
-public class StringTemplateLoader implements TemplateLoader {
+public class ByteArrayTemplateLoader implements TemplateLoader {
     
-    private final Map<String, StringTemplateSource> templates = new HashMap<String, StringTemplateSource>();
+    private final Map<String, ByteArrayTemplateSource> templates = new HashMap<String, ByteArrayTemplateSource>();
     
     /**
      * Puts a template into the loader. A call to this method is identical to 
-     * the call to the three-arg {@link #putTemplate(String, String, long)} 
+     * the call to the three-arg {@link #putTemplate(String, byte[], long)} 
      * passing <tt>System.currentTimeMillis()</tt> as the third argument.
      * @param name the name of the template.
      * @param templateSource the source code of the template.
      */
-    public void putTemplate(String name, String templateSource) {
+    public void putTemplate(String name, byte[] templateSource) {
         putTemplate(name, templateSource, System.currentTimeMillis());
     }
     
@@ -87,8 +62,8 @@ public class StringTemplateLoader implements TemplateLoader {
      * @param lastModified the time of last modification of the template in 
      * terms of <tt>System.currentTimeMillis()</tt>
      */
-    public void putTemplate(String name, String templateSource, long lastModified) {
-        templates.put(name, new StringTemplateSource(name, templateSource, lastModified));
+    public void putTemplate(String name, byte[] templateSource, long lastModified) {
+        templates.put(name, new ByteArrayTemplateSource(name, templateSource, lastModified));
     }
     
     public void closeTemplateSource(Object templateSource) {
@@ -99,19 +74,21 @@ public class StringTemplateLoader implements TemplateLoader {
     }
     
     public long getLastModified(Object templateSource) {
-        return ((StringTemplateSource) templateSource).lastModified;
+        return ((ByteArrayTemplateSource) templateSource).lastModified;
     }
     
-    public Reader getReader(Object templateSource, String encoding) {
-        return new StringReader(((StringTemplateSource) templateSource).source);
+    public Reader getReader(Object templateSource, String encoding) throws UnsupportedEncodingException {
+        return new InputStreamReader(
+                new ByteArrayInputStream(((ByteArrayTemplateSource) templateSource).source),
+                encoding);
     }
     
-    private static class StringTemplateSource {
+    private static class ByteArrayTemplateSource {
         private final String name;
-        private final String source;
+        private final byte[] source;
         private final long lastModified;
         
-        StringTemplateSource(String name, String source, long lastModified) {
+        ByteArrayTemplateSource(String name, byte[] source, long lastModified) {
             if (name == null) {
                 throw new IllegalArgumentException("name == null");
             }
@@ -128,8 +105,8 @@ public class StringTemplateLoader implements TemplateLoader {
         
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof StringTemplateSource) {
-                return name.equals(((StringTemplateSource) obj).name);
+            if (obj instanceof ByteArrayTemplateSource) {
+                return name.equals(((ByteArrayTemplateSource) obj).name);
             }
             return false;
         }
@@ -142,8 +119,6 @@ public class StringTemplateLoader implements TemplateLoader {
     
     /**
      * Show class name and some details that are useful in template-not-found errors.
-     * 
-     * @since 2.3.21
      */
     @Override
     public String toString() {

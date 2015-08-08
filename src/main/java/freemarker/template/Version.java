@@ -124,6 +124,24 @@ public final class Version implements Serializable {
     public Version(int major, int minor, int micro) {
         this(major, minor, micro, null, null, null);
     }
+
+    /**
+     * Creates an object based on the {@code int} value that uses the same kind of encoding as {@link #intValue()}.
+     * 
+     * @since 2.3.24
+     */
+    public Version(int intValue) {
+        this.intValue = intValue;
+        
+        this.micro = intValue % 1000;
+        this.minor = (intValue / 1000) % 1000;
+        this.major = intValue / 1000000;
+        
+        this.extraInfo = null;
+        this.gaeCompliant = null;
+        this.buildDate = null;
+        originalStringValue = null;
+    }
     
     public Version(int major, int minor, int micro, String extraInfo, Boolean gaeCompatible, Date buildDate) {
         this.major = major;

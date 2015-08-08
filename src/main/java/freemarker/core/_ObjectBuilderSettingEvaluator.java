@@ -26,9 +26,19 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import freemarker.cache.AndMatcher;
+import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.NotMatcher;
+import freemarker.cache.OrMatcher;
+import freemarker.cache.PathGlobMatcher;
+import freemarker.cache.PathRegexMatcher;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleObjectWrapper;
@@ -125,7 +135,12 @@ public class _ObjectBuilderSettingEvaluator {
         if (!v2321Mode) {
             return ClassUtil.forName(exp.className).newInstance();
         } else {
-            return exp.eval();
+            Object result = exp.eval();
+            if (!expectedClass.isInstance(result)) {
+                throw new _ObjectBuilderSettingEvaluationException("The resulting object (of class "
+                        + result.getClass() + ") is not a(n) " + expectedClass.getName() + ".");
+            }
+            return result;
         }
     }
 
@@ -477,14 +492,35 @@ public class _ObjectBuilderSettingEvaluator {
     private static synchronized String shorthandToFullQualified(String className) {
         if (SHORTHANDS == null) {
             SHORTHANDS = new HashMap/*<String,String>*/();
-            SHORTHANDS.put("DefaultObjectWrapper", DefaultObjectWrapper.class.getName());
-            SHORTHANDS.put("BeansWrapper", BeansWrapper.class.getName());
-            SHORTHANDS.put("SimpleObjectWrapper", SimpleObjectWrapper.class.getName());
+            
+            addWithSimpleName(SHORTHANDS, DefaultObjectWrapper.class);
+            addWithSimpleName(SHORTHANDS, BeansWrapper.class);
+            addWithSimpleName(SHORTHANDS, SimpleObjectWrapper.class);
+
+            addWithSimpleName(SHORTHANDS, TemplateConfigurer.class);
+            
+            addWithSimpleName(SHORTHANDS, PathGlobMatcher.class);
+            addWithSimpleName(SHORTHANDS, FileNameGlobMatcher.class);
+            addWithSimpleName(SHORTHANDS, PathRegexMatcher.class);
+            addWithSimpleName(SHORTHANDS, AndMatcher.class);
+            addWithSimpleName(SHORTHANDS, OrMatcher.class);
+            addWithSimpleName(SHORTHANDS, NotMatcher.class);
+            
+            addWithSimpleName(SHORTHANDS, ConditionalTemplateConfigurerFactory.class);
+            addWithSimpleName(SHORTHANDS, MergingTemplateConfigurerFactory.class);
+            addWithSimpleName(SHORTHANDS, FirstMatchTemplateConfigurerFactory.class);
+            
+            addWithSimpleName(SHORTHANDS, Locale.class);
+            SHORTHANDS.put("TimeZone", "freemarker.core._TimeZone");
         }
         String fullClassName = (String) SHORTHANDS.get(className);
         return fullClassName == null ? className : fullClassName;
     }
     
+    private static void addWithSimpleName(Map map, Class<?> pClass) {
+        map.put(pClass.getSimpleName(), pClass.getName());
+    }
+
     private void setJavaBeanProperties(Object bean,
             List/*<String>*/ namedParamNames, List/*<Object>*/ namedParamValues)
             throws _ObjectBuilderSettingEvaluationException {
@@ -579,19 +615,19 @@ public class _ObjectBuilderSettingEvaluator {
         @Override
         Object eval() throws _ObjectBuilderSettingEvaluationException {
             Class cl;
-            try {
-                cl = ClassUtil.forName(className);
-            } catch (Exception e) {
-                throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to get class " + StringUtil.jQuote(className) + ".", e);
-            }
-            
+
             boolean clIsBuilderClass;
             try {
-                cl = ClassUtil.forName(cl.getName() + BUILDER_CLASS_POSTFIX);
+                cl = ClassUtil.forName(className + BUILDER_CLASS_POSTFIX);
                 clIsBuilderClass = true;
             } catch (ClassNotFoundException e) {
                 clIsBuilderClass = false;
+                try {
+                    cl = ClassUtil.forName(className);
+                } catch (Exception e2) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "Failed to get class " + StringUtil.jQuote(className) + ".", e2);
+                }
             }
             
             if (!clIsBuilderClass && hasNoParameters()) {
@@ -622,11 +658,6 @@ public class _ObjectBuilderSettingEvaluator {
                     ((WriteProtectable) constructorResult).writeProtect();
                 }
                 result = constructorResult;
-            }
-            
-            if (!expectedClass.isInstance(result)) {
-                throw new _ObjectBuilderSettingEvaluationException("The resulting object (of class "
-                        + result.getClass() + ") is not a(n) " + expectedClass.getName() + ".");
             }
             
             return result;

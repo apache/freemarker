@@ -44,26 +44,32 @@ import freemarker.core.FMParser;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
 import freemarker.core.ParseException;
+import freemarker.core.ParserConfiguration;
+import freemarker.core.TemplateConfigurer;
 import freemarker.core.TemplateElement;
 import freemarker.core.TextBlock;
 import freemarker.core.TokenMgrError;
 import freemarker.debug.impl.DebuggerService;
 
 /**
- * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
- * multiple threads.
+ * <p>
+ * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
+ * threads.
  * 
- * <p>Typically, you will use {@link Configuration#getTemplate(String)} to create/get {@link Template} objects, so
- * you don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String}
- * that contains the template source code. But then it's
- * important to know that while the resulting {@link Template} is efficient for later processing, creating a new
- * {@link Template} itself is relatively expensive. So try to re-use {@link Template} objects if possible.
- * {@link Configuration#getTemplate(String)} does that (caching {@link Template}-s) for you, but the constructor of
- * course doesn't, so it's up to you to solve then.
+ * <p>
+ * Typically, you will use {@link Configuration#getTemplate(String)} to create/get {@link Template} objects, so you
+ * don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String} that
+ * contains the template source code. But then it's important to know that while the resulting {@link Template} is
+ * efficient for later processing, creating a new {@link Template} itself is relatively expensive. So try to re-use
+ * {@link Template} objects if possible. {@link Configuration#getTemplate(String)} (and its overloads) does that
+ * (caching {@link Template}-s) for you, but the constructor of course doesn't, so it's up to you to solve then.
  * 
- * <p>Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods
- * for changing FreeMarker settings. Those must not be used while the template is being processed, or if the
- * template object is already accessible from multiple threads.
+ * <p>
+ * Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods for
+ * changing FreeMarker settings. Those must not be used while the template is being processed, or if the template object
+ * is already accessible from multiple threads. If some templates need different settings that those coming from the
+ * shared {@link Configuration}, and you are using {@link Configuration#getTemplate(String)} (or its overloads), then
+ * see {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
  */
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
@@ -83,6 +89,7 @@ public class Template extends Configurable {
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
+    private final ParserConfiguration customParserConfiguration;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
     private Version templateLanguageVersion;
@@ -91,11 +98,12 @@ public class Template extends Configurable {
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    private Template(String name, String sourceName, Configuration cfg, boolean overloadSelector) {
+    private Template(String name, String sourceName, Configuration cfg, ParserConfiguration customParserConfiguration) {
         super(toNonNull(cfg));
         this.name = name;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
+        this.customParserConfiguration = customParserConfiguration; 
     }
 
     private static Configuration toNonNull(Configuration cfg) {
@@ -185,10 +193,41 @@ public class Template extends Configurable {
      * 
      * @since 2.3.22
      */
-    @Deprecated
+   @Deprecated
+   public Template(
+           String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
+       this(name, sourceName, reader, cfg, null, encoding);
+   }
+   
+    /**
+     * Same as {@link #Template(String, String, Reader, Configuration, String)}, but also specifies a
+     * {@link TemplateConfigurer}. This is mostly meant to be used by FreeMarker internally, but advanced users might
+     * still find this useful.
+     * 
+     * @param customParserConfiguration
+     *            Overrides the parsing related configuration settings of the {@link Configuration} parameter; can be
+     *            {@code null}. This is useful as the {@link Configuration} is normally a singleton shared by all
+     *            templates, and so it's not good for specifying template-specific settings. (While
+     *            {@link Template} itself has methods to specify settings just for that template, those don't influence
+     *            the parsing, and you only have opportunity to call them after the parsing anyway.) This objects is
+     *            often a {@link TemplateConfigurer} whose parent is the {@link Configuration} parameter, and then it
+     *            practically just overrides some of the parser settings, as the others are inherited from the
+     *            {@link Configuration}. Note that if this is a {@link TemplateConfigurer}, you will also want to call
+     *            {@link TemplateConfigurer#configure(Template)} on the resulting {@link Template} so that
+     *            {@link Configurable} settings will be set too, because this constructor only uses it as a
+     *            {@link ParserConfiguration}.  
+     * @param encoding
+     *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
+     *            null}, it overrides the value coming from the {@code TemplateConfigurer#getEncoding()} method of the
+     *            {@code templateConfigurer} parameter.
+     * 
+     * @since 2.3.24
+     */
     public Template(
-            String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(name, sourceName, cfg, true);
+            String name, String sourceName, Reader reader,
+            Configuration cfg, ParserConfiguration customParserConfiguration,
+            String encoding) throws IOException {
+        this(name, sourceName, cfg, customParserConfiguration);
         
         this.encoding = encoding;
         LineTableBuilder ltbReader;
@@ -200,13 +239,8 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                final Configuration actualCfg = getConfiguration();
                 parser = new FMParser(this, reader,
-                        actualCfg.getStrictSyntaxMode(),
-                        actualCfg.getWhitespaceStripping(),
-                        actualCfg.getTagSyntax(),
-                        actualCfg.getNamingConvention(),
-                        actualCfg.getIncompatibleImprovements().intValue());
+                        customParserConfiguration != null ? customParserConfiguration : getConfiguration());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -263,7 +297,7 @@ public class Template extends Configurable {
     @Deprecated
     // [2.4] remove this
     Template(String name, TemplateElement root, Configuration cfg) {
-        this(name, null, cfg, true);
+        this(name, null, cfg, (ParserConfiguration) null);
         this.rootElement = root;
         DebuggerService.registerTemplate(this);
     }
@@ -291,7 +325,7 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        Template template = new Template(name, sourceName, config, true);
+        Template template = new Template(name, sourceName, config, (ParserConfiguration) null);
         template.rootElement = new TextBlock(content);
         template.actualTagSyntax = config.getTagSyntax();
         DebuggerService.registerTemplate(template);
@@ -520,6 +554,27 @@ public class Template extends Configurable {
      */
     public Configuration getConfiguration() {
         return (Configuration) getParent();
+    }
+    
+    /**
+     * Returns the value passed in as the parameter of
+     * {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}.
+     * 
+     * @since 2.3.24
+     */
+    public ParserConfiguration getCustomParserConfiguration() {
+        return customParserConfiguration;
+    }
+
+    /**
+     * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
+     * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfigurer}, or something else. It's
+     * never {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    public ParserConfiguration getEffectiveParserConfiguration() {
+        return customParserConfiguration != null ? customParserConfiguration : getConfiguration();
     }
     
     /**
@@ -952,5 +1007,6 @@ public class Template extends Configurable {
         }
 
     }
+
 }
 

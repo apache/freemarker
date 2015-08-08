@@ -51,6 +51,8 @@ public class FMParser {
     private Template template;
 
     private boolean stripWhitespace, stripText;
+    private int incompatibleImprovements;
+    private ArithmeticEngine arithmeticEngine;
 
     /** Keeps track of #list and #foreach nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
@@ -68,7 +70,6 @@ public class FMParser {
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
-    private int incompatibleImprovements;
 
     /**
      * Create an FM expression parser using a string.
@@ -97,11 +98,7 @@ public class FMParser {
      * @Deprecated This is an internal API of FreeMarker; will be removed in 2.4.
      */
     public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
-        this(reader);
-        setTemplate(template);
-        token_source.setParser(this);
-        token_source.strictEscapeSyntax = strictEscapeSyntax;
-        this.stripWhitespace = stripWhitespace;
+        this(template, reader, strictEscapeSyntax, stripWhitespace, Configuration.AUTO_DETECT_TAG_SYNTAX);
     }
 
     /**
@@ -124,11 +121,33 @@ public class FMParser {
     /**
      * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
      */
-    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
+    public FMParser(Template template, Reader reader, boolean strictSyntaxMode, boolean whitespaceStripping,
             int tagSyntax, int namingConvention, int incompatibleImprovements) {
-        this(template, reader, strictEscapeSyntax, stripWhitespace);
+        this(template, reader,
+                new SimpleParserConfiguration(
+                        strictSyntaxMode, whitespaceStripping,
+                        tagSyntax, namingConvention,
+                        new Version(incompatibleImprovements),
+                        template != null ? template.getArithmeticEngine() : null, null));
+    }
         
-        switch (tagSyntax) {
+    /**
+     * @Deprecated This is an internal API of FreeMarker; don't call it from outside FreeMarker.
+     * 
+     * @since 2.3.24
+     */
+    public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
+        this(reader);
+        
+        setTemplate(template);
+        
+        token_source.setParser(this);
+        
+        token_source.strictEscapeSyntax = pCfg.getStrictSyntaxMode();
+        
+        this.stripWhitespace = pCfg.getWhitespaceStripping();
+
+        switch (pCfg.getTagSyntax()) {
         case Configuration.AUTO_DETECT_TAG_SYNTAX:
             token_source.autodetectTagSyntax = true;
             break;
@@ -141,18 +160,23 @@ public class FMParser {
         default:
             throw new IllegalArgumentException("Illegal argument for tagSyntax");
         }
-        
-        switch (namingConvention) {
+
+        switch (pCfg.getNamingConvention()) {
         case Configuration.AUTO_DETECT_NAMING_CONVENTION:
         case Configuration.CAMEL_CASE_NAMING_CONVENTION:
         case Configuration.LEGACY_NAMING_CONVENTION:
-            token_source.initialNamingConvention = namingConvention;
-            token_source.namingConvention = namingConvention;
+            token_source.initialNamingConvention = pCfg.getNamingConvention();
+            token_source.namingConvention = pCfg.getNamingConvention();
             break;
         default:
             throw new IllegalArgumentException("Illegal argument for namingConvention");
         }
-        
+
+        this.arithmeticEngine = pCfg.getArithmeticEngine();
+        if (template != null) {            template.setArithmeticEngine(this.arithmeticEngine);
+        }
+
+        int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
     }
@@ -164,14 +188,20 @@ public class FMParser {
         this(null, new StringReader(template), true, true);
     }
 
-    void setTemplate(Template template)
-    {
+    void setTemplate(Template template) {
         this.template = template;
+        if (template != null && arithmeticEngine == null) {            arithmeticEngine = template.getArithmeticEngine();
+        }
     }
 
-    Template getTemplate()
-    {
+    Template getTemplate() {
         return template;
+    }
+
+    void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {        this.arithmeticEngine = arithmeticEngine;
+    }
+
+    ArithmeticEngine getArithmeticEngine() {        return arithmeticEngine;
     }
 
     /**
@@ -1731,7 +1761,7 @@ Expression NumberLiteral() :
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(template.getArithmeticEngine().toNumber(s));
+        Expression result = new NumberLiteral(arithmeticEngine.toNumber(s));
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
         return result;
@@ -2020,7 +2050,7 @@ StringLiteral StringLiteral(boolean interpolate) :
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source);
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(this, token_source);
         }
         return result;
     }

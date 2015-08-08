@@ -16,12 +16,16 @@
 
 package freemarker.cache;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.Locale;
 
-import junit.framework.TestCase;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
@@ -29,11 +33,9 @@ import freemarker.template.Template;
 import freemarker.template.TemplateNotFoundException;
 import freemarker.template.Version;
 
-public class TemplateCacheTest extends TestCase {
-    public TemplateCacheTest(String name) {
-        super(name);
-    }
+public class TemplateCacheTest {
 
+    @Test
     public void testCachedException() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
         TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage());
@@ -50,8 +52,9 @@ public class TemplateCacheTest extends TestCase {
                 fail();
             } catch (IOException e2) {
                 // Still 1 - returned cached exception
-                assertEquals("There was an error loading the template on an " +
-                        "earlier attempt; it's attached as a cause", e2.getMessage());
+                assertThat(e2.getMessage(),
+                        Matchers.allOf(Matchers.containsString("There was an error loading the template on an " +
+                        "earlier attempt")));
                 assertSame(e, e2.getCause());
                 assertEquals(1, loader.getFindCount());
                 try {
@@ -67,6 +70,7 @@ public class TemplateCacheTest extends TestCase {
         }
     }
     
+    @Test
     public void testCachedNotFound() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
         TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage(), new Configuration());
@@ -118,6 +122,7 @@ public class TemplateCacheTest extends TestCase {
         
     }
     
+    @Test
     public void testManualRemovalPlain() throws IOException {
         Configuration cfg = new Configuration();
         cfg.setCacheStorage(new StrongCacheStorage());
@@ -144,6 +149,7 @@ public class TemplateCacheTest extends TestCase {
         assertEquals("2 v2", cfg.getTemplate("2.ftl").toString()); // changed
     }
 
+    @Test
     public void testManualRemovalI18ed() throws IOException {
         Configuration cfg = new Configuration();
         cfg.setCacheStorage(new StrongCacheStorage());
@@ -184,6 +190,7 @@ public class TemplateCacheTest extends TestCase {
         assertEquals("1_en v2", cfg.getTemplate("1.ftl", Locale.UK).toString());        
     }
 
+    @Test
     public void testZeroUpdateDelay() throws IOException {
         Configuration cfg = new Configuration();
         cfg.setLocale(Locale.US);
@@ -203,6 +210,7 @@ public class TemplateCacheTest extends TestCase {
         assertEquals("v10", cfg.getTemplate("t.ftl").toString()); // still v10
     }
     
+    @Test
     public void testIncompatibleImprovementsChangesURLConCaching() throws IOException {
         Version newVersion = Configuration.VERSION_2_3_21;
         Version oldVersion = Configuration.VERSION_2_3_20;
@@ -253,6 +261,7 @@ public class TemplateCacheTest extends TestCase {
         }
     }
     
+    @Test
     public void testWrongEncodingReload() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setLocale(Locale.US);
@@ -279,6 +288,7 @@ public class TemplateCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void testEncodingSelection() throws IOException {
         Locale hungary = new Locale("hu", "HU"); 
                 
@@ -349,6 +359,7 @@ public class TemplateCacheTest extends TestCase {
         }
     }
     
+    @Test
     public void testTemplateNameFormatExceptionAndBackwardCompatibility() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         
