@@ -18,6 +18,7 @@ package freemarker.cache;
 import java.io.IOException;
 
 import freemarker.core.TemplateConfigurer;
+import freemarker.template.Configuration;
 
 /**
  * Returns the merged results of all the child factories. The factories are merged in the order as they were added.
@@ -46,7 +47,14 @@ public class MergingTemplateConfigurerFactory extends TemplateConfigurerFactory 
                     resultTC = tc;
                 } else {
                     if (mergedTC == null) {
+                        Configuration cfg = getConfiguration();
+                        if (cfg == null) {
+                            throw new IllegalStateException(
+                                    "The TemplateConfigurerFactory wasn't associated to a Configuration yet.");
+                        }
+                        
                         mergedTC = new TemplateConfigurer();
+                        mergedTC.setParentConfiguration(cfg);
                         mergedTC.merge(resultTC);
                         resultTC = mergedTC;
                     }
@@ -55,6 +63,13 @@ public class MergingTemplateConfigurerFactory extends TemplateConfigurerFactory 
             }
         }
         return resultTC;
+    }
+    
+    @Override
+    protected void setConfigurationOfChildren(Configuration cfg) {
+        for (TemplateConfigurerFactory templateConfigurerFactory : templateConfigurerFactories) {
+            templateConfigurerFactory.setConfiguration(cfg);
+        }
     }
 
 }

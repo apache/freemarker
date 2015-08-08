@@ -120,9 +120,12 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     public void setParentConfiguration(Configuration cfg) {
         setParent(cfg);
     }
-    
+
+    /**
+     * Returns the parent {@link Configuration}, or {@code null} if none was associated yet.
+     */
     public Configuration getParentConfiguration() {
-        return (Configuration) getParent();
+        return parentConfigurationSet ? (Configuration) getParent() : null;
     }
     
     /**

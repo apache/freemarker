@@ -18,6 +18,7 @@ package freemarker.cache;
 import java.io.IOException;
 
 import freemarker.core.TemplateConfigurer;
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
@@ -26,6 +27,8 @@ import freemarker.template.Template;
  * @since 2.3.24
  */
 public abstract class TemplateConfigurerFactory {
+    
+    private Configuration cfg;
 
     /**
      * Returns (maybe creates) the {@link TemplateConfigurer} for the given template source.
@@ -47,5 +50,39 @@ public abstract class TemplateConfigurerFactory {
      */
     public abstract TemplateConfigurer get(String sourceName, Object templateSource)
             throws IOException, TemplateConfigurerFactoryException;
+    
+    /**
+     * Binds this {@link TemplateConfigurerFactory} to a {@link Configuration}. Once it's bound, it can't be bound to
+     * another {@link Configuration} any more. This is automatically called by
+     * {@link Configuration#setTemplateConfigurers(TemplateConfigurerFactory)}.
+     */
+    public final void setConfiguration(Configuration cfg) {
+        if (this.cfg != null) {
+            if (cfg != this.cfg) {
+                throw new IllegalStateException(
+                        "The TemplateConfigurerFactory is already bound to another Configuration");
+            }
+            return;
+        } else {
+            this.cfg = cfg;
+            setConfigurationOfChildren(cfg);
+        }
+    }
+    
+    /**
+     * Returns the configuration this object belongs to, or {@code null} if it isn't yet bound to a
+     * {@link Configuration}.
+     */
+    public Configuration getConfiguration() {
+        return cfg;
+    }
+    
+    /**
+     * Calls {@link TemplateConfigurer#setParentConfiguration(Configuration)} on each enclosed
+     * {@link TemplateConfigurer} and {@link TemplateConfigurerFactory#setConfiguration(Configuration)}
+     * on each enclosed {@link TemplateConfigurerFactory} objects. It only supposed to call these on the direct
+     * "children" of this object, not on the children of the children.
+     */
+    protected abstract void setConfigurationOfChildren(Configuration cfg);
 
 }

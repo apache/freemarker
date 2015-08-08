@@ -15,24 +15,28 @@
  */
 package freemarker.cache;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import freemarker.core.TemplateConfigurer;
+import freemarker.template.Configuration;
 
 public class TemplateConfigurerFactoryTest {
+    
+    private Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 
     @Test
     public void testCondition1() throws IOException, TemplateConfigurerFactoryException {
         TemplateConfigurer tc = newTemplateConfigurer(1);
         
         TemplateConfigurerFactory tcf = new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.ftlx"), tc);
+        tcf.setConfiguration(cfg);
         
         assertNotApplicable(tcf, "x.ftl");
         assertApplicable(tcf, "x.ftlx", tc);
@@ -46,6 +50,7 @@ public class TemplateConfigurerFactoryTest {
                 new FileNameGlobMatcher("*.ftlx"),
                 new ConditionalTemplateConfigurerFactory(
                         new FileNameGlobMatcher("x.*"), tc));
+        tcf.setConfiguration(cfg);
         
         assertNotApplicable(tcf, "x.ftl");
         assertNotApplicable(tcf, "y.ftlx");
@@ -62,6 +67,7 @@ public class TemplateConfigurerFactoryTest {
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.ftlx"), tc1),
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*a*.*"), tc2),
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*b*.*"), tc3));
+        tcf.setConfiguration(cfg);
         
         assertNotApplicable(tcf, "x.ftl");
         assertApplicable(tcf, "x.ftlx", tc1);
@@ -85,17 +91,18 @@ public class TemplateConfigurerFactoryTest {
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.ftlx"), tc1),
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*a*.*"), tc2),
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*b*.*"), tc3));
+        tcf.setConfiguration(cfg);
 
         try {
             assertNotApplicable(tcf, "x.ftl");
         } catch (TemplateConfigurerFactoryException e) {
-            assertThat(e.getMessage(), Matchers.containsString("x.ftl"));
+            assertThat(e.getMessage(), containsString("x.ftl"));
         }
         tcf.setNoMatchErrorDetails("Test details");
         try {
             assertNotApplicable(tcf, "x.ftl");
         } catch (TemplateConfigurerFactoryException e) {
-            assertThat(e.getMessage(), Matchers.containsString("Test details"));
+            assertThat(e.getMessage(), containsString("Test details"));
         }
         
         tcf.setAllowNoMatch(true);
@@ -136,6 +143,7 @@ public class TemplateConfigurerFactoryTest {
                         new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.*x"), tcXml))
                         .allowNoMatch(true),
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.nws.*"), tcNWS));
+        tcf.setConfiguration(cfg);
         
         assertNotApplicable(tcf, "x.ftl");
         assertApplicable(tcf, "b/x.ftl", tcBCommon);
@@ -145,6 +153,28 @@ public class TemplateConfigurerFactoryTest {
         assertApplicable(tcf, "a/x.s.nws.ftlx", tcA, tcXml, tcNWS);
         assertApplicable(tcf, "a.hh", tcHH);
         assertApplicable(tcf, "a.nws.hh", tcHH, tcNWS);
+    }
+
+    @Test
+    public void testSetConfiguration() {
+        TemplateConfigurer tc = new TemplateConfigurer();
+        ConditionalTemplateConfigurerFactory tcf = new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*"), tc);
+        assertNull(tcf.getConfiguration());
+        assertNull(tc.getParentConfiguration());
+        
+        tcf.setConfiguration(cfg);
+        assertEquals(cfg, tcf.getConfiguration());
+        assertEquals(cfg, tc.getParentConfiguration());
+        
+        // Ignored:
+        tcf.setConfiguration(cfg);
+        
+        try {
+            tcf.setConfiguration(Configuration.getDefaultConfiguration());
+            fail();
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), containsString("TemplateConfigurerFactory"));
+        }
     }
 
     @SuppressWarnings("boxing")
@@ -163,6 +193,7 @@ public class TemplateConfigurerFactoryTest {
     private void assertApplicable(TemplateConfigurerFactory tcf, String sourceName, TemplateConfigurer... expectedTCs)
             throws IOException, TemplateConfigurerFactoryException {
         TemplateConfigurer mergedTC = tcf.get(sourceName, "dummy");
+        assertNotNull("TC should have its parents Configuration set", mergedTC.getParentConfiguration());
         List<String> mergedTCAttNames = Arrays.asList(mergedTC.getCustomAttributeNames());
 
         for (TemplateConfigurer expectedTC : expectedTCs) {

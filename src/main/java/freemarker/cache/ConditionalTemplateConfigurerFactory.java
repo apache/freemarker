@@ -18,6 +18,7 @@ package freemarker.cache;
 import java.io.IOException;
 
 import freemarker.core.TemplateConfigurer;
+import freemarker.template.Configuration;
 
 /**
  * Returns the given {@link TemplateConfigurer} directly, or another {@link TemplateConfigurerFactory}'s result, when
@@ -29,32 +30,42 @@ public class ConditionalTemplateConfigurerFactory extends TemplateConfigurerFact
 
     private final TemplateSourceMatcher matcher;
     private final TemplateConfigurer templateConfigurer;
-    private final TemplateConfigurerFactory templateConfigurerFactories;
+    private final TemplateConfigurerFactory templateConfigurerFactory;
 
     public ConditionalTemplateConfigurerFactory(
-            TemplateSourceMatcher matcher, TemplateConfigurerFactory templateConfigurerFactories) {
+            TemplateSourceMatcher matcher, TemplateConfigurerFactory templateConfigurerFactory) {
         this.matcher = matcher;
         this.templateConfigurer = null;
-        this.templateConfigurerFactories = templateConfigurerFactories;
+        this.templateConfigurerFactory = templateConfigurerFactory;
     }
     
     public ConditionalTemplateConfigurerFactory(TemplateSourceMatcher matcher, TemplateConfigurer templateConfigurer) {
         this.matcher = matcher;
         this.templateConfigurer = templateConfigurer;
-        this.templateConfigurerFactories = null;
+        this.templateConfigurerFactory = null;
     }
 
     @Override
     public TemplateConfigurer get(String sourceName, Object templateSource)
             throws IOException, TemplateConfigurerFactoryException {
         if (matcher.matches(sourceName, templateSource)) {
-            if (templateConfigurerFactories != null) {
-                return templateConfigurerFactories.get(sourceName, templateSource);
+            if (templateConfigurerFactory != null) {
+                return templateConfigurerFactory.get(sourceName, templateSource);
             } else {
                 return templateConfigurer;
             }
         } else {
             return null;
+        }
+    }
+
+    @Override
+    protected void setConfigurationOfChildren(Configuration cfg) {
+        if (templateConfigurer != null) {
+            templateConfigurer.setParentConfiguration(cfg);
+        }
+        if (templateConfigurerFactory != null) {
+            templateConfigurerFactory.setConfiguration(cfg);
         }
     }
     
