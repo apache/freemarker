@@ -285,7 +285,7 @@ public class TemplateCache {
             return new MaybeMissingTemplate(name, "The TemplateLoader was null.");
         }
         
-        Template template = getTemplate(templateLoader, name, locale, customLookupCondition, encoding, parseAsFTL);
+        Template template = getTemplateInternal(name, locale, customLookupCondition, encoding, parseAsFTL);
         return template != null ? new MaybeMissingTemplate(template) : new MaybeMissingTemplate(name, (String) null);
     }    
 
@@ -315,8 +315,8 @@ public class TemplateCache {
         return _TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0);        
     }
     
-    private Template getTemplate(
-            final TemplateLoader templateLoader, final String name, final Locale locale, final Object customLookupCondition,
+    private Template getTemplateInternal(
+            final String name, final Locale locale, final Object customLookupCondition,
             final String encoding, final boolean parseAsFTL)
     throws IOException {
         final boolean debug = LOG.isDebugEnabled();
@@ -670,7 +670,7 @@ public class TemplateCache {
      * {@link #setDelay(long)} alone does.
      * 
      * For the meaning of the parameters, see
-     * {@link #getTemplate(TemplateLoader, String, Locale, Object, String, boolean)}.
+     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean, boolean)}
      */
     public void removeTemplate(
             String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
