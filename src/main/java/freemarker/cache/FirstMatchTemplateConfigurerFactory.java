@@ -91,7 +91,7 @@ public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFacto
     /**
      * Same as {@link #setAllowNoMatch(boolean)}, but return this object to support "fluent API" style. 
      */
-    public FirstMatchTemplateConfigurerFactory allowsNoMatch(boolean allow) {
+    public FirstMatchTemplateConfigurerFactory allowNoMatch(boolean allow) {
         setAllowNoMatch(allow);
         return this;
     }

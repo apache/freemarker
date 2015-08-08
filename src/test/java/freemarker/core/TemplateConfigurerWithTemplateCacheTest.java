@@ -59,7 +59,7 @@ public class TemplateConfigurerWithTemplateCacheTest {
                 new FirstMatchTemplateConfigurerFactory(
                         new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8),
                         new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf16*"), tcUtf16)
-                ).allowsNoMatch(true));
+                ).allowNoMatch(true));
         
         {
             Template t = cfg.getTemplate("utf8.ftl");
