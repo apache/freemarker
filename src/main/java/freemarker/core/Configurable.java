@@ -1584,6 +1584,10 @@ public class Configurable {
      *       See: {@link Configuration#setIncompatibleEnhancements(String)}.
      *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
      *       
+     *   <li><p>{@code "template_configurers"}:
+     *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
+     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
