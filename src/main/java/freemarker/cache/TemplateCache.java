@@ -527,8 +527,6 @@ public class TemplateCache {
             throw newIOException("Error while getting TemplateConfigurer; see cause exception.", e);
         }
         if (tc != null) {
-            tc.setParentConfiguration(config);
-            
             // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
             if (tc.isEncodingSet()) {
                 initialEncoding = tc.getEncoding();

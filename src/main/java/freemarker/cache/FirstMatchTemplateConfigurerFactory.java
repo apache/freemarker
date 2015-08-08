@@ -18,6 +18,7 @@ package freemarker.cache;
 import java.io.IOException;
 
 import freemarker.core.TemplateConfigurer;
+import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -102,6 +103,13 @@ public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFacto
     public FirstMatchTemplateConfigurerFactory noMatchErrorDetails(String message) {
         setNoMatchErrorDetails(message);
         return this;
+    }
+
+    @Override
+    protected void setConfigurationOfChildren(Configuration cfg) {
+        for (TemplateConfigurerFactory templateConfigurerFactory : templateConfigurerFactories) {
+            templateConfigurerFactory.setConfiguration(cfg);
+        }
     }
     
 }

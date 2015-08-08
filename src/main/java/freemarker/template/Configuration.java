@@ -1130,6 +1130,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void setTemplateConfigurers(TemplateConfigurerFactory templateConfigurers) {
         if (cache.getTemplateConfigurers() != templateConfigurers) {
+            templateConfigurers.setConfiguration(this);
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
                     templateConfigurers);
