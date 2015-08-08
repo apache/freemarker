@@ -23659,6 +23659,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>freemarker.cache.ByteArrayTemplateLoader</literal>,
+              which is similar to <literal>StringTemplateLoader</literal>, but
+              stores the templates as <literal>byte[]</literal>-s instead of
+              as <literal>String</literal>-s.</para>
+            </listitem>
+
+            <listitem>
               <para><emphasis role="strong">Attention!</emphasis> Raised
               minimum required Java version from 1.4 to 1.5 (aka. Java
               5)</para>

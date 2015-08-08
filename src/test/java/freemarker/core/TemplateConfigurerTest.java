@@ -40,8 +40,6 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-
 import freemarker.template.Configuration;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
@@ -121,6 +119,20 @@ public class TemplateConfigurerTest {
         NON_DEFAULT_LOCALE = locale;
     }
 
+    private static final String NON_DEFAULT_ENCODING;
+
+    static {
+        String defaultEncoding = DEFAULT_CFG.getDefaultEncoding();
+        String encoding = "UTF-16";
+        if (encoding.equals(defaultEncoding)) {
+            encoding = "UTF-8";
+            if (encoding.equals(defaultEncoding)) {
+                throw new AssertionError("Couldn't chose a non-default locale");
+            }
+        }
+        NON_DEFAULT_ENCODING = encoding;
+    }
+    
     private static final Map<String, Object> SETTING_ASSIGNMENTS;
 
     static {
@@ -152,6 +164,9 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
+        
+        // Special settings:
+        SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
     }
     
     public static String getIsSetMethodName(String readMethodName) {
@@ -164,7 +179,8 @@ public class TemplateConfigurerTest {
         return isSetMethodName;
     }
 
-    public static List<PropertyDescriptor> getTemplateConfigurerSettingPropDescs(boolean includeCompilerSettings)
+    public static List<PropertyDescriptor> getTemplateConfigurerSettingPropDescs(
+            boolean includeCompilerSettings, boolean includeSpecialSettings)
             throws IntrospectionException {
         List<PropertyDescriptor> settingPropDescs = new ArrayList<PropertyDescriptor>();
 
@@ -173,7 +189,9 @@ public class TemplateConfigurerTest {
             String name = pd.getName();
             if (pd.getWriteMethod() != null && !IGNORED_PROP_NAMES.contains(name)
                     && (includeCompilerSettings
-                            || (CONFIGURABLE_PROP_NAMES.contains(name) || !PARSER_PROP_NAMES.contains(name)))) {
+                            || (CONFIGURABLE_PROP_NAMES.contains(name) || !PARSER_PROP_NAMES.contains(name)))
+                    && (includeSpecialSettings
+                            || !SPECIAL_PROP_NAMES.contains(name))) {
                 if (pd.getReadMethod() == null) {
                     throw new AssertionError("Property has no read method: " + pd);
                 }
@@ -238,6 +256,12 @@ public class TemplateConfigurerTest {
             }
         }
     }
+
+    private static final Set<String> SPECIAL_PROP_NAMES;
+    static {
+        SPECIAL_PROP_NAMES = new HashSet<String>();
+        SPECIAL_PROP_NAMES.add("encoding");
+    }
     
     private static final CustomAttribute CA1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
     private static final CustomAttribute CA2 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
@@ -246,8 +270,8 @@ public class TemplateConfigurerTest {
 
     @Test
     public void testMergeBasicFunctionality() throws Exception {
-        for (PropertyDescriptor propDesc1 : getTemplateConfigurerSettingPropDescs(true)) {
-            for (PropertyDescriptor propDesc2 : getTemplateConfigurerSettingPropDescs(true)) {
+        for (PropertyDescriptor propDesc1 : getTemplateConfigurerSettingPropDescs(true, true)) {
+            for (PropertyDescriptor propDesc2 : getTemplateConfigurerSettingPropDescs(true, true)) {
                 TemplateConfigurer tc1 = new TemplateConfigurer();
                 TemplateConfigurer tc2 = new TemplateConfigurer();
 
@@ -256,9 +280,9 @@ public class TemplateConfigurerTest {
                 Object value2 = SETTING_ASSIGNMENTS.get(propDesc2.getName());
                 propDesc2.getWriteMethod().invoke(tc2, value2);
 
-                TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2));
-                Object mValue1 = propDesc1.getReadMethod().invoke(tcm);
-                Object mValue2 = propDesc2.getReadMethod().invoke(tcm);
+                tc1.merge(tc2);
+                Object mValue1 = propDesc1.getReadMethod().invoke(tc1);
+                Object mValue2 = propDesc2.getReadMethod().invoke(tc1);
 
                 assertEquals("For " + propDesc1.getName(), value1, mValue1);
                 assertEquals("For " + propDesc2.getName(), value2, mValue2);
@@ -280,11 +304,12 @@ public class TemplateConfigurerTest {
         TemplateConfigurer tc3 = new TemplateConfigurer();
         tc3.setDateFormat("3");
 
-        TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2, tc3));
+        tc1.merge(tc2);
+        tc1.merge(tc3);
 
-        assertEquals("3", tcm.getDateFormat());
-        assertEquals("2", tcm.getTimeFormat());
-        assertEquals("1", tcm.getDateTimeFormat());
+        assertEquals("3", tc1.getDateFormat());
+        assertEquals("2", tc1.getTimeFormat());
+        assertEquals("1", tc1.getDateTimeFormat());
     }
     
     @Test
@@ -307,14 +332,15 @@ public class TemplateConfigurerTest {
         tc3.setCustomAttribute("k1", "v3");
         CA1.set("V3", tc2);
 
-        TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2, tc3));
+        tc1.merge(tc2);
+        tc1.merge(tc3);
 
-        assertEquals("v3", tcm.getCustomAttribute("k1"));
-        assertEquals("v2", tcm.getCustomAttribute("k2"));
-        assertEquals("v1", tcm.getCustomAttribute("k3"));
-        assertEquals("V3", CA1.get(tcm));
-        assertEquals("V2", CA2.get(tcm));
-        assertEquals("V1", CA3.get(tcm));
+        assertEquals("v3", tc1.getCustomAttribute("k1"));
+        assertEquals("v2", tc1.getCustomAttribute("k2"));
+        assertEquals("v1", tc1.getCustomAttribute("k3"));
+        assertEquals("V3", CA1.get(tc1));
+        assertEquals("V2", CA2.get(tc1));
+        assertEquals("V1", CA3.get(tc1));
     }
     
     @Test
@@ -344,32 +370,33 @@ public class TemplateConfigurerTest {
         tc3.setCustomAttribute("k1", null);
         CA1.set(null, tc2);
 
-        TemplateConfigurer tcm = TemplateConfigurer.merge(ImmutableList.of(tc1, tc2, tc3));
+        tc1.merge(tc2);
+        tc1.merge(tc3);
 
-        assertNull(tcm.getCustomAttribute("k1"));
-        assertNull(tcm.getCustomAttribute("k2"));
-        assertNull(tcm.getCustomAttribute("k3"));
-        assertNull(CA1.get(tcm));
-        assertNull(CA2.get(tcm));
-        assertNull(CA3.get(tcm));
+        assertNull(tc1.getCustomAttribute("k1"));
+        assertNull(tc1.getCustomAttribute("k2"));
+        assertNull(tc1.getCustomAttribute("k3"));
+        assertNull(CA1.get(tc1));
+        assertNull(CA2.get(tc1));
+        assertNull(CA3.get(tc1));
         
         TemplateConfigurer tc4 = new TemplateConfigurer();
         tc4.setCustomAttribute("k1", "v4");
         CA1.set("V4", tc4);
         
-        tcm = TemplateConfigurer.merge(ImmutableList.of(tcm, tc4));
+        tc1.merge(tc4);
         
-        assertEquals("v4", tcm.getCustomAttribute("k1"));
-        assertNull(tcm.getCustomAttribute("k2"));
-        assertNull(tcm.getCustomAttribute("k3"));
-        assertEquals("V4", CA1.get(tcm));
-        assertNull(CA2.get(tcm));
-        assertNull(CA3.get(tcm));
+        assertEquals("v4", tc1.getCustomAttribute("k1"));
+        assertNull(tc1.getCustomAttribute("k2"));
+        assertNull(tc1.getCustomAttribute("k3"));
+        assertEquals("V4", CA1.get(tc1));
+        assertNull(CA2.get(tc1));
+        assertNull(CA3.get(tc1));
     }
 
     @Test
     public void testConfigureNonParserConfig() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(false)) {
+        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(false, true)) {
             TemplateConfigurer tc = new TemplateConfigurer();
             tc.setParentConfiguration(DEFAULT_CFG);
     
@@ -478,9 +505,9 @@ public class TemplateConfigurerTest {
     }
     
     @Test
-    public void testConfigureParserToLowIcI() throws Exception {
+    public void testConfigureParserTooLowIcI() throws Exception {
         Configuration cfgWithTooLowIcI = new Configuration(Configuration.VERSION_2_3_21);
-        for (PropertyDescriptor propDesc : getTemplateConfigurerSettingPropDescs(true)) {
+        for (PropertyDescriptor propDesc : getTemplateConfigurerSettingPropDescs(true, false)) {
             TemplateConfigurer tc = new TemplateConfigurer();
 
             String propName = propDesc.getName();
@@ -650,7 +677,7 @@ public class TemplateConfigurerTest {
 
     @Test
     public void testIsSet() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true, true)) {
             TemplateConfigurer tc = new TemplateConfigurer();
             checkAllIsSetFalseExcept(tc, null);
             pd.getWriteMethod().invoke(tc, SETTING_ASSIGNMENTS.get(pd.getName()));
@@ -661,7 +688,7 @@ public class TemplateConfigurerTest {
     private void checkAllIsSetFalseExcept(TemplateConfigurer tc, String trueSetting)
             throws SecurityException, IntrospectionException,
             IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true, true)) {
             String isSetMethodName = getIsSetMethodName(pd.getReadMethod().getName());
             Method isSetMethod;
             try {
@@ -683,7 +710,7 @@ public class TemplateConfigurerTest {
      */
     @Test
     public void checkTestAssignments() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true, true)) {
             String propName = pd.getName();
             if (!SETTING_ASSIGNMENTS.containsKey(propName)) {
                 fail("Test case doesn't cover all settings in SETTING_ASSIGNMENTS. Missing: " + propName);
