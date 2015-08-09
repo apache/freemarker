@@ -89,7 +89,7 @@ public class Template extends Configurable {
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
-    private final ParserConfiguration customParserConfiguration;
+    private final ParserConfiguration parserConfiguration;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
     private Version templateLanguageVersion;
@@ -103,7 +103,7 @@ public class Template extends Configurable {
         this.name = name;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
-        this.customParserConfiguration = customParserConfiguration; 
+        this.parserConfiguration = customParserConfiguration != null ? customParserConfiguration : getConfiguration();
     }
 
     private static Configuration toNonNull(Configuration cfg) {
@@ -229,7 +229,7 @@ public class Template extends Configurable {
             String encoding) throws IOException {
         this(name, sourceName, cfg, customParserConfiguration);
         
-        this.encoding = encoding;
+        this.setEncoding(encoding);
         LineTableBuilder ltbReader;
         try {
             if (!(reader instanceof BufferedReader)) {
@@ -239,8 +239,7 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                parser = new FMParser(this, reader,
-                        customParserConfiguration != null ? customParserConfiguration : getConfiguration());
+                parser = new FMParser(this, reader, getParserConfiguration());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -557,24 +556,14 @@ public class Template extends Configurable {
     }
     
     /**
-     * Returns the value passed in as the parameter of
-     * {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}.
-     * 
-     * @since 2.3.24
-     */
-    public ParserConfiguration getCustomParserConfiguration() {
-        return customParserConfiguration;
-    }
-
-    /**
      * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
      * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfigurer}, or something else. It's
      * never {@code null}.
      * 
      * @since 2.3.24
      */
-    public ParserConfiguration getEffectiveParserConfiguration() {
-        return customParserConfiguration != null ? customParserConfiguration : getConfiguration();
+    public ParserConfiguration getParserConfiguration() {
+        return parserConfiguration;
     }
     
     /**
@@ -587,6 +576,11 @@ public class Template extends Configurable {
     }
 
     /**
+     * @param encoding
+     *            The encoding that was used to read this template. When this template {@code #include}-s or
+     *            {@code #import}-s another template, by default it will use this encoding for those. For backward
+     *            compatibility, this can be {@code null}, which will unset this setting.
+     * 
      * @deprecated Should only be used internally, and might will be removed later.
      */
     @Deprecated

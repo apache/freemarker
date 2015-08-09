@@ -38,6 +38,9 @@ public class TemplateConfigurerWithTemplateCacheTest {
 
     private static final String TEXT_WITH_ACCENTS = "pr\u00F3ba";
 
+    private static final CustomAttribute CUST_ATT_1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
+    private static final CustomAttribute CUST_ATT_2 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
+
     @Test
     public void testEncoding() throws Exception {
         Configuration cfg = createCommonEncodingTesterConfig();
@@ -217,6 +220,70 @@ public class TemplateConfigurerWithTemplateCacheTest {
         assertEquals("fr_FR true 1,2", getTemplateOutput(cfg.getTemplate("(fr)")));
         assertEquals("en_US Y 1.20", getTemplateOutput(cfg.getTemplate("(yn)(00)")));
         assertEquals("fr_FR true 1,20", getTemplateOutput(cfg.getTemplate("(00)(fr)")));
+    }
+    
+    @Test
+    public void testCustomAttributes() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        TemplateConfigurer tc1 = new TemplateConfigurer();
+        tc1.setCustomAttribute("a1", "a1tc1");
+        tc1.setCustomAttribute("a2", "a2tc1");
+        tc1.setCustomAttribute("a3", "a3tc1");
+        CUST_ATT_1.set("ca1tc1", tc1);
+        CUST_ATT_2.set("ca2tc1", tc1);
+        
+        TemplateConfigurer tc2 = new TemplateConfigurer();
+        tc2.setCustomAttribute("a1", "a1tc2");
+        CUST_ATT_1.set("ca1tc2", tc2);
+        
+        cfg.setTemplateConfigurers(
+                new MergingTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(tc1)*"), tc1),
+                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(tc2)*"), tc2)
+                )
+        );
+        
+        String commonFTL = "<#ftl attributes={ 'a3': 'a3temp' }>";
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("(tc1)", commonFTL);
+        tl.putTemplate("(tc1)noHeader", "");
+        tl.putTemplate("(tc2)", commonFTL);
+        tl.putTemplate("(tc1)(tc2)", commonFTL);
+        cfg.setTemplateLoader(tl);
+
+        {
+            Template t = cfg.getTemplate("(tc1)");
+            assertEquals("a1tc1", t.getCustomAttribute("a1"));
+            assertEquals("a2tc1", t.getCustomAttribute("a2"));
+            assertEquals("a3temp", t.getCustomAttribute("a3"));
+            assertEquals("ca1tc1", CUST_ATT_1.get(t));
+            assertEquals("ca2tc1", CUST_ATT_2.get(t));
+        }
+        {
+            Template t = cfg.getTemplate("(tc1)noHeader");
+            assertEquals("a1tc1", t.getCustomAttribute("a1"));
+            assertEquals("a2tc1", t.getCustomAttribute("a2"));
+            assertEquals("a3tc1", t.getCustomAttribute("a3"));
+            assertEquals("ca1tc1", CUST_ATT_1.get(t));
+            assertEquals("ca2tc1", CUST_ATT_2.get(t));
+        }
+        {
+            Template t = cfg.getTemplate("(tc2)");
+            assertEquals("a1tc2", t.getCustomAttribute("a1"));
+            assertNull(t.getCustomAttribute("a2"));
+            assertEquals("a3temp", t.getCustomAttribute("a3"));
+            assertEquals("ca1tc2", CUST_ATT_1.get(t));
+            assertNull(CUST_ATT_2.get(t));
+        }
+        {
+            Template t = cfg.getTemplate("(tc1)(tc2)");
+            assertEquals("a1tc2", t.getCustomAttribute("a1"));
+            assertEquals("a2tc1", t.getCustomAttribute("a2"));
+            assertEquals("a3temp", t.getCustomAttribute("a3"));
+            assertEquals("ca1tc2", CUST_ATT_1.get(t));
+            assertEquals("ca2tc1", CUST_ATT_2.get(t));
+        }
     }
     
     private String getTemplateOutput(Template t) throws TemplateException, IOException {

@@ -22,24 +22,21 @@ import freemarker.template.Version;
  * 
  * @since 2.3.24
  */
-class SimpleParserConfiguration implements ParserConfiguration {
+class LegacyConstructorParserConfiguration implements ParserConfiguration {
 
     private final int tagSyntax;
     private final int namingConvention;
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
-    private final String encoding;
     private final Version incompatibleImprovements;
-    private final ArithmeticEngine arithmeticEngine;
+    private ArithmeticEngine arithmeticEngine;
 
-    public SimpleParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
-            int namingConvention, Version incompatibleImprovements, ArithmeticEngine arithmeticEngine,
-            String encoding) {
+    public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
+            int namingConvention, Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
         this.whitespaceStripping = whitespaceStripping;
         this.strictSyntaxMode = strictSyntaxMode;
-        this.encoding = encoding;
         this.incompatibleImprovements = incompatibleImprovements;
         this.arithmeticEngine = arithmeticEngine;
     }
@@ -60,16 +57,19 @@ class SimpleParserConfiguration implements ParserConfiguration {
         return strictSyntaxMode;
     }
 
-    public String getEncoding() {
-        return encoding;
-    }
-
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
     }
 
     public ArithmeticEngine getArithmeticEngine() {
         return arithmeticEngine;
+    }
+
+    public void setArithmeticEngineFromNull(ArithmeticEngine arithmeticEngine) {
+        if (this.arithmeticEngine != null) {
+            throw new IllegalStateException();
+        }
+        this.arithmeticEngine = arithmeticEngine;
     }
 
 }

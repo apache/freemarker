@@ -52,7 +52,7 @@ public class FMParser {
 
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
-    private ArithmeticEngine arithmeticEngine;
+    private ParserConfiguration pCfg;
 
     /** Keeps track of #list and #foreach nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
@@ -124,11 +124,11 @@ public class FMParser {
     public FMParser(Template template, Reader reader, boolean strictSyntaxMode, boolean whitespaceStripping,
             int tagSyntax, int namingConvention, int incompatibleImprovements) {
         this(template, reader,
-                new SimpleParserConfiguration(
+                new LegacyConstructorParserConfiguration(
                         strictSyntaxMode, whitespaceStripping,
                         tagSyntax, namingConvention,
                         new Version(incompatibleImprovements),
-                        template != null ? template.getArithmeticEngine() : null, null));
+                        template != null ? template.getArithmeticEngine() : null));
     }
         
     /**
@@ -138,6 +138,8 @@ public class FMParser {
      */
     public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
         this(reader);
+
+        this.pCfg = pCfg;
         
         setTemplate(template);
         
@@ -172,10 +174,6 @@ public class FMParser {
             throw new IllegalArgumentException("Illegal argument for namingConvention");
         }
 
-        this.arithmeticEngine = pCfg.getArithmeticEngine();
-        if (template != null) {            template.setArithmeticEngine(this.arithmeticEngine);
-        }
-
         int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
@@ -190,18 +188,16 @@ public class FMParser {
 
     void setTemplate(Template template) {
         this.template = template;
-        if (template != null && arithmeticEngine == null) {            arithmeticEngine = template.getArithmeticEngine();
+        if (template != null) {            if (pCfg == null) {                pCfg = template.getParserConfiguration();
+            }
+            if (pCfg.getArithmeticEngine() == null && pCfg instanceof LegacyConstructorParserConfiguration) {                ((LegacyConstructorParserConfiguration) pCfg).setArithmeticEngineFromNull(
+                        template.getArithmeticEngine());
+            }
         }
     }
 
     Template getTemplate() {
         return template;
-    }
-
-    void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {        this.arithmeticEngine = arithmeticEngine;
-    }
-
-    ArithmeticEngine getArithmeticEngine() {        return arithmeticEngine;
     }
 
     /**
@@ -1761,7 +1757,7 @@ Expression NumberLiteral() :
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(arithmeticEngine.toNumber(s));
+        Expression result = new NumberLiteral(pCfg.getArithmeticEngine().toNumber(s));
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
         return result;
@@ -2050,7 +2046,7 @@ StringLiteral StringLiteral(boolean interpolate) :
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(this, token_source);
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source);
         }
         return result;
     }
