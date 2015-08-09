@@ -41,11 +41,7 @@ New features:
 Notes on internal changes (some of this need not be in Version History):
 - The main change is splitting Template to Template and UnboundTemplate. With an analogy, if UnboundTemplate is
   the class of the template, then Template is the instance of the template. The content of UnboundTemplate only
-  depends on the content of the actual template file content and on its *source* path, while Template contains
-  all the settings defined in by the Configurable class and the name with which the template was requested.
+  depends on the content of the actual template file, the ParserSettings, and on its *source* path, while Template
+  contains all the settings defined in by the Configurable class and the name with which the template was requested.
   This splitting allows more efficient caching when due to the template lookup mechanism, multiple Template-s
   share the same actual template file.
-- When resolving  arithmetic expressions and comparisons on parsing time (happens when only literal operands
-  are involved), Template.getArithmeticEngine() isn't used any more. Configuration.getArithmeticEngine() is
-  used instead. This is backward compatible as using published API-s you can't set Template-level settings before the
-  Template is completed by the parser, and so it has defaulted to the Configuration-level artimeticEngine setting anyway.
