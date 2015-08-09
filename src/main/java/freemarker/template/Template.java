@@ -227,7 +227,7 @@ public class Template extends Configurable {
             String encoding) throws IOException {
         this(name, sourceName, cfg, customParserConfiguration);
         
-        this.encoding = encoding;
+        this.setEncoding(encoding);
         LineTableBuilder ltbReader;
         try {
             if (!(reader instanceof BufferedReader)) {
@@ -585,6 +585,11 @@ public class Template extends Configurable {
     }
 
     /**
+     * @param encoding
+     *            The encoding that was used to read this template. When this template {@code #include}-s or
+     *            {@code #import}-s another template, by default it will use this encoding for those. For backward
+     *            compatibility, this can be {@code null}, which will unset this setting.
+     * 
      * @deprecated Should only be used internally, and might will be removed later.
      */
     @Deprecated

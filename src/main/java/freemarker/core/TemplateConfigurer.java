@@ -25,16 +25,16 @@ import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used for customizing the configuration settings of the individual {@link Template}-s, relatively to the common
- * setting values coming from the {@link Configuration}. This was designed with the standard template loading mechanism
- * of FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}), though can also be
- * reused for custom template loading and caching solutions.
+ * Used for customizing the configuration settings for individual {@link Template}-s, relatively to the common setting
+ * values coming from the {@link Configuration}. This was designed with the standard template loading mechanism of
+ * FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}), though can also be reused
+ * for custom template loading and caching solutions.
  * 
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism
  * ({@link Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale}
- * here could have any effect. The {@code locale} will be only set in the template that the localized looks has already
- * found.
+ * specified here could have effect. The {@code locale} will be only set in the template that the localized looks has
+ * already found.
  * 
  * <p>
  * Note on encoding setting {@code encoding}: See {@link #setEncoding(String)}.
@@ -46,12 +46,23 @@ import freemarker.template.utility.NullArgumentException;
  * 
  * <p>
  * If you are using this class for your own template loading and caching solution, rather than with the standard one,
- * you should be aware of the details described in this paragraph. This class implements both {@link Configurable} and
+ * you should be aware of a few more details:
+ * 
+ * <ul>
+ * <li>This class implements both {@link Configurable} and
  * {@link ParserConfiguration}. This means that it can influence both the template parsing phase and the runtime
  * settings. For both aspects (i.e., {@link Configurable} and {@link ParserConfiguration}) to take effect, you have
  * first pass this object to the {@link Template} constructor (this is where the {@link ParserConfiguration} interface
  * is used), and then you have to call {@link #configure(Template)} on the resulting {@link Template} object (this is
- * where the {@link Configurable} is used).
+ * where the {@link Configurable} aspect is used).
+ * 
+ * <li>{@link #configure(Template)} only change the settings that weren't yet set on the {@link Template} (but are
+ * inherited from the {@link Configuration}). This is primarily because if the template configures itself via the
+ * {@code #ftl} header, those values should have precedence. A consequence of this is that if you want to configure
+ * the same {@link Template} with multiple {@link TemplateConfigurer}-s, you either should merge them to a single one
+ * before that (with {@link #merge(TemplateConfigurer)}), or you have to apply them in reverse order of their intended
+ * precedence. 
+ * </ul>
  * 
  * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, String)
  * 
@@ -207,20 +218,18 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
             setWhitespaceStripping(tc.getWhitespaceStripping());
         }
         
-        tc.copyDirectCustomAttributes(this);
+        tc.copyDirectCustomAttributes(this, true);
     }
 
     /**
-     * Sets the settings of the {@link Template} which are set in this {@link TemplateConfigurer}, leaves the other
-     * settings as is. A setting is said to be set in a {@link TemplateConfigurer} if it was explicitly set via a setter
-     * method, as opposed to be inherited.
+     * Sets the settings of the {@link Template} which are not yet set in the {@link Template} and are set in this
+     * {@link TemplateConfigurer}, leaves the other settings as is. A setting is said to be set in a
+     * {@link TemplateConfigurer} or {@link Template} if it was explicitly set via a setter method on that object, as
+     * opposed to be inherited from the {@link Configuration}.
      * 
      * <p>
-     * Note that the {@code encoding} setting is only applied on the {@link Template} if it's still {@code null} there.
-     * Otherwise it's assumed that the encoding that the {@link Template} has is the actually used one, and so it won't
-     * be overwritten. (This is not to be confused with the encoding parameter of
-     * {@link Configuration#getTemplate(String, java.util.Locale, String)} and of its overloads, which are weaker than
-     * that suggested by the {@link TemplateConfigurer}).
+     * Note that the {@code encoding} setting of the {@link Template} counts as unset if it's {@code null},
+     * even if {@code null} was set via {@link Template#setEncoding(String)}.
      *
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
@@ -234,68 +243,68 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
                     "The argument Template doesn't belong to the same Configuration as the TemplateConfigurer");
         }
 
-        if (isAPIBuiltinEnabledSet()) {
+        if (isAPIBuiltinEnabledSet() && !template.isAPIBuiltinEnabledSet()) {
             template.setAPIBuiltinEnabled(isAPIBuiltinEnabled());
         }
-        if (isArithmeticEngineSet()) {
+        if (isArithmeticEngineSet() && !template.isArithmeticEngineSet()) {
             template.setArithmeticEngine(getArithmeticEngine());
         }
-        if (isAutoFlushSet()) {
+        if (isAutoFlushSet() && !template.isAutoFlushSet()) {
             template.setAutoFlush(getAutoFlush());
         }
-        if (isBooleanFormatSet()) {
+        if (isBooleanFormatSet() && !template.isBooleanFormatSet()) {
             template.setBooleanFormat(getBooleanFormat());
         }
-        if (isClassicCompatibleSet()) {
+        if (isClassicCompatibleSet() && !template.isClassicCompatibleSet()) {
             template.setClassicCompatibleAsInt(getClassicCompatibleAsInt());
         }
-        if (isDateFormatSet()) {
+        if (isDateFormatSet() && !template.isDateFormatSet()) {
             template.setDateFormat(getDateFormat());
         }
-        if (isDateTimeFormatSet()) {
+        if (isDateTimeFormatSet() && !template.isDateTimeFormatSet()) {
             template.setDateTimeFormat(getDateTimeFormat());
         }
         if (isEncodingSet() && template.getEncoding() == null) {
             template.setEncoding(getEncoding());
         }
-        if (isLocaleSet()) {
+        if (isLocaleSet() && !template.isLocaleSet()) {
             template.setLocale(getLocale());
         }
-        if (isLogTemplateExceptionsSet()) {
+        if (isLogTemplateExceptionsSet() && !template.isLogTemplateExceptionsSet()) {
             template.setLogTemplateExceptions(getLogTemplateExceptions());
         }
-        if (isNewBuiltinClassResolverSet()) {
+        if (isNewBuiltinClassResolverSet() && !template.isNewBuiltinClassResolverSet()) {
             template.setNewBuiltinClassResolver(getNewBuiltinClassResolver());
         }
-        if (isNumberFormatSet()) {
+        if (isNumberFormatSet() && !template.isNumberFormatSet()) {
             template.setNumberFormat(getNumberFormat());
         }
-        if (isObjectWrapperSet()) {
+        if (isObjectWrapperSet() && !template.isObjectWrapperSet()) {
             template.setObjectWrapper(getObjectWrapper());
         }
-        if (isOutputEncodingSet()) {
+        if (isOutputEncodingSet() && !template.isOutputEncodingSet()) {
             template.setOutputEncoding(getOutputEncoding());
         }
-        if (isShowErrorTipsSet()) {
+        if (isShowErrorTipsSet() && !template.isShowErrorTipsSet()) {
             template.setShowErrorTips(getShowErrorTips());
         }
-        if (isSQLDateAndTimeTimeZoneSet()) {
+        if (isSQLDateAndTimeTimeZoneSet() && !template.isSQLDateAndTimeTimeZoneSet()) {
             template.setSQLDateAndTimeTimeZone(getSQLDateAndTimeTimeZone());
         }
-        if (isTemplateExceptionHandlerSet()) {
+        if (isTemplateExceptionHandlerSet() && !template.isTemplateExceptionHandlerSet()) {
             template.setTemplateExceptionHandler(getTemplateExceptionHandler());
         }
-        if (isTimeFormatSet()) {
+        if (isTimeFormatSet() && !template.isTimeFormatSet()) {
             template.setTimeFormat(getTimeFormat());
         }
-        if (isTimeZoneSet()) {
+        if (isTimeZoneSet() && !template.isTimeZoneSet()) {
             template.setTimeZone(getTimeZone());
         }
-        if (isURLEscapingCharsetSet()) {
+        if (isURLEscapingCharsetSet() && !template.isURLEscapingCharsetSet()) {
             template.setURLEscapingCharset(getURLEscapingCharset());
         }
         
-        copyDirectCustomAttributes(template);
+        copyDirectCustomAttributes(template, false);
     }
 
     /**
@@ -395,19 +404,17 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Forces the charset used for reading template "file", overriding everything but the encoding coming from the
-     * {@code #ftl} header. This is similar to {@link Configuration#setDefaultEncoding(String)} in its meaning. This
-     * setting overrides the locale-specific encodings set via
-     * {@link Configuration#setEncoding(java.util.Locale, String)}, overrides the {@code encoding} parameter of
-     * {@link Configuration#getTemplate(String, String)} (and of its overloads) and the {@code encoding} parameter of
-     * the {@code #include} directive. This setting can only be overridden in the {@code #ftl} header of the template
-     * (like {@code <#ftl encoding="ISO-8859-1">}). This works like that because specifying the encoding when requesting
-     * the template is error prone and deprecated.
+     * When the standard template loading/caching mechanism is used, this forces the charset used for reading the
+     * template "file", overriding everything but the encoding coming from the {@code #ftl} header. This setting
+     * overrides the locale-specific encodings set via {@link Configuration#setEncoding(java.util.Locale, String)}. It
+     * also overrides the {@code encoding} parameter of {@link Configuration#getTemplate(String, String)} (and of its
+     * overloads) and the {@code encoding} parameter of the {@code #include} directive. This works like that because
+     * specifying the encoding where you are requesting the template is error prone and deprecated.
      * 
      * <p>
      * If you are developing your own template loading/caching mechanism instead of the standard one, note that the
-     * above behavior is not guaranteed by this class; you have to ensure it. Also, read the note on {@code encoding}
-     * in the documentation of {@link #configure(Template)}.
+     * above behavior is not guaranteed by this class alone; you have to ensure it. Also, read the note on
+     * {@code encoding} in the documentation of {@link #configure(Template)}.
      */
     public void setEncoding(String encoding) {
         NullArgumentException.check("encoding", encoding);
