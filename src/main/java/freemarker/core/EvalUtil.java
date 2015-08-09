@@ -390,4 +390,13 @@ class EvalUtil {
         }
     }
     
+    /**
+     * Returns an {@link ArithmeticEngine} even if {@code env} is {@code null}, because we are in parsing phase.
+     */
+    public static ArithmeticEngine getArithmeticEngine(Environment env, TemplateObject tObj) {
+        return env != null
+                ? env.getArithmeticEngine()
+                : tObj.getUnboundTemplate().getParserConfiguration().getArithmeticEngine();
+    }
+    
 }

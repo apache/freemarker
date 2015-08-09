@@ -42,7 +42,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
      *            this to share the {@code namingConvetion} with that.
      */
     // TODO This should be the part of the "parent" parsing; now it contains hacks like those with namingConvention.  
-    void parseValue(FMParser parentParser, FMParserTokenManager parentTokenSource) throws ParseException {
+    void parseValue(FMParserTokenManager parentTokenSource) throws ParseException {
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
             SimpleCharStream scs = new SimpleCharStream(new StringReader(value), beginLine, beginColumn + 1, value.length());
             
@@ -54,7 +54,6 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getUnboundTemplate());
-            parser.setArithmeticEngine(parentParser.getArithmeticEngine());
             try {
                 dynamicValue = parser.FreeMarkerText();
             } catch (ParseException e) {

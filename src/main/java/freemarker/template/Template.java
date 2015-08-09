@@ -483,25 +483,14 @@ public class Template extends Configurable {
     }
     
     /**
-     * Returns the value passed in as the parameter of
-     * {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}.
-     * 
-     * @since 2.3.24
-     */
-    public ParserConfiguration getCustomParserConfiguration() {
-        return getUnboundTemplate().getCustomParserConfiguration();
-    }
-
-    /**
      * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
      * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfigurer}, or something else. It's
      * never {@code null}.
      * 
      * @since 2.3.24
      */
-    public ParserConfiguration getEffectiveParserConfiguration() {
-        ParserConfiguration customParserCfg = unboundTemplate.getCustomParserConfiguration();
-        return customParserCfg != null ? customParserCfg : getConfiguration();
+    public ParserConfiguration getParserConfiguration() {
+        return unboundTemplate.getParserConfiguration();
     }
     
     /**

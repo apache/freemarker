@@ -52,7 +52,7 @@ class BuiltInsForStringsMisc {
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
             UnboundTemplate parentUnboundTemplate = getUnboundTemplate();
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            ParserConfiguration pCfg = parentUnboundTemplate.getEffectiveParserConfiguration();
+            ParserConfiguration pCfg = parentUnboundTemplate.getParserConfiguration();
             token_source.incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
             int namingConvention = pCfg.getNamingConvention();
@@ -60,7 +60,6 @@ class BuiltInsForStringsMisc {
             token_source.namingConvention = namingConvention;
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(parentUnboundTemplate);
-            parser.setArithmeticEngine(parentUnboundTemplate.getEffectiveParserConfiguration().getArithmeticEngine());
             Expression exp = null;
             try {
                 try {

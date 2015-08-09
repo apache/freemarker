@@ -54,7 +54,7 @@ public final class UnboundTemplate {
 
     private final String sourceName;
     private final Configuration cfg;
-    private final ParserConfiguration customParserCfg;
+    private final ParserConfiguration parserCfg;
     private final Version templateLanguageVersion;
     
     /** Attributes added via {@code <#ftl attributes=...>}. */
@@ -96,10 +96,10 @@ public final class UnboundTemplate {
             throws IOException {
         NullArgumentException.check(cfg);
         this.cfg = cfg;
-        this.customParserCfg = customParserCfg;
-        ParserConfiguration actualParserCfg = getEffectiveParserConfiguration();
+        this.parserCfg = customParserCfg != null ? customParserCfg : cfg;
         this.sourceName = sourceName;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(actualParserCfg.getIncompatibleImprovements());
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(
+                getParserConfiguration().getIncompatibleImprovements());
 
         LineTableBuilder ltbReader;
         try {
@@ -110,7 +110,7 @@ public final class UnboundTemplate {
             reader = ltbReader;
 
             try {
-                FMParser parser = new FMParser(this, reader, assumedEncoding, actualParserCfg);
+                FMParser parser = new FMParser(this, reader, assumedEncoding, getParserConfiguration());
                 
                 TemplateElement rootElement;
                 try {
@@ -163,7 +163,7 @@ public final class UnboundTemplate {
     private UnboundTemplate(String content, String sourceName, Configuration cfg) {
         NullArgumentException.check(cfg);
         this.cfg = cfg;
-        this.customParserCfg = null;
+        this.parserCfg = cfg;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
         this.templateSpecifiedEncoding = null;
@@ -237,19 +237,11 @@ public final class UnboundTemplate {
     }
     
     /**
-     * Returns the value passed in as the similarly named parameter of
-     * {@link #UnboundTemplate(Reader, String, Configuration, ParserConfiguration, String)}.
-     */
-    public ParserConfiguration getCustomParserConfiguration() {
-        return customParserCfg;
-    }
-
-    /**
      * Returns the parser configuration that was in effect when creating this template; never {@code null}.
-     * See {@link Template#getEffectiveParserConfiguration()} for details.
+     * See {@link Template#getParserConfiguration()} for details.
      */
-    public ParserConfiguration getEffectiveParserConfiguration() {
-        return customParserCfg != null ? customParserCfg : cfg;
+    public ParserConfiguration getParserConfiguration() {
+        return parserCfg;
     }
 
     /**
