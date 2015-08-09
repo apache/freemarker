@@ -128,7 +128,7 @@ public class FMParser {
                         strictSyntaxMode, whitespaceStripping,
                         tagSyntax, namingConvention,
                         new Version(incompatibleImprovements),
-                        template != null ? template.getArithmeticEngine() : null, null));
+                        template != null ? template.getArithmeticEngine() : null));
     }
         
     /**
