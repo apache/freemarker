@@ -102,10 +102,7 @@ final class AddConcatExpression extends Expression {
 
     static TemplateModel _evalOnNumbers(Environment env, TemplateObject parent, Number first, Number second)
             throws TemplateException {
-        ArithmeticEngine ae =
-            env != null
-                ? env.getArithmeticEngine()
-                : parent.getTemplate().getArithmeticEngine();
+        ArithmeticEngine ae = EvalUtil.getArithmeticEngine(env, parent);
         return new SimpleNumber(ae.add(first, second));
     }
 

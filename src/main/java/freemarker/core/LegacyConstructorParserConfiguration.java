@@ -22,16 +22,16 @@ import freemarker.template.Version;
  * 
  * @since 2.3.24
  */
-class SimpleParserConfiguration implements ParserConfiguration {
+class LegacyConstructorParserConfiguration implements ParserConfiguration {
 
     private final int tagSyntax;
     private final int namingConvention;
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
     private final Version incompatibleImprovements;
-    private final ArithmeticEngine arithmeticEngine;
+    private ArithmeticEngine arithmeticEngine;
 
-    public SimpleParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
+    public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
             int namingConvention, Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
@@ -63,6 +63,13 @@ class SimpleParserConfiguration implements ParserConfiguration {
 
     public ArithmeticEngine getArithmeticEngine() {
         return arithmeticEngine;
+    }
+
+    public void setArithmeticEngineFromNull(ArithmeticEngine arithmeticEngine) {
+        if (this.arithmeticEngine != null) {
+            throw new IllegalStateException();
+        }
+        this.arithmeticEngine = arithmeticEngine;
     }
 
 }

@@ -50,10 +50,7 @@ final class ArithmeticExpression extends Expression {
 
     static TemplateModel _eval(Environment env, TemplateObject parent, Number lhoNumber, int operator, Number rhoNumber)
             throws TemplateException, _MiscTemplateException {
-        ArithmeticEngine ae = 
-            env != null 
-                ? env.getArithmeticEngine()
-                : parent.getTemplate().getArithmeticEngine();
+        ArithmeticEngine ae = EvalUtil.getArithmeticEngine(env, parent); 
         switch (operator) {
             case TYPE_SUBSTRACTION : 
                 return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));

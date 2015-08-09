@@ -87,7 +87,7 @@ public class Template extends Configurable {
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
-    private final ParserConfiguration customParserConfiguration;
+    private final ParserConfiguration parserConfiguration;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
     private Version templateLanguageVersion;
@@ -101,7 +101,7 @@ public class Template extends Configurable {
         this.name = name;
         this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
-        this.customParserConfiguration = customParserConfiguration; 
+        this.parserConfiguration = customParserConfiguration != null ? customParserConfiguration : getConfiguration();
     }
 
     private static Configuration toNonNull(Configuration cfg) {
@@ -237,8 +237,7 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                parser = new FMParser(this, reader,
-                        customParserConfiguration != null ? customParserConfiguration : getConfiguration());
+                parser = new FMParser(this, reader, getParserConfiguration());
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -555,24 +554,14 @@ public class Template extends Configurable {
     }
     
     /**
-     * Returns the value passed in as the parameter of
-     * {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}.
-     * 
-     * @since 2.3.24
-     */
-    public ParserConfiguration getCustomParserConfiguration() {
-        return customParserConfiguration;
-    }
-
-    /**
      * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
      * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfigurer}, or something else. It's
      * never {@code null}.
      * 
      * @since 2.3.24
      */
-    public ParserConfiguration getEffectiveParserConfiguration() {
-        return customParserConfiguration != null ? customParserConfiguration : getConfiguration();
+    public ParserConfiguration getParserConfiguration() {
+        return parserConfiguration;
     }
     
     /**
