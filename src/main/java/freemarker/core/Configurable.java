@@ -2043,6 +2043,10 @@ public class Configurable {
         }
     }
     
+    boolean isCustomAttributeSet(Object key) {
+        return getDirectCustomAttributes().containsKey(key);
+    }
+    
     /**
      * For internal usage only, copies the custom attributes set directly on this objects into another
      * {@link Configurable}. The target {@link Configurable} is assumed to be not seen be other thread than the current
@@ -2051,14 +2055,16 @@ public class Configurable {
      * 
      * @since 2.3.24
      */
-    void copyDirectCustomAttributes(Configurable target) {
+    void copyDirectCustomAttributes(Configurable target, boolean overwriteExisting) {
         synchronized (customAttributesLock) {
             for (Entry<? extends Object, ? extends Object> custAttrEnt : getDirectCustomAttributes().entrySet()) {
                 Object custAttrKey = custAttrEnt.getKey();
-                if (custAttrKey instanceof String) {
-                    target.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
-                } else {
-                    target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
+                if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
+                    if (custAttrKey instanceof String) {
+                        target.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
+                    } else {
+                        target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
+                    }
                 }
             }
         }

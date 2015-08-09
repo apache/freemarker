@@ -415,39 +415,42 @@ public class TemplateConfigurerTest {
     @Test
     public void testConfigureCustomAttributes() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        cfg.setCustomAttribute("k5", "c");
-        cfg.setCustomAttribute("k6", "c");
-        
+        cfg.setCustomAttribute("k1", "c");
+        cfg.setCustomAttribute("k2", "c");
+        cfg.setCustomAttribute("k3", "c");
+
         TemplateConfigurer tc = new TemplateConfigurer();
-        tc.setCustomAttribute("k1", "v");
-        tc.setCustomAttribute("k2", "v");
+        tc.setCustomAttribute("k2", "tc");
         tc.setCustomAttribute("k3", null);
-        tc.setCustomAttribute("k6", null);
-        CA1.set("V", tc);
-        CA2.set("V", tc);
-        CA3.set(null, tc);
+        tc.setCustomAttribute("k4", "tc");
+        tc.setCustomAttribute("k5", "tc");
+        tc.setCustomAttribute("k6", "tc");
+        CA1.set("tc", tc);
+        CA2.set("tc", tc);
+        CA3.set("tc", tc);
+
+        Template t = new Template(null, "", cfg);
+        t.setCustomAttribute("k5", "t");
+        t.setCustomAttribute("k6", null);
+        t.setCustomAttribute("k7", "t");
+        CA2.set("t", t);
+        CA3.set(null, t);
+        CA4.set("t", t);
         
         tc.setParentConfiguration(cfg);
-        
-        Template t = new Template(null, "", cfg);
-        t.setCustomAttribute("k2", "t");
-        t.setCustomAttribute("k3", "t");
-        t.setCustomAttribute("k4", "t");
-        CA2.set("T", t);
-        CA4.set("T", t);
-        
         tc.configure(t);
         
-        assertEquals("v", t.getCustomAttribute("k1"));
-        assertEquals("v", t.getCustomAttribute("k2"));
+        assertEquals("c", t.getCustomAttribute("k1"));
+        assertEquals("tc", t.getCustomAttribute("k2"));
         assertNull(t.getCustomAttribute("k3"));
-        assertEquals("t", t.getCustomAttribute("k4"));
-        assertEquals("c", t.getCustomAttribute("k5"));
+        assertEquals("tc", t.getCustomAttribute("k4"));
+        assertEquals("t", t.getCustomAttribute("k5"));
         assertNull(t.getCustomAttribute("k6"));
-        assertEquals("V", CA1.get(t));
-        assertEquals("V", CA2.get(t));
+        assertEquals("t", t.getCustomAttribute("k7"));
+        assertEquals("tc", CA1.get(t));
+        assertEquals("t", CA2.get(t));
         assertNull(CA3.get(t));
-        assertEquals("T", CA4.get(t));
+        assertEquals("t", CA4.get(t));
     }
     
     @Test
