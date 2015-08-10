@@ -1509,7 +1509,8 @@ public class Configurable {
      * <ul>
      *   <li><p>{@code "auto_escaping"}:
      *       See {@link Configuration#setAutoEscaping(boolean)}
-     *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
+     *       {@code yes}, etc.
      *       
      *   <li><p>{@code "auto_import"}:
      *       See {@link Configuration#setAutoImports(Map)}
