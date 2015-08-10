@@ -1596,7 +1596,8 @@ public class Configurable {
      *       
      *   <li><p>{@code "template_configurers"}:
      *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
-     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>,
+     *       can be {@code null}.
      *       
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
