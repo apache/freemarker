@@ -84,6 +84,7 @@ public class Template extends Configurable {
     private Object customLookupCondition;
     private int actualTagSyntax;
     private int actualNamingConvention;
+    private String outputFormat;
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
@@ -640,6 +641,24 @@ public class Template extends Configurable {
      */
     public int getActualNamingConvention() {
         return actualNamingConvention;
+    }
+    
+    /**
+     * Returns the output format (see {@link Configuration#setOutputFormat(String)}) used for this template.
+     * The output format of a template can come from various places, in order of increasing priority:
+     * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
+     * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code output_format}
+     * option in the template.
+     */
+    public String getOutputFormat() {
+        return outputFormat;
+    }
+    
+    /**
+     * Meant to be called by the parser only. 
+     */
+    void setOutputFormat(String outputFormat) {
+        this.outputFormat = outputFormat;
     }
 
     /**

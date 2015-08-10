@@ -98,4 +98,8 @@ public class _TemplateAPI {
         return cfg.getSettingNames(camelCase);
     }
     
+    public static void setOutputFormat(Template t, String outputFormat) {
+        t.setOutputFormat(outputFormat);
+    }
+    
 }

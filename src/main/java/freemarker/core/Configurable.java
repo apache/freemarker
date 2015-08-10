@@ -1528,6 +1528,11 @@ public class Configurable {
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}).
      *       Case insensitive.
      *       
+     *   <li><p>{@code "output_format"}:
+     *       See {@link Configuration#setOutputFormat(String)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or an output format name
+     *       like {@code "raw"}, {@code "HTML"}, {@code "XML"}, etc.
+     *       
      *   <li><p>{@code "strict_syntax"}:
      *       See {@link Configuration#setStrictSyntaxMode}. Deprecated.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.

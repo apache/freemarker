@@ -75,6 +75,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Integer namingConvention;
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
+    private String outputFormat;
     private String encoding;
 
     /**
@@ -216,6 +217,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (tc.isWhitespaceStrippingSet()) {
             setWhitespaceStripping(tc.getWhitespaceStripping());
+        }
+        if (tc.isOutputFormatSet()) {
+            setOutputFormat(tc.getOutputFormat());
         }
         
         tc.copyDirectCustomAttributes(this, true);
@@ -369,6 +373,29 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      */
     public boolean isWhitespaceStrippingSet() {
         return whitespaceStripping != null;
+    }
+
+    /**
+     * Sets the output format of the template, for example {@link Configuration#HTML_OUTPUT_FORMAT}.
+     * See {@link Configuration#setOutputFormat(String)} for more about output formats.
+     */
+    public void setOutputFormat(String outputFormat) {
+        NullArgumentException.check("outputFormat", outputFormat);
+        this.outputFormat = outputFormat;
+    }
+
+    /**
+     * The getter pair of {@link #getOutputFormat()}.
+     */
+    public String getOutputFormat() {
+        return outputFormat != null ? outputFormat : getParentConfiguration().getOutputFormat();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     */
+    public boolean isOutputFormatSet() {
+        return outputFormat != null;
     }
 
     /**
