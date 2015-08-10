@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
 import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.OrMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.test.TemplateTest;
@@ -63,6 +64,104 @@ public class OutputFormatTest extends TemplateTest {
             cfg.clearTemplateCache();
         }
     }
+    
+    @Test
+    public void testStandardFileExtensions() throws Exception {
+        String commonContent = "${.outputFormat}";
+        addTemplate("t", commonContent);
+        addTemplate("t.ftl", commonContent);
+        addTemplate("t.ftlh", commonContent);
+        addTemplate("t.FTLH", commonContent);
+        addTemplate("t.fTlH", commonContent);
+        addTemplate("t.ftlx", commonContent);
+        addTemplate("t.FTLX", commonContent);
+        addTemplate("t.fTlX", commonContent);
+        addTemplate("tWithHeader.ftlx", "<#ftl outputFormat='HTML'>" + commonContent);
+        
+        Configuration cfg = getConfiguration();
+        for (int setupNumber = 1; setupNumber <= 5; setupNumber++) {
+            final String cfgOutputFormat;
+            final String ftlhOutputFormat;
+            final String ftlxOutputFormat;
+            switch (setupNumber) {
+            case 1:
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlhOutputFormat = Configuration.HTML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                break;
+            case 2:
+                cfgOutputFormat = Configuration.RTF_OUTPUT_FORMAT;
+                cfg.setOutputFormat(cfgOutputFormat);
+                ftlhOutputFormat = Configuration.HTML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                break;
+            case 3:
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                cfg.unsetOutputFormat();
+                TemplateConfigurer tcXml = new TemplateConfigurer();
+                tcXml.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+                cfg.setTemplateConfigurers(
+                        new ConditionalTemplateConfigurerFactory(
+                                new OrMatcher(
+                                        new FileNameGlobMatcher("*.ftlh"),
+                                        new FileNameGlobMatcher("*.FTLH"),
+                                        new FileNameGlobMatcher("*.fTlH")),
+                                tcXml));
+                ftlhOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                break;
+            case 4:
+                cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlhOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                break;
+            case 5:
+                cfg.setTemplateConfigurers(null);
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlhOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                break;
+            default:
+                throw new AssertionError();
+            }
+            
+            assertEquals(cfgOutputFormat, cfg.getOutputFormat());
+            
+            {
+                Template t = cfg.getTemplate("t");
+                assertEquals(cfgOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            {
+                Template t = cfg.getTemplate("t.ftl");
+                assertEquals(cfgOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            for (String name : new String[] { "t.ftlh", "t.FTLH", "t.fTlH" }) {
+                Template t = cfg.getTemplate(name);
+                assertEquals(ftlhOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            for (String name : new String[] { "t.ftlx", "t.FTLX", "t.fTlX" }) {
+                Template t = cfg.getTemplate(name);
+                assertEquals(ftlxOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+
+            {
+                Template t = cfg.getTemplate("tWithHeader.ftlx");
+                assertEquals(Configuration.HTML_OUTPUT_FORMAT, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            cfg.clearTemplateCache();
+        }
+    }
+    
 
     @Test
     public void testAutoEscapingSettingLayers() throws Exception {

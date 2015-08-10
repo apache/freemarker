@@ -11375,25 +11375,23 @@ Green Mouse</programlisting>
             </listitem>
 
             <listitem>
-              <para>if FreeMarker was configured by the programmers so (by
-              setting the <literal>incompatible_improvements</literal> setting
-              to <literal>2.3.20</literal> or higher; more <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>),
-              <literal>'</literal> is replaced with
-              <literal>&amp;#39;</literal></para>
+              <para><literal>'</literal> is replaced with
+              <literal>&amp;#39;</literal> if the programmers has <link
+              linkend="pgui_config_incompatible_improvements_how_to_set">set
+              the <literal>incompatible_improvements</literal> setting</link>
+              to <literal>2.3.20</literal> or higher. Otherwise
+              <literal>'</literal> won't be replaced, so you must use
+              quotation mark (<literal>"</literal>, not <literal>'</literal>)
+              to quote attribute values where you want to insert a value
+              safely.</para>
             </listitem>
           </itemizedlist>
-
-          <para>Note that if you want to insert an attribute value securely,
-          you must quote the attribute value in the HTML template with
-          quotation mark (with <literal>"</literal>, not with
-          <literal>'</literal>):</para>
 
           <programlisting role="template">&lt;input type=text name=user value=<emphasis>"</emphasis>${user?html}<emphasis>"</emphasis>&gt;</programlisting>
 
           <para>Note that in HTML pages usually you want to use this built-in
-          for all interpolations. So you can spare a lot of typing and lessen
-          the chances of accidental mistakes by using the <link
+          for all interpolations. You can spare a lot of typing and lessen the
+          chances of accidental mistakes by using the <link
           linkend="ref_directive_escape"><literal>escape</literal>
           directive</link>.</para>
         </section>
@@ -23739,6 +23737,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set">the
+              <literal>incompatible_improvements</literal> setting</link> is
+              set to 2.3.24 (or higher), templates whose name ends with
+              <literal>ftlh</literal> file extension will automatically get
+              <literal>HTML</literal> <literal>output_format</literal>, and
+              those with <literal>ftlx</literal> file extension automatically
+              get <literal>XML</literal> <literal>output_format</literal>, in
+              both cases with <literal>auto_escaping</literal> on. (These can
+              be overridden with <literal>template_configurers</literal> of
+              course.)</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>freemarker.cache.ByteArrayTemplateLoader</literal>,
               which is similar to <literal>StringTemplateLoader</literal>, but
@@ -23853,18 +23865,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>++</literal> and <literal>--</literal>:
-                  <literal>&lt;#assign counter++&gt;</literal> is equivalent
-                  to <literal>&lt;#assign counter = counter +
+                  <para><literal>++</literal> and <literal>--</literal>: For
+                  example, <literal>&lt;#assign counter++&gt;</literal> is
+                  equivalent to <literal>&lt;#assign counter = counter +
                   1&gt;</literal>.</para>
                 </listitem>
 
                 <listitem>
                   <para><literal>+=</literal>, <literal>-=</literal>,
                   <literal>*=</literal>, <literal>/=</literal> and
-                  <literal>%=</literal>: <literal>&lt;#assign counter +=
-                  2&gt;</literal> is equivalent to <literal>&lt;#assign
-                  counter = counter + 2&gt;</literal>.</para>
+                  <literal>%=</literal>: For example, <literal>&lt;#assign
+                  counter += 2&gt;</literal> is equivalent to
+                  <literal>&lt;#assign counter = counter +
+                  2&gt;</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

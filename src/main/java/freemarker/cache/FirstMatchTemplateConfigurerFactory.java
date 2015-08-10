@@ -22,8 +22,8 @@ import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Returns the first non-{@code null} result of the child factories, ignores all further child factories. The child
- * factories are call in the order as they were added.
+ * Returns the first non-{@code null} result of the child factories, ignoring all further child factories. The child
+ * factories are called in the order as they were added.
  */
 public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFactory {
     
