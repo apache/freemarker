@@ -1511,7 +1511,8 @@ public class Configurable {
      * <ul>
      *   <li><p>{@code "auto_escaping"}:
      *       See {@link Configuration#setAutoEscaping(boolean)}
-     *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
+     *       {@code yes}, etc.
      *       
      *   <li><p>{@code "auto_import"}:
      *       See {@link Configuration#setAutoImports(Map)}
@@ -1597,7 +1598,8 @@ public class Configurable {
      *       
      *   <li><p>{@code "template_configurers"}:
      *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
-     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>,
+     *       can be {@code null}.
      *       
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.

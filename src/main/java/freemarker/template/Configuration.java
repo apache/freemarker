@@ -349,6 +349,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Deprecated
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
+    private static final String NULL = "null";
     private static final String DEFAULT = "default";
     
     private static final Version VERSION;
@@ -1169,7 +1170,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void setTemplateConfigurers(TemplateConfigurerFactory templateConfigurers) {
         if (cache.getTemplateConfigurers() != templateConfigurers) {
-            templateConfigurers.setConfiguration(this);
+            if (templateConfigurers != null) {
+                templateConfigurers.setConfiguration(this);
+            }
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
                     templateConfigurers);
@@ -1678,7 +1681,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void setOutputFormat(String outputFormat) {
-        NullArgumentException.check("outputFormat", outputFormat);
+        if (outputFormat == null) {
+            throw new NullArgumentException("outputFormat", "You may meant: " + RAW_OUTPUT_FORMAT);
+        }
         this.outputFormat = outputFormat;
         outputFormatExplicitlySet = true; 
     }
@@ -2523,8 +2528,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             } else if (TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE.equals(name)) {
-                setTemplateConfigurers((TemplateConfigurerFactory) _ObjectBuilderSettingEvaluator.eval(
-                        value, TemplateConfigurerFactory.class, _SettingEvaluationEnvironment.getCurrent()));
+                if (value.equals(NULL)) {
+                    setTemplateConfigurers(null);
+                } else {
+                    setTemplateConfigurers((TemplateConfigurerFactory) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateConfigurerFactory.class, _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else {
                 unknown = true;
             }
