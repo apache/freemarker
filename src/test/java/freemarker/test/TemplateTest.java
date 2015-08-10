@@ -26,6 +26,8 @@ import java.util.Map;
 
 import org.junit.Ignore;
 
+import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -39,23 +41,26 @@ import freemarker.test.templatesuite.TemplateTestSuite;
 @Ignore
 public abstract class TemplateTest {
     
-    private Configuration configuration = new Configuration(Configuration.VERSION_2_3_0);
+    private Configuration configuration;
 
-    public Configuration getConfiguration() {
+    protected final Configuration getConfiguration() {
+        if (configuration == null) {
+            configuration = createConfiguration();
+        }
         return configuration;
     }
 
-    public void setConfiguration(Configuration configuration) {
+    protected final void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
 
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
-        Template t = new Template(null, ftl, configuration);
+        Template t = new Template(null, ftl, getConfiguration());
         assertOutput(t, expectedOut);
     }
 
     protected void assertOutputForNamed(String name, String expectedOut) throws IOException, TemplateException {
-        assertOutput(configuration.getTemplate(name), expectedOut);
+        assertOutput(getConfiguration().getTemplate(name), expectedOut);
     }
     
     protected void assertOutput(Template t, String expectedOut) throws TemplateException, IOException {
@@ -64,6 +69,10 @@ public abstract class TemplateTest {
         assertEquals(expectedOut, out.toString());
     }
     
+    protected Configuration createConfiguration() {
+        return new Configuration(Configuration.VERSION_2_3_0);
+    }
+
     protected Object createDataModel() {
         return null;
     }
@@ -80,9 +89,22 @@ public abstract class TemplateTest {
         return dataModel;
     }
     
+    protected void addTemplate(String name, String content) {
+        Configuration cfg = getConfiguration();
+        TemplateLoader tl = cfg.getTemplateLoader();
+        if (tl != null && !(tl instanceof StringTemplateLoader)) {
+            throw new IllegalStateException("The template loader was already set to a non-StringTemplateLoader: " + tl);
+        }
+        if (tl == null) {
+            tl = new StringTemplateLoader();
+            cfg.setTemplateLoader(tl);
+        }
+        ((StringTemplateLoader) tl).putTemplate(name, content);
+    }
+    
     protected void assertErrorContains(String ftl, String... expectedSubstrings) {
         try {
-            new Template("adhoc", ftl, configuration).process(createDataModel(), new StringWriter());
+            new Template("adhoc", ftl, getConfiguration()).process(createDataModel(), new StringWriter());
             fail("The tempalte had to fail");
         } catch (TemplateException e) {
             assertContainsAll(e.getMessageWithoutStackTop(), expectedSubstrings);

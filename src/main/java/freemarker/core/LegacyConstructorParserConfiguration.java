@@ -28,15 +28,18 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private final int namingConvention;
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
-    private final Version incompatibleImprovements;
     private ArithmeticEngine arithmeticEngine;
+    private String outputFormat;
+    private final Version incompatibleImprovements;
 
     public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
-            int namingConvention, Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
+            int namingConvention, String outputFormat,
+            Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
         this.whitespaceStripping = whitespaceStripping;
         this.strictSyntaxMode = strictSyntaxMode;
+        this.outputFormat = outputFormat;
         this.incompatibleImprovements = incompatibleImprovements;
         this.arithmeticEngine = arithmeticEngine;
     }
@@ -65,11 +68,22 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         return arithmeticEngine;
     }
 
-    public void setArithmeticEngineFromNull(ArithmeticEngine arithmeticEngine) {
+    void setArithmeticEngineFromNull(ArithmeticEngine arithmeticEngine) {
         if (this.arithmeticEngine != null) {
             throw new IllegalStateException();
         }
         this.arithmeticEngine = arithmeticEngine;
+    }
+
+    public String getOutputFormat() {
+        return outputFormat;
+    }
+
+    void setOutputFormatFromNull(String outputFormat) {
+        if (this.outputFormat != null) {
+            throw new IllegalStateException();
+        }
+        this.outputFormat = outputFormat;
     }
 
 }
