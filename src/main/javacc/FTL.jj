@@ -192,9 +192,9 @@ public class FMParser {
         this.template = template;
         if (template != null) {            if (pCfg == null) {                pCfg = template.getParserConfiguration();
             }
-            if (template.getOutputFormat() == null) {
+            if (outputFormat == null) {                // TODO Check if outputFormat is registered
                 outputFormat = pCfg.getOutputFormat();
-                // TODO Check if outputFormat is registered
+            }            if (template.getOutputFormat() == null) {
                 _TemplateAPI.setOutputFormat(template, outputFormat);
             }
             if (pCfg.getArithmeticEngine() == null && pCfg instanceof LegacyConstructorParserConfiguration) {                ((LegacyConstructorParserConfiguration) pCfg).setArithmeticEngineFromNull(
