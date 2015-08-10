@@ -588,6 +588,8 @@ public class Template extends Configurable {
      * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
      * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code output_format}
      * option in the template.
+     * 
+     * @since 2.3.24
      */
     public String getOutputFormat() {
         return unboundTemplate.getOutputFormat();

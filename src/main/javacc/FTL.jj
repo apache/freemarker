@@ -127,9 +127,10 @@ public class FMParser {
             if (pCfg == null) {
                 pCfg = unboundTemplate.getParserConfiguration();
             }
-            if (unboundTemplate.getOutputFormat() == null) {
-                outputFormat = pCfg.getOutputFormat();
+            if (outputFormat == null) {
                 // TODO Check if outputFormat is registered
+                outputFormat = pCfg.getOutputFormat();            }
+            if (unboundTemplate.getOutputFormat() == null) {
                 unboundTemplate.setOutputFormat(outputFormat);
             }
         }
