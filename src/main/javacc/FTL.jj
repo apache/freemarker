@@ -53,6 +53,7 @@ public class FMParser {
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
     private String outputFormat;
+    private boolean autoEscaping;
     private ParserConfiguration pCfg;
 
     /** Keeps track of #list and #foreach nesting. */
@@ -128,6 +129,7 @@ public class FMParser {
                 new LegacyConstructorParserConfiguration(
                         strictSyntaxMode, whitespaceStripping,
                         tagSyntax, namingConvention,
+                        template != null ? template.getParserConfiguration().getAutoEscaping() : true,
                         template != null ? template.getParserConfiguration().getOutputFormat() : null,
                         new Version(incompatibleImprovements),
                         template != null ? template.getArithmeticEngine() : null));
@@ -189,17 +191,29 @@ public class FMParser {
     }
 
     void setTemplate(Template template) {
+        if (this.template == template) {
+            return;
+        }
+        if (this.template != null) {
+            throw new IllegalStateException("The template was already set");
+        }
+      
         this.template = template;
-        if (template != null) {            if (pCfg == null) {                pCfg = template.getParserConfiguration();
-            }
-            if (outputFormat == null) {                // TODO Check if outputFormat is registered
-                outputFormat = pCfg.getOutputFormat();
-            }            if (template.getOutputFormat() == null) {
-                _TemplateAPI.setOutputFormat(template, outputFormat);
-            }
-            if (pCfg.getArithmeticEngine() == null && pCfg instanceof LegacyConstructorParserConfiguration) {                ((LegacyConstructorParserConfiguration) pCfg).setArithmeticEngineFromNull(
-                        template.getArithmeticEngine());
-            }
+        if (pCfg == null) {
+            pCfg = template.getParserConfiguration();
+        }
+
+        autoEscaping = pCfg.getAutoEscaping();
+        _TemplateAPI.setAutoEscaping(template, autoEscaping);
+        
+        outputFormat = pCfg.getOutputFormat();
+        _TemplateAPI.setOutputFormat(template, outputFormat);
+        // TODO Check if outputFormat is registered
+        
+        if (pCfg instanceof LegacyConstructorParserConfiguration) {
+            LegacyConstructorParserConfiguration lpCfg = (LegacyConstructorParserConfiguration) pCfg;            lpCfg.setArithmeticEngineFromNull(template.getArithmeticEngine());
+            lpCfg.setAutoEscaping(template.getAutoEscaping());
+            lpCfg.setOutputFormatFromNull(template.getOutputFormat());
         }
     }
 
@@ -3719,6 +3733,9 @@ void HeaderElement() :
                             this.stripText = getBoolean(exp);
                         } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
                             this.token_source.strictEscapeSyntax = getBoolean(exp);
+                        } else if (ks.equalsIgnoreCase("auto_escaping") || ks.equals("autoEscaping")) {
+                            autoEscaping = getBoolean(exp);
+                            _TemplateAPI.setAutoEscaping(template, autoEscaping);
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);

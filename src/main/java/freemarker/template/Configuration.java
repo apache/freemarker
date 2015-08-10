@@ -163,6 +163,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String OUTPUT_FORMAT_KEY_CAMEL_CASE = "outputFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String OUTPUT_FORMAT_KEY = OUTPUT_FORMAT_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+    public static final String AUTO_ESCAPING_KEY_SNAKE_CASE = "auto_escaping";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+    public static final String AUTO_ESCAPING_KEY_CAMEL_CASE = "autoEscaping";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String AUTO_ESCAPING_KEY = AUTO_ESCAPING_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String CACHE_STORAGE_KEY_SNAKE_CASE = "cache_storage";
@@ -250,6 +257,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
         // Must be sorted alphabetically!
+        AUTO_ESCAPING_KEY_SNAKE_CASE,
         AUTO_IMPORT_KEY_SNAKE_CASE,
         AUTO_INCLUDE_KEY_SNAKE_CASE,
         CACHE_STORAGE_KEY_SNAKE_CASE,
@@ -270,6 +278,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
         // Must be sorted alphabetically!
+        AUTO_ESCAPING_KEY_CAMEL_CASE,
         AUTO_IMPORT_KEY_CAMEL_CASE,
         AUTO_INCLUDE_KEY_CAMEL_CASE,
         CACHE_STORAGE_KEY_CAMEL_CASE,
@@ -403,6 +412,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
+    private Boolean autoEscaping;
     private String outputFormat = RAW_OUTPUT_FORMAT;
     private boolean outputFormatExplicitlySet;
     private Version incompatibleImprovements;
@@ -1606,6 +1616,45 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
+     * Sets if auto-escaping should be enabled; default is {@code true}, but only has effect if the output format
+     * ({@link #setOutputFormat(String)}) is one that can do escaping. Notably, the default output format,
+     * {@value #RAW_OUTPUT_FORMAT} doesn't escape.
+     * 
+     * @since 2.3.24
+     */
+    public void setAutoEscaping(boolean autoEscaping) {
+        this.autoEscaping = Boolean.valueOf(autoEscaping);
+    }
+
+    /**
+     * Getter pair of {@link #setAutoEscaping(boolean)}
+     * 
+     * @since 2.3.24
+     */
+    public boolean getAutoEscaping() {
+        return autoEscaping != null ? autoEscaping.booleanValue() : true;
+    }
+    
+    /**
+     * Tells if {@link #setOutputFormat(String)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.24
+     */
+    public boolean isAutoEscapingExplicitlySet() {
+        return autoEscaping != null;
+    }
+    
+    /**
+     * Resets the setting to its default, as it was never set. 
+     * {@link #isAutoEscapingExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.24
+     */
+    public void unsetAutoEscaping() {
+        autoEscaping = null;
+    }
+    
+    /**
      * Sets the (default) output format. Usually, you leave this on its default, which is {@link #RAW_OUTPUT_FORMAT},
      * and then override it for individual templates based on their name (like based on their "file" extension) with
      * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, if {@link #getIncompatibleImprovements()} is
@@ -1652,7 +1701,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Resets the setting to its default, as it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also
-     * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
+     * {@link #isOutputFormatExplicitlySet()} will return {@code false}.
      * 
      * @since 2.3.24
      */
@@ -2346,6 +2395,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
                     || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
+            } else if (AUTO_ESCAPING_KEY_SNAKE_CASE.equals(name) || AUTO_ESCAPING_KEY_CAMEL_CASE.equals(name)) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetAutoEscaping();
+                } else {
+                    setAutoEscaping(StringUtil.getYesNo(value));
+                }
             } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetOutputFormat();

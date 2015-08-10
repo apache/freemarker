@@ -87,6 +87,7 @@ public class CamelCaseTest extends TemplateTest {
                 + "stripText=true "
                 + "strictSyntax=true "
                 + "outputFormat='" + Configuration.HTML_OUTPUT_FORMAT + "' "
+                + "autoEscaping=true "
                 + "nsPrefixes={} "
                 + ">\nx\n<#if true>\n${.outputFormat}\n</#if>\n",
                 "\nHTML\n");
@@ -97,6 +98,7 @@ public class CamelCaseTest extends TemplateTest {
                 + "strip_text=true "
                 + "strict_syntax=true "
                 + "output_format='" + Configuration.HTML_OUTPUT_FORMAT + "' "
+                + "auto_escaping=true "
                 + "ns_prefixes={} "
                 + ">\nx\n<#if true>\n${.output_format}\n</#if>\n",
                 "\nHTML\n");

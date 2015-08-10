@@ -84,6 +84,7 @@ public class Template extends Configurable {
     private Object customLookupCondition;
     private int actualTagSyntax;
     private int actualNamingConvention;
+    private boolean autoEscaping;
     private String outputFormat;
     private final String name;
     private final String sourceName;
@@ -661,6 +662,26 @@ public class Template extends Configurable {
      */
     void setOutputFormat(String outputFormat) {
         this.outputFormat = outputFormat;
+    }
+    
+    /**
+     * Returns if the template uses auto-escaping (see {@link Configuration#setAutoEscaping(boolean)}).
+     * The output format of a template can come from various places, in order of increasing priority:
+     * {@link Configuration#getAutoEscaping()}, {@link ParserConfiguration#getAutoEscaping()} (which is usually
+     * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code auto_escaping}
+     * option in the template.
+     * 
+     * @since 2.3.24
+     */
+    public boolean getAutoEscaping() {
+        return autoEscaping;
+    }
+
+    /**
+     * Meant to be called by the parser only. 
+     */
+    void setAutoEscaping(boolean autoEscaping) {
+        this.autoEscaping = autoEscaping;
     }
 
     /**

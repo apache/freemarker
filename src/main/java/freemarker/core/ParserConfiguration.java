@@ -52,6 +52,14 @@ public interface ParserConfiguration {
      */
     boolean getStrictSyntaxMode();
     
+    /**
+     * See {@link Configuration#getAutoEscaping()}.
+     */
+    boolean getAutoEscaping();
+    
+    /**
+     * See {@link Configuration#getOutputEncoding()}.
+     */
     String getOutputFormat();
     
     /**
