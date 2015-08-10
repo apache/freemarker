@@ -46,6 +46,7 @@ import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.core.Configurable;
+import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
 import freemarker.core.Environment;
@@ -843,12 +844,38 @@ public class ConfigurationTest extends TestCase {
             assertEquals("TODO,XML", t.getBooleanFormat());
             assertEquals(DateUtil.UTC, t.getTimeZone());
         }
+        
+        assertNotNull(cfg.getTemplateConfigurers());
+        cfg.setSetting(Configuration.TEMPLATE_CONFIGURERS_KEY, "null");
+        assertNull(cfg.getTemplateConfigurers());
+    }
+
+    public void testSetAutoEscaping() throws Exception {
+       Configuration cfg = new Configuration();
+    
+       assertTrue(cfg.getAutoEscaping());
+       assertFalse(cfg.isAutoEscapingExplicitlySet());
+
+       cfg.setAutoEscaping(false);
+       assertFalse(cfg.getAutoEscaping());
+       assertTrue(cfg.isAutoEscapingExplicitlySet());
+    
+       cfg.unsetAutoEscaping();
+       assertTrue(cfg.getAutoEscaping());
+       assertFalse(cfg.isAutoEscapingExplicitlySet());
+    
+       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "true");
+       assertTrue(cfg.getAutoEscaping());
+       assertTrue(cfg.isAutoEscapingExplicitlySet());
+       
+       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_SNAKE_CASE, "default");
+       assertFalse(cfg.isAutoEscapingExplicitlySet());
     }
 
     public void testSetOutputFormat() throws Exception {
        Configuration cfg = new Configuration();
        
-       assertEquals(cfg.getOutputFormat(), Configuration.RAW_OUTPUT_FORMAT);
+       assertEquals(Configuration.RAW_OUTPUT_FORMAT, cfg.getOutputFormat());
        assertFalse(cfg.isOutputFormatExplicitlySet());
        
        try {
@@ -874,8 +901,19 @@ public class ConfigurationTest extends TestCase {
        cfg.unsetOutputFormat();
        assertEquals(cfg.getOutputFormat(), Configuration.RAW_OUTPUT_FORMAT);
        assertFalse(cfg.isOutputFormatExplicitlySet());
+       
+       cfg.setOutputFormat(Configuration.RAW_OUTPUT_FORMAT);
+       assertTrue(cfg.isOutputFormatExplicitlySet());
+       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, "default");
+       assertFalse(cfg.isOutputFormatExplicitlySet());
+       
+       try {
+           cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY, "null");
+       } catch (SettingValueAssignmentException e) {
+           assertThat(e.getCause().getMessage(), containsString(Configuration.RAW_OUTPUT_FORMAT));
+       }
     }
-    
+
     public void testSetTimeZone() throws TemplateException {
         TimeZone origSysDefTZ = TimeZone.getDefault();
         try {

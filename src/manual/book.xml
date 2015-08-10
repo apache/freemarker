@@ -23690,10 +23690,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>New built-in variable, <literal>.output_format</literal>
-              (or <literal>.outputFormat</literal>), returns the current
-              output format at the place of invocation. (The output format
-              mechanism is new in this release; see it elsewhere.)</para>
+              <para>Things related to the output format mechanism, which is
+              new in this release (see it elsewhere):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>New <literal>ftl</literal> header options to override
+                  the defaults of <literal>output_format</literal> and
+                  <literal>auto_escaping</literal> (e.g. <literal>&lt;#ftl
+                  output_format='HTML'&gt;</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>New built-in variable,
+                  <literal>.output_format</literal> (or
+                  <literal>.outputFormat</literal>), returns the current
+                  output format at the place of invocation.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>

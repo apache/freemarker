@@ -26,6 +26,10 @@ public class NullArgumentException extends IllegalArgumentException {
     public NullArgumentException(String argumentName) {
         super("The \"" + argumentName + "\" argument can't be null");
     }
+
+    public NullArgumentException(String argumentName, String details) {
+        super("The \"" + argumentName + "\" argument can't be null. " + details);
+    }
     
     /**
      * Convenience method to protect against a {@code null} argument.

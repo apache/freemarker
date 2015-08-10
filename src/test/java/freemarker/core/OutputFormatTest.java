@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package freemarker.core;
 
 import static org.junit.Assert.*;
@@ -13,7 +28,7 @@ import freemarker.test.TemplateTest;
 public class OutputFormatTest extends TemplateTest {
 
     @Test
-    public void testSettingLayers() throws Exception {
+    public void testOutputFormatSettingLayers() throws Exception {
         addTemplate("t", "${.outputFormat}");
         addTemplate("t.xml", "${.outputFormat}");
         addTemplate("tWithHeader", "<#ftl outputFormat='HTML'>${.outputFormat}");
@@ -47,6 +62,49 @@ public class OutputFormatTest extends TemplateTest {
             
             cfg.clearTemplateCache();
         }
+    }
+
+    @Test
+    public void testAutoEscapingSettingLayers() throws Exception {
+        addTemplate("t", "${'a&b'}");
+        addTemplate("tWithHeaderFalse", "<#ftl autoEscaping=false>${'a&b'}");
+        addTemplate("tWithHeaderTrue", "<#ftl autoEscaping=false>${'a&b'}");
+        
+        Configuration cfg = getConfiguration();
+        
+        assertTrue(cfg.getAutoEscaping());
+        
+        cfg.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+        
+        for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
+            if (!cfgAutoEscaping) {
+                cfg.setAutoEscaping(false);
+            }
+            
+            {
+                Template t = cfg.getTemplate("t");
+                assertTrue(t.getAutoEscaping());
+                if (cfgAutoEscaping) {
+                    assertOutput(t, "a&b"); // TODO "a&amp;b"
+                } else {
+                    assertOutput(t, "a&b");
+                }
+            }
+            
+            {
+                Template t = cfg.getTemplate("tWithHeaderFalse");
+                assertFalse(t.getAutoEscaping());
+                assertOutput(t, "a&b");
+            }
+            
+            {
+                Template t = cfg.getTemplate("tWithHeaderTrue");
+                assertFalse(t.getAutoEscaping());
+                assertOutput(t, "a&b"); // TODO "a&amp;b"
+            }
+        }
+        
+        cfg.clearTemplateCache();
     }
     
     @Override

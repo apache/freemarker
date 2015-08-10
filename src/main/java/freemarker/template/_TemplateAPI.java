@@ -98,6 +98,10 @@ public class _TemplateAPI {
         return cfg.getSettingNames(camelCase);
     }
     
+    public static void setAutoEscaping(Template t, boolean autoEscaping) {
+        t.setAutoEscaping(autoEscaping);
+    }
+    
     public static void setOutputFormat(Template t, String outputFormat) {
         t.setOutputFormat(outputFormat);
     }

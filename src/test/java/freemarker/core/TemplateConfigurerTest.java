@@ -164,6 +164,7 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
+        SETTING_ASSIGNMENTS.put("autoEscaping", false);
         SETTING_ASSIGNMENTS.put("outputFormat", Configuration.HTML_OUTPUT_FORMAT);
         
         // Special settings:
@@ -497,6 +498,15 @@ public class TemplateConfigurerTest {
             assertOutputWithoutAndWithTC(tc, "${.outputFormat}",
                     Configuration.RAW_OUTPUT_FORMAT, Configuration.XML_OUTPUT_FORMAT);
             testedProps.add(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE);
+        }
+
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+            tc.setAutoEscaping(false);
+            assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b" /* TODO "a&amp;b" */, "a&b");
+            testedProps.add(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE);
         }
         
         {

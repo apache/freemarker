@@ -1507,6 +1507,11 @@ public class Configurable {
      * 
      * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
      * <ul>
+     *   <li><p>{@code "auto_escaping"}:
+     *       See {@link Configuration#setAutoEscaping(boolean)}
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
+     *       {@code yes}, etc.
+     *       
      *   <li><p>{@code "auto_import"}:
      *       See {@link Configuration#setAutoImports(Map)}
      *       <br>String value is something like:
@@ -1591,7 +1596,8 @@ public class Configurable {
      *       
      *   <li><p>{@code "template_configurers"}:
      *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
-     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>,
+     *       can be {@code null}.
      *       
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
