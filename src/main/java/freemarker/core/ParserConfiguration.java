@@ -52,6 +52,8 @@ public interface ParserConfiguration {
      */
     boolean getStrictSyntaxMode();
     
+    String getOutputFormat();
+    
     /**
      * See {@link Configuration#getIncompatibleImprovements()}.
      */

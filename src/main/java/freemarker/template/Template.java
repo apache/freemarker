@@ -581,6 +581,17 @@ public class Template extends Configurable {
     public int getActualNamingConvention() {
         return unboundTemplate.getActualNamingConvention();
     }
+    
+    /**
+     * Returns the output format (see {@link Configuration#setOutputFormat(String)}) used for this template.
+     * The output format of a template can come from various places, in order of increasing priority:
+     * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
+     * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code output_format}
+     * option in the template.
+     */
+    public String getOutputFormat() {
+        return unboundTemplate.getOutputFormat();
+    }
 
     /**
      * Dump the raw template in canonical form.

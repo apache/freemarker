@@ -60,6 +60,8 @@ final class BuiltinVariable extends Expression {
     static final String ERROR = "error";
     static final String OUTPUT_ENCODING_CC = "outputEncoding";
     static final String OUTPUT_ENCODING = "output_encoding";
+    static final String OUTPUT_FORMAT_CC = "outputFormat";
+    static final String OUTPUT_FORMAT = "output_format";
     static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
@@ -87,7 +89,9 @@ final class BuiltinVariable extends Expression {
         NODE,
         NOW,
         OUTPUT_ENCODING_CC,
+        OUTPUT_FORMAT_CC,
         OUTPUT_ENCODING,
+        OUTPUT_FORMAT,
         PASS,
         TEMPLATE_NAME_CC,
         TEMPLATE_NAME,
@@ -98,9 +102,12 @@ final class BuiltinVariable extends Expression {
     };
 
     private final String name;
+    private final TemplateModel parseTimeValue;
 
-    BuiltinVariable(Token nameTk, FMParserTokenManager tokenManager) throws ParseException {
+    BuiltinVariable(Token nameTk, FMParserTokenManager tokenManager, TemplateModel parseTimeValue)
+            throws ParseException {
         String name = nameTk.image;
+        this.parseTimeValue = parseTimeValue;
         if (Arrays.binarySearch(SPEC_VAR_NAMES, name) < 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("Unknown special variable name: ");
@@ -137,6 +144,9 @@ final class BuiltinVariable extends Expression {
 
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
+        if (parseTimeValue != null) {
+            return parseTimeValue;
+        }
         if (name == NAMESPACE) {
             return env.getCurrentNamespace();
         }
@@ -190,6 +200,10 @@ final class BuiltinVariable extends Expression {
         }
         if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
             String s = env.getOutputEncoding();
+            return SimpleScalar.newInstanceOrNull(s);
+        }
+        if (name == OUTPUT_FORMAT || name == OUTPUT_FORMAT_CC) {
+            String s = env.getCurrentTemplate().getOutputFormat();
             return SimpleScalar.newInstanceOrNull(s);
         }
         if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {

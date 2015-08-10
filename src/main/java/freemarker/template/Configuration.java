@@ -157,6 +157,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String WHITESPACE_STRIPPING_KEY = WHITESPACE_STRIPPING_KEY_SNAKE_CASE;
     
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+    public static final String OUTPUT_FORMAT_KEY_SNAKE_CASE = "output_format";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+    public static final String OUTPUT_FORMAT_KEY_CAMEL_CASE = "outputFormat";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String OUTPUT_FORMAT_KEY = OUTPUT_FORMAT_KEY_SNAKE_CASE;
+    
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String CACHE_STORAGE_KEY_SNAKE_CASE = "cache_storage";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -250,6 +257,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
+        OUTPUT_FORMAT_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
         TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE,
@@ -269,6 +277,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
+        OUTPUT_FORMAT_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
         TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE,
@@ -287,6 +296,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int LEGACY_NAMING_CONVENTION = 11;
     public static final int CAMEL_CASE_NAMING_CONVENTION = 12;
     
+    /** @since 2.3.24 */
+    public static final String RAW_OUTPUT_FORMAT = "raw";
+    /** @since 2.3.24 */
+    public static final String HTML_OUTPUT_FORMAT = "HTML";
+    /** @since 2.3.24 */
+    public static final String XHTML_OUTPUT_FORMAT = "XHTML";
+    /** @since 2.3.24 */
+    public static final String XML_OUTPUT_FORMAT = "XML";
+    /** @since 2.3.24 */
+    public static final String RTF_OUTPUT_FORMAT = "RTF";
+
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     
@@ -307,6 +327,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /** FreeMarker version 2.4.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_4_0 = new Version(2, 4, 0);
+
+    /** FreeMarker version 2.3.24 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_24 = new Version(2, 3, 24);
 
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
@@ -377,11 +400,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     private final static Object defaultConfigLock = new Object();
+
     private static volatile Configuration defaultConfig;
 
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
+    private String outputFormat = RAW_OUTPUT_FORMAT;
+    private boolean outputFormatExplicitlySet;
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
@@ -1581,6 +1607,62 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public boolean getWhitespaceStripping() {
         return whitespaceStripping;
     }
+
+    /**
+     * Sets the (default) output format. Usually, you leave this on its default, which is {@link #RAW_OUTPUT_FORMAT},
+     * and then override it for individual templates based on their name (like based on their "file" extension) with
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, if {@link #getIncompatibleImprovements()} is
+     * 2.3.24 or greater, templates with these extensions get non-default output format (unless
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)} specifies another output format for the template):
+     * 
+     * <ul>
+     *   <li>{@code ftlh}: {@value #HTML_OUTPUT_FORMAT}
+     *   <li>{@code ftlxh}: {@value #XHTML_OUTPUT_FORMAT}
+     *   <li>{@code ftlx}: {@value #XML_OUTPUT_FORMAT}
+     *   <li>{@code ftlr}: {@value #RTF_OUTPUT_FORMAT}
+     * </ul>
+     * 
+     * <p>
+     * The output format need not be already registered when this value is set. It need to be registered before a
+     * template that need to use this output format is parsed.
+     * 
+     * @since 2.3.24
+     */
+    public void setOutputFormat(String outputFormat) {
+        NullArgumentException.check("outputFormat", outputFormat);
+        this.outputFormat = outputFormat;
+        outputFormatExplicitlySet = true; 
+    }
+
+    /**
+     * Getter pair of {@link #setOutputFormat(String)}
+     * 
+     * @since 2.3.24
+     */
+    public String getOutputFormat() {
+        return outputFormat;
+    }
+    
+    /**
+     * Tells if {@link #setOutputFormat(String)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.24
+     */
+    public boolean isOutputFormatExplicitlySet() {
+        return outputFormatExplicitlySet;
+    }
+    
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also
+     * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.24
+     */
+    public void unsetOutputFormat() {
+        outputFormat = RAW_OUTPUT_FORMAT;
+        outputFormatExplicitlySet = false;
+    }
     
     /**
      * Determines the syntax of the template files (angle bracket VS square bracket)
@@ -2267,6 +2349,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
                     || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
+            } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetOutputFormat();
+                } else {
+                    setOutputFormat(value);
+                }
             } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetCacheStorage();

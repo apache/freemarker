@@ -21,7 +21,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class SpecialVariableTest {
+import freemarker.test.TemplateTest;
+
+public class SpecialVariableTest extends TemplateTest {
 
     @Test
     public void testGetSettingNamesSorted() throws Exception {

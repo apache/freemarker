@@ -54,6 +54,7 @@ public class FMParser {
 
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
+    private String outputFormat;
     private ParserConfiguration pCfg;
 
     /** Keeps track of #list and #foreach nesting. */
@@ -125,6 +126,11 @@ public class FMParser {
         if (unboundTemplate != null) {
             if (pCfg == null) {
                 pCfg = unboundTemplate.getParserConfiguration();
+            }
+            if (unboundTemplate.getOutputFormat() == null) {
+                outputFormat = pCfg.getOutputFormat();
+                // TODO Check if outputFormat is registered
+                unboundTemplate.setOutputFormat(outputFormat);
             }
         }
     }
@@ -1742,7 +1748,16 @@ BuiltinVariable BuiltinVariable() :
     {
         BuiltinVariable result = null;
         token_source.checkNamingConvention(name);
-        result = new BuiltinVariable(name, token_source);
+
+        TemplateModel parseTimeValue;
+        if (name.image.equals(BuiltinVariable.OUTPUT_FORMAT) || name.image.equals(BuiltinVariable.OUTPUT_FORMAT_CC)) {
+            parseTimeValue = new SimpleScalar(outputFormat);
+        } else {
+            parseTimeValue = null;
+        }
+        
+        result = new BuiltinVariable(name, token_source, parseTimeValue);
+        
         result.setLocation(unboundTemplate, dot, name);
         return result;
     }
@@ -3633,7 +3648,7 @@ void HeaderElement() :
                     if (unboundTemplate != null) {
                         if (ks.equalsIgnoreCase("encoding")) {
                             if (vs == null) {
-                                throw new ParseException("Expecting an encoding string.", exp);
+                                throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
                             }
                             if (assumedEncoding != null && !assumedEncoding.equalsIgnoreCase(vs)) {
                                 throw new Template.WrongEncodingException(vs, assumedEncoding);
@@ -3645,6 +3660,13 @@ void HeaderElement() :
                             this.stripText = getBoolean(exp);
                         } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
                             this.token_source.strictEscapeSyntax = getBoolean(exp);
+                        } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
+                            if (vs == null) {
+                                throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
+                            }
+                            outputFormat = vs;
+                            // TODO Check if outputFormat is registered
+                            unboundTemplate.setOutputFormat(outputFormat);
                         } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);
@@ -3686,7 +3708,7 @@ void HeaderElement() :
 	                        if (ks.equals("charset")) {
 	                            correctName = "encoding";
 	                        } else if (ks.equals("xmlns")) {
-	                            // [2.4] If came case will be the default, update this
+	                            // [2.4] If camel case will be the default, update this
                                 correctName
                                         = token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
                                                 ? "nsPrefixes" : "ns_prefixes";

@@ -54,6 +54,7 @@ import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import junit.framework.TestCase;
 
@@ -842,6 +843,37 @@ public class ConfigurationTest extends TestCase {
             assertEquals("TODO,XML", t.getBooleanFormat());
             assertEquals(DateUtil.UTC, t.getTimeZone());
         }
+    }
+
+    public void testSetOutputFormat() throws Exception {
+       Configuration cfg = new Configuration();
+       
+       assertEquals(cfg.getOutputFormat(), Configuration.RAW_OUTPUT_FORMAT);
+       assertFalse(cfg.isOutputFormatExplicitlySet());
+       
+       try {
+           cfg.setOutputFormat(null);
+           fail();
+       } catch (NullArgumentException e) {
+           // Expected
+       }
+       
+       assertFalse(cfg.isOutputFormatExplicitlySet());
+       
+       String s = "Has to accept anything";
+       cfg.setOutputFormat(s);
+       assertEquals(s, cfg.getOutputFormat());
+       assertTrue(cfg.isOutputFormatExplicitlySet());
+       
+       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, "cc");
+       assertEquals("cc", cfg.getOutputFormat());
+       
+       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_SNAKE_CASE, "sc");
+       assertEquals("sc", cfg.getOutputFormat());
+       
+       cfg.unsetOutputFormat();
+       assertEquals(cfg.getOutputFormat(), Configuration.RAW_OUTPUT_FORMAT);
+       assertFalse(cfg.isOutputFormatExplicitlySet());
     }
     
     public void testSetTimeZone() throws TemplateException {

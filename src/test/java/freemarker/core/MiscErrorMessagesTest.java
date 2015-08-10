@@ -19,7 +19,6 @@ package freemarker.core;
 import org.junit.Test;
 
 import freemarker.cache.TemplateNameFormat;
-import freemarker.template.Configuration;
 import freemarker.test.TemplateTest;
 
 public class MiscErrorMessagesTest extends TemplateTest {
@@ -31,9 +30,7 @@ public class MiscErrorMessagesTest extends TemplateTest {
     
     @Test
     public void wrongTemplateNameFormat() {
-        Configuration cfg = new Configuration();
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
-        setConfiguration(cfg);
+        getConfiguration().setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
         
         assertErrorContains("<#include 'foo:/bar:baaz'>", "Malformed template name", "':'");
         assertErrorContains("<#include '../baaz'>", "Malformed template name", "root");

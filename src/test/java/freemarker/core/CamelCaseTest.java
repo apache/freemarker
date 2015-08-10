@@ -44,6 +44,8 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput("${.template_name?length}", "0");
         assertOutput("${.outputEncoding}", "utf-8");
         assertOutput("${.output_encoding}", "utf-8");
+        assertOutput("${.outputFormat}", Configuration.RAW_OUTPUT_FORMAT);
+        assertOutput("${.output_format}", Configuration.RAW_OUTPUT_FORMAT);
         assertOutput("${.urlEscapingCharset}", "iso-8859-1");
         assertOutput("${.url_escaping_charset}", "iso-8859-1");
         assertOutput("${.currentNode!'-'}", "-");
@@ -84,18 +86,20 @@ public class CamelCaseTest extends TemplateTest {
                 + "stripWhitespace=false "
                 + "stripText=true "
                 + "strictSyntax=true "
+                + "outputFormat='" + Configuration.HTML_OUTPUT_FORMAT + "' "
                 + "nsPrefixes={} "
-                + ">\nx\n<#if true>\ny\n</#if>\n",
-                "\ny\n");
+                + ">\nx\n<#if true>\n${.outputFormat}\n</#if>\n",
+                "\nHTML\n");
 
         assertOutput(
                 "<#ftl "
                 + "strip_whitespace=false "
                 + "strip_text=true "
                 + "strict_syntax=true "
+                + "output_format='" + Configuration.HTML_OUTPUT_FORMAT + "' "
                 + "ns_prefixes={} "
-                + ">\nx\n<#if true>\ny\n</#if>\n",
-                "\ny\n");
+                + ">\nx\n<#if true>\n${.output_format}\n</#if>\n",
+                "\nHTML\n");
 
         assertErrorContains("<#ftl strip_text=true xmlns={}>", "ns_prefixes", "\\!nsPrefixes");
         assertErrorContains("<#ftl stripText=true xmlns={}>", "nsPrefixes");
@@ -283,9 +287,8 @@ public class CamelCaseTest extends TemplateTest {
 
     @Test
     public void camelCaseDirectivesNonStrict() throws IOException, TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
-        cfg.setStrictSyntaxMode(false);
-        setConfiguration(cfg);
+        getConfiguration().setStrictSyntaxMode(false);
+        
         assertOutput(
                 "<list 1..4 as x><if x == 1>one <elseIf x == 2>two <elseif x == 3>three <else>other </if></list>",
                 "one <elseIf x == 2>two other three other ");
