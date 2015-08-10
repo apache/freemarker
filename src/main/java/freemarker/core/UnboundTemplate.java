@@ -67,6 +67,7 @@ public final class UnboundTemplate {
     private final int actualTagSyntax;
     private final int actualNamingConvention;
     private String outputFormat;
+    private boolean autoEscaping;
     
     private final String templateSpecifiedEncoding;
     
@@ -245,6 +246,20 @@ public final class UnboundTemplate {
      */
     void setOutputFormat(String outputFormat) {
         this.outputFormat = outputFormat;
+    }
+    
+    /**
+     * See {@link Template#getAutoEscaping()}.
+     */
+    public boolean getAutoEscaping() {
+        return autoEscaping;
+    }
+
+    /**
+     * Meant to be called by the parser only. 
+     */
+    void setAutoEscaping(boolean autoEscaping) {
+        this.autoEscaping = autoEscaping;
     }
     
     public Configuration getConfiguration() {

@@ -845,10 +845,32 @@ public class ConfigurationTest extends TestCase {
         }
     }
 
+    public void testSetAutoEscaping() throws Exception {
+       Configuration cfg = new Configuration();
+    
+       assertTrue(cfg.getAutoEscaping());
+       assertFalse(cfg.isAutoEscapingExplicitlySet());
+
+       cfg.setAutoEscaping(false);
+       assertFalse(cfg.getAutoEscaping());
+       assertTrue(cfg.isAutoEscapingExplicitlySet());
+    
+       cfg.unsetAutoEscaping();
+       assertTrue(cfg.getAutoEscaping());
+       assertFalse(cfg.isAutoEscapingExplicitlySet());
+    
+       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "true");
+       assertTrue(cfg.getAutoEscaping());
+       assertTrue(cfg.isAutoEscapingExplicitlySet());
+       
+       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_SNAKE_CASE, "default");
+       assertFalse(cfg.isAutoEscapingExplicitlySet());
+    }
+
     public void testSetOutputFormat() throws Exception {
        Configuration cfg = new Configuration();
        
-       assertEquals(cfg.getOutputFormat(), Configuration.RAW_OUTPUT_FORMAT);
+       assertEquals(Configuration.RAW_OUTPUT_FORMAT, cfg.getOutputFormat());
        assertFalse(cfg.isOutputFormatExplicitlySet());
        
        try {
@@ -874,8 +896,13 @@ public class ConfigurationTest extends TestCase {
        cfg.unsetOutputFormat();
        assertEquals(cfg.getOutputFormat(), Configuration.RAW_OUTPUT_FORMAT);
        assertFalse(cfg.isOutputFormatExplicitlySet());
+       
+       cfg.setOutputFormat(Configuration.RAW_OUTPUT_FORMAT);
+       assertTrue(cfg.isOutputFormatExplicitlySet());
+       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, "default");
+       assertFalse(cfg.isOutputFormatExplicitlySet());
     }
-    
+
     public void testSetTimeZone() throws TemplateException {
         TimeZone origSysDefTZ = TimeZone.getDefault();
         try {

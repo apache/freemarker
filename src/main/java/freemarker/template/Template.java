@@ -594,6 +594,19 @@ public class Template extends Configurable {
     public String getOutputFormat() {
         return unboundTemplate.getOutputFormat();
     }
+    
+    /**
+     * Returns if the template uses auto-escaping (see {@link Configuration#setAutoEscaping(boolean)}).
+     * The output format of a template can come from various places, in order of increasing priority:
+     * {@link Configuration#getAutoEscaping()}, {@link ParserConfiguration#getAutoEscaping()} (which is usually
+     * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code auto_escaping}
+     * option in the template.
+     * 
+     * @since 2.3.24
+     */
+    public boolean getAutoEscaping() {
+        return unboundTemplate.getAutoEscaping();
+    }
 
     /**
      * Dump the raw template in canonical form.

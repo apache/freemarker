@@ -55,6 +55,7 @@ public class FMParser {
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
     private String outputFormat;
+    private boolean autoEscaping;
     private ParserConfiguration pCfg;
 
     /** Keeps track of #list and #foreach nesting. */
@@ -122,18 +123,24 @@ public class FMParser {
     }
 
     void setTemplate(UnboundTemplate template) {
-        this.template = template;
-        if (template != null) {
-            if (pCfg == null) {
-                pCfg = template.getParserConfiguration();
-            }
-            if (outputFormat == null) {
-                // TODO Check if outputFormat is registered
-                outputFormat = pCfg.getOutputFormat();            }
-            if (template.getOutputFormat() == null) {
-                template.setOutputFormat(outputFormat);
-            }
+        if (this.template == template) {
+            return;
         }
+        if (this.template != null) {
+            throw new IllegalStateException("The template was already set");
+        }
+      
+        this.template = template;
+        if (pCfg == null) {
+            pCfg = template.getParserConfiguration();
+        }
+
+        autoEscaping = pCfg.getAutoEscaping();
+        template.setAutoEscaping(autoEscaping);
+        
+        outputFormat = pCfg.getOutputFormat();
+        template.setOutputFormat(outputFormat);
+        // TODO Check if outputFormat is registered
     }
 
     UnboundTemplate getTemplate() {
@@ -3661,6 +3668,9 @@ void HeaderElement() :
                             this.stripText = getBoolean(exp);
                         } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
                             this.token_source.strictEscapeSyntax = getBoolean(exp);
+                        } else if (ks.equalsIgnoreCase("auto_escaping") || ks.equals("autoEscaping")) {
+                            autoEscaping = getBoolean(exp);
+                            template.setAutoEscaping(autoEscaping);
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
