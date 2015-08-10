@@ -547,7 +547,7 @@ public class TemplateCache {
                 if ((tc == null || !tc.isOutputFormatSet())
                         && config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24
                         && (formatFromStdFileExt = getFormatFromStdFileExt(sourceName)) != null) {
-                    pCfg = overiddeOutputFormat(tc != null ? tc : config, formatFromStdFileExt);
+                    pCfg = overrideOutputFormat(tc != null ? tc : config, formatFromStdFileExt);
                 } else {
                     pCfg = tc;
                 }
@@ -604,7 +604,7 @@ public class TemplateCache {
         return template;
     }
 
-    private ParserConfiguration overiddeOutputFormat(
+    private ParserConfiguration overrideOutputFormat(
             final ParserConfiguration pCfg, final String outputFormat) {
         return new ParserConfiguration() {
             
