@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
@@ -38,30 +37,17 @@ import freemarker.test.TemplateTest;
 
 public class DirectiveCallPlaceTest extends TemplateTest {
     
-    private static final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-    static {
-        StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate(
-                "customDataBasics.ftl",
-                "<@uc>Abc</@uc> <@uc>x=${x}</@uc> <@uc>Ab<#-- -->c</@uc> <@lc/><@lc></@lc> <@lc>Abc</@lc>");
-        tl.putTemplate(
-                "customDataProviderMismatch.ftl",
-                "<#list [uc, lc, uc] as d><#list 1..2 as _><@d>Abc</@d></#list></#list>");
-        tl.putTemplate(
-                "positions.ftl",
-                "<@pa />\n"
-                + "..<@pa\n"
-                + "/><@pa>xxx</@>\n"
-                + "<@pa>{<@pa/> <@pa/>}</@>\n"
-                + "${curDirLine}<@argP p=curDirLine?string>${curDirLine}</@argP>${curDirLine}\n"
-                + "<#macro m p>(p=${p}){<#nested>}</#macro>\n"
-                + "${curDirLine}<@m p=curDirLine?string>${curDirLine}</@m>${curDirLine}");
-        cfg.setTemplateLoader(tl);
+    @Override
+    protected Configuration createConfiguration() {
+        return new Configuration(Configuration.VERSION_2_3_22);
     }
     
     @Test
     public void testCustomDataBasics() throws IOException, TemplateException {
-        setConfiguration(cfg);
+        addTemplate(
+                "customDataBasics.ftl",
+                "<@uc>Abc</@uc> <@uc>x=${x}</@uc> <@uc>Ab<#-- -->c</@uc> <@lc/><@lc></@lc> <@lc>Abc</@lc>");
+        
         CachingTextConverterDirective.resetCacheRecreationCount();
         for (int i = 0; i < 3; i++) {
             assertOutputForNamed(
@@ -72,7 +58,10 @@ public class DirectiveCallPlaceTest extends TemplateTest {
 
     @Test
     public void testCustomDataProviderMismatch() throws IOException, TemplateException {
-        setConfiguration(cfg);
+        addTemplate(
+                "customDataProviderMismatch.ftl",
+                "<#list [uc, lc, uc] as d><#list 1..2 as _><@d>Abc</@d></#list></#list>");
+        
         CachingTextConverterDirective.resetCacheRecreationCount();
         assertOutputForNamed(
                 "customDataProviderMismatch.ftl",
@@ -84,7 +73,16 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     
     @Test
     public void testPositions() throws IOException, TemplateException {
-        setConfiguration(cfg);
+        addTemplate(
+                "positions.ftl",
+                "<@pa />\n"
+                + "..<@pa\n"
+                + "/><@pa>xxx</@>\n"
+                + "<@pa>{<@pa/> <@pa/>}</@>\n"
+                + "${curDirLine}<@argP p=curDirLine?string>${curDirLine}</@argP>${curDirLine}\n"
+                + "<#macro m p>(p=${p}){<#nested>}</#macro>\n"
+                + "${curDirLine}<@m p=curDirLine?string>${curDirLine}</@m>${curDirLine}");
+        
         assertOutputForNamed(
                 "positions.ftl",
                 "[positions.ftl:1:1-1:7]"
