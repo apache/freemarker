@@ -23737,6 +23737,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set">the
+              <literal>incompatible_improvements</literal> setting</link> is
+              set to 2.3.24 (or higher), templates whose name ends with
+              <literal>ftlh</literal> file extension will automatically get
+              <literal>HTML</literal> <literal>output_format</literal>, and
+              those with <literal>ftlx</literal> file extension automatically
+              get <literal>XML</literal> <literal>output_format</literal>, in
+              both cases with <literal>auto_escaping</literal> on. (These can
+              be overridden with <literal>template_configurers</literal> of
+              course.)</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>freemarker.cache.ByteArrayTemplateLoader</literal>,
               which is similar to <literal>StringTemplateLoader</literal>, but

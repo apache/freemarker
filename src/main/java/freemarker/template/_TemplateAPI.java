@@ -38,6 +38,7 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_3_21 = Configuration.VERSION_2_3_21.intValue();
     public static final int VERSION_INT_2_3_22 = Configuration.VERSION_2_3_22.intValue();
     public static final int VERSION_INT_2_3_23 = Configuration.VERSION_2_3_23.intValue();
+    public static final int VERSION_INT_2_3_24 = Configuration.VERSION_2_3_24.intValue();
     public static final int VERSION_INT_2_4_0 = Version.intValueFor(2, 4, 0);
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
