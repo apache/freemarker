@@ -20039,6 +20039,12 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
+          <para><literal>pass</literal>: This is a macro that does nothing. It
+          has no parameters. Mostly used as no-op node handler in XML
+          processing.</para>
+        </listitem>
+
+        <listitem>
           <para><indexterm>
               <primary>template_name</primary>
             </indexterm><literal>template_name</literal>: <emphasis>Don't use
