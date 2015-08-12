@@ -54,9 +54,14 @@ import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
+import freemarker.core.HTMLOutputFormat;
+import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
+import freemarker.core.RTFOutputFormat;
+import freemarker.core.RawOutputFormat;
 import freemarker.core.TemplateConfigurer;
+import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
@@ -1724,6 +1729,33 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void unsetOutputFormat() {
         outputFormat = RAW_OUTPUT_FORMAT;
         outputFormatExplicitlySet = false;
+    }
+    
+    /**
+     * Returns the output format for a name (not {@code null}).
+     * 
+     * @throws IllegalArgumentException
+     *             If there's no output format registered with the given name.
+     * 
+     * @since 2.3.24
+     */
+    public OutputFormat<?> getOutputFormat(String name) {
+        // TODO Custom OF-s
+        if (name.equals(HTML_OUTPUT_FORMAT)) {
+            return HTMLOutputFormat.INSTANCE;
+        }
+        if (name.equals(XML_OUTPUT_FORMAT)) {
+            return XMLOutputFormat.INSTANCE;
+        }
+        if (name.equals(RTF_OUTPUT_FORMAT)) {
+            return RTFOutputFormat.INSTANCE;
+        }
+        if (name.equals(RAW_OUTPUT_FORMAT)) {
+            return RawOutputFormat.INSTANCE;
+        }
+        throw new IllegalArgumentException(
+                "Unrecongnized output format name, " + StringUtil.jQuote(outputFormat)
+                + ". Ensure that it's registered in the Configuration.");
     }
     
     /**

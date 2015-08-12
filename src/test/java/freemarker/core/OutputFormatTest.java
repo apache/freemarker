@@ -167,7 +167,7 @@ public class OutputFormatTest extends TemplateTest {
     public void testAutoEscapingSettingLayers() throws Exception {
         addTemplate("t", "${'a&b'}");
         addTemplate("tWithHeaderFalse", "<#ftl autoEscaping=false>${'a&b'}");
-        addTemplate("tWithHeaderTrue", "<#ftl autoEscaping=false>${'a&b'}");
+        addTemplate("tWithHeaderTrue", "<#ftl autoEscaping=true>${'a&b'}");
         
         Configuration cfg = getConfiguration();
         
@@ -182,10 +182,11 @@ public class OutputFormatTest extends TemplateTest {
             
             {
                 Template t = cfg.getTemplate("t");
-                assertTrue(t.getAutoEscaping());
                 if (cfgAutoEscaping) {
-                    assertOutput(t, "a&b"); // TODO "a&amp;b"
+                    assertTrue(t.getAutoEscaping());
+                    assertOutput(t, "a&amp;b");
                 } else {
+                    assertFalse(t.getAutoEscaping());
                     assertOutput(t, "a&b");
                 }
             }
@@ -198,12 +199,12 @@ public class OutputFormatTest extends TemplateTest {
             
             {
                 Template t = cfg.getTemplate("tWithHeaderTrue");
-                assertFalse(t.getAutoEscaping());
-                assertOutput(t, "a&b"); // TODO "a&amp;b"
+                assertTrue(t.getAutoEscaping());
+                assertOutput(t, "a&amp;b");
             }
+            
+            cfg.clearTemplateCache();
         }
-        
-        cfg.clearTemplateCache();
     }
     
     @Override

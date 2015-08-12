@@ -70,7 +70,8 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
     public abstract String getMarkup(TOM tom) throws TemplateModelException;
 
     /**
-     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response. 
+     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
+     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
      */
     public abstract String getMimeType();
 
@@ -84,5 +85,11 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
      * Returns a {@link TemplateOutputModel} that contains the content of both {@link TemplateOutputModel} concatenated.  
      */
     public abstract TOM concat(TOM tom1, TOM tom2) throws TemplateModelException;
+    
+    /**
+     * Tells if this output format defines any kind of escaping. If not, most methods should throw
+     * {@link UnsupportedOperationException}.
+     */
+    public abstract boolean isEscaping();
 
 }

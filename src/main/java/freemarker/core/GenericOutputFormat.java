@@ -87,6 +87,11 @@ public abstract class GenericOutputFormat<TOM extends GenericTemplateOutputModel
             return newTOM(null, mc1 + getMarkup(tom2));
         }
     }
+    
+    @Override
+    public boolean isEscaping() {
+        return true;
+    }
 
     protected abstract String escapePlainTextToString(String plainTextContent);
 
