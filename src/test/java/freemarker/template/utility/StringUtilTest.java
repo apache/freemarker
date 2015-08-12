@@ -18,6 +18,8 @@ package freemarker.template.utility;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.regex.Pattern;
 
 import org.hamcrest.Matchers;
@@ -281,6 +283,98 @@ public class StringUtilTest {
                 fail("Glob " + glob + " (regexp: " + pattern + ") matches " + s);
             }
         }
+    }
+    
+    @Test
+    public void testHTMLEnc() {
+        String s = "";
+        assertSame(s, StringUtil.HTMLEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.HTMLEnc(s));
+        
+        assertEquals("a&amp;b&lt;c&gt;d&quot;e'f", StringUtil.HTMLEnc("a&b<c>d\"e'f"));
+        assertEquals("&lt;", StringUtil.HTMLEnc("<"));
+        assertEquals("&lt;a", StringUtil.HTMLEnc("<a"));
+        assertEquals("&lt;a&gt;", StringUtil.HTMLEnc("<a>"));
+        assertEquals("a&gt;", StringUtil.HTMLEnc("a>"));
+        assertEquals("&lt;&gt;", StringUtil.HTMLEnc("<>"));
+        assertEquals("a&lt;&gt;b", StringUtil.HTMLEnc("a<>b"));
+    }
+
+    @Test
+    public void testXHTMLEnc() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XHTMLEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XHTMLEnc(s));
+        
+        testXHTMLEnc("a&amp;b&lt;c&gt;d&quot;e&#39;f", "a&b<c>d\"e'f");
+        testXHTMLEnc("&lt;", "<");
+        testXHTMLEnc("&lt;a", "<a");
+        testXHTMLEnc("&lt;a&gt;", "<a>");
+        testXHTMLEnc("a&gt;", "a>");
+        testXHTMLEnc("&lt;&gt;", "<>");
+        testXHTMLEnc("a&lt;&gt;b", "a<>b");
+    }
+    
+    private void testXHTMLEnc(String expected, String in) throws IOException {
+        assertEquals(expected, StringUtil.XHTMLEnc(in));
+        
+        StringWriter sw = new StringWriter();
+        StringUtil.XHTMLEnc(in, sw);
+        assertEquals(expected, sw.toString());
+    }
+
+    @Test
+    public void testXMLEnc() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XMLEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XMLEnc(s));
+        
+        testXMLEnc("a&amp;b&lt;c&gt;d&quot;e&apos;f", "a&b<c>d\"e'f");
+        testXMLEnc("&lt;", "<");
+        testXMLEnc("&lt;a", "<a");
+        testXMLEnc("&lt;a&gt;", "<a>");
+        testXMLEnc("a&gt;", "a>");
+        testXMLEnc("&lt;&gt;", "<>");
+        testXMLEnc("a&lt;&gt;b", "a<>b");
+    }
+    
+    private void testXMLEnc(String expected, String in) throws IOException {
+        assertEquals(expected, StringUtil.XMLEnc(in));
+        
+        StringWriter sw = new StringWriter();
+        StringUtil.XMLEnc(in, sw);
+        assertEquals(expected, sw.toString());
+    }
+
+    @Test
+    public void testRTFEnc() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.RTFEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.RTFEnc(s));
+        
+        testRTFEnc("a\\{b\\}c\\\\d", "a{b}c\\d");
+        testRTFEnc("\\{", "{");
+        testRTFEnc("\\{a", "{a");
+        testRTFEnc("\\{a\\}", "{a}");
+        testRTFEnc("a\\}", "a}");
+        testRTFEnc("\\{\\}", "{}");
+        testRTFEnc("a\\{\\}b", "a{}b");
+    }
+
+    private void testRTFEnc(String expected, String in) throws IOException {
+        assertEquals(expected, StringUtil.RTFEnc(in));
+        
+        StringWriter sw = new StringWriter();
+        StringUtil.RTFEnc(in, sw);
+        assertEquals(expected, sw.toString());
     }
     
 }

@@ -67,7 +67,7 @@ public class StringUtil {
      *  Replaces all '&gt;' '&lt;' '&amp;', "'" and '"' with entity reference
      */
     public static String XMLEnc(String s) {
-        return XMLOrXHTMLEnc(s, XML_APOS);
+        return XMLOrHTMLEnc(s, XML_APOS);
     }
 
     /**
@@ -76,7 +76,7 @@ public class StringUtil {
      * @since 2.3.24
      */
     public static void XMLEnc(String s, Writer out) throws IOException {
-        XMLOrXHTMLEnc(s, XML_APOS, out);
+        XMLOrHTMLEnc(s, XML_APOS, out);
     }
     
     /**
@@ -87,7 +87,7 @@ public class StringUtil {
      *  instead [see http://www.w3.org/TR/xhtml1/#C_16])
      */
     public static String XHTMLEnc(String s) {
-        return XMLOrXHTMLEnc(s, HTML_APOS);
+        return XMLOrHTMLEnc(s, HTML_APOS);
     }
 
     /**
@@ -96,10 +96,10 @@ public class StringUtil {
      * @since 2.3.24
      */
     public static void XHTMLEnc(String s, Writer out) throws IOException {
-        XMLOrXHTMLEnc(s, HTML_APOS, out);
+        XMLOrHTMLEnc(s, HTML_APOS, out);
     }
     
-    private static String XMLOrXHTMLEnc(String s, char[] apos) {
+    private static String XMLOrHTMLEnc(String s, char[] apos) {
         int ln = s.length();
         
         // First we find out if we need to escape, and if so, what the length of the output will be:
@@ -108,7 +108,7 @@ public class StringUtil {
         int plusOutLn = 0;
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
-            if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
+            if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'' && apos != null) {
                 if (firstEscIdx == -1) {
                     firstEscIdx = i;
                 }
@@ -134,7 +134,7 @@ public class StringUtil {
             int dst = firstEscIdx;
             for (int i = firstEscIdx; i <= lastEscIdx; i++) {
                 char c = s.charAt(i);
-                if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
+                if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'' && apos != null) {
                     switch (c) {
                     case '<': dst = shortArrayCopy(LT, esced, dst); break;
                     case '>': dst = shortArrayCopy(GT, esced, dst); break;
@@ -154,7 +154,7 @@ public class StringUtil {
         }
     }
     
-    private static void XMLOrXHTMLEnc(String s, char[] apos, Writer out) throws IOException {
+    private static void XMLOrHTMLEnc(String s, char[] apos, Writer out) throws IOException {
         int writtenEnd = 0;  // exclusive end
         int ln = s.length();
         for (int i = 0; i < ln; i++) {
@@ -196,44 +196,11 @@ public class StringUtil {
      *  @see #XMLEnc(String)
      */
     public static String XMLEncNA(String s) {
-        int ln = s.length();
-        for (int i = 0; i < ln; i++) {
-            char c = s.charAt(i);
-            if (c == '<' || c == '>' || c == '&' || c == '"') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
-                switch (c) {
-                    case '<': b.append("&lt;"); break;
-                    case '>': b.append("&gt;"); break;
-                    case '&': b.append("&amp;"); break;
-                    case '"': b.append("&quot;"); break;
-                }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '<' || c == '>' || c == '&' || c == '"') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '<': b.append("&lt;"); break;
-                            case '>': b.append("&gt;"); break;
-                            case '&': b.append("&amp;"); break;
-                            case '"': b.append("&quot;"); break;
-                        }
-                        next = i + 1;
-                    }
-                    i++;
-                }
-                if (next < ln) b.append(s.substring(next));
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+        return XMLOrHTMLEnc(s, null);
     }
 
     /**
-     *  XML encoding for attributes values quoted with <tt>"</tt> (not with <tt>'</tt>!).
+     *  XML encoding for attribute values quoted with <tt>"</tt> (not with <tt>'</tt>!).
      *  Also can be used for HTML attributes that are quoted with <tt>"</tt>.
      *  @see #XMLEnc(String)
      */
@@ -328,42 +295,73 @@ public class StringUtil {
     
     /**
      *  Rich Text Format encoding (does not replace line breaks).
-     *  Escapes all '\' '{' '}' and '"'
+     *  Escapes all '\' '{' '}'.
      */
     public static String RTFEnc(String s) {
         int ln = s.length();
+        
+        // First we find out if we need to escape, and if so, what the length of the output will be:
+        int firstEscIdx = -1;
+        int lastEscIdx = 0;
+        int plusOutLn = 0;
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
-            if (c == '\\' || c == '{' || c == '}') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
-                switch (c) {
-                    case '\\': b.append("\\\\"); break;
-                    case '{': b.append("\\{"); break;
-                    case '}': b.append("\\}"); break;
+            if (c == '{' || c == '}' || c == '\\') {
+                if (firstEscIdx == -1) {
+                    firstEscIdx = i;
                 }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '\\' || c == '{' || c == '}') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '\\': b.append("\\\\"); break;
-                            case '{': b.append("\\{"); break;
-                            case '}': b.append("\\}"); break;
-                        }
-                        next = i + 1;
-                    }
-                    i++;
+                lastEscIdx = i;
+                plusOutLn++;
+            }
+        }
+        
+        if (firstEscIdx == -1) {
+            return s; // Nothing to escape
+        } else {
+            char[] esced = new char[ln + plusOutLn];
+            if (firstEscIdx != 0) {
+                s.getChars(0, firstEscIdx, esced, 0);
+            }
+            int dst = firstEscIdx;
+            for (int i = firstEscIdx; i <= lastEscIdx; i++) {
+                char c = s.charAt(i);
+                if (c == '{' || c == '}' || c == '\\') {
+                    esced[dst++] = '\\';
                 }
-                if (next < ln) b.append(s.substring(next));
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+                esced[dst++] = c;
+            }
+            if (lastEscIdx != ln - 1) {
+                s.getChars(lastEscIdx + 1, ln, esced, dst);
+            }
+            
+            return String.valueOf(esced);
+        }
     }
+    
+    /**
+     * Like {@link #RTFEnc(String)}, but writes the result into a {@link Writer}.
+     * 
+     * @since 2.3.24
+     */
+    public static void RTFEnc(String s, Writer out) throws IOException {
+        int writtenEnd = 0;  // exclusive end
+        int ln = s.length();
+        for (int i = 0; i < ln; i++) {
+            char c = s.charAt(i);
+            if (c == '{' || c == '}' || c == '\\') {
+                int flushLn = i - writtenEnd;
+                if (flushLn != 0) {
+                    out.write(s, writtenEnd, flushLn);
+                }
+                out.write('\\');
+                writtenEnd = i; // Not i + 1, so c will be written out later
+            }
+        }
+        if (writtenEnd < ln) {
+            out.write(s, writtenEnd, ln - writtenEnd);
+        }
+    }
+    
 
     /**
      * URL encoding (like%20this) for query parameter values, path <em>segments</em>, fragments; this encodes all
