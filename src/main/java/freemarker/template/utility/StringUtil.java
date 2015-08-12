@@ -16,7 +16,9 @@
 
 package freemarker.template.utility;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -33,7 +35,15 @@ import freemarker.template.Version;
  *  Some text related utilities.
  */
 public class StringUtil {
+    
     private static final char[] ESCAPES = createEscapes();
+    
+    private static final char[] LT = new char[] { '&', 'l', 't', ';' };
+    private static final char[] GT = new char[] { '&', 'g', 't', ';' };
+    private static final char[] AMP = new char[] { '&', 'a', 'm', 'p', ';' };
+    private static final char[] QUOT = new char[] { '&', 'q', 'u', 'o', 't', ';' };
+    private static final char[] HTML_APOS = new char[] { '&', '#', '3', '9', ';' };
+    private static final char[] XML_APOS = new char[] { '&', 'a', 'p', 'o', 's', ';' };
 
     /*
      *  For better performance most methods are folded down. Don't you scream... :)
@@ -57,9 +67,18 @@ public class StringUtil {
      *  Replaces all '&gt;' '&lt;' '&amp;', "'" and '"' with entity reference
      */
     public static String XMLEnc(String s) {
-        return XMLOrXHTMLEnc(s, "&apos;");
+        return XMLOrXHTMLEnc(s, XML_APOS);
     }
 
+    /**
+     * Like {@link #XMLEnc(String)}, but writes the result into a {@link Writer}.
+     * 
+     * @since 2.3.24
+     */
+    public static void XMLEnc(String s, Writer out) throws IOException {
+        XMLOrXHTMLEnc(s, XML_APOS, out);
+    }
+    
     /**
      *  XHTML Encoding.
      *  Replaces all '&gt;' '&lt;' '&amp;', "'" and '"' with entity reference
@@ -68,46 +87,108 @@ public class StringUtil {
      *  instead [see http://www.w3.org/TR/xhtml1/#C_16])
      */
     public static String XHTMLEnc(String s) {
-        return XMLOrXHTMLEnc(s, "&#39;");
+        return XMLOrXHTMLEnc(s, HTML_APOS);
+    }
+
+    /**
+     * Like {@link #XHTMLEnc(String)}, but writes the result into a {@link Writer}.
+     * 
+     * @since 2.3.24
+     */
+    public static void XHTMLEnc(String s, Writer out) throws IOException {
+        XMLOrXHTMLEnc(s, HTML_APOS, out);
     }
     
-    private static String XMLOrXHTMLEnc(String s, String aposReplacement) {
+    private static String XMLOrXHTMLEnc(String s, char[] apos) {
+        int ln = s.length();
+        
+        // First we find out if we need to escape, and if so, what the length of the output will be:
+        int firstEscIdx = -1;
+        int lastEscIdx = 0;
+        int plusOutLn = 0;
+        for (int i = 0; i < ln; i++) {
+            char c = s.charAt(i);
+            if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
+                if (firstEscIdx == -1) {
+                    firstEscIdx = i;
+                }
+                lastEscIdx = i;
+                
+                switch (c) {
+                case '<': plusOutLn += LT.length - 1; break;
+                case '>': plusOutLn += GT.length - 1; break;
+                case '&': plusOutLn += AMP.length - 1; break;
+                case '"': plusOutLn += QUOT.length - 1; break;
+                default: plusOutLn += apos.length - 1; break;
+                }
+            }
+        }
+        
+        if (firstEscIdx == -1) {
+            return s; // Nothing to escape
+        } else {
+            char[] esced = new char[ln + plusOutLn];
+            if (firstEscIdx != 0) {
+                s.getChars(0, firstEscIdx, esced, 0);
+            }
+            int dst = firstEscIdx;
+            for (int i = firstEscIdx; i <= lastEscIdx; i++) {
+                char c = s.charAt(i);
+                if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
+                    switch (c) {
+                    case '<': dst = shortArrayCopy(LT, esced, dst); break;
+                    case '>': dst = shortArrayCopy(GT, esced, dst); break;
+                    case '&': dst = shortArrayCopy(AMP, esced, dst); break;
+                    case '"': dst = shortArrayCopy(QUOT, esced, dst); break;
+                    default: dst = shortArrayCopy(apos, esced, dst); break;
+                    }
+                } else {
+                    esced[dst++] = c;
+                }
+            }
+            if (lastEscIdx != ln - 1) {
+                s.getChars(lastEscIdx + 1, ln, esced, dst);
+            }
+            
+            return String.valueOf(esced);
+        }
+    }
+    
+    private static void XMLOrXHTMLEnc(String s, char[] apos, Writer out) throws IOException {
+        int writtenEnd = 0;  // exclusive end
         int ln = s.length();
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
+                int flushLn = i - writtenEnd;
+                if (flushLn != 0) {
+                    out.write(s, writtenEnd, flushLn);
+                }
+                writtenEnd = i + 1;
+                
                 switch (c) {
-                    case '<': b.append("&lt;"); break;
-                    case '>': b.append("&gt;"); break;
-                    case '&': b.append("&amp;"); break;
-                    case '"': b.append("&quot;"); break;
-                    case '\'': b.append(aposReplacement); break;
+                case '<': out.write(LT); break;
+                case '>': out.write(GT); break;
+                case '&': out.write(AMP); break;
+                case '"': out.write(QUOT); break;
+                default: out.write(apos); break;
                 }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '<': b.append("&lt;"); break;
-                            case '>': b.append("&gt;"); break;
-                            case '&': b.append("&amp;"); break;
-                            case '"': b.append("&quot;"); break;
-                            case '\'': b.append(aposReplacement); break;
-                        }
-                        next = i + 1;
-                    }
-                    i++;
-                }
-                if (next < ln) b.append(s.substring(next));
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+            }
+        }
+        if (writtenEnd < ln) {
+            out.write(s, writtenEnd, ln - writtenEnd);
+        }
+    }
+    
+    /**
+     * For efficiently copying very short char arrays.
+     */
+    private static int shortArrayCopy(char[] src, char[] dst, int dstOffset) {
+        int ln = src.length;
+        for (int i = 0; i < ln; i++) {
+            dst[dstOffset++] = src[i];
+        }
+        return dstOffset;
     }
     
     /**

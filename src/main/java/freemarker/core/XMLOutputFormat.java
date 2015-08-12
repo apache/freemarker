@@ -22,41 +22,41 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Represents the HTML output format.
+ * Represents the XML output format.
  * 
  * @since 2.3.24
  */
-public final class HTMLOutputFormat extends GenericOutputFormat<HTMLTemplateOutputModel> {
+public final class XMLOutputFormat extends GenericOutputFormat<XMLTemplateOutputModel> {
 
-    public static final HTMLOutputFormat INSTANCE = new HTMLOutputFormat();
+    public static final XMLOutputFormat INSTANCE = new XMLOutputFormat();
     
-    private HTMLOutputFormat() {
+    private XMLOutputFormat() {
         // Only to decrease visibility
     }
     
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        StringUtil.XHTMLEnc(textToEsc, out);
+        StringUtil.XMLEnc(textToEsc, out);
     }
 
     @Override
     public String getMimeType() {
-        return "text/html";
+        return "text/xml";
     }
 
     @Override
     public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
+        return builtInName.equals("xml") || builtInName.equals("xhtml");
     }
 
     @Override
     protected String escapePlainTextToString(String plainTextContent) {
-        return StringUtil.XHTMLEnc(plainTextContent);
+        return StringUtil.XMLEnc(plainTextContent);
     }
 
     @Override
-    protected HTMLTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
-        return new HTMLTemplateOutputModel(plainTextContent, markupContent);
+    protected XMLTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
+        return new XMLTemplateOutputModel(plainTextContent, markupContent);
     }
 
 }

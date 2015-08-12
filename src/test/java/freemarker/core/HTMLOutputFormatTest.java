@@ -55,9 +55,9 @@ public class HTMLOutputFormatTest {
         
         INSTANCE.output("a", out);
         INSTANCE.output("<", out);
-        INSTANCE.output("b&c", out);
+        INSTANCE.output("b'c", out);
         
-        assertEquals("a&lt;b&amp;c", out.toString());
+        assertEquals("a&lt;b&#39;c", out.toString());
     }
     
     @Test
@@ -126,6 +126,12 @@ public class HTMLOutputFormatTest {
             HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("<");
             assertEquals("&lt;", INSTANCE.getMarkup(tom));
         }
+        {
+            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("'");
+            String mc = INSTANCE.getMarkup(tom);
+            assertEquals("&#39;", mc);
+            assertSame(mc, INSTANCE.getMarkup(tom)); // cached
+        }
     }
     
     @Test
@@ -147,6 +153,11 @@ public class HTMLOutputFormatTest {
     private void assertTOM(String pc, String mc, HTMLTemplateOutputModel tom) {
         assertEquals(pc, tom.getPlainTextContent());
         assertEquals(mc, tom.getMarkupContent());
+    }
+    
+    @Test
+    public void testGetMimeType() {
+        assertEquals("text/html", INSTANCE.getMimeType());
     }
     
 }

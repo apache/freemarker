@@ -16,22 +16,22 @@
 package freemarker.core;
 
 /**
- * Stores HTML output.
+ * Stores XML output.
  * 
  * @since 2.3.24
  */
-public final class HTMLTemplateOutputModel extends GenericTemplateOutputModel<HTMLTemplateOutputModel> {
+public final class XMLTemplateOutputModel extends GenericTemplateOutputModel<XMLTemplateOutputModel> {
     
     /**
      * See {@link GenericTemplateOutputModel#GenericTemplateOutputModel(String, String)}.
      */
-    HTMLTemplateOutputModel(String plainTextContent, String markupContent) {
+    XMLTemplateOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 
     @Override
-    public HTMLOutputFormat getOutputFormat() {
-        return HTMLOutputFormat.INSTANCE;
+    public XMLOutputFormat getOutputFormat() {
+        return XMLOutputFormat.INSTANCE;
     }
 
 }

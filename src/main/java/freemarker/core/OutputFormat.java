@@ -33,26 +33,26 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
      * Equivalent to calling {@link #getMarkup(TemplateOutputModel)} and then {@link Writer#write(String)}, but
      * implementators should chose a more efficient way.
      */
-    abstract void output(TOM tom, Writer out) throws IOException, TemplateModelException;
+    public abstract void output(TOM tom, Writer out) throws IOException, TemplateModelException;
 
     /**
      * Equivalent to calling {@link #escapePlainText(String)} and then {@link #output(TemplateOutputModel, Writer)}, but
      * implementators should chose a more efficient way.
      */
-    abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
+    public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
 
     /**
      * Converts {@link String} that's assumed to be plain text to {@link TemplateOutputModel}, by escaping any special
      * characters in the plain text. This corresponds to {@code ?esc}, or, to outputting with auto-escaping if that
      * wasn't using {@link #output(String, Writer)} as an optimization.
      */
-    abstract TOM escapePlainText(String textToEsc) throws TemplateModelException;
+    public abstract TOM escapePlainText(String textToEsc) throws TemplateModelException;
 
     /**
      * If this {@link TemplateOutputModel} was created with {@link #escapePlainText(String)}, it returns the original
      * plain text, otherwise it might returns {@code null}. Needed for re-escaping, like in {@code alreadyTOM?attrEsc}.
      */
-    abstract String getSourcePlainText(TOM tom);
+    public abstract String getSourcePlainText(TOM tom);
 
     /**
      * Wraps {@link String} that's already markup to {@link TemplateOutputModel} interface, to indicate its format. This
@@ -60,29 +60,29 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
      * markup text is malformed, but it's unlikely that an implementation chooses to parse the parameter until, and if
      * ever, that becomes necessary.) 
      */
-    abstract TOM fromMarkup(String markupText) throws TemplateModelException;
+    public abstract TOM fromMarkup(String markupText) throws TemplateModelException;
 
     /**
      * Returns the content as markup text. If this {@link TemplateOutputModel} was created with
      * {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required as far
      * as the returned markup means the same.
      */
-    abstract String getMarkup(TOM tom) throws TemplateModelException;
+    public abstract String getMarkup(TOM tom) throws TemplateModelException;
 
     /**
      * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response. 
      */
-    abstract String getMimeType();
+    public abstract String getMimeType();
 
     /**
      * Tells if a string built-in that can't handle a {@link TemplateOutputModel} left operand can bypass this object
      * as is. A typical such case would be when a {@link TemplateOutputModel} of "HTML" format bypasses {@code ?html}.
      */
-    abstract boolean isLegacyBuiltInBypassed(String builtInName);
+    public abstract boolean isLegacyBuiltInBypassed(String builtInName);
     
     /**
      * Returns a {@link TemplateOutputModel} that contains the content of both {@link TemplateOutputModel} concatenated.  
      */
-    abstract TOM concat(TOM tom1, TOM tom2) throws TemplateModelException;
+    public abstract TOM concat(TOM tom1, TOM tom2) throws TemplateModelException;
 
 }
