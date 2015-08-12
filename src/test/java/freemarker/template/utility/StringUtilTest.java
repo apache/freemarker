@@ -353,6 +353,47 @@ public class StringUtilTest {
     }
 
     @Test
+    public void testXMLEncQAttr() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XMLEncQAttr(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XMLEncQAttr(s));
+        
+        assertEquals("a&amp;b&lt;c>d&quot;e'f", StringUtil.XMLEncQAttr("a&b<c>d\"e'f"));
+        assertEquals("&lt;", StringUtil.XMLEncQAttr("<"));
+        assertEquals("&lt;a", StringUtil.XMLEncQAttr("<a"));
+        assertEquals("&lt;a>", StringUtil.XMLEncQAttr("<a>"));
+        assertEquals("a>", StringUtil.XMLEncQAttr("a>"));
+        assertEquals("&lt;>", StringUtil.XMLEncQAttr("<>"));
+        assertEquals("a&lt;>b", StringUtil.XMLEncQAttr("a<>b"));
+    }
+    
+    @Test
+    public void testXMLEncNQG() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XMLEncNQG(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XMLEncNQG(s));
+        
+        assertEquals("a&amp;b&lt;c>d\"e'f", StringUtil.XMLEncNQG("a&b<c>d\"e'f"));
+        assertEquals("&lt;", StringUtil.XMLEncNQG("<"));
+        assertEquals("&lt;a", StringUtil.XMLEncNQG("<a"));
+        assertEquals("&lt;a>", StringUtil.XMLEncNQG("<a>"));
+        assertEquals("a>", StringUtil.XMLEncNQG("a>"));
+        assertEquals("&lt;>", StringUtil.XMLEncNQG("<>"));
+        assertEquals("a&lt;>b", StringUtil.XMLEncNQG("a<>b"));
+        
+        assertEquals("&gt;", StringUtil.XMLEncNQG(">"));
+        assertEquals("]&gt;", StringUtil.XMLEncNQG("]>"));
+        assertEquals("]]&gt;", StringUtil.XMLEncNQG("]]>"));
+        assertEquals("x]]&gt;", StringUtil.XMLEncNQG("x]]>"));
+        assertEquals("x]>", StringUtil.XMLEncNQG("x]>"));
+        assertEquals("]x>", StringUtil.XMLEncNQG("]x>"));
+    }
+
+    @Test
     public void testRTFEnc() throws IOException {
         String s = "";
         assertSame(s, StringUtil.RTFEnc(s));
