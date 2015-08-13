@@ -36,6 +36,7 @@ import java.util.Vector;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
@@ -47,6 +48,7 @@ import freemarker.core.TemplateConfigurer;
 import freemarker.core.TemplateElement;
 import freemarker.core.TextBlock;
 import freemarker.core.TokenMgrError;
+import freemarker.core._CoreAPI;
 import freemarker.debug.impl.DebuggerService;
 
 /**
@@ -232,7 +234,7 @@ public class Template extends Configurable {
         this.setEncoding(encoding);
         LineTableBuilder ltbReader;
         try {
-            if (!(reader instanceof BufferedReader)) {
+            if (!(reader instanceof BufferedReader) && !(reader instanceof StringReader)) {
                 reader = new BufferedReader(reader, 0x1000);
             }
             ltbReader = new LineTableBuilder(reader);
@@ -310,7 +312,7 @@ public class Template extends Configurable {
     }
     
     /**
-     * Creates a {@link Template} that only contains a single block of static text, no dynamic content.
+     * Creates (not "get"-s) a {@link Template} that only contains a single block of static text, no dynamic content.
      * 
      * @param name
      *            See {@link #getName} for more details.
@@ -324,9 +326,13 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        Template template = new Template(name, sourceName, config, (ParserConfiguration) null);
-        template.rootElement = new TextBlock(content);
-        template.actualTagSyntax = config.getTagSyntax();
+        Template template;
+        try {
+            template = new Template(name, sourceName, new StringReader("X"), config);
+        } catch (IOException e) {
+            throw new BugException("Plain text template creation failed", e);
+        }
+        _CoreAPI.replaceText((TextBlock) template.rootElement, content);
         DebuggerService.registerTemplate(template);
         return template;
     }

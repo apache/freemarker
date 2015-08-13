@@ -125,4 +125,8 @@ public class _CoreAPI {
         NestedContentNotSupportedException.check(body);
     }
     
+    static final public void replaceText(TextBlock textBlock, String text) {
+        textBlock.replaceText(text);
+    }
+    
 }
