@@ -21,6 +21,7 @@ import java.io.StringReader;
 import java.util.Enumeration;
 
 import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
@@ -37,30 +38,37 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
     
     /**
-     * @param parentTokenSource
+     * @param parentTkMan
      *            The token source of the template that contains this string literal. As of this writing, we only need
      *            this to share the {@code namingConvetion} with that.
      */
     // TODO This should be the part of the "parent" parsing; now it contains hacks like those with namingConvention.  
-    void parseValue(FMParserTokenManager parentTokenSource) throws ParseException {
+    void parseValue(FMParserTokenManager parentTkMan) throws ParseException {
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
-            SimpleCharStream scs = new SimpleCharStream(new StringReader(value), beginLine, beginColumn + 1, value.length());
             
-            FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            FMParser parser = new FMParser(token_source);
-            parser.setTemplate(getTemplate());
-            
-            // We continue from the parent parser's current state:
-            parser.setupStringLiteralMode(parentTokenSource);
+            Template parentTemplate = getTemplate();
+
             try {
-                dynamicValue = parser.FreeMarkerText();
+                FMParserTokenManager tkMan = new FMParserTokenManager(
+                        new SimpleCharStream(
+                                new StringReader(value),
+                                beginLine, beginColumn + 1,
+                                value.length()));
+                
+                FMParser parser = new FMParser(parentTemplate, false, tkMan, parentTemplate.getParserConfiguration());
+                // We continue from the parent parser's current state:
+                parser.setupStringLiteralMode(parentTkMan);
+                try {
+                    dynamicValue = parser.FreeMarkerText();
+                } finally {
+                    // The parent parser continues from this parser's current state:
+                    parser.tearDownStringLiteralMode(parentTkMan);
+                }
             } catch (ParseException e) {
-                e.setTemplateName(getTemplate().getSourceName());
+                e.setTemplateName(parentTemplate.getSourceName());
                 throw e;
             }
             this.constantValue = null;
-            // The parent parser continues from this parser's current state:
-            parser.tearDownStringLiteralMode(parentTokenSource);
         }
     }
     

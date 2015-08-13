@@ -126,7 +126,16 @@ public class FMParser {
      * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
      */
     public FMParser(String template) {
-        this(null, new StringReader(template), true, true);
+        this(dummyTemplate(),
+                new StringReader(template), true, true);
+    }
+    
+    private static Template dummyTemplate() {
+        try {
+            return new Template(null, new StringReader(""), Configuration.getDefaultConfiguration());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create dummy template", e);
+        }        
     }
 
     /**
@@ -143,17 +152,28 @@ public class FMParser {
                         new Version(incompatibleImprovements),
                         template != null ? template.getArithmeticEngine() : null));
     }
-        
+
     /**
      * @Deprecated This is an internal API of FreeMarker; don't call it from outside FreeMarker.
      * 
      * @since 2.3.24
      */
     public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
-        this(reader);
-        if (template != null) {            initialize(template, true, pCfg);
-        } else {
-            this.pCfg = pCfg;        }
+        this(template, true, readerToTokenManager(reader), pCfg);
+    }
+    
+    private static FMParserTokenManager readerToTokenManager(Reader reader) {
+        return new FMParserTokenManager(new SimpleCharStream(reader, 1, 1));        
+    }
+    
+    /**
+     * @Deprecated This is an internal API of FreeMarker; don't call it from outside FreeMarker.
+     * 
+     * @since 2.3.24
+     */
+    public FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg) {
+        this(tkMan);
+        initialize(template, newTemplate, pCfg);
     }
 
     /**
@@ -163,7 +183,7 @@ public class FMParser {
     private void initialize(Template template, boolean newTemplate, ParserConfiguration pCfg) {
         NullArgumentException.check(pCfg);
         this.pCfg = pCfg;
-        
+
         NullArgumentException.check(template);
         this.template = template;
 
@@ -181,9 +201,9 @@ public class FMParser {
 
         autoEscaping = pCfg.getAutoEscaping();
         outputFormat = pCfg.getOutputFormat();
-        
+
         token_source.setParser(this);
-        
+
         token_source.strictEscapeSyntax = pCfg.getStrictSyntaxMode();
 
         int tagSyntax = pCfg.getTagSyntax();
@@ -217,34 +237,16 @@ public class FMParser {
 
         // If this is a Template under construction, we do the below.
         // If this is just the enclosing Template for ?eval or such, we must not modify it.
-        if (newTemplate) {	        _TemplateAPI.setAutoEscaping(template, autoEscaping);
-	        _TemplateAPI.setOutputFormat(template, outputFormat);
+        if (newTemplate) {
+            _TemplateAPI.setAutoEscaping(template, autoEscaping);
+            _TemplateAPI.setOutputFormat(template, outputFormat);
         }
 
         initialized = true;
     }
 
-    /**
-     * Should only be used when we attach an already fully constructed Template to a new parser.
-     */
-    void setTemplate(Template template) {
-        if (this.template == template) {
-            return;
-        }
-        if (this.template != null) {
-            throw new IllegalStateException("The template was already set");
-        }
-
-        if (pCfg == null) {
-            pCfg = template.getParserConfiguration();
-        }
-
-        if (!initialized) {
-            initialize(template, false, pCfg);        } else {
-            this.template = template;
-        }    }
-
-    void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {        token_source.onlyTextOutput = true;
+    void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
+        token_source.onlyTextOutput = true;
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
