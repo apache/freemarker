@@ -29,7 +29,7 @@ import freemarker.core.OutputFormat;
  * 
  * @since 2.3.24
  */
-public interface TemplateOutputModel<TOM extends TemplateOutputModel<TOM>>  {
+public interface TemplateOutputModel<TOM extends TemplateOutputModel<TOM>> extends TemplateModel {
 
     OutputFormat<TOM> getOutputFormat();
     

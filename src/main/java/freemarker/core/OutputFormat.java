@@ -20,6 +20,8 @@ import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateOutputModel;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Encapsulates the {@link TemplateOutputModel} factories and {@code TemplateOutputModel} operations, and other meta
@@ -70,12 +72,6 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
     public abstract String getMarkup(TOM tom) throws TemplateModelException;
 
     /**
-     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
-     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
-     */
-    public abstract String getMimeType();
-
-    /**
      * Tells if a string built-in that can't handle a {@link TemplateOutputModel} left operand can bypass this object
      * as is. A typical such case would be when a {@link TemplateOutputModel} of "HTML" format bypasses {@code ?html}.
      */
@@ -91,5 +87,24 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
      * {@link UnsupportedOperationException}.
      */
     public abstract boolean isEscaping();
+    
+    /**
+     * The short name we used to refer to this format (like in the {@code #ftl} header).
+     */
+    public abstract String getCommonName();
+    
+    /**
+     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
+     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
+     */
+    public abstract String getMimeType();
+
+    @Override
+    public final String toString() {
+        return getCommonName() + "("
+                + "mimeType=" + StringUtil.jQuote(getMimeType()) + ", "
+                + "class=" + ClassUtil.getShortClassNameOfObject(this, true)
+                + ")";
+    }
 
 }

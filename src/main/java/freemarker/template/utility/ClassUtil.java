@@ -47,6 +47,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateOutputModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
@@ -184,6 +185,8 @@ public class ClassUtil {
     }
 
     private static void appendTemplateModelTypeName(StringBuilder sb, Set typeNamesAppended, Class cl) {
+        int initalLength = sb.length();
+        
         if (TemplateNodeModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "node");
         }
@@ -229,6 +232,14 @@ public class ClassUtil {
         
         if (TemplateScalarModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "string");
+        }
+        
+        if (TemplateOutputModel.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "output_fragment");
+        }
+        
+        if (sb.length() == initalLength) {
+            appendTypeName(sb, typeNamesAppended, "misc_template_model");
         }
     }
     

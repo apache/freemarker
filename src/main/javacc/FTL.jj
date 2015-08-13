@@ -230,23 +230,23 @@ public class FMParser {
      */
     @SuppressFBWarnings(value="ES_COMPARING_STRINGS_WITH_EQ",
             justification="Faster for cache hits, occasional misses aren't a problem.")
-    OutputFormat getCurrentEscapingOutputFormat(Template template, Token begin, Token end) throws ParseException {        if (cachedEscapingOutputFormatKey == outputFormat) {  // deliberately not "equals"
-            return cachedEscapingOutputFormatValue;         }
-
-        OutputFormat value;
-        try {
-            value = template.getConfiguration().getOutputFormat(outputFormat);
-        } catch (IllegalArgumentException e) {
-            throw new ParseException(
-                    e.getMessage(),
-                    template, begin.beginLine, begin.beginColumn, end.endLine, end.endColumn,
-                    e.getCause());
+    OutputFormat getCurrentEscapingOutputFormat(Template template, Token begin, Token end)
+    throws ParseException {        if (cachedEscapingOutputFormatKey != outputFormat) {  // deliberately not "equals"
+	        OutputFormat value;
+	        try {
+	            value = template.getConfiguration().getOutputFormat(outputFormat);
+	        } catch (UnknownOutputFormatException e) {
+	            throw new ParseException(
+	                    e.getMessage(),
+	                    template, begin.beginLine, begin.beginColumn, end.endLine, end.endColumn,
+	                    e.getCause());
+	        }
+	        cachedEscapingOutputFormatKey = outputFormat;
+	        cachedEscapingOutputFormatValue = value.isEscaping() ? value : null;
         }
-        if (!value.isEscaping()) {
-            value = null;        }
-        cachedEscapingOutputFormatKey = outputFormat;
-        cachedEscapingOutputFormatValue = value;
-        return value;    }
+        
+        return cachedEscapingOutputFormatValue; 
+    }
 
     /**
      * Don't use it, unless you are developing FreeMarker itself.
@@ -1951,7 +1951,7 @@ Expression BuiltIn(Expression lhoExp) :
         if (!(result instanceof SpecialBuiltIn)) {
             return result;
         }
-        
+
         if (result instanceof BuiltInForLoopVariable) {
             if (!(lhoExp instanceof Identifier)) {
                 throw new ParseException(
@@ -1964,6 +1964,18 @@ Expression BuiltIn(Expression lhoExp) :
             
             return result;
         }
+
+        if (result instanceof BuiltInForOutputFormatRelated) {
+            OutputFormat curEscOF = getCurrentEscapingOutputFormat(template, t, t);
+            if (curEscOF == null) {
+                throw new ParseException(
+                        "Built-in can't be used here, as the current output format isn't an escaping one: "
+                        + outputFormat, template, t);
+            }
+            ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(curEscOF);
+            
+            return result;
+        }
     }
     [
         LOOKAHEAD({ result instanceof BuiltInWithParseTimeParameters  })
@@ -1972,6 +1984,7 @@ Expression BuiltIn(Expression lhoExp) :
         closeParen = <CLOSE_PAREN> {
             result.setLocation(template, lhoExp, closeParen);
             ((BuiltInWithParseTimeParameters) result).bindToParameters(args, openParen, closeParen);
+            
             return result;
         }
     ]

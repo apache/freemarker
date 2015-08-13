@@ -40,13 +40,18 @@ public final class HTMLOutputFormat extends GenericOutputFormat<HTMLTemplateOutp
     }
 
     @Override
-    public String getMimeType() {
-        return "text/html";
+    public boolean isLegacyBuiltInBypassed(String builtInName) {
+        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
     }
 
     @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
+    public String getCommonName() {
+        return "HTML";
+    }
+
+    @Override
+    public String getMimeType() {
+        return "text/html";
     }
 
     @Override

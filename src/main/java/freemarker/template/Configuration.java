@@ -61,6 +61,7 @@ import freemarker.core.ParserConfiguration;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.RawOutputFormat;
 import freemarker.core.TemplateConfigurer;
+import freemarker.core.UnknownOutputFormatException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
@@ -1734,12 +1735,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Returns the output format for a name (not {@code null}).
      * 
-     * @throws IllegalArgumentException
+     * @throws UnknownOutputFormatException
      *             If there's no output format registered with the given name.
      * 
      * @since 2.3.24
      */
-    public OutputFormat<?> getOutputFormat(String name) {
+    public OutputFormat<?> getOutputFormat(String name) throws UnknownOutputFormatException {
         // TODO Custom OF-s
         if (name.equals(HTML_OUTPUT_FORMAT)) {
             return HTMLOutputFormat.INSTANCE;
@@ -1753,9 +1754,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         if (name.equals(RAW_OUTPUT_FORMAT)) {
             return RawOutputFormat.INSTANCE;
         }
-        throw new IllegalArgumentException(
-                "Unrecongnized output format name, " + StringUtil.jQuote(outputFormat)
-                + ". Ensure that it's registered in the Configuration.");
+        throw new UnknownOutputFormatException(name);
     }
     
     /**

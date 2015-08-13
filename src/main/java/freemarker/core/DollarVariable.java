@@ -61,15 +61,21 @@ final class DollarVariable extends Interpolation {
             TemplateOutputModel tom = (TemplateOutputModel) tm;
             OutputFormat tomOF = tom.getOutputFormat();
             if (autoEscFormat != null && tomOF != autoEscFormat) {
-                throw new _MiscTemplateException(env,
-                        "Incompatible output formats. The current auto-escaping output format is ",
-                        new _DelayedJQuote(autoEscFormat.getMimeType()),
-                        " (", new _DelayedToString(autoEscFormat),
-                        "), while the value to print belongs to the ", 
-                        new _DelayedJQuote(tomOF.getMimeType()), " output format (",
-                        new _DelayedToString(tomOF));
+                String srcPlainText = tomOF.getSourcePlainText(tom);
+                if (srcPlainText == null) {
+                    throw new _TemplateModelException(escapedExpression,
+                            "Tha value to print is already in output format ",
+                            new _DelayedToString(tomOF),
+                            ", which differs from the current auto-escaping output format, ",
+                            new _DelayedToString(autoEscFormat),
+                            ". The value offers no source plain text, so it can't be re-escape with the current "
+                            + "output format.");
+                }
+                // Re-escape the source plain text with the current format (output format conversion):
+                autoEscFormat.output(srcPlainText, out);
+            } else {
+                tomOF.output(tom, out);
             }
-            tomOF.output(tom, out);
         }
     }
 

@@ -64,11 +64,6 @@ public final class RawOutputFormat extends OutputFormat<RawTemplateOutputModel> 
     }
 
     @Override
-    public String getMimeType() {
-        return null;
-    }
-
-    @Override
     public boolean isLegacyBuiltInBypassed(String builtInName) {
         throw new UnsupportedOperationException();
     }
@@ -82,6 +77,16 @@ public final class RawOutputFormat extends OutputFormat<RawTemplateOutputModel> 
     @Override
     public boolean isEscaping() {
         return false;
+    }
+
+    @Override
+    public String getCommonName() {
+        return "raw";
+    }
+
+    @Override
+    public String getMimeType() {
+        return null;
     }
 
 }

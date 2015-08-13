@@ -122,9 +122,9 @@ public class _TemplateModelException extends TemplateModelException {
     static Object[] modelHasStoredNullDescription(Class expected, TemplateModel model) {
         return new Object[] {
                 "The FreeMarker value exists, but has nothing inside it; the TemplateModel object (class: ",
-                model.getClass().getName(), ") has returned a null instead of a ",
-                ClassUtil.getShortClassName(expected), ". ",
-                "This is possibly a bug in the non-FreeMarker code that builds the data-model." };
+                model.getClass().getName(), ") has returned a null",
+                (expected != null ? new Object[] { " instead of a ", ClassUtil.getShortClassName(expected) } : ""),
+                ". This is possibly a bug in the non-FreeMarker code that builds the data-model." };
     }
     
 }

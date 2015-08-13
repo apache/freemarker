@@ -85,7 +85,7 @@ class EvalUtil {
     }
     
     /** Signals the buggy case where we have a non-null model, but it wraps a null. */
-    private static TemplateModelException newModelHasStoredNullException(
+    static TemplateModelException newModelHasStoredNullException(
             Class expected, TemplateModel model, Expression expr) {
         return new _TemplateModelException(expr,
                 _TemplateModelException.modelHasStoredNullDescription(expected, model));
@@ -344,17 +344,17 @@ class EvalUtil {
     }
     
     /**
-     * @param expectTOM
+     * @param allowTOM
      *            Instead of throwing exception, return {@code null} for a {@link TemplateOutputModel}.
      */
     static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint,
-            boolean expectTOM,
+            boolean allowTOM,
             Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
             return env.formatNumber(modelToNumber((TemplateNumberModel) tm, exp));
         } else if (tm instanceof TemplateDateModel) {
             return env.formatDate((TemplateDateModel) tm, exp);
-        } else if (expectTOM && tm instanceof TemplateOutputModel) {
+        } else if (allowTOM && tm instanceof TemplateOutputModel) {
             return null;
         } else if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
@@ -397,13 +397,13 @@ class EvalUtil {
                 return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
             }
             if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
-                if (expectTOM) {
+                if (allowTOM) {
                     throw new NonStringOrTemplateOutputException(exp, tm, seqHint, env);
                 } else {
                     throw new NonStringException(exp, tm, seqHint, env);
                 }
             } else {
-                if (expectTOM) {
+                if (allowTOM) {
                     throw new NonStringOrTemplateOutputException(exp, tm, env);
                 } else {
                     throw new NonStringException(exp, tm, env);

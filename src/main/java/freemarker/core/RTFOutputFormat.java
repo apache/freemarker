@@ -40,13 +40,18 @@ public final class RTFOutputFormat extends GenericOutputFormat<RTFTemplateOutput
     }
 
     @Override
-    public String getMimeType() {
-        return "text/rtf";
+    public boolean isLegacyBuiltInBypassed(String builtInName) {
+        return builtInName.equals("rtf");
     }
 
     @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("rtf");
+    public String getCommonName() {
+        return "RTF";
+    }
+
+    @Override
+    public String getMimeType() {
+        return "text/rtf";
     }
 
     @Override

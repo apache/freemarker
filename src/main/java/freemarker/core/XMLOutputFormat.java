@@ -40,13 +40,18 @@ public final class XMLOutputFormat extends GenericOutputFormat<XMLTemplateOutput
     }
 
     @Override
-    public String getMimeType() {
-        return "text/xml";
+    public boolean isLegacyBuiltInBypassed(String builtInName) {
+        return builtInName.equals("xml") || builtInName.equals("xhtml");
     }
 
     @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("xml") || builtInName.equals("xhtml");
+    public String getCommonName() {
+        return "XML";
+    }
+
+    @Override
+    public String getMimeType() {
+        return "text/xml";
     }
 
     @Override

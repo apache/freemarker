@@ -17,6 +17,8 @@ package freemarker.core;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
@@ -24,6 +26,8 @@ import freemarker.cache.FileNameGlobMatcher;
 import freemarker.cache.OrMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
 public class OutputFormatTest extends TemplateTest {
@@ -207,14 +211,88 @@ public class OutputFormatTest extends TemplateTest {
         }
     }
     
+    @Test
+    public void testAutoEscapingOnTOMs() throws IOException, TemplateException {
+        assertOutput(
+                "<#ftl outputFormat='RTF'>"
+                + "${rtfPlain} ${rtfMarkup} "
+                + "${htmlPlain} "
+                + "${xmlPlain}",
+                "\\\\par a & b \\par c "
+                + "a < \\{h\\} "
+                + "a < \\{x\\}");
+        assertOutput(
+                "<#ftl outputFormat='HTML'>"
+                + "${htmlPlain} ${htmlMarkup} "
+                + "${xmlPlain} "
+                + "${rtfPlain}",
+                "a &lt; {h} <p>c "
+                + "a &lt; {x} "
+                + "\\par a &amp; b");
+        assertOutput(
+                "<#ftl outputFormat='XML'>"
+                + "${xmlPlain} ${xmlMarkup} "
+                + "${htmlPlain} "
+                + "${rtfPlain}",
+                "a &lt; {x} <p>c</p> "
+                + "a &lt; {h} "
+                + "\\par a &amp; b");
+        assertErrorContains("<#ftl outputFormat='RTF'>${htmlMarkup}", "output format", "RTF", "HTML");
+        assertErrorContains("<#ftl outputFormat='RTF'>${xmlMarkup}", "output format", "RTF", "XML");
+        assertErrorContains("<#ftl outputFormat='HTML'>${rtfMarkup}", "output format", "HTML", "RTF");
+        assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
+        assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
+        assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
+    }
+    
+    @Test
+    public void testEscAndNoEscBIBasics() throws IOException, TemplateException {
+        String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
+        addTemplate("t.ftlh", commonFTL);
+        addTemplate("t-noAuto.ftlh", "<#ftl autoEscaping=false>" + commonFTL);
+        addTemplate("t.ftl", commonFTL);
+        assertOutputForNamed("t.ftlh", "&lt;x&gt; &lt;x&gt; <x>");
+        assertOutputForNamed("t-noAuto.ftlh", "<x> &lt;x&gt; <x>");
+        assertErrorContainsForNamed("t.ftl", "output format", "raw");
+    }
+
+    @Test
+    public void testStringBIsFail() {
+        assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "output_fragment");
+    }
+    
+
+    @Test
+    public void testEscAndNoEscBIsOnTOMs() throws IOException, TemplateException {
+        assertOutput(
+                "<#ftl outputFormat='XML'>${'&'?esc?esc} ${'&'?esc?noEsc} ${'&'?noEsc?esc} ${'&'?noEsc?noEsc}",
+                "&amp; &amp; & &");
+        
+        for (String bi : new String[] { "esc", "noEsc" } ) {
+            assertOutput(
+                    "<#ftl outputFormat='XML'>${rtfPlain?" + bi + "}",
+                    "\\par a &amp; b");
+            assertErrorContains(
+                    "<#ftl outputFormat='XML'>${rtfMarkup?" + bi + "}",
+                    "?" + bi, "output format", "RTF", "XML");
+        }
+    }
+    
     @Override
-    protected Configuration createConfiguration() {
+    protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         
         TemplateConfigurer xmlTC = new TemplateConfigurer();
         xmlTC.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
         cfg.setTemplateConfigurers(
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.xml"), xmlTC));
+
+        cfg.setSharedVariable("rtfPlain", RTFOutputFormat.INSTANCE.escapePlainText("\\par a & b"));
+        cfg.setSharedVariable("rtfMarkup", RTFOutputFormat.INSTANCE.fromMarkup("\\par c"));
+        cfg.setSharedVariable("htmlPlain", HTMLOutputFormat.INSTANCE.escapePlainText("a < {h}"));
+        cfg.setSharedVariable("htmlMarkup", HTMLOutputFormat.INSTANCE.fromMarkup("<p>c"));
+        cfg.setSharedVariable("xmlPlain", XMLOutputFormat.INSTANCE.escapePlainText("a < {x}"));
+        cfg.setSharedVariable("xmlMarkup", XMLOutputFormat.INSTANCE.fromMarkup("<p>c</p>"));
         
         return cfg;
     }
