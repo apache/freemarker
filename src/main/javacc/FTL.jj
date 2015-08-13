@@ -47,7 +47,7 @@ public class FMParser {
         private int kind;
     }
 
-    boolean initialized;    
+    private boolean initialized;    
     private Template template;
 
     private boolean stripWhitespace, stripText;
@@ -125,6 +125,13 @@ public class FMParser {
     /**
      * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
      */
+    public FMParser(String template) {
+        this(null, new StringReader(template), true, true);
+    }
+
+    /**
+     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
+     */
     public FMParser(Template template, Reader reader, boolean strictSyntaxMode, boolean whitespaceStripping,
             int tagSyntax, int namingConvention, int incompatibleImprovements) {
         this(template, reader,
@@ -144,7 +151,9 @@ public class FMParser {
      */
     public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
         this(reader);
-        initialize(template, true, pCfg);
+        if (template != null) {            initialize(template, true, pCfg);
+        } else {
+            this.pCfg = pCfg;        }
     }
 
     /**
@@ -216,13 +225,6 @@ public class FMParser {
     }
 
     /**
-     * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
-     */
-    public FMParser(String template) {
-        this(null, new StringReader(template), true, true);
-    }
-
-    /**
      * Should only be used when we attach an already fully constructed Template to a new parser.
      */
     void setTemplate(Template template) {
@@ -241,10 +243,6 @@ public class FMParser {
             initialize(template, false, pCfg);        } else {
             this.template = template;
         }    }
-
-    Template getTemplate() {
-        return template;
-    }
 
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {        token_source.onlyTextOutput = true;
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
@@ -266,7 +264,7 @@ public class FMParser {
      */
     @SuppressFBWarnings(value="ES_COMPARING_STRINGS_WITH_EQ",
             justification="Faster for cache hits, occasional misses aren't a problem.")
-    OutputFormat getCurrentEscapingOutputFormat(Template template, Token begin, Token end)
+    private OutputFormat getCurrentEscapingOutputFormat(Template template, Token begin, Token end)
     throws ParseException {        if (cachedEscapingOutputFormatKey != outputFormat) {  // deliberately not "equals"
 	        OutputFormat value;
 	        try {
@@ -541,10 +539,6 @@ TOKEN_MGR_DECLS:
 
     void setParser(FMParser parser) {
         this.parser = parser;
-    }
-
-    Template getTemplate() {
-        return parser != null ? parser.getTemplate() : null;
     }
 
     // This method checks if we are in a strict mode where all
