@@ -47,13 +47,11 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             SimpleCharStream scs = new SimpleCharStream(new StringReader(value), beginLine, beginColumn + 1, value.length());
             
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            token_source.onlyTextOutput = true;
-            token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
-            token_source.namingConvention = parentTokenSource.namingConvention;
-            token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
-            
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getUnboundTemplate());
+            
+            // We continue from the parent parser's current state:
+            parser.setupStringLiteralMode(parentTokenSource);
             try {
                 dynamicValue = parser.FreeMarkerText();
             } catch (ParseException e) {
@@ -61,10 +59,8 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 throw e;
             }
             this.constantValue = null;
-            
-            // We participate in detecting the namingConvention.
-            parentTokenSource.namingConvention = token_source.namingConvention;
-            parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
+            // The parent parser continues from this parser's current state:
+            parser.tearDownStringLiteralMode(parentTokenSource);
         }
     }
     

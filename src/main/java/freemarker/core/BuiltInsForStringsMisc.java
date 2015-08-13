@@ -50,22 +50,17 @@ class BuiltInsForStringsMisc {
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             SimpleCharStream scs = new SimpleCharStream(
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
-            UnboundTemplate parentUnboundTemplate = getUnboundTemplate();
+            UnboundTemplate parentTemplate = getUnboundTemplate();
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            ParserConfiguration pCfg = parentUnboundTemplate.getParserConfiguration();
-            token_source.incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
-            int namingConvention = pCfg.getNamingConvention();
-            token_source.initialNamingConvention = namingConvention;
-            token_source.namingConvention = namingConvention;
             FMParser parser = new FMParser(token_source);
-            parser.setTemplate(parentUnboundTemplate);
+            parser.setTemplate(parentTemplate);
             Expression exp = null;
             try {
                 try {
                     exp = parser.Expression();
                 } catch (TokenMgrError e) {
-                    throw e.toParseException(parentUnboundTemplate);
+                    throw e.toParseException(parentTemplate);
                 }
             } catch (ParseException e) {
                 throw new _MiscTemplateException(this, env,

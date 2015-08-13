@@ -21,6 +21,7 @@ import java.io.FilterReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -105,7 +106,7 @@ public final class UnboundTemplate {
 
         LineTableBuilder ltbReader;
         try {
-            if (!(reader instanceof BufferedReader)) {
+            if (!(reader instanceof BufferedReader) && !(reader instanceof StringReader)) {
                 reader = new BufferedReader(reader, 0x1000);
             }
             ltbReader = new LineTableBuilder(reader);
@@ -156,25 +157,16 @@ public final class UnboundTemplate {
      * Creates a plain text (unparsed) template. 
      */
     static UnboundTemplate newPlainTextUnboundTemplate(String content, String sourceName, Configuration cfg) {
-        return new UnboundTemplate(content, sourceName, cfg);
+        UnboundTemplate template;
+        try {
+            template = new UnboundTemplate(new StringReader("X"), sourceName, cfg, null, null);
+        } catch (IOException e) {
+            throw new BugException("Plain text template creation failed", e);
+        }
+        ((TextBlock) template.rootElement).replaceText(content);
+        return template;
     }
     
-    /**
-     * Creates a plain text (unparsed) template. 
-     */
-    private UnboundTemplate(String content, String sourceName, Configuration cfg) {
-        NullArgumentException.check(cfg);
-        this.cfg = cfg;
-        this.parserCfg = cfg;
-        this.sourceName = sourceName;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
-        this.templateSpecifiedEncoding = null;
-        
-        rootElement = new TextBlock(content);
-        actualTagSyntax = cfg.getTagSyntax();
-        actualNamingConvention = cfg.getNamingConvention();
-    }
-
     private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         int v = incompatibleImprovements.intValue();

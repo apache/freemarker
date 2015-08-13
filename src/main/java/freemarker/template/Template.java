@@ -241,7 +241,7 @@ public class Template extends Configurable {
     }
     
     /**
-     * Creates a {@link Template} that only contains a single block of static text, no dynamic content.
+     * Creates (not "get"-s) a {@link Template} that only contains a single block of static text, no dynamic content.
      * 
      * @param name
      *            See {@link #getName} for more details.

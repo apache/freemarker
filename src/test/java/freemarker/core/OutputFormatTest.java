@@ -18,6 +18,8 @@ package freemarker.core;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import org.junit.Test;
 
@@ -210,7 +212,7 @@ public class OutputFormatTest extends TemplateTest {
             cfg.clearTemplateCache();
         }
     }
-    
+
     @Test
     public void testAutoEscapingOnTOMs() throws IOException, TemplateException {
         assertOutput(
@@ -243,6 +245,44 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
         assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
         assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
+    }
+
+    @Test
+    public void testStringLiteralsUseRawOF() throws IOException, TemplateException {
+        String expectedOut = "&amp; (&) &amp;";
+        String ftl = "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc} ${'&'}";
+        
+        assertOutput(ftl, expectedOut);
+        
+        addTemplate("t.xml", ftl);
+        assertOutputForNamed("t.xml", expectedOut);
+    }
+    
+    @Test
+    public void testPlainTextTemplate() throws IOException, TemplateException {
+        String content = "<#ftl>a<#foo>b${x}";
+        {
+            Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
+            Writer sw = new StringWriter();
+            t.process(null, sw);
+            assertEquals(content, sw.toString());
+            assertEquals(Configuration.RAW_OUTPUT_FORMAT, t.getOutputFormat());
+        }
+        
+        {
+            getConfiguration().setOutputFormat(Configuration.HTML_OUTPUT_FORMAT);
+            Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
+            Writer sw = new StringWriter();
+            t.process(null, sw);
+            assertEquals(content, sw.toString());
+            assertEquals(Configuration.HTML_OUTPUT_FORMAT, t.getOutputFormat());
+        }
+    }
+
+    @Test
+    public void testStringLiteralTemplateModificationBug() throws IOException, TemplateException {
+        Template t = new Template(null, "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc}", getConfiguration());
+        assertEquals(Configuration.XML_OUTPUT_FORMAT, t.getOutputFormat());
     }
     
     @Test

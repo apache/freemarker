@@ -46,6 +46,10 @@ public final class TextBlock extends TemplateElement {
         this.text = text;
         this.unparsed = unparsed;
     }
+    
+    void replaceText(String text) {
+        this.text = text.toCharArray();
+    }
 
     /**
      * Simply outputs the text.

@@ -27,8 +27,7 @@ PARSER_BEGIN(FMParser)
 package freemarker.core;
 
 import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
-import freemarker.template.utility.DeepUnwrap;
+import freemarker.template.utility.*;
 import java.io.*;
 import java.util.*;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -48,7 +47,7 @@ public class FMParser {
         private int kind;
     }
 
-    /** Necessary for adding macros and setting location info. */
+    private boolean initialized;    
     private UnboundTemplate template;
     
     private String assumedEncoding, templateSpecifiedEncoding;
@@ -82,20 +81,34 @@ public class FMParser {
             UnboundTemplate template,
             Reader reader, String assumedEncoding, ParserConfiguration pCfg) {
         this(reader);
+        this.assumedEncoding = assumedEncoding;
+        initialize(template, true, pCfg);
+    }
 
+    /**
+     * Set up initial parser state, also inits parser-filled {@link Template} fields if {@code newTemplate} is
+     * {@code true}.
+     */
+    private void initialize(UnboundTemplate template, boolean newTemplate, ParserConfiguration pCfg) {
+        NullArgumentException.check(pCfg);
         this.pCfg = pCfg;
         
-        this.assumedEncoding = assumedEncoding;
+        NullArgumentException.check(template);
+        this.template = template;
 
-        setTemplate(template);
+        int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
+        token_source.incompatibleImprovements = incompatibleImprovements;
+        this.incompatibleImprovements = incompatibleImprovements;
 
+        autoEscaping = pCfg.getAutoEscaping();
+        outputFormat = pCfg.getOutputFormat();
+        
         token_source.setParser(this);
-
+        
         token_source.strictEscapeSyntax = pCfg.getStrictSyntaxMode();
 
-        this.stripWhitespace = pCfg.getWhitespaceStripping();
-
-        switch (pCfg.getTagSyntax()) {
+        int tagSyntax = pCfg.getTagSyntax();
+        switch (tagSyntax) {
         case Configuration.AUTO_DETECT_TAG_SYNTAX:
             token_source.autodetectTagSyntax = true;
             break;
@@ -106,25 +119,36 @@ public class FMParser {
             token_source.squBracTagSyntax = true;
             break;
         default:
-            throw new IllegalArgumentException("Illegal argument for tagSyntax");
+            throw new IllegalArgumentException("Illegal argument for tagSyntax: " + tagSyntax);
         }
 
-        switch (pCfg.getNamingConvention()) {
+        int namingConvention = pCfg.getNamingConvention();
+        switch (namingConvention) {
         case Configuration.AUTO_DETECT_NAMING_CONVENTION:
         case Configuration.CAMEL_CASE_NAMING_CONVENTION:
         case Configuration.LEGACY_NAMING_CONVENTION:
-            token_source.initialNamingConvention = pCfg.getNamingConvention();
-            token_source.namingConvention = pCfg.getNamingConvention();
+            token_source.initialNamingConvention = namingConvention;
+            token_source.namingConvention = namingConvention;
             break;
         default:
-            throw new IllegalArgumentException("Illegal argument for namingConvention");
+            throw new IllegalArgumentException("Illegal argument for namingConvention: " + namingConvention);
         }
-        
-        int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
-        token_source.incompatibleImprovements = incompatibleImprovements;
-        this.incompatibleImprovements = incompatibleImprovements;
+
+        this.stripWhitespace = pCfg.getWhitespaceStripping();
+
+        // If this is a Template under construction, we do the below.
+        // If this is just the enclosing Template for ?eval or such, we must not modify it.
+        if (newTemplate) {
+            template.setAutoEscaping(autoEscaping);
+            template.setOutputFormat(outputFormat);
+        }
+
+        initialized = true;
     }
 
+    /**
+     * Should only be used when we attach an already fully constructed Template to a new parser.
+     */
     void setTemplate(UnboundTemplate template) {
         if (this.template == template) {
             return;
@@ -132,21 +156,34 @@ public class FMParser {
         if (this.template != null) {
             throw new IllegalStateException("The template was already set");
         }
-      
-        this.template = template;
+
         if (pCfg == null) {
             pCfg = template.getParserConfiguration();
         }
 
-        autoEscaping = pCfg.getAutoEscaping();
-        template.setAutoEscaping(autoEscaping);
-        
-        outputFormat = pCfg.getOutputFormat();
-        template.setOutputFormat(outputFormat);
+        if (!initialized) {
+            initialize(template, false, pCfg);
+        } else {
+            this.template = template;
+        }
     }
 
     UnboundTemplate getTemplate() {
         return template;
+    }
+
+    void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
+        token_source.onlyTextOutput = true;
+        token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
+        token_source.namingConvention = parentTokenSource.namingConvention;
+        token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
+        outputFormat = Configuration.RAW_OUTPUT_FORMAT;
+        autoEscaping = true;
+    }
+
+    void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
+        parentTokenSource.namingConvention = token_source.namingConvention;
+        parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
     }
 
     /**
@@ -156,7 +193,7 @@ public class FMParser {
      */
     @SuppressFBWarnings(value="ES_COMPARING_STRINGS_WITH_EQ",
             justification="Faster for cache hits, occasional misses aren't a problem.")
-    OutputFormat getCurrentEscapingOutputFormat(UnboundTemplate template, Token begin, Token end)
+    private OutputFormat getCurrentEscapingOutputFormat(UnboundTemplate template, Token begin, Token end)
     throws ParseException {
         if (cachedEscapingOutputFormatKey != outputFormat) {  // deliberately not "equals"
 	        OutputFormat value;
