@@ -45,6 +45,8 @@ import freemarker.core.BuiltInsForNumbers.longBI;
 import freemarker.core.BuiltInsForNumbers.number_to_dateBI;
 import freemarker.core.BuiltInsForNumbers.roundBI;
 import freemarker.core.BuiltInsForNumbers.shortBI;
+import freemarker.core.BuiltInsForOutputFormatRelated.escBI;
+import freemarker.core.BuiltInsForOutputFormatRelated.no_escBI;
 import freemarker.core.BuiltInsForSequences.chunkBI;
 import freemarker.core.BuiltInsForSequences.firstBI;
 import freemarker.core.BuiltInsForSequences.lastBI;
@@ -71,7 +73,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 252;
+    static final int NUMBER_OF_BIS = 255;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -97,6 +99,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("ends_with", "endsWith", new BuiltInsForStringsBasic.ends_withBI());
         putBI("ensure_ends_with", "ensureEndsWith", new BuiltInsForStringsBasic.ensure_ends_withBI());
         putBI("ensure_starts_with", "ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
+        putBI("esc", new escBI());
         putBI("eval", new evalBI());
         putBI("exists", new ExistenceBuiltins.existsBI());
         putBI("first", new firstBI());
@@ -226,6 +229,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("node_name", "nodeName", new node_nameBI());
         putBI("node_namespace", "nodeNamespace", new node_namespaceBI());
         putBI("node_type", "nodeType", new node_typeBI());
+        putBI("no_esc", "noEsc", new no_escBI());
         putBI("number", new BuiltInsForStringsMisc.numberBI());
         putBI("number_to_date", "numberToDate", new number_to_dateBI(TemplateDateModel.DATE));
         putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));

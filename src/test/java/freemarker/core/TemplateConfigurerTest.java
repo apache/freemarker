@@ -495,8 +495,9 @@ public class TemplateConfigurerTest {
             TemplateConfigurer tc = new TemplateConfigurer();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
-            assertOutputWithoutAndWithTC(tc, "${.outputFormat}",
-                    Configuration.RAW_OUTPUT_FORMAT, Configuration.XML_OUTPUT_FORMAT);
+            assertOutputWithoutAndWithTC(tc, "${.outputFormat} ${\"a'b\"}",
+                    Configuration.RAW_OUTPUT_FORMAT + " a'b",
+                    Configuration.XML_OUTPUT_FORMAT + " a&apos;b");
             testedProps.add(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE);
         }
 
@@ -505,7 +506,7 @@ public class TemplateConfigurerTest {
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
             tc.setAutoEscaping(false);
-            assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b" /* TODO "a&amp;b" */, "a&b");
+            assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b", "a&b");
             testedProps.add(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE);
         }
         

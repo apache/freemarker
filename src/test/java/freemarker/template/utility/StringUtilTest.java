@@ -18,12 +18,141 @@ package freemarker.template.utility;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.regex.Pattern;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 public class StringUtilTest {
+
+    @Test
+    public void testV2319() {
+        assertEquals("\\n\\r\\f\\b\\t\\x00\\x19", StringUtil.javaScriptStringEnc("\n\r\f\b\t\u0000\u0019"));
+    }
+
+    @Test
+    public void testControlChars() {
+        assertEsc(
+                "\n\r\f\b\t \u0000\u0019\u001F \u007F\u0080\u009F \u2028\u2029",
+                "\\n\\r\\f\\b\\t \\x00\\x19\\x1F \\x7F\\x80\\x9F \\u2028\\u2029",
+                "\\n\\r\\f\\b\\t \\u0000\\u0019\\u001F \\u007F\\u0080\\u009F \\u2028\\u2029");
+    }
+
+    @Test
+    public void testHtmlChars() {
+        assertEsc(
+                "<safe>/>->]> </foo> <!-- --> <![CDATA[ ]]> <?php?>",
+                "<safe>/>->]> <\\/foo> \\x3C!-- --\\> \\x3C![CDATA[ ]]\\> \\x3C?php?>",
+                "<safe>/>->]> <\\/foo> \\u003C!-- --\\u003E \\u003C![CDATA[ ]]\\u003E \\u003C?php?>");
+        assertEsc("<!c", "\\x3C!c", "\\u003C!c");
+        assertEsc("c<!", "c\\x3C!", "c\\u003C!");
+        assertEsc("c<", "c\\x3C", "c\\u003C");
+        assertEsc("c<c", "c<c", "c<c");
+        assertEsc("<c", "<c", "<c");
+        assertEsc(">", "\\>", "\\u003E");
+        assertEsc("->", "-\\>", "-\\u003E");
+        assertEsc("-->", "--\\>", "--\\u003E");
+        assertEsc("c-->", "c--\\>", "c--\\u003E");
+        assertEsc("-->c", "--\\>c", "--\\u003Ec");
+        assertEsc("]>", "]\\>", "]\\u003E");
+        assertEsc("]]>", "]]\\>", "]]\\u003E");
+        assertEsc("c]]>", "c]]\\>", "c]]\\u003E");
+        assertEsc("]]>c", "]]\\>c", "]]\\u003Ec");
+        assertEsc("c->", "c->", "c->");
+        assertEsc("c>", "c>", "c>");
+        assertEsc("-->", "--\\>", "--\\u003E");
+        assertEsc("/", "\\/", "\\/");
+        assertEsc("/c", "\\/c", "\\/c");
+        assertEsc("</", "<\\/", "<\\/");
+        assertEsc("</c", "<\\/c", "<\\/c");
+        assertEsc("c/", "c/", "c/");
+    }
+
+    @Test
+    public void testJSChars() {
+        assertEsc("\"", "\\\"", "\\\"");
+        assertEsc("'", "\\'", "'");
+        assertEsc("\\", "\\\\", "\\\\");
+    }
+
+    @Test
+    public void testSameStringsReturned() {
+        String s = "==> I/m <safe>!";
+        assertTrue(s == StringUtil.jsStringEnc(s, false));  // "==" because is must return the same object
+        assertTrue(s == StringUtil.jsStringEnc(s, true));
+
+        s = "";
+        assertTrue(s == StringUtil.jsStringEnc(s, false));
+        assertTrue(s == StringUtil.jsStringEnc(s, true));
+
+        s = "\u00E1rv\u00EDzt\u0171r\u0151 \u3020";
+        assertEquals(s, StringUtil.jsStringEnc(s, false));
+        assertTrue(s == StringUtil.jsStringEnc(s, false));
+        assertTrue(s == StringUtil.jsStringEnc(s, true));
+    }
+
+    @Test
+    public void testOneOffs() {
+        assertEsc("c\"c\"cc\"\"c", "c\\\"c\\\"cc\\\"\\\"c", "c\\\"c\\\"cc\\\"\\\"c");
+        assertEsc("\"c\"cc\"", "\\\"c\\\"cc\\\"", "\\\"c\\\"cc\\\"");
+        assertEsc("c/c/cc//c", "c/c/cc//c", "c/c/cc//c");
+        assertEsc("c<c<cc<<c", "c<c<cc<<c", "c<c<cc<<c");
+        assertEsc("/<", "\\/\\x3C", "\\/\\u003C");
+        assertEsc(">", "\\>", "\\u003E");
+        assertEsc("]>", "]\\>", "]\\u003E");
+        assertEsc("->", "-\\>", "-\\u003E");
+    }
+
+    @Test
+    public void testFTLEscaping() {
+        assertFTLEsc("", "", "", "", "\"\"");
+        assertFTLEsc("\'", "\\'", "'", "\\'", "\"'\"");
+        assertFTLEsc("\"", "\\\"", "\\\"", "\"", "'\"'");
+        assertFTLEsc("\"", "\\\"", "\\\"", "\"", "'\"'");
+        assertFTLEsc("foo", "foo", "foo", "foo", "\"foo\"");
+        assertFTLEsc("foo's", "foo\\'s", "foo's", "foo\\'s", "\"foo's\"");
+        assertFTLEsc("foo \"", "foo \\\"", "foo \\\"", "foo \"", "'foo \"'");
+        assertFTLEsc("foo's \"", "foo\\'s \\\"", "foo's \\\"", "foo\\'s \"", "\"foo's \\\"\"");
+        assertFTLEsc("foo\nb\u0000c", "foo\\nb\\x0000c", "foo\\nb\\x0000c", "foo\\nb\\x0000c", "\"foo\\nb\\x0000c\"");
+    }
+    
+    private void assertEsc(String s, String javaScript, String json) {
+        assertEquals(javaScript, StringUtil.jsStringEnc(s, false));
+        assertEquals(json, StringUtil.jsStringEnc(s, true));
+    }
+
+    private void assertFTLEsc(String s, String partAny, String partQuot, String partApos, String quoted) {
+        assertEquals(partAny, StringUtil.FTLStringLiteralEnc(s));
+        assertEquals(partQuot, StringUtil.FTLStringLiteralEnc(s, '\"'));
+        assertEquals(partApos, StringUtil.FTLStringLiteralEnc(s, '\''));
+        assertEquals(quoted, StringUtil.ftlQuote(s));
+    }
+    
+    @Test
+    public void testTrim() {
+        assertSame(CollectionUtils.EMPTY_CHAR_ARRAY, StringUtil.trim(CollectionUtils.EMPTY_CHAR_ARRAY));
+        assertSame(CollectionUtils.EMPTY_CHAR_ARRAY, StringUtil.trim(" \t\u0001 ".toCharArray()));
+        {
+            char[] cs = "foo".toCharArray();
+            assertSame(cs, cs);
+        }
+        assertArrayEquals("foo".toCharArray(), StringUtil.trim("foo ".toCharArray()));
+        assertArrayEquals("foo".toCharArray(), StringUtil.trim(" foo".toCharArray()));
+        assertArrayEquals("foo".toCharArray(), StringUtil.trim(" foo ".toCharArray()));
+        assertArrayEquals("foo".toCharArray(), StringUtil.trim("\t\tfoo \r\n".toCharArray()));
+        assertArrayEquals("x".toCharArray(), StringUtil.trim(" x ".toCharArray()));
+        assertArrayEquals("x y z".toCharArray(), StringUtil.trim(" x y z ".toCharArray()));
+    }
+
+    @Test
+    public void testIsTrimmedToEmpty() {
+        assertTrue(StringUtil.isTrimmableToEmpty("".toCharArray()));
+        assertTrue(StringUtil.isTrimmableToEmpty("\r\r\n\u0001".toCharArray()));
+        assertFalse(StringUtil.isTrimmableToEmpty("x".toCharArray()));
+        assertFalse(StringUtil.isTrimmableToEmpty("  x  ".toCharArray()));
+    }
     
     @Test
     public void testJQuote() {
@@ -154,6 +283,139 @@ public class StringUtilTest {
                 fail("Glob " + glob + " (regexp: " + pattern + ") matches " + s);
             }
         }
+    }
+    
+    @Test
+    public void testHTMLEnc() {
+        String s = "";
+        assertSame(s, StringUtil.HTMLEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.HTMLEnc(s));
+        
+        assertEquals("a&amp;b&lt;c&gt;d&quot;e'f", StringUtil.HTMLEnc("a&b<c>d\"e'f"));
+        assertEquals("&lt;", StringUtil.HTMLEnc("<"));
+        assertEquals("&lt;a", StringUtil.HTMLEnc("<a"));
+        assertEquals("&lt;a&gt;", StringUtil.HTMLEnc("<a>"));
+        assertEquals("a&gt;", StringUtil.HTMLEnc("a>"));
+        assertEquals("&lt;&gt;", StringUtil.HTMLEnc("<>"));
+        assertEquals("a&lt;&gt;b", StringUtil.HTMLEnc("a<>b"));
+    }
+
+    @Test
+    public void testXHTMLEnc() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XHTMLEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XHTMLEnc(s));
+        
+        testXHTMLEnc("a&amp;b&lt;c&gt;d&quot;e&#39;f", "a&b<c>d\"e'f");
+        testXHTMLEnc("&lt;", "<");
+        testXHTMLEnc("&lt;a", "<a");
+        testXHTMLEnc("&lt;a&gt;", "<a>");
+        testXHTMLEnc("a&gt;", "a>");
+        testXHTMLEnc("&lt;&gt;", "<>");
+        testXHTMLEnc("a&lt;&gt;b", "a<>b");
+    }
+    
+    private void testXHTMLEnc(String expected, String in) throws IOException {
+        assertEquals(expected, StringUtil.XHTMLEnc(in));
+        
+        StringWriter sw = new StringWriter();
+        StringUtil.XHTMLEnc(in, sw);
+        assertEquals(expected, sw.toString());
+    }
+
+    @Test
+    public void testXMLEnc() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XMLEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XMLEnc(s));
+        
+        testXMLEnc("a&amp;b&lt;c&gt;d&quot;e&apos;f", "a&b<c>d\"e'f");
+        testXMLEnc("&lt;", "<");
+        testXMLEnc("&lt;a", "<a");
+        testXMLEnc("&lt;a&gt;", "<a>");
+        testXMLEnc("a&gt;", "a>");
+        testXMLEnc("&lt;&gt;", "<>");
+        testXMLEnc("a&lt;&gt;b", "a<>b");
+    }
+    
+    private void testXMLEnc(String expected, String in) throws IOException {
+        assertEquals(expected, StringUtil.XMLEnc(in));
+        
+        StringWriter sw = new StringWriter();
+        StringUtil.XMLEnc(in, sw);
+        assertEquals(expected, sw.toString());
+    }
+
+    @Test
+    public void testXMLEncQAttr() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XMLEncQAttr(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XMLEncQAttr(s));
+        
+        assertEquals("a&amp;b&lt;c>d&quot;e'f", StringUtil.XMLEncQAttr("a&b<c>d\"e'f"));
+        assertEquals("&lt;", StringUtil.XMLEncQAttr("<"));
+        assertEquals("&lt;a", StringUtil.XMLEncQAttr("<a"));
+        assertEquals("&lt;a>", StringUtil.XMLEncQAttr("<a>"));
+        assertEquals("a>", StringUtil.XMLEncQAttr("a>"));
+        assertEquals("&lt;>", StringUtil.XMLEncQAttr("<>"));
+        assertEquals("a&lt;>b", StringUtil.XMLEncQAttr("a<>b"));
+    }
+    
+    @Test
+    public void testXMLEncNQG() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.XMLEncNQG(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.XMLEncNQG(s));
+        
+        assertEquals("a&amp;b&lt;c>d\"e'f", StringUtil.XMLEncNQG("a&b<c>d\"e'f"));
+        assertEquals("&lt;", StringUtil.XMLEncNQG("<"));
+        assertEquals("&lt;a", StringUtil.XMLEncNQG("<a"));
+        assertEquals("&lt;a>", StringUtil.XMLEncNQG("<a>"));
+        assertEquals("a>", StringUtil.XMLEncNQG("a>"));
+        assertEquals("&lt;>", StringUtil.XMLEncNQG("<>"));
+        assertEquals("a&lt;>b", StringUtil.XMLEncNQG("a<>b"));
+        
+        assertEquals("&gt;", StringUtil.XMLEncNQG(">"));
+        assertEquals("]&gt;", StringUtil.XMLEncNQG("]>"));
+        assertEquals("]]&gt;", StringUtil.XMLEncNQG("]]>"));
+        assertEquals("x]]&gt;", StringUtil.XMLEncNQG("x]]>"));
+        assertEquals("x]>", StringUtil.XMLEncNQG("x]>"));
+        assertEquals("]x>", StringUtil.XMLEncNQG("]x>"));
+    }
+
+    @Test
+    public void testRTFEnc() throws IOException {
+        String s = "";
+        assertSame(s, StringUtil.RTFEnc(s));
+        
+        s = "asd";
+        assertSame(s, StringUtil.RTFEnc(s));
+        
+        testRTFEnc("a\\{b\\}c\\\\d", "a{b}c\\d");
+        testRTFEnc("\\{", "{");
+        testRTFEnc("\\{a", "{a");
+        testRTFEnc("\\{a\\}", "{a}");
+        testRTFEnc("a\\}", "a}");
+        testRTFEnc("\\{\\}", "{}");
+        testRTFEnc("a\\{\\}b", "a{}b");
+    }
+
+    private void testRTFEnc(String expected, String in) throws IOException {
+        assertEquals(expected, StringUtil.RTFEnc(in));
+        
+        StringWriter sw = new StringWriter();
+        StringUtil.RTFEnc(in, sw);
+        assertEquals(expected, sw.toString());
     }
     
 }

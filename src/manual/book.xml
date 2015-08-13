@@ -23700,6 +23700,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>New built-in: <literal>noEsc</literal>. Used to
+                  prevent auto-escaping, like
+                  <literal>${descriptionInHtml?noEsc}</literal>. This doesn't
+                  work with <literal>&lt;#escape
+                  <replaceable>...</replaceable>&gt;</literal>, only with the
+                  new auto-escaping mechanism. [TODO link to ref]</para>
+                </listitem>
+
+                <listitem>
+                  <para>New built-in: <literal>esc</literal>. Used for
+                  escaping with the current output format when auto-escaping
+                  is disabled. [TODO link to ref]</para>
+                </listitem>
+
+                <listitem>
                   <para>New built-in variable,
                   <literal>.output_format</literal> (or
                   <literal>.outputFormat</literal>), returns the current
