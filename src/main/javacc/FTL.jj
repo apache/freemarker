@@ -168,10 +168,6 @@ public class FMParser {
         }
     }
 
-    UnboundTemplate getTemplate() {
-        return template;
-    }
-
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
         token_source.onlyTextOutput = true;
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
@@ -476,10 +472,6 @@ TOKEN_MGR_DECLS:
 
     void setParser(FMParser parser) {
         this.parser = parser;
-    }
-
-    UnboundTemplate getTemplate() {
-        return parser != null ? parser.getTemplate() : null;
     }
 
     // This method checks if we are in a strict mode where all
