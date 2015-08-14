@@ -15,20 +15,27 @@
  */
 package freemarker.core;
 
-import org.junit.Test;
+import freemarker.template.utility.StringUtil;
 
-public class LegacyFMParserConstructorsTest {
+/**
+ * @since 2.3.24
+ */
+public class UnknownOutputFormatException extends Exception {
 
-    @Test
-    public void test1() throws ParseException {
-        FMParser parser = new FMParser("x");
-        parser.Root();
+    private final String outputFormat;
+
+    public UnknownOutputFormatException(String outputFormat) {
+        this(outputFormat, null);
     }
     
-    @Test
-    public void testCreateExpressionParser() throws ParseException {
-         FMParser parser = FMParser.createExpressionParser("x + y");
-         parser.Expression();
+    public UnknownOutputFormatException(String outputFormat, Throwable cause) {
+        super("Unrecongnized output format name, " + StringUtil.jQuote(outputFormat)
+                + ". Ensure that it's registered in the Configuration.", cause);
+        this.outputFormat = outputFormat;
     }
-    
+
+    public String getOutputFormat() {
+        return outputFormat;
+    }
+
 }

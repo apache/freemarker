@@ -17,8 +17,11 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.io.Writer;
 
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateOutputModel;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -27,11 +30,17 @@ import freemarker.template.utility.StringUtil;
 final class DollarVariable extends Interpolation {
 
     private final Expression expression;
+    
+    /** For {@code #escape x as ...} (legacy auto-escaping) */
     private final Expression escapedExpression;
+    
+    /** For OutputFormat-based auto-escaping */
+    private final OutputFormat autoEscFormat;
 
-    DollarVariable(Expression expression, Expression escapedExpression) {
+    DollarVariable(Expression expression, Expression escapedExpression, OutputFormat autoEscFormat) {
         this.expression = expression;
         this.escapedExpression = escapedExpression;
+        this.autoEscFormat = autoEscFormat;
     }
 
     /**
@@ -39,7 +48,35 @@ final class DollarVariable extends Interpolation {
      */
     @Override
     void accept(Environment env) throws TemplateException, IOException {
-        env.getOut().write(escapedExpression.evalAndCoerceToString(env));
+        TemplateModel tm = escapedExpression.eval(env);
+        Writer out = env.getOut();
+        String s = EvalUtil.coerceModelToString(tm, escapedExpression, null, true, env);
+        if (s != null) {
+            if (autoEscFormat != null) {
+                autoEscFormat.output(s, out);
+            } else {
+                out.write(s);
+            }
+        } else {
+            TemplateOutputModel tom = (TemplateOutputModel) tm;
+            OutputFormat tomOF = tom.getOutputFormat();
+            if (autoEscFormat != null && tomOF != autoEscFormat) {
+                String srcPlainText = tomOF.getSourcePlainText(tom);
+                if (srcPlainText == null) {
+                    throw new _TemplateModelException(escapedExpression,
+                            "Tha value to print is already in output format ",
+                            new _DelayedToString(tomOF),
+                            ", which differs from the current auto-escaping output format, ",
+                            new _DelayedToString(autoEscFormat),
+                            ". The value offers no source plain text, so it can't be re-escape with the current "
+                            + "output format.");
+                }
+                // Re-escape the source plain text with the current format (output format conversion):
+                autoEscFormat.output(srcPlainText, out);
+            } else {
+                tomOF.output(tom, out);
+            }
+        }
     }
 
     @Override

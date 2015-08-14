@@ -49,21 +49,21 @@ class BuiltInsForStringsMisc {
     static class evalBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
-            SimpleCharStream scs = new SimpleCharStream(
-                    new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
             Template parentTemplate = getTemplate();
-            FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
-            token_source.incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
-            token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
-            int namingConvention = pCfg.getNamingConvention();
-            token_source.initialNamingConvention = namingConvention;
-            token_source.namingConvention = namingConvention;
-            FMParser parser = new FMParser(token_source);
-            parser.setTemplate(parentTemplate);
+            
             Expression exp = null;
             try {
                 try {
+                    FMParserTokenManager tkMan = new FMParserTokenManager(
+                            new SimpleCharStream(
+                                    new StringReader("(" + s + ")"),
+                                    RUNTIME_EVAL_LINE_DISPLACEMENT, 1,
+                                    s.length() + 2));
+                    tkMan.SwitchTo(FMParserConstants.FM_EXPRESSION);
+                    
+                    FMParser parser = new FMParser(
+                            parentTemplate, false, tkMan, parentTemplate.getParserConfiguration());
+                    
                     exp = parser.Expression();
                 } catch (TokenMgrError e) {
                     throw e.toParseException(parentTemplate);

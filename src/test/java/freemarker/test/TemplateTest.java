@@ -45,7 +45,11 @@ public abstract class TemplateTest {
 
     protected final Configuration getConfiguration() {
         if (configuration == null) {
-            configuration = createConfiguration();
+            try {
+                configuration = createConfiguration();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to set up configuration for the test", e);
+            }
         }
         return configuration;
     }
@@ -69,7 +73,7 @@ public abstract class TemplateTest {
         assertEquals(expectedOut, out.toString());
     }
     
-    protected Configuration createConfiguration() {
+    protected Configuration createConfiguration() throws Exception {
         return new Configuration(Configuration.VERSION_2_3_0);
     }
 
@@ -103,8 +107,22 @@ public abstract class TemplateTest {
     }
     
     protected void assertErrorContains(String ftl, String... expectedSubstrings) {
+        assertErrorContains(null, ftl, expectedSubstrings);
+    }
+
+    protected void assertErrorContainsForNamed(String name, String... expectedSubstrings) {
+        assertErrorContains(name, null, expectedSubstrings);
+    }
+    
+    private void assertErrorContains(String name, String ftl, String... expectedSubstrings) {
         try {
-            new Template("adhoc", ftl, getConfiguration()).process(createDataModel(), new StringWriter());
+            Template t;
+            if (ftl == null) {
+                t = getConfiguration().getTemplate(name);
+            } else {
+                t = new Template("adhoc", ftl, getConfiguration());
+            }
+            t.process(createDataModel(), new StringWriter());
             fail("The tempalte had to fail");
         } catch (TemplateException e) {
             assertContainsAll(e.getMessageWithoutStackTop(), expectedSubstrings);
@@ -114,7 +132,7 @@ public abstract class TemplateTest {
             throw new RuntimeException("Unexpected exception class: " + e.getClass().getName(), e);
         }
     }
-
+    
     private void assertContainsAll(String msg, String... expectedSubstrings) {
         for (String needle: expectedSubstrings) {
             if (needle.startsWith("\\!")) {

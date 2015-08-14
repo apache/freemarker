@@ -17,12 +17,19 @@ package freemarker.core;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+
 import org.junit.Test;
 
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
 import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.OrMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
 public class OutputFormatTest extends TemplateTest {
@@ -63,12 +70,110 @@ public class OutputFormatTest extends TemplateTest {
             cfg.clearTemplateCache();
         }
     }
+    
+    @Test
+    public void testStandardFileExtensions() throws Exception {
+        String commonContent = "${.outputFormat}";
+        addTemplate("t", commonContent);
+        addTemplate("t.ftl", commonContent);
+        addTemplate("t.ftlh", commonContent);
+        addTemplate("t.FTLH", commonContent);
+        addTemplate("t.fTlH", commonContent);
+        addTemplate("t.ftlx", commonContent);
+        addTemplate("t.FTLX", commonContent);
+        addTemplate("t.fTlX", commonContent);
+        addTemplate("tWithHeader.ftlx", "<#ftl outputFormat='HTML'>" + commonContent);
+        
+        Configuration cfg = getConfiguration();
+        for (int setupNumber = 1; setupNumber <= 5; setupNumber++) {
+            final String cfgOutputFormat;
+            final String ftlhOutputFormat;
+            final String ftlxOutputFormat;
+            switch (setupNumber) {
+            case 1:
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlhOutputFormat = Configuration.HTML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                break;
+            case 2:
+                cfgOutputFormat = Configuration.RTF_OUTPUT_FORMAT;
+                cfg.setOutputFormat(cfgOutputFormat);
+                ftlhOutputFormat = Configuration.HTML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                break;
+            case 3:
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                cfg.unsetOutputFormat();
+                TemplateConfigurer tcXml = new TemplateConfigurer();
+                tcXml.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+                cfg.setTemplateConfigurers(
+                        new ConditionalTemplateConfigurerFactory(
+                                new OrMatcher(
+                                        new FileNameGlobMatcher("*.ftlh"),
+                                        new FileNameGlobMatcher("*.FTLH"),
+                                        new FileNameGlobMatcher("*.fTlH")),
+                                tcXml));
+                ftlhOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                break;
+            case 4:
+                cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlhOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                break;
+            case 5:
+                cfg.setTemplateConfigurers(null);
+                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlhOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                ftlxOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                break;
+            default:
+                throw new AssertionError();
+            }
+            
+            assertEquals(cfgOutputFormat, cfg.getOutputFormat());
+            
+            {
+                Template t = cfg.getTemplate("t");
+                assertEquals(cfgOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            {
+                Template t = cfg.getTemplate("t.ftl");
+                assertEquals(cfgOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            for (String name : new String[] { "t.ftlh", "t.FTLH", "t.fTlH" }) {
+                Template t = cfg.getTemplate(name);
+                assertEquals(ftlhOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            for (String name : new String[] { "t.ftlx", "t.FTLX", "t.fTlX" }) {
+                Template t = cfg.getTemplate(name);
+                assertEquals(ftlxOutputFormat, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+
+            {
+                Template t = cfg.getTemplate("tWithHeader.ftlx");
+                assertEquals(Configuration.HTML_OUTPUT_FORMAT, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat());
+            }
+            
+            cfg.clearTemplateCache();
+        }
+    }
+    
 
     @Test
     public void testAutoEscapingSettingLayers() throws Exception {
         addTemplate("t", "${'a&b'}");
         addTemplate("tWithHeaderFalse", "<#ftl autoEscaping=false>${'a&b'}");
-        addTemplate("tWithHeaderTrue", "<#ftl autoEscaping=false>${'a&b'}");
+        addTemplate("tWithHeaderTrue", "<#ftl autoEscaping=true>${'a&b'}");
         
         Configuration cfg = getConfiguration();
         
@@ -83,10 +188,11 @@ public class OutputFormatTest extends TemplateTest {
             
             {
                 Template t = cfg.getTemplate("t");
-                assertTrue(t.getAutoEscaping());
                 if (cfgAutoEscaping) {
-                    assertOutput(t, "a&b"); // TODO "a&amp;b"
+                    assertTrue(t.getAutoEscaping());
+                    assertOutput(t, "a&amp;b");
                 } else {
+                    assertFalse(t.getAutoEscaping());
                     assertOutput(t, "a&b");
                 }
             }
@@ -99,22 +205,134 @@ public class OutputFormatTest extends TemplateTest {
             
             {
                 Template t = cfg.getTemplate("tWithHeaderTrue");
-                assertFalse(t.getAutoEscaping());
-                assertOutput(t, "a&b"); // TODO "a&amp;b"
+                assertTrue(t.getAutoEscaping());
+                assertOutput(t, "a&amp;b");
             }
+            
+            cfg.clearTemplateCache();
+        }
+    }
+
+    @Test
+    public void testAutoEscapingOnTOMs() throws IOException, TemplateException {
+        assertOutput(
+                "<#ftl outputFormat='RTF'>"
+                + "${rtfPlain} ${rtfMarkup} "
+                + "${htmlPlain} "
+                + "${xmlPlain}",
+                "\\\\par a & b \\par c "
+                + "a < \\{h\\} "
+                + "a < \\{x\\}");
+        assertOutput(
+                "<#ftl outputFormat='HTML'>"
+                + "${htmlPlain} ${htmlMarkup} "
+                + "${xmlPlain} "
+                + "${rtfPlain}",
+                "a &lt; {h} <p>c "
+                + "a &lt; {x} "
+                + "\\par a &amp; b");
+        assertOutput(
+                "<#ftl outputFormat='XML'>"
+                + "${xmlPlain} ${xmlMarkup} "
+                + "${htmlPlain} "
+                + "${rtfPlain}",
+                "a &lt; {x} <p>c</p> "
+                + "a &lt; {h} "
+                + "\\par a &amp; b");
+        assertErrorContains("<#ftl outputFormat='RTF'>${htmlMarkup}", "output format", "RTF", "HTML");
+        assertErrorContains("<#ftl outputFormat='RTF'>${xmlMarkup}", "output format", "RTF", "XML");
+        assertErrorContains("<#ftl outputFormat='HTML'>${rtfMarkup}", "output format", "HTML", "RTF");
+        assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
+        assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
+        assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
+    }
+
+    @Test
+    public void testStringLiteralsUseRawOF() throws IOException, TemplateException {
+        String expectedOut = "&amp; (&) &amp;";
+        String ftl = "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc} ${'&'}";
+        
+        assertOutput(ftl, expectedOut);
+        
+        addTemplate("t.xml", ftl);
+        assertOutputForNamed("t.xml", expectedOut);
+    }
+    
+    @Test
+    public void testPlainTextTemplate() throws IOException, TemplateException {
+        String content = "<#ftl>a<#foo>b${x}";
+        {
+            Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
+            Writer sw = new StringWriter();
+            t.process(null, sw);
+            assertEquals(content, sw.toString());
+            assertEquals(Configuration.RAW_OUTPUT_FORMAT, t.getOutputFormat());
         }
         
-        cfg.clearTemplateCache();
+        {
+            getConfiguration().setOutputFormat(Configuration.HTML_OUTPUT_FORMAT);
+            Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
+            Writer sw = new StringWriter();
+            t.process(null, sw);
+            assertEquals(content, sw.toString());
+            assertEquals(Configuration.HTML_OUTPUT_FORMAT, t.getOutputFormat());
+        }
+    }
+
+    @Test
+    public void testStringLiteralTemplateModificationBug() throws IOException, TemplateException {
+        Template t = new Template(null, "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc}", getConfiguration());
+        assertEquals(Configuration.XML_OUTPUT_FORMAT, t.getOutputFormat());
+    }
+    
+    @Test
+    public void testEscAndNoEscBIBasics() throws IOException, TemplateException {
+        String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
+        addTemplate("t.ftlh", commonFTL);
+        addTemplate("t-noAuto.ftlh", "<#ftl autoEscaping=false>" + commonFTL);
+        addTemplate("t.ftl", commonFTL);
+        assertOutputForNamed("t.ftlh", "&lt;x&gt; &lt;x&gt; <x>");
+        assertOutputForNamed("t-noAuto.ftlh", "<x> &lt;x&gt; <x>");
+        assertErrorContainsForNamed("t.ftl", "output format", "raw");
+    }
+
+    @Test
+    public void testStringBIsFail() {
+        assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "output_fragment");
+    }
+    
+
+    @Test
+    public void testEscAndNoEscBIsOnTOMs() throws IOException, TemplateException {
+        assertOutput(
+                "<#ftl outputFormat='XML'>${'&'?esc?esc} ${'&'?esc?noEsc} ${'&'?noEsc?esc} ${'&'?noEsc?noEsc}",
+                "&amp; &amp; & &");
+        
+        for (String bi : new String[] { "esc", "noEsc" } ) {
+            assertOutput(
+                    "<#ftl outputFormat='XML'>${rtfPlain?" + bi + "}",
+                    "\\par a &amp; b");
+            assertErrorContains(
+                    "<#ftl outputFormat='XML'>${rtfMarkup?" + bi + "}",
+                    "?" + bi, "output format", "RTF", "XML");
+        }
     }
     
     @Override
-    protected Configuration createConfiguration() {
+    protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         
         TemplateConfigurer xmlTC = new TemplateConfigurer();
         xmlTC.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
         cfg.setTemplateConfigurers(
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.xml"), xmlTC));
+
+        cfg.setSharedVariable("rtfPlain", RTFOutputFormat.INSTANCE.escapePlainText("\\par a & b"));
+        cfg.setSharedVariable("rtfMarkup", RTFOutputFormat.INSTANCE.fromMarkup("\\par c"));
+        cfg.setSharedVariable("htmlPlain", HTMLOutputFormat.INSTANCE.escapePlainText("a < {h}"));
+        cfg.setSharedVariable("htmlMarkup", HTMLOutputFormat.INSTANCE.fromMarkup("<p>c"));
+        cfg.setSharedVariable("xmlPlain", XMLOutputFormat.INSTANCE.escapePlainText("a < {x}"));
+        cfg.setSharedVariable("xmlMarkup", XMLOutputFormat.INSTANCE.fromMarkup("<p>c</p>"));
         
         return cfg;
     }

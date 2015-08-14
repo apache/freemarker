@@ -29,12 +29,12 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
     private ArithmeticEngine arithmeticEngine;
-    private boolean autoEscaping; 
+    private Boolean autoEscaping; 
     private String outputFormat;
     private final Version incompatibleImprovements;
 
     public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
-            int namingConvention, boolean autoEscaping, String outputFormat,
+            int namingConvention, Boolean autoEscaping, String outputFormat,
             Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
@@ -67,33 +67,42 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     }
 
     public ArithmeticEngine getArithmeticEngine() {
+        if (arithmeticEngine == null) {
+            throw new IllegalStateException();
+        }
         return arithmeticEngine;
     }
 
-    void setArithmeticEngineFromNull(ArithmeticEngine arithmeticEngine) {
-        if (this.arithmeticEngine != null) {
-            throw new IllegalStateException();
+    void setArithmeticEngineIfNotSet(ArithmeticEngine arithmeticEngine) {
+        if (this.arithmeticEngine == null) {
+            this.arithmeticEngine = arithmeticEngine;
         }
-        this.arithmeticEngine = arithmeticEngine;
     }
 
     public boolean getAutoEscaping() {
-        return autoEscaping;
+        if (autoEscaping == null) {
+            throw new IllegalStateException();
+        }
+        return autoEscaping.booleanValue();
     }
     
-    void setAutoEscaping(boolean autoEscaping) {
-        this.autoEscaping = autoEscaping;
+    void setAutoEscapingIfNotSet(boolean autoEscaping) {
+        if (this.autoEscaping == null) {
+            this.autoEscaping = Boolean.valueOf(autoEscaping);
+        }
     }
 
     public String getOutputFormat() {
+        if (outputFormat == null) {
+            throw new IllegalStateException();
+        }
         return outputFormat;
     }
 
-    void setOutputFormatFromNull(String outputFormat) {
-        if (this.outputFormat != null) {
-            throw new IllegalStateException();
+    void setOutputFormatIfNotSet(String outputFormat) {
+        if (this.outputFormat == null) {
+            this.outputFormat = outputFormat;
         }
-        this.outputFormat = outputFormat;
     }
 
 }

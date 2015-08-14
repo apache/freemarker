@@ -54,9 +54,15 @@ import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
+import freemarker.core.HTMLOutputFormat;
+import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
+import freemarker.core.RTFOutputFormat;
+import freemarker.core.RawOutputFormat;
 import freemarker.core.TemplateConfigurer;
+import freemarker.core.UnknownOutputFormatException;
+import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
@@ -309,8 +315,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String RAW_OUTPUT_FORMAT = "raw";
     /** @since 2.3.24 */
     public static final String HTML_OUTPUT_FORMAT = "HTML";
-    /** @since 2.3.24 */
-    public static final String XHTML_OUTPUT_FORMAT = "XHTML";
     /** @since 2.3.24 */
     public static final String XML_OUTPUT_FORMAT = "XML";
     /** @since 2.3.24 */
@@ -673,6 +677,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          restored to be backward compatible with 2.3.0. (Ironically, the restored legacy behavior itself is
      *          broken when it comes to macro invocations, we just keep it for backward compatibility. If you need fixed
      *          behavior, use {@code .current_template_name} or {@code .main_template_name} instead.)
+     *       </li>
+     *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.24 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          Templates whose name ends with {@code ftlh} file extension will automatically get {@value #HTML_OUTPUT_FORMAT}
+     *          {@link #setOutputFormat(String) output_format}, and those with {@code ftlx} file extension automatically
+     *          get {@value #XML_OUTPUT_FORMAT} {@link #setOutputFormat(String) output_format}, in both cases with
+     *          {@link #setAutoEscaping(boolean) auto_escaping} on. (These can be overridden with
+     *          {@link #setTemplateConfigurers(TemplateConfigurerFactory) template_configurers} of course.)
+     *          The file extensions aren't case sensitive.
      *       </li>
      *     </ul>
      *   </li>
@@ -1666,10 +1683,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * <ul>
      *   <li>{@code ftlh}: {@value #HTML_OUTPUT_FORMAT}
-     *   <li>{@code ftlxh}: {@value #XHTML_OUTPUT_FORMAT}
      *   <li>{@code ftlx}: {@value #XML_OUTPUT_FORMAT}
-     *   <li>{@code ftlr}: {@value #RTF_OUTPUT_FORMAT}
      * </ul>
+     * 
+     * <p>These file extensions aren't case sensitive.
      * 
      * <p>
      * The output format need not be already registered when this value is set. It need to be registered before a
@@ -1713,6 +1730,31 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void unsetOutputFormat() {
         outputFormat = RAW_OUTPUT_FORMAT;
         outputFormatExplicitlySet = false;
+    }
+    
+    /**
+     * Returns the output format for a name (not {@code null}).
+     * 
+     * @throws UnknownOutputFormatException
+     *             If there's no output format registered with the given name.
+     * 
+     * @since 2.3.24
+     */
+    public OutputFormat<?> getOutputFormat(String name) throws UnknownOutputFormatException {
+        // TODO Custom OF-s
+        if (name.equals(HTML_OUTPUT_FORMAT)) {
+            return HTMLOutputFormat.INSTANCE;
+        }
+        if (name.equals(XML_OUTPUT_FORMAT)) {
+            return XMLOutputFormat.INSTANCE;
+        }
+        if (name.equals(RTF_OUTPUT_FORMAT)) {
+            return RTFOutputFormat.INSTANCE;
+        }
+        if (name.equals(RAW_OUTPUT_FORMAT)) {
+            return RawOutputFormat.INSTANCE;
+        }
+        throw new UnknownOutputFormatException(name);
     }
     
     /**

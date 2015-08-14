@@ -15,20 +15,23 @@
  */
 package freemarker.core;
 
-import org.junit.Test;
-
-public class LegacyFMParserConstructorsTest {
-
-    @Test
-    public void test1() throws ParseException {
-        FMParser parser = new FMParser("x");
-        parser.Root();
-    }
+/**
+ * Stores HTML output.
+ * 
+ * @since 2.3.24
+ */
+public final class HTMLTemplateOutputModel extends GenericTemplateOutputModel<HTMLTemplateOutputModel> {
     
-    @Test
-    public void testCreateExpressionParser() throws ParseException {
-         FMParser parser = FMParser.createExpressionParser("x + y");
-         parser.Expression();
+    /**
+     * See {@link GenericTemplateOutputModel#GenericTemplateOutputModel(String, String)}.
+     */
+    HTMLTemplateOutputModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
     }
-    
+
+    @Override
+    public HTMLOutputFormat getOutputFormat() {
+        return HTMLOutputFormat.INSTANCE;
+    }
+
 }

@@ -15,20 +15,12 @@
  */
 package freemarker.core;
 
-import org.junit.Test;
+import freemarker.template.TemplateOutputModel;
 
-public class LegacyFMParserConstructorsTest {
+class RawTemplateOutputModel implements TemplateOutputModel<RawTemplateOutputModel> {
 
-    @Test
-    public void test1() throws ParseException {
-        FMParser parser = new FMParser("x");
-        parser.Root();
+    public OutputFormat<RawTemplateOutputModel> getOutputFormat() {
+        return RawOutputFormat.INSTANCE;
     }
-    
-    @Test
-    public void testCreateExpressionParser() throws ParseException {
-         FMParser parser = FMParser.createExpressionParser("x + y");
-         parser.Expression();
-    }
-    
+
 }

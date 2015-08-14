@@ -16,14 +16,15 @@
 
 package freemarker.template.utility;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.template.Template;
@@ -33,7 +34,15 @@ import freemarker.template.Version;
  *  Some text related utilities.
  */
 public class StringUtil {
+    
     private static final char[] ESCAPES = createEscapes();
+    
+    private static final char[] LT = new char[] { '&', 'l', 't', ';' };
+    private static final char[] GT = new char[] { '&', 'g', 't', ';' };
+    private static final char[] AMP = new char[] { '&', 'a', 'm', 'p', ';' };
+    private static final char[] QUOT = new char[] { '&', 'q', 'u', 'o', 't', ';' };
+    private static final char[] HTML_APOS = new char[] { '&', '#', '3', '9', ';' };
+    private static final char[] XML_APOS = new char[] { '&', 'a', 'p', 'o', 's', ';' };
 
     /*
      *  For better performance most methods are folded down. Don't you scream... :)
@@ -57,9 +66,18 @@ public class StringUtil {
      *  Replaces all '&gt;' '&lt;' '&amp;', "'" and '"' with entity reference
      */
     public static String XMLEnc(String s) {
-        return XMLOrXHTMLEnc(s, "&apos;");
+        return XMLOrHTMLEnc(s, true, true, XML_APOS);
     }
 
+    /**
+     * Like {@link #XMLEnc(String)}, but writes the result into a {@link Writer}.
+     * 
+     * @since 2.3.24
+     */
+    public static void XMLEnc(String s, Writer out) throws IOException {
+        XMLOrHTMLEnc(s, XML_APOS, out);
+    }
+    
     /**
      *  XHTML Encoding.
      *  Replaces all '&gt;' '&lt;' '&amp;', "'" and '"' with entity reference
@@ -68,46 +86,152 @@ public class StringUtil {
      *  instead [see http://www.w3.org/TR/xhtml1/#C_16])
      */
     public static String XHTMLEnc(String s) {
-        return XMLOrXHTMLEnc(s, "&#39;");
+        return XMLOrHTMLEnc(s, true, true, HTML_APOS);
+    }
+
+    /**
+     * Like {@link #XHTMLEnc(String)}, but writes the result into a {@link Writer}.
+     * 
+     * @since 2.3.24
+     */
+    public static void XHTMLEnc(String s, Writer out) throws IOException {
+        XMLOrHTMLEnc(s, HTML_APOS, out);
     }
     
-    private static String XMLOrXHTMLEnc(String s, String aposReplacement) {
+    private static String XMLOrHTMLEnc(String s, boolean escGT, boolean escQuot, char[] apos) {
+        final int ln = s.length();
+        
+        // First we find out if we need to escape, and if so, what the length of the output will be:
+        int firstEscIdx = -1;
+        int lastEscIdx = 0;
+        int plusOutLn = 0;
+        for (int i = 0; i < ln; i++) {
+            escape: do {
+                final char c = s.charAt(i);
+                switch (c) {
+                case '<':
+                    plusOutLn += LT.length - 1;
+                    break;
+                case '>':
+                    if (!(escGT || maybeCDataEndGT(s, i))) {
+                        break escape;
+                    }
+                    plusOutLn += GT.length - 1;
+                    break;
+                case '&':
+                    plusOutLn += AMP.length - 1;
+                    break;
+                case '"':
+                    if (!escQuot) {
+                        break escape;
+                    }
+                    plusOutLn += QUOT.length - 1;
+                    break;
+                case '\'': // apos
+                    if (apos == null) {
+                        break escape;
+                    }
+                    plusOutLn += apos.length - 1;
+                    break;
+                default:
+                    break escape;
+                }
+                
+                if (firstEscIdx == -1) {
+                    firstEscIdx = i;
+                }
+                lastEscIdx = i;
+            } while (false);
+        }
+        
+        if (firstEscIdx == -1) {
+            return s; // Nothing to escape
+        } else {
+            final char[] esced = new char[ln + plusOutLn];
+            if (firstEscIdx != 0) {
+                s.getChars(0, firstEscIdx, esced, 0);
+            }
+            int dst = firstEscIdx;
+            scan: for (int i = firstEscIdx; i <= lastEscIdx; i++) {
+                final char c = s.charAt(i);
+                switch (c) {
+                case '<':
+                    dst = shortArrayCopy(LT, esced, dst);
+                    continue scan;
+                case '>':
+                    if (!(escGT || maybeCDataEndGT(s, i))) {
+                        break;
+                    }
+                    dst = shortArrayCopy(GT, esced, dst);
+                    continue scan;
+                case '&':
+                    dst = shortArrayCopy(AMP, esced, dst);
+                    continue scan;
+                case '"':
+                    if (!escQuot) {
+                        break;
+                    }
+                    dst = shortArrayCopy(QUOT, esced, dst);
+                    continue scan;
+                case '\'': // apos
+                    if (apos == null) {
+                        break;
+                    }
+                    dst = shortArrayCopy(apos, esced, dst);
+                    continue scan;
+                }
+                esced[dst++] = c;
+            }
+            if (lastEscIdx != ln - 1) {
+                s.getChars(lastEscIdx + 1, ln, esced, dst);
+            }
+            
+            return String.valueOf(esced);
+        }
+    }
+    
+    private static boolean maybeCDataEndGT(String s, int i) {
+        if (i == 0) return true;
+        if (s.charAt(i - 1) != ']') return false;
+        if (i == 1 || s.charAt(i - 2) == ']') return true;
+        return false;
+    }
+
+    private static void XMLOrHTMLEnc(String s, char[] apos, Writer out) throws IOException {
+        int writtenEnd = 0;  // exclusive end
         int ln = s.length();
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
+                int flushLn = i - writtenEnd;
+                if (flushLn != 0) {
+                    out.write(s, writtenEnd, flushLn);
+                }
+                writtenEnd = i + 1;
+                
                 switch (c) {
-                    case '<': b.append("&lt;"); break;
-                    case '>': b.append("&gt;"); break;
-                    case '&': b.append("&amp;"); break;
-                    case '"': b.append("&quot;"); break;
-                    case '\'': b.append(aposReplacement); break;
+                case '<': out.write(LT); break;
+                case '>': out.write(GT); break;
+                case '&': out.write(AMP); break;
+                case '"': out.write(QUOT); break;
+                default: out.write(apos); break;
                 }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '<': b.append("&lt;"); break;
-                            case '>': b.append("&gt;"); break;
-                            case '&': b.append("&amp;"); break;
-                            case '"': b.append("&quot;"); break;
-                            case '\'': b.append(aposReplacement); break;
-                        }
-                        next = i + 1;
-                    }
-                    i++;
-                }
-                if (next < ln) b.append(s.substring(next));
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+            }
+        }
+        if (writtenEnd < ln) {
+            out.write(s, writtenEnd, ln - writtenEnd);
+        }
+    }
+    
+    /**
+     * For efficiently copying very short char arrays.
+     */
+    private static int shortArrayCopy(char[] src, char[] dst, int dstOffset) {
+        int ln = src.length;
+        for (int i = 0; i < ln; i++) {
+            dst[dstOffset++] = src[i];
+        }
+        return dstOffset;
     }
     
     /**
@@ -115,82 +239,16 @@ public class StringUtil {
      *  @see #XMLEnc(String)
      */
     public static String XMLEncNA(String s) {
-        int ln = s.length();
-        for (int i = 0; i < ln; i++) {
-            char c = s.charAt(i);
-            if (c == '<' || c == '>' || c == '&' || c == '"') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
-                switch (c) {
-                    case '<': b.append("&lt;"); break;
-                    case '>': b.append("&gt;"); break;
-                    case '&': b.append("&amp;"); break;
-                    case '"': b.append("&quot;"); break;
-                }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '<' || c == '>' || c == '&' || c == '"') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '<': b.append("&lt;"); break;
-                            case '>': b.append("&gt;"); break;
-                            case '&': b.append("&amp;"); break;
-                            case '"': b.append("&quot;"); break;
-                        }
-                        next = i + 1;
-                    }
-                    i++;
-                }
-                if (next < ln) b.append(s.substring(next));
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+        return XMLOrHTMLEnc(s, true, true, null);
     }
 
     /**
-     *  XML encoding for attributes values quoted with <tt>"</tt> (not with <tt>'</tt>!).
+     *  XML encoding for attribute values quoted with <tt>"</tt> (not with <tt>'</tt>!).
      *  Also can be used for HTML attributes that are quoted with <tt>"</tt>.
      *  @see #XMLEnc(String)
      */
     public static String XMLEncQAttr(String s) {
-        int ln = s.length();
-        for (int i = 0; i < ln; i++) {
-            char c = s.charAt(i);
-            if (c == '<' || c == '&' || c == '"') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
-                switch (c) {
-                    case '<': b.append("&lt;"); break;
-                    case '&': b.append("&amp;"); break;
-                    case '"': b.append("&quot;"); break;
-                }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '<' || c == '&' || c == '"') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '<': b.append("&lt;"); break;
-                            case '&': b.append("&amp;"); break;
-                            case '"': b.append("&quot;"); break;
-                        }
-                        next = i + 1;
-                    }
-                    i++;
-                }
-                if (next < ln) {
-                    b.append(s.substring(next));
-                }
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+        return XMLOrHTMLEnc(s, false, true, null);
     }
 
     /**
@@ -199,90 +257,78 @@ public class StringUtil {
      *  @see #XMLEnc(String)
      */
     public static String XMLEncNQG(String s) {
-        int ln = s.length();
-        for (int i = 0; i < ln; i++) {
-            char c = s.charAt(i);
-            if (c == '<'
-                    || (c == '>' && i > 1
-                            && s.charAt(i - 1) == ']'
-                            && s.charAt(i - 2) == ']')
-                    || c == '&') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
-                switch (c) {
-                    case '<': b.append("&lt;"); break;
-                    case '>': b.append("&gt;"); break;
-                    case '&': b.append("&amp;"); break;
-                    default: throw new BugException();
-                }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '<'
-                            || (c == '>' && i > 1
-                                    && s.charAt(i - 1) == ']'
-                                    && s.charAt(i - 2) == ']')
-                            || c == '&') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '<': b.append("&lt;"); break;
-                            case '>': b.append("&gt;"); break;
-                            case '&': b.append("&amp;"); break;
-                            default: throw new BugException();
-                        }
-                        next = i + 1;
-                    }
-                    i++;
-                }
-                if (next < ln) {
-                    b.append(s.substring(next));
-                }
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+        return XMLOrHTMLEnc(s, false, false, null);
     }
     
     /**
      *  Rich Text Format encoding (does not replace line breaks).
-     *  Escapes all '\' '{' '}' and '"'
+     *  Escapes all '\' '{' '}'.
      */
     public static String RTFEnc(String s) {
         int ln = s.length();
+        
+        // First we find out if we need to escape, and if so, what the length of the output will be:
+        int firstEscIdx = -1;
+        int lastEscIdx = 0;
+        int plusOutLn = 0;
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
-            if (c == '\\' || c == '{' || c == '}') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
-                switch (c) {
-                    case '\\': b.append("\\\\"); break;
-                    case '{': b.append("\\{"); break;
-                    case '}': b.append("\\}"); break;
+            if (c == '{' || c == '}' || c == '\\') {
+                if (firstEscIdx == -1) {
+                    firstEscIdx = i;
                 }
-                i++;
-                int next = i;
-                while (i < ln) {
-                    c = s.charAt(i);
-                    if (c == '\\' || c == '{' || c == '}') {
-                        b.append(s.substring(next, i));
-                        switch (c) {
-                            case '\\': b.append("\\\\"); break;
-                            case '{': b.append("\\{"); break;
-                            case '}': b.append("\\}"); break;
-                        }
-                        next = i + 1;
-                    }
-                    i++;
+                lastEscIdx = i;
+                plusOutLn++;
+            }
+        }
+        
+        if (firstEscIdx == -1) {
+            return s; // Nothing to escape
+        } else {
+            char[] esced = new char[ln + plusOutLn];
+            if (firstEscIdx != 0) {
+                s.getChars(0, firstEscIdx, esced, 0);
+            }
+            int dst = firstEscIdx;
+            for (int i = firstEscIdx; i <= lastEscIdx; i++) {
+                char c = s.charAt(i);
+                if (c == '{' || c == '}' || c == '\\') {
+                    esced[dst++] = '\\';
                 }
-                if (next < ln) b.append(s.substring(next));
-                s = b.toString();
-                break;
-            } // if c ==
-        } // for
-        return s;
+                esced[dst++] = c;
+            }
+            if (lastEscIdx != ln - 1) {
+                s.getChars(lastEscIdx + 1, ln, esced, dst);
+            }
+            
+            return String.valueOf(esced);
+        }
     }
+    
+    /**
+     * Like {@link #RTFEnc(String)}, but writes the result into a {@link Writer}.
+     * 
+     * @since 2.3.24
+     */
+    public static void RTFEnc(String s, Writer out) throws IOException {
+        int writtenEnd = 0;  // exclusive end
+        int ln = s.length();
+        for (int i = 0; i < ln; i++) {
+            char c = s.charAt(i);
+            if (c == '{' || c == '}' || c == '\\') {
+                int flushLn = i - writtenEnd;
+                if (flushLn != 0) {
+                    out.write(s, writtenEnd, flushLn);
+                }
+                out.write('\\');
+                writtenEnd = i; // Not i + 1, so c will be written out later
+            }
+        }
+        if (writtenEnd < ln) {
+            out.write(s, writtenEnd, ln - writtenEnd);
+        }
+    }
+    
 
     /**
      * URL encoding (like%20this) for query parameter values, path <em>segments</em>, fragments; this encodes all

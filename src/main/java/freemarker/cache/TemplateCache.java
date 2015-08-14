@@ -28,14 +28,17 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import freemarker.cache.MultiTemplateLoader.MultiSource;
+import freemarker.core.ArithmeticEngine;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
+import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateNotFoundException;
+import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -539,10 +542,20 @@ public class TemplateCache {
         Template template;
         {
             if (parseAsFTL) {
+                final ParserConfiguration pCfg;
+                final String formatFromStdFileExt;
+                if ((tc == null || !tc.isOutputFormatSet())
+                        && config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24
+                        && (formatFromStdFileExt = getFormatFromStdFileExt(sourceName)) != null) {
+                    pCfg = overrideOutputFormat(tc != null ? tc : config, formatFromStdFileExt);
+                } else {
+                    pCfg = tc;
+                }
+                
                 try {
                     final Reader reader = templateLoader.getReader(source, initialEncoding);
                     try {
-                        template = new Template(name, sourceName, reader, config, tc, initialEncoding);
+                        template = new Template(name, sourceName, reader, config, pCfg, initialEncoding);
                     } finally {
                         reader.close();
                     }
@@ -555,7 +568,7 @@ public class TemplateCache {
                     
                     final Reader reader = templateLoader.getReader(source, actualEncoding);
                     try {
-                        template = new Template(name, sourceName, reader, config, tc, actualEncoding);
+                        template = new Template(name, sourceName, reader, config, pCfg, actualEncoding);
                     } finally {
                         reader.close();
                     }
@@ -589,6 +602,68 @@ public class TemplateCache {
         template.setLocale(locale);
         template.setCustomLookupCondition(customLookupCondition);
         return template;
+    }
+
+    private ParserConfiguration overrideOutputFormat(
+            final ParserConfiguration pCfg, final String outputFormat) {
+        return new ParserConfiguration() {
+            
+            public boolean getWhitespaceStripping() {
+                return pCfg.getWhitespaceStripping();
+            }
+            
+            public int getTagSyntax() {
+                return pCfg.getTagSyntax();
+            }
+            
+            public boolean getStrictSyntaxMode() {
+                return pCfg.getStrictSyntaxMode();
+            }
+            
+            public String getOutputFormat() {
+                return outputFormat;
+            }
+            
+            public int getNamingConvention() {
+                return pCfg.getNamingConvention();
+            }
+            
+            public Version getIncompatibleImprovements() {
+                return pCfg.getIncompatibleImprovements();
+            }
+            
+            public boolean getAutoEscaping() {
+                return pCfg.getAutoEscaping();
+            }
+            
+            public ArithmeticEngine getArithmeticEngine() {
+                return pCfg.getArithmeticEngine();
+            }
+        };
+    }
+
+    private String getFormatFromStdFileExt(String sourceName) {
+        if (sourceName == null) return null;
+
+        int ln = sourceName.length();
+        if (ln < 5) return null;
+        
+        char c = sourceName.charAt(ln - 5);
+        if (c != '.') return null;
+        
+        c = sourceName.charAt(ln - 4);
+        if (c != 'f' && c != 'F') return null;
+        
+        c = sourceName.charAt(ln - 3);
+        if (c != 't' && c != 'T') return null;
+        
+        c = sourceName.charAt(ln - 2);
+        if (c != 'l' && c != 'L') return null;
+        
+        c = sourceName.charAt(ln - 1);
+        if (c == 'h' || c == 'H') return Configuration.HTML_OUTPUT_FORMAT;
+        if (c == 'x' || c == 'X') return Configuration.XML_OUTPUT_FORMAT;
+        return null;
     }
 
     /**
