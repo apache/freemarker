@@ -2159,6 +2159,9 @@ NumericalOutput NumericalOutput() :
     ]
     end = <CLOSING_CURLY_BRACKET>
     {
+        OutputFormat curOF = getCurrentOutputFormat(template, begin, end);
+        boolean escNonTOMs = autoEscaping && curOF.isEscaping();
+    
         NumericalOutput result;
         if (fmt != null) {
             int minFrac = -1;  // -1 indicates that the value has not been set
@@ -2213,9 +2216,9 @@ NumericalOutput NumericalOutput() :
             if (minFrac > 50 || maxFrac > 50) {// sanity check
                 throw new ParseException("Cannot specify more than 50 fraction digits", template, fmt);
             }
-            result = new NumericalOutput(exp, minFrac, maxFrac);
+            result = new NumericalOutput(exp, minFrac, maxFrac, curOF, escNonTOMs);
         } else {  // if format != null
-            result = new NumericalOutput(exp);
+            result = new NumericalOutput(exp, curOF, escNonTOMs);
         }
         result.setLocation(template, begin, end);
         return result;
