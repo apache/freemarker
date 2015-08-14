@@ -1762,7 +1762,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public OutputFormat<?> getOutputFormat(String name) throws UnknownOutputFormatException {
-        // TODO Custom OF-s
+        OutputFormat<?> custOF = customOutputFormats.get(name);
+        if (custOF != null) {
+            return custOF;
+        }
+        
         if (name.equals(HTML_OUTPUT_FORMAT)) {
             return HTMLOutputFormat.INSTANCE;
         }
@@ -1779,6 +1783,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             return PlainTextOutputFormat.INSTANCE;
         }
         throw new UnknownOutputFormatException(name);
+    }
+    
+    // TODO Temporal solution - will be deleted
+    private Map<String, OutputFormat<?>> customOutputFormats = new HashMap<String, OutputFormat<?>>(); 
+    
+    // TODO Temporal solution - will be deleted
+    public void addOutputFormat(String key, OutputFormat<?> outputFormat) {
+        customOutputFormats.put(key, outputFormat);
     }
     
     /**

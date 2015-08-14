@@ -36,9 +36,9 @@ public abstract class EscapingTemplateOutputModel<TOM extends EscapingTemplateOu
     /**
      * A least one of the parameters must be non-{@code null}!
      */
-    EscapingTemplateOutputModel(String plainTextContent, String markupContet) {
+    EscapingTemplateOutputModel(String plainTextContent, String markupContent) {
         this.plainTextContent = plainTextContent;
-        this.markupContet = markupContet;
+        this.markupContet = markupContent;
     }
 
     public abstract OutputFormat<TOM> getOutputFormat();

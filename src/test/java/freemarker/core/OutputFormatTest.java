@@ -213,6 +213,20 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
+    public void testNumericalInterpolation() throws IOException, TemplateException {
+        getConfiguration().addOutputFormat(DummyOutputFormat.INSTANCE.getCommonName(), DummyOutputFormat.INSTANCE);
+        assertOutput(
+                "<#ftl outputFormat='dummy'>#{1.5}; #{1.5; m3}; ${'a.b'}",
+                "1\\.5; 1\\.500; a\\.b");
+        assertOutput(
+                "<#ftl outputFormat='dummy' autoEscaping=false>#{1.5}; #{1.5; m3}; ${'a.b'}; ${'a.b'?esc}",
+                "1.5; 1.500; a.b; a\\.b");
+        assertOutput("<#ftl outputFormat='plainText'>#{1.5}", "1.5");
+        assertOutput("<#ftl outputFormat='HTML'>#{1.5}", "1.5");
+        assertOutput("#{1.5}", "1.5");
+    }
+    
+    @Test
     public void testRawOutputFormat() throws IOException, TemplateException {
         assertOutput("${'a < b'}; ${htmlPlain}; ${htmlMarkup}", "a < b; a &lt; {h}; <p>c");
         assertErrorContains("${'x'?esc}", "raw", "escaping", "?esc");
@@ -370,6 +384,55 @@ public class OutputFormatTest extends TemplateTest {
         cfg.setSharedVariable("xmlMarkup", XMLOutputFormat.INSTANCE.fromMarkup("<p>c</p>"));
         
         return cfg;
+    }
+
+    static class DummyTemplateOutputModel extends EscapingTemplateOutputModel<DummyTemplateOutputModel> {
+
+        DummyTemplateOutputModel(String plainTextContent, String markupContet) {
+            super(plainTextContent, markupContet);
+        }
+
+        @Override
+        public OutputFormat<DummyTemplateOutputModel> getOutputFormat() {
+            return DummyOutputFormat.INSTANCE;
+        }
+        
+    }
+    
+    static class DummyOutputFormat extends EscapingOutputFormat<DummyTemplateOutputModel> {
+        
+        private static final DummyOutputFormat INSTANCE = new DummyOutputFormat();
+
+        @Override
+        protected String escapePlainTextToString(String plainTextContent) {
+            return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
+        }
+
+        @Override
+        protected DummyTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
+            return new DummyTemplateOutputModel(plainTextContent, markupContent);
+        }
+
+        @Override
+        public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+            out.write(escapePlainTextToString(textToEsc));
+        }
+
+        @Override
+        public boolean isLegacyBuiltInBypassed(String builtInName) {
+            return false;
+        }
+
+        @Override
+        public String getCommonName() {
+            return "dummy";
+        }
+
+        @Override
+        public String getMimeType() {
+            return "text/dummy";
+        }
+        
     }
     
 }
