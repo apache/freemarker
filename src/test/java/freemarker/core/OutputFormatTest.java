@@ -168,7 +168,6 @@ public class OutputFormatTest extends TemplateTest {
         }
     }
     
-
     @Test
     public void testAutoEscapingSettingLayers() throws Exception {
         addTemplate("t", "${'a&b'}");
@@ -212,39 +211,66 @@ public class OutputFormatTest extends TemplateTest {
             cfg.clearTemplateCache();
         }
     }
+    
+    @Test
+    public void testAutoEscapingRaw() throws IOException, TemplateException {
+        assertOutput("a&b", "a&b");
+    }
 
     @Test
     public void testAutoEscapingOnTOMs() throws IOException, TemplateException {
-        assertOutput(
-                "<#ftl outputFormat='RTF'>"
-                + "${rtfPlain} ${rtfMarkup} "
-                + "${htmlPlain} "
-                + "${xmlPlain}",
-                "\\\\par a & b \\par c "
-                + "a < \\{h\\} "
-                + "a < \\{x\\}");
-        assertOutput(
-                "<#ftl outputFormat='HTML'>"
-                + "${htmlPlain} ${htmlMarkup} "
-                + "${xmlPlain} "
-                + "${rtfPlain}",
-                "a &lt; {h} <p>c "
-                + "a &lt; {x} "
-                + "\\par a &amp; b");
-        assertOutput(
-                "<#ftl outputFormat='XML'>"
-                + "${xmlPlain} ${xmlMarkup} "
-                + "${htmlPlain} "
-                + "${rtfPlain}",
-                "a &lt; {x} <p>c</p> "
-                + "a &lt; {h} "
-                + "\\par a &amp; b");
-        assertErrorContains("<#ftl outputFormat='RTF'>${htmlMarkup}", "output format", "RTF", "HTML");
-        assertErrorContains("<#ftl outputFormat='RTF'>${xmlMarkup}", "output format", "RTF", "XML");
-        assertErrorContains("<#ftl outputFormat='HTML'>${rtfMarkup}", "output format", "HTML", "RTF");
-        assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
-        assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
-        assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
+        for (int autoEsc = 0; autoEsc < 2; autoEsc++) {
+            String commonAutoEscFtl = "<#ftl outputFormat='HTML'>${'&'}";
+            if (autoEsc == 0) {
+                // Cfg default is autoEscaping true
+                assertOutput(commonAutoEscFtl, "&amp;");
+            } else {
+                getConfiguration().setAutoEscaping(false);
+                assertOutput(commonAutoEscFtl, "&");
+            }
+            
+            assertOutput(
+                    "<#ftl outputFormat='RTF'>"
+                    + "${rtfPlain} ${rtfMarkup} "
+                    + "${htmlPlain} "
+                    + "${xmlPlain}",
+                    "\\\\par a & b \\par c "
+                    + "a < \\{h\\} "
+                    + "a < \\{x\\}");
+            assertOutput(
+                    "<#ftl outputFormat='HTML'>"
+                    + "${htmlPlain} ${htmlMarkup} "
+                    + "${xmlPlain} "
+                    + "${rtfPlain}",
+                    "a &lt; {h} <p>c "
+                    + "a &lt; {x} "
+                    + "\\par a &amp; b");
+            assertOutput(
+                    "<#ftl outputFormat='XML'>"
+                    + "${xmlPlain} ${xmlMarkup} "
+                    + "${htmlPlain} "
+                    + "${rtfPlain}",
+                    "a &lt; {x} <p>c</p> "
+                    + "a &lt; {h} "
+                    + "\\par a &amp; b");
+            assertErrorContains("<#ftl outputFormat='RTF'>${htmlMarkup}", "output format", "RTF", "HTML");
+            assertErrorContains("<#ftl outputFormat='RTF'>${xmlMarkup}", "output format", "RTF", "XML");
+            assertErrorContains("<#ftl outputFormat='HTML'>${rtfMarkup}", "output format", "HTML", "RTF");
+            assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
+            assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
+            assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
+            
+            for (int hasHeader = 0; hasHeader < 2; hasHeader++) {
+                assertOutput(
+                        (hasHeader == 1 ? "<#ftl outputFormat='raw'>" : "")
+                        + "${xmlPlain} ${xmlMarkup} "
+                        + "${htmlPlain} ${htmlMarkup} "
+                        + "${rtfPlain} ${rtfMarkup}",
+                        "a &lt; {x} <p>c</p> "
+                        + "a &lt; {h} <p>c "
+                        + "\\\\par a & b \\par c");
+            }
+        }
     }
 
     @Test

@@ -44,9 +44,10 @@ class BuiltInsForOutputFormatRelated {
     static abstract class AbstractConverterBI extends BuiltInForOutputFormatRelated {
 
         @Override
-        protected TemplateModel calculateResult(OutputFormat contextOF, Environment env) throws TemplateException {
+        protected TemplateModel calculateResult(Environment env) throws TemplateException {
             TemplateModel lhoTM = target.eval(env);
             String lhoStr = EvalUtil.coerceModelToString(lhoTM, target, null, true, env);
+            OutputFormat contextOF = outputFormat;
             if (lhoStr == null) { // should indicate that lhoTM is a TOM
                 TemplateOutputModel lhoTOM;
                 try {

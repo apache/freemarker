@@ -54,8 +54,8 @@ public class FMParser {
     private String outputFormat;
     private boolean autoEscaping;
     private ParserConfiguration pCfg;
-    private String cachedEscapingOutputFormatKey;
-    private OutputFormat cachedEscapingOutputFormatValue;
+    private String cachedOutputFormatKey;
+    private OutputFormat cachedOutputFormatValue;
 
     /** Keeps track of #list and #foreach nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
@@ -256,8 +256,8 @@ public class FMParser {
      */
     @SuppressFBWarnings(value="ES_COMPARING_STRINGS_WITH_EQ",
             justification="Faster for cache hits, occasional misses aren't a problem.")
-    private OutputFormat getCurrentEscapingOutputFormat(Template template, Token begin, Token end)
-    throws ParseException {        if (cachedEscapingOutputFormatKey != outputFormat) {  // deliberately not "equals"
+    private OutputFormat getCurrentOutputFormat(Template template, Token begin, Token end)
+    throws ParseException {        if (cachedOutputFormatKey != outputFormat) {  // deliberately not "equals"
 	        OutputFormat value;
 	        try {
 	            value = template.getConfiguration().getOutputFormat(outputFormat);
@@ -267,11 +267,11 @@ public class FMParser {
 	                    template, begin.beginLine, begin.beginColumn, end.endLine, end.endColumn,
 	                    e.getCause());
 	        }
-	        cachedEscapingOutputFormatKey = outputFormat;
-	        cachedEscapingOutputFormatValue = value.isEscaping() ? value : null;
+	        cachedOutputFormatKey = outputFormat;
+	        cachedOutputFormatValue = value;
         }
         
-        return cachedEscapingOutputFormatValue; 
+        return cachedOutputFormatValue; 
     }
 
     /**
@@ -1988,13 +1988,13 @@ Expression BuiltIn(Expression lhoExp) :
         }
 
         if (result instanceof BuiltInForOutputFormatRelated) {
-            OutputFormat curEscOF = getCurrentEscapingOutputFormat(template, t, t);
-            if (curEscOF == null) {
+            OutputFormat curOF = getCurrentOutputFormat(template, t, t);
+            if (!curOF.isEscaping()) {
                 throw new ParseException(
                         "Built-in can't be used here, as the current output format isn't an escaping one: "
                         + outputFormat, template, t);
             }
-            ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(curEscOF);
+            ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(curOF, autoEscaping);
             
             return result;
         }
@@ -2216,11 +2216,10 @@ DollarVariable StringOutput() :
     }
     end = <CLOSING_CURLY_BRACKET>
     {
-        OutputFormat autoEscOF;
-        if (autoEscaping) {            autoEscOF = getCurrentEscapingOutputFormat(template, begin, end);
-        } else {            autoEscOF = null;
-        }
-        DollarVariable result = new DollarVariable(exp, escapedExpression(exp), autoEscOF);
+        OutputFormat curOF = getCurrentOutputFormat(template, begin, end);
+        DollarVariable result = new DollarVariable(
+                exp, escapedExpression(exp),
+                curOF, autoEscaping && curOF.isEscaping());
         result.setLocation(template, begin, end);
         return result;
     }

@@ -1636,7 +1636,25 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets if auto-escaping should be enabled; default is {@code true}, but only has effect if the output format
+     * Sets if auto-escaping should be enabled; default is {@code true}, but note with the default output format,
+     * {@value #RAW_OUTPUT_FORMAT}, that has no effect. Auto escaping has significance when a string value is
+     * printed with <code>${...}</code> (or <code>#{...}</code>). If auto escaping is {@code true}, FreeMarker will
+     * assume that the string value is plain text (not markup or some kind of rich text), and so it will escape it
+     * according the current output format (see {@link #setOutputFormat(String)}). If auto escaping is {@code false},
+     * FreeMarker will assume that the string value is already in the output format, so it prints it as is to the
+     * output.
+     * 
+     * <p>Notes:
+     * <ul>
+     *   <li>Auto escaping doesn't do any escaping if for the current output format {@link OutputFormat#isEscaping()}
+     *       is {@code false}. That's the case for the default output format, {@value #RAW_OUTPUT_FORMAT}.
+     *   <li>The current output format inside a string literal expression is always {@value #RAW_OUTPUT_FORMAT},
+     *       regardless of the output format of the containing template. For example, with
+     *       <code>&lt;#assign s = "foo${bar}"></code>, {@code bar} will never be escaped in {@code s}, but with
+     *       <code>&lt;#assign s>foo${bar}&lt;#assign></code> it may will.
+     * </ul>
+     * 
+     * only has effect if the output format
      * ({@link #setOutputFormat(String)}) is one that can do escaping. Notably, the default output format,
      * {@value #RAW_OUTPUT_FORMAT} doesn't escape.
      * 
