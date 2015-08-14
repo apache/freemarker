@@ -20,10 +20,10 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public final class RTFTemplateOutputModel extends GenericTemplateOutputModel<RTFTemplateOutputModel> {
+public final class RTFTemplateOutputModel extends EscapingTemplateOutputModel<RTFTemplateOutputModel> {
     
     /**
-     * See {@link GenericTemplateOutputModel#GenericTemplateOutputModel(String, String)}.
+     * See {@link EscapingTemplateOutputModel#EscapingTemplateOutputModel(String, String)}.
      */
     RTFTemplateOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);

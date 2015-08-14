@@ -21,9 +21,10 @@ import freemarker.template.utility.NullArgumentException;
 
 abstract class BuiltInForOutputFormatRelated extends SpecialBuiltIn {
     
-    private OutputFormat outputFormat;
+    protected OutputFormat outputFormat;
+    protected boolean autoEscaping;
     
-    void bindToOutputFormat(OutputFormat outputFormat) {
+    void bindToOutputFormat(OutputFormat outputFormat, boolean autoEscaping) {
         NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
     }
@@ -34,12 +35,12 @@ abstract class BuiltInForOutputFormatRelated extends SpecialBuiltIn {
             // The parser should prevent this situation
             throw new _MiscTemplateException(
                     this, env,
-                    "The place isn't bound to an output format.");
+                    "?" + key + " can't be used here, as the place isn't bound to an output format.");
         }
-        return calculateResult(outputFormat, env);
+        return calculateResult(env);
     }
 
-    protected abstract TemplateModel calculateResult(OutputFormat outputFormat, Environment env)
+    protected abstract TemplateModel calculateResult(Environment env)
             throws TemplateException;
     
 }

@@ -35,12 +35,15 @@ final class DollarVariable extends Interpolation {
     private final Expression escapedExpression;
     
     /** For OutputFormat-based auto-escaping */
-    private final OutputFormat autoEscFormat;
+    private final OutputFormat outputFormat;
+    private final boolean escapeNonTOMs;
 
-    DollarVariable(Expression expression, Expression escapedExpression, OutputFormat autoEscFormat) {
+    DollarVariable(
+            Expression expression, Expression escapedExpression, OutputFormat outputFormat, boolean escapeNonTOMs) {
         this.expression = expression;
         this.escapedExpression = escapedExpression;
-        this.autoEscFormat = autoEscFormat;
+        this.outputFormat = outputFormat;
+        this.escapeNonTOMs = escapeNonTOMs;
     }
 
     /**
@@ -52,27 +55,26 @@ final class DollarVariable extends Interpolation {
         Writer out = env.getOut();
         String s = EvalUtil.coerceModelToString(tm, escapedExpression, null, true, env);
         if (s != null) {
-            if (autoEscFormat != null) {
-                autoEscFormat.output(s, out);
+            if (escapeNonTOMs) {
+                outputFormat.output(s, out);
             } else {
                 out.write(s);
             }
         } else {
             TemplateOutputModel tom = (TemplateOutputModel) tm;
             OutputFormat tomOF = tom.getOutputFormat();
-            if (autoEscFormat != null && tomOF != autoEscFormat) {
-                String srcPlainText = tomOF.getSourcePlainText(tom);
+            // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
+            if (tomOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
+                String srcPlainText;
+                // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
+                srcPlainText = tomOF.getSourcePlainText(tom);
                 if (srcPlainText == null) {
                     throw new _TemplateModelException(escapedExpression,
-                            "Tha value to print is already in output format ",
-                            new _DelayedToString(tomOF),
-                            ", which differs from the current auto-escaping output format, ",
-                            new _DelayedToString(autoEscFormat),
-                            ". The value offers no source plain text, so it can't be re-escape with the current "
-                            + "output format.");
+                            "Tha value to print is in ", new _DelayedToString(tomOF),
+                            " format, which differs from the current output format, ",
+                            new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
                 }
-                // Re-escape the source plain text with the current format (output format conversion):
-                autoEscFormat.output(srcPlainText, out);
+                outputFormat.output(srcPlainText, out);
             } else {
                 tomOF.output(tom, out);
             }

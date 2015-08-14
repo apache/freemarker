@@ -58,6 +58,7 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
+import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.RawOutputFormat;
 import freemarker.core.TemplateConfigurer;
@@ -319,6 +320,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String XML_OUTPUT_FORMAT = "XML";
     /** @since 2.3.24 */
     public static final String RTF_OUTPUT_FORMAT = "RTF";
+    /** @since 2.3.24 */
+    public static final String PLAIN_TEXT_OUTPUT_FORMAT = "plainText";
 
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
@@ -1639,7 +1642,25 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets if auto-escaping should be enabled; default is {@code true}, but only has effect if the output format
+     * Sets if auto-escaping should be enabled; default is {@code true}, but note with the default output format,
+     * {@value #RAW_OUTPUT_FORMAT}, that has no effect. Auto escaping has significance when a string value is
+     * printed with <code>${...}</code> (or <code>#{...}</code>). If auto escaping is {@code true}, FreeMarker will
+     * assume that the string value is plain text (not markup or some kind of rich text), and so it will escape it
+     * according the current output format (see {@link #setOutputFormat(String)}). If auto escaping is {@code false},
+     * FreeMarker will assume that the string value is already in the output format, so it prints it as is to the
+     * output.
+     * 
+     * <p>Notes:
+     * <ul>
+     *   <li>Auto escaping doesn't do any escaping if for the current output format {@link OutputFormat#isEscaping()}
+     *       is {@code false}. That's the case for the default output format, {@value #RAW_OUTPUT_FORMAT}.
+     *   <li>The current output format inside a string literal expression is always {@value #RAW_OUTPUT_FORMAT},
+     *       regardless of the output format of the containing template. For example, with
+     *       <code>&lt;#assign s = "foo${bar}"></code>, {@code bar} will never be escaped in {@code s}, but with
+     *       <code>&lt;#assign s>foo${bar}&lt;#assign></code> it may will.
+     * </ul>
+     * 
+     * only has effect if the output format
      * ({@link #setOutputFormat(String)}) is one that can do escaping. Notably, the default output format,
      * {@value #RAW_OUTPUT_FORMAT} doesn't escape.
      * 
@@ -1756,6 +1777,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         if (name.equals(RAW_OUTPUT_FORMAT)) {
             return RawOutputFormat.INSTANCE;
+        }
+        if (name.equals(PLAIN_TEXT_OUTPUT_FORMAT)) {
+            return PlainTextOutputFormat.INSTANCE;
         }
         throw new UnknownOutputFormatException(name);
     }

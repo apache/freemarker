@@ -27,7 +27,7 @@ import freemarker.template.TemplateOutputModel;
  * 
  * @since 2.3.24
  */
-public abstract class GenericTemplateOutputModel<TOM extends GenericTemplateOutputModel<TOM>>
+public abstract class EscapingTemplateOutputModel<TOM extends EscapingTemplateOutputModel<TOM>>
         implements TemplateOutputModel<TOM> {
 
     private final String plainTextContent;
@@ -36,7 +36,7 @@ public abstract class GenericTemplateOutputModel<TOM extends GenericTemplateOutp
     /**
      * A least one of the parameters must be non-{@code null}!
      */
-    GenericTemplateOutputModel(String plainTextContent, String markupContet) {
+    EscapingTemplateOutputModel(String plainTextContent, String markupContet) {
         this.plainTextContent = plainTextContent;
         this.markupContet = markupContet;
     }

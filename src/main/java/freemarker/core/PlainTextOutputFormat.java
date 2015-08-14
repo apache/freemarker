@@ -16,32 +16,27 @@
 package freemarker.core;
 
 /**
- * Represents the output format used when the template output format is undecided. This is the default output format if
- * FreeMarker can't select anything more specific.
+ * Represents the plain text output format. Plain text is text without any characters with special meaning. As such,
+ * it has no escaping. 
  * 
  * @since 2.3.24
  */
-public final class RawOutputFormat extends NonEscapingOutputFormat<RawTemplateOutputModel> {
+public final class PlainTextOutputFormat extends NonEscapingOutputFormat<PlainTextTemplateOutputModel> {
 
-    public static final RawOutputFormat INSTANCE = new RawOutputFormat();
+    public static final PlainTextOutputFormat INSTANCE = new PlainTextOutputFormat();
     
-    private RawOutputFormat() {
+    private PlainTextOutputFormat() {
         // Only to decrease visibility
     }
 
     @Override
-    public boolean isOutputFormatMixingAllowed() {
-        return true;
-    }
-
-    @Override
     public String getCommonName() {
-        return "raw";
+        return "plainText";
     }
 
     @Override
     public String getMimeType() {
-        return null;
+        return "text/plain";
     }
 
 }

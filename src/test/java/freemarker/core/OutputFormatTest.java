@@ -168,7 +168,6 @@ public class OutputFormatTest extends TemplateTest {
         }
     }
     
-
     @Test
     public void testAutoEscapingSettingLayers() throws Exception {
         addTemplate("t", "${'a&b'}");
@@ -212,39 +211,76 @@ public class OutputFormatTest extends TemplateTest {
             cfg.clearTemplateCache();
         }
     }
+    
+    @Test
+    public void testRawOutputFormat() throws IOException, TemplateException {
+        assertOutput("${'a < b'}; ${htmlPlain}; ${htmlMarkup}", "a < b; a &lt; {h}; <p>c");
+        assertErrorContains("${'x'?esc}", "raw", "escaping", "?esc");
+        assertErrorContains("${'x'?noEsc}", "raw", "escaping", "?noEsc");
+    }
 
     @Test
+    public void testPlainTextOutputFormat() throws IOException, TemplateException {
+        assertOutput("<#ftl outputFormat='plainText'>${'a < b'}; ${htmlPlain}", "a < b; a < {h}");
+        assertErrorContains("<#ftl outputFormat='plainText'>${htmlMarkup}", "plainText", "HTML", "conversion");
+        assertErrorContains("<#ftl outputFormat='plainText'>${'x'?esc}", "plainText", "escaping", "?esc");
+        assertErrorContains("<#ftl outputFormat='plainText'>${'x'?noEsc}", "plainText", "escaping", "?noEsc");
+    }
+    
+    @Test
     public void testAutoEscapingOnTOMs() throws IOException, TemplateException {
-        assertOutput(
-                "<#ftl outputFormat='RTF'>"
-                + "${rtfPlain} ${rtfMarkup} "
-                + "${htmlPlain} "
-                + "${xmlPlain}",
-                "\\\\par a & b \\par c "
-                + "a < \\{h\\} "
-                + "a < \\{x\\}");
-        assertOutput(
-                "<#ftl outputFormat='HTML'>"
-                + "${htmlPlain} ${htmlMarkup} "
-                + "${xmlPlain} "
-                + "${rtfPlain}",
-                "a &lt; {h} <p>c "
-                + "a &lt; {x} "
-                + "\\par a &amp; b");
-        assertOutput(
-                "<#ftl outputFormat='XML'>"
-                + "${xmlPlain} ${xmlMarkup} "
-                + "${htmlPlain} "
-                + "${rtfPlain}",
-                "a &lt; {x} <p>c</p> "
-                + "a &lt; {h} "
-                + "\\par a &amp; b");
-        assertErrorContains("<#ftl outputFormat='RTF'>${htmlMarkup}", "output format", "RTF", "HTML");
-        assertErrorContains("<#ftl outputFormat='RTF'>${xmlMarkup}", "output format", "RTF", "XML");
-        assertErrorContains("<#ftl outputFormat='HTML'>${rtfMarkup}", "output format", "HTML", "RTF");
-        assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
-        assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
-        assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
+        for (int autoEsc = 0; autoEsc < 2; autoEsc++) {
+            String commonAutoEscFtl = "<#ftl outputFormat='HTML'>${'&'}";
+            if (autoEsc == 0) {
+                // Cfg default is autoEscaping true
+                assertOutput(commonAutoEscFtl, "&amp;");
+            } else {
+                getConfiguration().setAutoEscaping(false);
+                assertOutput(commonAutoEscFtl, "&");
+            }
+            
+            assertOutput(
+                    "<#ftl outputFormat='RTF'>"
+                    + "${rtfPlain} ${rtfMarkup} "
+                    + "${htmlPlain} "
+                    + "${xmlPlain}",
+                    "\\\\par a & b \\par c "
+                    + "a < \\{h\\} "
+                    + "a < \\{x\\}");
+            assertOutput(
+                    "<#ftl outputFormat='HTML'>"
+                    + "${htmlPlain} ${htmlMarkup} "
+                    + "${xmlPlain} "
+                    + "${rtfPlain}",
+                    "a &lt; {h} <p>c "
+                    + "a &lt; {x} "
+                    + "\\par a &amp; b");
+            assertOutput(
+                    "<#ftl outputFormat='XML'>"
+                    + "${xmlPlain} ${xmlMarkup} "
+                    + "${htmlPlain} "
+                    + "${rtfPlain}",
+                    "a &lt; {x} <p>c</p> "
+                    + "a &lt; {h} "
+                    + "\\par a &amp; b");
+            assertErrorContains("<#ftl outputFormat='RTF'>${htmlMarkup}", "output format", "RTF", "HTML");
+            assertErrorContains("<#ftl outputFormat='RTF'>${xmlMarkup}", "output format", "RTF", "XML");
+            assertErrorContains("<#ftl outputFormat='HTML'>${rtfMarkup}", "output format", "HTML", "RTF");
+            assertErrorContains("<#ftl outputFormat='HTML'>${xmlMarkup}", "output format", "HTML", "XML");
+            assertErrorContains("<#ftl outputFormat='XML'>${rtfMarkup}", "output format", "XML", "RTF");
+            assertErrorContains("<#ftl outputFormat='XML'>${htmlMarkup}", "output format", "XML", "HTML");
+            
+            for (int hasHeader = 0; hasHeader < 2; hasHeader++) {
+                assertOutput(
+                        (hasHeader == 1 ? "<#ftl outputFormat='raw'>" : "")
+                        + "${xmlPlain} ${xmlMarkup} "
+                        + "${htmlPlain} ${htmlMarkup} "
+                        + "${rtfPlain} ${rtfMarkup}",
+                        "a &lt; {x} <p>c</p> "
+                        + "a &lt; {h} <p>c "
+                        + "\\\\par a & b \\par c");
+            }
+        }
     }
 
     @Test
@@ -259,7 +295,7 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testPlainTextTemplate() throws IOException, TemplateException {
+    public void testUnparsedTemplate() throws IOException, TemplateException {
         String content = "<#ftl>a<#foo>b${x}";
         {
             Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
@@ -300,7 +336,6 @@ public class OutputFormatTest extends TemplateTest {
     public void testStringBIsFail() {
         assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "output_fragment");
     }
-    
 
     @Test
     public void testEscAndNoEscBIsOnTOMs() throws IOException, TemplateException {
