@@ -63,17 +63,17 @@ final class DollarVariable extends Interpolation {
         } else {
             TemplateOutputModel tom = (TemplateOutputModel) tm;
             OutputFormat tomOF = tom.getOutputFormat();
-            if (tomOF != outputFormat && outputFormat != RawOutputFormat.INSTANCE) {
-                String srcPlainText = tomOF.getSourcePlainText(tom);
+            // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
+            if (tomOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
+                String srcPlainText;
+                // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
+                srcPlainText = tomOF.getSourcePlainText(tom);
                 if (srcPlainText == null) {
                     throw new _TemplateModelException(escapedExpression,
-                            "Tha value to print is already in ", new _DelayedToString(tomOF),
+                            "Tha value to print is in ", new _DelayedToString(tomOF),
                             " format, which differs from the current output format, ",
-                            new _DelayedToString(outputFormat),
-                            ". The value has no source plain text, so it can't be converted to the current "
-                            + "output format.");
+                            new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
                 }
-                // Re-escape the source plain text with the current format (output format conversion):
                 outputFormat.output(srcPlainText, out);
             } else {
                 tomOF.output(tom, out);

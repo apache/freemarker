@@ -35,7 +35,7 @@ abstract class BuiltInForOutputFormatRelated extends SpecialBuiltIn {
             // The parser should prevent this situation
             throw new _MiscTemplateException(
                     this, env,
-                    "The place isn't bound to an output format.");
+                    "?" + key + " can't be used here, as the place isn't bound to an output format.");
         }
         return calculateResult(env);
     }

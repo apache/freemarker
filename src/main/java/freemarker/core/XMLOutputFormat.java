@@ -26,7 +26,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class XMLOutputFormat extends GenericOutputFormat<XMLTemplateOutputModel> {
+public final class XMLOutputFormat extends EscapingOutputFormat<XMLTemplateOutputModel> {
 
     public static final XMLOutputFormat INSTANCE = new XMLOutputFormat();
     

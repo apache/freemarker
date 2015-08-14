@@ -1991,7 +1991,7 @@ Expression BuiltIn(Expression lhoExp) :
             OutputFormat curOF = getCurrentOutputFormat(template, t, t);
             if (!curOF.isEscaping()) {
                 throw new ParseException(
-                        "Built-in can't be used here, as the current output format isn't an escaping one: "
+                        "?" + t.image + " can't be used here, as the current output format isn't an escaping one: "
                         + outputFormat, template, t);
             }
             ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(curOF, autoEscaping);

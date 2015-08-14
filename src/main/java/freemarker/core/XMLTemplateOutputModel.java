@@ -20,10 +20,10 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public final class XMLTemplateOutputModel extends GenericTemplateOutputModel<XMLTemplateOutputModel> {
+public final class XMLTemplateOutputModel extends EscapingTemplateOutputModel<XMLTemplateOutputModel> {
     
     /**
-     * See {@link GenericTemplateOutputModel#GenericTemplateOutputModel(String, String)}.
+     * See {@link EscapingTemplateOutputModel#EscapingTemplateOutputModel(String, String)}.
      */
     XMLTemplateOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);

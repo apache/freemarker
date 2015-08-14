@@ -58,6 +58,7 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
+import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.RawOutputFormat;
 import freemarker.core.TemplateConfigurer;
@@ -319,6 +320,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String XML_OUTPUT_FORMAT = "XML";
     /** @since 2.3.24 */
     public static final String RTF_OUTPUT_FORMAT = "RTF";
+    /** @since 2.3.24 */
+    public static final String PLAIN_TEXT_OUTPUT_FORMAT = "plainText";
 
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
@@ -1771,6 +1774,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         if (name.equals(RAW_OUTPUT_FORMAT)) {
             return RawOutputFormat.INSTANCE;
+        }
+        if (name.equals(PLAIN_TEXT_OUTPUT_FORMAT)) {
+            return PlainTextOutputFormat.INSTANCE;
         }
         throw new UnknownOutputFormatException(name);
     }

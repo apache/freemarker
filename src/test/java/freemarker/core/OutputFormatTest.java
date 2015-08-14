@@ -213,10 +213,20 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testAutoEscapingRaw() throws IOException, TemplateException {
-        assertOutput("a&b", "a&b");
+    public void testRawOutputFormat() throws IOException, TemplateException {
+        assertOutput("${'a < b'}; ${htmlPlain}; ${htmlMarkup}", "a < b; a &lt; {h}; <p>c");
+        assertErrorContains("${'x'?esc}", "raw", "escaping", "?esc");
+        assertErrorContains("${'x'?noEsc}", "raw", "escaping", "?noEsc");
     }
 
+    @Test
+    public void testPlainTextOutputFormat() throws IOException, TemplateException {
+        assertOutput("<#ftl outputFormat='plainText'>${'a < b'}; ${htmlPlain}", "a < b; a < {h}");
+        assertErrorContains("<#ftl outputFormat='plainText'>${htmlMarkup}", "plainText", "HTML", "conversion");
+        assertErrorContains("<#ftl outputFormat='plainText'>${'x'?esc}", "plainText", "escaping", "?esc");
+        assertErrorContains("<#ftl outputFormat='plainText'>${'x'?noEsc}", "plainText", "escaping", "?noEsc");
+    }
+    
     @Test
     public void testAutoEscapingOnTOMs() throws IOException, TemplateException {
         for (int autoEsc = 0; autoEsc < 2; autoEsc++) {
@@ -285,7 +295,7 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testPlainTextTemplate() throws IOException, TemplateException {
+    public void testUnparsedTemplate() throws IOException, TemplateException {
         String content = "<#ftl>a<#foo>b${x}";
         {
             Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
@@ -326,7 +336,6 @@ public class OutputFormatTest extends TemplateTest {
     public void testStringBIsFail() {
         assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "output_fragment");
     }
-    
 
     @Test
     public void testEscAndNoEscBIsOnTOMs() throws IOException, TemplateException {

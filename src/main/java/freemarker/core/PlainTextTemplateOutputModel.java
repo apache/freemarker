@@ -15,33 +15,17 @@
  */
 package freemarker.core;
 
+import freemarker.template.TemplateOutputModel;
+
 /**
- * Represents the output format used when the template output format is undecided. This is the default output format if
- * FreeMarker can't select anything more specific.
+ * Represents the plainHTML output format.
  * 
  * @since 2.3.24
  */
-public final class RawOutputFormat extends NonEscapingOutputFormat<RawTemplateOutputModel> {
+public class PlainTextTemplateOutputModel implements TemplateOutputModel<PlainTextTemplateOutputModel> {
 
-    public static final RawOutputFormat INSTANCE = new RawOutputFormat();
-    
-    private RawOutputFormat() {
-        // Only to decrease visibility
-    }
-
-    @Override
-    public boolean isOutputFormatMixingAllowed() {
-        return true;
-    }
-
-    @Override
-    public String getCommonName() {
-        return "raw";
-    }
-
-    @Override
-    public String getMimeType() {
-        return null;
+    public OutputFormat<PlainTextTemplateOutputModel> getOutputFormat() {
+        return PlainTextOutputFormat.INSTANCE;
     }
 
 }

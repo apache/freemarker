@@ -56,18 +56,18 @@ class BuiltInsForOutputFormatRelated {
                     throw EvalUtil.newModelHasStoredNullException(null, lhoTM, target);
                 }
                 OutputFormat lhoOF = lhoTOM.getOutputFormat();
-                if (lhoOF == contextOF) {
+                // ATTENTION: Keep this logic in sync. with ${...}'s logic!
+                if (lhoOF == contextOF || contextOF.isOutputFormatMixingAllowed()) {
                     // bypass
                     return lhoTM;
                 } else {
+                    // ATTENTION: Keep this logic in sync. with ${...}'s logic!
                     lhoStr = lhoOF.getSourcePlainText(lhoTOM);
                     if (lhoStr == null) {
                         throw new _TemplateModelException(target,
-                                "The left side operand of ?", key, " was a template output fragment of format ",
-                                new _DelayedToString(lhoOF),
-                                ", which differs from the current output format, ",
-                                new _DelayedToString(contextOF),
-                                ". Also it has no source plain text to re-apply the current output format on it.");
+                                "The left side operand of ?", key, " is in ", new _DelayedToString(lhoOF),
+                                " format, which differs from the current output format, ",
+                                new _DelayedToString(contextOF), ". Conversion wasn't possible.");
                     }
                     // Here we know that lho is escaped plain text. So we re-escape it to the current format and
                     // bypass it, just as if the two output formats were the same earlier.

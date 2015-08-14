@@ -21,13 +21,13 @@ import java.io.Writer;
 import freemarker.template.TemplateModelException;
 
 /**
- * Common superclass for implementing {@link OutputFormat}-s that use a {@link GenericTemplateOutputModel} subclass.
+ * Common superclass for implementing {@link OutputFormat}-s that use a {@link EscapingTemplateOutputModel} subclass.
  * 
  * @since 2.3.24
  */
-public abstract class GenericOutputFormat<TOM extends GenericTemplateOutputModel> extends OutputFormat<TOM> {
+public abstract class EscapingOutputFormat<TOM extends EscapingTemplateOutputModel> extends OutputFormat<TOM> {
 
-    protected GenericOutputFormat() {
+    protected EscapingOutputFormat() {
         // Only to decrease visibility
     }
     
@@ -89,8 +89,13 @@ public abstract class GenericOutputFormat<TOM extends GenericTemplateOutputModel
     }
     
     @Override
-    public boolean isEscaping() {
+    public final boolean isEscaping() {
         return true;
+    }
+    
+    @Override
+    public boolean isOutputFormatMixingAllowed() {
+        return false;
     }
 
     protected abstract String escapePlainTextToString(String plainTextContent);

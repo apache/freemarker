@@ -83,10 +83,25 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
     public abstract TOM concat(TOM tom1, TOM tom2) throws TemplateModelException;
     
     /**
-     * Tells if this output format defines any kind of escaping. If not, most methods should throw
-     * {@link UnsupportedOperationException}.
+     * Tells if this output format defines any kind of escaping. If not, this formatter shouldn't produce
+     * {@link TemplateOutputModel}-s, thus methods in this interface that are related to {@link TemplateOutputModel}-s
+     * should throw {@link UnsupportedOperationException}.
      */
     public abstract boolean isEscaping();
+
+    /**
+     * Tells if this output format allows inserting {@link TemplateOutputModel}-s of another output formats into it. If
+     * {@code true}, the foreign {@link TemplateOutputModel} will be inserted into the output as is (like if the
+     * surrounding output format was the same). This is usually a bad idea, as such an even could indicate application
+     * bugs. If this method returns {@code false} (recommended), then FreeMarker will try to assimilate the inserted
+     * value by converting its format to this format, which will currently (2.3.24) cause exception, unless the inserted
+     * value is made by escaping plain text and the target format has {@code true} {@link #isEscaping()}, in which case
+     * format conversion is trivially possible. (It's not impossible to extending conversions beyond this, if there will
+     * be real world demand for it.)
+     * 
+     * <p>{@code true} value is used by {@link RawOutputFormat}.
+     */
+    public abstract boolean isOutputFormatMixingAllowed();
     
     /**
      * The short name we used to refer to this format (like in the {@code #ftl} header).
