@@ -47,7 +47,6 @@ public class FMParser {
         private int kind;
     }
 
-    private boolean initialized;    
     private Template template;
 
     private boolean stripWhitespace, stripText;
@@ -241,8 +240,6 @@ public class FMParser {
             _TemplateAPI.setAutoEscaping(template, autoEscaping);
             _TemplateAPI.setOutputFormat(template, outputFormat);
         }
-
-        initialized = true;
     }
 
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
