@@ -47,7 +47,6 @@ public class FMParser {
         private int kind;
     }
 
-    private boolean initialized;    
     private UnboundTemplate template;
     
     private String assumedEncoding, templateSpecifiedEncoding;
@@ -77,22 +76,24 @@ public class FMParser {
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
 
-    FMParser(
-            UnboundTemplate template,
-            Reader reader, String assumedEncoding, ParserConfiguration pCfg) {
-        this(reader);
-        this.assumedEncoding = assumedEncoding;
-        initialize(template, true, pCfg);
+    FMParser(UnboundTemplate template, Reader reader, String assumedEncoding, ParserConfiguration pCfg) {
+        this(template, true, readerToTokenManager(reader), assumedEncoding, pCfg);
     }
 
-    /**
-     * Set up initial parser state, also inits parser-filled {@link Template} fields if {@code newTemplate} is
-     * {@code true}.
-     */
-    private void initialize(UnboundTemplate template, boolean newTemplate, ParserConfiguration pCfg) {
+    private static FMParserTokenManager readerToTokenManager(Reader reader) {
+        return new FMParserTokenManager(new SimpleCharStream(reader, 1, 1));        
+    }
+
+    FMParser(UnboundTemplate template, boolean newTemplate,
+            FMParserTokenManager tkMan, String assumedEncoding,
+            ParserConfiguration pCfg) {
+        this(tkMan);
+        
+        this.assumedEncoding = assumedEncoding;
+        
         NullArgumentException.check(pCfg);
         this.pCfg = pCfg;
-        
+
         NullArgumentException.check(template);
         this.template = template;
 
@@ -102,9 +103,9 @@ public class FMParser {
 
         autoEscaping = pCfg.getAutoEscaping();
         outputFormat = pCfg.getOutputFormat();
-        
+
         token_source.setParser(this);
-        
+
         token_source.strictEscapeSyntax = pCfg.getStrictSyntaxMode();
 
         int tagSyntax = pCfg.getTagSyntax();
@@ -141,30 +142,6 @@ public class FMParser {
         if (newTemplate) {
             template.setAutoEscaping(autoEscaping);
             template.setOutputFormat(outputFormat);
-        }
-
-        initialized = true;
-    }
-
-    /**
-     * Should only be used when we attach an already fully constructed Template to a new parser.
-     */
-    void setTemplate(UnboundTemplate template) {
-        if (this.template == template) {
-            return;
-        }
-        if (this.template != null) {
-            throw new IllegalStateException("The template was already set");
-        }
-
-        if (pCfg == null) {
-            pCfg = template.getParserConfiguration();
-        }
-
-        if (!initialized) {
-            initialize(template, false, pCfg);
-        } else {
-            this.template = template;
         }
     }
 

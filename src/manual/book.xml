@@ -23820,6 +23820,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para>Internal code cleanup: Mostly source code formatting, and
+              parser construction and setup</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
