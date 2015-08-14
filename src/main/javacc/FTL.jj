@@ -172,14 +172,7 @@ public class FMParser {
      */
     public FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg) {
         this(tkMan);
-        initialize(template, newTemplate, pCfg);
-    }
 
-    /**
-     * Set up initial parser state, also inits parser-filled {@link Template} fields if {@code newTemplate} is
-     * {@code true}.
-     */
-    private void initialize(Template template, boolean newTemplate, ParserConfiguration pCfg) {
         NullArgumentException.check(pCfg);
         this.pCfg = pCfg;
 
