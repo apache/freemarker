@@ -333,6 +333,10 @@ public class OutputFormatTest extends TemplateTest {
     public void testStringLiteralTemplateModificationBug() throws IOException, TemplateException {
         Template t = new Template(null, "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc}", getConfiguration());
         assertEquals(Configuration.XML_OUTPUT_FORMAT, t.getOutputFormat());
+        
+        assertOutput("${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}", "raw plainText raw");
+        assertOutput("${'foo ${xmlPlain}'}", "foo a < {x}");
+        assertErrorContains("${'${xmlMarkup}'}", "plainText", "XML", "conversion");
     }
     
     @Test
