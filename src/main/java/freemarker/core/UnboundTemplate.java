@@ -67,7 +67,7 @@ public final class UnboundTemplate {
     private String defaultNamespaceURI;
     private final int actualTagSyntax;
     private final int actualNamingConvention;
-    private String outputFormat;
+    private OutputFormat<?> outputFormat;
     private boolean autoEscaping;
     
     private final String templateSpecifiedEncoding;
@@ -229,14 +229,14 @@ public final class UnboundTemplate {
     /**
      * See {@link Template#getOutputFormat()}.
      */
-    public String getOutputFormat() {
+    public OutputFormat<?> getOutputFormat() {
         return outputFormat;
     }
     
     /**
      * Meant to be called by the parser only. 
      */
-    void setOutputFormat(String outputFormat) {
+    void setOutputFormat(OutputFormat<?> outputFormat) {
         this.outputFormat = outputFormat;
     }
     

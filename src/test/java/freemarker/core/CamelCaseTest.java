@@ -44,8 +44,8 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput("${.template_name?length}", "0");
         assertOutput("${.outputEncoding}", "utf-8");
         assertOutput("${.output_encoding}", "utf-8");
-        assertOutput("${.outputFormat}", Configuration.RAW_OUTPUT_FORMAT);
-        assertOutput("${.output_format}", Configuration.RAW_OUTPUT_FORMAT);
+        assertOutput("${.outputFormat}", RawOutputFormat.INSTANCE.getName());
+        assertOutput("${.output_format}", RawOutputFormat.INSTANCE.getName());
         assertOutput("${.urlEscapingCharset}", "iso-8859-1");
         assertOutput("${.url_escaping_charset}", "iso-8859-1");
         assertOutput("${.currentNode!'-'}", "-");
@@ -86,7 +86,7 @@ public class CamelCaseTest extends TemplateTest {
                 + "stripWhitespace=false "
                 + "stripText=true "
                 + "strictSyntax=true "
-                + "outputFormat='" + Configuration.HTML_OUTPUT_FORMAT + "' "
+                + "outputFormat='" + HTMLOutputFormat.INSTANCE.getName() + "' "
                 + "autoEscaping=true "
                 + "nsPrefixes={} "
                 + ">\nx\n<#if true>\n${.outputFormat}\n</#if>\n",
@@ -97,7 +97,7 @@ public class CamelCaseTest extends TemplateTest {
                 + "strip_whitespace=false "
                 + "strip_text=true "
                 + "strict_syntax=true "
-                + "output_format='" + Configuration.HTML_OUTPUT_FORMAT + "' "
+                + "output_format='" + HTMLOutputFormat.INSTANCE.getName() + "' "
                 + "auto_escaping=true "
                 + "ns_prefixes={} "
                 + ">\nx\n<#if true>\n${.output_format}\n</#if>\n",

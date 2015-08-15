@@ -33,6 +33,7 @@ import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
+import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
@@ -583,7 +584,7 @@ public class Template extends Configurable {
     }
     
     /**
-     * Returns the output format (see {@link Configuration#setOutputFormat(String)}) used for this template.
+     * Returns the output format (see {@link Configuration#setOutputFormat(OutputFormat)}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:
      * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
      * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code output_format}
@@ -591,7 +592,7 @@ public class Template extends Configurable {
      * 
      * @since 2.3.24
      */
-    public String getOutputFormat() {
+    public OutputFormat<?> getOutputFormat() {
         return unboundTemplate.getOutputFormat();
     }
     

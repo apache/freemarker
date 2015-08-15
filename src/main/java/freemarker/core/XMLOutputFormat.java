@@ -45,7 +45,7 @@ public final class XMLOutputFormat extends EscapingOutputFormat<XMLTemplateOutpu
     }
 
     @Override
-    public String getCommonName() {
+    public String getName() {
         return "XML";
     }
 

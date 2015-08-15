@@ -15,27 +15,17 @@
  */
 package freemarker.core;
 
-import freemarker.template.utility.StringUtil;
-
 /**
  * @since 2.3.24
  */
-public class UnknownOutputFormatException extends Exception {
+public class UnregisteredOutputFormatException extends Exception {
 
-    private final String outputFormat;
-
-    public UnknownOutputFormatException(String outputFormat) {
-        this(outputFormat, null);
+    public UnregisteredOutputFormatException(String message) {
+        this(message, null);
     }
     
-    public UnknownOutputFormatException(String outputFormat, Throwable cause) {
-        super("Unrecongnized output format name, " + StringUtil.jQuote(outputFormat)
-                + ". Ensure that it's registered in the Configuration.", cause);
-        this.outputFormat = outputFormat;
-    }
-
-    public String getOutputFormat() {
-        return outputFormat;
+    public UnregisteredOutputFormatException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

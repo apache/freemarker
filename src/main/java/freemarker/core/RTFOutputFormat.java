@@ -45,7 +45,7 @@ public final class RTFOutputFormat extends EscapingOutputFormat<RTFTemplateOutpu
     }
 
     @Override
-    public String getCommonName() {
+    public String getName() {
         return "RTF";
     }
 

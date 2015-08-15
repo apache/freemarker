@@ -1536,9 +1536,10 @@ public class Configurable {
      *       Case insensitive.
      *       
      *   <li><p>{@code "output_format"}:
-     *       See {@link Configuration#setOutputFormat(String)}.
-     *       <br>String value: {@code "default"} (case insensitive) for the default, or an output format name
-     *       like {@code "raw"}, {@code "HTML"}, {@code "XML"}, etc.
+     *       See {@link Configuration#setOutputFormat(OutputFormat)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or an
+     *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
+     *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
      *       
      *   <li><p>{@code "strict_syntax"}:
      *       See {@link Configuration#setStrictSyntaxMode}. Deprecated.
@@ -1678,7 +1679,9 @@ public class Configurable {
      *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
      *     {@link TemplateConfigurer}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurerFactory},
-     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory}.
+     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory},
+     *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
+     *     {@link RawOutputFormat}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such

@@ -18,10 +18,10 @@ package freemarker.template;
 import freemarker.core.OutputFormat;
 
 /**
- * "template output" template language data-type; stores "markup" (some kind of "rich text" / structured format), as
- * opposed to plain text. This type is related to the {@link Configuration#setOutputFormat(String)}/
- * {@link Configuration#setAutoEscaping(boolean)} mechanism. Values of this type are exempt from automatic escaping with
- * that mechanism.
+ * "output" template language data-type; stores "markup" (some kind of "rich text" / structured format), as opposed to
+ * plain text. This type is related to the {@link Configuration#setOutputFormat(OutputFormat)} and
+ * {@link Configuration#setAutoEscaping(boolean)} mechanism; see more there. Values of this type are exempt from
+ * automatic escaping with that mechanism.
  * 
  * @param <TOM>
  *            Refers to the interface's own type, which is useful in interfaces that extend {@link TemplateOutputModel}

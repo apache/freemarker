@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -41,9 +42,9 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tWithHeader", "<#ftl outputFormat='HTML'>${.outputFormat}");
         
         Configuration cfg = getConfiguration();
-        for (String cfgOutputFormat
-                : new String[] { Configuration.RAW_OUTPUT_FORMAT, Configuration.RTF_OUTPUT_FORMAT } ) {
-            if (!cfgOutputFormat.equals(Configuration.RAW_OUTPUT_FORMAT)) {
+        for (OutputFormat<?> cfgOutputFormat
+                : new OutputFormat<?>[] { RawOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
+            if (!cfgOutputFormat.equals(RawOutputFormat.INSTANCE)) {
                 cfg.setOutputFormat(cfgOutputFormat);
             }
             
@@ -52,19 +53,19 @@ public class OutputFormatTest extends TemplateTest {
             {
                 Template t = cfg.getTemplate("t");
                 assertEquals(cfgOutputFormat, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
             
             {
                 Template t = cfg.getTemplate("t.xml");
-                assertEquals(Configuration.XML_OUTPUT_FORMAT, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
             
             {
                 Template t = cfg.getTemplate("tWithHeader");
-                assertEquals(Configuration.HTML_OUTPUT_FORMAT, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertEquals(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
             
             cfg.clearTemplateCache();
@@ -86,26 +87,26 @@ public class OutputFormatTest extends TemplateTest {
         
         Configuration cfg = getConfiguration();
         for (int setupNumber = 1; setupNumber <= 5; setupNumber++) {
-            final String cfgOutputFormat;
-            final String ftlhOutputFormat;
-            final String ftlxOutputFormat;
+            final OutputFormat<?> cfgOutputFormat;
+            final OutputFormat<?> ftlhOutputFormat;
+            final OutputFormat<?> ftlxOutputFormat;
             switch (setupNumber) {
             case 1:
-                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
-                ftlhOutputFormat = Configuration.HTML_OUTPUT_FORMAT;
-                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                cfgOutputFormat = RawOutputFormat.INSTANCE;
+                ftlhOutputFormat = HTMLOutputFormat.INSTANCE;
+                ftlxOutputFormat = XMLOutputFormat.INSTANCE;
                 break;
             case 2:
-                cfgOutputFormat = Configuration.RTF_OUTPUT_FORMAT;
+                cfgOutputFormat = RTFOutputFormat.INSTANCE;
                 cfg.setOutputFormat(cfgOutputFormat);
-                ftlhOutputFormat = Configuration.HTML_OUTPUT_FORMAT;
-                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                ftlhOutputFormat = HTMLOutputFormat.INSTANCE;
+                ftlxOutputFormat = XMLOutputFormat.INSTANCE;
                 break;
             case 3:
-                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                cfgOutputFormat = RawOutputFormat.INSTANCE;
                 cfg.unsetOutputFormat();
                 TemplateConfigurer tcXml = new TemplateConfigurer();
-                tcXml.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+                tcXml.setOutputFormat(XMLOutputFormat.INSTANCE);
                 cfg.setTemplateConfigurers(
                         new ConditionalTemplateConfigurerFactory(
                                 new OrMatcher(
@@ -113,20 +114,20 @@ public class OutputFormatTest extends TemplateTest {
                                         new FileNameGlobMatcher("*.FTLH"),
                                         new FileNameGlobMatcher("*.fTlH")),
                                 tcXml));
-                ftlhOutputFormat = Configuration.XML_OUTPUT_FORMAT;
-                ftlxOutputFormat = Configuration.XML_OUTPUT_FORMAT;
+                ftlhOutputFormat = XMLOutputFormat.INSTANCE;
+                ftlxOutputFormat = XMLOutputFormat.INSTANCE;
                 break;
             case 4:
                 cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
-                ftlhOutputFormat = Configuration.XML_OUTPUT_FORMAT;
-                ftlxOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                cfgOutputFormat = RawOutputFormat.INSTANCE;
+                ftlhOutputFormat = XMLOutputFormat.INSTANCE;
+                ftlxOutputFormat = RawOutputFormat.INSTANCE;
                 break;
             case 5:
                 cfg.setTemplateConfigurers(null);
-                cfgOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
-                ftlhOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
-                ftlxOutputFormat = Configuration.RAW_OUTPUT_FORMAT;
+                cfgOutputFormat = RawOutputFormat.INSTANCE;
+                ftlhOutputFormat = RawOutputFormat.INSTANCE;
+                ftlxOutputFormat = RawOutputFormat.INSTANCE;
                 break;
             default:
                 throw new AssertionError();
@@ -137,31 +138,31 @@ public class OutputFormatTest extends TemplateTest {
             {
                 Template t = cfg.getTemplate("t");
                 assertEquals(cfgOutputFormat, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
             
             {
                 Template t = cfg.getTemplate("t.ftl");
                 assertEquals(cfgOutputFormat, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
             
             for (String name : new String[] { "t.ftlh", "t.FTLH", "t.fTlH" }) {
                 Template t = cfg.getTemplate(name);
                 assertEquals(ftlhOutputFormat, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
             
             for (String name : new String[] { "t.ftlx", "t.FTLX", "t.fTlX" }) {
                 Template t = cfg.getTemplate(name);
                 assertEquals(ftlxOutputFormat, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
 
             {
                 Template t = cfg.getTemplate("tWithHeader.ftlx");
-                assertEquals(Configuration.HTML_OUTPUT_FORMAT, t.getOutputFormat());
-                assertOutput(t, t.getOutputFormat());
+                assertEquals(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
+                assertOutput(t, t.getOutputFormat().getName());
             }
             
             cfg.clearTemplateCache();
@@ -178,7 +179,7 @@ public class OutputFormatTest extends TemplateTest {
         
         assertTrue(cfg.getAutoEscaping());
         
-        cfg.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+        cfg.setOutputFormat(XMLOutputFormat.INSTANCE);
         
         for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
             if (!cfgAutoEscaping) {
@@ -214,7 +215,7 @@ public class OutputFormatTest extends TemplateTest {
     
     @Test
     public void testNumericalInterpolation() throws IOException, TemplateException {
-        getConfiguration().addOutputFormat(DummyOutputFormat.INSTANCE.getCommonName(), DummyOutputFormat.INSTANCE);
+        getConfiguration().setRegisteredCustomOutputFormats(Collections.singleton(DummyOutputFormat.INSTANCE));
         assertOutput(
                 "<#ftl outputFormat='dummy'>#{1.5}; #{1.5; m3}; ${'a.b'}",
                 "1\\.5; 1\\.500; a\\.b");
@@ -316,24 +317,23 @@ public class OutputFormatTest extends TemplateTest {
             Writer sw = new StringWriter();
             t.process(null, sw);
             assertEquals(content, sw.toString());
-            assertEquals(Configuration.RAW_OUTPUT_FORMAT, t.getOutputFormat());
+            assertEquals(RawOutputFormat.INSTANCE, t.getOutputFormat());
         }
         
         {
-            getConfiguration().setOutputFormat(Configuration.HTML_OUTPUT_FORMAT);
+            getConfiguration().setOutputFormat(HTMLOutputFormat.INSTANCE);
             Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
             Writer sw = new StringWriter();
             t.process(null, sw);
             assertEquals(content, sw.toString());
-            assertEquals(Configuration.HTML_OUTPUT_FORMAT, t.getOutputFormat());
+            assertEquals(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
         }
     }
 
     @Test
     public void testStringLiteralTemplateModificationBug() throws IOException, TemplateException {
         Template t = new Template(null, "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc}", getConfiguration());
-        assertEquals(Configuration.XML_OUTPUT_FORMAT, t.getOutputFormat());
-        
+        assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
         assertOutput("${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}", "raw plainText raw");
         assertOutput("${'foo ${xmlPlain}'}", "foo a < {x}");
         assertErrorContains("${'${xmlMarkup}'}", "plainText", "XML", "conversion");
@@ -376,7 +376,7 @@ public class OutputFormatTest extends TemplateTest {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         
         TemplateConfigurer xmlTC = new TemplateConfigurer();
-        xmlTC.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+        xmlTC.setOutputFormat(XMLOutputFormat.INSTANCE);
         cfg.setTemplateConfigurers(
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.xml"), xmlTC));
 
@@ -428,7 +428,7 @@ public class OutputFormatTest extends TemplateTest {
         }
 
         @Override
-        public String getCommonName() {
+        public String getName() {
             return "dummy";
         }
 

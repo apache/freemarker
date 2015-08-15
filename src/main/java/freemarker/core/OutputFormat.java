@@ -106,7 +106,7 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
     /**
      * The short name we used to refer to this format (like in the {@code #ftl} header).
      */
-    public abstract String getCommonName();
+    public abstract String getName();
     
     /**
      * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
@@ -116,7 +116,7 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
 
     @Override
     public final String toString() {
-        return getCommonName() + "("
+        return getName() + "("
                 + "mimeType=" + StringUtil.jQuote(getMimeType()) + ", "
                 + "class=" + ClassUtil.getShortClassNameOfObject(this, true)
                 + ")";

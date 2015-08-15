@@ -16,8 +16,18 @@
 package freemarker.core;
 
 /**
- * Represents the plain text output format. Plain text is text without any characters with special meaning. As such,
- * it has no escaping. 
+ * Represents the plain text output format. Plain text is text without any characters with special meaning. As such, it
+ * has no escaping.
+ * 
+ * <p>
+ * The main difference from {@link RawOutputFormat} is that this format doesn't allow inserting values of another output
+ * formats into itself (unless they can be converted to plain text), while {@link RawOutputFormat} would just insert the
+ * foreign "markup" as is. Also, this format has {"text/plain"} MIME type, while {@link RawOutputFormat} has
+ * {@code null}.
+ * 
+ * <p>
+ * String literals in FTL expressions use this output format, which has importance when <code>${...}</code> is used
+ * inside them.
  * 
  * @since 2.3.24
  */
@@ -30,7 +40,7 @@ public final class PlainTextOutputFormat extends NonEscapingOutputFormat<PlainTe
     }
 
     @Override
-    public String getCommonName() {
+    public String getName() {
         return "plainText";
     }
 
