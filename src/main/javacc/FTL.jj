@@ -240,7 +240,7 @@ public class FMParser {
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
-        outputFormat = Configuration.RAW_OUTPUT_FORMAT;
+        outputFormat = Configuration.PLAIN_TEXT_OUTPUT_FORMAT;
         autoEscaping = true;
     }
 
