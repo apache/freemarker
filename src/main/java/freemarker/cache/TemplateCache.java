@@ -633,7 +633,7 @@ public class TemplateCache {
             }
             
             public boolean getAutoEscaping() {
-                return pCfg.getAutoEscaping();
+                return true;
             }
             
             public ArithmeticEngine getArithmeticEngine() {
