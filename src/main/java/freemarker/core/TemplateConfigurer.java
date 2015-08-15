@@ -76,7 +76,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
     private Boolean autoEscaping;
-    private String outputFormat;
+    private OutputFormat<?> outputFormat;
     private String encoding;
 
     /**
@@ -380,8 +380,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Sets the output format of the template, for example {@link Configuration#HTML_OUTPUT_FORMAT}.
-     * See {@link Configuration#setOutputFormat(String)} for more about output formats.
+     * Sets the output format of the template; see {@link Configuration#setAutoEscaping(boolean)} for more.
      */
     public void setAutoEscaping(boolean autoEscaping) {
         this.autoEscaping = Boolean.valueOf(autoEscaping);
@@ -402,18 +401,17 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Sets the output format of the template, for example {@link Configuration#HTML_OUTPUT_FORMAT}.
-     * See {@link Configuration#setOutputFormat(String)} for more about output formats.
+     * Sets the output format of the template; see {@link Configuration#setOutputFormat(OutputFormat)} for more.
      */
-    public void setOutputFormat(String outputFormat) {
+    public void setOutputFormat(OutputFormat outputFormat) {
         NullArgumentException.check("outputFormat", outputFormat);
         this.outputFormat = outputFormat;
     }
 
     /**
-     * The getter pair of {@link #setOutputFormat(String)}.
+     * The getter pair of {@link #setOutputFormat(OutputFormat)}.
      */
-    public String getOutputFormat() {
+    public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : getParentConfiguration().getOutputFormat();
     }
 

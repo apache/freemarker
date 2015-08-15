@@ -45,7 +45,7 @@ public final class HTMLOutputFormat extends EscapingOutputFormat<HTMLTemplateOut
     }
 
     @Override
-    public String getCommonName() {
+    public String getName() {
         return "HTML";
     }
 

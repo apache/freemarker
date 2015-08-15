@@ -23,6 +23,8 @@ import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +36,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -62,7 +65,7 @@ import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.RawOutputFormat;
 import freemarker.core.TemplateConfigurer;
-import freemarker.core.UnknownOutputFormatException;
+import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
@@ -304,6 +307,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         WHITESPACE_STRIPPING_KEY_CAMEL_CASE
     };
     
+    private static final Map<String, OutputFormat<?>> STANDARD_OUTPUT_FORMATS;
+    static {
+        STANDARD_OUTPUT_FORMATS = new HashMap<String, OutputFormat<?>>();
+        STANDARD_OUTPUT_FORMATS.put(RawOutputFormat.INSTANCE.getName(), RawOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(XMLOutputFormat.INSTANCE.getName(), XMLOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(RTFOutputFormat.INSTANCE.getName(), RTFOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(PlainTextOutputFormat.INSTANCE.getName(), PlainTextOutputFormat.INSTANCE);
+    }
+    
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
@@ -312,17 +325,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int LEGACY_NAMING_CONVENTION = 11;
     public static final int CAMEL_CASE_NAMING_CONVENTION = 12;
     
-    /** @since 2.3.24 */
-    public static final String RAW_OUTPUT_FORMAT = "raw";
-    /** @since 2.3.24 */
-    public static final String HTML_OUTPUT_FORMAT = "HTML";
-    /** @since 2.3.24 */
-    public static final String XML_OUTPUT_FORMAT = "XML";
-    /** @since 2.3.24 */
-    public static final String RTF_OUTPUT_FORMAT = "RTF";
-    /** @since 2.3.24 */
-    public static final String PLAIN_TEXT_OUTPUT_FORMAT = "plainText";
-
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     
@@ -421,8 +423,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
     private Boolean autoEscaping;
-    private String outputFormat = RAW_OUTPUT_FORMAT;
+    private OutputFormat<?> outputFormat = RawOutputFormat.INSTANCE;
     private boolean outputFormatExplicitlySet;
+    private Map<String, ? extends OutputFormat<?>> registeredCustomOutputFormats = Collections.emptyMap(); 
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
@@ -687,12 +690,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *     2.3.24 (or higher):
      *     <ul>
      *       <li><p>
-     *          Templates whose name ends with {@code ftlh} file extension will automatically get {@value #HTML_OUTPUT_FORMAT}
-     *          {@link #setOutputFormat(String) output_format}, and those with {@code ftlx} file extension automatically
-     *          get {@value #XML_OUTPUT_FORMAT} {@link #setOutputFormat(String) output_format}, in both cases with
+     *          Templates whose name ends with {@code ftlh} "file" extension will automatically get
+     *          {@link HTMLOutputFormat#INSTANCE} output format, and those with {@code ftlx} extension
+     *          automatically get {@link XMLOutputFormat#INSTANCE} output format. (See:
+     *          {@link #setOutputFormat(OutputFormat)}, in both cases with
      *          {@link #setAutoEscaping(boolean) auto_escaping} on. (These can be overridden with
-     *          {@link #setTemplateConfigurers(TemplateConfigurerFactory) template_configurers} of course.)
-     *          The file extensions aren't case sensitive.
+     *          {@link #setTemplateConfigurers(TemplateConfigurerFactory) template_configurers}.) The "file" extensions
+     *          aren't case sensitive.
      *       </li>
      *     </ul>
      *   </li>
@@ -1050,7 +1054,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
      * {@link #isTemplateLoaderExplicitlySet()} will return {@code false}.
      * 
@@ -1098,7 +1102,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
      * {@link #isTemplateLookupStrategyExplicitlySet()} will return {@code false}.
      * 
@@ -1147,7 +1151,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
      * {@link #isTemplateNameFormatExplicitlySet()} will return {@code false}.
      * 
@@ -1181,7 +1185,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
-     * from those coming from the common {@link Configuration} object. 
+     * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
+     * output format ({@link TemplateConfigurer#setOutputFormat(OutputFormat)}) for templates based on their file
+     * extension or parent directory.
+     * 
+     * @see TemplateConfigurer#setOutputFormat(OutputFormat)
      * 
      * @since 2.3.24
      */
@@ -1231,7 +1239,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
      * {@link #isCacheStorageExplicitlySet()} will return {@code false}.
      * 
@@ -1437,7 +1445,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
      * {@link #isObjectWrapperExplicitlySet()} will return {@code false}.
      * 
@@ -1466,7 +1474,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
      * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
      * 
@@ -1499,7 +1507,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
      * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
      * 
@@ -1639,27 +1647,33 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets if auto-escaping should be enabled; default is {@code true}, but note with the default output format,
-     * {@value #RAW_OUTPUT_FORMAT}, that has no effect. Auto escaping has significance when a string value is
-     * printed with <code>${...}</code> (or <code>#{...}</code>). If auto escaping is {@code true}, FreeMarker will
-     * assume that the string value is plain text (not markup or some kind of rich text), and so it will escape it
-     * according the current output format (see {@link #setOutputFormat(String)}). If auto escaping is {@code false},
-     * FreeMarker will assume that the string value is already in the output format, so it prints it as is to the
-     * output.
+     * Sets if auto-escaping should be enabled; default is {@code true}, but note that the default output format,
+     * {@link RawOutputFormat}, is a non-escaping format, so there auto-escaping has no effect. Auto-escaping has
+     * significance when a value is printed with <code>${...}</code> (or <code>#{...}</code>). If auto-escaping
+     * is {@code true}, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
+     * rich text), and so it will escape it according the current output format (see
+     * {@link #setOutputFormat(OutputFormat)} and {@link TemplateConfigurer#setOutputFormat(OutputFormat)}). If
+     * auto-escaping is {@code false}, FreeMarker will assume that the string value is already in the output format, so
+     * it prints it as is to the output.
      * 
      * <p>Notes:
      * <ul>
-     *   <li>Auto escaping doesn't do any escaping if for the current output format {@link OutputFormat#isEscaping()}
-     *       is {@code false}. That's the case for the default output format, {@value #RAW_OUTPUT_FORMAT}.
-     *   <li>The current output format inside a string literal expression is always {@value #RAW_OUTPUT_FORMAT},
-     *       regardless of the output format of the containing template. For example, with
-     *       <code>&lt;#assign s = "foo${bar}"></code>, {@code bar} will never be escaped in {@code s}, but with
-     *       <code>&lt;#assign s>foo${bar}&lt;#assign></code> it may will.
+     *   <li>When printing numbers, dates, and other kind of non-string values with <code>${...}</code>, they will be
+     *       first converted to string (according the formatting settings and locale), then they are escaped just like
+     *       string values.
+     *   <li>When printing {@link TemplateOutputModel}-s, they aren't escaped again (they are already escaped).
+     *   <li>Auto escaping doesn't do anything eif the current output format has {@code false}
+     *       {@link OutputFormat#isEscaping()}. That's the case for the default output format, {@link RawOutputFormat},
+     *       and also for {@link PlainTextOutputFormat}.
+     *   <li>The output format inside a string literal expression is always {@link PlainTextOutputFormat}
+     *       (regardless of the output format of the containing template), which is a non-escaping format. Thus for
+     *       example, with <code>&lt;#assign s = "foo${bar}"&gt;</code>, {@code bar} will always get into {@code s}
+     *       without escaping, but with <code>&lt;#assign s&gt;foo${bar}&lt;#assign&gt;</code> it may will be escaped.
      * </ul>
      * 
-     * only has effect if the output format
-     * ({@link #setOutputFormat(String)}) is one that can do escaping. Notably, the default output format,
-     * {@value #RAW_OUTPUT_FORMAT} doesn't escape.
+     * @see TemplateConfigurer#setAutoEscaping(boolean)
+     * @see Configuration#setOutputFormat(OutputFormat)
+     * @see TemplateConfigurer#setOutputFormat(OutputFormat)
      * 
      * @since 2.3.24
      */
@@ -1677,7 +1691,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Tells if {@link #setOutputFormat(String)} (or equivalent) was already called on this instance.
+     * Tells if {@link #setOutputFormat(OutputFormat)} (or equivalent) was already called on this instance.
      * 
      * @since 2.3.24
      */
@@ -1686,7 +1700,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Resets the setting to its default, as it was never set. 
+     * Resets the setting to its default, as if it was never set. 
      * {@link #isAutoEscapingExplicitlySet()} will return {@code false}.
      * 
      * @since 2.3.24
@@ -1696,44 +1710,45 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets the (default) output format. Usually, you leave this on its default, which is {@link #RAW_OUTPUT_FORMAT},
-     * and then override it for individual templates based on their name (like based on their "file" extension) with
-     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, if {@link #getIncompatibleImprovements()} is
-     * 2.3.24 or greater, templates with these extensions get non-default output format (unless
-     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)} specifies another output format for the template):
+     * Sets the (default) output format. Usually, you leave this on its default, which is
+     * {@link RawOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like based
+     * on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, if
+     * {@link #getIncompatibleImprovements()} is 2.3.24 or greater, templates with these extensions get these
+     * non-default output format and auto-escaping:
      * 
      * <ul>
-     *   <li>{@code ftlh}: {@value #HTML_OUTPUT_FORMAT}
-     *   <li>{@code ftlx}: {@value #XML_OUTPUT_FORMAT}
+     *   <li>{@code ftlh}: {@code "HTML"} output format ({@link HTMLOutputFormat#INSTANCE} unless overridden)
+     *   <li>{@code ftlx}: {@code "XML"} output format ({@link XMLOutputFormat#INSTANCE} unless overridden)
      * </ul>
      * 
-     * <p>These file extensions aren't case sensitive.
+     * <p>These file extensions aren't case sensitive. It's possible to redefine the meaning of these extensions
+     * by setting the output format for the templates with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
      * 
-     * <p>
-     * The output format need not be already registered when this value is set. It need to be registered before a
-     * template that need to use this output format is parsed.
+     * @see #setRegisteredCustomOutputFormats(Collection)
      * 
      * @since 2.3.24
      */
-    public void setOutputFormat(String outputFormat) {
+    public void setOutputFormat(OutputFormat<?> outputFormat) {
         if (outputFormat == null) {
-            throw new NullArgumentException("outputFormat", "You may meant: " + RAW_OUTPUT_FORMAT);
+            throw new NullArgumentException(
+                    "outputFormat",
+                    "You may meant: " + RawOutputFormat.class.getSimpleName() + ".INSTANCE");
         }
         this.outputFormat = outputFormat;
-        outputFormatExplicitlySet = true; 
+        outputFormatExplicitlySet = true;
     }
 
     /**
-     * Getter pair of {@link #setOutputFormat(String)}
+     * Getter pair of {@link #setOutputFormat(OutputFormat)}
      * 
      * @since 2.3.24
      */
-    public String getOutputFormat() {
+    public OutputFormat<?> getOutputFormat() {
         return outputFormat;
     }
     
     /**
-     * Tells if {@link #setOutputFormat(String)} (or equivalent) was already called on this instance.
+     * Tells if {@link #setOutputFormat(OutputFormat)} (or equivalent) was already called on this instance.
      * 
      * @since 2.3.24
      */
@@ -1742,57 +1757,101 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Resets the setting to its default, as it was never set. This means that when you change the
+     * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also
      * {@link #isOutputFormatExplicitlySet()} will return {@code false}.
      * 
      * @since 2.3.24
      */
     public void unsetOutputFormat() {
-        outputFormat = RAW_OUTPUT_FORMAT;
+        outputFormat = RawOutputFormat.INSTANCE;
         outputFormatExplicitlySet = false;
     }
     
     /**
      * Returns the output format for a name (not {@code null}).
      * 
-     * @throws UnknownOutputFormatException
+     * @throws UnregisteredOutputFormatException
      *             If there's no output format registered with the given name.
      * 
      * @since 2.3.24
      */
-    public OutputFormat<?> getOutputFormat(String name) throws UnknownOutputFormatException {
-        OutputFormat<?> custOF = customOutputFormats.get(name);
+    public OutputFormat<?> getOutputFormat(String name) throws UnregisteredOutputFormatException {
+        OutputFormat<?> custOF = registeredCustomOutputFormats.get(name);
         if (custOF != null) {
             return custOF;
         }
         
-        if (name.equals(HTML_OUTPUT_FORMAT)) {
-            return HTMLOutputFormat.INSTANCE;
+        OutputFormat<?> stdOF = STANDARD_OUTPUT_FORMATS.get(name);
+        if (stdOF == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Unregistered output format name, ");
+            sb.append(StringUtil.jQuote(name));
+            sb.append(". The output formats registered in the Configuration are: ");
+            
+            Set<String> registeredNames = new TreeSet<String>();
+            registeredNames.addAll(STANDARD_OUTPUT_FORMATS.keySet());
+            registeredNames.addAll(registeredCustomOutputFormats.keySet());
+            
+            boolean first = true;
+            for (String registeredName : registeredNames) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(StringUtil.jQuote(registeredName));
+            }
+            
+            throw new UnregisteredOutputFormatException(sb.toString());
         }
-        if (name.equals(XML_OUTPUT_FORMAT)) {
-            return XMLOutputFormat.INSTANCE;
-        }
-        if (name.equals(RTF_OUTPUT_FORMAT)) {
-            return RTFOutputFormat.INSTANCE;
-        }
-        if (name.equals(RAW_OUTPUT_FORMAT)) {
-            return RawOutputFormat.INSTANCE;
-        }
-        if (name.equals(PLAIN_TEXT_OUTPUT_FORMAT)) {
-            return PlainTextOutputFormat.INSTANCE;
-        }
-        throw new UnknownOutputFormatException(name);
+        return stdOF;
     }
     
-    // TODO Temporal solution - will be deleted
-    private Map<String, OutputFormat<?>> customOutputFormats = new HashMap<String, OutputFormat<?>>(); 
-    
-    // TODO Temporal solution - will be deleted
-    public void addOutputFormat(String key, OutputFormat<?> outputFormat) {
-        customOutputFormats.put(key, outputFormat);
+    /**
+     * Sets the custom output formats that can be referred by their unique name ({@link OutputFormat#getName()}).
+     * Output formats are referred by name in templates (among other places).
+     *  
+     * <p>When there's a clash between a custom output format name and a standard output format name, the custom format
+     * will win, thus you can override the meaning of standard output format names. The default value is an empty
+     * collection.
+     * 
+     * @param registeredCustomOutputFormats
+     *            The collection of the {@link OutputFormat}-s, each must be different and has an unique name within
+     *            this collection.
+     * 
+     * @throws IllegalArgumentException
+     *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection.
+     *             When the same {@link OutputFormat} object occurs for multiple times in the collection.
+     * 
+     * @since 2.3.24
+     */
+    public void setRegisteredCustomOutputFormats(Collection<? extends OutputFormat<?>> registeredCustomOutputFormats) {
+        Map<String, OutputFormat<?>> m = new LinkedHashMap<String, OutputFormat<?>>(
+                registeredCustomOutputFormats.size() * 4 / 3, 1f);
+        for (OutputFormat<?> outputFormat : registeredCustomOutputFormats) {
+            OutputFormat<?> replaced = m.put(outputFormat.getName(), outputFormat);
+            if (replaced != null) {
+                if (replaced == outputFormat) {
+                    throw new IllegalArgumentException(
+                            "Duplicate output format in the collection: " + outputFormat);
+                }
+                throw new IllegalArgumentException(
+                        "Clashing output format names between " + replaced + " and " + outputFormat + ".");
+            }
+        }
+        this.registeredCustomOutputFormats = Collections.unmodifiableMap(m);
     }
     
+    /**
+     * Getter pair of {@link #setRegisteredCustomOutputFormats(Collection)}.
+     * 
+     * @since 2.3.24
+     */
+    public Collection<? extends OutputFormat<?>> getRegisteredCustomOutputFormats() {
+        return registeredCustomOutputFormats.values();
+    }
+
     /**
      * Determines the syntax of the template files (angle bracket VS square bracket)
      * that has no {@code #ftl} in it. The {@code tagSyntax}
@@ -2487,8 +2546,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetOutputFormat();
+                } else if (value.equalsIgnoreCase(NULL)) {
+                    setOutputFormat(null); // will throw exception
                 } else {
-                    setOutputFormat(value);
+                    setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
+                            value, OutputFormat.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {

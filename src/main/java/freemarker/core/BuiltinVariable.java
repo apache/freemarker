@@ -201,7 +201,7 @@ final class BuiltinVariable extends Expression {
             return SimpleScalar.newInstanceOrNull(s);
         }
         if (name == OUTPUT_FORMAT || name == OUTPUT_FORMAT_CC) {
-            String s = env.getCurrentTemplate().getOutputFormat();
+            String s = env.getCurrentTemplate().getOutputFormat().getName();
             return SimpleScalar.newInstanceOrNull(s);
         }
         if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {

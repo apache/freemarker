@@ -30,11 +30,11 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private final boolean strictSyntaxMode;
     private ArithmeticEngine arithmeticEngine;
     private Boolean autoEscaping; 
-    private String outputFormat;
+    private OutputFormat<?> outputFormat;
     private final Version incompatibleImprovements;
 
     public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
-            int namingConvention, Boolean autoEscaping, String outputFormat,
+            int namingConvention, Boolean autoEscaping, OutputFormat<?> outputFormat,
             Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
@@ -92,14 +92,14 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
-    public String getOutputFormat() {
+    public OutputFormat<?> getOutputFormat() {
         if (outputFormat == null) {
             throw new IllegalStateException();
         }
         return outputFormat;
     }
 
-    void setOutputFormatIfNotSet(String outputFormat) {
+    void setOutputFormatIfNotSet(OutputFormat<?> outputFormat) {
         if (this.outputFormat == null) {
             this.outputFormat = outputFormat;
         }

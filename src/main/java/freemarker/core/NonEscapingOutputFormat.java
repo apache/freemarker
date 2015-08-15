@@ -86,7 +86,7 @@ public abstract class NonEscapingOutputFormat<TOM extends TemplateOutputModel> e
     }
 
     @Override
-    public abstract String getCommonName();
+    public abstract String getName();
 
     @Override
     public abstract String getMimeType();

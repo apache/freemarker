@@ -15,9 +15,12 @@
  */
 package freemarker.core;
 
+import freemarker.template.Configuration;
+
 /**
  * Represents the output format used when the template output format is undecided. This is the default output format if
- * FreeMarker can't select anything more specific.
+ * FreeMarker can't select anything more specific (see
+ * {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}).
  * 
  * @since 2.3.24
  */
@@ -35,7 +38,7 @@ public final class RawOutputFormat extends NonEscapingOutputFormat<RawTemplateOu
     }
 
     @Override
-    public String getCommonName() {
+    public String getName() {
         return "raw";
     }
 
