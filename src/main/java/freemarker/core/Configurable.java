@@ -1663,8 +1663,15 @@ public class Configurable {
      *        <li>The null literal: {@code null}
      *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
      *            <tt>#{...}</tt>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
+     *        <li>A list literal (since 2.3.24) with FTL-like syntax, for example {@code ['foo', 2, true]}.
+     *            If the parameter is expected to be array, the list will be automatically converted to array.
+     *            The list items can be any kind of expression, like even object builder expressions.
      *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
      *      </ul>
+     *   </li>
+     *   <li>
+     *     The same kind of expression as for parameters can also be used as top-level expressions (though it's
+     *     rarely useful, apart from using {@code null}).
      *   </li>
      *   <li>
      *     <p>The top-level object builder expressions may omit {@code ()}. In that case, for backward compatibility,

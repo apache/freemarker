@@ -24,10 +24,17 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableList;
 
 import freemarker.cache.CacheStorage;
 import freemarker.cache.MruCacheStorage;
@@ -41,6 +48,7 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.Version;
 import freemarker.template.utility.WriteProtectable;
 
 public class ObjectBuilderSettingsTest {
@@ -614,11 +622,123 @@ public class ObjectBuilderSettingsTest {
                 "'foo'",
                 CharSequence.class, true, _SettingEvaluationEnvironment.getCurrent()));
         assertEquals(Boolean.TRUE, _ObjectBuilderSettingEvaluator.eval(
-                "true",
+                "  true  ",
                 Object.class, true, _SettingEvaluationEnvironment.getCurrent()));
         assertEquals(new BigDecimal("1.23"), _ObjectBuilderSettingEvaluator.eval(
-                "1.23",
+                "1.23 ",
                 Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(new Version(1, 2, 3), _ObjectBuilderSettingEvaluator.eval(
+                " 1.2.3",
+                Object.class, true, _SettingEvaluationEnvironment.getCurrent()));
+    }
+
+    @Test
+    public void testNumberLiteralJavaTypes() throws Exception {
+        assertEquals(new BigDecimal("1.0"), _ObjectBuilderSettingEvaluator.eval(
+                "1.0",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+
+        assertEquals(new BigInteger("-9223372036854775809"), _ObjectBuilderSettingEvaluator.eval(
+                "-9223372036854775809",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(new BigInteger("9223372036854775808"), _ObjectBuilderSettingEvaluator.eval(
+                "9223372036854775808",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        
+        assertEquals(Long.valueOf(-9223372036854775808L), _ObjectBuilderSettingEvaluator.eval(
+                "-9223372036854775808",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(Long.valueOf(9223372036854775807L), _ObjectBuilderSettingEvaluator.eval(
+                "9223372036854775807",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        
+        assertEquals(Integer.valueOf(-2147483648), _ObjectBuilderSettingEvaluator.eval(
+                "-2147483648",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(Integer.valueOf(2147483647), _ObjectBuilderSettingEvaluator.eval(
+                "2147483647",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        
+        assertEquals(Integer.valueOf(-1), _ObjectBuilderSettingEvaluator.eval(
+                "-1",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(Integer.valueOf(1), _ObjectBuilderSettingEvaluator.eval(
+                "1",
+                Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
+    }
+    
+    @SuppressWarnings("boxing")
+    @Test
+    public void testListLiterals() throws Exception {
+        {
+            ArrayList<Object> expected = new ArrayList();
+            expected.add("s");
+            expected.add(null);
+            expected.add(true);
+            expected.add(new TestBean9(1));
+            expected.add(ImmutableList.of(11, 22, 33));
+            assertEquals(expected, _ObjectBuilderSettingEvaluator.eval(
+                    "['s', null, true, freemarker.core.ObjectBuilderSettingsTest$TestBean9(1), [11, 22, 33]]",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+            assertEquals(expected, _ObjectBuilderSettingEvaluator.eval(
+                    "  [  's'  ,  null ,  true , freemarker.core.ObjectBuilderSettingsTest$TestBean9(1) ,"
+                    + "  [ 11 , 22 , 33 ]  ]  ",
+                    Collection.class, false, _SettingEvaluationEnvironment.getCurrent()));
+            assertEquals(expected, _ObjectBuilderSettingEvaluator.eval(
+                    "['s',null,true,freemarker.core.ObjectBuilderSettingsTest$TestBean9(1),[11,22,33]]",
+                    List.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        }
+        
+        assertEquals(Collections.emptyList(), _ObjectBuilderSettingEvaluator.eval(
+                "[]",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(Collections.emptyList(), _ObjectBuilderSettingEvaluator.eval(
+                "[  ]",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+
+        assertEquals(Collections.singletonList(123), _ObjectBuilderSettingEvaluator.eval(
+                "[123]",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(Collections.singletonList(123), _ObjectBuilderSettingEvaluator.eval(
+                "[ 123 ]",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        
+        assertEquals(new TestBean9(1, ImmutableList.of("a", "b")), _ObjectBuilderSettingEvaluator.eval(
+                "freemarker.core.ObjectBuilderSettingsTest$TestBean9(1, ['a', 'b'])",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "[1,]",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("found character \"]\""));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "[,1]",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("found character \",\""));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "1]",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("found character \"]\""));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "[1",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("end of"));
+        }
     }
     
     @Test
@@ -972,6 +1092,7 @@ public class ObjectBuilderSettingsTest {
     public static class TestBean8 {
         private TimeZone timeZone;
         private Object anyObject;
+        private List<?> list;
         
         public TimeZone getTimeZone() {
             return timeZone;
@@ -988,8 +1109,55 @@ public class ObjectBuilderSettingsTest {
         public void setAnyObject(Object anyObject) {
             this.anyObject = anyObject;
         }
+
+        public List<?> getList() {
+            return list;
+        }
+        
+        public void setList(List<?> list) {
+            this.list = list;
+        }
         
     }
+    
+    public static class TestBean9 {
+        
+        private final int n;
+        private final List<?> list;
+
+        public TestBean9(int n) {
+            this(n, null);
+        }
+
+        public TestBean9(int n, List<?> list) {
+            this.n = n;
+            this.list = list;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((list == null) ? 0 : list.hashCode());
+            result = prime * result + n;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            TestBean9 other = (TestBean9) obj;
+            if (list == null) {
+                if (other.list != null) return false;
+            } else if (!list.equals(other.list)) return false;
+            if (n != other.n) return false;
+            return true;
+        }
+        
+    }
+    
     
     public static class DummyArithmeticEngine extends ArithmeticEngine {
         

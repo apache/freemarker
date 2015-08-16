@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,7 +120,7 @@ public class _ObjectBuilderSettingEvaluator {
         
         skipWS();
         try {
-            value = fetchValue(false, true, true);
+            value = ensureEvaled(fetchValue(false, true, true));
         } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
             e.rethrowLegacy();
             value = null; // newer reached
@@ -191,7 +192,7 @@ public class _ObjectBuilderSettingEvaluator {
             fetchParameterListInto(exp);
         }
         
-        return exp.eval();
+        return exp;
     }
 
     private void fetchParameterListInto(ExpressionWithParameters exp) throws _ObjectBuilderSettingEvaluationException {
@@ -242,6 +243,11 @@ public class _ObjectBuilderSettingEvaluator {
             }
     
             val = fetchStringLiteral(true);
+            if (val != VOID) {
+                return val;
+            }
+
+            val = fetchListLiteral(true);
             if (val != VOID) {
                 return val;
             }
@@ -390,7 +396,21 @@ public class _ObjectBuilderSettingEvaluator {
                 if (tk.startsWith(".") || tk.startsWith("-.")  || tk.startsWith("+.")) {
                     throw new NumberFormatException("A number can't start with a dot");
                 }
-                return new BigDecimal(tk);
+                
+                if (tk.indexOf('.') == -1) {
+                    BigInteger biNum = new BigInteger(tk);
+                    final int bitLength = biNum.bitLength();  // Doesn't include sign bit
+                    if (bitLength <= 31) {
+                        return Integer.valueOf(biNum.intValue());
+                    } else if (bitLength <= 63) {
+                        return Long.valueOf(biNum.longValue());
+                    } else {
+                        return biNum;
+                    }
+                } else {
+                    return new BigDecimal(tk);
+                }
+                
             } catch (NumberFormatException e) {
                 throw new _ObjectBuilderSettingEvaluationException("Malformed number: " + tk, e);
             }
@@ -464,6 +484,35 @@ public class _ObjectBuilderSettingEvaluator {
         }
     }
 
+    private Object fetchListLiteral(boolean optional) throws _ObjectBuilderSettingEvaluationException {
+        int startPos = pos;
+        if (pos == src.length() || src.charAt(pos) != '[') {
+            if (!optional) {
+                throw new _ObjectBuilderSettingEvaluationException("[", src, pos);
+            }
+            return VOID;
+        }
+        pos++;
+        
+        ListExpression listExp = new ListExpression();
+        
+        while (true) {
+            skipWS();
+            
+            if (fetchOptionalChar("]") != 0) {
+                return listExp;
+            }
+            if (listExp.itemCount() != 0) {
+                fetchRequiredChar(",");
+                skipWS();
+            }
+            
+            listExp.addItem(fetchValue(false, false, true));
+            
+            skipWS();
+        }
+    }
+    
     private void skipWS() {
         while (true) {
             if (pos == src.length()) {
@@ -642,6 +691,29 @@ public class _ObjectBuilderSettingEvaluator {
         protected List/*<Object>*/ namedParamValues = new ArrayList();
         
         protected abstract boolean getAllowPositionalParameters();
+    }
+    
+    private class ListExpression extends SettingExpression {
+        
+        private List<Object> items = new ArrayList();
+        
+        void addItem(Object item) {
+            items.add(item);
+        }
+
+        public int itemCount() {
+            return items.size();
+        }
+
+        @Override
+        Object eval() throws _ObjectBuilderSettingEvaluationException {
+            ArrayList res = new ArrayList(items.size());
+            for (Object item : items) {
+                res.add(ensureEvaled(item));
+            }
+            return res;
+        }
+        
     }
     
     private class BuilderCallExpression extends ExpressionWithParameters {
