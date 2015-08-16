@@ -1841,7 +1841,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *  
      * <p>
      * When there's a clash between a custom output format name and a standard output format name, the custom format
-     * will win, thus you can override the meaning of standard output format names. 
+     * will win, thus you can override the meaning of standard output format names. Except, it's not allowed to
+     * override {@link RawOutputFormat}.
      * 
      * <p>
      * The default value is an empty collection.
@@ -1853,6 +1854,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @throws IllegalArgumentException
      *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection.
      *             When the same {@link OutputFormat} object occurs for multiple times in the collection.
+     *             If an {@link OutputFormat} name is 0 long.
+     *             If an {@link OutputFormat} name doesn't start with letter or digit.
+     *             If an {@link OutputFormat} name equals to {@link RawOutputFormat#getName()}.
      * 
      * @since 2.3.24
      */
@@ -1861,6 +1865,20 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         Map<String, OutputFormat<?>> m = new LinkedHashMap<String, OutputFormat<?>>(
                 registeredCustomOutputFormats.size() * 4 / 3, 1f);
         for (OutputFormat<?> outputFormat : registeredCustomOutputFormats) {
+            String name = outputFormat.getName();
+            if (name.equals(RawOutputFormat.INSTANCE.getName())) {
+                throw new IllegalArgumentException(
+                        "The \"" + name + "\" output format can't be redefined");
+            }
+            if (name.length() == 0) {
+                throw new IllegalArgumentException("The output format name can't be 0 long");
+            }
+            char c = name.charAt(0);
+            if (!Character.isLetterOrDigit(c)) {
+                throw new IllegalArgumentException("The output format name must start with letter or digit: "
+                        + name);
+            }
+            
             OutputFormat<?> replaced = m.put(outputFormat.getName(), outputFormat);
             if (replaced != null) {
                 if (replaced == outputFormat) {

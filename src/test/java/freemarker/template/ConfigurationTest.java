@@ -929,7 +929,7 @@ public class ConfigurationTest extends TestCase {
                 new ArrayList(cfg.getRegisteredCustomOutputFormats()));
         
         try {
-            cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE, "[TemplateConfigurer()]");
+            cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfigurer()]");
             fail();
         } catch (Exception e) {
             assertThat(e.getCause().getMessage(), containsString(OutputFormat.class.getSimpleName()));
