@@ -548,10 +548,13 @@ public class TemplateCache {
             if (parseAsFTL) {
                 final ParserConfiguration pCfg;
                 final OutputFormat outputFormatFromStdFileExt;
-                if ((tc == null || !tc.isOutputFormatSet())
+                if ((tc == null || !tc.isOutputFormatSet() || !tc.isAutoEscapingSet())
                         && config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24
                         && (outputFormatFromStdFileExt = getFormatFromStdFileExt(sourceName)) != null) {
-                    pCfg = overrideOutputFormatAndAutoEscaping(tc != null ? tc : config, outputFormatFromStdFileExt);
+                    pCfg = overrideOutputFormatAndAutoEscaping(
+                            tc != null ? tc : config,
+                            tc != null && tc.isOutputFormatSet() ? null : outputFormatFromStdFileExt,
+                            tc != null && tc.isAutoEscapingSet() ? null : Boolean.TRUE);
                 } else {
                     pCfg = tc;
                 }
@@ -609,7 +612,7 @@ public class TemplateCache {
     }
 
     private ParserConfiguration overrideOutputFormatAndAutoEscaping(
-            final ParserConfiguration pCfg, final OutputFormat<?> outputFormat) {
+            final ParserConfiguration pCfg, final OutputFormat<?> outputFormat, final Boolean autoEscaping) {
         return new ParserConfiguration() {
             
             public boolean getWhitespaceStripping() {
@@ -625,7 +628,7 @@ public class TemplateCache {
             }
             
             public OutputFormat<?> getOutputFormat() {
-                return outputFormat;
+                return outputFormat != null ? outputFormat : pCfg.getOutputFormat();
             }
             
             public int getNamingConvention() {
@@ -637,7 +640,7 @@ public class TemplateCache {
             }
             
             public boolean getAutoEscaping() {
-                return true;
+                return autoEscaping != null ? autoEscaping.booleanValue() : pCfg.getAutoEscaping();
             }
             
             public ArithmeticEngine getArithmeticEngine() {

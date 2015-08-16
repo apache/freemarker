@@ -1186,10 +1186,27 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
      * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
-     * output format ({@link TemplateConfigurer#setOutputFormat(OutputFormat)}) for templates based on their file
+     * ({@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat}) for templates based on their file
      * extension or parent directory.
      * 
-     * @see TemplateConfigurer#setOutputFormat(OutputFormat)
+     * <p>
+     * If {@link #getIncompatibleImprovements()} is 2.3.24 or greater, there's an invisible layer of template
+     * configurers behind those set by this method, which provide the setting values for these standard file
+     * extensions (case insensitive):
+     * 
+     * <ul>
+     *   <li>{@code ftlh}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "HTML"}
+     *       (i.e., {@link HTMLOutputFormat#INSTANCE} unless overridden by
+     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
+     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     *   <li>{@code ftlx}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "XML"}
+     *       (i.e., {@link XMLOutputFormat#INSTANCE} unless overridden by
+     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
+     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     * </ul>
+     * 
+     * <p>When the {@link TemplateConfigurer} provided by this method also sets some of these settings, the values
+     * coming from the standard settings mappings above will be overridden. 
      * 
      * @since 2.3.24
      */
@@ -1656,7 +1673,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * auto-escaping is {@code false}, FreeMarker will assume that the string value is already in the output format, so
      * it prints it as is to the output.
      * 
-     * <p>Notes:
+     * <p>Further notes on auto-escaping:
      * <ul>
      *   <li>When printing numbers, dates, and other kind of non-string values with <code>${...}</code>, they will be
      *       first converted to string (according the formatting settings and locale), then they are escaped just like
@@ -1670,6 +1687,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       example, with <code>&lt;#assign s = "foo${bar}"&gt;</code>, {@code bar} will always get into {@code s}
      *       without escaping, but with <code>&lt;#assign s&gt;foo${bar}&lt;#assign&gt;</code> it may will be escaped.
      * </ul>
+     * 
+     * <p>Note that what you set here is just a default, which can be overridden for individual templates via
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, even if no template configurers were set, this
+     * setting is still overridden by the standard file extension mappings; see them at
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
      * 
      * @see TemplateConfigurer#setAutoEscaping(boolean)
      * @see Configuration#setOutputFormat(OutputFormat)
@@ -1712,19 +1734,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Sets the (default) output format. Usually, you leave this on its default, which is
      * {@link RawOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like based
-     * on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, if
-     * {@link #getIncompatibleImprovements()} is 2.3.24 or greater, templates with these extensions get these
-     * non-default output format and auto-escaping:
-     * 
-     * <ul>
-     *   <li>{@code ftlh}: {@code "HTML"} output format ({@link HTMLOutputFormat#INSTANCE} unless overridden)
-     *   <li>{@code ftlx}: {@code "XML"} output format ({@link XMLOutputFormat#INSTANCE} unless overridden)
-     * </ul>
-     * 
-     * <p>These file extensions aren't case sensitive. It's possible to redefine the meaning of these extensions
-     * by setting the output format for the templates with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
+     * on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Even if no template
+     * configurers were set, this setting is still overridden by the standard file extension mappings; see them
+     * at {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
+     * @see #setTemplateConfigurers(TemplateConfigurerFactory)
      * 
      * @since 2.3.24
      */

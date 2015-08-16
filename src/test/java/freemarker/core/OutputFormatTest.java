@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
 import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.MergingTemplateConfigurerFactory;
 import freemarker.cache.OrMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -166,6 +167,52 @@ public class OutputFormatTest extends TemplateTest {
             }
             
             cfg.clearTemplateCache();
+        }
+    }
+    
+    @Test
+    public void testStandardFileExtensions2() throws Exception {
+        addTemplate("t.ftlx",
+                "${\"'\"} ${\"'\"?esc} ${\"'\"?noEsc}");
+        addTemplate("t.ftl",
+                "${'{}'} ${'{}'?esc} ${'{}'?noEsc}");
+        
+        TemplateConfigurer tcHTML = new TemplateConfigurer();
+        tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        ConditionalTemplateConfigurerFactory tcfHTML = new ConditionalTemplateConfigurerFactory(
+                new FileNameGlobMatcher("t.*"), tcHTML);
+
+        TemplateConfigurer tcNoAutoEsc = new TemplateConfigurer();
+        tcNoAutoEsc.setAutoEscaping(false);
+        ConditionalTemplateConfigurerFactory tcfNoAutoEsc = new ConditionalTemplateConfigurerFactory(
+                new FileNameGlobMatcher("t.*"), tcNoAutoEsc);
+
+        Configuration cfg = getConfiguration();
+        
+        for (int i = 0; i < 3; i++) {
+            if (i == 1) {
+                cfg.setTemplateConfigurers(null);
+                cfg.setOutputFormat(RTFOutputFormat.INSTANCE);
+                // Just to prove that the settings are as expected:
+                assertOutputForNamed("t.ftl", "\\{\\} \\{\\} {}");
+            } else if (i == 2) {
+                cfg.setTemplateConfigurers(null);
+                cfg.setAutoEscaping(false);
+                // Just to prove that the settings are as expected:
+                assertOutputForNamed("t.ftl", "{} \\{\\} {}");
+            }
+            
+            assertOutputForNamed("t.ftlx", "&apos; &apos; '");
+            
+            cfg.setTemplateConfigurers(tcfHTML);
+            assertOutputForNamed("t.ftlx", "&#39; &#39; '");
+            
+            cfg.setTemplateConfigurers(tcfNoAutoEsc);
+            assertOutputForNamed("t.ftlx", "' &apos; '");
+            
+            cfg.setTemplateConfigurers(
+                    new MergingTemplateConfigurerFactory(tcfHTML, tcfNoAutoEsc));
+            assertOutputForNamed("t.ftlx", "' &#39; '");
         }
     }
     
