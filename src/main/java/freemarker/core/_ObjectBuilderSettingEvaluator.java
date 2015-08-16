@@ -81,14 +81,16 @@ public class _ObjectBuilderSettingEvaluator {
     // Parsing results:
     private boolean v2321Mode = false;
     
-    private _ObjectBuilderSettingEvaluator(String src, int pos, Class expectedClass, _SettingEvaluationEnvironment env) {
+    private _ObjectBuilderSettingEvaluator(
+            String src, int pos, Class expectedClass, _SettingEvaluationEnvironment env) {
         this.src = src;
         this.pos = pos;
         this.expectedClass = expectedClass;
         this.env = env;
     }
 
-    public static Object eval(String src, Class expectedClass, _SettingEvaluationEnvironment env) throws _ObjectBuilderSettingEvaluationException,
+    public static Object eval(String src, Class expectedClass, _SettingEvaluationEnvironment env)
+            throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new _ObjectBuilderSettingEvaluator(src, 0, expectedClass, env).eval();
     }
@@ -99,10 +101,12 @@ public class _ObjectBuilderSettingEvaluator {
      * 
      * @return The location of the next character to process.
      */
-    public static int configureBean(String argumentListSrc, int posAfterOpenParen, Object bean, _SettingEvaluationEnvironment env)
+    public static int configureBean(
+            String argumentListSrc, int posAfterOpenParen, Object bean, _SettingEvaluationEnvironment env)
             throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
-        return new _ObjectBuilderSettingEvaluator(argumentListSrc, posAfterOpenParen, bean.getClass(), env).configureBean(bean);
+        return new _ObjectBuilderSettingEvaluator(
+                argumentListSrc, posAfterOpenParen, bean.getClass(), env).configureBean(bean);
     }
     
     private Object eval() throws _ObjectBuilderSettingEvaluationException,
@@ -130,8 +134,8 @@ public class _ObjectBuilderSettingEvaluator {
     }
 
     private Object execute(BuilderExpression exp) throws _ObjectBuilderSettingEvaluationException,
-    // Don't pack these into {@link ObjectFactorySettingEvaluationException} for backward compatibility:
-    ClassNotFoundException, InstantiationException, IllegalAccessException {
+            // Don't pack these into {@link ObjectFactorySettingEvaluationException} for backward compatibility:
+            ClassNotFoundException, InstantiationException, IllegalAccessException {
         if (!v2321Mode) {
             return ClassUtil.forName(exp.className).newInstance();
         } else {
@@ -639,14 +643,16 @@ public class _ObjectBuilderSettingEvaluator {
             if (!clIsBuilderClass && hasNoParameters()) {
                 try {
                     Field f = cl.getField(INSTANCE_FIELD_NAME);
-                    if ((f.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)) {
+                    if ((f.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC))
+                            == (Modifier.PUBLIC | Modifier.STATIC)) {
                         return f.get(null);
                     }
                 } catch (NoSuchFieldException e) {
                     // Expected
                 } catch (Exception e) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "Error when trying to access " + StringUtil.jQuote(className) + "." + INSTANCE_FIELD_NAME, e);
+                            "Error when trying to access " + StringUtil.jQuote(className) + "."
+                            + INSTANCE_FIELD_NAME, e);
                 }
             }
             
@@ -722,8 +728,8 @@ public class _ObjectBuilderSettingEvaluator {
                 } else {
                     cause = e;
                 }
-                throw new _ObjectBuilderSettingEvaluationException("Failed to call " + BUILD_METHOD_NAME + "() method on "
-                        + cl.getName() + " instance", cause);
+                throw new _ObjectBuilderSettingEvaluationException("Failed to call " + BUILD_METHOD_NAME
+                        + "() method on " + cl.getName() + " instance", cause);
             }
         }
 
