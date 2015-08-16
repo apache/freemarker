@@ -1873,9 +1873,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (name.length() == 0) {
                 throw new IllegalArgumentException("The output format name can't be 0 long");
             }
-            char c = name.charAt(0);
-            if (!Character.isLetterOrDigit(c)) {
+            if (!Character.isLetterOrDigit(name.charAt(0))) {
                 throw new IllegalArgumentException("The output format name must start with letter or digit: "
+                        + name);
+            }
+            if (name.indexOf('+') != -1) {
+                throw new IllegalArgumentException("The output format name can't contain \"+\" character: "
                         + name);
             }
             
