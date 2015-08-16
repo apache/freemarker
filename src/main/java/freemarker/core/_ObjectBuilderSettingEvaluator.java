@@ -70,29 +70,33 @@ public class _ObjectBuilderSettingEvaluator {
     private static final String BUILDER_CLASS_POSTFIX = "Builder";
 
     private static Map/*<String,String>*/ SHORTHANDS;
+    
+    private static final Object VOID = new Object();
 
     private final String src;
     private final Class expectedClass;
+    private final boolean allowNull;
     private final _SettingEvaluationEnvironment env;
 
     // Parser state:
     private int pos;
     
     // Parsing results:
-    private boolean v2321Mode = false;
+    private boolean modernMode = false;
     
     private _ObjectBuilderSettingEvaluator(
-            String src, int pos, Class expectedClass, _SettingEvaluationEnvironment env) {
+            String src, int pos, Class expectedClass, boolean allowNull, _SettingEvaluationEnvironment env) {
         this.src = src;
         this.pos = pos;
         this.expectedClass = expectedClass;
+        this.allowNull = allowNull;
         this.env = env;
     }
 
-    public static Object eval(String src, Class expectedClass, _SettingEvaluationEnvironment env)
+    public static Object eval(String src, Class expectedClass, boolean allowNull, _SettingEvaluationEnvironment env)
             throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
-        return new _ObjectBuilderSettingEvaluator(src, 0, expectedClass, env).eval();
+        return new _ObjectBuilderSettingEvaluator(src, 0, expectedClass, allowNull, env).eval();
     }
 
     /**
@@ -106,12 +110,35 @@ public class _ObjectBuilderSettingEvaluator {
             throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new _ObjectBuilderSettingEvaluator(
-                argumentListSrc, posAfterOpenParen, bean.getClass(), env).configureBean(bean);
+                argumentListSrc, posAfterOpenParen, bean.getClass(), true, env).configureBean(bean);
     }
     
     private Object eval() throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
-        return execute(parse());
+        Object value;
+        
+        skipWS();
+        try {
+            value = fetchValue(false, true, true);
+        } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
+            e.rethrowLegacy();
+            value = null; // newer reached
+        }
+        skipWS();
+        
+        if (pos != src.length()) {
+            throw new _ObjectBuilderSettingEvaluationException("end-of-expression", src, pos);
+        }
+        
+        if (value == null && !allowNull) {
+            throw new _ObjectBuilderSettingEvaluationException("Value can't be null.");
+        }
+        if (value != null && !expectedClass.isInstance(value)) {
+            throw new _ObjectBuilderSettingEvaluationException("The resulting object (of class "
+                    + value.getClass() + ") is not a(n) " + expectedClass.getName() + ".");
+        }
+        
+        return value;
     }
     
     private int configureBean(Object bean) throws _ObjectBuilderSettingEvaluationException,
@@ -123,50 +150,28 @@ public class _ObjectBuilderSettingEvaluator {
         return pos;
     }
 
-    private BuilderExpression parse() throws _ObjectBuilderSettingEvaluationException {
-        skipWS();
-        BuilderExpression exp = fetchBuilderCall(true, false);
-        skipWS();
-        if (pos != src.length()) {
-            throw new _ObjectBuilderSettingEvaluationException("end-of-expression", src, pos);
-        }
-        return exp;
-    }
-
-    private Object execute(BuilderExpression exp) throws _ObjectBuilderSettingEvaluationException,
-            // Don't pack these into {@link ObjectFactorySettingEvaluationException} for backward compatibility:
-            ClassNotFoundException, InstantiationException, IllegalAccessException {
-        if (!v2321Mode) {
-            return ClassUtil.forName(exp.className).newInstance();
-        } else {
-            Object result = exp.eval();
-            if (!expectedClass.isInstance(result)) {
-                throw new _ObjectBuilderSettingEvaluationException("The resulting object (of class "
-                        + result.getClass() + ") is not a(n) " + expectedClass.getName() + ".");
-            }
-            return result;
-        }
-    }
-
-    private Object eval(Object value) throws _ObjectBuilderSettingEvaluationException {
+    private Object ensureEvaled(Object value) throws _ObjectBuilderSettingEvaluationException {
         return value instanceof SettingExpression ? ((SettingExpression) value).eval() : value;
     }
 
-    private BuilderExpression fetchBuilderCall(boolean topLevel, boolean optional)
+    private Object fetchBuilderCall(boolean optional, boolean topLevel)
             throws _ObjectBuilderSettingEvaluationException {
         int startPos = pos;
         
-        BuilderExpression exp = new BuilderExpression();
+        BuilderCallExpression exp = new BuilderCallExpression();
         
         {
             final String fetchedClassName = fetchClassName(optional);
             if (fetchedClassName == null) {
-                return null;
+                if (!optional) {
+                    throw new _ObjectBuilderSettingEvaluationException("class name", src, pos);
+                }
+                return VOID;
             }
             exp.className = shorthandToFullQualified(fetchedClassName);
             if (!fetchedClassName.equals(exp.className)) {
                 // Before 2.3.21 only full-qualified class names were allowed
-                v2321Mode = true;
+                modernMode = true;
             }
         }
         
@@ -179,41 +184,37 @@ public class _ObjectBuilderSettingEvaluator {
                 throw new _ObjectBuilderSettingEvaluationException("(", src, pos);
             }
             pos = startPos;
-            return null;
+            return VOID;
         }
     
         if (openParen != 0) {
             fetchParameterListInto(exp);
         }
         
-        return exp;
+        return exp.eval();
     }
 
     private void fetchParameterListInto(ExpressionWithParameters exp) throws _ObjectBuilderSettingEvaluationException {
         // Before 2.3.21 there was no parameter list
-        v2321Mode = true;
+        modernMode = true;
         
         skipWS();
         if (fetchOptionalChar(")") != ')') { 
             do {
                 skipWS();
                 
-                Object paramNameOrValue = fetchValueOrName(false);
-                if (paramNameOrValue != null) {
+                Object paramNameOrValue = fetchValue(false, false, false);
+                if (paramNameOrValue != VOID) {
                     skipWS();
-                    if (paramNameOrValue instanceof ParameterName) {
-                        exp.namedParamNames.add(((ParameterName) paramNameOrValue).name);
+                    if (paramNameOrValue instanceof Name) {
+                        exp.namedParamNames.add(((Name) paramNameOrValue).name);
                         
                         skipWS();
                         fetchRequiredChar("=");
                         skipWS();
                         
-                        int paramValPos = pos;
-                        Object paramValue = fetchValueOrName(false);
-                        if (paramValue instanceof ParameterName) {
-                            throw new _ObjectBuilderSettingEvaluationException("concrete value", src, paramValPos);
-                        }
-                        exp.namedParamValues.add(eval(paramValue));
+                        Object paramValue = fetchValue(false, false, true);
+                        exp.namedParamValues.add(ensureEvaled(paramValue));
                     } else {
                         if (!exp.namedParamNames.isEmpty()) {
                             throw new _ObjectBuilderSettingEvaluationException(
@@ -223,7 +224,7 @@ public class _ObjectBuilderSettingEvaluator {
                             throw new _ObjectBuilderSettingEvaluationException(
                                     "Positional parameters not supported here");
                         }
-                        exp.positionalParamValues.add(eval(paramNameOrValue));
+                        exp.positionalParamValues.add(ensureEvaled(paramNameOrValue));
                     }
                     
                     skipWS();
@@ -232,37 +233,56 @@ public class _ObjectBuilderSettingEvaluator {
         }
     }
 
-    private Object fetchValueOrName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
+    private Object fetchValue(boolean optional, boolean topLevel, boolean resolveVariables)
+            throws _ObjectBuilderSettingEvaluationException {
         if (pos < src.length()) {
             Object val = fetchNumberLike(true);
-            if (val != null) {
+            if (val != VOID) {
                 return val;
             }
     
             val = fetchStringLiteral(true);
-            if (val != null) {
+            if (val != VOID) {
                 return val;
             }
             
-            val = fetchBuilderCall(false, true);
-            if (val != null) {
+            val = fetchBuilderCall(true, topLevel);
+            if (val != VOID) {
                 return val;
             }
             
             String name = fetchSimpleName(true);
             if (name != null) {
-                if (name.equals("true")) return Boolean.TRUE;
-                if (name.equals("false")) return Boolean.FALSE;
-                if (name.equals("null")) return NullExpression.INSTANCE;
-                return new ParameterName(name);
+                val = keywordToValueOrVoid(name);
+                if (val != VOID) {
+                    return val;
+                }
+                
+                if (resolveVariables) {
+                    // Not supported currently...
+                    throw new _ObjectBuilderSettingEvaluationException("Can't resolve variable reference: " + name);
+                } else {
+                    return new Name(name);
+                }
             }
         }
         
         if (optional) {
-            return null;
+            return VOID;
         } else {
             throw new _ObjectBuilderSettingEvaluationException("value or name", src, pos);
         }
+    }
+
+    private boolean isKeyword(String name) {
+        return keywordToValueOrVoid(name) != VOID;
+    }
+    
+    private Object keywordToValueOrVoid(String name) {
+        if (name.equals("true")) return Boolean.TRUE;
+        if (name.equals("false")) return Boolean.FALSE;
+        if (name.equals("null")) return null;
+        return VOID;
     }
 
     private String fetchSimpleName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
@@ -317,7 +337,12 @@ public class _ObjectBuilderSettingEvaluator {
             skipWS();
         } while (true);
         
-        return sb.toString();
+        String className = sb.toString();
+        if (isKeyword(className)) {
+            pos = startPos;
+            return null;
+        }
+        return className;
     }
 
     private Object fetchNumberLike(boolean optional) throws _ObjectBuilderSettingEvaluationException {
@@ -344,7 +369,7 @@ public class _ObjectBuilderSettingEvaluator {
         
         if (startPos == pos) {
             if (optional) {
-                return null;
+                return VOID;
             } else {
                 throw new _ObjectBuilderSettingEvaluationException("number-like", src, pos);
             }
@@ -424,7 +449,7 @@ public class _ObjectBuilderSettingEvaluator {
         }
         if (startPos == pos) {
             if (optional) {
-                return null;
+                return VOID;
             } else {
                 throw new _ObjectBuilderSettingEvaluationException("string literal", src, pos);
             }
@@ -598,9 +623,9 @@ public class _ObjectBuilderSettingEvaluator {
         }
     }
 
-    private static class ParameterName {
+    private static class Name {
         
-        public ParameterName(String name) {
+        public Name(String name) {
             this.name = name;
         }
 
@@ -619,12 +644,24 @@ public class _ObjectBuilderSettingEvaluator {
         protected abstract boolean getAllowPositionalParameters();
     }
     
-    private class BuilderExpression extends ExpressionWithParameters {
+    private class BuilderCallExpression extends ExpressionWithParameters {
         private String className;
         
         @Override
         Object eval() throws _ObjectBuilderSettingEvaluationException {
             Class cl;
+            
+            if (!modernMode) {
+                try {
+                    return ClassUtil.forName(className).newInstance();
+                } catch (InstantiationException e) {
+                    throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
+                } catch (IllegalAccessException e) {
+                    throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
+                } catch (ClassNotFoundException e) {
+                    throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
+                }
+            }
 
             boolean clIsBuilderClass;
             try {
@@ -704,7 +741,6 @@ public class _ObjectBuilderSettingEvaluator {
             }
         }
 
-
         private Object callBuild(Object constructorResult)
                 throws _ObjectBuilderSettingEvaluationException {
             final Class cl = constructorResult.getClass();
@@ -765,16 +801,28 @@ public class _ObjectBuilderSettingEvaluator {
         
     }
     
-    private static class NullExpression extends SettingExpression {
-        
-        static final NullExpression INSTANCE = new NullExpression();
+    private static class LegacyExceptionWrapperSettingEvaluationExpression
+            extends _ObjectBuilderSettingEvaluationException {
 
-        @Override
-        Object eval() throws _ObjectBuilderSettingEvaluationException {
-            return null;
+        public LegacyExceptionWrapperSettingEvaluationExpression(Throwable cause) {
+            super("Legacy operation failed", cause);
+            if (!(
+                    (cause instanceof ClassNotFoundException) 
+                    || (cause instanceof InstantiationException)
+                    || (cause instanceof IllegalAccessException)
+                    )) {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        public void rethrowLegacy() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+            Throwable cause = getCause();
+            if (cause instanceof ClassNotFoundException) throw (ClassNotFoundException) cause;
+            if (cause instanceof InstantiationException) throw (InstantiationException) cause;
+            if (cause instanceof IllegalAccessException) throw (IllegalAccessException) cause;
+            throw new BugException();
         }
         
-    };
+    }
     
-
 }

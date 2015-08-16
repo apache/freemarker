@@ -1749,7 +1749,7 @@ public class Configurable {
                     }
                 } else {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateExceptionHandler.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) { 
@@ -1762,7 +1762,7 @@ public class Configurable {
                     }
                 } else {
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
-                            value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, ArithmeticEngine.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name) || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
                 if (DEFAULT.equalsIgnoreCase(value)) {
@@ -1784,7 +1784,7 @@ public class Configurable {
                             (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
-                                    value, ObjectWrapper.class, _SettingEvaluationEnvironment.getCurrent()));
+                                    value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setBooleanFormat(value);
@@ -1834,7 +1834,8 @@ public class Configurable {
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
                 } else if (value.indexOf('.') != -1) {
                     setNewBuiltinClassResolver((TemplateClassResolver) _ObjectBuilderSettingEvaluator.eval(
-                                    value, TemplateClassResolver.class, _SettingEvaluationEnvironment.getCurrent()));
+                                    value, TemplateClassResolver.class, false,
+                                    _SettingEvaluationEnvironment.getCurrent()));
                 } else {
                     throw invalidSettingValueException(name, value);
                 }

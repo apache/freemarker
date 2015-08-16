@@ -2561,11 +2561,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetOutputFormat();
-                } else if (value.equalsIgnoreCase(NULL)) {
-                    setOutputFormat(null); // will throw exception
                 } else {
                     setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
-                            value, OutputFormat.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
@@ -2599,7 +2597,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setCacheStorage(new MruCacheStorage(strongSize, softSize));
                 } else {
                     setCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
-                            value, CacheStorage.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, CacheStorage.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE.equals(name)) {
@@ -2657,7 +2655,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     unsetTemplateLoader();
                 } else {
                     setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateLoader.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE.equals(name)) {
@@ -2665,7 +2663,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     unsetTemplateLookupStrategy();
                 } else {
                     setTemplateLookupStrategy((TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateLookupStrategy.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
@@ -2684,7 +2682,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setTemplateConfigurers(null);
                 } else {
                     setTemplateConfigurers((TemplateConfigurerFactory) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateConfigurerFactory.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateConfigurerFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else {
                 unknown = true;
