@@ -1539,6 +1539,12 @@ public class Configurable {
      *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
      *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
      *       
+     *   <li><p>{@code "registered_custom_output_formats"}:
+     *       See {@link Configuration#setRegisteredCustomOutputFormats(Collection)}.
+     *       <br>String value: an <a href="#fm_obe">object builder expression</a> that gives a {@link List} of
+     *       {@link OutputFormat}-s.
+     *       Example: {@code [com.example.MyOutputFormat(), com.example.MyOtherOutputFormat()]}
+     *       
      *   <li><p>{@code "strict_syntax"}:
      *       See {@link Configuration#setStrictSyntaxMode}. Deprecated.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
