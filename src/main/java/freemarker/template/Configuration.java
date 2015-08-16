@@ -68,6 +68,8 @@ import freemarker.core.TemplateConfigurer;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
+import freemarker.core._DelayedJQuote;
+import freemarker.core._MiscTemplateException;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.core._SortedArraySet;
@@ -173,6 +175,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String OUTPUT_FORMAT_KEY_CAMEL_CASE = "outputFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String OUTPUT_FORMAT_KEY = OUTPUT_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+    public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE = "registered_custom_output_formats";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+    public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE = "registeredCustomOutputFormats";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY = REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE;
 
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
     public static final String AUTO_ESCAPING_KEY_SNAKE_CASE = "auto_escaping";
@@ -276,6 +285,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
+        REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
         TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE,
@@ -297,6 +307,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
+        REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
         TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE,
@@ -1189,10 +1200,27 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
      * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
-     * output format ({@link TemplateConfigurer#setOutputFormat(OutputFormat)}) for templates based on their file
+     * ({@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat}) for templates based on their file
      * extension or parent directory.
      * 
-     * @see TemplateConfigurer#setOutputFormat(OutputFormat)
+     * <p>
+     * If {@link #getIncompatibleImprovements()} is 2.3.24 or greater, there's an invisible layer of template
+     * configurers behind those set by this method, which provide the setting values for these standard file
+     * extensions (case insensitive):
+     * 
+     * <ul>
+     *   <li>{@code ftlh}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "HTML"}
+     *       (i.e., {@link HTMLOutputFormat#INSTANCE} unless the {@code "HTML"} name is overridden by
+     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
+     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     *   <li>{@code ftlx}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "XML"}
+     *       (i.e., {@link XMLOutputFormat#INSTANCE} unless the {@code "XML"} name is overridden by
+     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
+     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     * </ul>
+     * 
+     * <p>When the {@link TemplateConfigurer} provided by this method also sets some of these settings, the values
+     * coming from the standard settings mappings above will be overridden. 
      * 
      * @since 2.3.24
      */
@@ -1659,7 +1687,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * auto-escaping is {@code false}, FreeMarker will assume that the string value is already in the output format, so
      * it prints it as is to the output.
      * 
-     * <p>Notes:
+     * <p>Further notes on auto-escaping:
      * <ul>
      *   <li>When printing numbers, dates, and other kind of non-string values with <code>${...}</code>, they will be
      *       first converted to string (according the formatting settings and locale), then they are escaped just like
@@ -1673,6 +1701,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       example, with <code>&lt;#assign s = "foo${bar}"&gt;</code>, {@code bar} will always get into {@code s}
      *       without escaping, but with <code>&lt;#assign s&gt;foo${bar}&lt;#assign&gt;</code> it may will be escaped.
      * </ul>
+     * 
+     * <p>Note that what you set here is just a default, which can be overridden for individual templates via
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, even if no template configurers were set, this
+     * setting is still overridden by the standard file extension mappings; see them at
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
      * 
      * @see TemplateConfigurer#setAutoEscaping(boolean)
      * @see Configuration#setOutputFormat(OutputFormat)
@@ -1715,19 +1748,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Sets the (default) output format. Usually, you leave this on its default, which is
      * {@link RawOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like based
-     * on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, if
-     * {@link #getIncompatibleImprovements()} is 2.3.24 or greater, templates with these extensions get these
-     * non-default output format and auto-escaping:
-     * 
-     * <ul>
-     *   <li>{@code ftlh}: {@code "HTML"} output format ({@link HTMLOutputFormat#INSTANCE} unless overridden)
-     *   <li>{@code ftlx}: {@code "XML"} output format ({@link XMLOutputFormat#INSTANCE} unless overridden)
-     * </ul>
-     * 
-     * <p>These file extensions aren't case sensitive. It's possible to redefine the meaning of these extensions
-     * by setting the output format for the templates with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
+     * on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Even if no template
+     * configurers were set, this setting is still overridden by the standard file extension mappings; see them
+     * at {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
+     * @see #setTemplateConfigurers(TemplateConfigurerFactory)
      * 
      * @since 2.3.24
      */
@@ -1812,15 +1838,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets the custom output formats that can be referred by their unique name ({@link OutputFormat#getName()}).
-     * Output formats are referred by name in templates (among other places).
+     * Sets the custom output formats that can be referred by their unique name ({@link OutputFormat#getName()}) from
+     * templates. Names are also used to look up the {@link OutputFormat} for the {@code ftlh} and {@code code ftlx}
+     * file extensions; see {@link #setTemplateConfigurers(TemplateConfigurerFactory)} for more details.
      *  
-     * <p>When there's a clash between a custom output format name and a standard output format name, the custom format
-     * will win, thus you can override the meaning of standard output format names. The default value is an empty
-     * collection.
+     * <p>
+     * When there's a clash between a custom output format name and a standard output format name, the custom format
+     * will win, thus you can override the meaning of standard output format names. 
+     * 
+     * <p>
+     * The default value is an empty collection.
      * 
      * @param registeredCustomOutputFormats
-     *            The collection of the {@link OutputFormat}-s, each must be different and has an unique name within
+     *            The collection of the {@link OutputFormat}-s, each must be different and has a unique name within
      *            this collection.
      * 
      * @throws IllegalArgumentException
@@ -1830,6 +1860,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void setRegisteredCustomOutputFormats(Collection<? extends OutputFormat<?>> registeredCustomOutputFormats) {
+        NullArgumentException.check(registeredCustomOutputFormats);
         Map<String, OutputFormat<?>> m = new LinkedHashMap<String, OutputFormat<?>>(
                 registeredCustomOutputFormats.size() * 4 / 3, 1f);
         for (OutputFormat<?> outputFormat : registeredCustomOutputFormats) {
@@ -1844,6 +1875,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             }
         }
         this.registeredCustomOutputFormats = Collections.unmodifiableMap(m);
+        
+        cache.clear();
     }
     
     /**
@@ -2549,12 +2582,22 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetOutputFormat();
-                } else if (value.equalsIgnoreCase(NULL)) {
-                    setOutputFormat(null); // will throw exception
                 } else {
                     setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
-                            value, OutputFormat.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
+            } else if (REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE.equals(name)
+                    || REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+                List list = (List) _ObjectBuilderSettingEvaluator.eval(
+                        value, List.class, true, _SettingEvaluationEnvironment.getCurrent());
+                for (Object item : list) {
+                    if (!(item instanceof OutputFormat)) {
+                        throw new _MiscTemplateException(getEnvironment(),
+                                "Invalid value for setting ", new _DelayedJQuote(name), ": List items must be "
+                                + OutputFormat.class.getName() + " intances, in: ", value);
+                    }
+                }
+                setRegisteredCustomOutputFormats(list);
             } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetCacheStorage();
@@ -2587,7 +2630,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setCacheStorage(new MruCacheStorage(strongSize, softSize));
                 } else {
                     setCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
-                            value, CacheStorage.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, CacheStorage.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE.equals(name)) {
@@ -2645,7 +2688,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     unsetTemplateLoader();
                 } else {
                     setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateLoader.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE.equals(name)) {
@@ -2653,7 +2696,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     unsetTemplateLookupStrategy();
                 } else {
                     setTemplateLookupStrategy((TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateLookupStrategy.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
@@ -2672,7 +2715,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setTemplateConfigurers(null);
                 } else {
                     setTemplateConfigurers((TemplateConfigurerFactory) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateConfigurerFactory.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateConfigurerFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else {
                 unknown = true;

@@ -23766,6 +23766,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added new configuration setting:
+              <literal>registered_custom_output_formats</literal> (or
+              <literal>registeredCustomOutputFormats</literal>). With this you
+              can add new <literal>OutputFormat</literal>-s that templates can
+              refer to by name (like in <literal>&lt;#ftl
+              output_format="foo"&gt;</literal>).</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>freemarker.cache.ByteArrayTemplateLoader</literal>,
               which is similar to <literal>StringTemplateLoader</literal>, but

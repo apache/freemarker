@@ -33,6 +33,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
@@ -49,8 +51,11 @@ import freemarker.core.Configurable;
 import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
+import freemarker.core.CustomHTMLOutputFormat;
+import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.RawOutputFormat;
 import freemarker.core.XMLOutputFormat;
@@ -912,6 +917,25 @@ public class ConfigurationTest extends TestCase {
        }
     }
 
+    public void testSetRegisteredCustomOutputFormats() throws Exception {
+        Configuration cfg = new Configuration();
+        
+        assertTrue(cfg.getRegisteredCustomOutputFormats().isEmpty());
+        
+        cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
+                "[freemarker.core.CustomHTMLOutputFormat(), freemarker.core.DummyOutputFormat()]");
+        assertEquals(
+                ImmutableList.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE),
+                new ArrayList(cfg.getRegisteredCustomOutputFormats()));
+        
+        try {
+            cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE, "[TemplateConfigurer()]");
+            fail();
+        } catch (Exception e) {
+            assertThat(e.getCause().getMessage(), containsString(OutputFormat.class.getSimpleName()));
+        }
+    }
+    
     public void testSetTimeZone() throws TemplateException {
         TimeZone origSysDefTZ = TimeZone.getDefault();
         try {

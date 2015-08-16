@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
 import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.MergingTemplateConfigurerFactory;
 import freemarker.cache.OrMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -167,6 +168,62 @@ public class OutputFormatTest extends TemplateTest {
             
             cfg.clearTemplateCache();
         }
+    }
+    
+    @Test
+    public void testStandardFileExtensionsSettingOverriding() throws Exception {
+        addTemplate("t.ftlx",
+                "${\"'\"} ${\"'\"?esc} ${\"'\"?noEsc}");
+        addTemplate("t.ftl",
+                "${'{}'} ${'{}'?esc} ${'{}'?noEsc}");
+        
+        TemplateConfigurer tcHTML = new TemplateConfigurer();
+        tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        ConditionalTemplateConfigurerFactory tcfHTML = new ConditionalTemplateConfigurerFactory(
+                new FileNameGlobMatcher("t.*"), tcHTML);
+
+        TemplateConfigurer tcNoAutoEsc = new TemplateConfigurer();
+        tcNoAutoEsc.setAutoEscaping(false);
+        ConditionalTemplateConfigurerFactory tcfNoAutoEsc = new ConditionalTemplateConfigurerFactory(
+                new FileNameGlobMatcher("t.*"), tcNoAutoEsc);
+
+        Configuration cfg = getConfiguration();
+        
+        for (int i = 0; i < 3; i++) {
+            if (i == 1) {
+                cfg.setTemplateConfigurers(null);
+                cfg.setOutputFormat(RTFOutputFormat.INSTANCE);
+                // Just to prove that the settings are as expected:
+                assertOutputForNamed("t.ftl", "\\{\\} \\{\\} {}");
+            } else if (i == 2) {
+                cfg.setTemplateConfigurers(null);
+                cfg.setAutoEscaping(false);
+                // Just to prove that the settings are as expected:
+                assertOutputForNamed("t.ftl", "{} \\{\\} {}");
+            }
+            
+            assertOutputForNamed("t.ftlx", "&apos; &apos; '");
+            
+            cfg.setTemplateConfigurers(tcfHTML);
+            assertOutputForNamed("t.ftlx", "&#39; &#39; '");
+            
+            cfg.setTemplateConfigurers(tcfNoAutoEsc);
+            assertOutputForNamed("t.ftlx", "' &apos; '");
+            
+            cfg.setTemplateConfigurers(
+                    new MergingTemplateConfigurerFactory(tcfHTML, tcfNoAutoEsc));
+            assertOutputForNamed("t.ftlx", "' &#39; '");
+        }
+    }
+    
+    @Test
+    public void testStandardFileExtensionsFormatterImplOverriding() throws Exception {
+        addTemplate("t.ftlh", "${'a&x'}");
+        assertOutputForNamed("t.ftlh", "a&amp;x");
+        getConfiguration().setRegisteredCustomOutputFormats(Collections.singleton(CustomHTMLOutputFormat.INSTANCE));
+        assertOutputForNamed("t.ftlh", "a&amp;X");
+        getConfiguration().setRegisteredCustomOutputFormats(Collections.<OutputFormat<?>>emptyList());
+        assertOutputForNamed("t.ftlh", "a&amp;x");
     }
     
     @Test
@@ -388,55 +445,6 @@ public class OutputFormatTest extends TemplateTest {
         cfg.setSharedVariable("xmlMarkup", XMLOutputFormat.INSTANCE.fromMarkup("<p>c</p>"));
         
         return cfg;
-    }
-
-    static class DummyTemplateOutputModel extends EscapingTemplateOutputModel<DummyTemplateOutputModel> {
-
-        DummyTemplateOutputModel(String plainTextContent, String markupContet) {
-            super(plainTextContent, markupContet);
-        }
-
-        @Override
-        public OutputFormat<DummyTemplateOutputModel> getOutputFormat() {
-            return DummyOutputFormat.INSTANCE;
-        }
-        
-    }
-    
-    static class DummyOutputFormat extends EscapingOutputFormat<DummyTemplateOutputModel> {
-        
-        private static final DummyOutputFormat INSTANCE = new DummyOutputFormat();
-
-        @Override
-        protected String escapePlainTextToString(String plainTextContent) {
-            return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
-        }
-
-        @Override
-        protected DummyTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
-            return new DummyTemplateOutputModel(plainTextContent, markupContent);
-        }
-
-        @Override
-        public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-            out.write(escapePlainTextToString(textToEsc));
-        }
-
-        @Override
-        public boolean isLegacyBuiltInBypassed(String builtInName) {
-            return false;
-        }
-
-        @Override
-        public String getName() {
-            return "dummy";
-        }
-
-        @Override
-        public String getMimeType() {
-            return "text/dummy";
-        }
-        
     }
     
 }
