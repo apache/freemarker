@@ -20,12 +20,12 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public final class TemplateRTFModel extends CommonTemplateMarkupOutputModel<TemplateRTFModel> {
+public final class TemplateRTFOutputModel extends CommonTemplateMarkupOutputModel<TemplateRTFOutputModel> {
     
     /**
      * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
      */
-    TemplateRTFModel(String plainTextContent, String markupContent) {
+    TemplateRTFOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 

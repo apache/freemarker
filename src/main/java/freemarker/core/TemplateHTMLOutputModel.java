@@ -20,12 +20,12 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public final class TemplateHTMLModel extends CommonTemplateMarkupOutputModel<TemplateHTMLModel> {
+public final class TemplateHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateHTMLOutputModel> {
     
     /**
      * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
      */
-    TemplateHTMLModel(String plainTextContent, String markupContent) {
+    TemplateHTMLOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 

@@ -1882,8 +1882,8 @@ Expression BuiltIn(Expression lhoExp) :
         if (result instanceof BuiltInForEscapingOutputFormatRelated) {
             if (!(outputFormat instanceof MarkupOutputFormat)) {
                 throw new ParseException(
-                        "?" + t.image + " can't be used here, as the current output format isn't an escaping one: "
-                        + outputFormat, template, t);
+                        "?" + t.image + " can't be used here, as the current output format doesn't define escaping "
+                        + "rules: " + outputFormat, template, t);
             }
             ((BuiltInForEscapingOutputFormatRelated) result).bindToOutputFormat((MarkupOutputFormat) outputFormat);
             

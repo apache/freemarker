@@ -45,16 +45,16 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
     
     /**
-     * Converts {@link String} that's assumed to be plain text to {@link TemplateMarkupOutputModel}, by escaping any special
-     * characters in the plain text. This corresponds to {@code ?esc}, or, to outputting with auto-escaping if that
-     * wasn't using {@link #output(String, Writer)} as an optimization.
+     * Converts {@link String} that's assumed to be plain text to {@link TemplateMarkupOutputModel}, by escaping any
+     * special characters in the plain text. This corresponds to {@code ?esc}, or, to outputting with auto-escaping if
+     * that wasn't using {@link #output(String, Writer)} as an optimization.
      */
     public abstract MO escapePlainText(String textToEsc) throws TemplateModelException;
 
     /**
      * If this {@link TemplateMarkupOutputModel} was created with {@link #escapePlainText(String)}, it returns the
-     * original plain text, otherwise it might returns {@code null}. Needed for re-escaping, like in
-     * {@code alreadyTOM?attrEsc}.
+     * original plain text, otherwise it might returns {@code null}. Used when converting between different type of 
+     * markups and the source was made from plain text.
      */
     public abstract String getSourcePlainText(MO mo) throws TemplateModelException;
 
@@ -67,20 +67,23 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     public abstract MO fromMarkup(String markupText) throws TemplateModelException;
 
     /**
-     * Returns the content as markup text. If this {@link TemplateMarkupOutputModel} was created with
-     * {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required as far
-     * as the returned markup means the same.
+     * Returns the content as markup text; never {@code null}. If this {@link TemplateMarkupOutputModel} was created
+     * with {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required
+     * as far as the returned markup means the same. If this {@link TemplateMarkupOutputModel} wasn't created
+     * with {@link #fromMarkup(String)} and it doesn't yet have to markup, it has to generate the markup now.
      */
     public abstract String getMarkup(MO mo) throws TemplateModelException;
     
     /**
-     * Returns a {@link TemplateMarkupOutputModel} that contains the content of both {@link TemplateMarkupOutputModel} concatenated.  
+     * Returns a {@link TemplateMarkupOutputModel} that contains the content of both {@link TemplateMarkupOutputModel}
+     * objects concatenated.
      */
-    public abstract MO concat(MO tom1, MO tom2) throws TemplateModelException;
+    public abstract MO concat(MO mo1, MO mo2) throws TemplateModelException;
     
     /**
-     * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left operand can bypass this object
-     * as is. A typical such case would be when a {@link TemplateMarkupOutputModel} of "HTML" format bypasses {@code ?html}.
+     * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left operand can bypass this
+     * object as is. A typical such case would be when a {@link TemplateHTMLOutputModel} of "HTML" format bypasses
+     * {@code ?html}.
      */
     public abstract boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateModelException;
     

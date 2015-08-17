@@ -26,7 +26,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFModel> {
+public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFOutputModel> {
 
     public static final RTFOutputFormat INSTANCE = new RTFOutputFormat();
     
@@ -60,8 +60,8 @@ public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFM
     }
 
     @Override
-    protected TemplateRTFModel newTOM(String plainTextContent, String markupContent) {
-        return new TemplateRTFModel(plainTextContent, markupContent);
+    protected TemplateRTFOutputModel newTOM(String plainTextContent, String markupContent) {
+        return new TemplateRTFOutputModel(plainTextContent, markupContent);
     }
 
 }

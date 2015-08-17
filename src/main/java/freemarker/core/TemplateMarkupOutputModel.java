@@ -21,7 +21,7 @@ import freemarker.template.TemplateModel;
 /**
  * "markup output" template language data-type; stores markup (some kind of "rich text" / structured format), as opposed
  * to plain text that meant to be printed as template output. Each implementation of this type has a
- * {@link OutputFormat} subclass pair (like {@link TemplateHTMLModel} has {@link HTMLOutputFormat}). This type is
+ * {@link OutputFormat} subclass pair (like {@link TemplateHTMLOutputModel} has {@link HTMLOutputFormat}). This type is
  * related to the {@link Configuration#setOutputFormat(OutputFormat)} and {@link Configuration#setAutoEscaping(boolean)}
  * mechanism; see more there. Values of this type are exempt from automatic escaping with that mechanism.
  * 
