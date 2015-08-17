@@ -32,6 +32,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 import freemarker.test.TemplateTest;
 
 public class OutputFormatTest extends TemplateTest {
@@ -300,7 +301,7 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testAutoEscapingOnTOMs() throws IOException, TemplateException {
+    public void testAutoEscapingOnMOs() throws IOException, TemplateException {
         for (int autoEsc = 0; autoEsc < 2; autoEsc++) {
             String commonAutoEscFtl = "<#ftl outputFormat='HTML'>${'&'}";
             if (autoEsc == 0) {
@@ -413,7 +414,7 @@ public class OutputFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testEscAndNoEscBIsOnTOMs() throws IOException, TemplateException {
+    public void testEscAndNoEscBIsOnMOs() throws IOException, TemplateException {
         assertOutput(
                 "<#ftl outputFormat='XML'>${'&'?esc?esc} ${'&'?esc?noEsc} ${'&'?noEsc?esc} ${'&'?noEsc?noEsc}",
                 "&amp; &amp; & &");
@@ -426,6 +427,58 @@ public class OutputFormatTest extends TemplateTest {
                     "<#ftl outputFormat='XML'>${rtfMarkup?" + bi + "}",
                     "?" + bi, "output format", "RTF", "XML");
         }
+    }
+
+    @Test
+    public void testConcatWithMOs() throws IOException, TemplateException {
+        assertOutput(
+                "${'&' + htmlMarkup} ${htmlMarkup + '&'} ${htmlMarkup + htmlMarkup}",
+                "&amp;<p>c <p>c&amp; <p>c<p>c");
+        assertOutput(
+                "${'&' + htmlPlain} ${htmlPlain + '&'} ${htmlPlain + htmlPlain}",
+                "&amp;a &lt; {h} a &lt; {h}&amp; a &lt; {h}a &lt; {h}");
+        assertErrorContains(
+                "<#ftl outputFormat='XML'>${'&' + htmlMarkup}",
+                "HTML", "XML", "conversion");
+        assertErrorContains(
+                "${xmlMarkup + htmlMarkup}",
+                "HTML", "XML", "Conversion", "common");
+        assertOutput(
+                "${xmlMarkup + htmlPlain}",
+                "<p>c</p>a &lt; {h}");
+        assertOutput(
+                "${xmlPlain + htmlMarkup}",
+                "a &lt; {x}<p>c");
+        assertOutput(
+                "${xmlPlain + htmlPlain}",
+                "a &lt; {x}a &lt; {h}");
+        assertOutput(
+                "${xmlPlain + htmlPlain + '\\''}",
+                "a &lt; {x}a &lt; {h}&apos;");
+        assertOutput(
+                "${htmlPlain + xmlPlain + '\\''}",
+                "a &lt; {h}a &lt; {x}&#39;");
+        assertOutput(
+                "${xmlPlain + htmlPlain + '\\''}",
+                "a &lt; {x}a &lt; {h}&apos;");
+        assertOutput(
+                "<#ftl outputFormat='XML'>${htmlPlain + xmlPlain + '\\''}",
+                "a &lt; {h}a &lt; {x}&apos;");
+        assertOutput(
+                "<#ftl outputFormat='RTF'>${htmlPlain + xmlPlain + '\\''}",
+                "a < \\{h\\}a < \\{x\\}'");
+        assertOutput(
+                "<#ftl outputFormat='XML'>${'\\'' + htmlPlain}",
+                "&apos;a &lt; {h}");
+        assertOutput(
+                "<#ftl outputFormat='HTML'>${'\\'' + htmlPlain}",
+                "&#39;a &lt; {h}");
+        assertOutput(
+                "<#ftl outputFormat='HTML'>${'\\'' + xmlPlain}",
+                "&#39;a &lt; {x}");
+        assertOutput(
+                "<#ftl outputFormat='RTF'>${'\\'' + xmlPlain}",
+                "'a < \\{x\\}");
     }
     
     @Override
@@ -445,6 +498,14 @@ public class OutputFormatTest extends TemplateTest {
         cfg.setSharedVariable("xmlMarkup", XMLOutputFormat.INSTANCE.fromMarkup("<p>c</p>"));
         
         return cfg;
+    }
+    
+    private static class BrokenScalar implements TemplateScalarModel {
+
+        public String getAsString() throws TemplateModelException {
+            return null;
+        }
+        
     }
     
 }

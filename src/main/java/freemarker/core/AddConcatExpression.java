@@ -72,12 +72,28 @@ final class AddConcatExpression extends Expression {
             return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
         } else {
             try {
-                String s1 = Expression.coerceModelToString(leftModel, leftExp, env);
-                if (s1 == null) s1 = "null";
-                String s2 = Expression.coerceModelToString(rightModel, rightExp, env);
-                if (s2 == null) s2 = "null";
-                return new SimpleScalar(s1.concat(s2));
-            } catch (NonStringException e) {
+                String leftStr = EvalUtil.coerceModelToString(leftModel, leftExp, (String) null, true, env);
+                String rightStr = EvalUtil.coerceModelToString(rightModel, rightExp, (String) null, true, env);
+                
+                if (leftStr == null) {  // Signals that the model is markup output 
+                    if (leftModel instanceof TemplateMarkupOutputModel) {
+                        TemplateMarkupOutputModel<?> leftMO = (TemplateMarkupOutputModel<?>) leftModel; 
+                        if (rightStr == null) {  // Signals that the model is markup output
+                            return concatMarkupOutputs(parent, leftMO, (TemplateMarkupOutputModel) rightModel);
+                        }
+                        return concatMarkupOutputs(parent, leftMO, leftMO.getOutputFormat().escapePlainText(rightStr));
+                    } else {
+                        leftStr = "null";  // For B.C. only; should be an error 
+                        // Falls through
+                    }
+                }
+                if (rightStr == null) {  // Signals that the model is markup output
+                    TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightModel; 
+                    return concatMarkupOutputs(parent, rightMO.getOutputFormat().escapePlainText(leftStr), rightMO);
+                }
+                
+                return new SimpleScalar(leftStr.concat(rightStr));
+            } catch (NonStringOrTemplateOutputException e) {
                 if (leftModel instanceof TemplateHashModel && rightModel instanceof TemplateHashModel) {
                     if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
                         TemplateHashModelEx leftModelEx = (TemplateHashModelEx) leftModel;
@@ -97,6 +113,32 @@ final class AddConcatExpression extends Expression {
                     throw e;
                 }
             }
+        }
+    }
+
+    private static TemplateModel concatMarkupOutputs(TemplateObject parent, TemplateMarkupOutputModel leftMO,
+            TemplateMarkupOutputModel rightMO) throws TemplateModelException {
+        MarkupOutputFormat leftOF = leftMO.getOutputFormat();
+        MarkupOutputFormat rightOF = rightMO.getOutputFormat();
+        if (rightOF != leftOF) {
+            String rightPT;
+            String leftPT;
+            if ((rightPT = rightOF.getSourcePlainText(rightMO)) != null) {
+                return leftOF.concat(leftMO, leftOF.escapePlainText(rightPT));
+            } else if ((leftPT = leftOF.getSourcePlainText(leftMO)) != null) {
+                return rightOF.concat(rightOF.escapePlainText(leftPT), rightMO);
+            } else {
+                Object[] message = { "Concatenation left hand operand is in ", new _DelayedToString(leftOF),
+                        " format, while the right hand operand is in ", new _DelayedToString(rightOF),
+                        ". Conversion to common format wasn't possible." };
+                if (parent instanceof Expression) {
+                    throw new _TemplateModelException((Expression) parent, message);
+                } else {
+                    throw new _TemplateModelException(message);
+                }
+            }
+        } else {
+            return leftOF.concat(leftMO, rightMO);
         }
     }
 
