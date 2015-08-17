@@ -1750,8 +1750,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * configurers were set, this setting is still overridden by the standard file extension mappings; see them
      * at {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
      * 
+     * <p>The output format is mostly important because of auto-escaping (see {@link #setAutoEscaping(boolean)}), but
+     * maybe also used by the embedding application to set the HTTP response MIME type, etc.
+     * 
      * @see #setRegisteredCustomOutputFormats(Collection)
      * @see #setTemplateConfigurers(TemplateConfigurerFactory)
+     * @see #setAutoEscaping(boolean)
      * 
      * @since 2.3.24
      */
