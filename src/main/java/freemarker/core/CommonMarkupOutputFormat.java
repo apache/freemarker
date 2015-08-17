@@ -33,9 +33,6 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
         // Only to decrease visibility
     }
     
-    /**
-     * Prints the parameter model to the output.
-     */
     @Override
     public final void output(MO mo, Writer out) throws IOException, TemplateModelException {
         String mc = mo.getMarkupContent();
@@ -46,48 +43,24 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
         }
     }
 
-    /**
-     * Equivalent to calling {@link #escapePlainText(String)} and then
-     * {@link #output(CommonTemplateMarkupOutputModel, Writer)}, but implementators should chose a more efficient way.
-     */
     @Override
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
     
-    /**
-     * Converts {@link String} that's assumed to be plain text to {@link TemplateMarkupOutputModel}, by escaping any special
-     * characters in the plain text. This corresponds to {@code ?esc}, or, to outputting with auto-escaping if that
-     * wasn't using {@link #output(String, Writer)} as an optimization.
-     */
     @Override
     public final MO escapePlainText(String textToEsc) throws TemplateModelException {
         return newTOM(textToEsc, null);
     }
 
-    /**
-     * If this {@link TemplateMarkupOutputModel} was created with {@link #escapePlainText(String)}, it returns the original
-     * plain text, otherwise it might returns {@code null}. Needed for re-escaping, like in {@code alreadyTOM?attrEsc}.
-     */
     @Override
     public final String getSourcePlainText(MO mo) {
         return mo.getPlainTextContent();
     }
 
-    /**
-     * Wraps {@link String} that's already markup to {@link TemplateMarkupOutputModel} interface, to indicate its format. This
-     * corresponds to {@code ?noEsc}. (This methods is allowed to throw {@link TemplateModelException} if the parameter
-     * markup text is malformed, but it's unlikely that an implementation chooses to parse the parameter until, and if
-     * ever, that becomes necessary.) 
-     */
     @Override
     public final MO fromMarkup(String markupText) throws TemplateModelException {
         return newTOM(null, markupText);
     }
 
-    /**
-     * Returns the content as markup text. If this {@link TemplateMarkupOutputModel} was created with
-     * {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required as far
-     * as the returned markup means the same.
-     */
     @Override
     public final String getMarkup(MO mo) {
         String mc = mo.getMarkupContent();
@@ -100,15 +73,12 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
         return mc;
     }
     
-    /**
-     * Returns a {@link TemplateMarkupOutputModel} that contains the content of both {@link TemplateMarkupOutputModel} concatenated.  
-     */
     @Override
-    public final MO concat(MO tom1, MO tom2) {
-        String pc1 = tom1.getPlainTextContent();
-        String mc1 = tom1.getMarkupContent();
-        String pc2 = tom2.getPlainTextContent();
-        String mc2 = tom2.getMarkupContent();
+    public final MO concat(MO mo1, MO mo2) {
+        String pc1 = mo1.getPlainTextContent();
+        String mc1 = mo1.getMarkupContent();
+        String pc2 = mo2.getPlainTextContent();
+        String mc2 = mo2.getMarkupContent();
         
         String pc3 = pc1 != null && pc2 != null ? pc1 + pc2 : null;
         String mc3 = mc1 != null && mc2 != null ? mc1 + mc2 : null;
@@ -117,9 +87,9 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
         }
         
         if (pc1 != null) {
-            return newTOM(null, getMarkup(tom1) + mc2);
+            return newTOM(null, getMarkup(mo1) + mc2);
         } else {
-            return newTOM(null, mc1 + getMarkup(tom2));
+            return newTOM(null, mc1 + getMarkup(mo2));
         }
     }
     
@@ -132,10 +102,6 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
 
     protected abstract MO newTOM(String plainTextContent, String markupContent);
 
-    /**
-     * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left operand can bypass this object
-     * as is. A typical such case would be when a {@link TemplateMarkupOutputModel} of "HTML" format bypasses {@code ?html}.
-     */
     @Override
     public abstract boolean isLegacyBuiltInBypassed(String builtInName);
     
