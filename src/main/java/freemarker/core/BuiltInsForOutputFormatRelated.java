@@ -23,7 +23,7 @@ class BuiltInsForOutputFormatRelated {
     static class no_escBI extends AbstractConverterBI {
 
         @Override
-        protected TemplateModel calculateResult(String lho, OutputFormat outputFormat, Environment env)
+        protected TemplateModel calculateResult(String lho, EscapingOutputFormat outputFormat, Environment env)
                 throws TemplateException {
             return outputFormat.fromMarkup(lho);
         }
@@ -33,28 +33,28 @@ class BuiltInsForOutputFormatRelated {
     static class escBI extends AbstractConverterBI {
 
         @Override
-        protected TemplateModel calculateResult(String lho, OutputFormat outputFormat, Environment env)
+        protected TemplateModel calculateResult(String lho, EscapingOutputFormat outputFormat, Environment env)
                 throws TemplateException {
             return outputFormat.escapePlainText(lho);
         }
         
     }
     
-    static abstract class AbstractConverterBI extends BuiltInForOutputFormatRelated {
+    static abstract class AbstractConverterBI extends BuiltInForEscapingOutputFormatRelated {
 
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {
             TemplateModel lhoTM = target.eval(env);
             String lhoStr = EvalUtil.coerceModelToString(lhoTM, target, null, true, env);
-            OutputFormat contextOF = outputFormat;
+            EscapingOutputFormat contextOF = outputFormat;
             if (lhoStr == null) { // should indicate that lhoTM is a TOM
-                TemplateOutputModel lhoTOM;
+                EscapingTemplateOutputModel lhoTOM;
                 try {
-                    lhoTOM = (TemplateOutputModel) lhoTM;
+                    lhoTOM = (EscapingTemplateOutputModel) lhoTM;
                 } catch (ClassCastException e) {
                     throw EvalUtil.newModelHasStoredNullException(null, lhoTM, target);
                 }
-                OutputFormat lhoOF = lhoTOM.getOutputFormat();
+                EscapingOutputFormat lhoOF = lhoTOM.getOutputFormat();
                 // ATTENTION: Keep this logic in sync. with ${...}'s logic!
                 if (lhoOF == contextOF || contextOF.isOutputFormatMixingAllowed()) {
                     // bypass
@@ -76,7 +76,7 @@ class BuiltInsForOutputFormatRelated {
             return calculateResult(lhoStr, contextOF, env);
         }
         
-        protected abstract TemplateModel calculateResult(String lho, OutputFormat outputFormat, Environment env)
+        protected abstract TemplateModel calculateResult(String lho, EscapingOutputFormat outputFormat, Environment env)
                 throws TemplateException;
         
     }

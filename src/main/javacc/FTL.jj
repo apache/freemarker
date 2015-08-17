@@ -1960,13 +1960,13 @@ Expression BuiltIn(Expression lhoExp) :
             return result;
         }
 
-        if (result instanceof BuiltInForOutputFormatRelated) {
-            if (!outputFormat.isEscaping()) {
+        if (result instanceof BuiltInForEscapingOutputFormatRelated) {
+            if (!(outputFormat instanceof EscapingOutputFormat)) {
                 throw new ParseException(
                         "?" + t.image + " can't be used here, as the current output format isn't an escaping one: "
                         + outputFormat, template, t);
             }
-            ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(outputFormat, autoEscaping);
+            ((BuiltInForEscapingOutputFormatRelated) result).bindToOutputFormat((EscapingOutputFormat) outputFormat);
             
             return result;
         }
@@ -2190,7 +2190,9 @@ DollarVariable StringOutput() :
     {
         DollarVariable result = new DollarVariable(
                 exp, escapedExpression(exp),
-                outputFormat, autoEscaping && outputFormat.isEscaping());
+                outputFormat,
+                autoEscaping && outputFormat instanceof EscapingOutputFormat
+                        ? (EscapingOutputFormat)  outputFormat : null);
         result.setLocation(template, begin, end);
         return result;
     }
@@ -2210,7 +2212,8 @@ NumericalOutput NumericalOutput() :
     ]
     end = <CLOSING_CURLY_BRACKET>
     {
-        boolean escNonTOMs = autoEscaping && outputFormat.isEscaping();
+        EscapingOutputFormat<?> autoEscOF = autoEscaping && outputFormat instanceof EscapingOutputFormat
+                ? (EscapingOutputFormat<?>) outputFormat : null;
     
         NumericalOutput result;
         if (fmt != null) {
@@ -2266,9 +2269,9 @@ NumericalOutput NumericalOutput() :
             if (minFrac > 50 || maxFrac > 50) {// sanity check
                 throw new ParseException("Cannot specify more than 50 fraction digits", template, fmt);
             }
-            result = new NumericalOutput(exp, minFrac, maxFrac, outputFormat, escNonTOMs);
+            result = new NumericalOutput(exp, minFrac, maxFrac, autoEscOF);
         } else {  // if format != null
-            result = new NumericalOutput(exp, outputFormat, escNonTOMs);
+            result = new NumericalOutput(exp, autoEscOF);
         }
         result.setLocation(template, begin, end);
         return result;

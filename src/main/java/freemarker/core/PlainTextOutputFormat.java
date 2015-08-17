@@ -31,12 +31,17 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public final class PlainTextOutputFormat extends NonEscapingOutputFormat<PlainTextTemplateOutputModel> {
+public final class PlainTextOutputFormat extends OutputFormat {
 
     public static final PlainTextOutputFormat INSTANCE = new PlainTextOutputFormat();
     
     private PlainTextOutputFormat() {
         // Only to decrease visibility
+    }
+
+    @Override
+    public boolean isOutputFormatMixingAllowed() {
+        return false;
     }
 
     @Override

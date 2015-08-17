@@ -15,45 +15,24 @@
  */
 package freemarker.core;
 
+import freemarker.template.Configuration;
+import freemarker.template.TemplateModel;
+
 /**
- * Common superclass for implementing {@link TemplateOutputModel}-s.
+ * "output" template language data-type; stores "markup" (some kind of "rich text" / structured format), as opposed to
+ * plain text. Each implementation of this type has a {@link OutputFormat} subclass pair (like
+ * {@link HTMLTemplateOutputModel} and {@link HTMLOutputFormat}). This type is related to the
+ * {@link Configuration#setOutputFormat(OutputFormat)} and {@link Configuration#setAutoEscaping(boolean)}
+ * mechanism; see more there. Values of this type are exempt from automatic escaping with that mechanism.
  * 
- * <p>
- * Thread-safe after proper publishing. Calculated fields (typically, the markup calculated from plain text) might will
- * be re-calculated for multiple times if accessed from multiple threads (this only affects performance, not
- * functionality).
+ * @param <TOM>
+ *            Refers to the interface's own type, which is useful in interfaces that extend {@link EscapingTemplateOutputModel}
+ *            (Java Generics trick).
  * 
  * @since 2.3.24
  */
-public abstract class EscapingTemplateOutputModel<TOM extends EscapingTemplateOutputModel<TOM>>
-        implements TemplateOutputModel<TOM> {
+public interface EscapingTemplateOutputModel<TOM extends EscapingTemplateOutputModel<TOM>> extends TemplateModel {
 
-    private final String plainTextContent;
-    private String markupContet;
-
-    /**
-     * A least one of the parameters must be non-{@code null}!
-     */
-    EscapingTemplateOutputModel(String plainTextContent, String markupContent) {
-        this.plainTextContent = plainTextContent;
-        this.markupContet = markupContent;
-    }
-
-    public abstract OutputFormat<TOM> getOutputFormat();
-
-    /** Maybe {@code null}, but then the other field isn't {@code null}. */
-    final String getPlainTextContent() {
-        return plainTextContent;
-    }
-
-    /** Maybe {@code null}, but then the other field isn't {@code null}. */
-    final String getMarkupContent() {
-        return markupContet;
-    }
-
-    /** Use only to set {@code null} field to the value calculated from the other field! */
-    final void setMarkupContet(String markupContet) {
-        this.markupContet = markupContet;
-    }
-
+    EscapingOutputFormat<TOM> getOutputFormat();
+    
 }

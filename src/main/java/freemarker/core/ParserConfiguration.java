@@ -60,7 +60,7 @@ public interface ParserConfiguration {
     /**
      * See {@link Configuration#getOutputEncoding()}.
      */
-    OutputFormat<?> getOutputFormat();
+    OutputFormat getOutputFormat();
     
     /**
      * See {@link Configuration#getIncompatibleImprovements()}.

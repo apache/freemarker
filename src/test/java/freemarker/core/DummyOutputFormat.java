@@ -5,7 +5,7 @@ import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
 
-public class DummyOutputFormat extends EscapingOutputFormat<DummyTemplateOutputModel> {
+public class DummyOutputFormat extends CommonEscapingOutputFormat<DummyTemplateOutputModel> {
     
     public static final DummyOutputFormat INSTANCE = new DummyOutputFormat();
     

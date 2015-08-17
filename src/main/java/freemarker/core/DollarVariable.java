@@ -35,14 +35,15 @@ final class DollarVariable extends Interpolation {
     
     /** For OutputFormat-based auto-escaping */
     private final OutputFormat outputFormat;
-    private final boolean escapeNonTOMs;
+    private final EscapingOutputFormat autoEscapeOutputFormat;
 
     DollarVariable(
-            Expression expression, Expression escapedExpression, OutputFormat outputFormat, boolean escapeNonTOMs) {
+            Expression expression, Expression escapedExpression,
+            OutputFormat outputFormat, EscapingOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         this.escapedExpression = escapedExpression;
         this.outputFormat = outputFormat;
-        this.escapeNonTOMs = escapeNonTOMs;
+        this.autoEscapeOutputFormat = autoEscapeOutputFormat;
     }
 
     /**
@@ -54,14 +55,14 @@ final class DollarVariable extends Interpolation {
         Writer out = env.getOut();
         String s = EvalUtil.coerceModelToString(tm, escapedExpression, null, true, env);
         if (s != null) {
-            if (escapeNonTOMs) {
-                outputFormat.output(s, out);
+            if (autoEscapeOutputFormat != null) {
+                autoEscapeOutputFormat.output(s, out);
             } else {
                 out.write(s);
             }
         } else {
-            TemplateOutputModel tom = (TemplateOutputModel) tm;
-            OutputFormat tomOF = tom.getOutputFormat();
+            EscapingTemplateOutputModel tom = (EscapingTemplateOutputModel) tm;
+            EscapingOutputFormat tomOF = tom.getOutputFormat();
             // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
             if (tomOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
                 String srcPlainText;
@@ -73,7 +74,11 @@ final class DollarVariable extends Interpolation {
                             " format, which differs from the current output format, ",
                             new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
                 }
-                outputFormat.output(srcPlainText, out);
+                if (outputFormat instanceof EscapingOutputFormat) {
+                    ((EscapingOutputFormat) outputFormat).output(srcPlainText, out);
+                } else {
+                    out.write(srcPlainText);
+                }
             } else {
                 tomOF.output(tom, out);
             }

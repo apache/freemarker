@@ -21,7 +21,7 @@ import java.util.Set;
 
 import freemarker.core.Environment;
 import freemarker.core.Macro;
-import freemarker.core.TemplateOutputModel;
+import freemarker.core.EscapingTemplateOutputModel;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.CollectionModel;
@@ -234,7 +234,7 @@ public class ClassUtil {
             appendTypeName(sb, typeNamesAppended, "string");
         }
         
-        if (TemplateOutputModel.class.isAssignableFrom(cl)) {
+        if (EscapingTemplateOutputModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "output_fragment");
         }
         

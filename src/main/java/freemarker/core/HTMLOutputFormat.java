@@ -26,7 +26,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class HTMLOutputFormat extends EscapingOutputFormat<HTMLTemplateOutputModel> {
+public final class HTMLOutputFormat extends CommonEscapingOutputFormat<HTMLTemplateOutputModel> {
 
     public static final HTMLOutputFormat INSTANCE = new HTMLOutputFormat();
     

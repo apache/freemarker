@@ -612,7 +612,7 @@ public class TemplateCache {
     }
 
     private ParserConfiguration overrideOutputFormatAndAutoEscaping(
-            final ParserConfiguration pCfg, final OutputFormat<?> outputFormat, final Boolean autoEscaping) {
+            final ParserConfiguration pCfg, final OutputFormat outputFormat, final Boolean autoEscaping) {
         return new ParserConfiguration() {
             
             public boolean getWhitespaceStripping() {
@@ -627,7 +627,7 @@ public class TemplateCache {
                 return pCfg.getStrictSyntaxMode();
             }
             
-            public OutputFormat<?> getOutputFormat() {
+            public OutputFormat getOutputFormat() {
                 return outputFormat != null ? outputFormat : pCfg.getOutputFormat();
             }
             
@@ -649,7 +649,7 @@ public class TemplateCache {
         };
     }
 
-    private OutputFormat<?> getFormatFromStdFileExt(String sourceName) {
+    private OutputFormat getFormatFromStdFileExt(String sourceName) {
         if (sourceName == null) return null;
 
         int ln = sourceName.length();

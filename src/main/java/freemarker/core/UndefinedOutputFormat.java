@@ -22,13 +22,13 @@ import freemarker.template.Configuration;
  * FreeMarker can't select anything more specific (see
  * {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}).
  * With this format auto-escaping ({@link Configuration#setAutoEscaping(boolean)}) has no effect. It will print
- * {@link TemplateOutputModel}-s as is (doesn't try to convert them).
+ * {@link EscapingTemplateOutputModel}-s as is (doesn't try to convert them).
  * 
  * @see PlainTextOutputFormat 
  * 
  * @since 2.3.24
  */
-public final class UndefinedOutputFormat extends NonEscapingOutputFormat<UndefinedTemplateOutputModel> {
+public final class UndefinedOutputFormat extends OutputFormat {
 
     public static final UndefinedOutputFormat INSTANCE = new UndefinedOutputFormat();
     

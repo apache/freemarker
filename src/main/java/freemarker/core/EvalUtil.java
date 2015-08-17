@@ -344,7 +344,7 @@ class EvalUtil {
     
     /**
      * @param allowTOM
-     *            Instead of throwing exception, return {@code null} for a {@link TemplateOutputModel}.
+     *            Instead of throwing exception, return {@code null} for a {@link EscapingTemplateOutputModel}.
      */
     static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint,
             boolean allowTOM,
@@ -353,7 +353,7 @@ class EvalUtil {
             return env.formatNumber(modelToNumber((TemplateNumberModel) tm, exp));
         } else if (tm instanceof TemplateDateModel) {
             return env.formatDate((TemplateDateModel) tm, exp);
-        } else if (allowTOM && tm instanceof TemplateOutputModel) {
+        } else if (allowTOM && tm instanceof EscapingTemplateOutputModel) {
             return null;
         } else if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);

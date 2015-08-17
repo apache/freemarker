@@ -43,8 +43,8 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tWithHeader", "<#ftl outputFormat='HTML'>${.outputFormat}");
         
         Configuration cfg = getConfiguration();
-        for (OutputFormat<?> cfgOutputFormat
-                : new OutputFormat<?>[] { UndefinedOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
+        for (OutputFormat cfgOutputFormat
+                : new OutputFormat[] { UndefinedOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
             if (!cfgOutputFormat.equals(UndefinedOutputFormat.INSTANCE)) {
                 cfg.setOutputFormat(cfgOutputFormat);
             }
@@ -88,9 +88,9 @@ public class OutputFormatTest extends TemplateTest {
         
         Configuration cfg = getConfiguration();
         for (int setupNumber = 1; setupNumber <= 5; setupNumber++) {
-            final OutputFormat<?> cfgOutputFormat;
-            final OutputFormat<?> ftlhOutputFormat;
-            final OutputFormat<?> ftlxOutputFormat;
+            final OutputFormat cfgOutputFormat;
+            final OutputFormat ftlhOutputFormat;
+            final OutputFormat ftlxOutputFormat;
             switch (setupNumber) {
             case 1:
                 cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
@@ -222,7 +222,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed("t.ftlh", "a&amp;x");
         getConfiguration().setRegisteredCustomOutputFormats(Collections.singleton(CustomHTMLOutputFormat.INSTANCE));
         assertOutputForNamed("t.ftlh", "a&amp;X");
-        getConfiguration().setRegisteredCustomOutputFormats(Collections.<OutputFormat<?>>emptyList());
+        getConfiguration().setRegisteredCustomOutputFormats(Collections.<OutputFormat>emptyList());
         assertOutputForNamed("t.ftlh", "a&amp;x");
     }
     

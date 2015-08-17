@@ -104,7 +104,7 @@ public class _TemplateAPI {
         t.setAutoEscaping(autoEscaping);
     }
     
-    public static void setOutputFormat(Template t, OutputFormat<?> outputFormat) {
+    public static void setOutputFormat(Template t, OutputFormat outputFormat) {
         t.setOutputFormat(outputFormat);
     }
     

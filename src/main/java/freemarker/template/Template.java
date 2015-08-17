@@ -88,7 +88,7 @@ public class Template extends Configurable {
     private int actualTagSyntax;
     private int actualNamingConvention;
     private boolean autoEscaping;
-    private OutputFormat<?> outputFormat;
+    private OutputFormat outputFormat;
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
@@ -660,14 +660,14 @@ public class Template extends Configurable {
      * 
      * @since 2.3.24
      */
-    public OutputFormat<?> getOutputFormat() {
+    public OutputFormat getOutputFormat() {
         return outputFormat;
     }
     
     /**
      * Meant to be called by the parser only. 
      */
-    void setOutputFormat(OutputFormat<?> outputFormat) {
+    void setOutputFormat(OutputFormat outputFormat) {
         this.outputFormat = outputFormat;
     }
     

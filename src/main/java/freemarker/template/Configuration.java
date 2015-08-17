@@ -57,15 +57,16 @@ import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
+import freemarker.core.CommonEscapingOutputFormat;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
 import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
-import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.TemplateConfigurer;
-import freemarker.core.TemplateOutputModel;
+import freemarker.core.EscapingTemplateOutputModel;
+import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
@@ -319,9 +320,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         WHITESPACE_STRIPPING_KEY_CAMEL_CASE
     };
     
-    private static final Map<String, OutputFormat<?>> STANDARD_OUTPUT_FORMATS;
+    private static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
     static {
-        STANDARD_OUTPUT_FORMATS = new HashMap<String, OutputFormat<?>>();
+        STANDARD_OUTPUT_FORMATS = new HashMap<String, OutputFormat>();
         STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(XMLOutputFormat.INSTANCE.getName(), XMLOutputFormat.INSTANCE);
@@ -435,9 +436,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
     private Boolean autoEscaping;
-    private OutputFormat<?> outputFormat = UndefinedOutputFormat.INSTANCE;
+    private OutputFormat outputFormat = UndefinedOutputFormat.INSTANCE;
     private boolean outputFormatExplicitlySet;
-    private Map<String, ? extends OutputFormat<?>> registeredCustomOutputFormats = Collections.emptyMap(); 
+    private Map<String, ? extends OutputFormat> registeredCustomOutputFormats = Collections.emptyMap(); 
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
@@ -1690,10 +1691,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *   <li>When printing numbers, dates, and other kind of non-string values with <code>${...}</code>, they will be
      *       first converted to string (according the formatting settings and locale), then they are escaped just like
      *       string values.
-     *   <li>When printing {@link TemplateOutputModel}-s, they aren't escaped again (they are already escaped).
-     *   <li>Auto escaping doesn't do anything eif the current output format has {@code false}
-     *       {@link OutputFormat#isEscaping()}. That's the case for the default output format, {@link UndefinedOutputFormat},
-     *       and also for {@link PlainTextOutputFormat}.
+     *   <li>When printing {@link EscapingTemplateOutputModel}-s, they aren't escaped again (they are already escaped).
+     *   <li>Auto escaping doesn't do anything if the current output format isn't an {@link CommonEscapingOutputFormat}.
+     *       That's the case for the default output format, {@link UndefinedOutputFormat}, and also for
+     *       {@link PlainTextOutputFormat}.
      *   <li>The output format inside a string literal expression is always {@link PlainTextOutputFormat}
      *       (regardless of the output format of the containing template), which is a non-escaping format. Thus for
      *       example, with <code>&lt;#assign s = "foo${bar}"&gt;</code>, {@code bar} will always get into {@code s}
@@ -1759,7 +1760,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
-    public void setOutputFormat(OutputFormat<?> outputFormat) {
+    public void setOutputFormat(OutputFormat outputFormat) {
         if (outputFormat == null) {
             throw new NullArgumentException(
                     "outputFormat",
@@ -1774,7 +1775,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
-    public OutputFormat<?> getOutputFormat() {
+    public OutputFormat getOutputFormat() {
         return outputFormat;
     }
     
@@ -1807,13 +1808,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
-    public OutputFormat<?> getOutputFormat(String name) throws UnregisteredOutputFormatException {
-        OutputFormat<?> custOF = registeredCustomOutputFormats.get(name);
+    public OutputFormat getOutputFormat(String name) throws UnregisteredOutputFormatException {
+        OutputFormat custOF = registeredCustomOutputFormats.get(name);
         if (custOF != null) {
             return custOF;
         }
         
-        OutputFormat<?> stdOF = STANDARD_OUTPUT_FORMATS.get(name);
+        OutputFormat stdOF = STANDARD_OUTPUT_FORMATS.get(name);
         if (stdOF == null) {
             StringBuilder sb = new StringBuilder();
             sb.append("Unregistered output format name, ");
@@ -1866,11 +1867,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
-    public void setRegisteredCustomOutputFormats(Collection<? extends OutputFormat<?>> registeredCustomOutputFormats) {
+    public void setRegisteredCustomOutputFormats(Collection<? extends OutputFormat> registeredCustomOutputFormats) {
         NullArgumentException.check(registeredCustomOutputFormats);
-        Map<String, OutputFormat<?>> m = new LinkedHashMap<String, OutputFormat<?>>(
+        Map<String, OutputFormat> m = new LinkedHashMap<String, OutputFormat>(
                 registeredCustomOutputFormats.size() * 4 / 3, 1f);
-        for (OutputFormat<?> outputFormat : registeredCustomOutputFormats) {
+        for (OutputFormat outputFormat : registeredCustomOutputFormats) {
             String name = outputFormat.getName();
             if (name.equals(UndefinedOutputFormat.INSTANCE.getName())) {
                 throw new IllegalArgumentException(
@@ -1892,7 +1893,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                         + name);
             }
             
-            OutputFormat<?> replaced = m.put(outputFormat.getName(), outputFormat);
+            OutputFormat replaced = m.put(outputFormat.getName(), outputFormat);
             if (replaced != null) {
                 if (replaced == outputFormat) {
                     throw new IllegalArgumentException(
@@ -1912,7 +1913,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
-    public Collection<? extends OutputFormat<?>> getRegisteredCustomOutputFormats() {
+    public Collection<? extends OutputFormat> getRegisteredCustomOutputFormats() {
         return registeredCustomOutputFormats.values();
     }
 
