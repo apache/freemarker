@@ -21,9 +21,9 @@ import freemarker.template.utility.NullArgumentException;
 
 abstract class BuiltInForEscapingOutputFormatRelated extends SpecialBuiltIn {
     
-    protected EscapingOutputFormat outputFormat;
+    protected MarkupOutputFormat outputFormat;
     
-    void bindToOutputFormat(EscapingOutputFormat outputFormat) {
+    void bindToOutputFormat(MarkupOutputFormat outputFormat) {
         NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
     }

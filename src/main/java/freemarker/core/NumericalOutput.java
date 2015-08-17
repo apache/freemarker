@@ -34,10 +34,10 @@ final class NumericalOutput extends Interpolation {
     private final int minFracDigits;
     private final int maxFracDigits;
     /** For OutputFormat-based auto-escaping */
-    private final EscapingOutputFormat autoEscapeOutputFormat;
+    private final MarkupOutputFormat autoEscapeOutputFormat;
     private volatile FormatHolder formatCache; // creating new NumberFormat is slow operation
 
-    NumericalOutput(Expression expression, EscapingOutputFormat autoEscapeOutputFormat) {
+    NumericalOutput(Expression expression, MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         hasFormat = false;
         this.minFracDigits = 0;
@@ -47,7 +47,7 @@ final class NumericalOutput extends Interpolation {
 
     NumericalOutput(Expression expression,
             int minFracDigits, int maxFracDigits,
-            EscapingOutputFormat autoEscapeOutputFormat) {
+            MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         hasFormat = true;
         this.minFracDigits = minFracDigits;

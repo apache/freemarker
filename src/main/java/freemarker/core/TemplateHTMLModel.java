@@ -16,16 +16,16 @@
 package freemarker.core;
 
 /**
- * Stores HTML output.
+ * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
  * 
  * @since 2.3.24
  */
-public final class HTMLTemplateOutputModel extends CommonEscapingTemplateOutputModel<HTMLTemplateOutputModel> {
+public final class TemplateHTMLModel extends CommonTemplateMarkupOutputModel<TemplateHTMLModel> {
     
     /**
-     * See {@link CommonEscapingTemplateOutputModel#CommonEscapingTemplateOutputModel(String, String)}.
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
      */
-    HTMLTemplateOutputModel(String plainTextContent, String markupContent) {
+    TemplateHTMLModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 

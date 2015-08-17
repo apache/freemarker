@@ -409,7 +409,7 @@ public class OutputFormatTest extends TemplateTest {
 
     @Test
     public void testStringBIsFail() {
-        assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "output_fragment");
+        assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "markup_output");
     }
 
     @Test

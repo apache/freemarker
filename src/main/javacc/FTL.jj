@@ -1961,12 +1961,12 @@ Expression BuiltIn(Expression lhoExp) :
         }
 
         if (result instanceof BuiltInForEscapingOutputFormatRelated) {
-            if (!(outputFormat instanceof EscapingOutputFormat)) {
+            if (!(outputFormat instanceof MarkupOutputFormat)) {
                 throw new ParseException(
                         "?" + t.image + " can't be used here, as the current output format isn't an escaping one: "
                         + outputFormat, template, t);
             }
-            ((BuiltInForEscapingOutputFormatRelated) result).bindToOutputFormat((EscapingOutputFormat) outputFormat);
+            ((BuiltInForEscapingOutputFormatRelated) result).bindToOutputFormat((MarkupOutputFormat) outputFormat);
             
             return result;
         }
@@ -2191,8 +2191,8 @@ DollarVariable StringOutput() :
         DollarVariable result = new DollarVariable(
                 exp, escapedExpression(exp),
                 outputFormat,
-                autoEscaping && outputFormat instanceof EscapingOutputFormat
-                        ? (EscapingOutputFormat)  outputFormat : null);
+                autoEscaping && outputFormat instanceof MarkupOutputFormat
+                        ? (MarkupOutputFormat)  outputFormat : null);
         result.setLocation(template, begin, end);
         return result;
     }
@@ -2212,8 +2212,8 @@ NumericalOutput NumericalOutput() :
     ]
     end = <CLOSING_CURLY_BRACKET>
     {
-        EscapingOutputFormat<?> autoEscOF = autoEscaping && outputFormat instanceof EscapingOutputFormat
-                ? (EscapingOutputFormat<?>) outputFormat : null;
+        MarkupOutputFormat<?> autoEscOF = autoEscaping && outputFormat instanceof MarkupOutputFormat
+                ? (MarkupOutputFormat<?>) outputFormat : null;
     
         NumericalOutput result;
         if (fmt != null) {

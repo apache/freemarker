@@ -16,7 +16,8 @@
 package freemarker.core;
 
 /**
- * Common superclass for implementing {@link EscapingTemplateOutputModel}-s.
+ * Common superclass for implementing {@link TemplateMarkupOutputModel}-s that belong to a
+ * {@link CommonMarkupOutputFormat} subclass format.
  * 
  * <p>
  * Thread-safe after proper publishing. Calculated fields (typically, the markup calculated from plain text) might will
@@ -25,8 +26,8 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public abstract class CommonEscapingTemplateOutputModel<TOM extends CommonEscapingTemplateOutputModel<TOM>>
-        implements EscapingTemplateOutputModel<TOM> {
+public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateMarkupOutputModel<MO>>
+        implements TemplateMarkupOutputModel<MO> {
 
     private final String plainTextContent;
     private String markupContet;
@@ -34,12 +35,12 @@ public abstract class CommonEscapingTemplateOutputModel<TOM extends CommonEscapi
     /**
      * A least one of the parameters must be non-{@code null}!
      */
-    CommonEscapingTemplateOutputModel(String plainTextContent, String markupContent) {
+    protected CommonTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
         this.plainTextContent = plainTextContent;
         this.markupContet = markupContent;
     }
 
-    public abstract CommonEscapingOutputFormat<TOM> getOutputFormat();
+    public abstract CommonMarkupOutputFormat<MO> getOutputFormat();
 
     /** Maybe {@code null}, but then the other field isn't {@code null}. */
     final String getPlainTextContent() {

@@ -15,23 +15,15 @@
  */
 package freemarker.core;
 
-/**
- * Stores XML output.
- * 
- * @since 2.3.24
- */
-public final class XMLTemplateOutputModel extends CommonEscapingTemplateOutputModel<XMLTemplateOutputModel> {
+public final class CustomTemplateHTMLModel extends CommonTemplateMarkupOutputModel<CustomTemplateHTMLModel> {
     
-    /**
-     * See {@link CommonEscapingTemplateOutputModel#CommonEscapingTemplateOutputModel(String, String)}.
-     */
-    XMLTemplateOutputModel(String plainTextContent, String markupContent) {
+    CustomTemplateHTMLModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 
     @Override
-    public XMLOutputFormat getOutputFormat() {
-        return XMLOutputFormat.INSTANCE;
+    public CustomHTMLOutputFormat getOutputFormat() {
+        return CustomHTMLOutputFormat.INSTANCE;
     }
 
 }

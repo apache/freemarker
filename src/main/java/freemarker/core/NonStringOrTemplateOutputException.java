@@ -21,7 +21,7 @@ import freemarker.template.TemplateScalarModel;
 
 /**
  * Indicates that a {@link TemplateScalarModel} (or maybe something that can be automatically coerced
- * to that) or {@link EscapingTemplateOutputModel} value was expected, but the value had a different type.
+ * to that) or {@link TemplateMarkupOutputModel} value was expected, but the value had a different type.
  */
 public class NonStringOrTemplateOutputException extends UnexpectedTypeException {
 
@@ -35,7 +35,7 @@ public class NonStringOrTemplateOutputException extends UnexpectedTypeException 
         for (i = 0; i < NonStringException.STRING_COERCABLE_TYPES.length; i++) {
             STRING_COERCABLE_TYPES_AND_TOM[i] = NonStringException.STRING_COERCABLE_TYPES[i];
         }
-        STRING_COERCABLE_TYPES_AND_TOM[i] = EscapingTemplateOutputModel.class;
+        STRING_COERCABLE_TYPES_AND_TOM[i] = TemplateMarkupOutputModel.class;
     };
     
     private static final String DEFAULT_DESCRIPTION

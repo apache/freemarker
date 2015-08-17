@@ -57,7 +57,7 @@ import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
-import freemarker.core.CommonEscapingOutputFormat;
+import freemarker.core.CommonMarkupOutputFormat;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
@@ -65,7 +65,7 @@ import freemarker.core.ParserConfiguration;
 import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.TemplateConfigurer;
-import freemarker.core.EscapingTemplateOutputModel;
+import freemarker.core.TemplateMarkupOutputModel;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
@@ -1691,8 +1691,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *   <li>When printing numbers, dates, and other kind of non-string values with <code>${...}</code>, they will be
      *       first converted to string (according the formatting settings and locale), then they are escaped just like
      *       string values.
-     *   <li>When printing {@link EscapingTemplateOutputModel}-s, they aren't escaped again (they are already escaped).
-     *   <li>Auto escaping doesn't do anything if the current output format isn't an {@link CommonEscapingOutputFormat}.
+     *   <li>When printing {@link TemplateMarkupOutputModel}-s, they aren't escaped again (they are already escaped).
+     *   <li>Auto escaping doesn't do anything if the current output format isn't an {@link CommonMarkupOutputFormat}.
      *       That's the case for the default output format, {@link UndefinedOutputFormat}, and also for
      *       {@link PlainTextOutputFormat}.
      *   <li>The output format inside a string literal expression is always {@link PlainTextOutputFormat}

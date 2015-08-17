@@ -22,7 +22,7 @@ import freemarker.template.Configuration;
  * FreeMarker can't select anything more specific (see
  * {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}).
  * With this format auto-escaping ({@link Configuration#setAutoEscaping(boolean)}) has no effect. It will print
- * {@link EscapingTemplateOutputModel}-s as is (doesn't try to convert them).
+ * {@link TemplateMarkupOutputModel}-s as is (doesn't try to convert them).
  * 
  * @see PlainTextOutputFormat 
  * 

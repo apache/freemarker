@@ -26,7 +26,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class CustomHTMLOutputFormat extends CommonEscapingOutputFormat<CustomHTMLTemplateOutputModel> {
+public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<CustomTemplateHTMLModel> {
 
     public static final CustomHTMLOutputFormat INSTANCE = new CustomHTMLOutputFormat();
     
@@ -61,8 +61,8 @@ public final class CustomHTMLOutputFormat extends CommonEscapingOutputFormat<Cus
     }
 
     @Override
-    protected CustomHTMLTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
-        return new CustomHTMLTemplateOutputModel(plainTextContent, markupContent);
+    protected CustomTemplateHTMLModel newTOM(String plainTextContent, String markupContent) {
+        return new CustomTemplateHTMLModel(plainTextContent, markupContent);
     }
 
 }

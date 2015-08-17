@@ -21,14 +21,15 @@ import java.io.Writer;
 import freemarker.template.TemplateModelException;
 
 /**
- * Common superclass for implementing {@link OutputFormat}-s that use a {@link CommonEscapingTemplateOutputModel} subclass.
+ * Common superclass for implementing {@link MarkupOutputFormat}-s that use a {@link CommonTemplateMarkupOutputModel}
+ * subclass.
  * 
  * @since 2.3.24
  */
-public abstract class CommonEscapingOutputFormat<TOM extends CommonEscapingTemplateOutputModel>
-extends EscapingOutputFormat<TOM> {
+public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOutputModel>
+        extends MarkupOutputFormat<MO> {
 
-    protected CommonEscapingOutputFormat() {
+    protected CommonMarkupOutputFormat() {
         // Only to decrease visibility
     }
     
@@ -36,74 +37,74 @@ extends EscapingOutputFormat<TOM> {
      * Prints the parameter model to the output.
      */
     @Override
-    public final void output(TOM tom, Writer out) throws IOException, TemplateModelException {
-        String mc = tom.getMarkupContent();
+    public final void output(MO mo, Writer out) throws IOException, TemplateModelException {
+        String mc = mo.getMarkupContent();
         if (mc != null) {
             out.write(mc);
         } else {
-            output(tom.getPlainTextContent(), out);
+            output(mo.getPlainTextContent(), out);
         }
     }
 
     /**
      * Equivalent to calling {@link #escapePlainText(String)} and then
-     * {@link #output(CommonEscapingTemplateOutputModel, Writer)}, but implementators should chose a more efficient way.
+     * {@link #output(CommonTemplateMarkupOutputModel, Writer)}, but implementators should chose a more efficient way.
      */
     @Override
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
     
     /**
-     * Converts {@link String} that's assumed to be plain text to {@link EscapingTemplateOutputModel}, by escaping any special
+     * Converts {@link String} that's assumed to be plain text to {@link TemplateMarkupOutputModel}, by escaping any special
      * characters in the plain text. This corresponds to {@code ?esc}, or, to outputting with auto-escaping if that
      * wasn't using {@link #output(String, Writer)} as an optimization.
      */
     @Override
-    public final TOM escapePlainText(String textToEsc) throws TemplateModelException {
+    public final MO escapePlainText(String textToEsc) throws TemplateModelException {
         return newTOM(textToEsc, null);
     }
 
     /**
-     * If this {@link EscapingTemplateOutputModel} was created with {@link #escapePlainText(String)}, it returns the original
+     * If this {@link TemplateMarkupOutputModel} was created with {@link #escapePlainText(String)}, it returns the original
      * plain text, otherwise it might returns {@code null}. Needed for re-escaping, like in {@code alreadyTOM?attrEsc}.
      */
     @Override
-    public final String getSourcePlainText(TOM tom) {
-        return tom.getPlainTextContent();
+    public final String getSourcePlainText(MO mo) {
+        return mo.getPlainTextContent();
     }
 
     /**
-     * Wraps {@link String} that's already markup to {@link EscapingTemplateOutputModel} interface, to indicate its format. This
+     * Wraps {@link String} that's already markup to {@link TemplateMarkupOutputModel} interface, to indicate its format. This
      * corresponds to {@code ?noEsc}. (This methods is allowed to throw {@link TemplateModelException} if the parameter
      * markup text is malformed, but it's unlikely that an implementation chooses to parse the parameter until, and if
      * ever, that becomes necessary.) 
      */
     @Override
-    public final TOM fromMarkup(String markupText) throws TemplateModelException {
+    public final MO fromMarkup(String markupText) throws TemplateModelException {
         return newTOM(null, markupText);
     }
 
     /**
-     * Returns the content as markup text. If this {@link EscapingTemplateOutputModel} was created with
+     * Returns the content as markup text. If this {@link TemplateMarkupOutputModel} was created with
      * {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required as far
      * as the returned markup means the same.
      */
     @Override
-    public final String getMarkup(TOM tom) {
-        String mc = tom.getMarkupContent();
+    public final String getMarkup(MO mo) {
+        String mc = mo.getMarkupContent();
         if (mc != null) {
             return mc;
         }
         
-        mc = escapePlainTextToString(tom.getPlainTextContent());
-        tom.setMarkupContet(mc);
+        mc = escapePlainTextToString(mo.getPlainTextContent());
+        mo.setMarkupContet(mc);
         return mc;
     }
     
     /**
-     * Returns a {@link EscapingTemplateOutputModel} that contains the content of both {@link EscapingTemplateOutputModel} concatenated.  
+     * Returns a {@link TemplateMarkupOutputModel} that contains the content of both {@link TemplateMarkupOutputModel} concatenated.  
      */
     @Override
-    public final TOM concat(TOM tom1, TOM tom2) {
+    public final MO concat(MO tom1, MO tom2) {
         String pc1 = tom1.getPlainTextContent();
         String mc1 = tom1.getMarkupContent();
         String pc2 = tom2.getPlainTextContent();
@@ -129,11 +130,11 @@ extends EscapingOutputFormat<TOM> {
 
     protected abstract String escapePlainTextToString(String plainTextContent);
 
-    protected abstract TOM newTOM(String plainTextContent, String markupContent);
+    protected abstract MO newTOM(String plainTextContent, String markupContent);
 
     /**
-     * Tells if a string built-in that can't handle a {@link EscapingTemplateOutputModel} left operand can bypass this object
-     * as is. A typical such case would be when a {@link EscapingTemplateOutputModel} of "HTML" format bypasses {@code ?html}.
+     * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left operand can bypass this object
+     * as is. A typical such case would be when a {@link TemplateMarkupOutputModel} of "HTML" format bypasses {@code ?html}.
      */
     @Override
     public abstract boolean isLegacyBuiltInBypassed(String builtInName);

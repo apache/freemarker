@@ -19,20 +19,20 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateModel;
 
 /**
- * "output" template language data-type; stores "markup" (some kind of "rich text" / structured format), as opposed to
- * plain text. Each implementation of this type has a {@link OutputFormat} subclass pair (like
- * {@link HTMLTemplateOutputModel} and {@link HTMLOutputFormat}). This type is related to the
- * {@link Configuration#setOutputFormat(OutputFormat)} and {@link Configuration#setAutoEscaping(boolean)}
+ * "markup output" template language data-type; stores markup (some kind of "rich text" / structured format), as opposed
+ * to plain text that meant to be printed as template output. Each implementation of this type has a
+ * {@link OutputFormat} subclass pair (like {@link TemplateHTMLModel} has {@link HTMLOutputFormat}). This type is
+ * related to the {@link Configuration#setOutputFormat(OutputFormat)} and {@link Configuration#setAutoEscaping(boolean)}
  * mechanism; see more there. Values of this type are exempt from automatic escaping with that mechanism.
  * 
- * @param <TOM>
- *            Refers to the interface's own type, which is useful in interfaces that extend {@link EscapingTemplateOutputModel}
- *            (Java Generics trick).
+ * @param <MO>
+ *            Refers to the interface's own type, which is useful in interfaces that extend
+ *            {@link TemplateMarkupOutputModel} (Java Generics trick).
  * 
  * @since 2.3.24
  */
-public interface EscapingTemplateOutputModel<TOM extends EscapingTemplateOutputModel<TOM>> extends TemplateModel {
+public interface TemplateMarkupOutputModel<MO extends TemplateMarkupOutputModel<MO>> extends TemplateModel {
 
-    EscapingOutputFormat<TOM> getOutputFormat();
+    MarkupOutputFormat<MO> getOutputFormat();
     
 }

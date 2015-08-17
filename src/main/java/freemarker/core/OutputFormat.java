@@ -19,7 +19,7 @@ import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Encapsulates the {@link EscapingTemplateOutputModel} factories and {@code TemplateOutputModel} operations, and other meta
+ * Encapsulates the {@link TemplateMarkupOutputModel} factories and {@code TemplateOutputModel} operations, and other meta
  * information (like MIME type) about a certain output format.
  * 
  * @since 2.3.24
@@ -27,8 +27,8 @@ import freemarker.template.utility.StringUtil;
 public abstract class OutputFormat {
 
     /**
-     * Tells if this output format allows inserting {@link EscapingTemplateOutputModel}-s of another output formats into it. If
-     * {@code true}, the foreign {@link EscapingTemplateOutputModel} will be inserted into the output as is (like if the
+     * Tells if this output format allows inserting {@link TemplateMarkupOutputModel}-s of another output formats into it. If
+     * {@code true}, the foreign {@link TemplateMarkupOutputModel} will be inserted into the output as is (like if the
      * surrounding output format was the same). This is usually a bad idea, as such an even could indicate application
      * bugs. If this method returns {@code false} (recommended), then FreeMarker will try to assimilate the inserted
      * value by converting its format to this format, which will currently (2.3.24) cause exception, unless the inserted

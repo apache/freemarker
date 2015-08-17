@@ -15,18 +15,23 @@
  */
 package freemarker.core;
 
-public final class CustomHTMLTemplateOutputModel extends CommonEscapingTemplateOutputModel<CustomHTMLTemplateOutputModel> {
+/**
+ * Stores XML markup to be printed; used with {@link XMLOutputFormat}.
+ * 
+ * @since 2.3.24
+ */
+public final class TemplateXMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXMLOutputModel> {
     
     /**
-     * See {@link CommonEscapingTemplateOutputModel#CommonEscapingTemplateOutputModel(String, String)}.
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
      */
-    CustomHTMLTemplateOutputModel(String plainTextContent, String markupContent) {
+    TemplateXMLOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 
     @Override
-    public CustomHTMLOutputFormat getOutputFormat() {
-        return CustomHTMLOutputFormat.INSTANCE;
+    public XMLOutputFormat getOutputFormat() {
+        return XMLOutputFormat.INSTANCE;
     }
 
 }
