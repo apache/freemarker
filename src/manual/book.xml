@@ -23744,11 +23744,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>output_format</literal> (or
               <literal>outputFormat</literal>). This specifies the name of the
               output format (such as <literal>HTML</literal>,
-              <literal>XML</literal>, <literal>raw</literal>, etc.) that
-              governs the new auto-escaping mechanism (TODO: not yet
-              implemented). The output format can be different for different
-              templates, using the <literal>template_configurers</literal>
-              setting. [TODO describe this more]</para>
+              <literal>XML</literal>, <literal>plainText</literal>, etc.) that
+              governs the new auto-escaping mechanism. The output format can
+              be different for different templates, using the
+              <literal>template_configurers</literal> setting. [TODO describe
+              this more]</para>
             </listitem>
 
             <listitem>
@@ -23763,6 +23763,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               both cases with <literal>auto_escaping</literal> on. (These can
               be overridden with <literal>template_configurers</literal> of
               course.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added new configuration setting:
+              <literal>registered_custom_output_formats</literal> (or
+              <literal>registeredCustomOutputFormats</literal>). With this you
+              can add new <literal>OutputFormat</literal>-s that templates can
+              refer to by name (like in <literal>&lt;#ftl
+              output_format="foo"&gt;</literal>).</para>
             </listitem>
 
             <listitem>

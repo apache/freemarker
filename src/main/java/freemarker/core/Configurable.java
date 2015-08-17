@@ -1534,9 +1534,16 @@ public class Configurable {
      *       Case insensitive.
      *       
      *   <li><p>{@code "output_format"}:
-     *       See {@link Configuration#setOutputFormat(String)}.
-     *       <br>String value: {@code "default"} (case insensitive) for the default, or an output format name
-     *       like {@code "raw"}, {@code "HTML"}, {@code "XML"}, etc.
+     *       See {@link Configuration#setOutputFormat(OutputFormat)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or an
+     *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
+     *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
+     *       
+     *   <li><p>{@code "registered_custom_output_formats"}:
+     *       See {@link Configuration#setRegisteredCustomOutputFormats(Collection)}.
+     *       <br>String value: an <a href="#fm_obe">object builder expression</a> that gives a {@link List} of
+     *       {@link OutputFormat}-s.
+     *       Example: {@code [com.example.MyOutputFormat(), com.example.MyOtherOutputFormat()]}
      *       
      *   <li><p>{@code "strict_syntax"}:
      *       See {@link Configuration#setStrictSyntaxMode}. Deprecated.
@@ -1662,8 +1669,15 @@ public class Configurable {
      *        <li>The null literal: {@code null}
      *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
      *            <tt>#{...}</tt>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
+     *        <li>A list literal (since 2.3.24) with FTL-like syntax, for example {@code ['foo', 2, true]}.
+     *            If the parameter is expected to be array, the list will be automatically converted to array.
+     *            The list items can be any kind of expression, like even object builder expressions.
      *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
      *      </ul>
+     *   </li>
+     *   <li>
+     *     The same kind of expression as for parameters can also be used as top-level expressions (though it's
+     *     rarely useful, apart from using {@code null}).
      *   </li>
      *   <li>
      *     <p>The top-level object builder expressions may omit {@code ()}. In that case, for backward compatibility,
@@ -1676,7 +1690,9 @@ public class Configurable {
      *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
      *     {@link TemplateConfigurer}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurerFactory},
-     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory}.
+     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory},
+     *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
+     *     {@link UndefinedOutputFormat}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
@@ -1746,7 +1762,7 @@ public class Configurable {
                     }
                 } else {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateExceptionHandler.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) { 
@@ -1759,7 +1775,7 @@ public class Configurable {
                     }
                 } else {
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
-                            value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
+                            value, ArithmeticEngine.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name) || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
                 if (DEFAULT.equalsIgnoreCase(value)) {
@@ -1781,7 +1797,7 @@ public class Configurable {
                             (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
-                                    value, ObjectWrapper.class, _SettingEvaluationEnvironment.getCurrent()));
+                                    value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setBooleanFormat(value);
@@ -1831,7 +1847,8 @@ public class Configurable {
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
                 } else if (value.indexOf('.') != -1) {
                     setNewBuiltinClassResolver((TemplateClassResolver) _ObjectBuilderSettingEvaluator.eval(
-                                    value, TemplateClassResolver.class, _SettingEvaluationEnvironment.getCurrent()));
+                                    value, TemplateClassResolver.class, false,
+                                    _SettingEvaluationEnvironment.getCurrent()));
                 } else {
                     throw invalidSettingValueException(name, value);
                 }

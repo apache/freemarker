@@ -33,6 +33,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
@@ -49,8 +51,14 @@ import freemarker.core.Configurable;
 import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
 import freemarker.core.ConfigurableTest;
+import freemarker.core.CustomHTMLOutputFormat;
+import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
+import freemarker.core.HTMLOutputFormat;
+import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
+import freemarker.core.UndefinedOutputFormat;
+import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.StringModel;
@@ -875,7 +883,7 @@ public class ConfigurationTest extends TestCase {
     public void testSetOutputFormat() throws Exception {
        Configuration cfg = new Configuration();
        
-       assertEquals(Configuration.RAW_OUTPUT_FORMAT, cfg.getOutputFormat());
+       assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getOutputFormat());
        assertFalse(cfg.isOutputFormatExplicitlySet());
        
        try {
@@ -887,22 +895,17 @@ public class ConfigurationTest extends TestCase {
        
        assertFalse(cfg.isOutputFormatExplicitlySet());
        
-       String s = "Has to accept anything";
-       cfg.setOutputFormat(s);
-       assertEquals(s, cfg.getOutputFormat());
-       assertTrue(cfg.isOutputFormatExplicitlySet());
+       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, XMLOutputFormat.class.getSimpleName());
+       assertEquals(XMLOutputFormat.INSTANCE, cfg.getOutputFormat());
        
-       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, "cc");
-       assertEquals("cc", cfg.getOutputFormat());
-       
-       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_SNAKE_CASE, "sc");
-       assertEquals("sc", cfg.getOutputFormat());
+       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_SNAKE_CASE, HTMLOutputFormat.class.getSimpleName());
+       assertEquals(HTMLOutputFormat.INSTANCE, cfg.getOutputFormat());
        
        cfg.unsetOutputFormat();
-       assertEquals(cfg.getOutputFormat(), Configuration.RAW_OUTPUT_FORMAT);
+       assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getOutputFormat());
        assertFalse(cfg.isOutputFormatExplicitlySet());
        
-       cfg.setOutputFormat(Configuration.RAW_OUTPUT_FORMAT);
+       cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
        assertTrue(cfg.isOutputFormatExplicitlySet());
        cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, "default");
        assertFalse(cfg.isOutputFormatExplicitlySet());
@@ -910,10 +913,29 @@ public class ConfigurationTest extends TestCase {
        try {
            cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY, "null");
        } catch (SettingValueAssignmentException e) {
-           assertThat(e.getCause().getMessage(), containsString(Configuration.RAW_OUTPUT_FORMAT));
+           assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }
     }
 
+    public void testSetRegisteredCustomOutputFormats() throws Exception {
+        Configuration cfg = new Configuration();
+        
+        assertTrue(cfg.getRegisteredCustomOutputFormats().isEmpty());
+        
+        cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
+                "[freemarker.core.CustomHTMLOutputFormat(), freemarker.core.DummyOutputFormat()]");
+        assertEquals(
+                ImmutableList.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE),
+                new ArrayList(cfg.getRegisteredCustomOutputFormats()));
+        
+        try {
+            cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfigurer()]");
+            fail();
+        } catch (Exception e) {
+            assertThat(e.getCause().getMessage(), containsString(OutputFormat.class.getSimpleName()));
+        }
+    }
+    
     public void testSetTimeZone() throws TemplateException {
         TimeZone origSysDefTZ = TimeZone.getDefault();
         try {

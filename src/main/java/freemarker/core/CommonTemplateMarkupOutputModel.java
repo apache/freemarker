@@ -15,10 +15,9 @@
  */
 package freemarker.core;
 
-import freemarker.template.TemplateOutputModel;
-
 /**
- * Common superclass for implementing {@link TemplateOutputModel}-s.
+ * Common superclass for implementing {@link TemplateMarkupOutputModel}-s that belong to a
+ * {@link CommonMarkupOutputFormat} subclass format.
  * 
  * <p>
  * Thread-safe after proper publishing. Calculated fields (typically, the markup calculated from plain text) might will
@@ -27,8 +26,8 @@ import freemarker.template.TemplateOutputModel;
  * 
  * @since 2.3.24
  */
-public abstract class GenericTemplateOutputModel<TOM extends GenericTemplateOutputModel<TOM>>
-        implements TemplateOutputModel<TOM> {
+public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateMarkupOutputModel<MO>>
+        implements TemplateMarkupOutputModel<MO> {
 
     private final String plainTextContent;
     private String markupContet;
@@ -36,12 +35,12 @@ public abstract class GenericTemplateOutputModel<TOM extends GenericTemplateOutp
     /**
      * A least one of the parameters must be non-{@code null}!
      */
-    GenericTemplateOutputModel(String plainTextContent, String markupContet) {
+    protected CommonTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
         this.plainTextContent = plainTextContent;
-        this.markupContet = markupContet;
+        this.markupContet = markupContent;
     }
 
-    public abstract OutputFormat<TOM> getOutputFormat();
+    public abstract CommonMarkupOutputFormat<MO> getOutputFormat();
 
     /** Maybe {@code null}, but then the other field isn't {@code null}. */
     final String getPlainTextContent() {

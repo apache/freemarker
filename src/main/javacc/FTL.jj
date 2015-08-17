@@ -51,11 +51,9 @@ public class FMParser {
 
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
-    private String outputFormat;
+    private OutputFormat outputFormat;
     private boolean autoEscaping;
     private ParserConfiguration pCfg;
-    private String cachedEscapingOutputFormatKey;
-    private OutputFormat cachedEscapingOutputFormatValue;
 
     /** Keeps track of #list and #foreach nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
@@ -240,38 +238,13 @@ public class FMParser {
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
-        outputFormat = Configuration.RAW_OUTPUT_FORMAT;
+        outputFormat = PlainTextOutputFormat.INSTANCE;
         autoEscaping = true;
     }
 
     void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
         parentTokenSource.namingConvention = token_source.namingConvention;
         parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
-    }
-
-    /**
-     * @param template Used for error message position only
-     * @param begin Used for error message position only
-     * @param end Used for error message position only
-     */
-    @SuppressFBWarnings(value="ES_COMPARING_STRINGS_WITH_EQ",
-            justification="Faster for cache hits, occasional misses aren't a problem.")
-    private OutputFormat getCurrentEscapingOutputFormat(Template template, Token begin, Token end)
-    throws ParseException {        if (cachedEscapingOutputFormatKey != outputFormat) {  // deliberately not "equals"
-	        OutputFormat value;
-	        try {
-	            value = template.getConfiguration().getOutputFormat(outputFormat);
-	        } catch (UnknownOutputFormatException e) {
-	            throw new ParseException(
-	                    e.getMessage(),
-	                    template, begin.beginLine, begin.beginColumn, end.endLine, end.endColumn,
-	                    e.getCause());
-	        }
-	        cachedEscapingOutputFormatKey = outputFormat;
-	        cachedEscapingOutputFormatValue = value.isEscaping() ? value : null;
-        }
-        
-        return cachedEscapingOutputFormatValue; 
     }
 
     /**
@@ -1875,7 +1848,7 @@ BuiltinVariable BuiltinVariable() :
 
         TemplateModel parseTimeValue;
         if (name.image.equals(BuiltinVariable.OUTPUT_FORMAT) || name.image.equals(BuiltinVariable.OUTPUT_FORMAT_CC)) {
-            parseTimeValue = new SimpleScalar(outputFormat);
+            parseTimeValue = new SimpleScalar(outputFormat.getName());
         } else {            parseTimeValue = null;
         }        
         result = new BuiltinVariable(name, token_source, parseTimeValue);
@@ -1987,14 +1960,13 @@ Expression BuiltIn(Expression lhoExp) :
             return result;
         }
 
-        if (result instanceof BuiltInForOutputFormatRelated) {
-            OutputFormat curEscOF = getCurrentEscapingOutputFormat(template, t, t);
-            if (curEscOF == null) {
+        if (result instanceof BuiltInForEscapingOutputFormatRelated) {
+            if (!(outputFormat instanceof MarkupOutputFormat)) {
                 throw new ParseException(
-                        "Built-in can't be used here, as the current output format isn't an escaping one: "
+                        "?" + t.image + " can't be used here, as the current output format isn't an escaping one: "
                         + outputFormat, template, t);
             }
-            ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(curEscOF);
+            ((BuiltInForEscapingOutputFormatRelated) result).bindToOutputFormat((MarkupOutputFormat) outputFormat);
             
             return result;
         }
@@ -2216,11 +2188,11 @@ DollarVariable StringOutput() :
     }
     end = <CLOSING_CURLY_BRACKET>
     {
-        OutputFormat autoEscOF;
-        if (autoEscaping) {            autoEscOF = getCurrentEscapingOutputFormat(template, begin, end);
-        } else {            autoEscOF = null;
-        }
-        DollarVariable result = new DollarVariable(exp, escapedExpression(exp), autoEscOF);
+        DollarVariable result = new DollarVariable(
+                exp, escapedExpression(exp),
+                outputFormat,
+                autoEscaping && outputFormat instanceof MarkupOutputFormat
+                        ? (MarkupOutputFormat)  outputFormat : null);
         result.setLocation(template, begin, end);
         return result;
     }
@@ -2240,6 +2212,9 @@ NumericalOutput NumericalOutput() :
     ]
     end = <CLOSING_CURLY_BRACKET>
     {
+        MarkupOutputFormat<?> autoEscOF = autoEscaping && outputFormat instanceof MarkupOutputFormat
+                ? (MarkupOutputFormat<?>) outputFormat : null;
+    
         NumericalOutput result;
         if (fmt != null) {
             int minFrac = -1;  // -1 indicates that the value has not been set
@@ -2294,9 +2269,9 @@ NumericalOutput NumericalOutput() :
             if (minFrac > 50 || maxFrac > 50) {// sanity check
                 throw new ParseException("Cannot specify more than 50 fraction digits", template, fmt);
             }
-            result = new NumericalOutput(exp, minFrac, maxFrac);
+            result = new NumericalOutput(exp, minFrac, maxFrac, autoEscOF);
         } else {  // if format != null
-            result = new NumericalOutput(exp);
+            result = new NumericalOutput(exp, autoEscOF);
         }
         result.setLocation(template, begin, end);
         return result;
@@ -3806,8 +3781,11 @@ void HeaderElement() :
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
                             }
-                            outputFormat = vs;
-                            // TODO Check if outputFormat is registered
+                            try {
+                                outputFormat = template.getConfiguration().getOutputFormat(vs);
+                            } catch (UnregisteredOutputFormatException e) {
+                                throw new ParseException(e.getMessage(), exp);
+                            }
                             _TemplateAPI.setOutputFormat(template, outputFormat);
                         } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {

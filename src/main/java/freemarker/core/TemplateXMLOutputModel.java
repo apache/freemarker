@@ -15,27 +15,23 @@
  */
 package freemarker.core;
 
-import freemarker.template.utility.StringUtil;
-
 /**
+ * Stores XML markup to be printed; used with {@link XMLOutputFormat}.
+ * 
  * @since 2.3.24
  */
-public class UnknownOutputFormatException extends Exception {
-
-    private final String outputFormat;
-
-    public UnknownOutputFormatException(String outputFormat) {
-        this(outputFormat, null);
-    }
+public final class TemplateXMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXMLOutputModel> {
     
-    public UnknownOutputFormatException(String outputFormat, Throwable cause) {
-        super("Unrecongnized output format name, " + StringUtil.jQuote(outputFormat)
-                + ". Ensure that it's registered in the Configuration.", cause);
-        this.outputFormat = outputFormat;
+    /**
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     */
+    TemplateXMLOutputModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
     }
 
-    public String getOutputFormat() {
-        return outputFormat;
+    @Override
+    public XMLOutputFormat getOutputFormat() {
+        return XMLOutputFormat.INSTANCE;
     }
 
 }

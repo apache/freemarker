@@ -31,8 +31,12 @@ import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.ArithmeticEngine;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
+import freemarker.core.HTMLOutputFormat;
+import freemarker.core.OutputFormat;
 import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
+import freemarker.core.UnregisteredOutputFormatException;
+import freemarker.core.XMLOutputFormat;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
@@ -543,11 +547,14 @@ public class TemplateCache {
         {
             if (parseAsFTL) {
                 final ParserConfiguration pCfg;
-                final String formatFromStdFileExt;
-                if ((tc == null || !tc.isOutputFormatSet())
+                final OutputFormat outputFormatFromStdFileExt;
+                if ((tc == null || !tc.isOutputFormatSet() || !tc.isAutoEscapingSet())
                         && config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24
-                        && (formatFromStdFileExt = getFormatFromStdFileExt(sourceName)) != null) {
-                    pCfg = overrideOutputFormat(tc != null ? tc : config, formatFromStdFileExt);
+                        && (outputFormatFromStdFileExt = getFormatFromStdFileExt(sourceName)) != null) {
+                    pCfg = overrideOutputFormatAndAutoEscaping(
+                            tc != null ? tc : config,
+                            tc != null && tc.isOutputFormatSet() ? null : outputFormatFromStdFileExt,
+                            tc != null && tc.isAutoEscapingSet() ? null : Boolean.TRUE);
                 } else {
                     pCfg = tc;
                 }
@@ -604,8 +611,8 @@ public class TemplateCache {
         return template;
     }
 
-    private ParserConfiguration overrideOutputFormat(
-            final ParserConfiguration pCfg, final String outputFormat) {
+    private ParserConfiguration overrideOutputFormatAndAutoEscaping(
+            final ParserConfiguration pCfg, final OutputFormat outputFormat, final Boolean autoEscaping) {
         return new ParserConfiguration() {
             
             public boolean getWhitespaceStripping() {
@@ -620,8 +627,8 @@ public class TemplateCache {
                 return pCfg.getStrictSyntaxMode();
             }
             
-            public String getOutputFormat() {
-                return outputFormat;
+            public OutputFormat getOutputFormat() {
+                return outputFormat != null ? outputFormat : pCfg.getOutputFormat();
             }
             
             public int getNamingConvention() {
@@ -633,7 +640,7 @@ public class TemplateCache {
             }
             
             public boolean getAutoEscaping() {
-                return pCfg.getAutoEscaping();
+                return autoEscaping != null ? autoEscaping.booleanValue() : pCfg.getAutoEscaping();
             }
             
             public ArithmeticEngine getArithmeticEngine() {
@@ -642,7 +649,7 @@ public class TemplateCache {
         };
     }
 
-    private String getFormatFromStdFileExt(String sourceName) {
+    private OutputFormat getFormatFromStdFileExt(String sourceName) {
         if (sourceName == null) return null;
 
         int ln = sourceName.length();
@@ -661,8 +668,13 @@ public class TemplateCache {
         if (c != 'l' && c != 'L') return null;
         
         c = sourceName.charAt(ln - 1);
-        if (c == 'h' || c == 'H') return Configuration.HTML_OUTPUT_FORMAT;
-        if (c == 'x' || c == 'X') return Configuration.XML_OUTPUT_FORMAT;
+        try {
+            // Note: We get the output formats by name, so that custom overrides take effect.
+            if (c == 'h' || c == 'H') return config.getOutputFormat(HTMLOutputFormat.INSTANCE.getName());
+            if (c == 'x' || c == 'X') return config.getOutputFormat(XMLOutputFormat.INSTANCE.getName());
+        } catch (UnregisteredOutputFormatException e) {
+            throw new BugException("Unregistered std format", e);
+        }
         return null;
     }
 

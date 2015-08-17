@@ -26,42 +26,43 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFModel> {
+public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<CustomTemplateHTMLModel> {
 
-    public static final RTFOutputFormat INSTANCE = new RTFOutputFormat();
+    public static final CustomHTMLOutputFormat INSTANCE = new CustomHTMLOutputFormat();
     
-    private RTFOutputFormat() {
+    private CustomHTMLOutputFormat() {
         // Only to decrease visibility
     }
     
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        StringUtil.RTFEnc(textToEsc, out);
+        // This is lazy - don't do it in reality.
+        out.write(escapePlainTextToString(textToEsc));
     }
 
     @Override
     public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("rtf");
+        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
     }
 
     @Override
     public String getName() {
-        return "RTF";
+        return "HTML";
     }
 
     @Override
     public String getMimeType() {
-        return "text/rtf";
+        return "text/html";
     }
 
     @Override
     protected String escapePlainTextToString(String plainTextContent) {
-        return StringUtil.RTFEnc(plainTextContent);
+        return StringUtil.XHTMLEnc(plainTextContent.replace('x', 'X'));
     }
 
     @Override
-    protected TemplateRTFModel newTOM(String plainTextContent, String markupContent) {
-        return new TemplateRTFModel(plainTextContent, markupContent);
+    protected CustomTemplateHTMLModel newTOM(String plainTextContent, String markupContent) {
+        return new CustomTemplateHTMLModel(plainTextContent, markupContent);
     }
 
 }

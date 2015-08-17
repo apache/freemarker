@@ -39,5 +39,5 @@ public class _ObjectBuilderSettingEvaluationException extends Exception {
                             + (location + 1) + "."
                         : "the end of the parsed string was reached.") );
     }
-        
+    
 }

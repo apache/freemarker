@@ -44,6 +44,7 @@ import freemarker.core.Environment;
 import freemarker.core.FMParser;
 import freemarker.core.LibraryLoad;
 import freemarker.core.Macro;
+import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
@@ -89,7 +90,7 @@ public class Template extends Configurable {
     private int actualTagSyntax;
     private int actualNamingConvention;
     private boolean autoEscaping;
-    private String outputFormat;
+    private OutputFormat outputFormat;
     private final String name;
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
@@ -653,7 +654,7 @@ public class Template extends Configurable {
     }
     
     /**
-     * Returns the output format (see {@link Configuration#setOutputFormat(String)}) used for this template.
+     * Returns the output format (see {@link Configuration#setOutputFormat(OutputFormat)}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:
      * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
      * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code output_format}
@@ -661,14 +662,14 @@ public class Template extends Configurable {
      * 
      * @since 2.3.24
      */
-    public String getOutputFormat() {
+    public OutputFormat getOutputFormat() {
         return outputFormat;
     }
     
     /**
      * Meant to be called by the parser only. 
      */
-    void setOutputFormat(String outputFormat) {
+    void setOutputFormat(OutputFormat outputFormat) {
         this.outputFormat = outputFormat;
     }
     

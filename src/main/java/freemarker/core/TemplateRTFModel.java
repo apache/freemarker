@@ -16,16 +16,16 @@
 package freemarker.core;
 
 /**
- * Stores HTML output.
+ * Stores RTF markup to be printed; used with {@link RTFOutputFormat}.
  * 
  * @since 2.3.24
  */
-public final class RTFTemplateOutputModel extends GenericTemplateOutputModel<RTFTemplateOutputModel> {
+public final class TemplateRTFModel extends CommonTemplateMarkupOutputModel<TemplateRTFModel> {
     
     /**
-     * See {@link GenericTemplateOutputModel#GenericTemplateOutputModel(String, String)}.
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
      */
-    RTFTemplateOutputModel(String plainTextContent, String markupContent) {
+    TemplateRTFModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 

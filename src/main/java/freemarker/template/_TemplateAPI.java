@@ -22,6 +22,7 @@ import freemarker.cache.CacheStorage;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
+import freemarker.core.OutputFormat;
 import freemarker.core.TemplateObject;
 import freemarker.template.utility.NullArgumentException;
 
@@ -103,7 +104,7 @@ public class _TemplateAPI {
         t.setAutoEscaping(autoEscaping);
     }
     
-    public static void setOutputFormat(Template t, String outputFormat) {
+    public static void setOutputFormat(Template t, OutputFormat outputFormat) {
         t.setOutputFormat(outputFormat);
     }
     

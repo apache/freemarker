@@ -165,7 +165,7 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
         SETTING_ASSIGNMENTS.put("autoEscaping", false);
-        SETTING_ASSIGNMENTS.put("outputFormat", Configuration.HTML_OUTPUT_FORMAT);
+        SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
         
         // Special settings:
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
@@ -494,17 +494,17 @@ public class TemplateConfigurerTest {
         {
             TemplateConfigurer tc = new TemplateConfigurer();
             tc.setParentConfiguration(DEFAULT_CFG);
-            tc.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+            tc.setOutputFormat(XMLOutputFormat.INSTANCE);
             assertOutputWithoutAndWithTC(tc, "${.outputFormat} ${\"a'b\"}",
-                    Configuration.RAW_OUTPUT_FORMAT + " a'b",
-                    Configuration.XML_OUTPUT_FORMAT + " a&apos;b");
+                    UndefinedOutputFormat.INSTANCE.getName() + " a'b",
+                    XMLOutputFormat.INSTANCE.getName() + " a&apos;b");
             testedProps.add(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE);
         }
 
         {
             TemplateConfigurer tc = new TemplateConfigurer();
             tc.setParentConfiguration(DEFAULT_CFG);
-            tc.setOutputFormat(Configuration.XML_OUTPUT_FORMAT);
+            tc.setOutputFormat(XMLOutputFormat.INSTANCE);
             tc.setAutoEscaping(false);
             assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b", "a&b");
             testedProps.add(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE);

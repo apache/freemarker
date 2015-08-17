@@ -15,12 +15,15 @@
  */
 package freemarker.core;
 
-import freemarker.template.TemplateOutputModel;
+public final class CustomTemplateHTMLModel extends CommonTemplateMarkupOutputModel<CustomTemplateHTMLModel> {
+    
+    CustomTemplateHTMLModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
+    }
 
-class RawTemplateOutputModel implements TemplateOutputModel<RawTemplateOutputModel> {
-
-    public OutputFormat<RawTemplateOutputModel> getOutputFormat() {
-        return RawOutputFormat.INSTANCE;
+    @Override
+    public CustomHTMLOutputFormat getOutputFormat() {
+        return CustomHTMLOutputFormat.INSTANCE;
     }
 
 }

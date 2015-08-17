@@ -17,6 +17,7 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -32,22 +33,26 @@ final class NumericalOutput extends Interpolation {
     private final boolean hasFormat;
     private final int minFracDigits;
     private final int maxFracDigits;
+    /** For OutputFormat-based auto-escaping */
+    private final MarkupOutputFormat autoEscapeOutputFormat;
     private volatile FormatHolder formatCache; // creating new NumberFormat is slow operation
 
-    NumericalOutput(Expression expression) {
+    NumericalOutput(Expression expression, MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         hasFormat = false;
         this.minFracDigits = 0;
         this.maxFracDigits = 0;
+        this.autoEscapeOutputFormat = autoEscapeOutputFormat;
     }
 
     NumericalOutput(Expression expression,
-                    int minFracDigits,
-                    int maxFracDigits) {
+            int minFracDigits, int maxFracDigits,
+            MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         hasFormat = true;
         this.minFracDigits = minFracDigits;
         this.maxFracDigits = maxFracDigits;
+        this.autoEscapeOutputFormat = autoEscapeOutputFormat;
     }
 
     @Override
@@ -76,7 +81,13 @@ final class NumericalOutput extends Interpolation {
         // We must use Format even if hasFormat == false.
         // Some locales may use non-Arabic digits, thus replacing the
         // decimal separator in the result of toString() is not enough.
-        env.getOut().write(fmth.format.format(num));
+        String s = fmth.format.format(num);
+        Writer out = env.getOut();
+        if (autoEscapeOutputFormat != null) {
+            autoEscapeOutputFormat.output(s, out);
+        } else {
+            out.write(s);
+        }
     }
 
     @Override
