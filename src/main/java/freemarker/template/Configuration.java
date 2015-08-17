@@ -63,7 +63,7 @@ import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
 import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
-import freemarker.core.RawOutputFormat;
+import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.TemplateConfigurer;
 import freemarker.core.TemplateOutputModel;
 import freemarker.core.UnregisteredOutputFormatException;
@@ -322,7 +322,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private static final Map<String, OutputFormat<?>> STANDARD_OUTPUT_FORMATS;
     static {
         STANDARD_OUTPUT_FORMATS = new HashMap<String, OutputFormat<?>>();
-        STANDARD_OUTPUT_FORMATS.put(RawOutputFormat.INSTANCE.getName(), RawOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(XMLOutputFormat.INSTANCE.getName(), XMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(RTFOutputFormat.INSTANCE.getName(), RTFOutputFormat.INSTANCE);
@@ -435,7 +435,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
     private Boolean autoEscaping;
-    private OutputFormat<?> outputFormat = RawOutputFormat.INSTANCE;
+    private OutputFormat<?> outputFormat = UndefinedOutputFormat.INSTANCE;
     private boolean outputFormatExplicitlySet;
     private Map<String, ? extends OutputFormat<?>> registeredCustomOutputFormats = Collections.emptyMap(); 
     private Version incompatibleImprovements;
@@ -1677,7 +1677,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Sets if auto-escaping should be enabled; default is {@code true}, but note that the default output format,
-     * {@link RawOutputFormat}, is a non-escaping format, so there auto-escaping has no effect. Auto-escaping has
+     * {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping has no effect. Auto-escaping has
      * significance when a value is printed with <code>${...}</code> (or <code>#{...}</code>). If auto-escaping
      * is {@code true}, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
      * rich text), and so it will escape it according the current output format (see
@@ -1692,7 +1692,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       string values.
      *   <li>When printing {@link TemplateOutputModel}-s, they aren't escaped again (they are already escaped).
      *   <li>Auto escaping doesn't do anything eif the current output format has {@code false}
-     *       {@link OutputFormat#isEscaping()}. That's the case for the default output format, {@link RawOutputFormat},
+     *       {@link OutputFormat#isEscaping()}. That's the case for the default output format, {@link UndefinedOutputFormat},
      *       and also for {@link PlainTextOutputFormat}.
      *   <li>The output format inside a string literal expression is always {@link PlainTextOutputFormat}
      *       (regardless of the output format of the containing template), which is a non-escaping format. Thus for
@@ -1745,7 +1745,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets the (default) output format. Usually, you leave this on its default, which is
-     * {@link RawOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like based
+     * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like based
      * on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Even if no template
      * configurers were set, this setting is still overridden by the standard file extension mappings; see them
      * at {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
@@ -1763,7 +1763,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         if (outputFormat == null) {
             throw new NullArgumentException(
                     "outputFormat",
-                    "You may meant: " + RawOutputFormat.class.getSimpleName() + ".INSTANCE");
+                    "You may meant: " + UndefinedOutputFormat.class.getSimpleName() + ".INSTANCE");
         }
         this.outputFormat = outputFormat;
         outputFormatExplicitlySet = true;
@@ -1795,7 +1795,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void unsetOutputFormat() {
-        outputFormat = RawOutputFormat.INSTANCE;
+        outputFormat = UndefinedOutputFormat.INSTANCE;
         outputFormatExplicitlySet = false;
     }
     
@@ -1847,7 +1847,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>
      * When there's a clash between a custom output format name and a standard output format name, the custom format
      * will win, thus you can override the meaning of standard output format names. Except, it's not allowed to
-     * override {@link RawOutputFormat} and {@link PlainTextOutputFormat}.
+     * override {@link UndefinedOutputFormat} and {@link PlainTextOutputFormat}.
      * 
      * <p>
      * The default value is an empty collection.
@@ -1861,7 +1861,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *             When the same {@link OutputFormat} object occurs for multiple times in the collection.
      *             If an {@link OutputFormat} name is 0 long.
      *             If an {@link OutputFormat} name doesn't start with letter or digit.
-     *             If an {@link OutputFormat} name equals to {@link RawOutputFormat#getName()} or
+     *             If an {@link OutputFormat} name equals to {@link UndefinedOutputFormat#getName()} or
      *             {@link PlainTextOutputFormat#getName()}.
      * 
      * @since 2.3.24
@@ -1872,7 +1872,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 registeredCustomOutputFormats.size() * 4 / 3, 1f);
         for (OutputFormat<?> outputFormat : registeredCustomOutputFormats) {
             String name = outputFormat.getName();
-            if (name.equals(RawOutputFormat.INSTANCE.getName())) {
+            if (name.equals(UndefinedOutputFormat.INSTANCE.getName())) {
                 throw new IllegalArgumentException(
                         "The \"" + name + "\" output format can't be redefined");
             }

@@ -16,11 +16,15 @@
 package freemarker.core;
 
 /**
- * Represents the plainHTML output format.
+ * Unused, because {@link PlainTextOutputFormat} is non-escaping, and hence produces no {@link TemplateOutputModel}-s.
  * 
  * @since 2.3.24
  */
 public class PlainTextTemplateOutputModel implements TemplateOutputModel<PlainTextTemplateOutputModel> {
+    
+    private PlainTextTemplateOutputModel() {
+        // Can't be instantiated
+    }
 
     public OutputFormat<PlainTextTemplateOutputModel> getOutputFormat() {
         return PlainTextOutputFormat.INSTANCE;

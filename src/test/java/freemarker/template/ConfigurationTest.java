@@ -57,7 +57,7 @@ import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
-import freemarker.core.RawOutputFormat;
+import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -883,7 +883,7 @@ public class ConfigurationTest extends TestCase {
     public void testSetOutputFormat() throws Exception {
        Configuration cfg = new Configuration();
        
-       assertEquals(RawOutputFormat.INSTANCE, cfg.getOutputFormat());
+       assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getOutputFormat());
        assertFalse(cfg.isOutputFormatExplicitlySet());
        
        try {
@@ -902,10 +902,10 @@ public class ConfigurationTest extends TestCase {
        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getOutputFormat());
        
        cfg.unsetOutputFormat();
-       assertEquals(RawOutputFormat.INSTANCE, cfg.getOutputFormat());
+       assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getOutputFormat());
        assertFalse(cfg.isOutputFormatExplicitlySet());
        
-       cfg.setOutputFormat(RawOutputFormat.INSTANCE);
+       cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
        assertTrue(cfg.isOutputFormatExplicitlySet());
        cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, "default");
        assertFalse(cfg.isOutputFormatExplicitlySet());
@@ -913,7 +913,7 @@ public class ConfigurationTest extends TestCase {
        try {
            cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY, "null");
        } catch (SettingValueAssignmentException e) {
-           assertThat(e.getCause().getMessage(), containsString(RawOutputFormat.class.getSimpleName()));
+           assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }
     }
 

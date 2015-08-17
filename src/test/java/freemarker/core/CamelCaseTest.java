@@ -44,8 +44,8 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput("${.template_name?length}", "0");
         assertOutput("${.outputEncoding}", "utf-8");
         assertOutput("${.output_encoding}", "utf-8");
-        assertOutput("${.outputFormat}", RawOutputFormat.INSTANCE.getName());
-        assertOutput("${.output_format}", RawOutputFormat.INSTANCE.getName());
+        assertOutput("${.outputFormat}", UndefinedOutputFormat.INSTANCE.getName());
+        assertOutput("${.output_format}", UndefinedOutputFormat.INSTANCE.getName());
         assertOutput("${.urlEscapingCharset}", "iso-8859-1");
         assertOutput("${.url_escaping_charset}", "iso-8859-1");
         assertOutput("${.currentNode!'-'}", "-");

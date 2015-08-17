@@ -592,7 +592,7 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, XMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, RTFOutputFormat.class);
             addWithSimpleName(SHORTHANDS, PlainTextOutputFormat.class);
-            addWithSimpleName(SHORTHANDS, RawOutputFormat.class);
+            addWithSimpleName(SHORTHANDS, UndefinedOutputFormat.class);
             
             addWithSimpleName(SHORTHANDS, Locale.class);
             SHORTHANDS.put("TimeZone", "freemarker.core._TimeZone");

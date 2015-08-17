@@ -98,7 +98,7 @@ public abstract class OutputFormat<TOM extends TemplateOutputModel> {
      * format conversion is trivially possible. (It's not impossible to extending conversions beyond this, if there will
      * be real world demand for it.)
      * 
-     * <p>{@code true} value is used by {@link RawOutputFormat}.
+     * <p>{@code true} value is used by {@link UndefinedOutputFormat}.
      */
     public abstract boolean isOutputFormatMixingAllowed();
     

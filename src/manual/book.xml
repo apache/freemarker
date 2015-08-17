@@ -23744,11 +23744,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>output_format</literal> (or
               <literal>outputFormat</literal>). This specifies the name of the
               output format (such as <literal>HTML</literal>,
-              <literal>XML</literal>, <literal>raw</literal>, etc.) that
-              governs the new auto-escaping mechanism (TODO: not yet
-              implemented). The output format can be different for different
-              templates, using the <literal>template_configurers</literal>
-              setting. [TODO describe this more]</para>
+              <literal>XML</literal>, <literal>plainText</literal>, etc.) that
+              governs the new auto-escaping mechanism. The output format can
+              be different for different templates, using the
+              <literal>template_configurers</literal> setting. [TODO describe
+              this more]</para>
             </listitem>
 
             <listitem>

@@ -44,8 +44,8 @@ public class OutputFormatTest extends TemplateTest {
         
         Configuration cfg = getConfiguration();
         for (OutputFormat<?> cfgOutputFormat
-                : new OutputFormat<?>[] { RawOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
-            if (!cfgOutputFormat.equals(RawOutputFormat.INSTANCE)) {
+                : new OutputFormat<?>[] { UndefinedOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
+            if (!cfgOutputFormat.equals(UndefinedOutputFormat.INSTANCE)) {
                 cfg.setOutputFormat(cfgOutputFormat);
             }
             
@@ -93,7 +93,7 @@ public class OutputFormatTest extends TemplateTest {
             final OutputFormat<?> ftlxOutputFormat;
             switch (setupNumber) {
             case 1:
-                cfgOutputFormat = RawOutputFormat.INSTANCE;
+                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
                 ftlhOutputFormat = HTMLOutputFormat.INSTANCE;
                 ftlxOutputFormat = XMLOutputFormat.INSTANCE;
                 break;
@@ -104,7 +104,7 @@ public class OutputFormatTest extends TemplateTest {
                 ftlxOutputFormat = XMLOutputFormat.INSTANCE;
                 break;
             case 3:
-                cfgOutputFormat = RawOutputFormat.INSTANCE;
+                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
                 cfg.unsetOutputFormat();
                 TemplateConfigurer tcXml = new TemplateConfigurer();
                 tcXml.setOutputFormat(XMLOutputFormat.INSTANCE);
@@ -120,15 +120,15 @@ public class OutputFormatTest extends TemplateTest {
                 break;
             case 4:
                 cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-                cfgOutputFormat = RawOutputFormat.INSTANCE;
+                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
                 ftlhOutputFormat = XMLOutputFormat.INSTANCE;
-                ftlxOutputFormat = RawOutputFormat.INSTANCE;
+                ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
                 break;
             case 5:
                 cfg.setTemplateConfigurers(null);
-                cfgOutputFormat = RawOutputFormat.INSTANCE;
-                ftlhOutputFormat = RawOutputFormat.INSTANCE;
-                ftlxOutputFormat = RawOutputFormat.INSTANCE;
+                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
+                ftlhOutputFormat = UndefinedOutputFormat.INSTANCE;
+                ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
                 break;
             default:
                 throw new AssertionError();
@@ -285,10 +285,10 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testRawOutputFormat() throws IOException, TemplateException {
+    public void testUndefinedOutputFormat() throws IOException, TemplateException {
         assertOutput("${'a < b'}; ${htmlPlain}; ${htmlMarkup}", "a < b; a &lt; {h}; <p>c");
-        assertErrorContains("${'x'?esc}", "raw", "escaping", "?esc");
-        assertErrorContains("${'x'?noEsc}", "raw", "escaping", "?noEsc");
+        assertErrorContains("${'x'?esc}", "undefined", "escaping", "?esc");
+        assertErrorContains("${'x'?noEsc}", "undefined", "escaping", "?noEsc");
     }
 
     @Test
@@ -344,7 +344,7 @@ public class OutputFormatTest extends TemplateTest {
             
             for (int hasHeader = 0; hasHeader < 2; hasHeader++) {
                 assertOutput(
-                        (hasHeader == 1 ? "<#ftl outputFormat='raw'>" : "")
+                        (hasHeader == 1 ? "<#ftl outputFormat='undefined'>" : "")
                         + "${xmlPlain} ${xmlMarkup} "
                         + "${htmlPlain} ${htmlMarkup} "
                         + "${rtfPlain} ${rtfMarkup}",
@@ -356,7 +356,7 @@ public class OutputFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testStringLiteralsUseRawOF() throws IOException, TemplateException {
+    public void testStringLiteralsUseUndefinedOF() throws IOException, TemplateException {
         String expectedOut = "&amp; (&) &amp;";
         String ftl = "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc} ${'&'}";
         
@@ -374,7 +374,7 @@ public class OutputFormatTest extends TemplateTest {
             Writer sw = new StringWriter();
             t.process(null, sw);
             assertEquals(content, sw.toString());
-            assertEquals(RawOutputFormat.INSTANCE, t.getOutputFormat());
+            assertEquals(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
         }
         
         {
@@ -391,7 +391,7 @@ public class OutputFormatTest extends TemplateTest {
     public void testStringLiteralTemplateModificationBug() throws IOException, TemplateException {
         Template t = new Template(null, "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc}", getConfiguration());
         assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
-        assertOutput("${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}", "raw plainText raw");
+        assertOutput("${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}", "undefined plainText undefined");
         assertOutput("${'foo ${xmlPlain}'}", "foo a < {x}");
         assertErrorContains("${'${xmlMarkup}'}", "plainText", "XML", "conversion");
     }
@@ -404,7 +404,7 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t.ftl", commonFTL);
         assertOutputForNamed("t.ftlh", "&lt;x&gt; &lt;x&gt; <x>");
         assertOutputForNamed("t-noAuto.ftlh", "<x> &lt;x&gt; <x>");
-        assertErrorContainsForNamed("t.ftl", "output format", "raw");
+        assertErrorContainsForNamed("t.ftl", "output format", "undefined");
     }
 
     @Test

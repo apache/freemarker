@@ -15,10 +15,20 @@
  */
 package freemarker.core;
 
-class RawTemplateOutputModel implements TemplateOutputModel<RawTemplateOutputModel> {
+/**
+/**
+ * Unused, because {@link UndefinedOutputFormat} is non-escaping, and hence produces no {@link UndefinedOutputFormat}-s.
+ * 
+ * @since 2.3.24
+ */
+class UndefinedTemplateOutputModel implements TemplateOutputModel<UndefinedTemplateOutputModel> {
 
-    public OutputFormat<RawTemplateOutputModel> getOutputFormat() {
-        return RawOutputFormat.INSTANCE;
+    private UndefinedTemplateOutputModel() {
+        // Can't be instantiated
+    }
+    
+    public OutputFormat<UndefinedTemplateOutputModel> getOutputFormat() {
+        return UndefinedOutputFormat.INSTANCE;
     }
 
 }

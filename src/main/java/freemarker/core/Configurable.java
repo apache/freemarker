@@ -1692,7 +1692,7 @@ public class Configurable {
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurerFactory},
      *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link RawOutputFormat}.
+     *     {@link UndefinedOutputFormat}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
