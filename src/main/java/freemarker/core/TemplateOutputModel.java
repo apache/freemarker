@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package freemarker.template;
+package freemarker.core;
 
-import freemarker.core.OutputFormat;
+import freemarker.template.Configuration;
+import freemarker.template.TemplateModel;
 
 /**
  * "output" template language data-type; stores "markup" (some kind of "rich text" / structured format), as opposed to

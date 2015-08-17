@@ -21,6 +21,7 @@ import java.util.Set;
 
 import freemarker.core.Environment;
 import freemarker.core.Macro;
+import freemarker.core.TemplateOutputModel;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.CollectionModel;
@@ -47,7 +48,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
-import freemarker.template.TemplateOutputModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;

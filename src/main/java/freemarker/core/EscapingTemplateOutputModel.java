@@ -15,8 +15,6 @@
  */
 package freemarker.core;
 
-import freemarker.template.TemplateOutputModel;
-
 /**
  * Common superclass for implementing {@link TemplateOutputModel}-s.
  * 

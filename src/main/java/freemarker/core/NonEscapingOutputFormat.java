@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateOutputModel;
 
 /**
  * Represents the output format that doesn't have escaping.

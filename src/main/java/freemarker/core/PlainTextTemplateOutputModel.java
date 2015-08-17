@@ -15,8 +15,6 @@
  */
 package freemarker.core;
 
-import freemarker.template.TemplateOutputModel;
-
 /**
  * Represents the plainHTML output format.
  * 

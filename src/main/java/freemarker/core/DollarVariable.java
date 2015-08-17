@@ -21,7 +21,6 @@ import java.io.Writer;
 
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
-import freemarker.template.TemplateOutputModel;
 import freemarker.template.utility.StringUtil;
 
 /**

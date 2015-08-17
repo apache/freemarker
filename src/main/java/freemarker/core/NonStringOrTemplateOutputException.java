@@ -17,7 +17,6 @@
 package freemarker.core;
 
 import freemarker.template.TemplateModel;
-import freemarker.template.TemplateOutputModel;
 import freemarker.template.TemplateScalarModel;
 
 /**

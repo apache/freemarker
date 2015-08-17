@@ -65,6 +65,7 @@ import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.RawOutputFormat;
 import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateOutputModel;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
