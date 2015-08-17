@@ -23720,6 +23720,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>.outputFormat</literal>), returns the current
                   output format at the place of invocation.</para>
                 </listitem>
+
+                <listitem>
+                  <para>The <literal>+</literal> operator (concatenation)
+                  works with the new <quote>markup output</quote> type as
+                  well. Like <literal>someMarkup + somePlainText</literal>
+                  will result in markup where <literal>somePlainText</literal>
+                  is included properly escaped.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>

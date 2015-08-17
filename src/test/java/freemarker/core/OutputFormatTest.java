@@ -478,6 +478,15 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput(
                 "<#ftl outputFormat='RTF'>${'\\'' + xmlPlain}",
                 "'a < \\{x'\\}");
+        
+        assertOutput("<#assign x = '\\''><#assign x += xmlMarkup>${x}",
+                "&apos;<p>c</p>");
+        assertOutput("<#assign x = xmlMarkup><#assign x += '\\''>${x}",
+                "<p>c</p>&apos;");
+        assertOutput("<#assign x = xmlMarkup><#assign x += htmlPlain>${x}",
+                "<p>c</p>a &lt; {h&apos;}");
+        assertErrorContains("<#assign x = xmlMarkup><#assign x += htmlMarkup>${x}",
+                "HTML", "XML", "Conversion", "common");
     }
     
     @Override
