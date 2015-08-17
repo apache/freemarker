@@ -1842,7 +1842,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>
      * When there's a clash between a custom output format name and a standard output format name, the custom format
      * will win, thus you can override the meaning of standard output format names. Except, it's not allowed to
-     * override {@link RawOutputFormat}.
+     * override {@link RawOutputFormat} and {@link PlainTextOutputFormat}.
      * 
      * <p>
      * The default value is an empty collection.
@@ -1856,7 +1856,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *             When the same {@link OutputFormat} object occurs for multiple times in the collection.
      *             If an {@link OutputFormat} name is 0 long.
      *             If an {@link OutputFormat} name doesn't start with letter or digit.
-     *             If an {@link OutputFormat} name equals to {@link RawOutputFormat#getName()}.
+     *             If an {@link OutputFormat} name equals to {@link RawOutputFormat#getName()} or
+     *             {@link PlainTextOutputFormat#getName()}.
      * 
      * @since 2.3.24
      */
@@ -1867,6 +1868,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         for (OutputFormat<?> outputFormat : registeredCustomOutputFormats) {
             String name = outputFormat.getName();
             if (name.equals(RawOutputFormat.INSTANCE.getName())) {
+                throw new IllegalArgumentException(
+                        "The \"" + name + "\" output format can't be redefined");
+            }
+            if (name.equals(PlainTextOutputFormat.INSTANCE.getName())) {
                 throw new IllegalArgumentException(
                         "The \"" + name + "\" output format can't be redefined");
             }
