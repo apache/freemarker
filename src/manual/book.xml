@@ -23722,6 +23722,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>New FTL type, <quote>markup output</quote>. This is
+                  somewhat similar to string, but values of this type aren't
+                  auto-escaped by the new escaping mechanism, because they are
+                  known to already hold markup. (For example,
+                  <literal>?esc</literal> and <literal>?noEsc</literal>
+                  returns a value of this type, hence their results are
+                  protected from double-escaping problems.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Block assignments, like <literal>&lt;#assign
+                  <replaceable>captured</replaceable>&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>,
+                  when the current <literal>output_format</literal> is some
+                  kind of markup (like HTML), will store the captured output
+                  not with string type, but with <quote>markup output</quote>
+                  type. Thus
+                  <literal>${<replaceable>captured</replaceable>}</literal>
+                  will not get unwanted escaping.</para>
+                </listitem>
+
+                <listitem>
                   <para>The <literal>+</literal> operator (concatenation)
                   works with the new <quote>markup output</quote> type as
                   well. Like <literal>someMarkup + somePlainText</literal>

@@ -479,14 +479,35 @@ public class OutputFormatTest extends TemplateTest {
                 "<#ftl outputFormat='RTF'>${'\\'' + xmlPlain}",
                 "'a < \\{x'\\}");
         
-        assertOutput("<#assign x = '\\''><#assign x += xmlMarkup>${x}",
+        assertOutput(
+                "<#assign x = '\\''><#assign x += xmlMarkup>${x}",
                 "&apos;<p>c</p>");
-        assertOutput("<#assign x = xmlMarkup><#assign x += '\\''>${x}",
+        assertOutput(
+                "<#assign x = xmlMarkup><#assign x += '\\''>${x}",
                 "<p>c</p>&apos;");
-        assertOutput("<#assign x = xmlMarkup><#assign x += htmlPlain>${x}",
+        assertOutput(
+                "<#assign x = xmlMarkup><#assign x += htmlPlain>${x}",
                 "<p>c</p>a &lt; {h&apos;}");
-        assertErrorContains("<#assign x = xmlMarkup><#assign x += htmlMarkup>${x}",
+        assertErrorContains(
+                "<#assign x = xmlMarkup><#assign x += htmlMarkup>${x}",
                 "HTML", "XML", "Conversion", "common");
+    }
+    
+    @Test
+    public void testBlockAssignment() throws Exception {
+        for (String d : new String[] { "assign", "global", "local" }) {
+            String commonFTL =
+                    "<#macro m>"
+                    + "<#" + d + " x><p>${'&'}</#" + d + ">${x?isString?c} ${x} ${'&'} "
+                    + "<#" + d + " x></#" + d + ">${x?isString?c}"
+                    + "</#macro><@m />";
+            assertOutput(
+                    commonFTL,
+                    "true <p>& & true");
+            assertOutput(
+                    "<#ftl outputFormat='HTML'>" + commonFTL,
+                    "false <p>&amp; &amp; false");
+        }
     }
     
     @Override

@@ -2910,7 +2910,9 @@ TemplateElement Assign() :
             	}
 	        )
 	        {
-	            BlockAssignment ba = new BlockAssignment(block, varName, scope, nsExp);
+	            BlockAssignment ba = new BlockAssignment(
+	                   block, varName, scope, nsExp,
+	                   outputFormat instanceof MarkupOutputFormat ? (MarkupOutputFormat) outputFormat : null);
 	            ba.setLocation(template, start, end);
 	            return ba;
 	        }

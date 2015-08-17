@@ -24,6 +24,7 @@ import java.util.Map;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTransformModel;
 
 /**
@@ -34,12 +35,14 @@ final class BlockAssignment extends TemplateElement {
     private final String varName;
     private final Expression namespaceExp;
     private final int scope;
+    private final MarkupOutputFormat<?> markupOutputFormat;
 
-    BlockAssignment(TemplateElement nestedBlock, String varName, int scope, Expression namespaceExp) {
+    BlockAssignment(TemplateElement nestedBlock, String varName, int scope, Expression namespaceExp, MarkupOutputFormat<?> markupOutputFormat) {
         setNestedBlock(nestedBlock);
         this.varName = varName;
         this.namespaceExp = namespaceExp;
         this.scope = scope;
+        this.markupOutputFormat = markupOutputFormat;
     }
 
     @Override
@@ -47,18 +50,22 @@ final class BlockAssignment extends TemplateElement {
         if (getNestedBlock() != null) {
             env.visitAndTransform(getNestedBlock(), new CaptureOutput(env), null);
         } else {
-			TemplateModel value = new SimpleScalar("");
-			if (namespaceExp != null) {
-				Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
-				ns.put(varName, value);
- 			} else if (scope == Assignment.NAMESPACE) {
-				env.setVariable(varName, value);
-			} else if (scope == Assignment.GLOBAL) {
-				env.setGlobalVariable(varName, value);
-			} else if (scope == Assignment.LOCAL) {
-				env.setLocalVariable(varName, value);
-			}
-		}
+            TemplateModel value = capturedStringToModel("");
+            if (namespaceExp != null) {
+                Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
+                ns.put(varName, value);
+            } else if (scope == Assignment.NAMESPACE) {
+                env.setVariable(varName, value);
+            } else if (scope == Assignment.GLOBAL) {
+                env.setGlobalVariable(varName, value);
+            } else if (scope == Assignment.LOCAL) {
+                env.setLocalVariable(varName, value);
+            }
+        }
+    }
+
+    private TemplateModel capturedStringToModel(String s) throws TemplateModelException {
+        return markupOutputFormat == null ? new SimpleScalar(s) : markupOutputFormat.fromMarkup(s);
     }
 
     private class CaptureOutput implements TemplateTransformModel {
@@ -80,8 +87,14 @@ final class BlockAssignment extends TemplateElement {
         public Writer getWriter(Writer out, Map args) {
             return new StringWriter() {
                 @Override
-                public void close() {
-                    SimpleScalar result = new SimpleScalar(toString());
+                public void close() throws IOException {
+                    TemplateModel result;
+                    try {
+                        result = capturedStringToModel(toString());
+                    } catch (TemplateModelException e) {
+                        // [Java 1.6] e to cause
+                        throw new IOException("Failed to create FTL value from captured string: " + e);
+                    }
                     switch(scope) {
                         case Assignment.NAMESPACE: {
                             if (fnsModel != null) {
