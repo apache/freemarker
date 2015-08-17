@@ -19,12 +19,11 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.utility.NullArgumentException;
 
-abstract class BuiltInForOutputFormatRelated extends SpecialBuiltIn {
+abstract class BuiltInForEscapingOutputFormatRelated extends SpecialBuiltIn {
     
-    protected OutputFormat outputFormat;
-    protected boolean autoEscaping;
+    protected MarkupOutputFormat outputFormat;
     
-    void bindToOutputFormat(OutputFormat outputFormat, boolean autoEscaping) {
+    void bindToOutputFormat(MarkupOutputFormat outputFormat) {
         NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
     }

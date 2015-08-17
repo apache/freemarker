@@ -592,7 +592,7 @@ public class Template extends Configurable {
      * 
      * @since 2.3.24
      */
-    public OutputFormat<?> getOutputFormat() {
+    public OutputFormat getOutputFormat() {
         return unboundTemplate.getOutputFormat();
     }
     

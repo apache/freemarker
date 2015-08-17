@@ -21,7 +21,6 @@ import java.io.Writer;
 
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
-import freemarker.template.TemplateOutputModel;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -36,14 +35,15 @@ final class DollarVariable extends Interpolation {
     
     /** For OutputFormat-based auto-escaping */
     private final OutputFormat outputFormat;
-    private final boolean escapeNonTOMs;
+    private final MarkupOutputFormat autoEscapeOutputFormat;
 
     DollarVariable(
-            Expression expression, Expression escapedExpression, OutputFormat outputFormat, boolean escapeNonTOMs) {
+            Expression expression, Expression escapedExpression,
+            OutputFormat outputFormat, MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         this.escapedExpression = escapedExpression;
         this.outputFormat = outputFormat;
-        this.escapeNonTOMs = escapeNonTOMs;
+        this.autoEscapeOutputFormat = autoEscapeOutputFormat;
     }
 
     /**
@@ -55,28 +55,32 @@ final class DollarVariable extends Interpolation {
         Writer out = env.getOut();
         String s = EvalUtil.coerceModelToString(tm, escapedExpression, null, true, env);
         if (s != null) {
-            if (escapeNonTOMs) {
-                outputFormat.output(s, out);
+            if (autoEscapeOutputFormat != null) {
+                autoEscapeOutputFormat.output(s, out);
             } else {
                 out.write(s);
             }
         } else {
-            TemplateOutputModel tom = (TemplateOutputModel) tm;
-            OutputFormat tomOF = tom.getOutputFormat();
+            TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) tm;
+            MarkupOutputFormat moOF = mo.getOutputFormat();
             // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
-            if (tomOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
+            if (moOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
                 String srcPlainText;
                 // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
-                srcPlainText = tomOF.getSourcePlainText(tom);
+                srcPlainText = moOF.getSourcePlainText(mo);
                 if (srcPlainText == null) {
                     throw new _TemplateModelException(escapedExpression,
-                            "Tha value to print is in ", new _DelayedToString(tomOF),
+                            "Tha value to print is in ", new _DelayedToString(moOF),
                             " format, which differs from the current output format, ",
                             new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
                 }
-                outputFormat.output(srcPlainText, out);
+                if (outputFormat instanceof MarkupOutputFormat) {
+                    ((MarkupOutputFormat) outputFormat).output(srcPlainText, out);
+                } else {
+                    out.write(srcPlainText);
+                }
             } else {
-                tomOF.output(tom, out);
+                moOF.output(mo, out);
             }
         }
     }

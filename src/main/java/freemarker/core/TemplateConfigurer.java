@@ -76,7 +76,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
     private Boolean autoEscaping;
-    private OutputFormat<?> outputFormat;
+    private OutputFormat outputFormat;
     private String encoding;
 
     /**

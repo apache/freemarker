@@ -16,22 +16,22 @@
 package freemarker.core;
 
 /**
- * Stores HTML output.
+ * Stores XML markup to be printed; used with {@link XMLOutputFormat}.
  * 
  * @since 2.3.24
  */
-public final class RTFTemplateOutputModel extends EscapingTemplateOutputModel<RTFTemplateOutputModel> {
+public final class TemplateXMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXMLOutputModel> {
     
     /**
-     * See {@link EscapingTemplateOutputModel#EscapingTemplateOutputModel(String, String)}.
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
      */
-    RTFTemplateOutputModel(String plainTextContent, String markupContent) {
+    TemplateXMLOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 
     @Override
-    public RTFOutputFormat getOutputFormat() {
-        return RTFOutputFormat.INSTANCE;
+    public XMLOutputFormat getOutputFormat() {
+        return XMLOutputFormat.INSTANCE;
     }
 
 }

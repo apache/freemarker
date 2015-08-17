@@ -20,23 +20,28 @@ package freemarker.core;
  * has no escaping.
  * 
  * <p>
- * The main difference from {@link RawOutputFormat} is that this format doesn't allow inserting values of another output
- * formats into itself (unless they can be converted to plain text), while {@link RawOutputFormat} would just insert the
- * foreign "markup" as is. Also, this format has {"text/plain"} MIME type, while {@link RawOutputFormat} has
- * {@code null}.
- * 
- * <p>
  * String literals in FTL expressions use this output format, which has importance when <code>${...}</code> is used
  * inside them.
  * 
+ * <p>
+ * The main difference from {@link UndefinedOutputFormat} is that this format doesn't allow inserting values of another
+ * output formats into itself (unless they can be converted to plain text), while {@link UndefinedOutputFormat} would
+ * just insert the foreign "markup" as is. Also, this format has {"text/plain"} MIME type, while
+ * {@link UndefinedOutputFormat} has {@code null}.
+ * 
  * @since 2.3.24
  */
-public final class PlainTextOutputFormat extends NonEscapingOutputFormat<PlainTextTemplateOutputModel> {
+public final class PlainTextOutputFormat extends OutputFormat {
 
     public static final PlainTextOutputFormat INSTANCE = new PlainTextOutputFormat();
     
     private PlainTextOutputFormat() {
         // Only to decrease visibility
+    }
+
+    @Override
+    public boolean isOutputFormatMixingAllowed() {
+        return false;
     }
 
     @Override

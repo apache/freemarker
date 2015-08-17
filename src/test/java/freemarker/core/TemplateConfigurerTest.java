@@ -496,7 +496,7 @@ public class TemplateConfigurerTest {
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setOutputFormat(XMLOutputFormat.INSTANCE);
             assertOutputWithoutAndWithTC(tc, "${.outputFormat} ${\"a'b\"}",
-                    RawOutputFormat.INSTANCE.getName() + " a'b",
+                    UndefinedOutputFormat.INSTANCE.getName() + " a'b",
                     XMLOutputFormat.INSTANCE.getName() + " a&apos;b");
             testedProps.add(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE);
         }

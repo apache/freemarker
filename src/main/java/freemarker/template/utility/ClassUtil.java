@@ -21,6 +21,7 @@ import java.util.Set;
 
 import freemarker.core.Environment;
 import freemarker.core.Macro;
+import freemarker.core.TemplateMarkupOutputModel;
 import freemarker.core._CoreAPI;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
@@ -48,7 +49,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
-import freemarker.template.TemplateOutputModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
@@ -235,8 +235,8 @@ public class ClassUtil {
             appendTypeName(sb, typeNamesAppended, "string");
         }
         
-        if (TemplateOutputModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "output_fragment");
+        if (TemplateMarkupOutputModel.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "markup_output");
         }
         
         if (sb.length() == initalLength) {

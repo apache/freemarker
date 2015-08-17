@@ -34,29 +34,25 @@ final class NumericalOutput extends Interpolation {
     private final int minFracDigits;
     private final int maxFracDigits;
     /** For OutputFormat-based auto-escaping */
-    private final OutputFormat outputFormat;
-    private final boolean escapeNonTOMs;
+    private final MarkupOutputFormat autoEscapeOutputFormat;
     private volatile FormatHolder formatCache; // creating new NumberFormat is slow operation
 
-    NumericalOutput(Expression expression,
-            OutputFormat outputFormat, boolean escapeNonTOMs) {
+    NumericalOutput(Expression expression, MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         hasFormat = false;
         this.minFracDigits = 0;
         this.maxFracDigits = 0;
-        this.outputFormat = outputFormat;
-        this.escapeNonTOMs = escapeNonTOMs;
+        this.autoEscapeOutputFormat = autoEscapeOutputFormat;
     }
 
     NumericalOutput(Expression expression,
             int minFracDigits, int maxFracDigits,
-            OutputFormat outputFormat, boolean escapeNonTOMs) {
+            MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         hasFormat = true;
         this.minFracDigits = minFracDigits;
         this.maxFracDigits = maxFracDigits;
-        this.outputFormat = outputFormat;
-        this.escapeNonTOMs = escapeNonTOMs;
+        this.autoEscapeOutputFormat = autoEscapeOutputFormat;
     }
 
     @Override
@@ -87,8 +83,8 @@ final class NumericalOutput extends Interpolation {
         // decimal separator in the result of toString() is not enough.
         String s = fmth.format.format(num);
         Writer out = env.getOut();
-        if (escapeNonTOMs) {
-            outputFormat.output(s, out);
+        if (autoEscapeOutputFormat != null) {
+            autoEscapeOutputFormat.output(s, out);
         } else {
             out.write(s);
         }

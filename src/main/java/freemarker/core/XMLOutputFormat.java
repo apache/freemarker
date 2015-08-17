@@ -26,7 +26,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class XMLOutputFormat extends EscapingOutputFormat<XMLTemplateOutputModel> {
+public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLOutputModel> {
 
     public static final XMLOutputFormat INSTANCE = new XMLOutputFormat();
     
@@ -60,8 +60,8 @@ public final class XMLOutputFormat extends EscapingOutputFormat<XMLTemplateOutpu
     }
 
     @Override
-    protected XMLTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
-        return new XMLTemplateOutputModel(plainTextContent, markupContent);
+    protected TemplateXMLOutputModel newTOM(String plainTextContent, String markupContent) {
+        return new TemplateXMLOutputModel(plainTextContent, markupContent);
     }
 
 }

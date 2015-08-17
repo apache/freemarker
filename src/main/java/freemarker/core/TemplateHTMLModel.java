@@ -15,12 +15,23 @@
  */
 package freemarker.core;
 
-import freemarker.template.TemplateOutputModel;
+/**
+ * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
+ * 
+ * @since 2.3.24
+ */
+public final class TemplateHTMLModel extends CommonTemplateMarkupOutputModel<TemplateHTMLModel> {
+    
+    /**
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     */
+    TemplateHTMLModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
+    }
 
-class RawTemplateOutputModel implements TemplateOutputModel<RawTemplateOutputModel> {
-
-    public OutputFormat<RawTemplateOutputModel> getOutputFormat() {
-        return RawOutputFormat.INSTANCE;
+    @Override
+    public HTMLOutputFormat getOutputFormat() {
+        return HTMLOutputFormat.INSTANCE;
     }
 
 }

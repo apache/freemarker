@@ -15,17 +15,23 @@
  */
 package freemarker.core;
 
-import freemarker.template.TemplateOutputModel;
-
 /**
- * Represents the plainHTML output format.
+ * Stores RTF markup to be printed; used with {@link RTFOutputFormat}.
  * 
  * @since 2.3.24
  */
-public class PlainTextTemplateOutputModel implements TemplateOutputModel<PlainTextTemplateOutputModel> {
+public final class TemplateRTFModel extends CommonTemplateMarkupOutputModel<TemplateRTFModel> {
+    
+    /**
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     */
+    TemplateRTFModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
+    }
 
-    public OutputFormat<PlainTextTemplateOutputModel> getOutputFormat() {
-        return PlainTextOutputFormat.INSTANCE;
+    @Override
+    public RTFOutputFormat getOutputFormat() {
+        return RTFOutputFormat.INSTANCE;
     }
 
 }

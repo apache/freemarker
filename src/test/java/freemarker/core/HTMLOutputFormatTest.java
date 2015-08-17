@@ -28,7 +28,7 @@ import freemarker.template.TemplateModelException;
 public class HTMLOutputFormatTest {
     
     @Test
-    public void testOutputTOM() throws TemplateModelException, IOException {
+    public void testOutputMO() throws TemplateModelException, IOException {
        StringWriter out = new StringWriter();
        
        INSTANCE.output(INSTANCE.fromMarkup("<p>Test "), out);
@@ -63,96 +63,96 @@ public class HTMLOutputFormatTest {
     @Test
     public void testEscapePlainText() throws TemplateModelException {
         String plainText = "a&b";
-        HTMLTemplateOutputModel tom = INSTANCE.escapePlainText(plainText);
-        assertSame(plainText, tom.getPlainTextContent());
-        assertNull(tom.getMarkupContent()); // Not the TOM's duty to calculate it!
+        TemplateHTMLModel mo = INSTANCE.escapePlainText(plainText);
+        assertSame(plainText, mo.getPlainTextContent());
+        assertNull(mo.getMarkupContent()); // Not the MO's duty to calculate it!
     }
 
     @Test
     public void testFromMarkup() throws TemplateModelException {
         String markup = "a&amp;b";
-        HTMLTemplateOutputModel tom = INSTANCE.fromMarkup(markup);
-        assertSame(markup, tom.getMarkupContent());
-        assertNull(tom.getPlainTextContent()); // Not the TOM's duty to calculate it!
+        TemplateHTMLModel mo = INSTANCE.fromMarkup(markup);
+        assertSame(markup, mo.getMarkupContent());
+        assertNull(mo.getPlainTextContent()); // Not the MO's duty to calculate it!
     }
     
     @Test
     public void testMarkup() throws TemplateModelException {
         {
             String markup = "a&amp;b";
-            HTMLTemplateOutputModel tom = INSTANCE.fromMarkup(markup);
-            assertSame(markup, INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.fromMarkup(markup);
+            assertSame(markup, INSTANCE.getMarkup(mo));
         }
         
         {
             String safe = "abc";
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText(safe);
-            assertSame(safe, INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText(safe);
+            assertSame(safe, INSTANCE.getMarkup(mo));
         }
         {
             String safe = "";
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText(safe);
-            assertSame(safe, INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText(safe);
+            assertSame(safe, INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("<abc");
-            assertEquals("&lt;abc", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("<abc");
+            assertEquals("&lt;abc", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("abc>");
-            assertEquals("abc&gt;", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("abc>");
+            assertEquals("abc&gt;", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("<abc>");
-            assertEquals("&lt;abc&gt;", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("<abc>");
+            assertEquals("&lt;abc&gt;", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("a&bc");
-            assertEquals("a&amp;bc", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("a&bc");
+            assertEquals("a&amp;bc", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("a&b&c");
-            assertEquals("a&amp;b&amp;c", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("a&b&c");
+            assertEquals("a&amp;b&amp;c", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("a<&>b&c");
-            assertEquals("a&lt;&amp;&gt;b&amp;c", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("a<&>b&c");
+            assertEquals("a&lt;&amp;&gt;b&amp;c", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("\"<a<&>b&c>\"");
-            assertEquals("&quot;&lt;a&lt;&amp;&gt;b&amp;c&gt;&quot;", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("\"<a<&>b&c>\"");
+            assertEquals("&quot;&lt;a&lt;&amp;&gt;b&amp;c&gt;&quot;", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("<");
-            assertEquals("&lt;", INSTANCE.getMarkup(tom));
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("<");
+            assertEquals("&lt;", INSTANCE.getMarkup(mo));
         }
         {
-            HTMLTemplateOutputModel tom = INSTANCE.escapePlainText("'");
-            String mc = INSTANCE.getMarkup(tom);
+            TemplateHTMLModel mo = INSTANCE.escapePlainText("'");
+            String mc = INSTANCE.getMarkup(mo);
             assertEquals("&#39;", mc);
-            assertSame(mc, INSTANCE.getMarkup(tom)); // cached
+            assertSame(mc, INSTANCE.getMarkup(mo)); // cached
         }
     }
     
     @Test
     public void testConcat() {
-        assertTOM(
+        assertMO(
                 "ab", null,
-                INSTANCE.concat(new HTMLTemplateOutputModel("a", null), new HTMLTemplateOutputModel("b", null)));
-        assertTOM(
+                INSTANCE.concat(new TemplateHTMLModel("a", null), new TemplateHTMLModel("b", null)));
+        assertMO(
                 null, "ab",
-                INSTANCE.concat(new HTMLTemplateOutputModel(null, "a"), new HTMLTemplateOutputModel(null, "b")));
-        assertTOM(
+                INSTANCE.concat(new TemplateHTMLModel(null, "a"), new TemplateHTMLModel(null, "b")));
+        assertMO(
                 null, "<a>&lt;b&gt;",
-                INSTANCE.concat(new HTMLTemplateOutputModel(null, "<a>"), new HTMLTemplateOutputModel("<b>", null)));
-        assertTOM(
+                INSTANCE.concat(new TemplateHTMLModel(null, "<a>"), new TemplateHTMLModel("<b>", null)));
+        assertMO(
                 null, "&lt;a&gt;<b>",
-                INSTANCE.concat(new HTMLTemplateOutputModel("<a>", null), new HTMLTemplateOutputModel(null, "<b>")));
+                INSTANCE.concat(new TemplateHTMLModel("<a>", null), new TemplateHTMLModel(null, "<b>")));
     }
     
-    private void assertTOM(String pc, String mc, HTMLTemplateOutputModel tom) {
-        assertEquals(pc, tom.getPlainTextContent());
-        assertEquals(mc, tom.getMarkupContent());
+    private void assertMO(String pc, String mc, TemplateHTMLModel mo) {
+        assertEquals(pc, mo.getPlainTextContent());
+        assertEquals(mc, mo.getMarkupContent());
     }
     
     @Test

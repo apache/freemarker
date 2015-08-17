@@ -21,14 +21,18 @@ import freemarker.template.Configuration;
  * Represents the output format used when the template output format is undecided. This is the default output format if
  * FreeMarker can't select anything more specific (see
  * {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}).
+ * With this format auto-escaping ({@link Configuration#setAutoEscaping(boolean)}) has no effect. It will print
+ * {@link TemplateMarkupOutputModel}-s as is (doesn't try to convert them).
+ * 
+ * @see PlainTextOutputFormat 
  * 
  * @since 2.3.24
  */
-public final class RawOutputFormat extends NonEscapingOutputFormat<RawTemplateOutputModel> {
+public final class UndefinedOutputFormat extends OutputFormat {
 
-    public static final RawOutputFormat INSTANCE = new RawOutputFormat();
+    public static final UndefinedOutputFormat INSTANCE = new UndefinedOutputFormat();
     
-    private RawOutputFormat() {
+    private UndefinedOutputFormat() {
         // Only to decrease visibility
     }
 
@@ -39,7 +43,7 @@ public final class RawOutputFormat extends NonEscapingOutputFormat<RawTemplateOu
 
     @Override
     public String getName() {
-        return "raw";
+        return "undefined";
     }
 
     @Override

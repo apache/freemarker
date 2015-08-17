@@ -15,12 +15,9 @@
  */
 package freemarker.core;
 
-public final class CustomHTMLTemplateOutputModel extends EscapingTemplateOutputModel<CustomHTMLTemplateOutputModel> {
+public final class CustomTemplateHTMLModel extends CommonTemplateMarkupOutputModel<CustomTemplateHTMLModel> {
     
-    /**
-     * See {@link EscapingTemplateOutputModel#EscapingTemplateOutputModel(String, String)}.
-     */
-    CustomHTMLTemplateOutputModel(String plainTextContent, String markupContent) {
+    CustomTemplateHTMLModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 
