@@ -19914,12 +19914,12 @@ There was no specific handler for node y
         <listitem>
           <para><indexterm>
               <primary>auto_escaping</primary>
-            </indexterm><literal>auto_escaping</literal>: Boolean value that
-          tells if auto-escaping (based on output format) is on or off at the
-          place where this variable is referred (resolved statically). This is
-          <emphasis>not</emphasis> affected by the deprecated
-          <literal>escape</literal> directive. This only deals with automatic
-          escaping based on the output format mechanism.</para>
+            </indexterm><literal>auto_escaping</literal> (since 2.3.24):
+          Boolean value that tells if auto-escaping (based on output format)
+          is on or off at the place where this variable is referred (resolved
+          statically). This is <emphasis>not</emphasis> affected by the
+          deprecated <literal>escape</literal> directive. This only deals with
+          automatic escaping based on the output format mechanism.</para>
         </listitem>
 
         <listitem>
@@ -20136,9 +20136,9 @@ There was no specific handler for node y
         <listitem>
           <para><indexterm>
               <primary>output_format</primary>
-            </indexterm><literal>output_format</literal>: The name of output
-          format at the place where this variable is referred (resolved
-          statically), such as <literal>"HTML"</literal>,
+            </indexterm><literal>output_format</literal> (since 2.3.24): The
+          name of output format at the place where this variable is referred
+          (resolved statically), such as <literal>"HTML"</literal>,
           <literal>"XML"</literal>, <literal>"RTF"</literal>,
           <literal>"plainText"</literal>, <literal>"undefined"</literal>, etc.
           <phrase role="forProgrammers">(The available names can be extended
