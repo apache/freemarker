@@ -159,3 +159,10 @@
         - content: "\n10 "  // String
     #--...--  // f.c.Comment
         - content: " A comment "  // String
+    #text  // f.c.TextBlock
+        - content: "\n11 "  // String
+    #outputformat  // f.c.OutputFormatBlock
+        - value: "XML"  // f.c.StringLiteral
+            - embedded template: null  // Null
+        ${...}  // f.c.DollarVariable
+            - content: x  // f.c.Identifier

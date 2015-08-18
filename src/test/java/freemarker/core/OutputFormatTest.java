@@ -559,6 +559,69 @@ public class OutputFormatTest extends TemplateTest {
                 "${'x'?markup}",
                 "xpected", "markup output", "string");
     }
+
+    @Test
+    public void testOutputFormatDirective() throws Exception {
+        assertOutput(
+                "${.outputFormat} "
+                + "<#outputFormat 'HTML'>"
+                + "${.outputFormat} "
+                + "<#outputFormat 'RTF'>${.outputFormat}</#outputFormat> "
+                + "${.outputFormat} "
+                + "</#outputFormat>"
+                + "${.outputFormat}",
+                "undefined HTML RTF HTML undefined");
+        assertOutput(
+                "<#ftl output_format='XML'>"
+                + "${.output_format} "
+                + "<#outputformat 'HTML'>${.output_format}</#outputformat> "
+                + "${.output_format}",
+                "XML HTML XML");
+        
+        // Custom format:
+        assertErrorContains(
+                "<#outputFormat 'dummy'></#outputFormat>",
+                "dummy", "nregistered");
+        getConfiguration().setRegisteredCustomOutputFormats(Collections.singleton(DummyOutputFormat.INSTANCE));
+        assertOutput(
+                "<#outputFormat 'dummy'>${.outputFormat}</#outputFormat>",
+                "dummy");
+        
+        // Parse-time param expression:
+        assertOutput(
+                "<#outputFormat 'plain' + 'Text'>${.outputFormat}</#outputFormat>",
+                "plainText");
+        assertErrorContains(
+                "<#outputFormat 'plain' + someVar + 'Text'>${.outputFormat}</#outputFormat>",
+                "someVar", "parse-time");
+        assertErrorContains(
+                "<#outputFormat 'plainText'?upperCase>${.outputFormat}</#outputFormat>",
+                "?upperCase", "parse-time");
+        
+        // Naming convention:
+        assertErrorContains(
+                "<#outputFormat 'HTML'></#outputformat>",
+                "convention", "#outputFormat", "#outputformat");
+        assertErrorContains(
+                "<#outputformat 'HTML'></#outputFormat>",
+                "convention", "#outputFormat", "#outputformat");
+        
+        // Empty block:
+        assertOutput(
+                "${.output_format} "
+                + "<#outputformat 'HTML'></#outputformat>"
+                + "${.output_format}",
+                "undefined undefined");
+        
+        // WS stripping:
+        assertOutput(
+                "${.output_format}\n"
+                + "<#outputformat 'HTML'>\n"
+                + "  x\n"
+                + "</#outputformat>\n"
+                + "${.output_format}",
+                "undefined\n  x\nundefined");
+    }
     
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {

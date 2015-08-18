@@ -794,6 +794,10 @@ TOKEN:
     |
     <SETTING : <START_TAG> "setting" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
     |
+    <OUTPUTFORMAT : <START_TAG> "output" ("f"|"F") "ormat" <BLANK>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 6), FM_EXPRESSION);
+    }
+    |
     <COMPRESS : <START_TAG> "compress" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <COMMENT : <START_TAG> "comment" <CLOSE_TAG1>> {
@@ -833,6 +837,10 @@ TOKEN:
     <END_FUNCTION : <END_TAG> "function" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <END_MACRO : <END_TAG> "macro" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    |
+    <END_OUTPUTFORMAT : <END_TAG> "output" ("f" | "F") "ormat" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 6), DEFAULT);
+    }
     |
     <END_COMPRESS : <END_TAG> "compress" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -3473,6 +3481,68 @@ NoEscapeBlock NoEscape() :
     }
 }
 
+OutputFormatBlock OutputFormat() :
+{
+    Token start, end;
+    Expression outputFormatNameExp;
+    TemplateElement content;
+    OutputFormat lastOutputFormat;
+}
+{
+    start = <OUTPUTFORMAT>
+    outputFormatNameExp = Expression()
+    <DIRECTIVE_END>
+    {
+        if (!outputFormatNameExp.isLiteral()) {
+            throw new ParseException(
+                    "Parameter expression must be parse-time evaluable (constant): "
+                    + outputFormatNameExp.getCanonicalForm(),
+                    outputFormatNameExp);
+        }
+    
+        TemplateModel outputFormatNameTM;
+        try {
+            outputFormatNameTM = outputFormatNameExp.eval(null);
+        } catch (Exception e) {
+            throw new ParseException(
+                    "Could not evaluate expression (on parse-time): " + outputFormatNameExp.getCanonicalForm()
+                    + "\nUnderlying cause: " +  e,
+                    outputFormatNameExp, e);
+        }
+        String outputFormatNameStr;
+        if (outputFormatNameTM instanceof TemplateScalarModel) {
+            try {
+                outputFormatNameStr = ((TemplateScalarModel) outputFormatNameTM).getAsString();
+            } catch (TemplateModelException e) {
+	            throw new ParseException(
+	                    "Could not evaluate expression (on parse-time): " + outputFormatNameExp.getCanonicalForm()
+	                    + "\nUnderlying cause: " +  e,
+	                    outputFormatNameExp, e);
+            }
+        } else {
+                throw new ParseException(
+                        "Parameter must be a string, but was: " + ClassUtil.getFTLTypeDescription(outputFormatNameTM),
+                        outputFormatNameExp);
+        }
+        
+        lastOutputFormat = outputFormat; 
+        try {
+            outputFormat = template.getConfiguration().getOutputFormat(outputFormatNameStr);
+        } catch (UnregisteredOutputFormatException e) {
+            throw new ParseException(e.getMessage(), template, start);
+        }
+    }
+    content = OptionalBlock()
+    end = <END_OUTPUTFORMAT>
+    {
+        OutputFormatBlock result = new OutputFormatBlock(content, outputFormatNameExp);
+        result.setLocation(template, start, end);
+        
+        outputFormat = lastOutputFormat; 
+        return result;
+    }
+}
+
 /**
  * Production to terminate potentially empty elements. Either a ">" or "/>"
  */
@@ -3578,6 +3648,8 @@ TemplateElement FreemarkerDirective() :
         tp = FallBack()
         |
         tp = Attempt()
+        |
+        tp = OutputFormat()
     )
     {
         return tp;
@@ -3754,8 +3826,8 @@ void HeaderElement() :
                         value = exp.eval(null);
                     } catch (Exception e) {
                         throw new ParseException(
-                        		"Could not evaluate expression: " + exp.getCanonicalForm() + " \nUnderlying cause: "
-                				+  e.getMessage(),
+                        		"Could not evaluate expression (on parse-time): " + exp.getCanonicalForm()
+                        		+ " \nUnderlying cause: " +  e,
                                 exp, e);
                     }
                     String vs = null;
