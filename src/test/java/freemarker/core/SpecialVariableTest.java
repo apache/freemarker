@@ -21,6 +21,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import freemarker.template.Configuration;
+import freemarker.template.Version;
 import freemarker.test.TemplateTest;
 
 public class SpecialVariableTest extends TemplateTest {
@@ -35,5 +37,23 @@ public class SpecialVariableTest extends TemplateTest {
             prevName = name;
         }
     }
+    
+    @Test
+    public void testVersion() throws Exception {
+        String versionStr = Configuration.getVersion().toString();
+        assertOutput("${.version}", versionStr);
+    }
 
+    @Test
+    public void testIncompationImprovements() throws Exception {
+        assertOutput(
+                "${.incompatibleImprovements}",
+                getConfiguration().getIncompatibleImprovements().toString());
+        
+        getConfiguration().setIncompatibleImprovements(new Version(2, 3, 23));
+        assertOutput(
+                "${.incompatible_improvements}",
+                getConfiguration().getIncompatibleImprovements().toString());
+    }
+    
 }

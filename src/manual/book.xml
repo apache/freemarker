@@ -19970,6 +19970,16 @@ There was no specific handler for node y
 
         <listitem>
           <para><indexterm>
+              <primary>incomplatible_improvements</primary>
+            </indexterm><literal>incompatible_improvements</literal> (since
+          FreeMarker 2.3.24): The <link
+          linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+          setting</link> of the current FreeMarker configuration, as a
+          string.</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
               <primary>language</primary>
             </indexterm><indexterm>
               <primary>lang</primary>
@@ -23818,6 +23828,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   output</quote> type as a string.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added new special variable:
+              <literal>.incompatible_improvements</literal>, which returns the
+              <link
+              linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+              setting</link> of the current FreeMarker configuration, as a
+              string.</para>
             </listitem>
           </itemizedlist>
         </section>

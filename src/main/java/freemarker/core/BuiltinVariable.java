@@ -57,6 +57,8 @@ final class BuiltinVariable extends Expression {
     static final String PASS = "pass";
     static final String VARS = "vars";
     static final String VERSION = "version";
+    static final String INCOMPATIBLE_IMPROVEMENTS_CC = "incompatibleImprovements";
+    static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     static final String ERROR = "error";
     static final String OUTPUT_ENCODING_CC = "outputEncoding";
     static final String OUTPUT_ENCODING = "output_encoding";
@@ -79,6 +81,8 @@ final class BuiltinVariable extends Expression {
         DATA_MODEL,
         ERROR,
         GLOBALS,
+        INCOMPATIBLE_IMPROVEMENTS_CC,
+        INCOMPATIBLE_IMPROVEMENTS,
         LANG,
         LOCALE,
         LOCALE_OBJECT_CC,
@@ -197,9 +201,6 @@ final class BuiltinVariable extends Expression {
         if (name == PASS) {
             return Macro.DO_NOTHING_MACRO;
         }
-        if (name == VERSION) {
-            return new SimpleScalar(Configuration.getVersionNumber());
-        }
         if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
             String s = env.getOutputEncoding();
             return SimpleScalar.newInstanceOrNull(s);
@@ -213,6 +214,12 @@ final class BuiltinVariable extends Expression {
         }
         if (name == NOW) {
             return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
+        }
+        if (name == VERSION) {
+            return new SimpleScalar(Configuration.getVersionNumber());
+        }
+        if (name == INCOMPATIBLE_IMPROVEMENTS || name == INCOMPATIBLE_IMPROVEMENTS_CC) {
+            return new SimpleScalar(env.getConfiguration().getIncompatibleImprovements().toString());
         }
         throw new _MiscTemplateException(this,
                 "Invalid built-in variable: ", name);
