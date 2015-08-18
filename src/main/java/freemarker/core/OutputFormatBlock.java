@@ -25,10 +25,10 @@ import freemarker.template.TemplateException;
  */
 final class OutputFormatBlock extends TemplateElement {
     
-    private final Expression outputFormatName;
+    private final Expression paramExp;
 
-    OutputFormatBlock(TemplateElement nestedBlock, Expression outputFormatName) { 
-        this.outputFormatName = outputFormatName; 
+    OutputFormatBlock(TemplateElement nestedBlock, Expression paramExp) { 
+        this.paramExp = paramExp; 
         setNestedBlock(nestedBlock);
     }
 
@@ -43,7 +43,7 @@ final class OutputFormatBlock extends TemplateElement {
     protected String dump(boolean canonical) {
         if (canonical) {
             String nested = getNestedBlock() != null ? getNestedBlock().getCanonicalForm() : "";
-            return "<" + getNodeTypeSymbol() + " \"" + outputFormatName.getCanonicalForm() + "\">"
+            return "<" + getNodeTypeSymbol() + " \"" + paramExp.getCanonicalForm() + "\">"
                     + nested + "</" + getNodeTypeSymbol() + ">";
         } else {
             return getNodeTypeSymbol();
@@ -62,7 +62,7 @@ final class OutputFormatBlock extends TemplateElement {
 
     @Override
     Object getParameterValue(int idx) {
-        if (idx == 0) return outputFormatName;
+        if (idx == 0) return paramExp;
         else
             throw new IndexOutOfBoundsException();
     }

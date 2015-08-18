@@ -3484,50 +3484,50 @@ NoEscapeBlock NoEscape() :
 OutputFormatBlock OutputFormat() :
 {
     Token start, end;
-    Expression outputFormatNameExp;
+    Expression paramExp;
     TemplateElement content;
     OutputFormat lastOutputFormat;
 }
 {
     start = <OUTPUTFORMAT>
-    outputFormatNameExp = Expression()
+    paramExp = Expression()
     <DIRECTIVE_END>
     {
-        if (!outputFormatNameExp.isLiteral()) {
+        if (!paramExp.isLiteral()) {
             throw new ParseException(
                     "Parameter expression must be parse-time evaluable (constant): "
-                    + outputFormatNameExp.getCanonicalForm(),
-                    outputFormatNameExp);
+                    + paramExp.getCanonicalForm(),
+                    paramExp);
         }
     
-        TemplateModel outputFormatNameTM;
+        TemplateModel paramTM;
         try {
-            outputFormatNameTM = outputFormatNameExp.eval(null);
+            paramTM = paramExp.eval(null);
         } catch (Exception e) {
             throw new ParseException(
-                    "Could not evaluate expression (on parse-time): " + outputFormatNameExp.getCanonicalForm()
+                    "Could not evaluate expression (on parse-time): " + paramExp.getCanonicalForm()
                     + "\nUnderlying cause: " +  e,
-                    outputFormatNameExp, e);
+                    paramExp, e);
         }
-        String outputFormatNameStr;
-        if (outputFormatNameTM instanceof TemplateScalarModel) {
+        String paramStr;
+        if (paramTM instanceof TemplateScalarModel) {
             try {
-                outputFormatNameStr = ((TemplateScalarModel) outputFormatNameTM).getAsString();
+                paramStr = ((TemplateScalarModel) paramTM).getAsString();
             } catch (TemplateModelException e) {
 	            throw new ParseException(
-	                    "Could not evaluate expression (on parse-time): " + outputFormatNameExp.getCanonicalForm()
+	                    "Could not evaluate expression (on parse-time): " + paramExp.getCanonicalForm()
 	                    + "\nUnderlying cause: " +  e,
-	                    outputFormatNameExp, e);
+	                    paramExp, e);
             }
         } else {
-                throw new ParseException(
-                        "Parameter must be a string, but was: " + ClassUtil.getFTLTypeDescription(outputFormatNameTM),
-                        outputFormatNameExp);
+            throw new ParseException(
+                    "Parameter must be a string, but was: " + ClassUtil.getFTLTypeDescription(paramTM),
+                    paramExp);
         }
         
         lastOutputFormat = outputFormat; 
         try {
-            outputFormat = template.getConfiguration().getOutputFormat(outputFormatNameStr);
+            outputFormat = template.getConfiguration().getOutputFormat(paramStr);
         } catch (UnregisteredOutputFormatException e) {
             throw new ParseException(e.getMessage(), template, start);
         }
@@ -3535,7 +3535,7 @@ OutputFormatBlock OutputFormat() :
     content = OptionalBlock()
     end = <END_OUTPUTFORMAT>
     {
-        OutputFormatBlock result = new OutputFormatBlock(content, outputFormatNameExp);
+        OutputFormatBlock result = new OutputFormatBlock(content, paramExp);
         result.setLocation(template, start, end);
         
         outputFormat = lastOutputFormat; 

@@ -23780,9 +23780,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para>New directive: <literal>outputFormat</literal>, used
-                  to change the output format for a section in the template,
-                  like <literal>&lt;#output_format
-                  "XML"&gt;...&lt;/#output_format&gt;</literal></para>
+                  to change the output format for a section of a template,
+                  like <literal>&lt;#outputformat
+                  "XML"&gt;<replaceable>...</replaceable>&lt;/#outputformat&gt;</literal></para>
                 </listitem>
 
                 <listitem>

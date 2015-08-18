@@ -563,20 +563,20 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testOutputFormatDirective() throws Exception {
         assertOutput(
-                "${.outputFormat} "
+                "${.outputFormat}${'\\''} "
                 + "<#outputFormat 'HTML'>"
-                + "${.outputFormat} "
-                + "<#outputFormat 'RTF'>${.outputFormat}</#outputFormat> "
-                + "${.outputFormat} "
+                + "${.outputFormat}${'\\''} "
+                + "<#outputFormat 'XML'>${.outputFormat}${'\\''}</#outputFormat> "
+                + "${.outputFormat}${'\\''} "
                 + "</#outputFormat>"
-                + "${.outputFormat}",
-                "undefined HTML RTF HTML undefined");
+                + "${.outputFormat}${'\\''}",
+                "undefined' HTML&#39; XML&apos; HTML&#39; undefined'");
         assertOutput(
                 "<#ftl output_format='XML'>"
-                + "${.output_format} "
-                + "<#outputformat 'HTML'>${.output_format}</#outputformat> "
-                + "${.output_format}",
-                "XML HTML XML");
+                + "${.output_format}${'\\''} "
+                + "<#outputformat 'HTML'>${.output_format}${'\\''}</#outputformat> "
+                + "${.output_format}${'\\''}",
+                "XML&apos; HTML&#39; XML&apos;");
         
         // Custom format:
         assertErrorContains(
@@ -592,11 +592,14 @@ public class OutputFormatTest extends TemplateTest {
                 "<#outputFormat 'plain' + 'Text'>${.outputFormat}</#outputFormat>",
                 "plainText");
         assertErrorContains(
-                "<#outputFormat 'plain' + someVar + 'Text'>${.outputFormat}</#outputFormat>",
+                "<#outputFormat 'plain' + someVar + 'Text'></#outputFormat>",
                 "someVar", "parse-time");
         assertErrorContains(
-                "<#outputFormat 'plainText'?upperCase>${.outputFormat}</#outputFormat>",
+                "<#outputFormat 'plainText'?upperCase></#outputFormat>",
                 "?upperCase", "parse-time");
+        assertErrorContains(
+                "<#outputFormat true></#outputFormat>",
+                "string", "boolean");
         
         // Naming convention:
         assertErrorContains(
