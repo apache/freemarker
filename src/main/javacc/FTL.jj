@@ -1764,8 +1764,11 @@ BuiltinVariable BuiltinVariable() :
         token_source.checkNamingConvention(name);
 
         TemplateModel parseTimeValue;
-        if (name.image.equals(BuiltinVariable.OUTPUT_FORMAT) || name.image.equals(BuiltinVariable.OUTPUT_FORMAT_CC)) {
+        String nameStr = name.image;
+        if (nameStr.equals(BuiltinVariable.OUTPUT_FORMAT) || nameStr.equals(BuiltinVariable.OUTPUT_FORMAT_CC)) {
             parseTimeValue = new SimpleScalar(outputFormat.getName());
+        } else if (nameStr.equals(BuiltinVariable.AUTO_ESCAPING) || nameStr.equals(BuiltinVariable.AUTO_ESCAPING_CC)) {
+            parseTimeValue = autoEscaping ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         } else {
             parseTimeValue = null;
         }
@@ -2829,7 +2832,9 @@ TemplateElement Assign() :
             	}
 	        )
 	        {
-	            BlockAssignment ba = new BlockAssignment(block, varName, scope, nsExp);
+	            BlockAssignment ba = new BlockAssignment(
+	                   block, varName, scope, nsExp,
+	                   outputFormat instanceof MarkupOutputFormat ? (MarkupOutputFormat) outputFormat : null);
 	            ba.setLocation(template, start, end);
 	            return ba;
 	        }

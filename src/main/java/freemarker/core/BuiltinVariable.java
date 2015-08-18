@@ -57,11 +57,15 @@ final class BuiltinVariable extends Expression {
     static final String PASS = "pass";
     static final String VARS = "vars";
     static final String VERSION = "version";
+    static final String INCOMPATIBLE_IMPROVEMENTS_CC = "incompatibleImprovements";
+    static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     static final String ERROR = "error";
     static final String OUTPUT_ENCODING_CC = "outputEncoding";
     static final String OUTPUT_ENCODING = "output_encoding";
     static final String OUTPUT_FORMAT_CC = "outputFormat";
     static final String OUTPUT_FORMAT = "output_format";
+    static final String AUTO_ESCAPING_CC = "autoEscaping";
+    static final String AUTO_ESCAPING = "auto_escaping";
     static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
@@ -69,6 +73,8 @@ final class BuiltinVariable extends Expression {
     private static final BoundCallable PASS_VALUE = new BoundCallable(UnboundCallable.NO_OP_MACRO, null, null);
     
     static final String[] SPEC_VAR_NAMES = new String[] {
+        AUTO_ESCAPING_CC,
+        AUTO_ESCAPING,
         CURRENT_NODE_CC,
         CURRENT_TEMPLATE_NAME_CC,
         CURRENT_NODE,
@@ -77,6 +83,8 @@ final class BuiltinVariable extends Expression {
         DATA_MODEL,
         ERROR,
         GLOBALS,
+        INCOMPATIBLE_IMPROVEMENTS_CC,
+        INCOMPATIBLE_IMPROVEMENTS,
         LANG,
         LOCALE,
         LOCALE_OBJECT_CC,
@@ -195,15 +203,8 @@ final class BuiltinVariable extends Expression {
         if (name == PASS) {
             return PASS_VALUE;
         }
-        if (name == VERSION) {
-            return new SimpleScalar(Configuration.getVersionNumber());
-        }
         if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
             String s = env.getOutputEncoding();
-            return SimpleScalar.newInstanceOrNull(s);
-        }
-        if (name == OUTPUT_FORMAT || name == OUTPUT_FORMAT_CC) {
-            String s = env.getCurrentTemplate().getOutputFormat().getName();
             return SimpleScalar.newInstanceOrNull(s);
         }
         if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {
@@ -215,6 +216,12 @@ final class BuiltinVariable extends Expression {
         }
         if (name == NOW) {
             return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
+        }
+        if (name == VERSION) {
+            return new SimpleScalar(Configuration.getVersionNumber());
+        }
+        if (name == INCOMPATIBLE_IMPROVEMENTS || name == INCOMPATIBLE_IMPROVEMENTS_CC) {
+            return new SimpleScalar(env.getConfiguration().getIncompatibleImprovements().toString());
         }
         throw new _MiscTemplateException(this,
                 "Invalid built-in variable: ", name);
