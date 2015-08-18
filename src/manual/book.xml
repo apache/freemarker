@@ -23947,8 +23947,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Internal code cleanup: Mostly source code formatting, and
-              parser construction and setup</para>
+              <para>Bug fixed: The (rarely used) cause exception of
+              <literal>ParseException</literal>-s wasn't set</para>
+            </listitem>
+
+            <listitem>
+              <para>Internal code cleanup: Mostly source code formatting, also
+              many parser construction/setup cleanup</para>
             </listitem>
           </itemizedlist>
         </section>
