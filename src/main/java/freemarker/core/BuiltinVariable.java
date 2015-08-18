@@ -62,11 +62,15 @@ final class BuiltinVariable extends Expression {
     static final String OUTPUT_ENCODING = "output_encoding";
     static final String OUTPUT_FORMAT_CC = "outputFormat";
     static final String OUTPUT_FORMAT = "output_format";
+    static final String AUTO_ESCAPING_CC = "autoEscaping";
+    static final String AUTO_ESCAPING = "auto_escaping";
     static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
     
     static final String[] SPEC_VAR_NAMES = new String[] {
+        AUTO_ESCAPING_CC,
+        AUTO_ESCAPING,
         CURRENT_NODE_CC,
         CURRENT_TEMPLATE_NAME_CC,
         CURRENT_NODE,
@@ -198,10 +202,6 @@ final class BuiltinVariable extends Expression {
         }
         if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
             String s = env.getOutputEncoding();
-            return SimpleScalar.newInstanceOrNull(s);
-        }
-        if (name == OUTPUT_FORMAT || name == OUTPUT_FORMAT_CC) {
-            String s = env.getCurrentTemplate().getOutputFormat().getName();
             return SimpleScalar.newInstanceOrNull(s);
         }
         if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {

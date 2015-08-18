@@ -509,6 +509,27 @@ public class OutputFormatTest extends TemplateTest {
                     "false <p>&amp; &amp; false");
         }
     }
+
+    @Test
+    public void testSpecialVariables() throws Exception {
+        String commonFTL = "${.outputFormat} ${.autoEscaping?c}";
+        
+        addTemplate("t.ftlx", commonFTL);
+        assertOutputForNamed("t.ftlx", "XML true");
+        
+        addTemplate("t.ftlh", commonFTL);
+        assertOutputForNamed("t.ftlh", "HTML true");
+
+        addTemplate("t.ftl", commonFTL);
+        assertOutputForNamed("t.ftl", "undefined true");
+        
+        addTemplate("tX.ftl", "<#ftl outputFormat='XML'>" + commonFTL);
+        addTemplate("tX.ftlx", commonFTL);
+        assertOutputForNamed("t.ftlx", "XML true");
+        
+        addTemplate("tN.ftl", "<#ftl autoEscaping='false'>" + commonFTL);
+        assertOutputForNamed("tN.ftl", "undefined false");
+    }
     
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {

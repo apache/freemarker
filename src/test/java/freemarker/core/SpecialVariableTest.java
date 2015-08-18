@@ -26,7 +26,7 @@ import freemarker.test.TemplateTest;
 public class SpecialVariableTest extends TemplateTest {
 
     @Test
-    public void testGetSettingNamesSorted() throws Exception {
+    public void testNamesSorted() throws Exception {
         String prevName = null;
         for (String name : BuiltinVariable.SPEC_VAR_NAMES) {
             if (prevName != null) {
