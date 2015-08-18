@@ -397,35 +397,8 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testEscAndNoEscBIBasics() throws IOException, TemplateException {
-        String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
-        addTemplate("t.ftlh", commonFTL);
-        addTemplate("t-noAuto.ftlh", "<#ftl autoEscaping=false>" + commonFTL);
-        addTemplate("t.ftl", commonFTL);
-        assertOutputForNamed("t.ftlh", "&lt;x&gt; &lt;x&gt; <x>");
-        assertOutputForNamed("t-noAuto.ftlh", "<x> &lt;x&gt; <x>");
-        assertErrorContainsForNamed("t.ftl", "output format", "undefined");
-    }
-
-    @Test
     public void testStringBIsFail() {
         assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "markup_output");
-    }
-
-    @Test
-    public void testEscAndNoEscBIsOnMOs() throws IOException, TemplateException {
-        assertOutput(
-                "<#ftl outputFormat='XML'>${'&'?esc?esc} ${'&'?esc?noEsc} ${'&'?noEsc?esc} ${'&'?noEsc?noEsc}",
-                "&amp; &amp; & &");
-        
-        for (String bi : new String[] { "esc", "noEsc" } ) {
-            assertOutput(
-                    "<#ftl outputFormat='XML'>${rtfPlain?" + bi + "}",
-                    "\\par a &amp; b");
-            assertErrorContains(
-                    "<#ftl outputFormat='XML'>${rtfMarkup?" + bi + "}",
-                    "?" + bi, "output format", "RTF", "XML");
-        }
     }
 
     @Test
@@ -529,6 +502,60 @@ public class OutputFormatTest extends TemplateTest {
         
         addTemplate("tN.ftl", "<#ftl autoEscaping='false'>" + commonFTL);
         assertOutputForNamed("tN.ftl", "undefined false");
+    }
+    
+    @Test
+    public void testEscAndNoEscBIBasics() throws IOException, TemplateException {
+        String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
+        addTemplate("t.ftlh", commonFTL);
+        addTemplate("t-noAuto.ftlh", "<#ftl autoEscaping=false>" + commonFTL);
+        addTemplate("t.ftl", commonFTL);
+        assertOutputForNamed("t.ftlh", "&lt;x&gt; &lt;x&gt; <x>");
+        assertOutputForNamed("t-noAuto.ftlh", "<x> &lt;x&gt; <x>");
+        assertErrorContainsForNamed("t.ftl", "output format", "undefined");
+    }
+
+    @Test
+    public void testEscAndNoEscBIsOnMOs() throws IOException, TemplateException {
+        String xmlHdr = "<#ftl outputFormat='XML'>";
+        
+        assertOutput(
+                xmlHdr + "${'&'?esc?esc} ${'&'?esc?noEsc} ${'&'?noEsc?esc} ${'&'?noEsc?noEsc}",
+                "&amp; &amp; & &");
+        
+        for (String bi : new String[] { "esc", "noEsc" } ) {
+            assertOutput(
+                    xmlHdr + "${rtfPlain?" + bi + "}",
+                    "\\par a &amp; b");
+            assertOutput(
+                    xmlHdr + "<#setting numberFormat='0.0'>${1?" + bi + "}",
+                    "1.0");
+            assertOutput(
+                    xmlHdr + "<#setting booleanFormat='&y,&n'>${true?" + bi + "}",
+                    bi.equals("esc") ? "&amp;y" : "&y");
+            assertErrorContains(
+                    xmlHdr + "${rtfMarkup?" + bi + "}",
+                    "?" + bi, "output format", "RTF", "XML");
+            assertErrorContains(
+                    xmlHdr + "${noSuchVar?" + bi + "}",
+                    "noSuchVar", "null or missing");
+            assertErrorContains(
+                    xmlHdr + "${[]?" + bi + "}",
+                    "?" + bi, "xpected", "string", "sequence");
+        }
+    }
+
+    @Test
+    public void testMarkupBI() throws Exception {
+        assertOutput(
+                "${htmlPlain?markup} ${htmlMarkup?markup}",
+                "a &lt; {h&#39;} <p>c");
+        assertErrorContains(
+                "${noSuchVar?markup}",
+                "noSuchVar", "null or missing");
+        assertErrorContains(
+                "${'x'?markup}",
+                "xpected", "markup output", "string");
     }
     
     @Override

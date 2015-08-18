@@ -23775,6 +23775,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   will result in markup where <literal>somePlainText</literal>
                   is included properly escaped.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Added new built-in: <literal>markup</literal>. This
+                  returns the markup of a value of <quote>markup
+                  output</quote> type as a string.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>

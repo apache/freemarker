@@ -24,6 +24,7 @@ import java.util.List;
 
 import freemarker.core.BuiltInsForDates.iso_BI;
 import freemarker.core.BuiltInsForDates.iso_utc_or_local_BI;
+import freemarker.core.BuiltInsForMarkupOutputs.markupBI;
 import freemarker.core.BuiltInsForMultipleTypes.is_dateLikeBI;
 import freemarker.core.BuiltInsForNodes.ancestorsBI;
 import freemarker.core.BuiltInsForNodes.childrenBI;
@@ -73,8 +74,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 255;
-    static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 0.67f);
+    static final int NUMBER_OF_BIS = 256;
+    static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
         
@@ -226,6 +227,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("lower_case", "lowerCase", new BuiltInsForStringsBasic.lower_caseBI());
         putBI("namespace", new BuiltInsForMultipleTypes.namespaceBI());
         putBI("new", new NewBI());
+        putBI("markup", new markupBI());
         putBI("node_name", "nodeName", new node_nameBI());
         putBI("node_namespace", "nodeNamespace", new node_namespaceBI());
         putBI("node_type", "nodeType", new node_typeBI());
