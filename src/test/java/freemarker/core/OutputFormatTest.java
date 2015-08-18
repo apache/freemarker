@@ -625,6 +625,64 @@ public class OutputFormatTest extends TemplateTest {
                 + "${.output_format}",
                 "undefined\n  x\nundefined");
     }
+
+    @Test
+    public void testAutoEscAndNoAutoEscDirectives() throws Exception {
+        assertOutput(
+                "<#ftl outputFormat='XML'>"
+                + "${.autoEscaping?c}${'&'} "
+                + "<#noAutoEsc>"
+                + "${.autoEscaping?c}${'&'} "
+                + "<#autoEsc>${.autoEscaping?c}${'&'}</#autoEsc> "
+                + "${.autoEscaping?c}${'&'} "
+                + "</#noAutoEsc>"
+                + "${.autoEscaping?c}${'&'}",
+                "true&amp; false& true&amp; false& true&amp;");
+        assertOutput(
+                "<#ftl auto_escaping=false output_format='XML'>"
+                + "${.auto_escaping?c}${'&'} "
+                + "<#autoesc>${.auto_escaping?c}${'&'}</#autoesc> "
+                + "${.auto_escaping?c}${'&'}",
+                "false& true&amp; false&");
+        
+        // Naming convention:
+        assertErrorContains(
+                "<#autoEsc></#autoesc>",
+                "convention", "#autoEsc", "#autoesc");
+        assertErrorContains(
+                "<#autoesc></#autoEsc>",
+                "convention", "#autoEsc", "#autoesc");
+        assertErrorContains(
+                "<#noAutoEsc></#noautoesc>",
+                "convention", "#noAutoEsc", "#noautoesc");
+        assertErrorContains(
+                "<#noautoesc></#noAutoEsc>",
+                "convention", "#noAutoEsc", "#noautoesc");
+        
+        // Bad came case:
+        assertErrorContains(
+                "<#noAutoesc></#noAutoesc>",
+                "Unknown directive");
+        assertErrorContains(
+                "<#noautoEsc></#noautoEsc>",
+                "Unknown directive");
+        
+        // Empty block:
+        assertOutput(
+                "${.auto_escaping?c} "
+                + "<#noautoesc></#noautoesc>"
+                + "${.auto_escaping?c}",
+                "true true");
+        
+        // WS stripping:
+        assertOutput(
+                "${.auto_escaping?c}\n"
+                + "<#noautoesc>\n"
+                + "  x\n"
+                + "</#noautoesc>\n"
+                + "${.auto_escaping?c}",
+                "true\n  x\ntrue");
+    }
     
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {

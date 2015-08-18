@@ -798,6 +798,14 @@ TOKEN:
         strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 6), FM_EXPRESSION);
     }
     |
+    <AUTOESC : <START_TAG> "auto" ("e"|"E") "sc" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
+    }
+    |
+    <NOAUTOESC : <START_TAG> "no" ("autoe"|"AutoE") "sc" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+    }
+    |
     <COMPRESS : <START_TAG> "compress" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <COMMENT : <START_TAG> "comment" <CLOSE_TAG1>> {
@@ -840,6 +848,14 @@ TOKEN:
     |
     <END_OUTPUTFORMAT : <END_TAG> "output" ("f" | "F") "ormat" <CLOSE_TAG1>> {
         strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 6), DEFAULT);
+    }
+    |
+    <END_AUTOESC : <END_TAG> "auto" ("e" | "E") "sc" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
+    }
+    |
+    <END_NOAUTOESC : <END_TAG> "no" ("autoe"|"AutoE") "sc" <CLOSE_TAG1>> {
+        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
     }
     |
     <END_COMPRESS : <END_TAG> "compress" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
@@ -3543,6 +3559,52 @@ OutputFormatBlock OutputFormat() :
     }
 }
 
+AutoEscBlock AutoEsc() :
+{
+    Token start, end;
+    TemplateElement content;
+    boolean lastAutoEscaping;
+}
+{
+    start = <AUTOESC>
+    {
+        lastAutoEscaping = autoEscaping;
+        autoEscaping = true; 
+    }
+    content = OptionalBlock()
+    end = <END_AUTOESC>
+    {
+        AutoEscBlock result = new AutoEscBlock(content);
+        result.setLocation(template, start, end);
+        
+        autoEscaping = lastAutoEscaping; 
+        return result;
+    }
+}
+
+NoAutoEscBlock NoAutoEsc() :
+{
+    Token start, end;
+    TemplateElement content;
+    boolean lastAutoEscaping;
+}
+{
+    start = <NOAUTOESC>
+    {
+        lastAutoEscaping = autoEscaping;
+        autoEscaping = false; 
+    }
+    content = OptionalBlock()
+    end = <END_NOAUTOESC>
+    {
+        NoAutoEscBlock result = new NoAutoEscBlock(content);
+        result.setLocation(template, start, end);
+        
+        autoEscaping = lastAutoEscaping; 
+        return result;
+    }
+}
+
 /**
  * Production to terminate potentially empty elements. Either a ">" or "/>"
  */
@@ -3650,6 +3712,10 @@ TemplateElement FreemarkerDirective() :
         tp = Attempt()
         |
         tp = OutputFormat()
+        |
+        tp = AutoEsc()
+        |
+        tp = NoAutoEsc()
     )
     {
         return tp;

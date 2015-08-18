@@ -23786,6 +23786,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>New directives: <literal>noAutoEsc</literal> and
+                  <literal>autoEsc</literal>, used to turn auto-escaping off
+                  and on for a section of a template, like
+                  <literal>&lt;#noautoesc&gt;<replaceable>...</replaceable>&lt;/#noautoesc&gt;</literal>.</para>
+                </listitem>
+
+                <listitem>
                   <para>New built-in variable,
                   <literal>.output_format</literal> (or
                   <literal>.outputFormat</literal>), returns the current
