@@ -502,6 +502,8 @@ public class OutputFormatTest extends TemplateTest {
         
         addTemplate("tN.ftl", "<#ftl autoEscaping='false'>" + commonFTL);
         assertOutputForNamed("tN.ftl", "undefined false");
+        
+        assertOutput("${.output_format} ${.auto_escaping?c}", "undefined true");
     }
     
     @Test
