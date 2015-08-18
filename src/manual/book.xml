@@ -11376,7 +11376,8 @@ Green Mouse</programlisting>
 
             <listitem>
               <para><literal>'</literal> is replaced with
-              <literal>&amp;#39;</literal> if the programmers has <link
+              <literal>&amp;#39;</literal> <emphasis>if</emphasis> the
+              programmers has <link
               linkend="pgui_config_incompatible_improvements_how_to_set">set
               the <literal>incompatible_improvements</literal> setting</link>
               to <literal>2.3.20</literal> or higher. Otherwise
@@ -11388,6 +11389,14 @@ Green Mouse</programlisting>
           </itemizedlist>
 
           <programlisting role="template">&lt;input type=text name=user value=<emphasis>"</emphasis>${user?html}<emphasis>"</emphasis>&gt;</programlisting>
+
+          <warning>
+            <para>When inserting the value of an attribute, always quote it,
+            or else it can be exploited by attackers! This is WRONG:
+            <literal>&lt;input name="user" value=${user?xhtml}&gt;</literal>.
+            This is good: <literal>&lt;input name="user"
+            value="${user?xhtml}"&gt;</literal>.</para>
+          </warning>
 
           <para>Note that in HTML pages usually you want to use this built-in
           for all interpolations. You can spare a lot of typing and lessen the
@@ -11464,10 +11473,9 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <emphasis>inside</emphasis> the string literal.</para>
 
           <para>Both quotation mark (<literal>"</literal>) and
-          apostrophe-quoate (<literal>'</literal>) are escaped. Starting from
-          FreeMarker 2.3.1, it also escapes <literal>&gt;</literal> as
-          <literal>\&gt;</literal> (to avoid
-          <literal>&lt;/script&gt;</literal>).</para>
+          apostrophe-quoate (<literal>'</literal>) are escaped. It also
+          escapes <literal>&gt;</literal> as <literal>\&gt;</literal> (to
+          avoid <literal>&lt;/script&gt;</literal>).</para>
 
           <para>All characters under <link linkend="gloss.UCS">UCS</link> code
           point 0x20 will be escaped. When they have no dedicated escape
@@ -11475,6 +11483,16 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <literal>\t</literal>, etc.), they will be replaced with a UNICODE
           escape
           (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
+
+          <warning>
+            <para>When inserting into a JavaScript string literal that's
+            inside a HTML attribute, you also must escape the value with HTML
+            escaping. Thus, of you don't have automatic HTML escaping, this is
+            WRONG: <literal>&lt;p
+            onclick="alert('${message?js_string}')"&gt;</literal>, and this is
+            good: <literal>&lt;p
+            onclick="alert('${message?js_string?html}')"&gt;</literal>.</para>
+          </warning>
 
           <para>Example:</para>
 
@@ -12560,6 +12578,15 @@ ${x?url}</programlisting>
           <literal>&amp;#39;</literal> instead of as
           <literal>&amp;apos;</literal>, because some older browsers don't
           interpret <literal>&amp;apos;</literal> correctly.</para>
+
+          <warning>
+            <para>When inserting the value of an attribute, always quote it,
+            or else it can be exploited by attacker! This is WRONG:
+            <literal>&lt;input name="user" value=${user?xhtml}/&gt;</literal>.
+            These are good: <literal>&lt;input name="user"
+            value="${user?xhtml}"/&gt;</literal>, <literal>&lt;input
+            name="user" value='${user?xhtml}'/&gt;</literal>.</para>
+          </warning>
         </section>
 
         <section xml:id="ref_builtin_xml">
@@ -12603,6 +12630,15 @@ ${x?url}</programlisting>
               <literal>&amp;apos;</literal></para>
             </listitem>
           </itemizedlist>
+
+          <warning>
+            <para>When inserting the value of an attribute, always quote it,
+            or else it can be exploited by attackers! This is WRONG:
+            <literal>&lt;input name="user" value=${user?xml}/&gt;</literal>.
+            These are good: <literal>&lt;input name="user"
+            value="${user?xml}"/&gt;</literal>, <literal>&lt;input name="user"
+            value='${user?xml}'/&gt;</literal>.</para>
+          </warning>
         </section>
 
         <section xml:id="ref_builtin_string_flags">
