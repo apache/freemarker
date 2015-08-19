@@ -87,7 +87,7 @@ public class CamelCaseTest extends TemplateTest {
                 + "stripText=true "
                 + "strictSyntax=true "
                 + "outputFormat='" + HTMLOutputFormat.INSTANCE.getName() + "' "
-                + "autoEscaping=true "
+                + "autoEsc=true "
                 + "nsPrefixes={} "
                 + ">\nx\n<#if true>\n${.outputFormat}\n</#if>\n",
                 "\nHTML\n");
@@ -98,7 +98,7 @@ public class CamelCaseTest extends TemplateTest {
                 + "strip_text=true "
                 + "strict_syntax=true "
                 + "output_format='" + HTMLOutputFormat.INSTANCE.getName() + "' "
-                + "auto_escaping=true "
+                + "auto_esc=true "
                 + "ns_prefixes={} "
                 + ">\nx\n<#if true>\n${.output_format}\n</#if>\n",
                 "\nHTML\n");

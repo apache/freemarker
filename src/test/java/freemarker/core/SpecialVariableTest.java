@@ -55,5 +55,19 @@ public class SpecialVariableTest extends TemplateTest {
                 "${.incompatible_improvements}",
                 getConfiguration().getIncompatibleImprovements().toString());
     }
+
+    @Test
+    public void testAutoEsc() throws Exception {
+        assertOutput(
+                "${.autoEsc?c}",
+                "true");
+        
+        getConfiguration().setAutoEscaping(false);
+        assertOutput(
+                "${.auto_esc?c}",
+                "false");
+        
+        assertErrorContains("${.autoEscaping}", "You may meant: \"autoEsc\"");
+    }
     
 }
