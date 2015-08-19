@@ -164,15 +164,11 @@
     #outputformat  // f.c.OutputFormatBlock
         - value: "XML"  // f.c.StringLiteral
             - embedded template: null  // Null
-        ${...}  // f.c.DollarVariable
-            - content: x  // f.c.Identifier
-    #text  // f.c.TextBlock
-        - content: "\n12 "  // String
-    #noautoesc  // f.c.NoAutoEscBlock
-        #text  // f.c.TextBlock
-            - content: "a"  // String
-        #autoesc  // f.c.AutoEscBlock
-            #text  // f.c.TextBlock
-                - content: "c"  // String
-        #text  // f.c.TextBlock
-            - content: "b"  // String
+        #noautoesc  // f.c.NoAutoEscBlock
+            ${...}  // f.c.DollarVariable
+                - content: a  // f.c.Identifier
+            #autoesc  // f.c.AutoEscBlock
+                ${...}  // f.c.DollarVariable
+                    - content: b  // f.c.Identifier
+            ${...}  // f.c.DollarVariable
+                - content: c  // f.c.Identifier

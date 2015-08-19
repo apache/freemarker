@@ -2031,6 +2031,15 @@ public class StringUtil {
         }
         return true;
     }
+
+    /**
+     * Same as {@link #globToRegularExpression(String, boolean)} with {@code caseInsensitive} argument {@code false}.
+     * 
+     * @since 2.3.24
+     */
+    public static Pattern globToRegularExpression(String glob) {
+        return globToRegularExpression(glob, false);
+    }
     
     /**
      * Creates a regular expression from a glob. The glob must use {@code /} for as file separator, not {@code \}
@@ -2051,8 +2060,10 @@ public class StringUtil {
      *   <li>{@code [}: Reserved for future purposes; can't be used
      *   <li><code>{</code>: Reserved for future purposes; can't be used
      * </ul>
+     * 
+     * @since 2.3.24
      */
-    public static Pattern globToRegularExpression(String glob) {
+    public static Pattern globToRegularExpression(String glob, boolean caseInsensitive) {
         StringBuilder regex = new StringBuilder();
         
         int nextStart = 0;
@@ -2104,7 +2115,7 @@ public class StringUtil {
         }
         appendLiteralGlobSection(regex, glob, nextStart, glob.length());
         
-        return Pattern.compile(regex.toString());
+        return Pattern.compile(regex.toString(), caseInsensitive ? Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE : 0);
     }
 
     private static void appendLiteralGlobSection(StringBuilder regex, String glob, int start, int end) {

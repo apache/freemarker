@@ -275,7 +275,7 @@ public class FMParser {
         }
     }
 
-    private boolean getBoolean(Expression exp) throws ParseException {
+    private boolean getBoolean(Expression exp, boolean legacyCompat) throws ParseException {
         TemplateModel tm = null;
         try {
             tm = exp.eval(null);
@@ -292,7 +292,7 @@ public class FMParser {
             } catch (TemplateModelException tme) {
             }
         }
-        if (tm instanceof TemplateScalarModel) {
+        if (legacyCompat && tm instanceof TemplateScalarModel) {
             try {
                 return StringUtil.getYesNo(((TemplateScalarModel) tm).getAsString());
             } catch (Exception e) {
@@ -303,6 +303,13 @@ public class FMParser {
         }
         throw new ParseException("Expecting boolean (true/false) parameter", exp);
     }
+    
+    void checkCurrentOutputFormatCanEscape(Token start) throws ParseException {
+        if (!(outputFormat instanceof MarkupOutputFormat)) {
+            throw new ParseException("The current output format can't do escaping: " + outputFormat,
+                    template, start);
+        }
+    }    
     
     private ParserIteratorBlockContext pushIteratorBlockContext() {
         if (iteratorBlockContexts == null) {
@@ -3493,8 +3500,9 @@ AutoEscBlock AutoEsc() :
 {
     start = <AUTOESC>
     {
+        checkCurrentOutputFormatCanEscape(start);
         lastAutoEscaping = autoEscaping;
-        autoEscaping = true; 
+        autoEscaping = true;
     }
     content = OptionalBlock()
     end = <END_AUTOESC>
@@ -3796,6 +3804,7 @@ void HeaderElement() :
 {
     Token key;
     Expression exp = null;
+    Token autoEscRequester = null;
 }
 {
     [<STATIC_TEXT_WS>]
@@ -3837,14 +3846,17 @@ void HeaderElement() :
                             }
                             templateSpecifiedEncoding = assumedEncoding;
                         } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE") || ks.equals("stripWhitespace")) {
-                            this.stripWhitespace = getBoolean(exp);
+                            this.stripWhitespace = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("STRIP_TEXT") || ks.equals("stripText")) {
-                            this.stripText = getBoolean(exp);
+                            this.stripText = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
-                            this.token_source.strictEscapeSyntax = getBoolean(exp);
+                            this.token_source.strictEscapeSyntax = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
-                            autoEscaping = getBoolean(exp);
+                            autoEscaping = getBoolean(exp, false);
                             template.setAutoEscaping(autoEscaping);
+                            if (autoEscaping) {
+                                autoEscRequester = key;
+                            }
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
@@ -3916,6 +3928,11 @@ void HeaderElement() :
                 }
             )*
         )
+        {
+            if (autoEscRequester != null) {
+                checkCurrentOutputFormatCanEscape(autoEscRequester);
+            }        
+        }
         LooseDirectiveEnd()
     )
 }

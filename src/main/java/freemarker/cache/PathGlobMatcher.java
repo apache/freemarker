@@ -26,7 +26,7 @@ import freemarker.template.utility.StringUtil;
  * it's not the full path of a file on the file system.
  * 
  * <p>This glob implementation recognizes {@code **} (Ant-style directory wildcard) among others. For more details see
- * {@link StringUtil#globToRegularExpression(String)}.
+ * {@link StringUtil#globToRegularExpression(String, boolean)}.
  * 
  * <p>About the usage of {@code /} (slash):
  * <ul>
@@ -37,27 +37,61 @@ import freemarker.template.utility.StringUtil;
  *       {@code foo/bar/} refers to the {bar} directory.
  * </ul>
  * 
+ * <p>By default the glob is case sensitive, but this can be changed with {@link #setCaseInsensitive(boolean)} (or
+ * {@link #caseInsensitive(boolean)}).
+ * 
  * @since 2.3.24
  */
 public class PathGlobMatcher extends TemplateSourceMatcher {
     
-    private final Pattern pattern;
+    private final String glob;
+    
+    private Pattern pattern;
+    private boolean caseInsensitive;
     
     /**
      * @param glob
-     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String)}. Must not start
-     *            with {@code /}.
+     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String, boolean)}. Must not
+     *            start with {@code /}.
      */
     public PathGlobMatcher(String glob) {
         if (glob.startsWith("/")) {
             throw new IllegalArgumentException("Absolute template paths need no inital \"/\"; remove it from: " + glob);
         }
-        pattern = StringUtil.globToRegularExpression(glob);
+        this.glob = glob;
+        buildPattern();
     }
 
+    private void buildPattern() {
+        pattern = StringUtil.globToRegularExpression(glob, caseInsensitive);
+    }
+    
     @Override
     public boolean matches(String sourceName, Object templateSource) throws IOException {
         return pattern.matcher(sourceName).matches();
+    }
+    
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+    
+    /**
+     * Sets if the matching will be case insensitive (UNICODE compliant); default is {@code false}.
+     */
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        boolean lastCaseInsensitive = this.caseInsensitive;
+        this.caseInsensitive = caseInsensitive;
+        if (lastCaseInsensitive != caseInsensitive) {
+            buildPattern();
+        }
+    }
+    
+    /**
+     * Fluid API variation of {@link #setCaseInsensitive(boolean)}
+     */
+    public PathGlobMatcher caseInsensitive(boolean caseInsensitive) {
+        setCaseInsensitive(caseInsensitive);
+        return this;
     }
 
 }

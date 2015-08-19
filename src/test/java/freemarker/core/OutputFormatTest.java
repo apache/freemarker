@@ -500,8 +500,8 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tX.ftlx", commonFTL);
         assertOutputForNamed("t.ftlx", "XML true");
         
-        addTemplate("tN.ftl", "<#ftl autoEsc='false'>" + commonFTL);
-        assertOutputForNamed("tN.ftl", "undefined false");
+        addTemplate("tN.ftl", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
+        assertOutputForNamed("tN.ftl", "RTF false");
         
         assertOutput("${.output_format} ${.auto_esc?c}", "undefined true");
     }
@@ -645,20 +645,6 @@ public class OutputFormatTest extends TemplateTest {
                 + "${.auto_esc?c}${'&'}",
                 "false& true&amp; false&");
         
-        // Naming convention:
-        assertErrorContains(
-                "<#autoEsc></#autoesc>",
-                "convention", "#autoEsc", "#autoesc");
-        assertErrorContains(
-                "<#autoesc></#autoEsc>",
-                "convention", "#autoEsc", "#autoesc");
-        assertErrorContains(
-                "<#noAutoEsc></#noautoesc>",
-                "convention", "#noAutoEsc", "#noautoesc");
-        assertErrorContains(
-                "<#noautoesc></#noAutoEsc>",
-                "convention", "#noAutoEsc", "#noautoesc");
-        
         // Bad came case:
         assertErrorContains(
                 "<#noAutoesc></#noAutoesc>",
@@ -682,6 +668,40 @@ public class OutputFormatTest extends TemplateTest {
                 + "</#noautoesc>\n"
                 + "${.auto_esc?c}",
                 "true\n  x\ntrue");
+        
+        
+        // Naming convention:
+        getConfiguration().setOutputFormat(XMLOutputFormat.INSTANCE);
+        assertErrorContains(
+                "<#autoEsc></#autoesc>",
+                "convention", "#autoEsc", "#autoesc");
+        assertErrorContains(
+                "<#autoesc></#autoEsc>",
+                "convention", "#autoEsc", "#autoesc");
+        assertErrorContains(
+                "<#noAutoEsc></#noautoesc>",
+                "convention", "#noAutoEsc", "#noautoesc");
+        assertErrorContains(
+                "<#noautoesc></#noAutoEsc>",
+                "convention", "#noAutoEsc", "#noautoesc");
+    }
+    
+    @Test
+    public void testExplicitAutoEscBannedForNonMarkup() throws Exception {
+        // While this restriction is technically unnecessary, we can catch a dangerous and probably common user
+        // misunderstanding.
+        assertErrorContains("<#ftl autoEsc=true>", "can't do escaping", "undefined");
+        assertErrorContains("<#ftl outputFormat='plainText' autoEsc=true>", "can't do escaping", "plainText");
+        assertErrorContains("<#ftl autoEsc=true outputFormat='plainText'>", "can't do escaping", "plainText");
+        assertOutput("<#ftl autoEsc=true outputFormat='HTML'>", "");
+        assertOutput("<#ftl outputFormat='HTML' autoEsc=true>", "");
+        assertOutput("<#ftl autoEsc=false>", "");
+        
+        assertErrorContains("<#autoEsc></#autoEsc>", "can't do escaping", "undefined");
+        assertErrorContains("<#ftl outputFormat='plainText'><#autoEsc></#autoEsc>", "can't do escaping", "plainText");
+        assertOutput("<#ftl outputFormat='plainText'><#outputFormat 'XML'><#autoEsc></#autoEsc></#outputFormat>", "");
+        assertOutput("<#ftl outputFormat='HTML'><#autoEsc></#autoEsc>", "");
+        assertOutput("<#noAutoEsc></#noAutoEsc>", "");
     }
     
     @Test

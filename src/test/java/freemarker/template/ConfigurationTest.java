@@ -806,7 +806,7 @@ public class ConfigurationTest extends TestCase {
         tl.putTemplate("t.de.ftlh", "");
         tl.putTemplate("t.fr.ftlx", "");
         tl.putTemplate("t.ftlx", "");
-        tl.putTemplate("stat/t.de.ftlx", "");
+        tl.putTemplate("Stat/t.de.ftlx", "");
         cfg.setTemplateLoader(tl);
         
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+09"));
@@ -822,13 +822,14 @@ public class ConfigurationTest extends TestCase {
                     + "), "
                     + "FirstMatchTemplateConfigurerFactory("
                         + "ConditionalTemplateConfigurerFactory("
-                            + "FileNameGlobMatcher('*.ftlh'), TemplateConfigurer(booleanFormat='TODO,HTML')), "
+                            + "FileExtensionMatcher('ftlh'), TemplateConfigurer(booleanFormat='TODO,HTML')), "
                         + "ConditionalTemplateConfigurerFactory("
-                            + "FileNameGlobMatcher('*.ftlx'), TemplateConfigurer(booleanFormat='TODO,XML')), "
+                            + "FileExtensionMatcher('ftlx'), TemplateConfigurer(booleanFormat='TODO,XML')), "
                         + "noMatchErrorDetails='Unrecognized template file extension'"
                     + "), "
                     + "ConditionalTemplateConfigurerFactory("
-                        + "PathGlobMatcher('stat/**'), TemplateConfigurer(timeZone=TimeZone('UTC'))"
+                        + "PathGlobMatcher('stat/**', caseInsensitive=true), "
+                        + "TemplateConfigurer(timeZone=TimeZone('UTC'))"
                     + ")"
                 + ")");
         
@@ -848,7 +849,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(TimeZone.getTimeZone("GMT+09"), t.getTimeZone());
         }
         {
-            Template t = cfg.getTemplate("stat/t.de.ftlx");
+            Template t = cfg.getTemplate("Stat/t.de.ftlx");
             assertEquals("TODO,XML", t.getBooleanFormat());
             assertEquals(DateUtil.UTC, t.getTimeZone());
         }
