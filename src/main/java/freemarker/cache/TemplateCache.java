@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import freemarker.cache.MultiTemplateLoader.MultiSource;
-import freemarker.core.ArithmeticEngine;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
@@ -37,12 +36,12 @@ import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
+import freemarker.core._ParserConfigurationWithOverrides;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateNotFoundException;
-import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -551,7 +550,7 @@ public class TemplateCache {
                 if ((tc == null || !tc.isOutputFormatSet() || !tc.isAutoEscapingSet())
                         && config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24
                         && (outputFormatFromStdFileExt = getFormatFromStdFileExt(sourceName)) != null) {
-                    pCfg = overrideOutputFormatAndAutoEscaping(
+                    pCfg = new _ParserConfigurationWithOverrides(
                             tc != null ? tc : config,
                             tc != null && tc.isOutputFormatSet() ? null : outputFormatFromStdFileExt,
                             tc != null && tc.isAutoEscapingSet() ? null : Boolean.TRUE);
@@ -609,44 +608,6 @@ public class TemplateCache {
         template.setLocale(locale);
         template.setCustomLookupCondition(customLookupCondition);
         return template;
-    }
-
-    private ParserConfiguration overrideOutputFormatAndAutoEscaping(
-            final ParserConfiguration pCfg, final OutputFormat outputFormat, final Boolean autoEscaping) {
-        return new ParserConfiguration() {
-            
-            public boolean getWhitespaceStripping() {
-                return pCfg.getWhitespaceStripping();
-            }
-            
-            public int getTagSyntax() {
-                return pCfg.getTagSyntax();
-            }
-            
-            public boolean getStrictSyntaxMode() {
-                return pCfg.getStrictSyntaxMode();
-            }
-            
-            public OutputFormat getOutputFormat() {
-                return outputFormat != null ? outputFormat : pCfg.getOutputFormat();
-            }
-            
-            public int getNamingConvention() {
-                return pCfg.getNamingConvention();
-            }
-            
-            public Version getIncompatibleImprovements() {
-                return pCfg.getIncompatibleImprovements();
-            }
-            
-            public boolean getAutoEscaping() {
-                return autoEscaping != null ? autoEscaping.booleanValue() : pCfg.getAutoEscaping();
-            }
-            
-            public ArithmeticEngine getArithmeticEngine() {
-                return pCfg.getArithmeticEngine();
-            }
-        };
     }
 
     private OutputFormat getFormatFromStdFileExt(String sourceName) {

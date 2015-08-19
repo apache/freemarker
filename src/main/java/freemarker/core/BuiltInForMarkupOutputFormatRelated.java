@@ -19,11 +19,11 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.utility.NullArgumentException;
 
-abstract class BuiltInForEscapingOutputFormatRelated extends SpecialBuiltIn {
+abstract class BuiltInForMarkupOutputFormatRelated extends SpecialBuiltIn {
     
     protected MarkupOutputFormat outputFormat;
     
-    void bindToOutputFormat(MarkupOutputFormat outputFormat) {
+    void bindToMarkupOutputFormat(MarkupOutputFormat outputFormat) {
         NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
     }
@@ -32,9 +32,7 @@ abstract class BuiltInForEscapingOutputFormatRelated extends SpecialBuiltIn {
     TemplateModel _eval(Environment env) throws TemplateException {
         if (outputFormat == null) {
             // The parser should prevent this situation
-            throw new _MiscTemplateException(
-                    this, env,
-                    "?" + key + " can't be used here, as the place isn't bound to an output format.");
+            throw new NullPointerException("outputFormat was null");
         }
         return calculateResult(env);
     }

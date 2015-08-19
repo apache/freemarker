@@ -23862,6 +23862,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para><emphasis role="strong">Attention!</emphasis> Raised
+              minimum required Java version from 1.4 to 1.5 (aka. Java
+              5)</para>
+            </listitem>
+
+            <listitem>
               <para>Added new configuration setting:
               <literal>template_configurers</literal> (or
               <literal>templateConfigurers</literal>). This allows overriding
@@ -23915,28 +23921,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><emphasis role="strong">Attention!</emphasis> Raised
-              minimum required Java version from 1.4 to 1.5 (aka. Java
-              5)</para>
-            </listitem>
-
-            <listitem>
               <para>Upgraded JavaCC (used during build to generate the FTL
               parser) from 3.2 to 6.1.2.</para>
             </listitem>
 
             <listitem>
-              <para>Added
-              <literal>Configurable.getSettingNames(camelCase)</literal>,
-              which returns the set of valid setting names. This can be useful
-              for auto-completion and such.</para>
+              <para>Added <literal>Configurable.getSettingNames(boolean
+              camelCase)</literal>, which returns the set of valid setting
+              names. This can be useful for auto-completion and such.</para>
             </listitem>
 
             <listitem>
               <para>Fixes and improvements in the <quote>object
               builder</quote> syntax used for configuring FreeMarker from
-              <literal>Properties</literal> or other sting-only
-              sources:</para>
+              <literal>java.util.Properties</literal> (or other string-only
+              sources):</para>
 
               <itemizedlist>
                 <listitem>
@@ -23958,6 +23957,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para><literal>TimeZone</literal> objects can be created
                   like <literal>TimeZone("UTC")</literal>, despite that
                   there's no a such constructor.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added support for creating lists with <literal>[
+                  <replaceable>item1</replaceable>,
+                  <replaceable>item2</replaceable>,
+                  <replaceable>...</replaceable>
+                  <replaceable>itemN</replaceable> ]</literal> syntax.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Number without decimal point will now be parsed to
+                  <literal>Integer</literal>, <literal>Long</literal>, or
+                  <literal>BigInteger</literal>, depending in the size of the
+                  number. Earlier all number were
+                  <literal>BigDecimal</literal>-s, but it had little
+                  importance as number types are converted to the constructor
+                  parameter type anyway.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

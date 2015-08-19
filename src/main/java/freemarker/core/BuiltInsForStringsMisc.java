@@ -45,8 +45,13 @@ class BuiltInsForStringsMisc {
         }
     }
 
-    static class evalBI extends BuiltInForString {
+    static class evalBI extends BuiltInForOutputFormatRelated {
+        
         @Override
+        protected TemplateModel calculateResult(Environment env) throws TemplateException {
+            return calculateResult(BuiltInForString.getTargetString(target, env), env);
+        }
+        
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             UnboundTemplate parentTemplate = getUnboundTemplate();
             
@@ -59,9 +64,15 @@ class BuiltInsForStringsMisc {
                                     RUNTIME_EVAL_LINE_DISPLACEMENT, 1,
                                     s.length() + 2));
                     tkMan.SwitchTo(FMParserConstants.FM_EXPRESSION);
+
+                    ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
+                    // pCfg.outputFormat is exceptional: it's inherited from the lexical context
+                    if (pCfg.getOutputFormat() != outputFormat) {
+                        pCfg = new _ParserConfigurationWithOverrides(pCfg, outputFormat, null);
+                    }
                     
                     FMParser parser = new FMParser(
-                            parentTemplate, false, tkMan, null, parentTemplate.getParserConfiguration());
+                            parentTemplate, false, tkMan, null, pCfg);
                     
                     exp = parser.Expression();
                 } catch (TokenMgrError e) {
@@ -86,6 +97,7 @@ class BuiltInsForStringsMisc {
                         "\n\nThe failing expression:");
             }
         }
+        
     }
 
     static class numberBI extends BuiltInForString {
