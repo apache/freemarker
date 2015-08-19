@@ -33,6 +33,7 @@ import java.util.Properties;
 
 import freemarker.cache.AndMatcher;
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileExtensionMatcher;
 import freemarker.cache.FileNameGlobMatcher;
 import freemarker.cache.FirstMatchTemplateConfigurerFactory;
 import freemarker.cache.MergingTemplateConfigurerFactory;
@@ -485,7 +486,6 @@ public class _ObjectBuilderSettingEvaluator {
     }
 
     private Object fetchListLiteral(boolean optional) throws _ObjectBuilderSettingEvaluationException {
-        int startPos = pos;
         if (pos == src.length() || src.charAt(pos) != '[') {
             if (!optional) {
                 throw new _ObjectBuilderSettingEvaluationException("[", src, pos);
@@ -579,6 +579,7 @@ public class _ObjectBuilderSettingEvaluator {
             
             addWithSimpleName(SHORTHANDS, PathGlobMatcher.class);
             addWithSimpleName(SHORTHANDS, FileNameGlobMatcher.class);
+            addWithSimpleName(SHORTHANDS, FileExtensionMatcher.class);
             addWithSimpleName(SHORTHANDS, PathRegexMatcher.class);
             addWithSimpleName(SHORTHANDS, AndMatcher.class);
             addWithSimpleName(SHORTHANDS, OrMatcher.class);

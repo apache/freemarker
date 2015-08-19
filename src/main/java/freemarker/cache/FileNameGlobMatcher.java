@@ -29,24 +29,55 @@ import freemarker.template.utility.StringUtil;
  * @since 2.3.24
  */
 public class FileNameGlobMatcher extends TemplateSourceMatcher {
+
+    private final String glob;
     
-    private final Pattern pattern;
+    private Pattern pattern;
+    private boolean caseInsensitive;
     
     /**
      * @param glob
-     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String)}. Must not start
-     *            with {@code /}.
+     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String, boolean)}. Must not
+     *            start with {@code /}.
      */
     public FileNameGlobMatcher(String glob) {
         if (glob.indexOf('/') != -1) {
             throw new IllegalArgumentException("A file name glob can't contain \"/\": " + glob);
         }
-        pattern = StringUtil.globToRegularExpression("**/" + glob);
+        this.glob = glob;
+        buildPattern();
+    }
+
+    private void buildPattern() {
+        pattern = StringUtil.globToRegularExpression("**/" + glob, caseInsensitive);
     }
 
     @Override
     public boolean matches(String sourceName, Object templateSource) throws IOException {
         return pattern.matcher(sourceName).matches();
     }
-
+    
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+    
+    /**
+     * Sets if the matching will be case insensitive (UNICODE compliant); default is {@code false}.
+     */
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        boolean lastCaseInsensitive = this.caseInsensitive;
+        this.caseInsensitive = caseInsensitive;
+        if (lastCaseInsensitive != caseInsensitive) {
+            buildPattern();
+        }
+    }
+    
+    /**
+     * Fluid API variation of {@link #setCaseInsensitive(boolean)}
+     */
+    public FileNameGlobMatcher caseInsensitive(boolean caseInsensitive) {
+        setCaseInsensitive(caseInsensitive);
+        return this;
+    }
+    
 }
