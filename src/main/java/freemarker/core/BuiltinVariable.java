@@ -64,15 +64,15 @@ final class BuiltinVariable extends Expression {
     static final String OUTPUT_ENCODING = "output_encoding";
     static final String OUTPUT_FORMAT_CC = "outputFormat";
     static final String OUTPUT_FORMAT = "output_format";
-    static final String AUTO_ESCAPING_CC = "autoEscaping";
-    static final String AUTO_ESCAPING = "auto_escaping";
+    static final String AUTO_ESC_CC = "autoEsc";
+    static final String AUTO_ESC = "auto_esc";
     static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
     
     static final String[] SPEC_VAR_NAMES = new String[] {
-        AUTO_ESCAPING_CC,
-        AUTO_ESCAPING,
+        AUTO_ESC_CC,
+        AUTO_ESC,
         CURRENT_NODE_CC,
         CURRENT_TEMPLATE_NAME_CC,
         CURRENT_NODE,
@@ -126,7 +126,22 @@ final class BuiltinVariable extends Expression {
                         ? namingConvention : Configuration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
             }
             
-            sb.append(" The allowed special variable names are: ");
+            {
+                String correctName;
+                if (name.equals("auto_escape") || name.equals("auto_escaping") || name.equals("autoesc")) {
+                    correctName = "auto_esc";
+                } else if (name.equals("autoEscape") || name.equals("autoEscaping")) {
+                    correctName = "autoEsc";
+                } else {
+                    correctName = null;
+                }
+                if (correctName != null) {
+                    sb.append(" You may meant: ");
+                    sb.append(StringUtil.jQuote(correctName)).append(".");
+                }
+            }
+            
+            sb.append("\nThe allowed special variable names are: ");
             boolean first = true;
             for (int i = 0; i < SPEC_VAR_NAMES.length; i++) {
                 final String correctName = SPEC_VAR_NAMES[i];
@@ -221,8 +236,9 @@ final class BuiltinVariable extends Expression {
         if (name == INCOMPATIBLE_IMPROVEMENTS || name == INCOMPATIBLE_IMPROVEMENTS_CC) {
             return new SimpleScalar(env.getConfiguration().getIncompatibleImprovements().toString());
         }
+        
         throw new _MiscTemplateException(this,
-                "Invalid built-in variable: ", name);
+                "Invalid special variable: ", name);
     }
 
     @Override

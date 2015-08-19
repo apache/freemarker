@@ -1874,7 +1874,7 @@ BuiltinVariable BuiltinVariable() :
         String nameStr = name.image;
         if (nameStr.equals(BuiltinVariable.OUTPUT_FORMAT) || nameStr.equals(BuiltinVariable.OUTPUT_FORMAT_CC)) {
             parseTimeValue = new SimpleScalar(outputFormat.getName());
-        } else if (nameStr.equals(BuiltinVariable.AUTO_ESCAPING) || nameStr.equals(BuiltinVariable.AUTO_ESCAPING_CC)) {
+        } else if (nameStr.equals(BuiltinVariable.AUTO_ESC) || nameStr.equals(BuiltinVariable.AUTO_ESC_CC)) {
             parseTimeValue = autoEscaping ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         } else {            parseTimeValue = null;
         }        
@@ -3917,7 +3917,7 @@ void HeaderElement() :
                             this.stripText = getBoolean(exp);
                         } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
                             this.token_source.strictEscapeSyntax = getBoolean(exp);
-                        } else if (ks.equalsIgnoreCase("auto_escaping") || ks.equals("autoEscaping")) {
+                        } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
                             autoEscaping = getBoolean(exp);
                             _TemplateAPI.setAutoEscaping(template, autoEscaping);
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
@@ -3975,12 +3975,16 @@ void HeaderElement() :
                                 correctName
                                         = token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
                                                 ? "nsPrefixes" : "ns_prefixes";
+                            } else if (ks.equals("auto_escape") || ks.equals("auto_escaping") || ks.equals("autoesc")) {
+                                correctName = "auto_esc";
+                            } else if (ks.equals("autoEscape") || ks.equals("autoEscaping")) {
+                                correctName = "autoEsc";
 	                        } else {
-	                           correctName = null;
+                                correctName = null;
 	                        }
                             throw new ParseException(
                                     "Unknown FTL header parameter: " + key.image
-                                    + (correctName == null ? "" : ". Did you mean " + correctName + "?"),
+                                    + (correctName == null ? "" : ". You may meant: " + correctName),
                                     template, key);
                         }
                     }

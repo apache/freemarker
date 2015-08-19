@@ -19913,10 +19913,10 @@ There was no specific handler for node y
       <itemizedlist spacing="compact">
         <listitem>
           <para><indexterm>
-              <primary>auto_escaping</primary>
-            </indexterm><literal>auto_escaping</literal> (since 2.3.24):
-          Boolean value that tells if auto-escaping (based on output format)
-          is on or off at the place where this variable is referred (resolved
+              <primary>auto_esc</primary>
+            </indexterm><literal>auto_esc</literal> (since 2.3.24): Boolean
+          value that tells if auto-escaping (based on output format) is on or
+          off at the place where this variable is referred (resolved
           statically). This is <emphasis>not</emphasis> affected by the
           deprecated <literal>escape</literal> directive. This only deals with
           automatic escaping based on the output format mechanism.</para>
@@ -23753,14 +23753,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>Things related to the output format mechanism, which is
-              new in this release (see it elsewhere):</para>
+              new in this release [TODO link to guide section]:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>New <literal>ftl</literal> header options to override
-                  the defaults of <literal>output_format</literal> and
-                  <literal>auto_escaping</literal> (e.g. <literal>&lt;#ftl
-                  output_format='HTML'&gt;</literal>).</para>
+                  <para>New <literal>ftl</literal> header options,
+                  <literal>ouput_format</literal> and
+                  <literal>auto_esc</literal> to override the
+                  <literal>output_format</literal> and
+                  <literal>auto_escaping</literal> settings of the template,
+                  like <literal>&lt;#ftl
+                  output_format='HTML'</literal><literal>
+                  auto_esc=false&gt;</literal>.</para>
                 </listitem>
 
                 <listitem>
@@ -23794,17 +23798,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para>New built-in variable,
-                  <literal>.output_format</literal> (or
-                  <literal>.outputFormat</literal>), returns the current
+                  <literal>.output_format</literal>, returns the current
                   output format at the place of invocation.</para>
                 </listitem>
 
                 <listitem>
-                  <para>New built-in variable,
-                  <literal>.auto_escaping</literal> (or
-                  <literal>.autoEscaping</literal>), returns the boolean value
-                  of the <literal>auto_escaping</literal> setting at the place
-                  of invocation.</para>
+                  <para>New built-in variable, <literal>.auto_esc</literal>,
+                  returns the boolean value of the
+                  <literal>auto_escaping</literal> setting at the place of
+                  invocation.</para>
                 </listitem>
 
                 <listitem>

@@ -229,8 +229,8 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testAutoEscapingSettingLayers() throws Exception {
         addTemplate("t", "${'a&b'}");
-        addTemplate("tWithHeaderFalse", "<#ftl autoEscaping=false>${'a&b'}");
-        addTemplate("tWithHeaderTrue", "<#ftl autoEscaping=true>${'a&b'}");
+        addTemplate("tWithHeaderFalse", "<#ftl autoEsc=false>${'a&b'}");
+        addTemplate("tWithHeaderTrue", "<#ftl autoEsc=true>${'a&b'}");
         
         Configuration cfg = getConfiguration();
         
@@ -277,7 +277,7 @@ public class OutputFormatTest extends TemplateTest {
                 "<#ftl outputFormat='dummy'>#{1.5}; #{1.5; m3}; ${'a.b'}",
                 "1\\.5; 1\\.500; a\\.b");
         assertOutput(
-                "<#ftl outputFormat='dummy' autoEscaping=false>#{1.5}; #{1.5; m3}; ${'a.b'}; ${'a.b'?esc}",
+                "<#ftl outputFormat='dummy' autoEsc=false>#{1.5}; #{1.5; m3}; ${'a.b'}; ${'a.b'?esc}",
                 "1.5; 1.500; a.b; a\\.b");
         assertOutput("<#ftl outputFormat='plainText'>#{1.5}", "1.5");
         assertOutput("<#ftl outputFormat='HTML'>#{1.5}", "1.5");
@@ -485,7 +485,7 @@ public class OutputFormatTest extends TemplateTest {
 
     @Test
     public void testSpecialVariables() throws Exception {
-        String commonFTL = "${.outputFormat} ${.autoEscaping?c}";
+        String commonFTL = "${.outputFormat} ${.autoEsc?c}";
         
         addTemplate("t.ftlx", commonFTL);
         assertOutputForNamed("t.ftlx", "XML true");
@@ -500,17 +500,17 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tX.ftlx", commonFTL);
         assertOutputForNamed("t.ftlx", "XML true");
         
-        addTemplate("tN.ftl", "<#ftl autoEscaping='false'>" + commonFTL);
+        addTemplate("tN.ftl", "<#ftl autoEsc='false'>" + commonFTL);
         assertOutputForNamed("tN.ftl", "undefined false");
         
-        assertOutput("${.output_format} ${.auto_escaping?c}", "undefined true");
+        assertOutput("${.output_format} ${.auto_esc?c}", "undefined true");
     }
     
     @Test
     public void testEscAndNoEscBIBasics() throws IOException, TemplateException {
         String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
         addTemplate("t.ftlh", commonFTL);
-        addTemplate("t-noAuto.ftlh", "<#ftl autoEscaping=false>" + commonFTL);
+        addTemplate("t-noAuto.ftlh", "<#ftl autoEsc=false>" + commonFTL);
         addTemplate("t.ftl", commonFTL);
         assertOutputForNamed("t.ftlh", "&lt;x&gt; &lt;x&gt; <x>");
         assertOutputForNamed("t-noAuto.ftlh", "<x> &lt;x&gt; <x>");
@@ -630,19 +630,19 @@ public class OutputFormatTest extends TemplateTest {
     public void testAutoEscAndNoAutoEscDirectives() throws Exception {
         assertOutput(
                 "<#ftl outputFormat='XML'>"
-                + "${.autoEscaping?c}${'&'} "
+                + "${.autoEsc?c}${'&'} "
                 + "<#noAutoEsc>"
-                + "${.autoEscaping?c}${'&'} "
-                + "<#autoEsc>${.autoEscaping?c}${'&'}</#autoEsc> "
-                + "${.autoEscaping?c}${'&'} "
+                + "${.autoEsc?c}${'&'} "
+                + "<#autoEsc>${.autoEsc?c}${'&'}</#autoEsc> "
+                + "${.autoEsc?c}${'&'} "
                 + "</#noAutoEsc>"
-                + "${.autoEscaping?c}${'&'}",
+                + "${.autoEsc?c}${'&'}",
                 "true&amp; false& true&amp; false& true&amp;");
         assertOutput(
-                "<#ftl auto_escaping=false output_format='XML'>"
-                + "${.auto_escaping?c}${'&'} "
-                + "<#autoesc>${.auto_escaping?c}${'&'}</#autoesc> "
-                + "${.auto_escaping?c}${'&'}",
+                "<#ftl auto_esc=false output_format='XML'>"
+                + "${.auto_esc?c}${'&'} "
+                + "<#autoesc>${.auto_esc?c}${'&'}</#autoesc> "
+                + "${.auto_esc?c}${'&'}",
                 "false& true&amp; false&");
         
         // Naming convention:
@@ -669,18 +669,18 @@ public class OutputFormatTest extends TemplateTest {
         
         // Empty block:
         assertOutput(
-                "${.auto_escaping?c} "
+                "${.auto_esc?c} "
                 + "<#noautoesc></#noautoesc>"
-                + "${.auto_escaping?c}",
+                + "${.auto_esc?c}",
                 "true true");
         
         // WS stripping:
         assertOutput(
-                "${.auto_escaping?c}\n"
+                "${.auto_esc?c}\n"
                 + "<#noautoesc>\n"
                 + "  x\n"
                 + "</#noautoesc>\n"
-                + "${.auto_escaping?c}",
+                + "${.auto_esc?c}",
                 "true\n  x\ntrue");
     }
     
