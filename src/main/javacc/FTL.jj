@@ -1987,13 +1987,19 @@ Expression BuiltIn(Expression lhoExp) :
             return result;
         }
 
-        if (result instanceof BuiltInForEscapingOutputFormatRelated) {
+        if (result instanceof BuiltInForMarkupOutputFormatRelated) {
             if (!(outputFormat instanceof MarkupOutputFormat)) {
                 throw new ParseException(
-                        "?" + t.image + " can't be used here, as the current output format doesn't define escaping "
-                        + "rules: " + outputFormat, template, t);
+                        "?" + t.image + " can't be used here, as the current output format isn't a markup (escaping) "
+                        + "format: " + outputFormat, template, t);
             }
-            ((BuiltInForEscapingOutputFormatRelated) result).bindToOutputFormat((MarkupOutputFormat) outputFormat);
+            ((BuiltInForMarkupOutputFormatRelated) result).bindToMarkupOutputFormat((MarkupOutputFormat) outputFormat);
+            
+            return result;
+        }
+
+        if (result instanceof BuiltInForOutputFormatRelated) {
+            ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(outputFormat);
             
             return result;
         }

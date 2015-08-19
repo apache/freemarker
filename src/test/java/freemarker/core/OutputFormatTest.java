@@ -684,6 +684,37 @@ public class OutputFormatTest extends TemplateTest {
                 "true\n  x\ntrue");
     }
     
+    @Test
+    public void testDynamicParsingBIsInherticContextOutputFormat() throws Exception {
+        // Dynamic parser BI-s are supposed to use the parserConfiguration of the calling template, and ignore anything
+        // inside the calling template itself. Except, the outputFormat has to come from the calling lexical context.
+        
+        String commonFTL
+                = "Eval: ${'.outputFormat'?eval}; "
+                  + "Interpret: <#assign ipd = r\"${.outputFormat} ${'{&}'}\"?interpret><@ipd/>";
+        addTemplate("t.ftlh", commonFTL);
+        addTemplate("t2.ftlh", "<#outputFormat 'RTF'>" + commonFTL + "</#outputFormat>");
+        
+        assertOutputForNamed(
+                "t.ftlh",
+                "Eval: HTML; Interpret: HTML {&amp;}");
+        assertOutputForNamed(
+                "t2.ftlh",
+                "Eval: RTF; Interpret: RTF \\{&\\}");
+        assertOutput(
+                commonFTL,
+                "Eval: undefined; Interpret: undefined {&}");
+        assertOutput(
+                "<#ftl outputFormat='RTF'>" + commonFTL + "\n"
+                + "<#outputFormat 'XML'>" + commonFTL + "</#outputFormat>",
+                "Eval: RTF; Interpret: RTF \\{&\\}\n"
+                + "Eval: XML; Interpret: XML {&amp;}");
+        assertOutput(
+                "<#ftl autoEsc=false outputFormat='XML'>"
+                + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
+                "Eval: XML; Interpret: XML {&amp;} true");
+    }
+    
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);

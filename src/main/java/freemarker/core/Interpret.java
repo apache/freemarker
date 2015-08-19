@@ -40,7 +40,8 @@ import freemarker.template.TemplateTransformModel;
  * specify another parameter to the method call in which case the
  * template name suffix is the specified id instead of "anonymous_interpreted".
  */
-class Interpret extends BuiltIn {
+class Interpret extends BuiltInForOutputFormatRelated {
+    
     /**
      * Constructs a template on-the-fly and returns it embedded in a
      * {@link TemplateTransformModel}.
@@ -57,8 +58,7 @@ class Interpret extends BuiltIn {
      * just as if it had been <tt>&lt;transform></tt>-ed at that point.
      */
     @Override
-    TemplateModel _eval(Environment env)
-            throws TemplateException {
+    protected TemplateModel calculateResult(Environment env) throws TemplateException {
         TemplateModel model = target.eval(env);
         Expression sourceExpr = null;
         String id = "anonymous_interpreted";
@@ -80,11 +80,16 @@ class Interpret extends BuiltIn {
         
         final Template interpretedTemplate;
         try {
+            ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
+            // pCfg.outputFormat is exceptional: it's inherited from the lexical context
+            if (pCfg.getOutputFormat() != outputFormat) {
+                pCfg = new _ParserConfigurationWithOverrides(pCfg, outputFormat, null);
+            }
             interpretedTemplate = new Template(
                     (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
                     null,
                     new StringReader(templateSource),
-                    parentTemplate.getConfiguration(), parentTemplate.getParserConfiguration(),
+                    parentTemplate.getConfiguration(), pCfg,
                     null);
         } catch (IOException e) {
             throw new _MiscTemplateException(this, e, env, new Object[] {
@@ -143,4 +148,5 @@ class Interpret extends BuiltIn {
             };
         }
     }
+
 }

@@ -13,22 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template.utility.NullArgumentException;
 
-abstract class BuiltInForString extends BuiltIn {
-    @Override
-    TemplateModel _eval(Environment env)
-    throws TemplateException {
-        return calculateResult(getTargetString(target, env), env);
-    }
-    abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
+abstract class BuiltInForOutputFormatRelated extends SpecialBuiltIn {
     
-    static String getTargetString(Expression target, Environment env) throws TemplateException {
-        return target.evalAndCoerceToString(env);
+    protected OutputFormat outputFormat;
+    
+    void bindToOutputFormat(OutputFormat outputFormat) {
+        NullArgumentException.check(outputFormat);
+        this.outputFormat = outputFormat;
     }
+    
+    @Override
+    TemplateModel _eval(Environment env) throws TemplateException {
+        if (outputFormat == null) {
+            // The parser should prevent this situation
+            throw new NullPointerException("outputFormat was null");
+        }
+        return calculateResult(env);
+    }
+
+    protected abstract TemplateModel calculateResult(Environment env)
+            throws TemplateException;
     
 }
