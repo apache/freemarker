@@ -5587,9 +5587,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.22) do you want to apply the fixes that are not 100%
+// version (here 2.3.24) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -5857,7 +5857,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
@@ -6913,19 +6913,19 @@ public class RepeatDirective implements TemplateDirectiveModel {
                   the <literal>Configuration</literal>. Depending on how you
                   create/set the <literal>ObjectWrapper</literal>, it can be
                   done like this (let's assume you want
-                  <literal>incompatibleImprovements</literal> 2.3.22):</para>
+                  <literal>incompatibleImprovements</literal> 2.3.24):</para>
 
                   <itemizedlist>
                     <listitem>
                       <para>If you are using the builder API:</para>
 
-                      <programlisting role="unspecified">... = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build()</programlisting>
+                      <programlisting role="unspecified">... = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build()</programlisting>
                     </listitem>
 
                     <listitem>
                       <para>Or, if you are using the constructor:</para>
 
-                      <programlisting role="unspecified">... = new DefaultObjectWrapper(Configuration.VERSION_2_3_22)</programlisting>
+                      <programlisting role="unspecified">... = new DefaultObjectWrapper(Configuration.VERSION_2_3_24)</programlisting>
                     </listitem>
 
                     <listitem>
@@ -6934,7 +6934,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
                       (<literal>*.properties</literal> file or
                       <literal>java.util.Properties</literal> object):</para>
 
-                      <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.21)</programlisting>
+                      <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.24)</programlisting>
                     </listitem>
 
                     <listitem>
@@ -6946,7 +6946,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
 
                       <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;object_wrapper&lt;/param-name&gt;
-    &lt;param-value&gt;DefaultObjectWrapper(2.3.21)&lt;/param-value&gt;
+    &lt;param-value&gt;DefaultObjectWrapper(2.3.24)&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
                     </listitem>
                   </itemizedlist>
@@ -7107,7 +7107,7 @@ public class MyAppObjectWrapper extends DefaultObjectWrapper {
           our object wrapper in:</para>
 
           <programlisting role="unspecified">// Where you initialize the cfg *singleton* (happens just once in the application life-cycle):
-cfg = new Configuration(Configuration.VERSION_2_3_22);
+cfg = new Configuration(Configuration.VERSION_2_3_24);
 ...
 cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));</programlisting>
 
@@ -7115,7 +7115,7 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
           <literal>java.util.Properties</literal> instead (and let's say it's
           also a <literal>.properties</literal> file):</para>
 
-          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.22)</programlisting>
+          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.24)</programlisting>
         </section>
       </section>
     </chapter>
@@ -7175,7 +7175,7 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
         the configuration with the <literal>setSharedVariable</literal>
         methods:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
 <replaceable>..</replaceable>.
 cfg.setSharedVariable("warp", new WarpDirective());
 cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
@@ -7375,7 +7375,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_23);
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_24);
 myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 myCfg.setDefaultEncoding("UTF-8");</programlisting>
 
@@ -7400,7 +7400,7 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
   &lt;property name="freemarkerSettings"&gt;
     &lt;props&gt;
-      &lt;prop key="incompatible_improvements"&gt;2.3.23&lt;/prop&gt;
+      &lt;prop key="incompatible_improvements"&gt;2.3.24&lt;/prop&gt;
       &lt;prop key="template_exception_handler"&gt;rethrow&lt;/prop&gt;
       &lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
     &lt;/props&gt;
@@ -8182,14 +8182,14 @@ c</programlisting>
               <literal>freemarker.template.Configuration</literal> object
               like:</para>
 
-              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_22)</programlisting>
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_24)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
               where you initialize its other settings like:</para>
 
-              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22)</programlisting>
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24)</programlisting>
             </listitem>
 
             <listitem>
@@ -8197,7 +8197,7 @@ c</programlisting>
               (<literal>*.properties</literal> file or
               <literal>java.util.Properties</literal> object), add:</para>
 
-              <programlisting role="unspecified">incompatible_improvements=2.3.22</programlisting>
+              <programlisting role="unspecified">incompatible_improvements=2.3.24</programlisting>
             </listitem>
 
             <listitem>
@@ -8208,7 +8208,7 @@ c</programlisting>
 
               <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.22&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.24&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
