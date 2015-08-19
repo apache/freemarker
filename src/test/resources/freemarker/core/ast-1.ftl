@@ -9,3 +9,4 @@
 9 <#list xs>[<#items as x>${x}<#sep>, </#items>]<#else>None</#list>
 10 <#-- A comment -->
 11 <#outputFormat "XML">${x}</#outputFormat>
+12 <#noAutoEsc>a<#autoEsc>c</#autoEsc>b</#noAutoEsc>
