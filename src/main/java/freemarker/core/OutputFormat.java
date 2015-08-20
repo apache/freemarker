@@ -27,6 +27,17 @@ import freemarker.template.utility.StringUtil;
 public abstract class OutputFormat {
 
     /**
+     * The short name we used to refer to this format (like in the {@code #ftl} header).
+     */
+    public abstract String getName();
+    
+    /**
+     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
+     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
+     */
+    public abstract String getMimeType();
+
+    /**
      * Tells if this output format allows inserting {@link TemplateMarkupOutputModel}-s of another output formats into it. If
      * {@code true}, the foreign {@link TemplateMarkupOutputModel} will be inserted into the output as is (like if the
      * surrounding output format was the same). This is usually a bad idea, as such an even could indicate application
@@ -39,24 +50,27 @@ public abstract class OutputFormat {
      * <p>{@code true} value is used by {@link UndefinedOutputFormat}.
      */
     public abstract boolean isOutputFormatMixingAllowed();
-    
-    /**
-     * The short name we used to refer to this format (like in the {@code #ftl} header).
-     */
-    public abstract String getName();
-    
-    /**
-     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
-     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
-     */
-    public abstract String getMimeType();
 
+    /**
+     * Returns the short description of this format, to be used in error messages.
+     * Override {@link #toStringExtraProperties()} to customize this.
+     */
     @Override
     public final String toString() {
+        String extras = toStringExtraProperties();
         return getName() + "("
                 + "mimeType=" + StringUtil.jQuote(getMimeType()) + ", "
                 + "class=" + ClassUtil.getShortClassNameOfObject(this, true)
+                + (extras.length() != 0 ? ", " : "") + extras
                 + ")";
+    }
+    
+    /**
+     * Should be like {@code "foo=\"something\", bar=123"}; this will be inserted inside the parentheses in
+     * {@link #toString()}. 
+     */
+    protected String toStringExtraProperties() {
+        return "";
     }
 
 }

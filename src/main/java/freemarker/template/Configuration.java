@@ -55,9 +55,9 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
+import freemarker.core.CommonMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
-import freemarker.core.CommonMarkupOutputFormat;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
@@ -1862,6 +1862,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *             When the same {@link OutputFormat} object occurs for multiple times in the collection.
      *             If an {@link OutputFormat} name is 0 long.
      *             If an {@link OutputFormat} name doesn't start with letter or digit.
+     *             If an {@link OutputFormat} name contains {@code '+'} or <code>'{'</code> or <code>'}'</code>. 
      *             If an {@link OutputFormat} name equals to {@link UndefinedOutputFormat#getName()} or
      *             {@link PlainTextOutputFormat#getName()}.
      * 
@@ -1890,6 +1891,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             }
             if (name.indexOf('+') != -1) {
                 throw new IllegalArgumentException("The output format name can't contain \"+\" character: "
+                        + name);
+            }
+            if (name.indexOf('{') != -1) {
+                throw new IllegalArgumentException("The output format name can't contain \"{\" character: "
+                        + name);
+            }
+            if (name.indexOf('}') != -1) {
+                throw new IllegalArgumentException("The output format name can't contain \"}\" character: "
                         + name);
             }
             

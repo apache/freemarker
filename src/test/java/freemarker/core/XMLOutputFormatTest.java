@@ -30,7 +30,7 @@ public class XMLOutputFormatTest {
     @Test
     public void testOutputTOM() throws TemplateModelException, IOException {
        StringWriter out = new StringWriter();
-       INSTANCE.output(INSTANCE.escapePlainText("a'b"), out);
+       INSTANCE.output(INSTANCE.fromPlainTextByEscaping("a'b"), out);
        assertEquals("a&apos;b", out.toString());
     }
     

@@ -161,7 +161,7 @@ public class ErrorMessagesTest {
             return s;
         }
 
-        public String mOverloaded4(TemplateHTMLOutputModel s) {
+        public String mOverloaded4(TemplateHTMLOutputModel s) throws TemplateModelException {
             return s.getOutputFormat().getMarkup(s);
         }
         

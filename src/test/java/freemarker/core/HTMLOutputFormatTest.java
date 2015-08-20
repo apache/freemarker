@@ -32,11 +32,11 @@ public class HTMLOutputFormatTest {
        StringWriter out = new StringWriter();
        
        INSTANCE.output(INSTANCE.fromMarkup("<p>Test "), out);
-       INSTANCE.output(INSTANCE.escapePlainText("foo & bar "), out);
-       INSTANCE.output(INSTANCE.escapePlainText("baaz "), out);
-       INSTANCE.output(INSTANCE.escapePlainText("<b>A</b> <b>B</b> <b>C</b>"), out);
-       INSTANCE.output(INSTANCE.escapePlainText(""), out);
-       INSTANCE.output(INSTANCE.escapePlainText("\"' x's \"y\" \""), out);
+       INSTANCE.output(INSTANCE.fromPlainTextByEscaping("foo & bar "), out);
+       INSTANCE.output(INSTANCE.fromPlainTextByEscaping("baaz "), out);
+       INSTANCE.output(INSTANCE.fromPlainTextByEscaping("<b>A</b> <b>B</b> <b>C</b>"), out);
+       INSTANCE.output(INSTANCE.fromPlainTextByEscaping(""), out);
+       INSTANCE.output(INSTANCE.fromPlainTextByEscaping("\"' x's \"y\" \""), out);
        INSTANCE.output(INSTANCE.fromMarkup("</p>"), out);
        
        assertEquals(
@@ -63,7 +63,7 @@ public class HTMLOutputFormatTest {
     @Test
     public void testEscapePlainText() throws TemplateModelException {
         String plainText = "a&b";
-        TemplateHTMLOutputModel mo = INSTANCE.escapePlainText(plainText);
+        TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping(plainText);
         assertSame(plainText, mo.getPlainTextContent());
         assertNull(mo.getMarkupContent()); // Not the MO's duty to calculate it!
     }
@@ -86,48 +86,48 @@ public class HTMLOutputFormatTest {
         
         {
             String safe = "abc";
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText(safe);
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping(safe);
             assertSame(safe, INSTANCE.getMarkup(mo));
         }
         {
             String safe = "";
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText(safe);
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping(safe);
             assertSame(safe, INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("<abc");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("<abc");
             assertEquals("&lt;abc", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("abc>");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("abc>");
             assertEquals("abc&gt;", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("<abc>");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("<abc>");
             assertEquals("&lt;abc&gt;", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("a&bc");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("a&bc");
             assertEquals("a&amp;bc", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("a&b&c");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("a&b&c");
             assertEquals("a&amp;b&amp;c", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("a<&>b&c");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("a<&>b&c");
             assertEquals("a&lt;&amp;&gt;b&amp;c", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("\"<a<&>b&c>\"");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("\"<a<&>b&c>\"");
             assertEquals("&quot;&lt;a&lt;&amp;&gt;b&amp;c&gt;&quot;", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("<");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("<");
             assertEquals("&lt;", INSTANCE.getMarkup(mo));
         }
         {
-            TemplateHTMLOutputModel mo = INSTANCE.escapePlainText("'");
+            TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping("'");
             String mc = INSTANCE.getMarkup(mo);
             assertEquals("&#39;", mc);
             assertSame(mc, INSTANCE.getMarkup(mo)); // cached
@@ -135,7 +135,7 @@ public class HTMLOutputFormatTest {
     }
     
     @Test
-    public void testConcat() {
+    public void testConcat() throws Exception {
         assertMO(
                 "ab", null,
                 INSTANCE.concat(new TemplateHTMLOutputModel("a", null), new TemplateHTMLOutputModel("b", null)));

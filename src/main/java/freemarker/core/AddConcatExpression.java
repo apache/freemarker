@@ -81,7 +81,7 @@ final class AddConcatExpression extends Expression {
                         if (rightStr == null) {  // Signals that the model is markup output
                             return concatMarkupOutputs(parent, leftMO, (TemplateMarkupOutputModel) rightModel);
                         }
-                        return concatMarkupOutputs(parent, leftMO, leftMO.getOutputFormat().escapePlainText(rightStr));
+                        return concatMarkupOutputs(parent, leftMO, leftMO.getOutputFormat().fromPlainTextByEscaping(rightStr));
                     } else {
                         leftStr = "null";  // For B.C. only; should be an error 
                         // Falls through
@@ -89,7 +89,7 @@ final class AddConcatExpression extends Expression {
                 }
                 if (rightStr == null) {  // Signals that the model is markup output
                     TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightModel; 
-                    return concatMarkupOutputs(parent, rightMO.getOutputFormat().escapePlainText(leftStr), rightMO);
+                    return concatMarkupOutputs(parent, rightMO.getOutputFormat().fromPlainTextByEscaping(leftStr), rightMO);
                 }
                 
                 return new SimpleScalar(leftStr.concat(rightStr));
@@ -124,9 +124,9 @@ final class AddConcatExpression extends Expression {
             String rightPT;
             String leftPT;
             if ((rightPT = rightOF.getSourcePlainText(rightMO)) != null) {
-                return leftOF.concat(leftMO, leftOF.escapePlainText(rightPT));
+                return leftOF.concat(leftMO, leftOF.fromPlainTextByEscaping(rightPT));
             } else if ((leftPT = leftOF.getSourcePlainText(leftMO)) != null) {
-                return rightOF.concat(rightOF.escapePlainText(leftPT), rightMO);
+                return rightOF.concat(rightOF.fromPlainTextByEscaping(leftPT), rightMO);
             } else {
                 Object[] message = { "Concatenation left hand operand is in ", new _DelayedToString(leftOF),
                         " format, while the right hand operand is in ", new _DelayedToString(rightOF),
