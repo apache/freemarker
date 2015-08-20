@@ -17,6 +17,7 @@ package freemarker.core;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * "markup output" template language data-type; stores markup (some kind of "rich text" / structured format), as opposed
@@ -24,6 +25,11 @@ import freemarker.template.TemplateModel;
  * {@link OutputFormat} subclass pair (like {@link TemplateHTMLOutputModel} has {@link HTMLOutputFormat}). This type is
  * related to the {@link Configuration#setOutputFormat(OutputFormat)} and {@link Configuration#setAutoEscaping(boolean)}
  * mechanism; see more there. Values of this type are exempt from automatic escaping with that mechanism.
+ * 
+ * <p>Note that {@link TemplateMarkupOutputModel}-s are by design not handled like {@link TemplateScalarModel}-s,
+ * and so the implementations of this interface usually shouldn't implement {@link TemplateScalarModel}. (Because,
+ * operations applicable on plain strings, like converting to upper case, substringing, etc., can corrupt markup.)
+ * The template author should make conscious decision of passing in the markup as String by using {@code ?markup}.
  * 
  * @param <MO>
  *            Refers to the interface's own type, which is useful in interfaces that extend

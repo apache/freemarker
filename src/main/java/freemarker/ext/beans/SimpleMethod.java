@@ -21,8 +21,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.core.TemplateMarkupOutputModel;
 import freemarker.core._DelayedFTLTypeDescription;
 import freemarker.core._DelayedOrdinal;
+import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core._TemplateModelException;
 import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.TemplateModel;
@@ -34,6 +36,11 @@ import freemarker.template.utility.ClassUtil;
  * (For overloaded methods and constructors see {@link OverloadedMethods}.)
  */
 class SimpleMethod {
+    
+    static final String MARKUP_OUTPUT_TO_STRING_TIP
+            = "A markup output value can be converted to markup string like value?markup. "
+              + "But consider if the Java method whose argument it will be can handle markup strings properly.";
+    
     private final Member member;
     private final Class[] argTypes;
     
@@ -140,11 +147,15 @@ class SimpleMethod {
 
     private TemplateModelException createArgumentTypeMismarchException(
             int argIdx, TemplateModel argVal, Class targetType) {
-        return new _TemplateModelException(
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
                 new _DelayedOrdinal(Integer.valueOf(argIdx + 1)),
                 " argument's value to the target Java type, ", ClassUtil.getShortClassName(targetType),
                 ". The type of the actual value was: ", new _DelayedFTLTypeDescription(argVal));
+        if (argVal instanceof TemplateMarkupOutputModel && (targetType.isAssignableFrom(String.class))) {
+            desc.tip(MARKUP_OUTPUT_TO_STRING_TIP);
+        }
+        return new _TemplateModelException(desc);
     }
 
     private TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {

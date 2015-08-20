@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.core.TemplateMarkupOutputModel;
 import freemarker.core._DelayedConversionToString;
 import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core._TemplateModelException;
@@ -99,10 +100,12 @@ final class OverloadedMethods {
             edb.tip("You seem to use BeansWrapper with incompatibleImprovements set below 2.3.21. If you think this "
                     + "error is unfounded, enabling 2.3.21 fixes may helps. See version history for more.");
         }
+        addMarkupBITipAfterNoNoMarchIfApplicable(edb, tmArgs);
         throw new _TemplateModelException(edb);
     }
 
-    private Object[] toCompositeErrorMessage(final EmptyMemberAndArguments fixArgsEmptyRes, final EmptyMemberAndArguments varargsEmptyRes,
+    private Object[] toCompositeErrorMessage(
+            final EmptyMemberAndArguments fixArgsEmptyRes, final EmptyMemberAndArguments varargsEmptyRes,
             List tmArgs) {
         final Object[] argsErrorMsg;
         if (varargsEmptyRes != null) {
@@ -175,6 +178,40 @@ final class OverloadedMethods {
         };
     }
     
+    /**
+     * Adds tip to the error message if converting a {@link TemplateMarkupOutputModel} argument to {@link String} might
+     * allows finding a matching overload. 
+     */
+    private void addMarkupBITipAfterNoNoMarchIfApplicable(_ErrorDescriptionBuilder edb,
+            List tmArgs) {
+        for (int argIdx = 0; argIdx < tmArgs.size(); argIdx++) {
+            Object tmArg = tmArgs.get(argIdx);
+            if (tmArg instanceof TemplateMarkupOutputModel) {
+                for (Iterator membDescs = fixArgMethods.getMemberDescriptors(); membDescs.hasNext();) {
+                    CallableMemberDescriptor membDesc = (CallableMemberDescriptor) membDescs.next();
+                    Class[] paramTypes = membDesc.getParamTypes();
+                    
+                    Class paramType = null;
+                    if (membDesc.isVarargs() && argIdx >= paramTypes.length - 1) {
+                        paramType = paramTypes[paramTypes.length - 1];
+                        if (paramType.isArray()) {
+                            paramType = paramType.getComponentType();
+                        }
+                    }
+                    if (paramType == null && argIdx < paramTypes.length) {
+                        paramType = paramTypes[argIdx];
+                    }
+                    if (paramType != null) {
+                        if (paramType.isAssignableFrom(String.class) && !paramType.isAssignableFrom(tmArg.getClass())) {
+                            edb.tip(SimpleMethodModel.MARKUP_OUTPUT_TO_STRING_TIP);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private _DelayedConversionToString getTMActualParameterTypes(List arguments) {
         final String[] argumentTypeDescs = new String[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
