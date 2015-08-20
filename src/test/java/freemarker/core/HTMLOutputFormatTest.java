@@ -61,7 +61,7 @@ public class HTMLOutputFormatTest {
     }
     
     @Test
-    public void testEscapePlainText() throws TemplateModelException {
+    public void testFromPlainTextByEscaping() throws TemplateModelException {
         String plainText = "a&b";
         TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping(plainText);
         assertSame(plainText, mo.getPlainTextContent());
@@ -77,7 +77,7 @@ public class HTMLOutputFormatTest {
     }
     
     @Test
-    public void testMarkup() throws TemplateModelException {
+    public void testGetMarkup() throws TemplateModelException {
         {
             String markup = "a&amp;b";
             TemplateHTMLOutputModel mo = INSTANCE.fromMarkup(markup);
@@ -148,6 +148,15 @@ public class HTMLOutputFormatTest {
         assertMO(
                 null, "&lt;a&gt;<b>",
                 INSTANCE.concat(new TemplateHTMLOutputModel("<a>", null), new TemplateHTMLOutputModel(null, "<b>")));
+    }
+    
+    @Test
+    public void testEscaplePlainText() {
+        assertEquals("", INSTANCE.escapePlainText(""));
+        assertEquals("a", INSTANCE.escapePlainText("a"));
+        assertEquals("&lt;a&amp;b&#39;c&quot;d&gt;", INSTANCE.escapePlainText("<a&b'c\"d>"));
+        assertEquals("a&amp;b", INSTANCE.escapePlainText("a&b"));
+        assertEquals("&lt;&gt;", INSTANCE.escapePlainText("<>"));
     }
     
     private void assertMO(String pc, String mc, TemplateHTMLOutputModel mo) {

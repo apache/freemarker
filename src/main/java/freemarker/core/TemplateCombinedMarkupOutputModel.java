@@ -20,12 +20,18 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public final class TemplateCombinedMarkupOutputModel extends CommonTemplateMarkupOutputModel<TemplateCombinedMarkupOutputModel> {
+public final class TemplateCombinedMarkupOutputModel
+        extends CommonTemplateMarkupOutputModel<TemplateCombinedMarkupOutputModel> {
     
     private final CombinedMarkupOutputFormat outputFormat;
     
     /**
      * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     * 
+     * @param outputFormat
+     *            The {@link CombinedMarkupOutputFormat} format this value is bound to. Because
+     *            {@link CombinedMarkupOutputFormat} has no singleton, we have to pass it in, unlike with most other
+     *            {@link CommonTemplateMarkupOutputModel}-s.
      */
     TemplateCombinedMarkupOutputModel(String plainTextContent, String markupContent,
             CombinedMarkupOutputFormat outputFormat) {
