@@ -29,9 +29,9 @@ import freemarker.template.utility.StringUtil;
 
 class BuiltInsForStringsEncoding {
 
-    static class htmlBI extends BuiltInForString implements ICIChainMember {
+    static class htmlBI extends BuiltInForStringBannedWhenAutoEscaping implements ICIChainMember {
         
-        static class BIBeforeICI2d3d20 extends BuiltInForString {
+        static class BIBeforeICI2d3d20 extends BuiltInForStringBannedWhenAutoEscaping {
             @Override
             TemplateModel calculateResult(String s, Environment env) {
                 return new SimpleScalar(StringUtil.HTMLEnc(s));
@@ -75,7 +75,7 @@ class BuiltInsForStringsEncoding {
         }
     }
 
-    static class rtfBI extends BuiltInForString {
+    static class rtfBI extends BuiltInForStringBannedWhenAutoEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.RTFEnc(s));
@@ -126,14 +126,14 @@ class BuiltInsForStringsEncoding {
         
     }
 
-    static class xhtmlBI extends BuiltInForString {
+    static class xhtmlBI extends BuiltInForStringBannedWhenAutoEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XHTMLEnc(s));
         }
     }
 
-    static class xmlBI extends BuiltInForString {
+    static class xmlBI extends BuiltInForStringBannedWhenAutoEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XMLEnc(s));
