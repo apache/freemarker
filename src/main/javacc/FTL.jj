@@ -1993,6 +1993,17 @@ Expression BuiltIn(Expression lhoExp) :
             
             return result;
         }
+        
+        if (result instanceof BuiltInForStringBannedWhenAutoEscaping) {
+	        if (outputFormat instanceof MarkupOutputFormat && autoEscaping) {
+	            throw new ParseException(
+	                    "Using ?" + t.image + " (legacy escaping) is not allowed when auto-escaping is on with "
+	                    + "a markup output format (" + outputFormat.getName() + "), to avoid double-escaping mistakes.",
+	                    template, t);
+	        }
+            
+            return result;
+        }
 
         if (result instanceof BuiltInForMarkupOutputFormatRelated) {
             if (!(outputFormat instanceof MarkupOutputFormat)) {
@@ -3467,6 +3478,15 @@ EscapeBlock Escape() :
 }
 {
     start = <ESCAPE>
+    {
+        if (outputFormat instanceof MarkupOutputFormat && autoEscaping) {
+            throw new ParseException(
+                    "Using the \"escape\" directive (legacy escaping) is not allowed when auto-escaping is on with "
+                    + "a markup output format (" + outputFormat.getName()
+                    + "), to avoid confusion and double-escaping mistakes.",
+                    template, start);
+        }
+    }
     variable = <ID>
     <AS>
     escapeExpr = Expression()

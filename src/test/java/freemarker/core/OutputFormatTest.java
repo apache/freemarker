@@ -32,6 +32,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
+import freemarker.template.Version;
 import freemarker.test.TemplateTest;
 
 public class OutputFormatTest extends TemplateTest {
@@ -733,6 +734,36 @@ public class OutputFormatTest extends TemplateTest {
                 "<#ftl autoEsc=false outputFormat='XML'>"
                 + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
                 "Eval: XML; Interpret: XML {&amp;} true");
+    }
+
+    @Test
+    public void testBannedBIsWhenAutoEscaping() throws Exception {
+        for (String biName : new String[] { "html", "xhtml", "rtf", "xml" }) {
+            for (Version ici : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_24 }) {
+                getConfiguration().setIncompatibleImprovements(ici);
+                
+                String commonFTL = "${'x'?" + biName + "}";
+                assertOutput(commonFTL, "x");
+                assertErrorContains("<#ftl outputFormat='HTML'>" + commonFTL,
+                        "?" + biName, "HTML", "double-escaping");
+                assertOutput("<#ftl outputFormat='plainText'>" + commonFTL, "x");
+                assertOutput("<#ftl outputFormat='HTML' autoEsc=false>" + commonFTL, "x");
+                assertOutput("<#ftl outputFormat='HTML'><#noAutoEsc>" + commonFTL + "</#noAutoEsc>", "x");
+                assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>", "x");
+                assertOutput("<#ftl outputFormat='HTML'>${'${\"x\"?" + biName + "}'}", "x");
+            }
+        }
+    }
+    
+    @Test
+    public void testBannedDirectivesIsWhenAutoEscaping() throws Exception {
+        String commonFTL = "<#escape x as x?html>x</#escape>";
+        assertOutput(commonFTL, "x");
+        assertErrorContains("<#ftl outputFormat='HTML'>" + commonFTL, "escape", "HTML", "double-escaping");
+        assertOutput("<#ftl outputFormat='plainText'>" + commonFTL, "x");
+        assertOutput("<#ftl outputFormat='HTML' autoEsc=false>" + commonFTL, "x");
+        assertOutput("<#ftl outputFormat='HTML'><#noAutoEsc>" + commonFTL + "</#noAutoEsc>", "x");
+        assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>", "x");
     }
     
     @Override
