@@ -21,12 +21,14 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import freemarker.template.Configuration;
+import freemarker.template.Version;
 import freemarker.test.TemplateTest;
 
 public class SpecialVariableTest extends TemplateTest {
 
     @Test
-    public void testGetSettingNamesSorted() throws Exception {
+    public void testNamesSorted() throws Exception {
         String prevName = null;
         for (String name : BuiltinVariable.SPEC_VAR_NAMES) {
             if (prevName != null) {
@@ -35,5 +37,37 @@ public class SpecialVariableTest extends TemplateTest {
             prevName = name;
         }
     }
+    
+    @Test
+    public void testVersion() throws Exception {
+        String versionStr = Configuration.getVersion().toString();
+        assertOutput("${.version}", versionStr);
+    }
 
+    @Test
+    public void testIncompationImprovements() throws Exception {
+        assertOutput(
+                "${.incompatibleImprovements}",
+                getConfiguration().getIncompatibleImprovements().toString());
+        
+        getConfiguration().setIncompatibleImprovements(new Version(2, 3, 23));
+        assertOutput(
+                "${.incompatible_improvements}",
+                getConfiguration().getIncompatibleImprovements().toString());
+    }
+
+    @Test
+    public void testAutoEsc() throws Exception {
+        assertOutput(
+                "${.autoEsc?c}",
+                "true");
+        
+        getConfiguration().setAutoEscaping(false);
+        assertOutput(
+                "${.auto_esc?c}",
+                "false");
+        
+        assertErrorContains("${.autoEscaping}", "You may meant: \"autoEsc\"");
+    }
+    
 }

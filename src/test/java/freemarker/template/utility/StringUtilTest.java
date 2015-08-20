@@ -238,6 +238,11 @@ public class StringUtilTest {
         assertGlobMatches("**/a??/b*.ftl", "a11/b1.ftl", "x/a11/b123.ftl", "x/y/a11/b.ftl");
         assertGlobDoesNotMatch("**/a??/b*.ftl", "a1/b1.ftl", "x/a11/c123.ftl");
         
+        assertFalse(StringUtil.globToRegularExpression("ab*").matcher("aBc").matches());
+        assertTrue(StringUtil.globToRegularExpression("ab*", true).matcher("aBc").matches());
+        assertTrue(StringUtil.globToRegularExpression("ab", true).matcher("aB").matches());
+        assertTrue(StringUtil.globToRegularExpression("\u00E1b*", true).matcher("\u00C1bc").matches());
+        
         try {
             StringUtil.globToRegularExpression("x**/y");
             fail();

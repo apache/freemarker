@@ -40,7 +40,7 @@ class BuiltInsForOutputFormatRelated {
         
     }
     
-    static abstract class AbstractConverterBI extends BuiltInForEscapingOutputFormatRelated {
+    static abstract class AbstractConverterBI extends BuiltInForMarkupOutputFormatRelated {
 
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {

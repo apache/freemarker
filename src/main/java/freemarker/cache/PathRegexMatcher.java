@@ -33,8 +33,8 @@ public class PathRegexMatcher extends TemplateSourceMatcher {
     
     /**
      * @param regex
-     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String)}. Must not start
-     *            with {@code /}.
+     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String)}. Must not
+     *            start with {@code /}.
      */
     public PathRegexMatcher(String regex) {
         if (regex.startsWith("/")) {

@@ -18,17 +18,20 @@ package freemarker.core;
 
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
-abstract class BuiltInForString extends BuiltIn {
+abstract class BuiltInForMarkupOutput extends BuiltIn {
+    
     @Override
     TemplateModel _eval(Environment env)
-    throws TemplateException {
-        return calculateResult(getTargetString(target, env), env);
+            throws TemplateException {
+        TemplateModel model = target.eval(env);
+        if (!(model instanceof TemplateMarkupOutputModel)) {
+            throw new NonMarkupOutputException(target, model, env);
+        }
+        return calculateResult((TemplateMarkupOutputModel) model);
     }
-    abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
     
-    static String getTargetString(Expression target, Environment env) throws TemplateException {
-        return target.evalAndCoerceToString(env);
-    }
+    protected abstract TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateModelException;
     
 }

@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package freemarker.core;
 
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+
 /**
- * Stores RTF markup to be printed; used with {@link RTFOutputFormat}.
- * 
- * @since 2.3.24
+ * A holder for builtins that operate exclusively on markup output left-hand value.
  */
-public final class TemplateRTFModel extends CommonTemplateMarkupOutputModel<TemplateRTFModel> {
+class BuiltInsForMarkupOutputs {
     
-    /**
-     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
-     */
-    TemplateRTFModel(String plainTextContent, String markupContent) {
-        super(plainTextContent, markupContent);
-    }
+    static class markupBI extends BuiltInForMarkupOutput {
 
-    @Override
-    public RTFOutputFormat getOutputFormat() {
-        return RTFOutputFormat.INSTANCE;
+        @Override
+        protected TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateModelException {
+            return new SimpleScalar(model.getOutputFormat().getMarkup(model));
+        }
+        
     }
-
+    
 }

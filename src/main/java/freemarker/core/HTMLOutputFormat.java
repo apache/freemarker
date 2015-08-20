@@ -26,7 +26,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * @since 2.3.24
  */
-public final class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTMLModel> {
+public final class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTMLOutputModel> {
 
     public static final HTMLOutputFormat INSTANCE = new HTMLOutputFormat();
     
@@ -60,8 +60,8 @@ public final class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTM
     }
 
     @Override
-    protected TemplateHTMLModel newTOM(String plainTextContent, String markupContent) {
-        return new TemplateHTMLModel(plainTextContent, markupContent);
+    protected TemplateHTMLOutputModel newTOM(String plainTextContent, String markupContent) {
+        return new TemplateHTMLOutputModel(plainTextContent, markupContent);
     }
 
 }

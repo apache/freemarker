@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateModel;
+/**
+ * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
+ * 
+ * @since 2.3.24
+ */
+public final class TemplateHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateHTMLOutputModel> {
+    
+    /**
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     */
+    TemplateHTMLOutputModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
+    }
 
-abstract class BuiltInForString extends BuiltIn {
     @Override
-    TemplateModel _eval(Environment env)
-    throws TemplateException {
-        return calculateResult(getTargetString(target, env), env);
+    public HTMLOutputFormat getOutputFormat() {
+        return HTMLOutputFormat.INSTANCE;
     }
-    abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
-    
-    static String getTargetString(Expression target, Environment env) throws TemplateException {
-        return target.evalAndCoerceToString(env);
-    }
-    
+
 }

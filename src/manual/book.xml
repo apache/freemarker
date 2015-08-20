@@ -5587,9 +5587,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.22) do you want to apply the fixes that are not 100%
+// version (here 2.3.24) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -5857,7 +5857,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
@@ -6913,19 +6913,19 @@ public class RepeatDirective implements TemplateDirectiveModel {
                   the <literal>Configuration</literal>. Depending on how you
                   create/set the <literal>ObjectWrapper</literal>, it can be
                   done like this (let's assume you want
-                  <literal>incompatibleImprovements</literal> 2.3.22):</para>
+                  <literal>incompatibleImprovements</literal> 2.3.24):</para>
 
                   <itemizedlist>
                     <listitem>
                       <para>If you are using the builder API:</para>
 
-                      <programlisting role="unspecified">... = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build()</programlisting>
+                      <programlisting role="unspecified">... = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build()</programlisting>
                     </listitem>
 
                     <listitem>
                       <para>Or, if you are using the constructor:</para>
 
-                      <programlisting role="unspecified">... = new DefaultObjectWrapper(Configuration.VERSION_2_3_22)</programlisting>
+                      <programlisting role="unspecified">... = new DefaultObjectWrapper(Configuration.VERSION_2_3_24)</programlisting>
                     </listitem>
 
                     <listitem>
@@ -6934,7 +6934,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
                       (<literal>*.properties</literal> file or
                       <literal>java.util.Properties</literal> object):</para>
 
-                      <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.21)</programlisting>
+                      <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.24)</programlisting>
                     </listitem>
 
                     <listitem>
@@ -6946,7 +6946,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
 
                       <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;object_wrapper&lt;/param-name&gt;
-    &lt;param-value&gt;DefaultObjectWrapper(2.3.21)&lt;/param-value&gt;
+    &lt;param-value&gt;DefaultObjectWrapper(2.3.24)&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
                     </listitem>
                   </itemizedlist>
@@ -7107,7 +7107,7 @@ public class MyAppObjectWrapper extends DefaultObjectWrapper {
           our object wrapper in:</para>
 
           <programlisting role="unspecified">// Where you initialize the cfg *singleton* (happens just once in the application life-cycle):
-cfg = new Configuration(Configuration.VERSION_2_3_22);
+cfg = new Configuration(Configuration.VERSION_2_3_24);
 ...
 cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));</programlisting>
 
@@ -7115,7 +7115,7 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
           <literal>java.util.Properties</literal> instead (and let's say it's
           also a <literal>.properties</literal> file):</para>
 
-          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.22)</programlisting>
+          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.24)</programlisting>
         </section>
       </section>
     </chapter>
@@ -7175,7 +7175,7 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
         the configuration with the <literal>setSharedVariable</literal>
         methods:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
 <replaceable>..</replaceable>.
 cfg.setSharedVariable("warp", new WarpDirective());
 cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
@@ -7375,7 +7375,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_23);
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_24);
 myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 myCfg.setDefaultEncoding("UTF-8");</programlisting>
 
@@ -7400,7 +7400,7 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
   &lt;property name="freemarkerSettings"&gt;
     &lt;props&gt;
-      &lt;prop key="incompatible_improvements"&gt;2.3.23&lt;/prop&gt;
+      &lt;prop key="incompatible_improvements"&gt;2.3.24&lt;/prop&gt;
       &lt;prop key="template_exception_handler"&gt;rethrow&lt;/prop&gt;
       &lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
     &lt;/props&gt;
@@ -8182,14 +8182,14 @@ c</programlisting>
               <literal>freemarker.template.Configuration</literal> object
               like:</para>
 
-              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_22)</programlisting>
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_24)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
               where you initialize its other settings like:</para>
 
-              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22)</programlisting>
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24)</programlisting>
             </listitem>
 
             <listitem>
@@ -8197,7 +8197,7 @@ c</programlisting>
               (<literal>*.properties</literal> file or
               <literal>java.util.Properties</literal> object), add:</para>
 
-              <programlisting role="unspecified">incompatible_improvements=2.3.22</programlisting>
+              <programlisting role="unspecified">incompatible_improvements=2.3.24</programlisting>
             </listitem>
 
             <listitem>
@@ -8208,7 +8208,7 @@ c</programlisting>
 
               <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.22&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.24&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
@@ -11376,7 +11376,8 @@ Green Mouse</programlisting>
 
             <listitem>
               <para><literal>'</literal> is replaced with
-              <literal>&amp;#39;</literal> if the programmers has <link
+              <literal>&amp;#39;</literal> <emphasis>if</emphasis> the
+              programmers has <link
               linkend="pgui_config_incompatible_improvements_how_to_set">set
               the <literal>incompatible_improvements</literal> setting</link>
               to <literal>2.3.20</literal> or higher. Otherwise
@@ -11388,6 +11389,14 @@ Green Mouse</programlisting>
           </itemizedlist>
 
           <programlisting role="template">&lt;input type=text name=user value=<emphasis>"</emphasis>${user?html}<emphasis>"</emphasis>&gt;</programlisting>
+
+          <warning>
+            <para>When inserting the value of an attribute, always quote it,
+            or else it can be exploited by attackers! This is WRONG:
+            <literal>&lt;input name="user" value=${user?xhtml}&gt;</literal>.
+            This is good: <literal>&lt;input name="user"
+            value="${user?xhtml}"&gt;</literal>.</para>
+          </warning>
 
           <para>Note that in HTML pages usually you want to use this built-in
           for all interpolations. You can spare a lot of typing and lessen the
@@ -11464,10 +11473,9 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <emphasis>inside</emphasis> the string literal.</para>
 
           <para>Both quotation mark (<literal>"</literal>) and
-          apostrophe-quoate (<literal>'</literal>) are escaped. Starting from
-          FreeMarker 2.3.1, it also escapes <literal>&gt;</literal> as
-          <literal>\&gt;</literal> (to avoid
-          <literal>&lt;/script&gt;</literal>).</para>
+          apostrophe-quoate (<literal>'</literal>) are escaped. It also
+          escapes <literal>&gt;</literal> as <literal>\&gt;</literal> (to
+          avoid <literal>&lt;/script&gt;</literal>).</para>
 
           <para>All characters under <link linkend="gloss.UCS">UCS</link> code
           point 0x20 will be escaped. When they have no dedicated escape
@@ -11475,6 +11483,16 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <literal>\t</literal>, etc.), they will be replaced with a UNICODE
           escape
           (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
+
+          <warning>
+            <para>When inserting into a JavaScript string literal that's
+            inside a HTML attribute, you also must escape the value with HTML
+            escaping. Thus, of you don't have automatic HTML escaping, this is
+            WRONG: <literal>&lt;p
+            onclick="alert('${message?js_string}')"&gt;</literal>, and this is
+            good: <literal>&lt;p
+            onclick="alert('${message?js_string?html}')"&gt;</literal>.</para>
+          </warning>
 
           <para>Example:</para>
 
@@ -12560,6 +12578,15 @@ ${x?url}</programlisting>
           <literal>&amp;#39;</literal> instead of as
           <literal>&amp;apos;</literal>, because some older browsers don't
           interpret <literal>&amp;apos;</literal> correctly.</para>
+
+          <warning>
+            <para>When inserting the value of an attribute, always quote it,
+            or else it can be exploited by attacker! This is WRONG:
+            <literal>&lt;input name="user" value=${user?xhtml}/&gt;</literal>.
+            These are good: <literal>&lt;input name="user"
+            value="${user?xhtml}"/&gt;</literal>, <literal>&lt;input
+            name="user" value='${user?xhtml}'/&gt;</literal>.</para>
+          </warning>
         </section>
 
         <section xml:id="ref_builtin_xml">
@@ -12603,6 +12630,15 @@ ${x?url}</programlisting>
               <literal>&amp;apos;</literal></para>
             </listitem>
           </itemizedlist>
+
+          <warning>
+            <para>When inserting the value of an attribute, always quote it,
+            or else it can be exploited by attackers! This is WRONG:
+            <literal>&lt;input name="user" value=${user?xml}/&gt;</literal>.
+            These are good: <literal>&lt;input name="user"
+            value="${user?xml}"/&gt;</literal>, <literal>&lt;input name="user"
+            value='${user?xml}'/&gt;</literal>.</para>
+          </warning>
         </section>
 
         <section xml:id="ref_builtin_string_flags">
@@ -19877,6 +19913,17 @@ There was no specific handler for node y
       <itemizedlist spacing="compact">
         <listitem>
           <para><indexterm>
+              <primary>auto_esc</primary>
+            </indexterm><literal>auto_esc</literal> (since 2.3.24): Boolean
+          value that tells if auto-escaping (based on output format) is on or
+          off at the place where this variable is referred (resolved
+          statically). This is <emphasis>not</emphasis> affected by the
+          deprecated <literal>escape</literal> directive. This only deals with
+          automatic escaping based on the output format mechanism.</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
               <primary>current_template_name</primary>
             </indexterm><literal>current_template_name</literal>: The name of
           the template where we are now (available since FreeMarker 2.3.23).
@@ -19919,6 +19966,16 @@ There was no specific handler for node y
           variables created with <literal>assign</literal> or
           <literal>macro</literal> are not globals, thus they never hide the
           variables when you use <literal>globals</literal>.</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
+              <primary>incomplatible_improvements</primary>
+            </indexterm><literal>incompatible_improvements</literal> (since
+          FreeMarker 2.3.24): The <link
+          linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+          setting</link> of the current FreeMarker configuration, as a
+          string.</para>
         </listitem>
 
         <listitem>
@@ -20079,8 +20136,15 @@ There was no specific handler for node y
         <listitem>
           <para><indexterm>
               <primary>output_format</primary>
-            </indexterm><literal>output_format</literal>: The output format at
-          the place where this variable is referred.</para>
+            </indexterm><literal>output_format</literal> (since 2.3.24): The
+          name of output format at the place where this variable is referred
+          (resolved statically), such as <literal>"HTML"</literal>,
+          <literal>"XML"</literal>, <literal>"RTF"</literal>,
+          <literal>"plainText"</literal>, <literal>"undefined"</literal>, etc.
+          <phrase role="forProgrammers">(The available names can be extended
+          by the programmers, by the
+          <literal>registered_custom_output_formats</literal>
+          setting.)</phrase></para>
         </listitem>
 
         <listitem>
@@ -23689,14 +23753,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>Things related to the output format mechanism, which is
-              new in this release (see it elsewhere):</para>
+              new in this release [TODO link to guide section]:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>New <literal>ftl</literal> header options to override
-                  the defaults of <literal>output_format</literal> and
-                  <literal>auto_escaping</literal> (e.g. <literal>&lt;#ftl
-                  output_format='HTML'&gt;</literal>).</para>
+                  <para>New <literal>ftl</literal> header options,
+                  <literal>ouput_format</literal> and
+                  <literal>auto_esc</literal> to override the
+                  <literal>output_format</literal> and
+                  <literal>auto_escaping</literal> settings of the template,
+                  like <literal>&lt;#ftl
+                  output_format='HTML'</literal><literal>
+                  auto_esc=false&gt;</literal>.</para>
                 </listitem>
 
                 <listitem>
@@ -23715,12 +23783,76 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>New directive: <literal>outputFormat</literal>, used
+                  to change the output format for a section of a template,
+                  like <literal>&lt;#outputformat
+                  "XML"&gt;<replaceable>...</replaceable>&lt;/#outputformat&gt;</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para>New directives: <literal>noAutoEsc</literal> and
+                  <literal>autoEsc</literal>, used to turn auto-escaping off
+                  and on for a section of a template, like
+                  <literal>&lt;#noautoesc&gt;<replaceable>...</replaceable>&lt;/#noautoesc&gt;</literal>.</para>
+                </listitem>
+
+                <listitem>
                   <para>New built-in variable,
-                  <literal>.output_format</literal> (or
-                  <literal>.outputFormat</literal>), returns the current
+                  <literal>.output_format</literal>, returns the current
                   output format at the place of invocation.</para>
                 </listitem>
+
+                <listitem>
+                  <para>New built-in variable, <literal>.auto_esc</literal>,
+                  returns the boolean value of the
+                  <literal>auto_escaping</literal> setting at the place of
+                  invocation.</para>
+                </listitem>
+
+                <listitem>
+                  <para>New FTL type, <quote>markup output</quote>. This is
+                  somewhat similar to string, but values of this type aren't
+                  auto-escaped by the new escaping mechanism, because they are
+                  known to already hold markup. (For example,
+                  <literal>?esc</literal> and <literal>?noEsc</literal>
+                  returns a value of this type, hence their results are
+                  protected from double-escaping problems.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Block assignments, like <literal>&lt;#assign
+                  <replaceable>captured</replaceable>&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>,
+                  when the current <literal>output_format</literal> is some
+                  kind of markup (like HTML), will store the captured output
+                  not with string type, but with <quote>markup output</quote>
+                  type. Thus
+                  <literal>${<replaceable>captured</replaceable>}</literal>
+                  will not get unwanted escaping.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The <literal>+</literal> operator (concatenation)
+                  works with the new <quote>markup output</quote> type as
+                  well. Like <literal>someMarkup + somePlainText</literal>
+                  will result in markup where <literal>somePlainText</literal>
+                  is included properly escaped.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new built-in: <literal>markup</literal>. This
+                  returns the markup of a value of <quote>markup
+                  output</quote> type as a string.</para>
+                </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added new special variable:
+              <literal>.incompatible_improvements</literal>, which returns the
+              <link
+              linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+              setting</link> of the current FreeMarker configuration, as a
+              string.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -23729,6 +23861,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para><emphasis role="strong">Attention!</emphasis> Raised
+              minimum required Java version from 1.4 to 1.5 (aka. Java
+              5)</para>
+            </listitem>
+
             <listitem>
               <para>Added new configuration setting:
               <literal>template_configurers</literal> (or
@@ -23783,28 +23921,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><emphasis role="strong">Attention!</emphasis> Raised
-              minimum required Java version from 1.4 to 1.5 (aka. Java
-              5)</para>
-            </listitem>
-
-            <listitem>
               <para>Upgraded JavaCC (used during build to generate the FTL
               parser) from 3.2 to 6.1.2.</para>
             </listitem>
 
             <listitem>
-              <para>Added
-              <literal>Configurable.getSettingNames(camelCase)</literal>,
-              which returns the set of valid setting names. This can be useful
-              for auto-completion and such.</para>
+              <para>Added <literal>Configurable.getSettingNames(boolean
+              camelCase)</literal>, which returns the set of valid setting
+              names. This can be useful for auto-completion and such.</para>
             </listitem>
 
             <listitem>
               <para>Fixes and improvements in the <quote>object
               builder</quote> syntax used for configuring FreeMarker from
-              <literal>Properties</literal> or other sting-only
-              sources:</para>
+              <literal>java.util.Properties</literal> (or other string-only
+              sources):</para>
 
               <itemizedlist>
                 <listitem>
@@ -23827,12 +23958,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   like <literal>TimeZone("UTC")</literal>, despite that
                   there's no a such constructor.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Added support for creating lists with <literal>[
+                  <replaceable>item1</replaceable>,
+                  <replaceable>item2</replaceable>,
+                  <replaceable>...</replaceable>
+                  <replaceable>itemN</replaceable> ]</literal> syntax.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Number without decimal point will now be parsed to
+                  <literal>Integer</literal>, <literal>Long</literal>, or
+                  <literal>BigInteger</literal>, depending in the size of the
+                  number. Earlier all number were
+                  <literal>BigDecimal</literal>-s, but it had little
+                  importance as number types are converted to the constructor
+                  parameter type anyway.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>Internal code cleanup: Mostly source code formatting, and
-              parser construction and setup</para>
+              <para>Bug fixed: The (rarely used) cause exception of
+              <literal>ParseException</literal>-s wasn't set</para>
+            </listitem>
+
+            <listitem>
+              <para>Internal code cleanup: Mostly source code formatting, also
+              many parser construction/setup cleanup</para>
             </listitem>
           </itemizedlist>
         </section>

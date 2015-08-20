@@ -217,6 +217,11 @@ public class ParseException extends IOException implements FMParserConstants {
             int endLineNumber, int endColumnNumber,
             Throwable cause) {
         super(description);  // but we override getMessage, so it will be different
+        try {
+            this.initCause(cause);
+        } catch (Exception e) {
+            // Suppressed; we can't do more
+        }
         this.description = description; 
         this.templateName = templateName;
         this.lineNumber = lineNumber;
