@@ -754,6 +754,32 @@ public class OutputFormatTest extends TemplateTest {
             }
         }
     }
+
+    @Test
+    public void testLegacyEscaperBIsBypassMOs() throws Exception {
+        assertOutput("${htmlPlain?html} ${htmlMarkup?html}", "a &lt; {h&#39;} <p>c");
+        assertErrorContains("${xmlPlain?html}", "?html", "string", "markup_output", "XML");
+        assertErrorContains("${xmlMarkup?html}", "?html", "string", "markup_output", "XML");
+        assertErrorContains("${rtfPlain?html}", "?html", "string", "markup_output", "RTF");
+        assertErrorContains("${rtfMarkup?html}", "?html", "string", "markup_output", "RTF");
+
+        assertOutput("${htmlPlain?xhtml} ${htmlMarkup?xhtml}", "a &lt; {h&#39;} <p>c");
+        assertErrorContains("${xmlPlain?xhtml}", "?xhtml", "string", "markup_output", "XML");
+        assertErrorContains("${xmlMarkup?xhtml}", "?xhtml", "string", "markup_output", "XML");
+        assertErrorContains("${rtfPlain?xhtml}", "?xhtml", "string", "markup_output", "RTF");
+        assertErrorContains("${rtfMarkup?xhtml}", "?xhtml", "string", "markup_output", "RTF");
+        
+        assertOutput("${xmlPlain?xml} ${xmlMarkup?xml}", "a &lt; {x&apos;} <p>c</p>");
+        assertOutput("${htmlPlain?xml} ${htmlMarkup?xml}", "a &lt; {h&#39;} <p>c");
+        assertErrorContains("${rtfPlain?xml}", "?xml", "string", "markup_output", "RTF");
+        assertErrorContains("${rtfMarkup?xml}", "?xml", "string", "markup_output", "RTF");
+        
+        assertOutput("${rtfPlain?rtf} ${rtfMarkup?rtf}", "\\\\par a & b \\par c");
+        assertErrorContains("${xmlPlain?rtf}", "?rtf", "string", "markup_output", "XML");
+        assertErrorContains("${xmlMarkup?rtf}", "?rtf", "string", "markup_output", "XML");
+        assertErrorContains("${htmlPlain?rtf}", "?rtf", "string", "markup_output", "HTML");
+        assertErrorContains("${htmlMarkup?rtf}", "?rtf", "string", "markup_output", "HTML");
+    }
     
     @Test
     public void testBannedDirectivesIsWhenAutoEscaping() throws Exception {

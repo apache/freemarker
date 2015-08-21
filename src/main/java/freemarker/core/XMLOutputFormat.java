@@ -59,7 +59,7 @@ public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLO
 
     @Override
     public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("xml") || builtInName.equals("xhtml");
+        return builtInName.equals("xml");
     }
 
     @Override
