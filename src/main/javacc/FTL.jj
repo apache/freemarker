@@ -1913,7 +1913,7 @@ Expression BuiltIn(Expression lhoExp) :
             return result;
         }
         
-        if (result instanceof BuiltInForStringBannedWhenAutoEscaping) {
+        if (result instanceof BuiltInBannedWhenAutoEscaping) {
 	        if (outputFormat instanceof MarkupOutputFormat && autoEscaping) {
 	            throw new ParseException(
 	                    "Using ?" + t.image + " (legacy escaping) is not allowed when auto-escaping is on with "

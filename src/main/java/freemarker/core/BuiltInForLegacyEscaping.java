@@ -22,12 +22,21 @@ import freemarker.template.TemplateModel;
  * A string built-in whose usage is banned when auto-escaping with a markup-output format is active.
  * This is just a marker; the actual checking is in {@code FTL.jj}. 
  */
-abstract class BuiltInForStringBannedWhenAutoEscaping extends SpecialBuiltIn {
+abstract class BuiltInForLegacyEscaping extends BuiltInBannedWhenAutoEscaping {
     
     @Override
     TemplateModel _eval(Environment env)
     throws TemplateException {
-        return calculateResult(BuiltInForString.getTargetString(target, env), env);
+        TemplateModel tm = target.eval(env);
+        String targetString = EvalUtil.coerceModelToString(tm, target, null, true, env);
+        if (targetString == null) {
+            TemplateMarkupOutputModel<?> mo = (TemplateMarkupOutputModel<?>) tm;
+            if (mo.getOutputFormat().isLegacyBuiltInBypassed(key)) {
+                return mo;
+            }
+            throw new NonStringException(target, tm, env);
+        }
+        return calculateResult(targetString, env);
     }
     
     abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
