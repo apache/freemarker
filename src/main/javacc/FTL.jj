@@ -3574,11 +3574,36 @@ OutputFormatBlock OutputFormat() :
                     paramExp);
         }
         
-        lastOutputFormat = outputFormat; 
-        try {
-            outputFormat = template.getConfiguration().getOutputFormat(paramStr);
+        lastOutputFormat = outputFormat;
+        try { 
+            if (paramStr.startsWith("{")) {
+                if (!paramStr.endsWith("}")) {
+                    throw new ParseException("Output format name that starts with '{' must end with '}': " + paramStr,
+                            template, start);
+                }
+                OutputFormat innerOutputFormat = template.getConfiguration().getOutputFormat(
+                        paramStr.substring(1, paramStr.length() - 1));
+                if (!(innerOutputFormat instanceof MarkupOutputFormat)) {
+                    throw new ParseException(
+                            "The output format inside the {...} must be a markup format, but was: "
+                            + innerOutputFormat,
+                            template, start);
+                }
+                if (!(outputFormat instanceof MarkupOutputFormat)) {
+                    throw new ParseException(
+                            "The current output format must be a markup format when using {...}, but was: "
+                            + outputFormat,
+                            template, start);
+                }
+                outputFormat = new CombinedMarkupOutputFormat(
+                        (MarkupOutputFormat) outputFormat, (MarkupOutputFormat) innerOutputFormat);
+            } else {
+                outputFormat = template.getConfiguration().getOutputFormat(paramStr);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new ParseException("Invalid format name: " + e.getMessage(), template, start, e.getCause());
         } catch (UnregisteredOutputFormatException e) {
-            throw new ParseException(e.getMessage(), template, start);
+            throw new ParseException(e.getMessage(), template, start, e.getCause());
         }
     }
     content = OptionalBlock()
@@ -3964,9 +3989,11 @@ void HeaderElement() :
                             }
                             try {
                                 outputFormat = template.getConfiguration().getOutputFormat(vs);
-                            } catch (UnregisteredOutputFormatException e) {
-                                throw new ParseException(e.getMessage(), exp);
-                            }
+					        } catch (IllegalArgumentException e) {
+					            throw new ParseException("Invalid format name: " + e.getMessage(), exp, e.getCause());
+					        } catch (UnregisteredOutputFormatException e) {
+					            throw new ParseException(e.getMessage(), exp, e.getCause());
+					        }
                             _TemplateAPI.setOutputFormat(template, outputFormat);
                         } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {

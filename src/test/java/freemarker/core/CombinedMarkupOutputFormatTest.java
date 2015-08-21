@@ -70,6 +70,22 @@ public class CombinedMarkupOutputFormatTest {
                + " End</pre>",
                out.toString());
     }
+
+    @Test
+    public void testOutputMO3() throws TemplateModelException, IOException {
+        MarkupOutputFormat outputFormat = new CombinedMarkupOutputFormat(
+                RTFOutputFormat.INSTANCE,
+                new CombinedMarkupOutputFormat(RTFOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE));
+        StringWriter out = new StringWriter();
+        
+        outputFormat.output(outputFormat.fromPlainTextByEscaping("b{}"), out);
+        outputFormat.output(outputFormat.fromMarkup("a{}"), out);
+        
+        assertEquals(
+                "b\\\\\\\\\\\\\\{\\\\\\\\\\\\\\}"
+                + "a{}",
+                out.toString());
+    }
     
     @Test
     public void testOutputString() throws TemplateModelException, IOException {

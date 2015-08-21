@@ -16,6 +16,7 @@
 
 package freemarker.test;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -107,14 +108,25 @@ public abstract class TemplateTest {
     }
     
     protected void assertErrorContains(String ftl, String... expectedSubstrings) {
-        assertErrorContains(null, ftl, expectedSubstrings);
+        assertErrorContains(null, ftl, null, expectedSubstrings);
+    }
+
+    protected void assertErrorContains(String ftl, Class<? extends Throwable> exceptionClass,
+            String... expectedSubstrings) {
+        assertErrorContains(null, ftl, exceptionClass, expectedSubstrings);
     }
 
     protected void assertErrorContainsForNamed(String name, String... expectedSubstrings) {
-        assertErrorContains(name, null, expectedSubstrings);
+        assertErrorContains(name, null, null, expectedSubstrings);
+    }
+
+    protected void assertErrorContainsForNamed(String name, Class<? extends Throwable> exceptionClass,
+            String... expectedSubstrings) {
+        assertErrorContains(name, null, exceptionClass, expectedSubstrings);
     }
     
-    private void assertErrorContains(String name, String ftl, String... expectedSubstrings) {
+    private void assertErrorContains(String name, String ftl, Class<? extends Throwable> exceptionClass,
+            String... expectedSubstrings) {
         try {
             Template t;
             if (ftl == null) {
@@ -125,10 +137,19 @@ public abstract class TemplateTest {
             t.process(createDataModel(), new StringWriter());
             fail("The tempalte had to fail");
         } catch (TemplateException e) {
+            if (exceptionClass != null) {
+                assertThat(e, instanceOf(exceptionClass));
+            }
             assertContainsAll(e.getMessageWithoutStackTop(), expectedSubstrings);
         } catch (ParseException e) {
+            if (exceptionClass != null) {
+                assertThat(e, instanceOf(exceptionClass));
+            }
             assertContainsAll(e.getEditorMessage(), expectedSubstrings);
         } catch (IOException e) {
+            if (exceptionClass != null) {
+                assertThat(e, instanceOf(exceptionClass));
+            }
             throw new RuntimeException("Unexpected exception class: " + e.getClass().getName(), e);
         }
     }
