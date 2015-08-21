@@ -55,10 +55,12 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
+import freemarker.core.CombinedMarkupOutputFormat;
+import freemarker.core.CommonMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
-import freemarker.core.CommonMarkupOutputFormat;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
@@ -1806,41 +1808,77 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Returns the output format for a name (not {@code null}).
      * 
+     * <p>
+     * The name can also refer to a combined format that's created ad-hoc from the registered formats. For example, if
+     * you need RTF embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
+     * existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is also valid.
+     * 
      * @throws UnregisteredOutputFormatException
      *             If there's no output format registered with the given name.
+     * @throws IllegalArgumentException
+     *             If the usage of <@code>{</@code> and <@code>}</@code> in the name is syntactically wrong, or if not
+     *             all {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <@code>...{...}</@code>
+     *             expression.
      * 
      * @since 2.3.24
      */
     public OutputFormat getOutputFormat(String name) throws UnregisteredOutputFormatException {
-        OutputFormat custOF = registeredCustomOutputFormats.get(name);
-        if (custOF != null) {
-            return custOF;
+        if (name.length() == 0) {
+            throw new IllegalArgumentException("0-length format name");
         }
-        
-        OutputFormat stdOF = STANDARD_OUTPUT_FORMATS.get(name);
-        if (stdOF == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unregistered output format name, ");
-            sb.append(StringUtil.jQuote(name));
-            sb.append(". The output formats registered in the Configuration are: ");
-            
-            Set<String> registeredNames = new TreeSet<String>();
-            registeredNames.addAll(STANDARD_OUTPUT_FORMATS.keySet());
-            registeredNames.addAll(registeredCustomOutputFormats.keySet());
-            
-            boolean first = true;
-            for (String registeredName : registeredNames) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-                sb.append(StringUtil.jQuote(registeredName));
+        if (name.charAt(name.length() - 1) == '}') {
+            // Combined markup
+            int openBrcIdx = name.indexOf('{');
+            if (openBrcIdx == -1) {
+                throw new IllegalArgumentException("Missing opening '{' in: " + name);
             }
             
-            throw new UnregisteredOutputFormatException(sb.toString());
+            MarkupOutputFormat outerOF = getMarkupOutputFormatForCombiner(name.substring(0, openBrcIdx));
+            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombiner(name.substring(openBrcIdx + 1, name.length() - 1));
+            
+            return new CombinedMarkupOutputFormat(name, outerOF, innerOF);
+        } else {
+            OutputFormat custOF = registeredCustomOutputFormats.get(name);
+            if (custOF != null) {
+                return custOF;
+            }
+            
+            OutputFormat stdOF = STANDARD_OUTPUT_FORMATS.get(name);
+            if (stdOF == null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Unregistered output format name, ");
+                sb.append(StringUtil.jQuote(name));
+                sb.append(". The output formats registered in the Configuration are: ");
+                
+                Set<String> registeredNames = new TreeSet<String>();
+                registeredNames.addAll(STANDARD_OUTPUT_FORMATS.keySet());
+                registeredNames.addAll(registeredCustomOutputFormats.keySet());
+                
+                boolean first = true;
+                for (String registeredName : registeredNames) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(StringUtil.jQuote(registeredName));
+                }
+                
+                throw new UnregisteredOutputFormatException(sb.toString());
+            }
+            return stdOF;
         }
-        return stdOF;
+    }
+
+    private MarkupOutputFormat getMarkupOutputFormatForCombiner(String outerName)
+            throws UnregisteredOutputFormatException {
+        OutputFormat of = getOutputFormat(outerName);
+        if (!(of instanceof MarkupOutputFormat)) {
+            throw new IllegalArgumentException("The \"" + outerName + "\" output format can't be used in "
+                    + "...{...} expression, because it's not a markup format.");
+        }
+        MarkupOutputFormat outerOF = (MarkupOutputFormat) of;
+        return outerOF;
     }
     
     /**
@@ -1865,6 +1903,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *             When the same {@link OutputFormat} object occurs for multiple times in the collection.
      *             If an {@link OutputFormat} name is 0 long.
      *             If an {@link OutputFormat} name doesn't start with letter or digit.
+     *             If an {@link OutputFormat} name contains {@code '+'} or <code>'{'</code> or <code>'}'</code>. 
      *             If an {@link OutputFormat} name equals to {@link UndefinedOutputFormat#getName()} or
      *             {@link PlainTextOutputFormat#getName()}.
      * 
@@ -1893,6 +1932,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             }
             if (name.indexOf('+') != -1) {
                 throw new IllegalArgumentException("The output format name can't contain \"+\" character: "
+                        + name);
+            }
+            if (name.indexOf('{') != -1) {
+                throw new IllegalArgumentException("The output format name can't contain \"{\" character: "
+                        + name);
+            }
+            if (name.indexOf('}') != -1) {
+                throw new IllegalArgumentException("The output format name can't contain \"}\" character: "
                         + name);
             }
             

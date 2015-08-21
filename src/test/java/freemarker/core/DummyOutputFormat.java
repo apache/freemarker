@@ -29,18 +29,23 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<DummyTemplateOut
     }
 
     @Override
-    protected String escapePlainTextToString(String plainTextContent) {
-        return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
+    public String getName() {
+        return "dummy";
     }
 
     @Override
-    protected DummyTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
-        return new DummyTemplateOutputModel(plainTextContent, markupContent);
+    public String getMimeType() {
+        return "text/dummy";
     }
 
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        out.write(escapePlainTextToString(textToEsc));
+        out.write(escapePlainText(textToEsc));
+    }
+
+    @Override
+    public String escapePlainText(String plainTextContent) {
+        return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
     }
 
     @Override
@@ -49,13 +54,8 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<DummyTemplateOut
     }
 
     @Override
-    public String getName() {
-        return "dummy";
-    }
-
-    @Override
-    public String getMimeType() {
-        return "text/dummy";
+    protected DummyTemplateOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
+        return new DummyTemplateOutputModel(plainTextContent, markupContent);
     }
     
 }

@@ -47,6 +47,7 @@ import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
+import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
@@ -55,9 +56,12 @@ import freemarker.core.CustomHTMLOutputFormat;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
+import freemarker.core.RTFOutputFormat;
 import freemarker.core.UndefinedOutputFormat;
+import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -916,6 +920,60 @@ public class ConfigurationTest extends TestCase {
        } catch (SettingValueAssignmentException e) {
            assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }
+    }
+    
+    @Test
+    public void testGetOutputFormatByName() throws Exception {
+        Configuration cfg = new Configuration();
+        
+        assertSame(HTMLOutputFormat.INSTANCE, cfg.getOutputFormat(HTMLOutputFormat.INSTANCE.getName()));
+        
+        try {
+            cfg.getOutputFormat("noSuchFormat");
+            fail();
+        } catch (UnregisteredOutputFormatException e) {
+            assertThat(e.getMessage(), containsString("noSuchFormat"));
+        }
+        
+        try {
+            cfg.getOutputFormat("HTML}");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("'{'"));
+        }
+        
+        {
+            OutputFormat of = cfg.getOutputFormat("HTML{RTF}");
+            assertThat(of, instanceOf(CombinedMarkupOutputFormat.class));
+            CombinedMarkupOutputFormat combinedOF = (CombinedMarkupOutputFormat) of;
+            assertSame(HTMLOutputFormat.INSTANCE, combinedOF.getOuterOutputFormat());
+            assertSame(RTFOutputFormat.INSTANCE, combinedOF.getInnerOutputFormat());
+        }
+
+        {
+            OutputFormat of = cfg.getOutputFormat("XML{HTML{RTF}}");
+            assertThat(of, instanceOf(CombinedMarkupOutputFormat.class));
+            CombinedMarkupOutputFormat combinedOF = (CombinedMarkupOutputFormat) of;
+            assertSame(XMLOutputFormat.INSTANCE, combinedOF.getOuterOutputFormat());
+            MarkupOutputFormat innerOF = combinedOF.getInnerOutputFormat();
+            assertThat(innerOF, instanceOf(CombinedMarkupOutputFormat.class));
+            CombinedMarkupOutputFormat innerCombinedOF = (CombinedMarkupOutputFormat) innerOF; 
+            assertSame(HTMLOutputFormat.INSTANCE, innerCombinedOF.getOuterOutputFormat());
+            assertSame(RTFOutputFormat.INSTANCE, innerCombinedOF.getInnerOutputFormat());
+        }
+        
+        try {
+            cfg.getOutputFormat("plainText{HTML}");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), allOf(containsString("plainText"), containsString("markup")));
+        }
+        try {
+            cfg.getOutputFormat("HTML{plainText}");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), allOf(containsString("plainText"), containsString("markup")));
+        }
     }
 
     public void testSetRegisteredCustomOutputFormats() throws Exception {

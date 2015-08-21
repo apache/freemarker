@@ -28,22 +28,15 @@ import freemarker.template.utility.StringUtil;
  */
 public final class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTMLOutputModel> {
 
+    /**
+     * The only instance (singleton) of this {@link OutputFormat}.
+     */
     public static final HTMLOutputFormat INSTANCE = new HTMLOutputFormat();
     
     private HTMLOutputFormat() {
         // Only to decrease visibility
     }
     
-    @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        StringUtil.XHTMLEnc(textToEsc, out);
-    }
-
-    @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
-    }
-
     @Override
     public String getName() {
         return "HTML";
@@ -55,12 +48,22 @@ public final class HTMLOutputFormat extends CommonMarkupOutputFormat<TemplateHTM
     }
 
     @Override
-    protected String escapePlainTextToString(String plainTextContent) {
+    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+        StringUtil.XHTMLEnc(textToEsc, out);
+    }
+
+    @Override
+    public String escapePlainText(String plainTextContent) {
         return StringUtil.XHTMLEnc(plainTextContent);
     }
 
     @Override
-    protected TemplateHTMLOutputModel newTOM(String plainTextContent, String markupContent) {
+    public boolean isLegacyBuiltInBypassed(String builtInName) {
+        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
+    }
+
+    @Override
+    protected TemplateHTMLOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
         return new TemplateHTMLOutputModel(plainTextContent, markupContent);
     }
 

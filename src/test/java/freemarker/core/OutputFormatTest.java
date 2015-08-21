@@ -766,6 +766,48 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>", "x");
     }
     
+    @Test
+    public void testCombinedOutputFormats() throws Exception {
+        assertOutput(
+                "<#outputFormat 'XML{HTML}'>${'\\''}</#outputFormat>",
+                "&amp;#39;");
+        assertOutput(
+                "<#outputFormat 'HTML{RTF{XML}}'>${'<a=\\'{}\\' />'}</#outputFormat>",
+                "&amp;lt;a=&amp;apos;\\{\\}&amp;apos; /&amp;gt;");
+        
+        String commonFtl = "${'\\''} <#outputFormat '{HTML}'>${'\\''}</#outputFormat>";
+        String commonOutput = "&apos; &amp;#39;";
+        assertOutput(
+                "<#outputFormat 'XML'>" + commonFtl + "</#outputFormat>",
+                commonOutput);
+        assertOutput(
+                "<#ftl outputFormat='XML'>" + commonFtl,
+                commonOutput);
+        addTemplate("t.ftlx", commonFtl);
+        assertOutputForNamed(
+                "t.ftlx",
+                commonOutput);
+        
+        assertErrorContains(
+                commonFtl,
+                ParseException.class, "{...}", "markup", UndefinedOutputFormat.INSTANCE.getName());
+        assertErrorContains(
+                "<#ftl outputFormat='plainText'>" + commonFtl,
+                ParseException.class, "{...}", "markup", PlainTextOutputFormat.INSTANCE.getName());
+        assertErrorContains(
+                "<#ftl outputFormat='RTF'><#outputFormat '{plainText}'></#outputFormat>",
+                ParseException.class, "{...}", "markup", PlainTextOutputFormat.INSTANCE.getName());
+        assertErrorContains(
+                "<#ftl outputFormat='RTF'><#outputFormat '{noSuchFormat}'></#outputFormat>",
+                ParseException.class, "noSuchFormat", "registered");
+        assertErrorContains(
+                "<#outputFormat 'noSuchFormat{HTML}'></#outputFormat>",
+                ParseException.class, "noSuchFormat", "registered");
+        assertErrorContains(
+                "<#outputFormat 'HTML{noSuchFormat}'></#outputFormat>",
+                ParseException.class, "noSuchFormat", "registered");
+    }
+    
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
@@ -775,11 +817,11 @@ public class OutputFormatTest extends TemplateTest {
         cfg.setTemplateConfigurers(
                 new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.xml"), xmlTC));
 
-        cfg.setSharedVariable("rtfPlain", RTFOutputFormat.INSTANCE.escapePlainText("\\par a & b"));
+        cfg.setSharedVariable("rtfPlain", RTFOutputFormat.INSTANCE.fromPlainTextByEscaping("\\par a & b"));
         cfg.setSharedVariable("rtfMarkup", RTFOutputFormat.INSTANCE.fromMarkup("\\par c"));
-        cfg.setSharedVariable("htmlPlain", HTMLOutputFormat.INSTANCE.escapePlainText("a < {h'}"));
+        cfg.setSharedVariable("htmlPlain", HTMLOutputFormat.INSTANCE.fromPlainTextByEscaping("a < {h'}"));
         cfg.setSharedVariable("htmlMarkup", HTMLOutputFormat.INSTANCE.fromMarkup("<p>c"));
-        cfg.setSharedVariable("xmlPlain", XMLOutputFormat.INSTANCE.escapePlainText("a < {x'}"));
+        cfg.setSharedVariable("xmlPlain", XMLOutputFormat.INSTANCE.fromPlainTextByEscaping("a < {x'}"));
         cfg.setSharedVariable("xmlMarkup", XMLOutputFormat.INSTANCE.fromMarkup("<p>c</p>"));
         
         return cfg;

@@ -35,7 +35,7 @@ class BuiltInsForOutputFormatRelated {
         @Override
         protected TemplateModel calculateResult(String lho, MarkupOutputFormat outputFormat, Environment env)
                 throws TemplateException {
-            return outputFormat.escapePlainText(lho);
+            return outputFormat.fromPlainTextByEscaping(lho);
         }
         
     }
@@ -70,7 +70,7 @@ class BuiltInsForOutputFormatRelated {
                     }
                     // Here we know that lho is escaped plain text. So we re-escape it to the current format and
                     // bypass it, just as if the two output formats were the same earlier.
-                    return contextOF.escapePlainText(lhoStr);
+                    return contextOF.fromPlainTextByEscaping(lhoStr);
                 }
             }
             return calculateResult(lhoStr, contextOF, env);

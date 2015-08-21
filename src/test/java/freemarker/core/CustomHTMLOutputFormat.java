@@ -35,17 +35,6 @@ public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<Custo
     }
     
     @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        // This is lazy - don't do it in reality.
-        out.write(escapePlainTextToString(textToEsc));
-    }
-
-    @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
-    }
-
-    @Override
     public String getName() {
         return "HTML";
     }
@@ -56,12 +45,23 @@ public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<Custo
     }
 
     @Override
-    protected String escapePlainTextToString(String plainTextContent) {
+    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+        // This is lazy - don't do it in reality.
+        out.write(escapePlainText(textToEsc));
+    }
+
+    @Override
+    public String escapePlainText(String plainTextContent) {
         return StringUtil.XHTMLEnc(plainTextContent.replace('x', 'X'));
     }
 
     @Override
-    protected CustomTemplateHTMLModel newTOM(String plainTextContent, String markupContent) {
+    public boolean isLegacyBuiltInBypassed(String builtInName) {
+        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
+    }
+
+    @Override
+    protected CustomTemplateHTMLModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
         return new CustomTemplateHTMLModel(plainTextContent, markupContent);
     }
 
