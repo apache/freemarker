@@ -775,6 +775,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         cache.setLocalizedLookup(localizedLookup);
     }
     
+    private void recreateTemplateCache() {
+        recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                getTemplateConfigurers());
+    }
+    
     private TemplateLoader getDefaultTemplateLoader() {
         return createDefaultTemplateLoader(getIncompatibleImprovements(), getTemplateLoader());
     }
@@ -1628,6 +1634,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 objectWrapperExplicitlySet = true;
                 unsetObjectWrapper();
             }
+            
+            recreateTemplateCache();
         }
     }
 
@@ -1720,7 +1728,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void setAutoEscaping(boolean autoEscaping) {
+        boolean prevEffectiveAutoEscaping = getAutoEscaping();
         this.autoEscaping = Boolean.valueOf(autoEscaping);
+        if (prevEffectiveAutoEscaping != autoEscaping) {
+            clearTemplateCache();
+        }
     }
 
     /**
@@ -1773,8 +1785,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     "outputFormat",
                     "You may meant: " + UndefinedOutputFormat.class.getSimpleName() + ".INSTANCE");
         }
+        OutputFormat prevOutputFormat = getOutputFormat();
         this.outputFormat = outputFormat;
         outputFormatExplicitlySet = true;
+        if (prevOutputFormat != outputFormat) {
+            clearTemplateCache();
+        }
     }
 
     /**
