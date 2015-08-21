@@ -713,6 +713,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          {@link #setTemplateConfigurers(TemplateConfigurerFactory) template_configurers}.) The "file" extensions
      *          aren't case sensitive.
      *       </li>
+     *       <li><p>
+     *          Expressions inside interpolations that were inside <em>string literal expressions</em>
+     *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;, has always
+     *          used {@code incompatbileImprovement}-s 0 (2.3.0 in effect).
+     *       </li>
      *     </ul>
      *   </li>
      * </ul>
