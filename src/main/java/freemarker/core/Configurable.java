@@ -1603,7 +1603,8 @@ public class Configurable {
      *        
      *   <li><p>{@code "recognize_standard_file_extensions"}:
      *       See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}.
-     *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
+     *       {@code yes}, etc.
      *       
      *   <li><p>{@code "template_configurers"}:
      *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.

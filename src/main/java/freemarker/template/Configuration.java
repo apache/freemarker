@@ -725,8 +725,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       </li>
      *       <li><p>
      *          Expressions inside interpolations that were inside <em>string literal expressions</em>
-     *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;, has always
-     *          used {@code incompatbileImprovement}-s 0 (2.3.0 in effect).
+     *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;</code>, has
+     *          always used {@code incompatbileImprovement}-s 0 (2.3.0 in effect).
      *       </li>
      *     </ul>
      *   </li>
@@ -1712,9 +1712,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * </ul>
      * 
      * <p>Note that what you set here is just a default, which can be overridden for individual templates via
-     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, even if no template configurers were set, this
-     * setting can ne still overridden by the standard file extensions; see them at
-     * {@link #setRecognizeStandardFileExtensions(boolean)} too.
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. This setting is also overridden by the standard file
+     * extensions; see them at {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
      * @see TemplateConfigurer#setAutoEscaping(boolean)
      * @see Configuration#setOutputFormat(OutputFormat)
@@ -1762,7 +1761,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Sets the (default) output format. Usually, you leave this on its default, which is
      * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like
      * based on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. This setting is
-     * also overridden by the standard file extensions; see them at {@link #setRecognizeStandardFileExtensions(boolean)}.
+     * also overridden by the standard file extensions; see them at
+     * {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
      * <p>
      * The output format is mostly important because of auto-escaping (see {@link #setAutoEscaping(boolean)}), but maybe
@@ -1830,8 +1830,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @throws UnregisteredOutputFormatException
      *             If there's no output format registered with the given name.
      * @throws IllegalArgumentException
-     *             If the usage of <@code>{</@code> and <@code>}</@code> in the name is syntactically wrong, or if not
-     *             all {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <@code>...{...}</@code>
+     *             If the usage of <code>{</code> and <code>}</code> in the name is syntactically wrong, or if not
+     *             all {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <code>...{...}</code>
      *             expression.
      * 
      * @since 2.3.24
