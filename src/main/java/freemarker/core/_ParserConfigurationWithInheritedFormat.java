@@ -22,13 +22,13 @@ import freemarker.template.Version;
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
  */ 
-public final class _ParserConfigurationWithOverrides implements ParserConfiguration {
+public final class _ParserConfigurationWithInheritedFormat implements ParserConfiguration {
 
     private final OutputFormat outputFormat;
     private final Boolean autoEscaping;
     private final ParserConfiguration wrappedPCfg;
 
-    public _ParserConfigurationWithOverrides(ParserConfiguration wrappedPCfg, OutputFormat outputFormat,
+    public _ParserConfigurationWithInheritedFormat(ParserConfiguration wrappedPCfg, OutputFormat outputFormat,
             Boolean autoEscaping) {
         this.outputFormat = outputFormat;
         this.autoEscaping = autoEscaping;
@@ -49,6 +49,10 @@ public final class _ParserConfigurationWithOverrides implements ParserConfigurat
 
     public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : wrappedPCfg.getOutputFormat();
+    }
+
+    public boolean getRecognizeStandardFileExtensions() {
+        return false;
     }
 
     public int getNamingConvention() {

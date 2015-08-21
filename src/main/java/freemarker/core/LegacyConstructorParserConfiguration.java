@@ -31,10 +31,11 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private ArithmeticEngine arithmeticEngine;
     private Boolean autoEscaping; 
     private OutputFormat outputFormat;
+    private Boolean recognizeStandardFileExtensions; 
     private final Version incompatibleImprovements;
 
     public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
-            int namingConvention, Boolean autoEscaping, OutputFormat outputFormat,
+            int namingConvention, Boolean autoEscaping, OutputFormat outputFormat, Boolean recognizeStandardFileExtensions,
             Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
@@ -42,6 +43,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         this.strictSyntaxMode = strictSyntaxMode;
         this.autoEscaping = autoEscaping;
         this.outputFormat = outputFormat;
+        this.recognizeStandardFileExtensions = recognizeStandardFileExtensions;
         this.incompatibleImprovements = incompatibleImprovements;
         this.arithmeticEngine = arithmeticEngine;
     }
@@ -102,6 +104,19 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     void setOutputFormatIfNotSet(OutputFormat outputFormat) {
         if (this.outputFormat == null) {
             this.outputFormat = outputFormat;
+        }
+    }
+
+    public boolean getRecognizeStandardFileExtensions() {
+        if (recognizeStandardFileExtensions == null) {
+            throw new IllegalStateException();
+        }
+        return recognizeStandardFileExtensions.booleanValue();
+    }
+    
+    void setRecognizeStandardFileExtensionsIfNotSet(boolean recognizeStandardFileExtensions) {
+        if (this.recognizeStandardFileExtensions == null) {
+            this.recognizeStandardFileExtensions = Boolean.valueOf(recognizeStandardFileExtensions);
         }
     }
 

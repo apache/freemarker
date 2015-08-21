@@ -1591,7 +1591,7 @@ public class Configurable {
      *   <li><p>{@code "naming_convention"}:
      *       See {@link Configuration#setNamingConvention(int)}.
      *       <br>String value: Must be one of
-     *       {@code "auto_detect"}, {@code "legacy"}, and {@code "camel_case"}. 
+     *       {@code "auto_detect"}, {@code "legacy"}, and {@code "camel_case"}.
      *       
      *   <li><p>{@code "incompatible_improvements"}:
      *       See {@link Configuration#setIncompatibleImprovements(Version)}.
@@ -1600,6 +1600,10 @@ public class Configurable {
      *   <li><p>{@code "incompatible_enhancements"}:
      *       See: {@link Configuration#setIncompatibleEnhancements(String)}.
      *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
+     *        
+     *   <li><p>{@code "recognize_standard_file_extensions"}:
+     *       See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
      *       
      *   <li><p>{@code "template_configurers"}:
      *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.

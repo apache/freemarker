@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
 import freemarker.cache.FileNameGlobMatcher;
-import freemarker.cache.MergingTemplateConfigurerFactory;
 import freemarker.cache.OrMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -116,13 +115,13 @@ public class OutputFormatTest extends TemplateTest {
                                         new FileNameGlobMatcher("*.FTLH"),
                                         new FileNameGlobMatcher("*.fTlH")),
                                 tcXml));
-                ftlhOutputFormat = XMLOutputFormat.INSTANCE;
+                ftlhOutputFormat = HTMLOutputFormat.INSTANCE; // can't be overidden
                 ftlxOutputFormat = XMLOutputFormat.INSTANCE;
                 break;
             case 4:
                 cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
                 cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlhOutputFormat = XMLOutputFormat.INSTANCE;
+                ftlhOutputFormat = XMLOutputFormat.INSTANCE; // now gets overidden
                 ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
                 break;
             case 5:
@@ -189,31 +188,74 @@ public class OutputFormatTest extends TemplateTest {
                 new FileNameGlobMatcher("t.*"), tcNoAutoEsc);
 
         Configuration cfg = getConfiguration();
+        cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+        cfg.setTemplateConfigurers(tcfHTML);
+        assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+        cfg.setTemplateConfigurers(tcfNoAutoEsc);
+        assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         
-        for (int i = 0; i < 3; i++) {
-            if (i == 1) {
-                cfg.setTemplateConfigurers(null);
-                cfg.setOutputFormat(RTFOutputFormat.INSTANCE);
-                // Just to prove that the settings are as expected:
-                assertOutputForNamed("t.ftl", "\\{\\} \\{\\} {}");
-            } else if (i == 2) {
-                cfg.setTemplateConfigurers(null);
-                cfg.setAutoEscaping(false);
-                // Just to prove that the settings are as expected:
-                assertOutputForNamed("t.ftl", "{} \\{\\} {}");
-            }
-            
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");
-            
-            cfg.setTemplateConfigurers(tcfHTML);
-            assertOutputForNamed("t.ftlx", "&#39; &#39; '");
-            
-            cfg.setTemplateConfigurers(tcfNoAutoEsc);
-            assertOutputForNamed("t.ftlx", "' &apos; '");
-            
-            cfg.setTemplateConfigurers(
-                    new MergingTemplateConfigurerFactory(tcfHTML, tcfNoAutoEsc));
-            assertOutputForNamed("t.ftlx", "' &#39; '");
+        cfg.setTemplateConfigurers(null);
+        cfg.unsetOutputFormat();
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);  // Extensions has no effect
+        assertErrorContainsForNamed("t.ftlx", UndefinedOutputFormat.INSTANCE.getName());
+        cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        assertOutputForNamed("t.ftlx", "&#39; &#39; '");
+        cfg.setOutputFormat(XMLOutputFormat.INSTANCE);
+        assertOutputForNamed("t.ftlx", "&apos; &apos; '");
+        cfg.setTemplateConfigurers(tcfHTML);
+        assertOutputForNamed("t.ftlx", "&#39; &#39; '");
+        cfg.setTemplateConfigurers(tcfNoAutoEsc);
+        assertOutputForNamed("t.ftlx", "' &apos; '");
+        
+        cfg.setRecognizeStandardFileExtensions(true);
+        cfg.setTemplateConfigurers(tcfHTML);
+        assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+        cfg.setTemplateConfigurers(tcfNoAutoEsc);
+        assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+        
+        cfg.setTemplateConfigurers(null);
+        cfg.unsetOutputFormat();
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        cfg.setTemplateConfigurers(tcfHTML);
+        assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+        cfg.setRecognizeStandardFileExtensions(false);
+        assertOutputForNamed("t.ftlx", "&#39; &#39; '");
+    }
+
+    @Test
+    public void testStandardFileExtensionsWithConstructor() throws Exception {
+        Configuration cfg = getConfiguration();
+        String commonFTL = "${'\\''}";
+        {
+            Template t = new Template("foo.ftl", commonFTL, cfg);
+            assertSame(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
+            StringWriter out = new StringWriter();
+            t.process(null, out);
+            assertEquals("'", out.toString());
+        }
+        {
+            Template t = new Template("foo.ftlx", commonFTL, cfg);
+            assertSame(XMLOutputFormat.INSTANCE, t.getOutputFormat());
+            StringWriter out = new StringWriter();
+            t.process(null, out);
+            assertEquals("&apos;", out.toString());
+        }
+        {
+            Template t = new Template("foo.ftlh", commonFTL, cfg);
+            assertSame(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
+            StringWriter out = new StringWriter();
+            t.process(null, out);
+            assertEquals("&#39;", out.toString());
+        }
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        {
+            Template t = new Template("foo.ftlx", commonFTL, cfg);
+            assertSame(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
+            StringWriter out = new StringWriter();
+            t.process(null, out);
+            assertEquals("'", out.toString());
         }
     }
     

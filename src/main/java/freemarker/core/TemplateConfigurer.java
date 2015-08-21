@@ -76,6 +76,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
     private Boolean autoEscaping;
+    private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
     private String encoding;
 
@@ -173,6 +174,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (tc.isEncodingSet()) {
             setEncoding(tc.getEncoding());
+        }
+        if (tc.isRecognizeStandardFileExtensionsSet()) {
+            setRecognizeStandardFileExtensions(tc.getRecognizeStandardFileExtensions());
         }
         if (tc.isLocaleSet()) {
             setLocale(tc.getLocale());
@@ -421,7 +425,29 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     public boolean isOutputFormatSet() {
         return outputFormat != null;
     }
+    
+    /**
+     * See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}. 
+     */
+    public void setRecognizeStandardFileExtensions(boolean recognizeStandardFileExtensions) {
+        this.recognizeStandardFileExtensions = Boolean.valueOf(recognizeStandardFileExtensions);
+    }
 
+    /**
+     * Getter pair of {@link #setRecognizeStandardFileExtensions(boolean)}.
+     */
+    public boolean getRecognizeStandardFileExtensions() {
+        return recognizeStandardFileExtensions != null ? recognizeStandardFileExtensions.booleanValue()
+                : getParentConfiguration().getRecognizeStandardFileExtensions();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     */
+    public boolean isRecognizeStandardFileExtensionsSet() {
+        return recognizeStandardFileExtensions != null;
+    }
+    
     /**
      * See {@link Configuration#setStrictSyntaxMode(boolean)}.
      */
@@ -436,7 +462,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         return strictSyntaxMode != null ? strictSyntaxMode.booleanValue()
                 : getParentConfiguration().getStrictSyntaxMode();
     }
-
+    
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      */
