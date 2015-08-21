@@ -11380,7 +11380,8 @@ Green Mouse</programlisting>
               programmers has <link
               linkend="pgui_config_incompatible_improvements_how_to_set">set
               the <literal>incompatible_improvements</literal> setting</link>
-              to <literal>2.3.20</literal> or higher. Otherwise
+              to 2.3.24 or higher (also if it's set to 2.3.20 or higher and
+              you are outside a string literal). Otherwise
               <literal>'</literal> won't be replaced, so you must use
               quotation mark (<literal>"</literal>, not <literal>'</literal>)
               to quote attribute values where you want to insert a value
@@ -12964,14 +12965,15 @@ rif: foo XYr baar</programlisting>
           grouping separators).</para>
 
           <para>If the <literal>incompatible_imporvements</literal> FreeMarker
-          configuration setting is set to 2.3.21 (or higher), this built-in
-          will return <literal>"INF"</literal>, <literal>"-INF"</literal> and
-          <literal>"NaN"</literal> for positive/negative infinity and IEEE
-          floating point Not-a-Number, respectively. These are the XML Schema
-          compatible representations of these special values. (Earlier it has
-          returned what <literal>java.text.DecimalFormat</literal> did with US
-          locale, none of which is understood by any (common) computer
-          language.)</para>
+          configuration setting is set to 2.3.24 or higher (also if it's set
+          to 2.3.20 or higher and you are outside a string literal), this
+          built-in will return <literal>"INF"</literal>,
+          <literal>"-INF"</literal> and <literal>"NaN"</literal> for
+          positive/negative infinity and IEEE floating point Not-a-Number,
+          respectively. These are the XML Schema compatible representations of
+          these special values. (Earlier it has returned what
+          <literal>java.text.DecimalFormat</literal> did with US locale, none
+          of which is understood by any (common) computer language.)</para>
 
           <para>Note that this built-in <link
           linkend="ref_builtin_c_boolean">also works on
@@ -13554,10 +13556,11 @@ Last updated time: 08:00:54 PM</programlisting>
                   the <literal>incompatible_improvements</literal> (often set
                   via the Java <literal>Configuration</literal> constructor
                   parameter) FreeMarker configuration setting is at least
-                  2.3.21. This is because most databases store time values
-                  that aren't in any time zone, but just store hour, minute,
-                  second, and decimal second field values, so showing the time
-                  zone doesn't make sense.</para>
+                  2.3.21 (or 2.3.24 when you are inside a string literal).
+                  This is because most databases store time values that aren't
+                  in any time zone, but just store hour, minute, second, and
+                  decimal second field values, so showing the time zone
+                  doesn't make sense.</para>
                 </listitem>
               </itemizedlist>
 
@@ -23977,6 +23980,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   parameter type anyway.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed, only with
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>): Expressions inside interpolations that were
+              inside <emphasis>string literal expressions</emphasis> (not
+              <literal>${<replaceable>...</replaceable>}</literal>-s in
+              general), like in <literal>&lt;#assign s="Hello
+              ${name}!"&gt;</literal>, always used
+              <literal>incompatibleImprovements</literal> 0 (2.3.0 in effect).
+              This means that expressions inside string literals had missed
+              the <literal>?html</literal>,
+              <literal>?iso_<replaceable>...</replaceable></literal>,
+              <literal>?is_enumerable</literal>, <literal>?c</literal>, etc.
+              fixes/improvements.</para>
             </listitem>
 
             <listitem>

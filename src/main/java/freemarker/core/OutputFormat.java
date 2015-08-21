@@ -19,8 +19,8 @@ import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Encapsulates the {@link TemplateMarkupOutputModel} factories and {@code TemplateOutputModel} operations, and other meta
- * information (like MIME type) about a certain output format.
+ * Encapsulates the {@link TemplateMarkupOutputModel} factories and {@code TemplateOutputModel} operations, and other
+ * meta information (like MIME type) about a certain output format.
  * 
  * @since 2.3.24
  */

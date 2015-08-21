@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
@@ -36,7 +37,7 @@ public class StringLiteralInterpolationTest extends TemplateTest {
      * Broken behavior for backward compatibility.
      */
     @Test
-    public void legacyBug() throws IOException, TemplateException {
+    public void legacyEscapingBugStillPresent() throws IOException, TemplateException {
         assertOutput("<#assign x = 1>${'$\\{x} ${x}'}", "1 1");
         assertOutput("<#assign x = 1>${'${x} $\\{x}'}", "1 1");
     }
@@ -44,6 +45,17 @@ public class StringLiteralInterpolationTest extends TemplateTest {
     @Test
     public void escaping() throws IOException, TemplateException {
         assertOutput("<#escape x as x?html><#assign x = '&'>${x} ${'${x}'}</#escape> ${x}", "&amp; &amp; &");
+    }
+    
+    @Test
+    public void iciInheritanceBugFixed() throws Exception {
+        // Broken behavior emulated:
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        assertOutput("${'&\\''?html} ${\"${'&\\\\\\''?html}\"}", "&amp;&#39; &amp;'");
+        
+        // Fix enabled:
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        assertOutput("${'&\\''?html} ${\"${'&\\\\\\''?html}\"}", "&amp;&#39; &amp;&#39;");
     }
     
 }

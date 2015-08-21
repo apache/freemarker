@@ -150,6 +150,10 @@ public class FMParser {
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
         outputFormat = PlainTextOutputFormat.INSTANCE;
         autoEscaping = true;
+        if (incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_24) {
+            // Emulate bug, where the string literal parser haven't inherited the IcI:
+            incompatibleImprovements = _TemplateAPI.VERSION_INT_2_3_0;
+        }
     }
 
     void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
