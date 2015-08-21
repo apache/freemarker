@@ -179,6 +179,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String OUTPUT_FORMAT_KEY_CAMEL_CASE = "outputFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String OUTPUT_FORMAT_KEY = OUTPUT_FORMAT_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+    public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE = "recognize_standard_file_extensions";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+    public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE = "recognizeStandardFileExtensions";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY
+            = RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
     public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE = "registered_custom_output_formats";
@@ -289,6 +297,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
+        RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
@@ -311,6 +320,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
+        RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
@@ -443,6 +453,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Boolean autoEscaping;
     private OutputFormat outputFormat = UndefinedOutputFormat.INSTANCE;
     private boolean outputFormatExplicitlySet;
+    private Boolean recognizeStandardFileExtensions;
     private Map<String, ? extends OutputFormat> registeredCustomOutputFormats = Collections.emptyMap(); 
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
@@ -708,18 +719,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *     2.3.24 (or higher):
      *     <ul>
      *       <li><p>
-     *          Templates whose name ends with {@code ftlh} "file" extension will automatically get
-     *          {@link HTMLOutputFormat#INSTANCE} output format, and those with {@code ftlx} extension
-     *          automatically get {@link XMLOutputFormat#INSTANCE} output format. (See:
-     *          {@link #setOutputFormat(OutputFormat)}, in both cases with
-     *          {@link #setAutoEscaping(boolean) auto_escaping} on. (These can be overridden with
-     *          {@link #setTemplateConfigurers(TemplateConfigurerFactory) template_configurers}.) The "file" extensions
-     *          aren't case sensitive.
+     *          The default of the
+     *          {@link #setRecognizeStandardFileExtensions(boolean) recognize_standard_file_extensions}
+     *          setting changes to {@code true}, which means that templates whose name ends with {@code ".ftlh"} or
+     *          {@code ".ftlx"} will automatically get {@link HTMLOutputFormat#INSTANCE} or
+     *          {@link XMLOutputFormat#INSTANCE} output format respectively, in both cases with
+     *          {@link #setAutoEscaping(boolean) auto_escaping} on. These "file" extensions aren't case sensitive.
      *       </li>
      *       <li><p>
      *          Expressions inside interpolations that were inside <em>string literal expressions</em>
-     *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;, has always
-     *          used {@code incompatbileImprovement}-s 0 (2.3.0 in effect).
+     *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;</code>, has
+     *          always used {@code incompatbileImprovement}-s 0 (2.3.0 in effect).
      *       </li>
      *     </ul>
      *   </li>
@@ -776,6 +786,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
+    }
+    
+    private void recreateTemplateCache() {
+        recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+                getTemplateConfigurers());
     }
     
     private TemplateLoader getDefaultTemplateLoader() {
@@ -1208,28 +1224,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
-     * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
-     * ({@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat}) for templates based on their file
+     * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the (
+     * {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat}) for templates based on their file
      * extension or parent directory.
      * 
      * <p>
-     * If {@link #getIncompatibleImprovements()} is 2.3.24 or greater, there's an invisible layer of template
-     * configurers behind those set by this method, which provide the setting values for these standard file
-     * extensions (case insensitive):
-     * 
-     * <ul>
-     *   <li>{@code ftlh}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "HTML"}
-     *       (i.e., {@link HTMLOutputFormat#INSTANCE} unless the {@code "HTML"} name is overridden by
-     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
-     *   <li>{@code ftlx}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "XML"}
-     *       (i.e., {@link XMLOutputFormat#INSTANCE} unless the {@code "XML"} name is overridden by
-     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
-     * </ul>
-     * 
-     * <p>When the {@link TemplateConfigurer} provided by this method also sets some of these settings, the values
-     * coming from the standard settings mappings above will be overridden. 
+     * Note that the settings suggested by standard file extensions are stronger than that you set here. See
+     * {@link #setRecognizeStandardFileExtensions(boolean)} for more information about standard file extensions.
      * 
      * @since 2.3.24
      */
@@ -1631,6 +1632,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 objectWrapperExplicitlySet = true;
                 unsetObjectWrapper();
             }
+            
+            recreateTemplateCache();
         }
     }
 
@@ -1712,9 +1715,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * </ul>
      * 
      * <p>Note that what you set here is just a default, which can be overridden for individual templates via
-     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Also, even if no template configurers were set, this
-     * setting is still overridden by the standard file extension mappings; see them at
-     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. This setting is also overridden by the standard file
+     * extensions; see them at {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
      * @see TemplateConfigurer#setAutoEscaping(boolean)
      * @see Configuration#setOutputFormat(OutputFormat)
@@ -1723,7 +1725,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void setAutoEscaping(boolean autoEscaping) {
+        boolean prevEffectiveAutoEscaping = getAutoEscaping();
         this.autoEscaping = Boolean.valueOf(autoEscaping);
+        if (prevEffectiveAutoEscaping != autoEscaping) {
+            clearTemplateCache();
+        }
     }
 
     /**
@@ -1756,16 +1762,18 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets the (default) output format. Usually, you leave this on its default, which is
-     * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like based
-     * on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. Even if no template
-     * configurers were set, this setting is still overridden by the standard file extension mappings; see them
-     * at {@link #setTemplateConfigurers(TemplateConfigurerFactory)} too.
+     * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like
+     * based on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. This setting is
+     * also overridden by the standard file extensions; see them at
+     * {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
-     * <p>The output format is mostly important because of auto-escaping (see {@link #setAutoEscaping(boolean)}), but
-     * maybe also used by the embedding application to set the HTTP response MIME type, etc.
+     * <p>
+     * The output format is mostly important because of auto-escaping (see {@link #setAutoEscaping(boolean)}), but maybe
+     * also used by the embedding application to set the HTTP response MIME type, etc.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
      * @see #setTemplateConfigurers(TemplateConfigurerFactory)
+     * @see #setRecognizeStandardFileExtensions(boolean)
      * @see #setAutoEscaping(boolean)
      * 
      * @since 2.3.24
@@ -1776,8 +1784,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     "outputFormat",
                     "You may meant: " + UndefinedOutputFormat.class.getSimpleName() + ".INSTANCE");
         }
+        OutputFormat prevOutputFormat = getOutputFormat();
         this.outputFormat = outputFormat;
         outputFormatExplicitlySet = true;
+        if (prevOutputFormat != outputFormat) {
+            clearTemplateCache();
+        }
     }
 
     /**
@@ -1821,8 +1833,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @throws UnregisteredOutputFormatException
      *             If there's no output format registered with the given name.
      * @throws IllegalArgumentException
-     *             If the usage of <@code>{</@code> and <@code>}</@code> in the name is syntactically wrong, or if not
-     *             all {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <@code>...{...}</@code>
+     *             If the usage of <code>{</code> and <code>}</code> in the name is syntactically wrong, or if not
+     *             all {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <code>...{...}</code>
      *             expression.
      * 
      * @since 2.3.24
@@ -1838,8 +1850,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 throw new IllegalArgumentException("Missing opening '{' in: " + name);
             }
             
-            MarkupOutputFormat outerOF = getMarkupOutputFormatForCombiner(name.substring(0, openBrcIdx));
-            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombiner(name.substring(openBrcIdx + 1, name.length() - 1));
+            MarkupOutputFormat outerOF = getMarkupOutputFormatForCombined(name.substring(0, openBrcIdx));
+            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombined(name.substring(openBrcIdx + 1, name.length() - 1));
             
             return new CombinedMarkupOutputFormat(name, outerOF, innerOF);
         } else {
@@ -1875,7 +1887,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
     }
 
-    private MarkupOutputFormat getMarkupOutputFormatForCombiner(String outerName)
+    private MarkupOutputFormat getMarkupOutputFormatForCombined(String outerName)
             throws UnregisteredOutputFormatException {
         OutputFormat of = getOutputFormat(outerName);
         if (!(of instanceof MarkupOutputFormat)) {
@@ -1888,27 +1900,26 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets the custom output formats that can be referred by their unique name ({@link OutputFormat#getName()}) from
-     * templates. Names are also used to look up the {@link OutputFormat} for the {@code ftlh} and {@code code ftlx}
-     * file extensions; see {@link #setTemplateConfigurers(TemplateConfigurerFactory)} for more details.
-     *  
+     * templates. Names are also used to look up the {@link OutputFormat} for standard file extensions; see them at
+     * {@link #setRecognizeStandardFileExtensions(boolean)}.
+     * 
      * <p>
      * When there's a clash between a custom output format name and a standard output format name, the custom format
-     * will win, thus you can override the meaning of standard output format names. Except, it's not allowed to
-     * override {@link UndefinedOutputFormat} and {@link PlainTextOutputFormat}.
+     * will win, thus you can override the meaning of standard output format names. Except, it's not allowed to override
+     * {@link UndefinedOutputFormat} and {@link PlainTextOutputFormat}.
      * 
      * <p>
      * The default value is an empty collection.
      * 
      * @param registeredCustomOutputFormats
-     *            The collection of the {@link OutputFormat}-s, each must be different and has a unique name within
-     *            this collection.
+     *            The collection of the {@link OutputFormat}-s, each must be different and has a unique name within this
+     *            collection.
      * 
      * @throws IllegalArgumentException
-     *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection.
-     *             When the same {@link OutputFormat} object occurs for multiple times in the collection.
-     *             If an {@link OutputFormat} name is 0 long.
-     *             If an {@link OutputFormat} name doesn't start with letter or digit.
-     *             If an {@link OutputFormat} name contains {@code '+'} or <code>'{'</code> or <code>'}'</code>. 
+     *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection. When
+     *             the same {@link OutputFormat} object occurs for multiple times in the collection. If an
+     *             {@link OutputFormat} name is 0 long. If an {@link OutputFormat} name doesn't start with letter or
+     *             digit. If an {@link OutputFormat} name contains {@code '+'} or <code>'{'</code> or <code>'}'</code>.
      *             If an {@link OutputFormat} name equals to {@link UndefinedOutputFormat#getName()} or
      *             {@link PlainTextOutputFormat#getName()}.
      * 
@@ -1970,6 +1981,71 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public Collection<? extends OutputFormat> getRegisteredCustomOutputFormats() {
         return registeredCustomOutputFormats.values();
+    }
+
+    /**
+     * Sets if the "file" extension part of the source name ({@link Template#getSourceName()}) will influence certain
+     * parsing settings. For backward compatibility, it defaults to {@code false} if
+     * {@link #getIncompatibleImprovements()} is less than 2.3.24. Starting from {@code incompatibleImprovements}
+     * 2.3.24, defaults to {@code true}, so the following standard file extensions take their effect:
+     * 
+     * <ul>
+     *   <li>{@code ftlh}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "HTML"}
+     *       (i.e., {@link HTMLOutputFormat#INSTANCE} unless the {@code "HTML"} name is overridden by
+     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
+     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     *   <li>{@code ftlx}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "XML"}
+     *       (i.e., {@link XMLOutputFormat#INSTANCE} unless the {@code "XML"} name is overridden by
+     *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
+     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     * </ul>
+     * 
+     * <p>These file extensions are not case sensitive. The file extension is the part after the last dot in the source
+     * name. If the source name contains no dot, then it has no file extension.
+     * 
+     * <p>The settings activated by these file extensions override the settings values dictated by
+     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
+     */
+    public void setRecognizeStandardFileExtensions(boolean recognizeStandardFileExtensions) {
+        boolean prevEffectiveValue = getRecognizeStandardFileExtensions();
+        this.recognizeStandardFileExtensions = Boolean.valueOf(recognizeStandardFileExtensions);
+        if (prevEffectiveValue != recognizeStandardFileExtensions) {
+            clearTemplateCache();
+        }
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isRecognizeStandardFileExtensionsExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.24
+     */
+    public void unsetRecognizeStandardFileExtensions() {
+        if (recognizeStandardFileExtensions != null) {
+            recognizeStandardFileExtensions = null;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setRecognizeStandardFileExtensions(boolean)} (or equivalent) was already called on this
+     * instance.
+     * 
+     * @since 2.3.24
+     */
+    public boolean isRecognizeStandardFileExtensionsExplicitlySet() {
+        return recognizeStandardFileExtensions != null;
+    }
+    
+    /**
+     * Getter pair of {@link #setRecognizeStandardFileExtensions(boolean)}.
+     * 
+     * @since 2.3.24
+     */
+    public boolean getRecognizeStandardFileExtensions() {
+        return recognizeStandardFileExtensions == null
+                ? incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_24
+                : recognizeStandardFileExtensions.booleanValue();
     }
 
     /**
@@ -2682,6 +2758,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     }
                 }
                 setRegisteredCustomOutputFormats(list);
+            } else if (RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE.equals(name)
+                    || RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE.equals(name)) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetRecognizeStandardFileExtensions();
+                } else {
+                    setRecognizeStandardFileExtensions(StringUtil.getYesNo(value));
+                }
             } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetCacheStorage();

@@ -166,6 +166,7 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
         SETTING_ASSIGNMENTS.put("autoEscaping", false);
         SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
+        SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", true);
         
         // Special settings:
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
@@ -524,8 +525,18 @@ public class TemplateConfigurerTest {
             assertOutputWithoutAndWithTC(tc, "<#foo>", null, "<#foo>");
             testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
         }
+
+
+        {
+            TemplateConfigurer tc = new TemplateConfigurer();
+            tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
+            tc.setRecognizeStandardFileExtensions(true);
+            assertOutputWithoutAndWithTC(tc, "${.outputFormat}",
+                    UndefinedOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE.getName());
+            testedProps.add(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE);
+        }
         
-        assertEquals(PARSER_PROP_NAMES, testedProps);
+        assertEquals("Check that you have tested all parser settings; ", PARSER_PROP_NAMES, testedProps);
     }
     
     @Test
@@ -696,7 +707,7 @@ public class TemplateConfigurerTest {
         StringWriter sw = new StringWriter();
         try {
             Configuration cfg = tc != null ? tc.getParentConfiguration() : DEFAULT_CFG;
-            Template t = new Template(null, null, new StringReader(ftl), cfg, tc, null);
+            Template t = new Template("adhoc.ftlh", null, new StringReader(ftl), cfg, tc, null);
             if (tc != null) {
                 tc.configure(t);
             }

@@ -63,6 +63,11 @@ public interface ParserConfiguration {
     OutputFormat getOutputFormat();
     
     /**
+     * See {@link Configuration#getRecognizeStandardFileExtensions()}.
+     */
+    boolean getRecognizeStandardFileExtensions();
+    
+    /**
      * See {@link Configuration#getIncompatibleImprovements()}.
      */
     Version getIncompatibleImprovements();

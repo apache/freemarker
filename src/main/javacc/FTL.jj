@@ -99,8 +99,15 @@ public class FMParser {
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
 
-        autoEscaping = pCfg.getAutoEscaping();
-        outputFormat = pCfg.getOutputFormat();
+        OutputFormat outputFormatFromExt;
+        if (!pCfg.getRecognizeStandardFileExtensions() || (outputFormatFromExt = getFormatFromStdFileExt()) == null) { 
+	        autoEscaping = pCfg.getAutoEscaping();
+	        outputFormat = pCfg.getOutputFormat();
+        } else {
+            // Override it
+            autoEscaping = true;
+            outputFormat = outputFormatFromExt;
+        }
 
         token_source.setParser(this);
 
@@ -159,6 +166,42 @@ public class FMParser {
     void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
         parentTokenSource.namingConvention = token_source.namingConvention;
         parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
+    }
+
+    private OutputFormat getFormatFromStdFileExt() {
+        String sourceName = template.getSourceName();
+        if (sourceName == null) {
+            return null; // Not possible anyway...
+        }
+
+        int ln = sourceName.length();
+        if (ln < 5) return null;
+        
+        char c = sourceName.charAt(ln - 5);
+        if (c != '.') return null;
+        
+        c = sourceName.charAt(ln - 4);
+        if (c != 'f' && c != 'F') return null;
+        
+        c = sourceName.charAt(ln - 3);
+        if (c != 't' && c != 'T') return null;
+        
+        c = sourceName.charAt(ln - 2);
+        if (c != 'l' && c != 'L') return null;
+        
+        c = sourceName.charAt(ln - 1);
+        try {
+            // Note: We get the output formats by name, so that custom overrides take effect.
+            if (c == 'h' || c == 'H') {
+                return template.getConfiguration().getOutputFormat(HTMLOutputFormat.INSTANCE.getName());
+                }
+            if (c == 'x' || c == 'X') {
+                return template.getConfiguration().getOutputFormat(XMLOutputFormat.INSTANCE.getName());
+            }
+        } catch (UnregisteredOutputFormatException e) {
+            throw new BugException("Unregistered std format", e);
+        }
+        return null;
     }
 
     /**

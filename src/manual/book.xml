@@ -23872,8 +23872,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added new configuration setting:
-              <literal>template_configurers</literal> (or
-              <literal>templateConfigurers</literal>). This allows overriding
+              <literal>template_configurers</literal>. This allows overriding
               the settings coming from the shared
               <literal>Configuration</literal> object for individual
               templates, based on template name patterns. [TODO describe this
@@ -23882,8 +23881,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added new configuration setting:
-              <literal>output_format</literal> (or
-              <literal>outputFormat</literal>). This specifies the name of the
+              <literal>output_format</literal>. This specifies the name of the
               output format (such as <literal>HTML</literal>,
               <literal>XML</literal>, <literal>plainText</literal>, etc.) that
               governs the new auto-escaping mechanism. The output format can
@@ -23893,25 +23891,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>If <link
-              linkend="pgui_config_incompatible_improvements_how_to_set">the
-              <literal>incompatible_improvements</literal> setting</link> is
-              set to 2.3.24 (or higher), templates whose name ends with
-              <literal>ftlh</literal> file extension will automatically get
+              <para>Added new configuration setting:
+              <literal>recognize_standard_file_extensions</literal>. When
+              <literal>true</literal>, templates whose source name ends with
+              <literal>ftlh</literal> file extension will get
               <literal>HTML</literal> <literal>output_format</literal>, and
               those with <literal>ftlx</literal> file extension automatically
               get <literal>XML</literal> <literal>output_format</literal>, in
-              both cases with <literal>auto_escaping</literal> on. (These can
-              be overridden with <literal>template_configurers</literal> of
-              course.)</para>
+              both cases with <literal>auto_escaping</literal> on. If <link
+              linkend="pgui_config_incompatible_improvements_how_to_set">the
+              <literal>incompatible_improvements</literal> setting</link> is
+              set to 2.3.24 (or higher) then this setting defaults to
+              <literal>true</literal>.</para>
             </listitem>
 
             <listitem>
               <para>Added new configuration setting:
-              <literal>registered_custom_output_formats</literal> (or
-              <literal>registeredCustomOutputFormats</literal>). With this you
-              can add new <literal>OutputFormat</literal>-s that templates can
-              refer to by name (like in <literal>&lt;#ftl
+              <literal>registered_custom_output_formats</literal>. With this
+              you can add new <literal>OutputFormat</literal>-s that templates
+              can refer to by name (like in <literal>&lt;#ftl
               output_format="foo"&gt;</literal>).</para>
             </listitem>
 
@@ -24002,6 +24000,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bug fixed: The (rarely used) cause exception of
               <literal>ParseException</literal>-s wasn't set</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When the
+              <literal>incomaptible_improvements</literal> setting of an
+              existing <literal>Configuration</literal> was changed, the
+              template cache sometimes wasn't recreated, hence old templates
+              could survive.</para>
             </listitem>
 
             <listitem>

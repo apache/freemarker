@@ -68,7 +68,7 @@ class BuiltInsForStringsMisc {
                     ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
                     // pCfg.outputFormat is exceptional: it's inherited from the lexical context
                     if (pCfg.getOutputFormat() != outputFormat) {
-                        pCfg = new _ParserConfigurationWithOverrides(pCfg, outputFormat, null);
+                        pCfg = new _ParserConfigurationWithInheritedFormat(pCfg, outputFormat, null);
                     }
                     
                     FMParser parser = new FMParser(

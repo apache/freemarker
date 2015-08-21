@@ -30,13 +30,7 @@ import java.util.StringTokenizer;
 import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
-import freemarker.core.HTMLOutputFormat;
-import freemarker.core.OutputFormat;
-import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfigurer;
-import freemarker.core.UnregisteredOutputFormatException;
-import freemarker.core.XMLOutputFormat;
-import freemarker.core._ParserConfigurationWithOverrides;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
@@ -545,23 +539,10 @@ public class TemplateCache {
         Template template;
         {
             if (parseAsFTL) {
-                final ParserConfiguration pCfg;
-                final OutputFormat outputFormatFromStdFileExt;
-                if ((tc == null || !tc.isOutputFormatSet() || !tc.isAutoEscapingSet())
-                        && config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24
-                        && (outputFormatFromStdFileExt = getFormatFromStdFileExt(sourceName)) != null) {
-                    pCfg = new _ParserConfigurationWithOverrides(
-                            tc != null ? tc : config,
-                            tc != null && tc.isOutputFormatSet() ? null : outputFormatFromStdFileExt,
-                            tc != null && tc.isAutoEscapingSet() ? null : Boolean.TRUE);
-                } else {
-                    pCfg = tc;
-                }
-                
                 try {
                     final Reader reader = templateLoader.getReader(source, initialEncoding);
                     try {
-                        template = new Template(name, sourceName, reader, config, pCfg, initialEncoding);
+                        template = new Template(name, sourceName, reader, config, tc, initialEncoding);
                     } finally {
                         reader.close();
                     }
@@ -574,7 +555,7 @@ public class TemplateCache {
                     
                     final Reader reader = templateLoader.getReader(source, actualEncoding);
                     try {
-                        template = new Template(name, sourceName, reader, config, pCfg, actualEncoding);
+                        template = new Template(name, sourceName, reader, config, tc, actualEncoding);
                     } finally {
                         reader.close();
                     }
@@ -608,35 +589,6 @@ public class TemplateCache {
         template.setLocale(locale);
         template.setCustomLookupCondition(customLookupCondition);
         return template;
-    }
-
-    private OutputFormat getFormatFromStdFileExt(String sourceName) {
-        if (sourceName == null) return null;
-
-        int ln = sourceName.length();
-        if (ln < 5) return null;
-        
-        char c = sourceName.charAt(ln - 5);
-        if (c != '.') return null;
-        
-        c = sourceName.charAt(ln - 4);
-        if (c != 'f' && c != 'F') return null;
-        
-        c = sourceName.charAt(ln - 3);
-        if (c != 't' && c != 'T') return null;
-        
-        c = sourceName.charAt(ln - 2);
-        if (c != 'l' && c != 'L') return null;
-        
-        c = sourceName.charAt(ln - 1);
-        try {
-            // Note: We get the output formats by name, so that custom overrides take effect.
-            if (c == 'h' || c == 'H') return config.getOutputFormat(HTMLOutputFormat.INSTANCE.getName());
-            if (c == 'x' || c == 'X') return config.getOutputFormat(XMLOutputFormat.INSTANCE.getName());
-        } catch (UnregisteredOutputFormatException e) {
-            throw new BugException("Unregistered std format", e);
-        }
-        return null;
     }
 
     /**

@@ -994,6 +994,41 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getCause().getMessage(), containsString(OutputFormat.class.getSimpleName()));
         }
     }
+
+    public void testSetRecognizeStandardFileExtensions() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
+     
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+
+        cfg.setRecognizeStandardFileExtensions(true);
+        assertTrue(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+     
+        cfg.unsetRecognizeStandardFileExtensions();
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+     
+        cfg.setSetting(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE, "false");
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+        
+        cfg.setSetting(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE, "default");
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+        
+        cfg.unsetRecognizeStandardFileExtensions();
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        assertTrue(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        cfg.setRecognizeStandardFileExtensions(false);
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+     }
     
     public void testSetTimeZone() throws TemplateException {
         TimeZone origSysDefTZ = TimeZone.getDefault();

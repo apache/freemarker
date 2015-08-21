@@ -83,7 +83,7 @@ class Interpret extends BuiltInForOutputFormatRelated {
             ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
             // pCfg.outputFormat is exceptional: it's inherited from the lexical context
             if (pCfg.getOutputFormat() != outputFormat) {
-                pCfg = new _ParserConfigurationWithOverrides(pCfg, outputFormat, null);
+                pCfg = new _ParserConfigurationWithInheritedFormat(pCfg, outputFormat, null);
             }
             interpretedTemplate = new Template(
                     (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
