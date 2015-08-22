@@ -876,6 +876,12 @@ public class OutputFormatTest extends TemplateTest {
                 ParseException.class, "noSuchFormat", "registered");
     }
     
+    @Test
+    public void testHasContentBI() throws Exception {
+        assertOutput("${htmlMarkup?hasContent?c} ${htmlPlain?hasContent?c}", "true true");
+        assertOutput("<#ftl outputFormat='HTML'>${''?esc?hasContent?c} ${''?noEsc?hasContent?c}", "false false");
+    }
+    
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);

@@ -92,6 +92,11 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     public abstract String escapePlainText(String plainTextContent) throws TemplateModelException;
 
     /**
+     * Returns if the markup is empty (0 length). This is used be at least {@code ?hasContent}.
+     */
+    public abstract boolean isEmpty(MO mo) throws TemplateModelException;
+    
+    /**
      * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left operand can bypass this
      * object as is. A typical such case would be when a {@link TemplateHTMLOutputModel} of "HTML" format bypasses
      * {@code ?html}.

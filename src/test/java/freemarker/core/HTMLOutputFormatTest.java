@@ -25,6 +25,9 @@ import org.junit.Test;
 
 import freemarker.template.TemplateModelException; 
 
+/**
+ * This actually more a {@link CommonMarkupOutputFormat} test.
+ */
 public class HTMLOutputFormatTest {
     
     @Test
@@ -157,6 +160,14 @@ public class HTMLOutputFormatTest {
         assertEquals("&lt;a&amp;b&#39;c&quot;d&gt;", INSTANCE.escapePlainText("<a&b'c\"d>"));
         assertEquals("a&amp;b", INSTANCE.escapePlainText("a&b"));
         assertEquals("&lt;&gt;", INSTANCE.escapePlainText("<>"));
+    }
+    
+    @Test
+    public void testIsEmpty() throws Exception {
+        assertTrue(INSTANCE.isEmpty(INSTANCE.fromMarkup("")));
+        assertTrue(INSTANCE.isEmpty(INSTANCE.fromPlainTextByEscaping("")));
+        assertFalse(INSTANCE.isEmpty(INSTANCE.fromMarkup(" ")));
+        assertFalse(INSTANCE.isEmpty(INSTANCE.fromPlainTextByEscaping(" ")));
     }
     
     private void assertMO(String pc, String mc, TemplateHTMLOutputModel mo) {
