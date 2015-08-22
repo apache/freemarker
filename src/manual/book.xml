@@ -5174,6 +5174,243 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
         </section>
       </section>
 
+      <section xml:id="dgui_misc_autoescaping">
+        <title>Auto escaping and output formats</title>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>output format</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>MIME type</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>HTML escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>HTML encoding</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>XML escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>XML encoding</primary>
+        </indexterm>
+
+        <para>This is a tutorial on escaping and auto-escaping in FreeMarker
+        2.3.24 and later, where <literal>#escape</literal>-based escaping was
+        deprecated.</para>
+
+        <section>
+          <title>Output formats</title>
+
+          <para>Each template has an associated output format <phrase
+          role="forProgrammers">(a
+          <literal>freemarker.core.OutputFormat</literal> instance)</phrase>.
+          The output format dictates the escaping rules, which is applied on
+          all <literal>${<replaceable>...</replaceable>}</literal> (and
+          <literal>#{<replaceable>...</replaceable>}</literal>-s). It also
+          specifies a MIME type (e.g. <literal>"text/HTML"</literal>) and a
+          canonical name (e.g. <literal>"HTML"</literal>) that the embedding
+          application/framework can leverage for its own purposes.</para>
+
+          <para>It's the programmer's responsibility to associate output
+          format to templates. Furthermore it's recommended that FreeMarker is
+          configured so that templates with <literal>ftlh</literal> and
+          <literal>ftlx</literal> file extensions are automatically associated
+          with the HTML and XML output types, respectively. <link
+          linkend="pgui_config_outputformatsautoesc">See here how to configure
+          FreeMarker like that...</link></para>
+
+          <para xml:id="topic.predefinedOutputFormats">The predefined set of
+          output formats are:</para>
+
+          <informaltable border="1">
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Description</th>
+
+                <th>MIME Type</th>
+
+                <th>Default implementation
+                (<literal>freemarker.core.*</literal>)</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td><literal>HTML</literal></td>
+
+                <td>Escapes <literal>&lt;</literal>, <literal>&gt;</literal>,
+                <literal>&amp;</literal>, <literal>"</literal>,
+                <literal>'</literal> as <literal>&amp;lt;</literal>,
+                <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;#39;</literal></td>
+
+                <td><literal>text/HTML</literal></td>
+
+                <td><literal>HTMLOutputFormat.INSTANCE</literal></td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr>
+                <td><literal>XML</literal></td>
+
+                <td>Escapes <literal>&lt;</literal>, <literal>&gt;</literal>,
+                <literal>&amp;</literal>, <literal>"</literal>,
+                <literal>'</literal> as <literal>&amp;lt;</literal>,
+                <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;apos;</literal></td>
+
+                <td><literal>text/xml</literal></td>
+
+                <td><literal>XMLOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>RTF</literal></td>
+
+                <td>Escapes <literal>{</literal>, <literal>}</literal>,
+                <literal>\</literal> as <literal>\{</literal>,
+                <literal>\}</literal>, <literal>\\</literal></td>
+
+                <td><literal>text/rtf</literal></td>
+
+                <td><literal>RTFOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>undefined</literal></td>
+
+                <td>Doesn't escape. Prints markup output values from other
+                output formats (concept explained later) as is.</td>
+
+                <td>None (<literal>null</literal>)</td>
+
+                <td><literal>UndefinedOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>plainText</literal></td>
+
+                <td>Doesn't escape. Doesn't accept markup output values from
+                other output formats.</td>
+
+                <td><literal>text/plain</literal></td>
+
+                <td><literal>PlainTextOutputFormat.INSTANCE</literal></td>
+              </tr>
+            </tbody>
+          </informaltable>
+
+          <para>Note that programmers can also define and register their your
+          own output formats.</para>
+        </section>
+
+        <section>
+          <title>Referring to output formats in templates</title>
+
+          <para>Let's say we have <literal>example.ftlh</literal>, which gets
+          HTML output format from the configuration:</para>
+
+          <programlisting role="template">${"'"}  &lt;#-- Prints: &amp;#39; --&gt;</programlisting>
+
+          <para>The output format can also be set explicitly in the template
+          in <link linkend="ref_directive_ftl">the <literal>ftl</literal>
+          header</link> (I will use camel case syntax in this tutorial, which
+          is possible since 2.3.23):</para>
+
+          <programlisting role="template">&lt;#ftl outputFormat='XML'&gt;
+${"'"}  &lt;#-- Prints: &amp;apos; --&gt;</programlisting>
+
+          <para>Note that the output format was referred by its name shown in
+          the earlier table (looked up via
+          <literal>Configuration.getOutputFormat(String name)</literal>,
+          actually).</para>
+
+          <para>The output format can also be applied to only a region of a
+          template, like:</para>
+
+          <programlisting role="template">${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
+&lt;#outputFormat 'XML'&gt;
+  ${"'"}  &lt;#-- Prints: &amp;apos; --&gt;
+&lt;/#outputFormat&gt;
+${"'"}  &lt;#-- Prints: &amp;#39; --&gt;</programlisting>
+
+          <para>So basically, each position in a template has an associated
+          output format, and it might not be the same everywhere in the same
+          file. This association is purely parse-time, so if for example you
+          call a macro from inside an <literal>outputFormat</literal> block
+          that's defined outside that block, it won't get the output format of
+          the calling place. It's similar to if you were coloring each
+          characters of the template files by output format in the text
+          editor, and then later when the templates are executed, it only
+          considers the color of the statement being executed. This gives you
+          firm control over the output format and hence escaping; you don't
+          have to consider the possible execution paths that can lead to a
+          point.</para>
+        </section>
+
+        <section>
+          <title>Disabling auto escaping</title>
+
+          <para>By default, the current output format dictate if auto-escaping
+          is actual happening. But sometimes you don't want auto escaping yet
+          choosing a different non-escaping output format (like plainText)
+          would be an award solution.</para>
+
+          <para>For a single interpolation you can suppress auto-escaping like
+          with <literal>?noEsc</literal> (and let's assume we are in
+          <literal>example.ftlh</literal> again):</para>
+
+          <programlisting role="template">${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
+${'&amp;'<emphasis>?noEsc</emphasis>}  &lt;#-- prints: &amp; --&gt;</programlisting>
+
+          <para>If you need to disable auto escaping for a bigger section, you
+          can control that int the templates on a similar manner as output
+          format (i.e., with parse time <quote>coloring</quote>):</para>
+
+          <programlisting role="template">${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
+<emphasis>&lt;#noAutoEsc&gt;</emphasis>
+  ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
+  ... lot more here ...
+<emphasis>&lt;/#noAutoEsc&gt;</emphasis>
+${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
+
+          <para>and</para>
+
+          <programlisting role="template">&lt;#ftl <emphasis>autoEsc=false</emphasis>&gt;
+${'&amp;'}  &lt;#-- prints: &amp; --&gt;
+<emphasis>&lt;#autoEsc&gt;</emphasis>
+  ${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
+  ... lot more here ...
+<emphasis>&lt;/#autoEsc&gt;</emphasis>
+${'&amp;'}  &lt;#-- prints: &amp; --&gt;</programlisting>
+
+          <para>You can also force escaping when escaping is disabled for a
+          single interpolation with <literal>?esc</literal>:</para>
+
+          <programlisting role="template">&lt;#ftl <emphasis>autoEsc=false</emphasis>&gt;
+${'&amp;'}  &lt;#-- prints: &amp; --&gt;
+${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
+        </section>
+      </section>
+
       <section xml:id="dgui_misc_whitespace">
         <title>White-space handling</title>
 
@@ -7415,17 +7652,15 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
 
           <listitem>
             <para><literal>Template</literal> layer: Settings on individual
-            templates are normally set by the
-            <literal>TemplateConfigurer</literal>-s specified with
-            <literal>Configuration.setTemplateConfigurers(<replaceable>...</replaceable>)</literal>,
-            which let you to override individual settings coming from the
-            common <literal>Configuration</literal> object, depending on the
-            name (path) of the template. [TODO example] There's a deviation
-            from this approach with the <literal>locale</literal> setting,
-            because that you can also specify to
-            <literal>Configuration.getTemplate(...)</literal> as parameter, to
-            get the template for the requested locale (so called localized
-            lookup).</para>
+            templates are normally set by <link
+            linkend="pgui_config_templateconfigurers">template configurers
+            (see them in their own chapter)</link>, which basically associate
+            setting assignments to template name (template path) patterns.
+            There's a deviation from this approach with the
+            <literal>locale</literal> setting, because that you can also
+            specify to <literal>Configuration.getTemplate(...)</literal> as
+            parameter, to get the template for the requested locale (so called
+            localized lookup).</para>
 
             <warning>
               <para>You should never set settings directly on the
@@ -8114,6 +8349,248 @@ c</programlisting>
             </listitem>
           </itemizedlist>
         </section>
+      </section>
+
+      <section xml:id="pgui_config_templateconfigurers">
+        <title>Template configurers</title>
+
+        <para>Template configurers refers to the
+        <literal>template_configurers</literal> setting of
+        <literal>Configuration</literal>
+        (<literal>Configuration.setTemplateConfigurers(<replaceable>...</replaceable>)</literal>).
+        This setting lets you override individual settings coming from the
+        common <literal>Configuration</literal> object, depending on the name
+        (path) of the template.</para>
+
+        <para>It's important to understand, however, that this setting only
+        has effect if you get templates with
+        <literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>,
+        not when you create templates directly with the
+        <literal>Template</literal> constructors. In that case it's up to you
+        to invoke this mechanism (see <literal>TemplateCache</literal> source
+        code as an example).</para>
+
+        <para>You will use these kind of objects to declare your template
+        configuration rules: </para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>TemplateConfigurer</literal>-s: These store the
+            actual setting assignments that you want to do. For example, this
+            <literal>TemplateConfigurer</literal> will set the encoding and
+            the output format of the matched template (and leave all other
+            settings of it alone):</para>
+
+            <programlisting role="unspecified">TemplateConfigurer tcUTF8XML = new TemplateConfigurer();
+tc.setEncoding("utf-8");
+tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
+          </listitem>
+
+          <listitem>
+            <para><literal>TemplateSourceMatcher</literal> (abstract)
+            subclasses: These define a rule that matches templates based on
+            their source name (their source path; as in
+            <literal>Template.getSourceName()</literal>), and possibly on
+            other <literal>TemplateLoader</literal>-dependent properties. For
+            example, <literal>new FileExtensionMatcher("xml")</literal>
+            matches templates that has <literal>xml</literal> file extension.
+            See all the subclasses in the Java API documentation.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>TemplateConfigurerFactory</literal>-es: This is
+            what connects <literal>TemplateConfigurer</literal> and
+            <literal>TemplateSourceMatcher</literal> together. This is the
+            Java type of the <literal>template_configurers</literal> setting.
+            For example, this setup combines our earlier two examples, causing
+            all templates with <literal>xml</literal> extension to get UTF-8
+            encoding and XML output format:</para>
+
+            <programlisting role="unspecified">cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(
+        new FileExtensionMatcher("xml"), tcUTF8XML));</programlisting>
+
+            <para>The same configuring is also doable if you don't have access
+            to the configuring Java code, but only to a Java
+            <literal>*.properties</literal> file or other kind of
+            string-string key value pairs (the <literal>\</literal>-s are
+            prescribed by the Java Properties file format):</para>
+
+            <programlisting role="unspecified">templateConfigurers = \
+    ConditionalTemplateConfigurerFactory( \
+        FileExtensionMatcher("xml"), \
+        TemplateConfigurer( \
+            encoding = "utf-8", \
+            outputFormat = XMLOutputFormat() \
+        ) \
+    )</programlisting>
+          </listitem>
+        </itemizedlist>
+
+        <para>Let's take a more complex example. [TODO]</para>
+      </section>
+
+      <section xml:id="pgui_config_outputformatsautoesc">
+        <title>Associating output formats with templates</title>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>output format</primary>
+        </indexterm>
+
+        <para>The output format associated with a template decides if and what
+        kind of auto-escaping is used in that template (unless the template
+        overrides that with directives). By default, templates has
+        <quote>undefined</quote> output format associated, which does no
+        escaping, and in general gives the behavior that you would expect from
+        a template engine that doesn't care about output formats and escaping.
+        However, if the <literal>recognize_standard_file_extensions</literal>
+        <link linkend="pgui_config_settings">setting</link> is
+        <literal>true</literal> (which is the default with <link
+        linkend="pgui_config_incompatible_improvements">the
+        <literal>incompatible_improvements</literal> setting</link> set to
+        2.3.24 or higher), templates whose source name ends with
+        <literal>".ftlh"</literal> get <quote>HTML</quote> output format, and
+        those with <literal>".ftlx"</literal> get <quote>XML</quote> output
+        format. Using the <literal>ftlh</literal> and <literal>ftlx</literal>
+        file extensions is the recommended way of activating HTML and XML
+        auto-escaping. You can also associate output formats to templates
+        based on arbitrary name patterns with the <link
+        linkend="pgui_config_templateconfigurers"><literal>template_configurers</literal>
+        setting introduced elsewhere</link> (see examples later).</para>
+
+        <para>There's also a related setting called
+        <literal>auto_escaping</literal>, which can be used to disable
+        auto-escaping even if the current output format supports it. Using it
+        is rarely advisable; disabling auto escaping normally happens inside
+        the template with the <literal>noautoesc</literal> directive [TODO ref
+        link]. None the less, it can be associated to templates just like the
+        output format.</para>
+
+        <para>To check if you have configured FreeMarker properly, you can use
+        this template:</para>
+
+        <programlisting role="template">&lt;p&gt;Output format: ${.output_format}
+&lt;p&gt;Auto-escaping enabled: ${.auto_esc?c}
+
+&lt;p&gt;Note that enabled auto-escaping only has effect if the output format
+also supports escaping; "undefined" and "plainText" doesn't.</programlisting>
+
+        <para>See the <link linkend="topic.predefinedOutputFormats">table of
+        predefined output formats here...</link></para>
+
+        <para>Configuration examples:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>To enable automatic output format associations to
+            <literal>*.ftlh</literal> and <literal>*.ftlx</literal>:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Either use <literal>incompatible_improvements</literal>
+                2.3.24 or higher: see <link
+                linkend="pgui_config_incompatible_improvements_how_to_set">how
+                to set
+                <literal>incompatible_improvements</literal></link></para>
+              </listitem>
+
+              <listitem>
+                <para>Or, enable standard file extension recognizing
+                explicitly:</para>
+
+                <programlisting role="unspecified">// Where you initalize the Configuration singletion, add:
+cfg.setRecognizeStandardFileExtensions(true);</programlisting>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Let's say you want to associate all templates in the
+            <literal>mail</literal> directory to the HTML output format. You
+            could achieve that like this (assuming that you are getting the
+            templates with
+            <literal>cfg.getTemplate(<replaceable>...</replaceable>)</literal>,
+            and not instantiating them yourself):</para>
+
+            <programlisting role="unspecified">// Where you initalize the Configuration singletion, add:
+
+TemplateConfigurer tcHTML = new TemplateConfigurer();
+tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurers(
+        new ConditionalTemplateConfigurerFactory(
+                new PathGlobMatcher("mail/**"),
+                tcHTML));</programlisting>
+
+            <para>or if you are configuring FreeMarker from Java
+            <literal>*.properties</literal> file (the <literal>\</literal>-s
+            are prescribed by the Java Properties file format):</para>
+
+            <programlisting role="unspecified">templateConfigurers = \
+    ConditionalTemplateConfigurerFactory( \
+        PathGlobMatcher("mail/**"), \
+        TemplateConfigurer(outputFormat = HTMLOutputFormat()))</programlisting>
+          </listitem>
+
+          <listitem>
+            <para>Let's say you want to associate templates with
+            <literal>xml</literal> extension to the XML output format,
+            templates with <literal>html</literal> and <literal>htm</literal>
+            extension to the HTML output format, and templates with
+            <literal>rtf</literal> extension to the <literal>RTF</literal>
+            output format. You could achieve that like this (assuming that you
+            are getting the templates with
+            <literal>cfg.getTemplate(<replaceable>...</replaceable>)</literal>,
+            and not instantiating them yourself):</para>
+
+            <programlisting role="unspecified">TemplateConfigurer tcHTML = new TemplateConfigurer();
+tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+TemplateConfigurer tcXML = new TemplateConfigurer();
+tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
+
+TemplateConfigurer tcRTF = new TemplateConfigurer();
+tcRTF.setOutputFormat(RTFOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurers(
+        new FirstMatchTemplateConfigurerFactory(
+                new ConditionalTemplateConfigurerFactory(
+                        new FileExtensionMatcher("xml"),
+                        tcXML),
+                new ConditionalTemplateConfigurerFactory(
+                        new OrMatcher(
+                                new FileExtensionMatcher("html"),
+                                new FileExtensionMatcher("htm")),
+                        tcHTML),
+                new ConditionalTemplateConfigurerFactory(
+                        new FileExtensionMatcher("rtf"),
+                        tcRTF)
+        ).allowNoMatch(true)
+);</programlisting>
+
+            <para>or if you are configuring FreeMarker from Java
+            <literal>*.properties</literal> file (the <literal>\</literal>-s
+            are prescribed by the Java Properties file format):</para>
+
+            <programlisting role="unspecified">templateConfigurers = \
+    FirstMatchTemplateConfigurerFactory( \
+        ConditionalTemplateConfigurerFactory( \
+            FileExtensionMatcher("xml"), \
+            TemplateConfigurer(outputFormat = XMLOutputFormat())), \
+        ConditionalTemplateConfigurerFactory( \
+            OrMatcher( \
+                FileExtensionMatcher("html"), \
+                FileExtensionMatcher("htm")), \
+            TemplateConfigurer(outputFormat = HTMLOutputFormat())), \
+        ConditionalTemplateConfigurerFactory( \
+            FileExtensionMatcher("rtf"), \
+            TemplateConfigurer(outputFormat = RTFOutputFormat())), \
+        allowNoMatch = true)</programlisting>
+          </listitem>
+        </itemizedlist>
       </section>
 
       <section xml:id="pgui_config_incompatible_improvements">
