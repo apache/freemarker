@@ -19,12 +19,13 @@ public class ConfigureOutputFormatExamples extends ExamplesTest {
     
     @Test
     public void test() throws Exception {
-        // Example 1:
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
-        // Or:
-        cfg.setRecognizeStandardFileExtensions(true);
-
-        setupConfiguration(cfg);
+        Configuration cfg = getConfiguration();
+        
+        addTemplate("mail/t.ftl", "");
+        addTemplate("t.html", "");
+        addTemplate("t.htm", "");
+        addTemplate("t.xml", "");
+        addTemplate("t.rtf", "");
         
         // Example 2/a:
         {

@@ -15,8 +15,10 @@ public class TemplateConfigurerExamples extends ExamplesTest {
 
     @Test
     public void test() throws Exception {
-        Configuration cfg = createConfiguration();
+        Configuration cfg = getConfiguration();
 
+        addTemplate("t.xml", "");
+        
         TemplateConfigurer tcUTF8XML = new TemplateConfigurer();
         tcUTF8XML.setEncoding("utf-8");
         tcUTF8XML.setOutputFormat(XMLOutputFormat.INSTANCE);

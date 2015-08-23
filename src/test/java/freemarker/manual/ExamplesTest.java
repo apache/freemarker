@@ -6,11 +6,15 @@ import java.util.Properties;
 
 import org.junit.Ignore;
 
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
+import freemarker.test.TemplateTest;
 
 @Ignore
-public abstract class ExamplesTest {
+public abstract class ExamplesTest extends TemplateTest {
 
     protected Properties loadPropertiesFile(String name) throws IOException {
         Properties props = new Properties();
@@ -23,20 +27,16 @@ public abstract class ExamplesTest {
         return props;
     }
     
-    protected Configuration createConfiguration() {
+    @Override
+    protected final Configuration createConfiguration() {
         Configuration cfg = new Configuration(Configuration.getVersion());
-        setupConfiguration(cfg);
+        setupTemplateLoaders(cfg);
         return cfg;
     }
 
-    protected void setupConfiguration(Configuration cfg) {
-        StringTemplateLoader tl = new StringTemplateLoader();
-        cfg.setTemplateLoader(tl);
-        tl.putTemplate("mail/t.ftl", "");
-        tl.putTemplate("t.html", "");
-        tl.putTemplate("t.htm", "");
-        tl.putTemplate("t.xml", "");
-        tl.putTemplate("t.rtf", "");
+    protected void setupTemplateLoaders(Configuration cfg) {
+        cfg.setTemplateLoader(new MultiTemplateLoader(
+                new TemplateLoader[] { new StringTemplateLoader(), new ClassTemplateLoader(this.getClass(), "") }));
     }
     
 }

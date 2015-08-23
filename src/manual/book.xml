@@ -1137,6 +1137,10 @@ brown</programlisting>
               <listitem>
                 <para><link linkend="dgui_datamodel_node">Node</link></para>
               </listitem>
+
+              <listitem>
+                <para>Markup output [TODO]</para>
+              </listitem>
             </itemizedlist>
           </listitem>
         </itemizedlist>
@@ -5226,13 +5230,12 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
           canonical name (e.g. <literal>"HTML"</literal>) that the embedding
           application/framework can leverage for its own purposes.</para>
 
-          <para>It's the programmer's responsibility to associate output
-          format to templates. Furthermore it's recommended that FreeMarker is
+          <para>It's the programmer's responsibility to <link
+          linkend="pgui_config_outputformatsautoesc">associate output format
+          to templates</link>. Furthermore it's recommended that FreeMarker is
           configured so that templates with <literal>ftlh</literal> and
           <literal>ftlx</literal> file extensions are automatically associated
-          with the HTML and XML output types, respectively. <link
-          linkend="pgui_config_outputformatsautoesc">See here how to configure
-          FreeMarker like that...</link></para>
+          with the HTML and XML output types, respectively.</para>
 
           <para xml:id="topic.predefinedOutputFormats">The predefined set of
           output formats are:</para>
@@ -5318,96 +5321,261 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
             </tbody>
           </informaltable>
 
-          <para>Note that programmers can also define and register their your
-          own output formats.</para>
+          <para>The programmers can extend this with their your own output
+          formats.</para>
         </section>
 
-        <section>
-          <title>Referring to output formats in templates</title>
+        <section xml:id="dgui_misc_autoescaping_overrideoformat">
+          <title>Overriding the output format in templates</title>
 
-          <para>Let's say we have <literal>example.ftlh</literal>, which gets
-          HTML output format from the configuration:</para>
+          <para>Especially in legacy applications, you will often find that
+          the output format is <literal>undefined</literal> (you can check
+          that with <literal>${.output_format}</literal>), and so no automatic
+          escaping is happening. In other cases, a common output format (like
+          HTML) is set for all templates, but a few templates needs a
+          different output format. In any case, the output format of a
+          template can be enforced in the <link
+          linkend="ref_directive_ftl">the <literal>ftl</literal>
+          header</link>:</para>
 
-          <programlisting role="template">${"'"}  &lt;#-- Prints: &amp;#39; --&gt;</programlisting>
-
-          <para>The output format can also be set explicitly in the template
-          in <link linkend="ref_directive_ftl">the <literal>ftl</literal>
-          header</link> (I will use camel case syntax in this tutorial, which
-          is possible since 2.3.23):</para>
-
-          <programlisting role="template">&lt;#ftl outputFormat='XML'&gt;
+          <programlisting role="template">&lt;#ftl output_format="XML"&gt;
 ${"'"}  &lt;#-- Prints: &amp;apos; --&gt;</programlisting>
 
           <para>Note that the output format was referred by its name shown in
-          the earlier table (looked up via
+          the earlier table <emphasis role="forProgrammers">(looked up via
           <literal>Configuration.getOutputFormat(String name)</literal>,
-          actually).</para>
+          actually)</emphasis>.</para>
 
-          <para>The output format can also be applied to only a region of a
+          <para>The output format can also be applied to only a section of a
           template, like:</para>
 
-          <programlisting role="template">${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
-&lt;#outputFormat 'XML'&gt;
+          <programlisting role="template">&lt;#-- Let's assume we have "HTML" output format by default. --&gt;
+${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
+&lt;#outputformat "XML"&gt;
   ${"'"}  &lt;#-- Prints: &amp;apos; --&gt;
-&lt;/#outputFormat&gt;
-${"'"}  &lt;#-- Prints: &amp;#39; --&gt;</programlisting>
+&lt;/#outputformat&gt;
+${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
+</programlisting>
 
           <para>So basically, each position in a template has an associated
           output format, and it might not be the same everywhere in the same
           file. This association is purely parse-time, so if for example you
-          call a macro from inside an <literal>outputFormat</literal> block
+          call a macro from inside an <literal>outputformat</literal> block
           that's defined outside that block, it won't get the output format of
-          the calling place. It's similar to if you were coloring each
-          characters of the template files by output format in the text
-          editor, and then later when the templates are executed, it only
-          considers the color of the statement being executed. This gives you
-          firm control over the output format and hence escaping; you don't
-          have to consider the possible execution paths that can lead to a
-          point.</para>
+          it. Similarly, if you have a macro that's defined in a template with
+          HTML output format, no mater from where you call it, that macro will
+          always execute with HTML output format. This is like if you were
+          coloring each characters of the template files by output format in
+          the text editor, and then later when the templates are executed, it
+          only considers the color of the statement being executed. This gives
+          you firm control over the output format and hence escaping; you
+          don't have to consider the possible execution paths that can lead to
+          a point.</para>
         </section>
 
         <section>
           <title>Disabling auto escaping</title>
 
-          <para>By default, the current output format dictate if auto-escaping
-          is actual happening. But sometimes you don't want auto escaping yet
-          choosing a different non-escaping output format (like plainText)
-          would be an award solution.</para>
+          <para>For a single interpolation you can disable auto-escaping with
+          <literal>?no_esc</literal> [TODO ref link]:</para>
 
-          <para>For a single interpolation you can suppress auto-escaping like
-          with <literal>?noEsc</literal> (and let's assume we are in
-          <literal>example.ftlh</literal> again):</para>
+          <programlisting role="template">&lt;#-- Let's assume we have "HTML" output format by default. --&gt;
+${'&lt;b&gt;test&lt;/b&gt;'}  &lt;#-- prints: &amp;lt;b&amp;gt;test&amp;lt;/b&amp;gt; --&gt;
+${'&lt;b&gt;test&lt;/b&gt;'<emphasis>?no_esc</emphasis>}  &lt;#-- prints: &lt;b&gt;test&lt;/b&gt; --&gt;</programlisting>
 
-          <programlisting role="template">${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
-${'&amp;'<emphasis>?noEsc</emphasis>}  &lt;#-- prints: &amp; --&gt;</programlisting>
-
-          <para>If you need to disable auto escaping for a bigger section, you
-          can control that int the templates on a similar manner as output
-          format (i.e., with parse time <quote>coloring</quote>):</para>
+          <para>You can also disable auto escaping for a whole section with
+          the <literal>noautoesc</literal> directive [TODO ref link]:</para>
 
           <programlisting role="template">${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
-<emphasis>&lt;#noAutoEsc&gt;</emphasis>
+<emphasis>&lt;#noautoesc&gt;</emphasis>
   ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
   ... lot more here ...
-<emphasis>&lt;/#noAutoEsc&gt;</emphasis>
+<emphasis>&lt;/#noautoesc&gt;</emphasis>
 ${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
 
-          <para>and</para>
+          <para>Just like <literal>outputformat</literal>, this only applies
+          to the part that's literally inside the block
+          (<quote>coloring</quote> logic).</para>
 
-          <programlisting role="template">&lt;#ftl <emphasis>autoEsc=false</emphasis>&gt;
+          <para>Auto-escaping can also be disabled fort the whole template in
+          the <literal>ftl</literal> header. It can be re-enabled for a
+          section with the <literal>autoesc</literal> directive [TODO ref
+          link]:</para>
+
+          <programlisting role="template">&lt;#ftl <emphasis>autoesc=false</emphasis>&gt;
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
-<emphasis>&lt;#autoEsc&gt;</emphasis>
+<emphasis>&lt;#autoesc&gt;</emphasis>
   ${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
   ... lot more here ...
-<emphasis>&lt;/#autoEsc&gt;</emphasis>
+<emphasis>&lt;/#autoesc&gt;</emphasis>
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;</programlisting>
 
-          <para>You can also force escaping when escaping is disabled for a
-          single interpolation with <literal>?esc</literal>:</para>
+          <para>You can also force escaping for an individual interpolation
+          when escaping is disabled with <literal>?esc</literal> [TODO ref
+          link]:</para>
 
-          <programlisting role="template">&lt;#ftl <emphasis>autoEsc=false</emphasis>&gt;
+          <programlisting role="template">&lt;#ftl <emphasis>autoesc=false</emphasis>&gt;
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
 ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
+
+          <para>Of course, both <literal>autoesc</literal> and
+          <literal>?esc</literal> works inside <literal>noautoesc</literal>
+          blocks too.</para>
+        </section>
+
+        <section xml:id="dpgu_misc_autoescaping_movalues">
+          <title><quote>Markup output</quote> values</title>
+
+          <para>In FTL, <link linkend="dgui_datamodel_basics">values has
+          types</link>, like string, number, boolean and so on. One such type
+          is called markup output. A value of that type is a piece of text
+          that's already in the output format (like HTML), and hence needs no
+          further escaping. We have already produced such values
+          earlier:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal><replaceable>s</replaceable>?esc</literal>
+              creates a markup output value out of a string value by escaping
+              all special characters in it.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal><replaceable>s</replaceable>?no_esc</literal>
+              creates a markup output value out of a string value by assuming
+              that it already stored markup and so needs no further
+              escaping</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Hence these can be used outside
+          <literal>${<replaceable>...</replaceable>}</literal> too. For
+          example, here the caller of the <literal>infoBox</literal> macro can
+          decide if the message is plain text (that hence needs escaping) or
+          HTML (that hence must not be escaped):</para>
+
+          <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;@infoBox "Foo &amp; bar" /&gt;
+&lt;@infoBox "Foo &lt;b&gt;bar&lt;/b&gt;"?no_esc /&gt;
+
+&lt;#macro infoBox message&gt;
+  &lt;div class="infoBox"&gt;
+    ${message}
+  &lt;/div&gt;
+&lt;/#macro&gt;</programlisting>
+
+          <para>which will output this:</para>
+
+          <programlisting role="output">  &lt;div class="infoBox"&gt;
+    Foo &amp;amp; bar
+  &lt;/div&gt;
+  &lt;div class="infoBox"&gt;
+    Foo &lt;b&gt;bar&lt;/b&gt;
+  &lt;/div&gt;</programlisting>
+
+          <para>Another case where you get a markup output value is output
+          capturing:</para>
+
+          <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+&lt;#assign captured&gt;&lt;b&gt;Test&lt;/b&gt;&lt;/#assign&gt;
+Just a string: ${"&lt;b&gt;Test&lt;/b&gt;"}
+Captured output: ${captured}</programlisting>
+
+          <para>which outputs:</para>
+
+          <programlisting role="template">Just a string: &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
+Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
+
+          <para>because the captured output is markup output, so it won't be
+          auto-escaped.</para>
+
+          <para>It's important that markup output values aren't strings, and
+          aren't automatically coerced to strings. Thus
+          <literal>?upper_case</literal>, <literal>?starts_with</literal>
+          etc., will give an error with them. You won't be able to pass them
+          to Java methods for <literal>String</literal> parameters either. But
+          sometimes you actually need to get the markup that's behind the
+          value as a string, and you can do that with
+          <literal><replaceable>markupOutput</replaceable>?markup</literal>.
+          Be sure you know what you are doing though. Applying string
+          operations on markup (as opposed to on plain text) can result in
+          invalid markup. Also there's the danger of possibly unintended
+          double escaping.</para>
+
+          <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;#assign markupOutput1="&lt;b&gt;Test&lt;/b&gt;"?no_esc&gt;
+&lt;#assign markupOutput2="Foo &amp; bar"?esc&gt;
+
+As expected:
+${markupOutput1}
+${markupOutput2}
+
+Double escaping:
+${markupOutput1?markup}
+${markupOutput2?markup}</programlisting>
+
+          <para>outputs:</para>
+
+          <programlisting role="output">As expected:
+&lt;b&gt;Test&lt;/b&gt;
+Foo &amp;amp; bar
+
+Double escaping:
+&amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
+Foo &amp;amp;amp; bar</programlisting>
+        </section>
+
+        <section>
+          <title>Further details and tricky cases</title>
+
+          <section>
+            <title>Non-markup output formats</title>
+
+            <para>An output format is called a non-markup format if it defines
+            no escaping rules. Examples of such output formats are the
+            <literal>undefined</literal> format (which is often the default
+            for <literal>ftl</literal> files) and the
+            <literal>plainText</literal> format.</para>
+
+            <para>These formats produce no <link
+            linkend="dpgu_misc_autoescaping_movalues">markup output
+            values</link>, hence you can't use <literal>?esc</literal> or
+            <literal>?noesc</literal> either when they are the current format.
+            You can use output capturing (like <literal>&lt;#assign
+            captured&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>),
+            but the resulting value will be a string, not a markup output
+            value.</para>
+
+            <para>Furthermore, you aren't allowed to use the
+            <literal>autoesc</literal> directive or <literal>&lt;#ftl
+            auto_esc=true&gt;</literal> when the current output format is
+            non-markup.</para>
+
+            <para>Note that as the output format is already known during
+            template parsing (i.e., earlier then execution), using constructs
+            that aren't supported by the current output format will give error
+            during parsing.</para>
+          </section>
+
+          <section>
+            <title>Mixing in markup output values from other markups</title>
+
+            <para>[TODO]</para>
+          </section>
+
+          <section>
+            <title>Interpolations inside string literals</title>
+
+            <para>[TODO]</para>
+          </section>
+
+          <section>
+            <title>Combined output formats</title>
+
+            <para>[TODO]</para>
+          </section>
         </section>
       </section>
 
@@ -8442,7 +8610,8 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
         <para>The output format associated with a template decides if and what
         kind of auto-escaping is used in that template (unless the template
-        overrides that with directives). By default, templates has
+        <link linkend="dgui_misc_autoescaping_overrideoformat">overrides that
+        with directives</link>). By default, templates has
         <quote>undefined</quote> output format associated, which does no
         escaping, and in general gives the behavior that you would expect from
         a template engine that doesn't care about output formats and escaping.
