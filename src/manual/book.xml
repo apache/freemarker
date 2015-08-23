@@ -7,7 +7,7 @@
       xmlns:ns3="http://www.w3.org/1998/Math/MathML"
       xmlns:ns="http://docbook.org/ns/docbook">
   <info>
-    <title>FreeMarker Manual</title>
+    <title>kFreeMarker Manual</title>
 
     <titleabbrev>Manual</titleabbrev>
 
@@ -5190,10 +5190,6 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
         </indexterm>
 
         <indexterm>
-          <primary>output format</primary>
-        </indexterm>
-
-        <indexterm>
           <primary>MIME type</primary>
         </indexterm>
 
@@ -5217,8 +5213,12 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
         2.3.24 and later, where <literal>#escape</literal>-based escaping was
         deprecated.</para>
 
-        <section>
+        <section xml:id="dgui_misc_autoescaping_outputformat">
           <title>Output formats</title>
+
+          <indexterm>
+            <primary>output format</primary>
+          </indexterm>
 
           <para>Each template has an associated output format <phrase
           role="forProgrammers">(a
@@ -5373,7 +5373,7 @@ ${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
           a point.</para>
         </section>
 
-        <section>
+        <section xml:id="dgui_misc_autoescaping_disableautoesc">
           <title>Disabling auto escaping</title>
 
           <para>For a single interpolation you can disable auto-escaping with
@@ -5530,7 +5530,7 @@ Foo &amp;amp;amp; bar</programlisting>
         <section>
           <title>Further details and tricky cases</title>
 
-          <section>
+          <section xml:id="dgui_misc_autoescaping_nonmarkupof">
             <title>Non-markup output formats</title>
 
             <para>An output format is called a non-markup format if it defines
@@ -5572,9 +5572,20 @@ Foo &amp;amp;amp; bar</programlisting>
           </section>
 
           <section>
-            <title>Combined output formats</title>
+            <title>Markup output values and the <quote>+</quote>
+            operator</title>
 
             <para>[TODO]</para>
+          </section>
+
+          <section>
+            <title>Combined output formats</title>
+
+            <para>Combined output formats are output formats that are created
+            ad-hoc from other output formats by nesting them into each other,
+            so that the escaping of all output formats are applied. <link
+            linkend="topic.combinedOutputFormats">They are discussed
+            here...</link></para>
           </section>
         </section>
       </section>
@@ -8539,7 +8550,7 @@ c</programlisting>
         code as an example).</para>
 
         <para>You will use these kind of objects to declare your template
-        configuration rules: </para>
+        configuration rules:</para>
 
         <itemizedlist>
           <listitem>
@@ -11167,10 +11178,10 @@ grant codeBase "file:/path/to/freemarker.jar"
         <note>
           <para>As of FreeMarker 2.3.23, you can use camel case instead of
           snake case for directive names, like <literal>startsWith</literal>
-          instead of <literal>starts_with</literal>. But know that then
-          withing the same template, FreeMarker will enforce the usage of
-          camel case for all identifiers that are part of the template
-          language (user defined names are not affected).</para>
+          instead of <literal>starts_with</literal>. But know that then within
+          the same template, FreeMarker will enforce the usage of camel case
+          for all identifiers that are part of the template language (user
+          defined names are not affected).</para>
         </note>
 
         <indexterm>
@@ -16530,10 +16541,10 @@ May 16, 2011
         <note>
           <para>As of FreeMarker 2.3.23, you can use camel case instead of
           all-lower-case for directive names, like <literal>noParse</literal>
-          instead of <literal>noparse</literal>. But know that then withing
-          the same template, FreeMarker will enforce the usage of camel case
-          for all identifiers that are part of the template language (user
-          defined names are not affected).</para>
+          instead of <literal>noparse</literal>. But know that then within the
+          same template, FreeMarker will enforce the usage of camel case for
+          all identifiers that are part of the template language (user defined
+          names are not affected).</para>
         </note>
 
         <indexterm>
@@ -16547,6 +16558,10 @@ May 16, 2011
 
           <listitem>
             <para><link linkend="ref.directive.attempt">attempt</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_directive_autoesc">autoesc</link></para>
           </listitem>
 
           <listitem>
@@ -16641,6 +16656,11 @@ May 16, 2011
 
           <listitem>
             <para><link
+            linkend="ref_directive_noautoesc">noautoesc</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref.directive.noescape">noescape</link></para>
           </listitem>
 
@@ -16650,6 +16670,11 @@ May 16, 2011
 
           <listitem>
             <para><link linkend="ref.directive.nt">nt</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_directive_outputformat">outputformat</link></para>
           </listitem>
 
           <listitem>
@@ -17011,6 +17036,83 @@ Primary content continued</programlisting>
         </section>
       </section>
 
+      <section xml:id="ref_directive_autoesc">
+        <title>autoesc</title>
+
+        <anchor xml:id="ref.directive.autoesc"/>
+
+        <indexterm>
+          <primary>autoesc directive</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <section>
+          <title>Synopsis</title>
+
+          <programlisting role="metaTemplate"><literal>&lt;#autoesc&gt;
+  <replaceable>...</replaceable>
+&lt;/#autoesc&gt;</literal>
+</programlisting>
+
+          <para>Camel case name variant: <literal>autoEsc</literal></para>
+        </section>
+
+        <section>
+          <title>Description</title>
+
+          <para>Enables <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> in the nested
+          section. Auto-escaping is usually enabled by default, so you rarely
+          need this. Note that to escape just a single
+          <literal>${<replaceable>expression</replaceable>}</literal> in a
+          place where auto-escaping is disabled, you should use
+          <literal>${<replaceable>expression</replaceable>?esc}</literal>
+          instead.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="XML" auto_esc=false&gt;
+${"&amp;"}
+&lt;#autoesc&gt;
+  ${"&amp;"}
+  ...
+  ${"&amp;"}
+&lt;/#autoesc&gt;
+${"&amp;"}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">&amp;
+  &amp;amp;
+  ...
+  &amp;amp;
+&amp;</programlisting>
+
+          <para><literal>autoesc</literal> can also be used nested into <link
+          linkend="ref_directive_noautoesc"><literal>noautoesc</literal>
+          directive</link> to re-enable auto-escaping.</para>
+
+          <para><literal>autoesc</literal> can be used on places where
+          auto-escaping is already enabled, such as even inside another
+          <literal>autoesc</literal> block. Doing so is redundant but
+          allowed.</para>
+
+          <para><literal>autoesc</literal> can't be used where the current
+          <link linkend="dgui_misc_autoescaping_outputformat">output
+          format</link> is a <link
+          linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
+          format</link>. Doing so is a parsing error, so the whole template
+          will be unaccessible.</para>
+        </section>
+      </section>
+
       <section xml:id="ref_directive_compress">
         <title>compress</title>
 
@@ -17070,7 +17172,7 @@ I said, test only)</programlisting>
       </section>
 
       <section xml:id="ref_directive_escape">
-        <title>escape, noescape</title>
+        <title>escape, noescape (deprecated)</title>
 
         <anchor xml:id="ref.directive.escape"/>
 
@@ -17094,10 +17196,22 @@ I said, test only)</programlisting>
   <replaceable>...</replaceable>
 &lt;/#escape&gt;</literal>
 </programlisting>
+
+          <para>Camel case name variant: <literal>noEscape</literal></para>
         </section>
 
         <section>
           <title>Description</title>
+
+          <note>
+            <para>These directives are <emphasis>deprecated</emphasis> by
+            <link linkend="dgui_misc_autoescaping">output-format-based
+            auto-escaping</link> since 2.3.24. Furthermore, on places that use
+            auto-escaping (with an output format that actually does escaping)
+            you aren't allowed to use the <literal>escape</literal> directive
+            (as you will find out from the parsing error message
+            anyway).</para>
+          </note>
 
           <para>When you surround a part of the template with an escape
           directive, interpolations
@@ -17339,9 +17453,44 @@ m2: &amp;lt;test&amp;gt;</programlisting>
           here has the highest precedence, that is, they will be used for the
           template regardless of any FreeMarker configuration settings.</para>
 
-          <para>Parameters:</para>
+          <para>Possible parameters:</para>
 
           <itemizedlist>
+            <listitem>
+              <para><literal>attributes</literal>: This is a hash that
+              associates arbitrary attributes (name-value pairs) to the
+              template. The values of the attributes can be of any type
+              (string, number, sequence... etc.). FreeMarker doesn't try to
+              understand the meaning of the attributes. It's up to the
+              application that encapsulates FreeMarker (as a Web application
+              framework). Thus, the set of allowed attributes and their
+              semantic is application (Web application framework) dependent.
+              <phrase role="forProgrammers">Programmers: you can get the
+              attributes associated with a <literal>Template</literal> object
+              with its <literal>getCustomAttributeNames</literal> and
+              <literal>getCustomAttribute</literal> methods (inherited from
+              <literal>freemarker.core.Configurable</literal>). As the
+              template attributes are associated with the
+              <literal>Template</literal> object when the template is parsed,
+              the attributes can be read anytime, the template need not be
+              executed. The methods mentioned return the attribute values
+              unwrapped, that is, with FreeMarker independent type as
+              <literal>java.util.List</literal>.</phrase></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>auto_esc</literal>: A boolean constant that
+              specifies if using <link
+              linkend="dgui_misc_autoescaping">auto-escaping</link> is enabled
+              in this template. The default is usually
+              <literal>true</literal>, so you mostly only use this to disable
+              auto-escaping (<literal>false</literal> value). An attempt to
+              explicitly enable auto-escaping with this parameter when the
+              current output format is a <link
+              linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
+              format</link> will cause parse-time error.</para>
+            </listitem>
+
             <listitem>
               <para><literal>encoding</literal>: With this you can specify the
               encoding (charset) of the template in the template file itself.
@@ -17361,48 +17510,6 @@ m2: &amp;lt;test&amp;gt;</programlisting>
               valid values of this parameter are MIME-preferred charset names
               from the IANA Charset Registry, like ISO-8859-5, UTF-8 or
               Shift_JIS.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>strip_whitespace</literal>: This enables/disables
-              <link linkend="dgui_misc_whitespace_stripping">white-space
-              stripping</link>. Valid values are the boolean constants
-              <literal>true</literal> and <literal>false</literal>. (And for
-              backward compatibility, strings <literal>"yes"</literal>,
-              <literal>"no"</literal>, <literal>"true"</literal>,
-              <literal>"false"</literal>). The default value (i.e. when you
-              don't use this parameter) depends on the FreeMarker
-              configuration set by the programmers, but it should be
-              <literal>true</literal> for new projects.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>strip_text</literal>: When enabled, all top-level
-              text in a template is removed when the template is parsed. This
-              does not affect text within macros, directives, or
-              interpolations. Valid values are the boolean constants
-              <literal>true</literal> and <literal>false</literal>. (And for
-              backward compatibility, strings <literal>"yes"</literal>,
-              <literal>"no"</literal>, <literal>"true"</literal>,
-              <literal>"false"</literal>). The default value (i.e. when you
-              don't use this parameter) is <literal>false</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>strict_syntax</literal>: This turns on/off
-              ``strict syntax''. Valid values are the boolean constants
-              <literal>true</literal> and <literal>false</literal>. (And for
-              backward compatibility, strings <literal>"yes"</literal>,
-              <literal>"no"</literal>, <literal>"true"</literal>,
-              <literal>"false"</literal>). The default value (i.e. when you
-              don't use this parameter) depends on the FreeMarker
-              configuration set by the programmers, but it should be
-              <literal>true</literal> for new projects. <phrase
-              role="forProgrammers">(Programmers: you must set explicitly this
-              setting to <literal>true</literal> for this:
-              <literal>config.setStrictSyntaxMode(true);</literal>)</phrase>
-              For more information read: <xref
-              linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
             <listitem>
@@ -17447,27 +17554,77 @@ m2: &amp;lt;test&amp;gt;</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>attributes</literal>: This is a hash that
-              associates arbitrary attributes (name-value pairs) to the
-              template. The values of the attributes can be of any type
-              (string, number, sequence... etc.). FreeMarker doesn't try to
-              understand the meaning of the attributes. It's up to the
-              application that encapsulates FreeMarker (as a Web application
-              framework). Thus, the set of allowed attributes and their
-              semantic is application (Web application framework) dependent.
-              <phrase role="forProgrammers">Programmers: you can get the
-              attributes associated with a <literal>Template</literal> object
-              with its <literal>getCustomAttributeNames</literal> and
-              <literal>getCustomAttribute</literal> methods (inherited from
-              <literal>freemarker.core.Configurable</literal>). As the
-              template attributes are associated with the
-              <literal>Template</literal> object when the template is parsed,
-              the attributes can be read anytime, the template need not be
-              executed. The methods mentioned return the attribute values
-              unwrapped, that is, with FreeMarker independent type as
-              <literal>java.util.List</literal>.</phrase></para>
+              <para><literal>output_format</literal>: Specifies the <link
+              linkend="dgui_misc_autoescaping_outputformat">output
+              format</link> of this template. This must be a string literal,
+              which refers to the name of the output format. See the <link
+              linkend="topic.predefinedOutputFormats">table of predefined
+              output formats here</link>. Other names can exist if the
+              programmers has added them via the
+              <literal>registered_custom_output_formats</literal>
+              configuration setting
+              (<literal>Configuration.setRegisteredCustomOutputFormats(<replaceable>...</replaceable>)</literal>).
+              The referred output format must be known by the
+              <literal>Configuration</literal>, or else a parse-time error
+              will occur. The name can also refer to a so called combined
+              output format as
+              <literal>"<replaceable>outerFormatName</replaceable>{<replaceable>innerFormatName</replaceable>}"</literal>;
+              <link linkend="topic.combinedOutputFormats">see combined output
+              formats here</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>strict_syntax</literal>: This turns on/off
+              ``strict syntax''. Valid values are the boolean constants
+              <literal>true</literal> and <literal>false</literal>. (And for
+              backward compatibility, strings <literal>"yes"</literal>,
+              <literal>"no"</literal>, <literal>"true"</literal>,
+              <literal>"false"</literal>). The default value (i.e. when you
+              don't use this parameter) depends on the FreeMarker
+              configuration set by the programmers, but it should be
+              <literal>true</literal> for new projects. <phrase
+              role="forProgrammers">(Programmers: you must set explicitly this
+              setting to <literal>true</literal> for this:
+              <literal>config.setStrictSyntaxMode(true);</literal>)</phrase>
+              For more information read: <xref
+              linkend="ref_depr_oldsyntax"/></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>strip_text</literal>: When enabled, all top-level
+              text in a template is removed when the template is parsed. This
+              does not affect text within macros, directives, or
+              interpolations. Valid values are the boolean constants
+              <literal>true</literal> and <literal>false</literal>. (And for
+              backward compatibility, strings <literal>"yes"</literal>,
+              <literal>"no"</literal>, <literal>"true"</literal>,
+              <literal>"false"</literal>). The default value (i.e. when you
+              don't use this parameter) is <literal>false</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>strip_whitespace</literal>: This enables/disables
+              <link linkend="dgui_misc_whitespace_stripping">white-space
+              stripping</link>. Valid values are the boolean constants
+              <literal>true</literal> and <literal>false</literal>. (And for
+              backward compatibility, strings <literal>"yes"</literal>,
+              <literal>"no"</literal>, <literal>"true"</literal>,
+              <literal>"false"</literal>). The default value (i.e. when you
+              don't use this parameter) depends on the FreeMarker
+              configuration set by the programmers, but it should be
+              <literal>true</literal> for new projects.</para>
             </listitem>
           </itemizedlist>
+
+          <note>
+            <para>As of FreeMarker 2.3.23, you can use camel case instead of
+            snake case for parameter names, like
+            <literal>outputFormat</literal> instead of
+            <literal>output_format</literal>. But know that then within the
+            same template, FreeMarker will enforce the usage of camel case for
+            all identifiers that are part of the template language (user
+            defined names are not affected).</para>
+          </note>
 
           <para>This directive also determines if the template uses angle
           bracket syntax (e.g. <literal>&lt;#include 'foo.ftl'&gt;</literal>)
@@ -17739,6 +17896,8 @@ or
 
           <para>The <literal>elseif</literal>-s and the
           <literal>else</literal> are optional.</para>
+
+          <para>Camel case name variant: <literal>elseIf</literal></para>
         </section>
 
         <section>
@@ -19197,6 +19356,82 @@ or
         </section>
       </section>
 
+      <section xml:id="ref_directive_noautoesc">
+        <title>noautoesc</title>
+
+        <anchor xml:id="ref.directive.noautoesc"/>
+
+        <indexterm>
+          <primary>noautoesc directive</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <section>
+          <title>Synopsis</title>
+
+          <programlisting role="metaTemplate"><literal>&lt;#noautoesc&gt;
+  <replaceable>...</replaceable>
+&lt;/#noautoesc&gt;</literal>
+</programlisting>
+
+          <para>Camel case name variant: <literal>noAutoEsc</literal></para>
+        </section>
+
+        <section>
+          <title>Description</title>
+
+          <para>Disables <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> in the nested
+          section. Note that to prevent escaping for just a single
+          <literal>${<replaceable>expression</replaceable>}</literal>, you
+          should use
+          <literal>${<replaceable>expression</replaceable>?no_esc}</literal>
+          instead.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="XML"&gt;
+${"&amp;"}
+&lt;#noautoesc&gt;
+  ${"&amp;"}
+  ...
+  ${"&amp;"}
+&lt;/#noautoesc&gt;
+${"&amp;"}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">&amp;amp;
+  &amp;
+  ...
+  &amp;
+&amp;amp;</programlisting>
+
+          <para><literal>noautoesc</literal> can also be used nested into
+          <link linkend="ref_directive_autoesc"><literal>autoesc</literal>
+          directive</link> to re-enable escaping.</para>
+
+          <para><literal>noautoesc</literal> can be used on places where
+          auto-escaping is already disabled, such as even inside another
+          <literal>noautoesc</literal> block. Doing so is redundant but
+          allowed.</para>
+
+          <para><literal>noautoesc</literal> can be used regardless of what
+          the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          is (unlike the <link
+          linkend="ref_directive_autoesc"><literal>autoesc</literal>
+          directive</link>).</para>
+        </section>
+      </section>
+
       <section xml:id="ref_directive_noparse">
         <title>noparse</title>
 
@@ -19214,6 +19449,8 @@ or
   <replaceable>...</replaceable>
 &lt;/#noparse&gt;</literal>
 </programlisting>
+
+          <para>Camel case name variant: <literal>noParse</literal></para>
         </section>
 
         <section>
@@ -19288,6 +19525,143 @@ or
           effect of other trim directives occuring in the same line (the
           effect of <literal>t</literal>, <literal>rt</literal>,
           <literal>lt</literal>).</para>
+        </section>
+      </section>
+
+      <section xml:id="ref_directive_outputformat">
+        <title>outputformat</title>
+
+        <anchor xml:id="ref.directive.outputformat"/>
+
+        <indexterm>
+          <primary>outputformat directive</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <section>
+          <title>Synopsis</title>
+
+          <programlisting role="metaTemplate"><literal>&lt;#outputformat <replaceable>formatName</replaceable>&gt;
+  <replaceable>...</replaceable>
+&lt;/#outputFormat&gt;</literal>
+</programlisting>
+
+          <para>Where:</para>
+
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para><literal><replaceable>formatName</replaceable></literal>:
+              A constant string (can't contain runtime expressions!). The name
+              of the output format; see the <link
+              linkend="topic.predefinedOutputFormats">table of the predefined
+              output formats here</link>. Other names can exist if the
+              programmers has added them via the
+              <literal>registered_custom_output_formats</literal>
+              configuration setting
+              (<literal>Configuration.setRegisteredCustomOutputFormats(<replaceable>...</replaceable>)</literal>).
+              The referred output format must be known by the
+              <literal>Configuration</literal>, or else a parse-time error
+              will occur. The name can also refer to a so called combined
+              output format as
+              <literal>"<replaceable>outerFormatName</replaceable>{<replaceable>innerFormatName</replaceable>}"</literal>,
+              or
+              <literal>"{<replaceable>innerFormatName</replaceable>}"</literal>;
+              <link linkend="topic.combinedOutputFormats">see this
+              later</link>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Camel case name variant:
+          <literal>outputFormat</literal></para>
+        </section>
+
+        <section>
+          <title>Description</title>
+
+          <para>Sets the <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          to the specified one inside the nested block.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="XML"&gt;
+XML escaping: ${"&amp;{}"}
+&lt;#outputformat "RTF"&gt;
+  RTF escaping: ${"&amp;{}"}
+&lt;/#outputformat&gt;
+&lt;#outputformat "plainText"&gt;
+  No escsaping: ${"&amp;{}"}
+&lt;/#outputformat&gt;
+XML escsaping: ${"&amp;{}"}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">XML escsaping: &amp;amp;{}
+  RTF escaping: &amp;\{\}
+  No escsaping: &amp;{}
+XML escsaping: &amp;amp;{}</programlisting>
+
+          <simplesect xml:id="topic.combinedOutputFormats">
+            <title>Combined (nested) output formats</title>
+
+            <para>When <literal>outputformat</literal>-s are nested into each
+            other, normally, only the innermost output format will count. For
+            example:</para>
+
+            <programlisting role="template">&lt;#ftl output_format="XML"&gt;
+${"'{}"}
+&lt;#outputformat "HTML"&gt;
+  ${"'{}"}
+  &lt;#outputformat "RTF"&gt;
+    ${"'{}"}
+  &lt;/#outputformat&gt;
+&lt;/#outputformat&gt;</programlisting>
+
+            <para>will output:</para>
+
+            <programlisting role="output">&amp;apos;{}
+  &amp;#39;{}
+    '\{\}</programlisting>
+
+            <para>Sometimes what you want though is applying all enclosing
+            output formats. Like the 2nd
+            <literal>${<replaceable>...</replaceable>}</literal> should be
+            escaped with <literal>"HTML"</literal> and then with
+            <literal>"XML"</literal>, and the 3rd
+            <literal>${<replaceable>...</replaceable>}</literal> should be
+            escaped with <literal>"RTF"</literal> and then with
+            <literal>"HTML"</literal> and then with <literal>"XML"</literal>.
+            These are called combined output formats, and can be referred by
+            names like <literal>"XML{HTML}"</literal> and
+            <literal>"XML{HTLM{RTF}}"</literal> respectively. We could use
+            these names in the earlier two <literal>outputformat</literal>
+            calls, however, there's a shorthand where you inherit the part
+            outside the <literal>{<replaceable>...</replaceable>}</literal>
+            from the enclosing output format:</para>
+
+            <programlisting role="template">&lt;#ftl outputFormat='XML'&gt;
+${"'{}"}
+&lt;#outputFormat '{HTML}'&gt;&lt;#-- Same as XML{HTML} --&gt;
+  ${"'{}"}
+  &lt;#outputFormat '{RTF}'&gt;&lt;#-- Same as XML{HTML{RTF}} --&gt;
+    ${"'{}"}
+  &lt;/#outputFormat&gt;
+&lt;/#outputFormat&gt;
+</programlisting>
+
+            <para>will output:</para>
+
+            <programlisting role="output">&amp;apos;{}
+  &amp;amp;#39;{}
+    &amp;amp;#39;\{\}</programlisting>
+          </simplesect>
         </section>
       </section>
 
@@ -20551,7 +20925,7 @@ There was no specific handler for node y
       <note>
         <para>As of FreeMarker 2.3.23, you can use camel case instead of snake
         case for special variable names, like <literal>dataModel</literal>
-        instead of <literal>data_model</literal>. But know that then withing
+        instead of <literal>data_model</literal>. But know that then within
         the same template, FreeMarker will enforce the usage of camel case for
         all identifiers that are part of the template language (user defined
         names are not affected).</para>
