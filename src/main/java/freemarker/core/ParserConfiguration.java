@@ -55,7 +55,7 @@ public interface ParserConfiguration {
     /**
      * See {@link Configuration#getAutoEscaping()}.
      */
-    boolean getAutoEscaping();
+    int getAutoEscaping();
     
     /**
      * See {@link Configuration#getOutputEncoding()}.

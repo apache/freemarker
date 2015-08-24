@@ -29,13 +29,14 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
     private ArithmeticEngine arithmeticEngine;
-    private Boolean autoEscaping; 
+    private Integer autoEscaping; 
     private OutputFormat outputFormat;
     private Boolean recognizeStandardFileExtensions; 
     private final Version incompatibleImprovements;
 
     public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
-            int namingConvention, Boolean autoEscaping, OutputFormat outputFormat, Boolean recognizeStandardFileExtensions,
+            int namingConvention, Integer autoEscaping, OutputFormat outputFormat,
+            Boolean recognizeStandardFileExtensions,
             Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
@@ -81,16 +82,16 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
-    public boolean getAutoEscaping() {
+    public int getAutoEscaping() {
         if (autoEscaping == null) {
             throw new IllegalStateException();
         }
-        return autoEscaping.booleanValue();
+        return autoEscaping.intValue();
     }
     
-    void setAutoEscapingIfNotSet(boolean autoEscaping) {
+    void setAutoEscapingIfNotSet(int autoEscaping) {
         if (this.autoEscaping == null) {
-            this.autoEscaping = Boolean.valueOf(autoEscaping);
+            this.autoEscaping = Integer.valueOf(autoEscaping);
         }
     }
 

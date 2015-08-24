@@ -183,7 +183,7 @@ public class OutputFormatTest extends TemplateTest {
                 new FileNameGlobMatcher("t.*"), tcHTML);
 
         TemplateConfigurer tcNoAutoEsc = new TemplateConfigurer();
-        tcNoAutoEsc.setAutoEscaping(false);
+        tcNoAutoEsc.setAutoEscaping(Configuration.DISABLE_AUTO_ESCAPING);
         ConditionalTemplateConfigurerFactory tcfNoAutoEsc = new ConditionalTemplateConfigurerFactory(
                 new FileNameGlobMatcher("t.*"), tcNoAutoEsc);
 
@@ -277,13 +277,13 @@ public class OutputFormatTest extends TemplateTest {
         
         Configuration cfg = getConfiguration();
         
-        assertTrue(cfg.getAutoEscaping());
+        assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, cfg.getAutoEscaping());
         
         cfg.setOutputFormat(XMLOutputFormat.INSTANCE);
         
         for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
             if (!cfgAutoEscaping) {
-                cfg.setAutoEscaping(false);
+                cfg.setAutoEscaping(Configuration.DISABLE_AUTO_ESCAPING);
             }
             
             {
@@ -350,7 +350,7 @@ public class OutputFormatTest extends TemplateTest {
                 // Cfg default is autoEscaping true
                 assertOutput(commonAutoEscFtl, "&amp;");
             } else {
-                getConfiguration().setAutoEscaping(false);
+                getConfiguration().setAutoEscaping(Configuration.DISABLE_AUTO_ESCAPING);
                 assertOutput(commonAutoEscFtl, "&");
             }
             
@@ -537,7 +537,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed("t.ftlh", "HTML true");
 
         addTemplate("t.ftl", commonFTL);
-        assertOutputForNamed("t.ftl", "undefined true");
+        assertOutputForNamed("t.ftl", "undefined false");
         
         addTemplate("tX.ftl", "<#ftl outputFormat='XML'>" + commonFTL);
         addTemplate("tX.ftlx", commonFTL);
@@ -546,7 +546,7 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tN.ftl", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
         assertOutputForNamed("tN.ftl", "RTF false");
         
-        assertOutput("${.output_format} ${.auto_esc?c}", "undefined true");
+        assertOutput("${.output_format} ${.auto_esc?c}", "undefined false");
     }
     
     @Test
@@ -695,6 +695,8 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains(
                 "<#noautoEsc></#noautoEsc>",
                 "Unknown directive");
+
+        getConfiguration().setOutputFormat(XMLOutputFormat.INSTANCE);
         
         // Empty block:
         assertOutput(
@@ -714,7 +716,6 @@ public class OutputFormatTest extends TemplateTest {
         
         
         // Naming convention:
-        getConfiguration().setOutputFormat(XMLOutputFormat.INSTANCE);
         assertErrorContains(
                 "<#autoEsc></#autoesc>",
                 "convention", "#autoEsc", "#autoesc");

@@ -103,4 +103,9 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      */
     public abstract boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateModelException;
     
+    /**
+     * Usually {@code true}; tells if by default auto-escaping should be on for this format. 
+     */
+    public abstract boolean isAutoEscapingByDefault();
+    
 }

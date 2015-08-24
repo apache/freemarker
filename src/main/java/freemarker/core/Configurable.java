@@ -1508,9 +1508,12 @@ public class Configurable {
      * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
      * <ul>
      *   <li><p>{@code "auto_escaping"}:
-     *       See {@link Configuration#setAutoEscaping(boolean)}
-     *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
-     *       {@code yes}, etc.
+     *       See {@link Configuration#setAutoEscaping(int)}
+     *       <br>String value: {@code "enable_if_default"} or {@code "enableIfDefault"} for
+     *       {@link Configuration#ENABLE_AUTO_ESCAPING_IF_DEFAULT},
+     *       {@code "enable_if_supported"} or {@code "enableIfSupported"} for
+     *       {@link Configuration#ENABLE_AUTO_ESCAPING_IF_SUPPORTED}
+     *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING}.
      *       
      *   <li><p>{@code "auto_import"}:
      *       See {@link Configuration#setAutoImports(Map)}

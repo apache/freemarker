@@ -75,7 +75,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Integer namingConvention;
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
-    private Boolean autoEscaping;
+    private Integer autoEscaping;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
     private String encoding;
@@ -323,6 +323,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * See {@link Configuration#setTagSyntax(int)}.
      */
     public void setTagSyntax(int tagSyntax) {
+        _TemplateAPI.valideTagSyntaxValue(tagSyntax);
         this.tagSyntax = Integer.valueOf(tagSyntax);
     }
 
@@ -344,6 +345,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * See {@link Configuration#setNamingConvention(int)}.
      */
     public void setNamingConvention(int namingConvention) {
+        _TemplateAPI.validateNamingConventionValue(namingConvention);
         this.namingConvention = Integer.valueOf(namingConvention);
     }
 
@@ -384,17 +386,18 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Sets the output format of the template; see {@link Configuration#setAutoEscaping(boolean)} for more.
+     * Sets the output format of the template; see {@link Configuration#setAutoEscaping(int)} for more.
      */
-    public void setAutoEscaping(boolean autoEscaping) {
-        this.autoEscaping = Boolean.valueOf(autoEscaping);
+    public void setAutoEscaping(int autoEscaping) {
+        _TemplateAPI.validateAutoEscapingValue(autoEscaping);
+        this.autoEscaping = Integer.valueOf(autoEscaping);
     }
 
     /**
-     * The getter pair of {@link #setAutoEscaping(boolean)}.
+     * The getter pair of {@link #setAutoEscaping(int)}.
      */
-    public boolean getAutoEscaping() {
-        return autoEscaping != null ? autoEscaping.booleanValue() : getParentConfiguration().getAutoEscaping();
+    public int getAutoEscaping() {
+        return autoEscaping != null ? autoEscaping.intValue() : getParentConfiguration().getAutoEscaping();
     }
 
     /**

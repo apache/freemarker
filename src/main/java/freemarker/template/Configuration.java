@@ -349,6 +349,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int AUTO_DETECT_NAMING_CONVENTION = 10;
     public static final int LEGACY_NAMING_CONVENTION = 11;
     public static final int CAMEL_CASE_NAMING_CONVENTION = 12;
+
+    /** Do not enable auto-escaping, regardless of what the {@link OutputFormat} is. */
+    public static final int DISABLE_AUTO_ESCAPING = 20;
+    /** Enable auto-escaping if it's the default of the {@link OutputFormat}. */
+    public static final int ENABLE_AUTO_ESCAPING_IF_DEFAULT = 21;
+    /** Enable auto-escaping if the {@link OutputFormat} supports it. */
+    public static final int ENABLE_AUTO_ESCAPING_IF_SUPPORTED = 22;
     
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
@@ -447,7 +454,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
-    private Boolean autoEscaping;
+    private int autoEscaping = ENABLE_AUTO_ESCAPING_IF_DEFAULT;
     private OutputFormat outputFormat = UndefinedOutputFormat.INSTANCE;
     private boolean outputFormatExplicitlySet;
     private Boolean recognizeStandardFileExtensions;
@@ -721,7 +728,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          setting changes to {@code true}, which means that templates whose name ends with {@code ".ftlh"} or
      *          {@code ".ftlx"} will automatically get {@link HTMLOutputFormat#INSTANCE} or
      *          {@link XMLOutputFormat#INSTANCE} output format respectively, in both cases with
-     *          {@link #setAutoEscaping(boolean) auto_escaping} on. These "file" extensions aren't case sensitive.
+     *          {@link #setAutoEscaping(int) auto_escaping} set to {@link #ENABLE_AUTO_ESCAPING_IF_DEFAULT}. These
+     *          "file" extensions aren't case sensitive.
      *       </li>
      *       <li><p>
      *          Expressions inside interpolations that were inside <em>string literal expressions</em>
@@ -1689,11 +1697,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets if auto-escaping should be enabled; default is {@code true}, but note that the default output format,
-     * {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping has no effect. Auto-escaping has
-     * significance when a value is printed with <code>${...}</code> (or <code>#{...}</code>). If auto-escaping
-     * is {@code true}, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
-     * rich text), and so it will escape it according the current output format (see
+     * Sets if auto-escaping should be enabled and when; default is {@code #ENABLE_AUTO_ESCAPING_IF_DEFAULT}. Note
+     * that the default output format, {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping
+     * setting won't have effect. Auto-escaping has significance when a value is printed with <code>${...}</code> (or
+     * <code>#{...}</code>). If auto-escaping is {@code true}, FreeMarker will assume that the value is plain text (as
+     * opposed to markup or some kind of rich text), and so it will escape it according the current output format (see
      * {@link #setOutputFormat(OutputFormat)} and {@link TemplateConfigurer#setOutputFormat(OutputFormat)}). If
      * auto-escaping is {@code false}, FreeMarker will assume that the string value is already in the output format, so
      * it prints it as is to the output.
@@ -1717,46 +1725,33 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. This setting is also overridden by the standard file
      * extensions; see them at {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
-     * @see TemplateConfigurer#setAutoEscaping(boolean)
+     * @param autoEscaping
+     *          One of the {@link #ENABLE_AUTO_ESCAPING_IF_DEFAULT}, {@link #ENABLE_AUTO_ESCAPING_IF_SUPPORTED}, and
+     *          {@link #DISABLE_AUTO_ESCAPING} constants.  
+     * 
+     * @see TemplateConfigurer#setAutoEscaping(int)
      * @see Configuration#setOutputFormat(OutputFormat)
      * @see TemplateConfigurer#setOutputFormat(OutputFormat)
      * 
      * @since 2.3.24
      */
-    public void setAutoEscaping(boolean autoEscaping) {
-        boolean prevEffectiveAutoEscaping = getAutoEscaping();
-        this.autoEscaping = Boolean.valueOf(autoEscaping);
-        if (prevEffectiveAutoEscaping != autoEscaping) {
+    public void setAutoEscaping(int autoEscaping) {
+        _TemplateAPI.validateAutoEscapingValue(autoEscaping);
+        
+        int prevAutoEscaping = getAutoEscaping();
+        this.autoEscaping = autoEscaping;
+        if (prevAutoEscaping != autoEscaping) {
             clearTemplateCache();
         }
     }
 
     /**
-     * Getter pair of {@link #setAutoEscaping(boolean)}
+     * Getter pair of {@link #setAutoEscaping(int)}
      * 
      * @since 2.3.24
      */
-    public boolean getAutoEscaping() {
-        return autoEscaping != null ? autoEscaping.booleanValue() : true;
-    }
-    
-    /**
-     * Tells if {@link #setOutputFormat(OutputFormat)} (or equivalent) was already called on this instance.
-     * 
-     * @since 2.3.24
-     */
-    public boolean isAutoEscapingExplicitlySet() {
-        return autoEscaping != null;
-    }
-    
-    /**
-     * Resets the setting to its default, as if it was never set. 
-     * {@link #isAutoEscapingExplicitlySet()} will return {@code false}.
-     * 
-     * @since 2.3.24
-     */
-    public void unsetAutoEscaping() {
-        autoEscaping = null;
+    public int getAutoEscaping() {
+        return autoEscaping;
     }
     
     /**
@@ -1767,13 +1762,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
      * <p>
-     * The output format is mostly important because of auto-escaping (see {@link #setAutoEscaping(boolean)}), but maybe
+     * The output format is mostly important because of auto-escaping (see {@link #setAutoEscaping(int)}), but maybe
      * also used by the embedding application to set the HTTP response MIME type, etc.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
      * @see #setTemplateConfigurers(TemplateConfigurerFactory)
      * @see #setRecognizeStandardFileExtensions(boolean)
-     * @see #setAutoEscaping(boolean)
+     * @see #setAutoEscaping(int)
      * 
      * @since 2.3.24
      */
@@ -1992,11 +1987,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *   <li>{@code ftlh}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "HTML"}
      *       (i.e., {@link HTMLOutputFormat#INSTANCE} unless the {@code "HTML"} name is overridden by
      *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     *       {@link TemplateConfigurer#setAutoEscaping(int) autoEscaping} to {@code #ENABLE_AUTO_ESCAPING_IF_DEFAULT}.
      *   <li>{@code ftlx}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "XML"}
      *       (i.e., {@link XMLOutputFormat#INSTANCE} unless the {@code "XML"} name is overridden by
      *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link TemplateConfigurer#setAutoEscaping(boolean) autoEscaping} to {@code true}.
+     *       {@link TemplateConfigurer#setAutoEscaping(int) autoEscaping} to {@code #ENABLE_AUTO_ESCAPING_IF_DEFAULT}.
      * </ul>
      * 
      * <p>These file extensions are not case sensitive. The file extension is the part after the last dot in the source
@@ -2071,16 +2066,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * the syntax.
      */
     public void setTagSyntax(int tagSyntax) {
-        if (tagSyntax != AUTO_DETECT_TAG_SYNTAX
-            && tagSyntax != SQUARE_BRACKET_TAG_SYNTAX
-            && tagSyntax != ANGLE_BRACKET_TAG_SYNTAX) {
-            throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
-                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
-                    + "or Configuration.SQAUARE_BRACKET_SYNTAX");
-        }
+        _TemplateAPI.valideTagSyntaxValue(tagSyntax);
         this.tagSyntax = tagSyntax;
     }
-    
+
     /**
      * The getter pair of {@link #setTagSyntax(int)}.
      */
@@ -2140,17 +2129,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.23
      */
     public void setNamingConvention(int namingConvention) {
-        if (namingConvention != AUTO_DETECT_NAMING_CONVENTION
-            && namingConvention != LEGACY_NAMING_CONVENTION
-            && namingConvention != CAMEL_CASE_NAMING_CONVENTION) {
-            throw new IllegalArgumentException("\"naming_convention\" can only be set to one of these: "
-                    + "Configuration.AUTO_DETECT_NAMING_CONVENTION, "
-                    + "or Configuration.LEGACY_NAMING_CONVENTION"
-                    + "or Configuration.CAMEL_CASE_NAMING_CONVENTION");
-        }
+        _TemplateAPI.validateNamingConventionValue(namingConvention);
         this.namingConvention = namingConvention;
     }
-    
+
     /**
      * The getter pair of {@link #setNamingConvention(int)}.
      * 
@@ -2733,10 +2715,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
             } else if (AUTO_ESCAPING_KEY_SNAKE_CASE.equals(name) || AUTO_ESCAPING_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equalsIgnoreCase(DEFAULT)) {
-                    unsetAutoEscaping();
+                if ("enable_if_default".equals(value) || "enableIfDefault".equals(value)) {
+                    setAutoEscaping(ENABLE_AUTO_ESCAPING_IF_DEFAULT);
+                } else if ("enable_if_supported".equals(value) || "enableIfSupported".equals(value)) {
+                    setAutoEscaping(ENABLE_AUTO_ESCAPING_IF_SUPPORTED);
+                } else if ("disable".equals(value)) {
+                    setAutoEscaping(DISABLE_AUTO_ESCAPING);
                 } else {
-                    setAutoEscaping(StringUtil.getYesNo(value));
+                    throw invalidSettingValueException(name, value);
                 }
             } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {

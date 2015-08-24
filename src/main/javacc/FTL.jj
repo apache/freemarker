@@ -52,6 +52,7 @@ public class FMParser {
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
     private OutputFormat outputFormat;
+    private int autoEscapingEnum;
     private boolean autoEscaping;
     private ParserConfiguration pCfg;
 
@@ -126,13 +127,13 @@ public class FMParser {
         this(dummyTemplate(),
                 new StringReader(template), true, true);
     }
-    
+
     private static Template dummyTemplate() {
         try {
             return new Template(null, new StringReader(""), Configuration.getDefaultConfiguration());
         } catch (IOException e) {
             throw new RuntimeException("Failed to create dummy template", e);
-        }        
+        }
     }
 
     /**
@@ -144,8 +145,10 @@ public class FMParser {
                 new LegacyConstructorParserConfiguration(
                         strictSyntaxMode, whitespaceStripping,
                         tagSyntax, namingConvention,
-                        template != null ? template.getParserConfiguration().getAutoEscaping() : true,
-                        template != null ? template.getParserConfiguration().getOutputFormat() : null,
+                        template != null ? template.getParserConfiguration().getAutoEscaping()
+                                : Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT,
+                        template != null ? template.getParserConfiguration().getOutputFormat()
+                                : null,
                         template != null ? template.getParserConfiguration().getRecognizeStandardFileExtensions()
                                 : null,
                         new Version(incompatibleImprovements),
@@ -160,11 +163,11 @@ public class FMParser {
     public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
         this(template, true, readerToTokenManager(reader), pCfg);
     }
-    
+
     private static FMParserTokenManager readerToTokenManager(Reader reader) {
-        return new FMParserTokenManager(new SimpleCharStream(reader, 1, 1));        
+        return new FMParserTokenManager(new SimpleCharStream(reader, 1, 1));
     }
-    
+
     /**
      * @Deprecated This is an internal API of FreeMarker; don't call it from outside FreeMarker.
      * 
@@ -183,7 +186,7 @@ public class FMParser {
         if (pCfg instanceof LegacyConstructorParserConfiguration) {
             LegacyConstructorParserConfiguration lpCfg = (LegacyConstructorParserConfiguration) pCfg;
             lpCfg.setArithmeticEngineIfNotSet(template.getArithmeticEngine());
-            lpCfg.setAutoEscapingIfNotSet(template.getAutoEscaping());
+            lpCfg.setAutoEscapingIfNotSet(template.getConfiguration().getAutoEscaping());
             lpCfg.setOutputFormatIfNotSet(template.getOutputFormat());
             lpCfg.setRecognizeStandardFileExtensionsIfNotSet(
                     template.getParserConfiguration().getRecognizeStandardFileExtensions());
@@ -193,15 +196,19 @@ public class FMParser {
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
 
-        OutputFormat outputFormatFromExt;
-        if (!pCfg.getRecognizeStandardFileExtensions() || (outputFormatFromExt = getFormatFromStdFileExt()) == null) { 
-	        autoEscaping = pCfg.getAutoEscaping();
-	        outputFormat = pCfg.getOutputFormat();
-        } else {
-            // Override it
-            autoEscaping = true;
-            outputFormat = outputFormatFromExt;
+        {
+            OutputFormat outputFormatFromExt;
+            if (!pCfg.getRecognizeStandardFileExtensions()
+                    || (outputFormatFromExt = getFormatFromStdFileExt()) == null) {
+                autoEscapingEnum = pCfg.getAutoEscaping();
+                outputFormat = pCfg.getOutputFormat();
+            } else {
+                // Override it
+                autoEscapingEnum = Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT;
+                outputFormat = outputFormatFromExt;
+            }
         }
+        recalculateAutoEscapingField();
 
         token_source.setParser(this);
 
@@ -243,14 +250,14 @@ public class FMParser {
             _TemplateAPI.setOutputFormat(template, outputFormat);
         }
     }
-
+    
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
         token_source.onlyTextOutput = true;
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
         outputFormat = PlainTextOutputFormat.INSTANCE;
-        autoEscaping = true;
+        recalculateAutoEscapingField();                                
         if (incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_24) {
             // Emulate bug, where the string literal parser haven't inherited the IcI:
             incompatibleImprovements = _TemplateAPI.VERSION_INT_2_3_0;
@@ -270,19 +277,19 @@ public class FMParser {
 
         int ln = sourceName.length();
         if (ln < 5) return null;
-        
+
         char c = sourceName.charAt(ln - 5);
         if (c != '.') return null;
-        
+
         c = sourceName.charAt(ln - 4);
         if (c != 'f' && c != 'F') return null;
-        
+
         c = sourceName.charAt(ln - 3);
         if (c != 't' && c != 'T') return null;
-        
+
         c = sourceName.charAt(ln - 2);
         if (c != 'l' && c != 'L') return null;
-        
+
         c = sourceName.charAt(ln - 1);
         try {
             // Note: We get the output formats by name, so that custom overrides take effect.
@@ -296,6 +303,25 @@ public class FMParser {
             throw new BugException("Unregistered std format", e);
         }
         return null;
+    }
+    
+    /**
+     * Updates the {@link #autoEscaping} field based on the {@link #autoEscapingEnum} and {@link #outputFormat} fields.
+     */
+    private void recalculateAutoEscapingField() {
+        if (outputFormat instanceof MarkupOutputFormat) {
+            if (autoEscapingEnum == Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT) {
+                autoEscaping = ((MarkupOutputFormat) outputFormat).isAutoEscapingByDefault();
+            } else if (autoEscapingEnum == Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED) {
+                autoEscaping = true;
+            } else if (autoEscapingEnum == Configuration.DISABLE_AUTO_ESCAPING) {
+                autoEscaping = false;
+            } else {
+                throw new IllegalStateException("Unhandled autoEscaping enum: " + autoEscapingEnum);
+            }
+        } else {
+            autoEscaping = false;
+        }
     }
 
     /**
@@ -3651,6 +3677,7 @@ OutputFormatBlock OutputFormat() :
             } else {
                 outputFormat = template.getConfiguration().getOutputFormat(paramStr);
             }
+            recalculateAutoEscapingField();
         } catch (IllegalArgumentException e) {
             throw new ParseException("Invalid format name: " + e.getMessage(), template, start, e.getCause());
         } catch (UnregisteredOutputFormatException e) {
@@ -3663,7 +3690,8 @@ OutputFormatBlock OutputFormat() :
         OutputFormatBlock result = new OutputFormatBlock(content, paramExp);
         result.setLocation(template, start, end);
         
-        outputFormat = lastOutputFormat; 
+        outputFormat = lastOutputFormat;
+        recalculateAutoEscapingField();         
         return result;
     }
 }
@@ -3672,14 +3700,15 @@ AutoEscBlock AutoEsc() :
 {
     Token start, end;
     TemplateElement content;
-    boolean lastAutoEscaping;
+    int lastAutoEscapingEnum;
 }
 {
     start = <AUTOESC>
     {
         checkCurrentOutputFormatCanEscape(start);
-        lastAutoEscaping = autoEscaping;
-        autoEscaping = true;
+        lastAutoEscapingEnum = autoEscapingEnum;
+        autoEscapingEnum = Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED;
+        recalculateAutoEscapingField();
     }
     content = OptionalBlock()
     end = <END_AUTOESC>
@@ -3687,7 +3716,8 @@ AutoEscBlock AutoEsc() :
         AutoEscBlock result = new AutoEscBlock(content);
         result.setLocation(template, start, end);
         
-        autoEscaping = lastAutoEscaping; 
+        autoEscapingEnum = lastAutoEscapingEnum; 
+        recalculateAutoEscapingField();
         return result;
     }
 }
@@ -3696,13 +3726,14 @@ NoAutoEscBlock NoAutoEsc() :
 {
     Token start, end;
     TemplateElement content;
-    boolean lastAutoEscaping;
+    int lastAutoEscapingEnum;
 }
 {
     start = <NOAUTOESC>
     {
-        lastAutoEscaping = autoEscaping;
-        autoEscaping = false; 
+        lastAutoEscapingEnum = autoEscapingEnum;
+        autoEscapingEnum = Configuration.DISABLE_AUTO_ESCAPING;
+        recalculateAutoEscapingField();
     }
     content = OptionalBlock()
     end = <END_NOAUTOESC>
@@ -3710,7 +3741,8 @@ NoAutoEscBlock NoAutoEsc() :
         NoAutoEscBlock result = new NoAutoEscBlock(content);
         result.setLocation(template, start, end);
         
-        autoEscaping = lastAutoEscaping; 
+        autoEscapingEnum = lastAutoEscapingEnum;
+        recalculateAutoEscapingField(); 
         return result;
     }
 }
@@ -4029,11 +4061,14 @@ void HeaderElement() :
                         } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
                             this.token_source.strictEscapeSyntax = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
-                            autoEscaping = getBoolean(exp, false);
-                            _TemplateAPI.setAutoEscaping(template, autoEscaping);
-                            if (autoEscaping) {
+                            if (getBoolean(exp, false)) {
                                 autoEscRequester = key;
+                                autoEscapingEnum = Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED;
+                            } else {
+                                autoEscapingEnum = Configuration.DISABLE_AUTO_ESCAPING;
                             }
+                            recalculateAutoEscapingField();
+                            _TemplateAPI.setAutoEscaping(template, autoEscaping);
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
@@ -4045,7 +4080,9 @@ void HeaderElement() :
 					        } catch (UnregisteredOutputFormatException e) {
 					            throw new ParseException(e.getMessage(), exp, e.getCause());
 					        }
+                            recalculateAutoEscapingField();                                
                             _TemplateAPI.setOutputFormat(template, outputFormat);
+                            _TemplateAPI.setAutoEscaping(template, autoEscaping);
                         } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);

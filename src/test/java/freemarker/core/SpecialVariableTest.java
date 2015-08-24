@@ -58,14 +58,40 @@ public class SpecialVariableTest extends TemplateTest {
 
     @Test
     public void testAutoEsc() throws Exception {
-        assertOutput(
-                "${.autoEsc?c}",
-                "true");
+        Configuration cfg = getConfiguration();
         
-        getConfiguration().setAutoEscaping(false);
+        for (int autoEscaping : new int[] {
+                Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED }) {
+            cfg.setAutoEscaping(autoEscaping);
+            cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
+            assertOutput("${.autoEsc?c}", "true");
+            assertOutput("<#ftl autoEsc=false>${.autoEsc?c}", "false");
+            cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+            assertOutput("${.autoEsc?c}", "false");
+            cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
+            assertOutput("${.autoEsc?c}", "false");
+        }
+        
+        cfg.setAutoEscaping(Configuration.DISABLE_AUTO_ESCAPING);
+        cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        assertOutput("${.autoEsc?c}", "false");
+        assertOutput("<#ftl autoEsc=true>${.autoEsc?c}", "true");
+        cfg.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        assertOutput("${.autoEsc?c}", "false");
+        cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
+        assertOutput("${.autoEsc?c}", "false");
+
+        cfg.setAutoEscaping(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT);
         assertOutput(
-                "${.auto_esc?c}",
-                "false");
+                "${.autoEsc?c} "
+                + "<#outputFormat 'HTML'>${.autoEsc?c}</#outputFormat> "
+                + "<#outputFormat 'undefined'>${.autoEsc?c}</#outputFormat> "
+                + "<#outputFormat 'HTML'>"
+                + "${.autoEsc?c} <#noAutoEsc>${.autoEsc?c} "
+                + "<#autoEsc>${.autoEsc?c}</#autoEsc> ${.autoEsc?c}</#noAutoEsc> ${.autoEsc?c}"
+                + "</#outputFormat>",
+                "false true false "
+                + "true false true false true");
         
         assertErrorContains("${.autoEscaping}", "You may meant: \"autoEsc\"");
     }

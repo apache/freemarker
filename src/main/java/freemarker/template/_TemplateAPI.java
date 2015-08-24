@@ -107,5 +107,37 @@ public class _TemplateAPI {
     public static void setOutputFormat(Template t, OutputFormat outputFormat) {
         t.setOutputFormat(outputFormat);
     }
+
+    public static void validateAutoEscapingValue(int autoEscaping) {
+        if (autoEscaping != Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT
+                && autoEscaping != Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED
+                && autoEscaping != Configuration.DISABLE_AUTO_ESCAPING) {
+            throw new IllegalArgumentException("\"auto_escaping\" can only be set to one of these: "
+                    + "Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, "
+                    + "or Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED"
+                    + "or Configuration.DISABLE_AUTO_ESCAPING");
+        }
+    }
+
+    public static void validateNamingConventionValue(int namingConvention) {
+        if (namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
+            && namingConvention != Configuration.LEGACY_NAMING_CONVENTION
+            && namingConvention != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+            throw new IllegalArgumentException("\"naming_convention\" can only be set to one of these: "
+                    + "Configuration.AUTO_DETECT_NAMING_CONVENTION, "
+                    + "or Configuration.LEGACY_NAMING_CONVENTION"
+                    + "or Configuration.CAMEL_CASE_NAMING_CONVENTION");
+        }
+    }
+
+    public static void valideTagSyntaxValue(int tagSyntax) {
+        if (tagSyntax != Configuration.AUTO_DETECT_TAG_SYNTAX
+            && tagSyntax != Configuration.SQUARE_BRACKET_TAG_SYNTAX
+            && tagSyntax != Configuration.ANGLE_BRACKET_TAG_SYNTAX) {
+            throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
+                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
+                    + "or Configuration.SQAUARE_BRACKET_SYNTAX");
+        }
+    }
     
 }

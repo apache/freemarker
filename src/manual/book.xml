@@ -8983,10 +8983,7 @@ cfg.setTemplateConfigurers(
         this template:</para>
 
         <programlisting role="template">&lt;p&gt;Output format: ${.output_format}
-&lt;p&gt;Auto-escaping enabled: ${.auto_esc?c}
-
-&lt;p&gt;Note that enabled auto-escaping only has effect if the output format
-also supports escaping; "undefined" and "plainText" doesn't.</programlisting>
+&lt;p&gt;Auto-escaping enabled: ${.auto_esc?c}</programlisting>
 
         <para>See the <link linkend="topic.predefinedOutputFormats">table of
         predefined output formats here...</link></para>
@@ -18008,12 +18005,15 @@ m2: &amp;lt;test&amp;gt;</programlisting>
             <listitem>
               <para><literal>auto_esc</literal>: A boolean constant that
               specifies if using <link
-              linkend="dgui_misc_autoescaping">auto-escaping</link> is enabled
-              in this template. The default is usually
-              <literal>true</literal>, so you mostly only use this to disable
-              auto-escaping (<literal>false</literal> value). An attempt to
-              explicitly enable auto-escaping with this parameter when the
-              current output format is a <link
+              linkend="dgui_misc_autoescaping">auto-escaping</link> will be
+              enabled in this template. It depends on the FreeMarker
+              configuration, but usually auto-escaping will be on if the
+              current <link
+              linkend="dgui_misc_autoescaping_outputformat">output
+              format</link> uses auto-escaping by default, so you mostly only
+              use this to disable auto-escaping (<literal>false</literal>
+              value). An attempt to explicitly enable auto-escaping with this
+              parameter when the current output format is a <link
               linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
               format</link> will cause parse-time error.</para>
             </listitem>
@@ -25389,9 +25389,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para>New built-in variable, <literal>.auto_esc</literal>,
-                  returns the boolean value of the
-                  <literal>auto_escaping</literal> setting at the place of
-                  invocation.</para>
+                  returns the boolean that tells if auto-escaping is active at
+                  the place of invocation.</para>
                 </listitem>
 
                 <listitem>

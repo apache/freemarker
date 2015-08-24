@@ -25,11 +25,11 @@ import freemarker.template.Version;
 public final class _ParserConfigurationWithInheritedFormat implements ParserConfiguration {
 
     private final OutputFormat outputFormat;
-    private final Boolean autoEscaping;
+    private final Integer autoEscaping;
     private final ParserConfiguration wrappedPCfg;
 
     public _ParserConfigurationWithInheritedFormat(ParserConfiguration wrappedPCfg, OutputFormat outputFormat,
-            Boolean autoEscaping) {
+            Integer autoEscaping) {
         this.outputFormat = outputFormat;
         this.autoEscaping = autoEscaping;
         this.wrappedPCfg = wrappedPCfg;
@@ -63,8 +63,8 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
         return wrappedPCfg.getIncompatibleImprovements();
     }
 
-    public boolean getAutoEscaping() {
-        return autoEscaping != null ? autoEscaping.booleanValue() : wrappedPCfg.getAutoEscaping();
+    public int getAutoEscaping() {
+        return autoEscaping != null ? autoEscaping.intValue() : wrappedPCfg.getAutoEscaping();
     }
 
     public ArithmeticEngine getArithmeticEngine() {

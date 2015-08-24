@@ -106,6 +106,11 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
     public boolean isOutputFormatMixingAllowed() {
         return false;
     }
+    
+    @Override
+    public boolean isAutoEscapingByDefault() {
+        return true;
+    }
 
     /**
      * Creates a new {@link CommonTemplateMarkupOutputModel} that's bound to this {@link OutputFormat} instance.
