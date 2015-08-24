@@ -7,7 +7,7 @@
       xmlns:ns3="http://www.w3.org/1998/Math/MathML"
       xmlns:ns="http://docbook.org/ns/docbook">
   <info>
-    <title>kFreeMarker Manual</title>
+    <title>FreeMarker Manual</title>
 
     <titleabbrev>Manual</titleabbrev>
 
@@ -1139,7 +1139,8 @@ brown</programlisting>
               </listitem>
 
               <listitem>
-                <para>Markup output [TODO]</para>
+                <para><link linkend="dgui_datamodel_markupoutput">Markup
+                output</link></para>
               </listitem>
             </itemizedlist>
           </listitem>
@@ -1519,6 +1520,38 @@ The average of the price of a python and an elephant is:
             retrieving the topological and metainformations is described <link
             linkend="ref_builtins_node">in a later chapter</link> (that you
             don't have to understand at this point).</para>
+          </section>
+
+          <section xml:id="dgui_datamodel_markupoutput">
+            <title>Markup output</title>
+
+            <indexterm>
+              <primary>markup output</primary>
+
+              <secondary>the FTL value type</secondary>
+            </indexterm>
+
+            <para>This type is related to <link
+            linkend="dgui_misc_autoescaping">auto-escaping mechanism</link>
+            introduced FreeMarker 2.3.24; you can <link
+            linkend="dgui_misc_autoescaping_movalues">read about this type
+            there</link>. But in short, this is a value that stores text
+            that's already in the output markup format (like HTML, XML, RTF,
+            etc.), and hence must not be auto-escaped.</para>
+
+            <para>Values of this type are usually produced inside the
+            templates (like with <link
+            linkend="ref_builtin_no_esc"><literal>no_esc</literal>
+            built-in</link> or <link linkend="ref_directive_assign">output
+            capturing assignments</link>), but can also be part of the
+            data-model. Such values in the data-model are useful for example
+            if you have message resources that sometimes contain the message
+            in HTML format, rather than in plain text. If the data-model uses
+            HTML markup output values for those messages instead of strings,
+            then the template author need not know which messages contain HTML
+            and which plain text, as double escaping will be avoided
+            automatically when the message is inserted with
+            <literal>${<replaceable>...</replaceable>}</literal>.</para>
           </section>
         </section>
       </section>
@@ -1931,7 +1964,7 @@ The average of the price of a python and an elephant is:
                 <listitem>
                   <para><link
                   linkend="dgui_template_exp_stringop_interpolation">Interpolation
-                  (or concatenation)</link>:
+                  and concatenation</link>:
                   <literal>"Hello ${user}!"</literal> (or <literal>"Hello
                   " + user + "!"</literal>)</para>
                 </listitem>
@@ -2676,7 +2709,7 @@ baz
           </indexterm>
 
           <section xml:id="dgui_template_exp_stringop_interpolation">
-            <title>Interpolation (or concatenation)</title>
+            <title>Interpolation and concatenation</title>
 
             <indexterm>
               <primary>interpolation</primary>
@@ -2712,13 +2745,19 @@ baz
             deprecated <literal>#{<replaceable>...</replaceable>}</literal>)
             in string literals.
             <literal>${<replaceable>...</replaceable>}</literal> in string
-            literals <link linkend="dgui_template_valueinsertion">behaves as
-            in <phrase role="markedText">text</phrase> sections</link> (so it
-            goes through the same <emphasis>locale sensitive</emphasis> number
-            and date/time formatting), except that it never go through <link
-            linkend="ref.directive.escape">automatic escaping</link>.</para>
+            literals <link linkend="dgui_template_valueinsertion">behaves
+            similarly as in <phrase role="markedText">text</phrase>
+            sections</link> (so it goes through the same <emphasis>locale
+            sensitive</emphasis> number and date/time formatting), except that
+            no automatic escaping will happen (the deprecated <link
+            linkend="ref.directive.escape">escaping by
+            <literal>escape</literal> directive</link> has no effect there,
+            nor <link linkend="dgui_misc_autoescaping">auto-escaping</link>
+            happens as <link
+            linkend="dgui_misc_autoescaping_stringliteral">explained
+            here</link>).</para>
 
-            <para>Example (assume that user is ``Big Joe''):</para>
+            <para>Example (assume that user is <quote>Big Joe</quote>):</para>
 
             <programlisting role="template">&lt;#assign s = "Hello ${user}!"&gt;
 ${s} &lt;#-- Just to see what the value of s is --&gt;
@@ -2747,23 +2786,25 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
               boolean value, so it will cause a runtime error.</para>
             </warning>
 
-            <para>Alternatively, you can use the <literal>+</literal> operator
-            to achieve similar result:</para>
+            <para
+            xml:id="dgui_template_exp_stringop_concatenation">Alternatively,
+            you can use the <literal>+</literal> operator to achieve similar
+            result:</para>
 
             <programlisting role="template">&lt;#assign s = "Hello " + user + "!"&gt;</programlisting>
 
-            <para>This gives the same result as the example with the
+            <para>This gives the same result as the earlier example with the
             <literal>${<replaceable>...</replaceable>}</literal>.</para>
 
             <warning>
-              <para>Because <literal>+</literal> follows the same rules as
+              <para>Because <literal>+</literal> follows similar rules as
               <literal>${<replaceable>...</replaceable>}</literal>, the
               appended string is influenced by the <literal>locale</literal>,
               <literal>number_format</literal>,
               <literal>date_format</literal>, <literal>time_format</literal>,
               <literal>datetime_format</literal> and
               <literal>boolean_format</literal>, etc. settings, and thus the
-              result targets humans and isn't in generally machine parsable.
+              result targets humans and isn't in generally machine parseable.
               This mostly leads to problems with numbers, as many locales use
               grouping (thousands separators) by default, and so
               <literal>"someUrl?id=" + id</literal> becomes to something like
@@ -2774,6 +2815,17 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
               something like <literal>"someUrl?id=1234"</literal>, regardless
               of locale and format settings.</para>
             </warning>
+
+            <para>Note for advanced users that <literal>+</literal> is more
+            flexible than <literal>${<replaceable>...</replaceable>}</literal>
+            when it comes to handling <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link>, because <link
+            linkend="dgui_misc_autoescaping_concatenation"><literal>+</literal>
+            can have markup output result</link>, while <link
+            linkend="dgui_misc_autoescaping_stringliteral">string literal
+            interpolation can't</link>, as the literal must yield a
+            string.</para>
           </section>
 
           <section xml:id="dgui_template_exp_get_character">
@@ -5427,7 +5479,7 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
           blocks too.</para>
         </section>
 
-        <section xml:id="dpgu_misc_autoescaping_movalues">
+        <section xml:id="dgui_misc_autoescaping_movalues">
           <title><quote>Markup output</quote> values</title>
 
           <para>In FTL, <link linkend="dgui_datamodel_basics">values has
@@ -5469,8 +5521,6 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
   &lt;/div&gt;
 &lt;/#macro&gt;</programlisting>
 
-          <para>which will output this:</para>
-
           <programlisting role="output">  &lt;div class="infoBox"&gt;
     Foo &amp;amp; bar
   &lt;/div&gt;
@@ -5486,9 +5536,7 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
 Just a string: ${"&lt;b&gt;Test&lt;/b&gt;"}
 Captured output: ${captured}</programlisting>
 
-          <para>which outputs:</para>
-
-          <programlisting role="template">Just a string: &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
+          <programlisting role="output">Just a string: &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
 Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
 
           <para>because the captured output is markup output, so it won't be
@@ -5520,8 +5568,6 @@ Double escaping:
 ${markupOutput1?markup}
 ${markupOutput2?markup}</programlisting>
 
-          <para>outputs:</para>
-
           <programlisting role="output">As expected:
 &lt;b&gt;Test&lt;/b&gt;
 Foo &amp;amp; bar
@@ -5544,7 +5590,7 @@ Foo &amp;amp;amp; bar</programlisting>
             <literal>plainText</literal> format.</para>
 
             <para>These formats produce no <link
-            linkend="dpgu_misc_autoescaping_movalues">markup output
+            linkend="dgui_misc_autoescaping_movalues">markup output
             values</link>, hence you can't use <literal>?esc</literal> or
             <literal>?noesc</literal> either when they are the current format.
             You can use output capturing (like <literal>&lt;#assign
@@ -5563,23 +5609,129 @@ Foo &amp;amp;amp; bar</programlisting>
             linkend="gloss.parseTimeError">parse-time error</link>.</para>
           </section>
 
-          <section>
-            <title>Mixing in markup output values from other markups</title>
+          <section xml:id="dgui_misc_autoescaping_mixingoutputformats">
+            <title>Inserting markup output values from other markups</title>
 
-            <para>[TODO]</para>
+            <para>Each <link linkend="dgui_misc_autoescaping_movalues">markup
+            output value</link> has an associated output format. When a markup
+            output value is inserted with
+            <literal>${<replaceable>...</replaceable>}</literal> (or
+            <literal>#{<replaceable>...</replaceable>}</literal>), it has to
+            be converted to the current output format at the point of
+            insertion (if they differ). As of this writing (2.3.24), such
+            output format conversion will only be successful if the value to
+            convert was created by escaping plain text:</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;#assign mo1 = "Foo's bar {}"?esc&gt;
+HTLM: ${mo1}
+XML:  &lt;#outputformat 'XML'&gt;${mo1}&lt;/#outputformat&gt;
+RTF:  &lt;#outputformat 'RTF'&gt;${mo1}&lt;/#outputformat&gt;
+
+&lt;#assign mo2&gt;&lt;p&gt;Test&lt;/#assign&gt;
+HTML: ${mo2}
+XML:  &lt;#attempt&gt;&lt;#outputformat 'XML'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;
+RTF:  &lt;#attempt&gt;&lt;#outputformat 'RTF'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
+
+            <programlisting role="output">HTLM: Foo&amp;#39;s bar {}
+XML:  Foo&amp;apos;s bar {}
+RTF:  Foo's bar \{\}
+
+HTML: &lt;p&gt;Test
+XML:  Failed
+RTF:  Failed</programlisting>
+
+            <para>But, an output format can chose to insert pieces of other
+            output formats as is, without converting them. Among the standard
+            output formats, <literal>undefined</literal> is like that, which
+            is the output format used for templates for which no output format
+            was specified in the configuration:</para>
+
+            <programlisting role="template">&lt;#outputformat "HTML"&gt;&lt;#assign htmlMO&gt;&lt;p&gt;Test&lt;/#assign&gt;&lt;/#outputformat&gt;
+&lt;#outputformat "XML"&gt;&lt;#assign xmlMO&gt;&lt;p&gt;Test&lt;/p&gt;&lt;/#assign&gt;&lt;/#outputformat&gt;
+&lt;#outputformat "RTF"&gt;&lt;#assign rtfMO&gt;\par Test&lt;/#assign&gt;&lt;/#outputformat&gt;
+&lt;#-- We assume that we have "undefined" output format here. --&gt;
+HTML: ${htmlMO}
+XML:  ${xmlMO}
+RTF:  ${rtfMO}</programlisting>
+
+            <programlisting role="output">HTML: &lt;p&gt;Test
+XML:  &lt;p&gt;Test&lt;/p&gt;
+RTF:  \par Test</programlisting>
           </section>
 
-          <section>
-            <title>Interpolations inside string literals</title>
+          <section xml:id="dgui_misc_autoescaping_stringliteral">
+            <title>Auto-escaping and ${...} inside string literals</title>
 
-            <para>[TODO]</para>
+            <para>Inside string literals (quoted text expressions), the output
+            format is <literal>plainText</literal>. Thus no auto-escaping will
+            occur there:</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+&lt;#assign s = "Foo &amp; bar"&gt;
+${s}
+${"${s} &amp; baz"}</programlisting>
+
+            <programlisting role="output">Foo &amp;amp; bar
+Foo &amp;amp; bar &amp;amp; baz</programlisting>
+
+            <para>Above, because inside the string literal
+            <literal>${s}</literal> did no auto-escaping, when we print the
+            whole string we don't end up with double-escaping.</para>
+
+            <para>The <literal>plainText</literal> output format only allows
+            the inserting of markup output values that were created by
+            escaping plain text
+            (<literal><replaceable>plainText</replaceable>?esc</literal>), as
+            those are trivially convertible back to plain text. Thus only such
+            markup output values can be insert into string literals with
+            <literal>${<replaceable>...</replaceable>}</literal> (the
+            <literal>+</literal> operator is more flexible, but see that
+            later):</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;#-- Markup output value created by escaping plain text: --&gt;
+&lt;#assign mo1 = "Foo &amp; bar"?esc&gt;
+
+&lt;#-- Markup output value created outherwise: --&gt;
+&lt;#assign mo2 = "&lt;p&gt;Foo"?no_esc&gt;
+
+${"${mo1} baz"}
+&lt;#attempt&gt;${"${mo2} baz"}&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
+
+            <programlisting role="output">Foo &amp;amp; bar baz
+Failed</programlisting>
           </section>
 
-          <section>
+          <section xml:id="dgui_misc_autoescaping_concatenation">
             <title>Markup output values and the <quote>+</quote>
             operator</title>
 
-            <para>[TODO]</para>
+            <para>As you certainly know, if one of the sides of the
+            <literal>+</literal> operator is a string, <link
+            linkend="dgui_template_exp_stringop_concatenation">it does
+            concatenation</link>. If there's a <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            value</link> in one side, the other side gets promoted to markup
+            output value of the same output format (if it's not already that),
+            by escaping its string value, and finally concatenating the two
+            markups. For example:</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
+
+            <programlisting role="output">&lt;h1&gt;Foo &amp;amp; bar&lt;/h1&gt;</programlisting>
+
+            <para>If the two side of the <literal>+</literal> operator are
+            markup values of different formats, the left side operand is
+            converted to the output format of the right side, if that's not
+            possible, then the right side operand to the format of the left
+            side, and if neither was possible, that's an error. (See the <link
+            linkend="dgui_misc_autoescaping_mixingoutputformats">limitations
+            of conversions here</link>.)</para>
           </section>
 
           <section>
@@ -12037,7 +12189,7 @@ ${s?esc} &lt;#-- ?esc is redundant here --&gt;</programlisting>
 R&amp;amp;D</programlisting>
 
           <para>This built-in works by converting the string value to a <link
-          linkend="dpgu_misc_autoescaping_movalues">markup output
+          linkend="dgui_misc_autoescaping_movalues">markup output
           value</link>, by escaping the string with the current output format,
           and using the result as the markup. The resulting markup output
           value belongs to the current output format at the point of the
@@ -12643,7 +12795,7 @@ ${s?no_esc}</programlisting>
 &lt;b&gt;Test&lt;/b&gt;</programlisting>
 
           <para>This works by converting the string value to a <link
-          linkend="dpgu_misc_autoescaping_movalues">markup output
+          linkend="dgui_misc_autoescaping_movalues">markup output
           value</link>, which uses the string as the markup as is, and belongs
           to the current <link
           linkend="dgui_misc_autoescaping_outputformat">output format</link>
@@ -16559,7 +16711,7 @@ Sorted by name.last:
           </note>
 
           <para>Returns the markup stored inside a <link
-          linkend="dpgu_misc_autoescaping_movalues">markup output value</link>
+          linkend="dgui_misc_autoescaping_movalues">markup output value</link>
           as string. This is useful if the value has to be passed to a Java
           method for a <literal>String</literal> parameter, or if we want to
           manipulate the markup directly in the template. Note that the
@@ -25054,34 +25206,40 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>template_configurers</literal>. This allows overriding
               the settings coming from the shared
               <literal>Configuration</literal> object for individual
-              templates, based on template name patterns. [TODO describe this
-              more, link to example]</para>
+              templates, based on template name patterns. <link
+              linkend="pgui_config_templateconfigurers">See more
+              here...</link></para>
             </listitem>
 
             <listitem>
               <para>Added new configuration setting:
               <literal>output_format</literal>. This specifies the name of the
-              output format (such as <literal>HTML</literal>,
+              <link linkend="dgui_misc_autoescaping_outputformat">output
+              format</link> (such as <literal>HTML</literal>,
               <literal>XML</literal>, <literal>plainText</literal>, etc.) that
-              governs the new auto-escaping mechanism. The output format can
-              be different for different templates, using the
-              <literal>template_configurers</literal> setting. [TODO describe
-              this more]</para>
+              governs the <link linkend="dgui_misc_autoescaping">new
+              auto-escaping mechanism</link>. The output format can be
+              different for different templates, using the
+              <literal>template_configurers</literal> setting (<link
+              linkend="pgui_config_outputformatsautoesc">see that
+              here...</link>).</para>
             </listitem>
 
             <listitem>
               <para>Added new configuration setting:
               <literal>recognize_standard_file_extensions</literal>. When
               <literal>true</literal>, templates whose source name ends with
-              <literal>ftlh</literal> file extension will get
-              <literal>HTML</literal> <literal>output_format</literal>, and
-              those with <literal>ftlx</literal> file extension automatically
-              get <literal>XML</literal> <literal>output_format</literal>, in
-              both cases with <literal>auto_escaping</literal> on. If <link
+              <literal>".ftlh"</literal> will get <literal>HTML</literal>
+              <literal>output_format</literal>, and those whose name ends with
+              <literal>".ftlx"</literal> get <literal>XML</literal>
+              <literal>output_format</literal>, in both cases with
+              <literal>auto_escaping</literal> on. If <link
               linkend="pgui_config_incompatible_improvements_how_to_set">the
               <literal>incompatible_improvements</literal> setting</link> is
               set to 2.3.24 (or higher) then this setting defaults to
-              <literal>true</literal>.</para>
+              <literal>true</literal>. Otherwise it's
+              <literal>false</literal>, but enabling it is highly
+              recommended.</para>
             </listitem>
 
             <listitem>
@@ -35527,6 +35685,20 @@ Dekany, and Jonathan Revusky.</programlisting>
         <literal>&lt;/#macro&gt;</literal>. This template fragment will be
         executed when you call the macro (for example as
         <literal>&lt;@myMacro/&gt;</literal>).</para>
+      </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss.markupOutputValue">
+      <glossterm>Markup output value</glossterm>
+
+      <glossdef>
+        <para>A value with FTL type <quote>markup output</quote>. This type is
+        related to <link linkend="dgui_misc_autoescaping">auto-escaping
+        mechanism</link>; you can <link
+        linkend="dgui_misc_autoescaping_movalues">read about this type
+        there</link>. But in short, this is a value that stores text that's
+        already in the output markup format (like HTML, XML, RTF, etc.), and
+        hence must not be auto-escaped.</para>
       </glossdef>
     </glossentry>
 
