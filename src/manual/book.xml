@@ -12401,7 +12401,7 @@ R&amp;amp;D</programlisting>
         </section>
 
         <section xml:id="ref_builtin_html">
-          <title>html</title>
+          <title>html (deprecated)</title>
 
           <indexterm>
             <primary>escaping</primary>
@@ -12412,6 +12412,18 @@ R&amp;amp;D</programlisting>
           <indexterm>
             <primary>html built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses HTML <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <para>The string as HTML markup. That is, the string with
           all:</para>
@@ -13189,7 +13201,19 @@ foobar</programlisting>
         </section>
 
         <section xml:id="ref_builtin_rtf">
-          <title>rtf</title>
+          <title>rtf (deprecated)</title>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses RTF <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <indexterm>
             <primary>rtf built-in</primary>
@@ -13645,7 +13669,19 @@ ${x?url}</programlisting>
         </section>
 
         <section xml:id="ref_builtin_xhtml">
-          <title>xhtml</title>
+          <title>xhtml (deprecated)</title>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses HTML <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <indexterm>
             <primary>xhtml built-in</primary>
@@ -13691,7 +13727,7 @@ ${x?url}</programlisting>
           built-in escapes <literal>'</literal> as
           <literal>&amp;#39;</literal> instead of as
           <literal>&amp;apos;</literal>, because some older browsers don't
-          interpret <literal>&amp;apos;</literal> correctly.</para>
+          know <literal>&amp;apos;</literal>.</para>
 
           <warning>
             <para>When inserting the value of an attribute, always quote it,
@@ -13704,7 +13740,19 @@ ${x?url}</programlisting>
         </section>
 
         <section xml:id="ref_builtin_xml">
-          <title>xml</title>
+          <title>xml (deprecated)</title>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses XML and HTML <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <indexterm>
             <primary>xml built-in</primary>
@@ -16612,19 +16660,21 @@ Sorted by name.last:
           </indexterm>
 
           <para>It is <literal>true</literal> if the variable exists (and
-          isn't Java <literal>null</literal>) and is not ``empty'', otherwise
-          it is <literal>false</literal>. The meaning of ``empty'' depends on
-          the concrete case. This follows intuitive common-sense ideas. The
-          following are empty: a string with 0 length, sequence or hash with
-          no sub variables, a collection which has passed the last element. If
-          the value is not a string or sequence or hash or collection, then it
-          counts as non-empty if it's a number or a date or a boolean (e.g.
-          <literal>0</literal> and <literal>false</literal> are not empty),
-          otherwise it counts as empty. Note that when your data-model
-          implements multiple template model interfaces you may get unexpected
-          results. However, when in doubt you can use always use
-          <literal>expr!?size &gt; 0</literal> or <literal>expr!?length &gt;
-          0</literal> instead of <literal>expr?has_content</literal>.</para>
+          isn't Java <literal>null</literal>) and is not <quote>empty</quote>,
+          otherwise it is <literal>false</literal>. The meaning of
+          <quote>empty</quote> depends on the concrete case. This follows
+          intuitive common-sense ideas. The following are empty: a string with
+          0 length, a <link linkend="dgui_misc_autoescaping_movalues">markup
+          output value</link> with 0 length markup, a sequence or hash with no
+          sub variables, a collection which has passed the last element. If
+          the value is not of any of these types, then it counts as non-empty
+          if it's a number or a date or a boolean (e.g. <literal>0</literal>
+          and <literal>false</literal> are not empty), otherwise it counts as
+          empty. Note that when your data-model implements multiple template
+          model interfaces you may get unexpected results. However, when in
+          doubt you can use always use <literal>expr!?size &gt; 0</literal> or
+          <literal>expr!?length &gt; 0</literal> instead of
+          <literal>expr?has_content</literal>.</para>
 
           <para>This buit-in is exceptional in that you can use the
           parentheses trick like with the <link
@@ -18042,12 +18092,13 @@ m2: &amp;lt;test&amp;gt;</programlisting>
               configuration setting
               (<literal>Configuration.setRegisteredCustomOutputFormats(<replaceable>...</replaceable>)</literal>).
               The referred output format must be known by the
-              <literal>Configuration</literal>, or else a parse-time error
-              will occur. The name can also refer to a so called combined
-              output format as
+              <literal>Configuration</literal>, or else a <link
+              linkend="gloss.parseTimeError">parse-time error </link>will
+              occur. The name can also refer to a so called combined output
+              format as
               <literal>"<replaceable>outerFormatName</replaceable>{<replaceable>innerFormatName</replaceable>}"</literal>;
-              <link linkend="topic.combinedOutputFormats">see combined output
-              formats here</link>.</para>
+              <link linkend="topic.combinedOutputFormats">see more about
+              combined output formats here</link>.</para>
             </listitem>
 
             <listitem>
@@ -21577,6 +21628,16 @@ There was no specific handler for node y
           Usage examples: "<literal>Page generated: ${.now}</literal>",
           "<literal>Today is ${.now?date}</literal>", "<literal>The current
           time is ${.now?time}</literal>".</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
+              <primary>output format</primary>
+            </indexterm> Returns the name of the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>.
+          This value is never missing/null. It's maybe the string
+          <literal>"undefined"</literal>, which is just the name of the
+          default output format.</para>
         </listitem>
 
         <listitem>
@@ -25283,6 +25344,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>New FTL type, <quote>markup output</quote>. This is
+                  somewhat similar to string, but values of this type aren't
+                  auto-escaped by the new escaping mechanism, because they are
+                  known to already hold markup. (For example,
+                  <literal>?esc</literal> and <literal>?no_esc</literal>
+                  returns a value of this type, hence their results are
+                  protected from double-escaping problems.)</para>
+                </listitem>
+
+                <listitem>
                   <para>New built-in: <link
                   linkend="ref_builtin_esc"><literal>esc</literal></link>.
                   Used for escaping with the current output format when
@@ -25290,15 +25361,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>New directive: <literal>outputFormat</literal>, used
+                  <para>Added new built-in: <literal>markup</literal>. This
+                  returns the markup of a <link
+                  linkend="dgui_misc_autoescaping_movalues">markup output
+                  value</link> as a string.</para>
+                </listitem>
+
+                <listitem>
+                  <para>New directive: <literal>outputformat</literal>, used
                   to change the output format for a section of a template,
                   like <literal>&lt;#outputformat
                   "XML"&gt;<replaceable>...</replaceable>&lt;/#outputformat&gt;</literal></para>
                 </listitem>
 
                 <listitem>
-                  <para>New directives: <literal>noAutoEsc</literal> and
-                  <literal>autoEsc</literal>, used to turn auto-escaping off
+                  <para>New directives: <literal>noautoesc</literal> and
+                  <literal>autoesc</literal>, used to turn auto-escaping off
                   and on for a section of a template, like
                   <literal>&lt;#noautoesc&gt;<replaceable>...</replaceable>&lt;/#noautoesc&gt;</literal>.</para>
                 </listitem>
@@ -25314,16 +25392,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   returns the boolean value of the
                   <literal>auto_escaping</literal> setting at the place of
                   invocation.</para>
-                </listitem>
-
-                <listitem>
-                  <para>New FTL type, <quote>markup output</quote>. This is
-                  somewhat similar to string, but values of this type aren't
-                  auto-escaped by the new escaping mechanism, because they are
-                  known to already hold markup. (For example,
-                  <literal>?esc</literal> and <literal>?noEsc</literal>
-                  returns a value of this type, hence their results are
-                  protected from double-escaping problems.)</para>
                 </listitem>
 
                 <listitem>
@@ -25346,9 +25414,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new built-in: <literal>markup</literal>. This
-                  returns the markup of a value of <quote>markup
-                  output</quote> type as a string.</para>
+                  <para>The <literal>has_content</literal> built-in now
+                  supports markup output values, considering 0 length markup
+                  as empty.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
