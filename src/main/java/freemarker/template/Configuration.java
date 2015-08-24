@@ -1221,13 +1221,15 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
-     * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the (
-     * {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat}) for templates based on their file
+     * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
+     * {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} for templates based on their file
      * extension or parent directory.
      * 
      * <p>
      * Note that the settings suggested by standard file extensions are stronger than that you set here. See
      * {@link #setRecognizeStandardFileExtensions(boolean)} for more information about standard file extensions.
+     * 
+     * <p>See "Template configurers" in the FreeMarker Manual for examples.
      * 
      * @since 2.3.24
      */

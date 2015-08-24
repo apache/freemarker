@@ -8737,20 +8737,30 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
             what connects <literal>TemplateConfigurer</literal> and
             <literal>TemplateSourceMatcher</literal> together. This is the
             Java type of the <literal>template_configurers</literal> setting.
-            For example, this setup combines our earlier two examples, causing
-            all templates with <literal>xml</literal> extension to get UTF-8
-            encoding and XML output format:</para>
+            See the examples below for more.</para>
+          </listitem>
+        </itemizedlist>
 
-            <programlisting role="unspecified">cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(
-        new FileExtensionMatcher("xml"), tcUTF8XML));</programlisting>
+        <simplesect>
+          <title>Example 1</title>
 
-            <para>The same configuring is also doable if you don't have access
-            to the configuring Java code, but only to a Java
-            <literal>*.properties</literal> file or other kind of
-            string-string key value pairs (the <literal>\</literal>-s are
-            prescribed by the Java Properties file format):</para>
+          <para>This setup combines our earlier two example object with a
+          <literal>ConditionalTemplateConfigurerFactory</literal>, causing all
+          templates with <literal>xml</literal> extension to get UTF-8
+          encoding and XML output format:</para>
 
-            <programlisting role="unspecified">templateConfigurers = \
+          <programlisting role="unspecified">cfg.setTemplateConfigurers(
+        new ConditionalTemplateConfigurerFactory(
+                new FileExtensionMatcher("xml"),
+                tcUTF8XML));</programlisting>
+
+          <para>The same configuring is also doable if you don't have access
+          to the configuring Java code, but only to a Java
+          <literal>*.properties</literal> file or other kind of string-string
+          key value pairs (the <literal>\</literal>-s are prescribed by the
+          Java Properties file format):</para>
+
+          <programlisting role="unspecified">templateConfigurers = \
     ConditionalTemplateConfigurerFactory( \
         FileExtensionMatcher("xml"), \
         TemplateConfigurer( \
@@ -8758,10 +8768,173 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
             outputFormat = XMLOutputFormat() \
         ) \
     )</programlisting>
-          </listitem>
-        </itemizedlist>
+        </simplesect>
 
-        <para>Let's take a more complex example. [TODO]</para>
+        <simplesect>
+          <title>Example 2</title>
+
+          <para>Let's say you only need to handle templates in the
+          <literal>mail</literal> directory specially, other templates can use
+          the setting coming from the shared <literal>Configuration</literal>
+          singleton. The names of templates there must contain
+          <literal>".subject."</literal> or <literal>".body."</literal>.
+          Subject templates must get <literal>plainText</literal> output
+          format, while body templates must get <literal>HTML</literal> output
+          format. So we have to make a choice here, and that's when you need a
+          <literal>FirstMatchTemplateConfigurerFactory</literal>.</para>
+
+          <para>Assuming <literal>cfg</literal> stores the shared
+          <literal>Configuration</literal> singleton, you set this up like
+          this:</para>
+
+          <programlisting role="unspecified">cfg.setTemplateConfigurers(
+        new ConditionalTemplateConfigurerFactory(
+                new PathGlobMatcher("mail/**"),
+                new FirstMatchTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurerFactory(
+                                new FileNameGlobMatcher("*.subject.*"),
+                                tcSubject),
+                        new ConditionalTemplateConfigurerFactory(
+                                new FileNameGlobMatcher("*.body.*"),
+                                tcBody)
+                        )
+                        .noMatchErrorDetails(
+                                "Mail template names must contain \".subject.\" or \".body.\"!")
+                ));</programlisting>
+
+          <para>The equivalent configuration using a Java
+          <literal>*.properties</literal> file or other kind of string-string
+          key value pairs (the <literal>\</literal>-s are prescribed by the
+          Java Properties file format only):</para>
+
+          <programlisting role="unspecified">templateConfigurers = \
+    ConditionalTemplateConfigurerFactory( \
+        PathGlobMatcher("mail/**"), \
+        FirstMatchTemplateConfigurerFactory( \
+            ConditionalTemplateConfigurerFactory( \
+                FileNameGlobMatcher("*.subject.*"), \
+                TemplateConfigurer(outputFormat = PlainTextOutputFormat()) \
+            ), \
+            ConditionalTemplateConfigurerFactory( \
+                FileNameGlobMatcher("*.body.*"), \
+                TemplateConfigurer(outputFormat = HTMLOutputFormat()) \
+            ), \
+            noMatchErrorDetails = 'Mail template names must contain ".subject." or ".body."!' \
+        ) \
+    )</programlisting>
+        </simplesect>
+
+        <simplesect>
+          <title>Example 3</title>
+
+          <para>Let's say you want the following deviations from the shared
+          <literal>Configuration</literal> settings in your
+          application:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>All templates whose name contains
+              <literal>".stats."</literal> should use ISO date/time format and
+              UTC time zone</para>
+            </listitem>
+
+            <listitem>
+              <para>All templates inside the <literal>mail</literal> directory
+              should use UTF-8 encoding</para>
+            </listitem>
+
+            <listitem>
+              <para>Templates with <literal>xml</literal> file extension
+              should use XML <literal>output_format</literal>, templates with
+              <literal>html</literal> or <literal>htm</literal> extension
+              should use HTML output format. For other templates, the shared
+              <literal>Configuration</literal> can dictate the
+              <literal>output_format</literal>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Here we have 3 independent concerns, and possibly multiple (or
+          none) of those apply to a template; that's when you need a
+          <literal>MergingTemplateConfigurerFactory</literal>. The last point
+          describes a rule where you have mutually exclusive choices; that's
+          when you need a
+          <literal>FirstMatchTemplateConfigurerFactory</literal>, but this
+          time no choice is also allowed. Here's the source code, assuming
+          <literal>cfg</literal> stores the shared
+          <literal>Configuration</literal> instance:</para>
+
+          <programlisting role="unspecified">TemplateConfigurer tcStats = new TemplateConfigurer();
+tcStats.setDateTimeFormat("iso");
+tcStats.setDateFormat("iso");
+tcStats.setTimeFormat("iso");
+tcStats.setTimeZone(DateUtil.UTC);
+
+TemplateConfigurer tcMail = new TemplateConfigurer();
+tcMail.setEncoding("utf-8");
+
+TemplateConfigurer tcHTML = new TemplateConfigurer();
+tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+TemplateConfigurer tcXML = new TemplateConfigurer();
+tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurers(
+        new MergingTemplateConfigurerFactory(
+                new ConditionalTemplateConfigurerFactory(
+                        new FileNameGlobMatcher("*.stats.*"),
+                        tcStats),
+                new ConditionalTemplateConfigurerFactory(
+                        new PathGlobMatcher("mail/**"),
+                        tcMail),
+                new FirstMatchTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurerFactory(
+                                new FileExtensionMatcher("xml"),
+                                tcXML),
+                        new ConditionalTemplateConfigurerFactory(
+                                new OrMatcher(
+                                        new FileExtensionMatcher("html"),
+                                        new FileExtensionMatcher("htm")),
+                                tcHTML)
+                ).allowNoMatch(true)
+        )
+);</programlisting>
+
+          <para>The equivalent configuration using a Java
+          <literal>*.properties</literal> file or other kind of string-string
+          key value pairs (the <literal>\</literal>-s are prescribed by the
+          Java Properties file format only):</para>
+
+          <programlisting role="unspecified">templateConfigurers = \
+    MergingTemplateConfigurerFactory( \
+        ConditionalTemplateConfigurerFactory( \
+            FileNameGlobMatcher("*.stats.*"), \
+            TemplateConfigurer( \
+                dateTimeFormat = "iso", \
+                dateFormat = "iso", \
+                timeFormat = "iso", \
+                timeZone = TimeZone("UTC") \
+            ) \
+        ), \
+        ConditionalTemplateConfigurerFactory( \
+            PathGlobMatcher("mail/**"), \
+            TemplateConfigurer(encoding = "utf-8") \
+        ), \
+        FirstMatchTemplateConfigurerFactory( \
+            ConditionalTemplateConfigurerFactory( \
+                FileExtensionMatcher("xml"), \
+                TemplateConfigurer(outputFormat = XMLOutputFormat()) \
+            ), \
+            ConditionalTemplateConfigurerFactory( \
+                OrMatcher( \
+                    FileExtensionMatcher("html"), \
+                    FileExtensionMatcher("htm") \
+                ), \
+                TemplateConfigurer(outputFormat = HTMLOutputFormat()) \
+            ), \
+            allowNoMatch = true \
+        ) \
+    )</programlisting>
+        </simplesect>
       </section>
 
       <section xml:id="pgui_config_outputformatsautoesc">
