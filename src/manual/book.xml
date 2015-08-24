@@ -5377,14 +5377,17 @@ ${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
           <title>Disabling auto escaping</title>
 
           <para>For a single interpolation you can disable auto-escaping with
-          <literal>?no_esc</literal> [TODO ref link]:</para>
+          <link
+          linkend="ref_builtin_no_esc"><literal>?no_esc</literal></link>:</para>
 
           <programlisting role="template">&lt;#-- Let's assume we have "HTML" output format by default. --&gt;
 ${'&lt;b&gt;test&lt;/b&gt;'}  &lt;#-- prints: &amp;lt;b&amp;gt;test&amp;lt;/b&amp;gt; --&gt;
 ${'&lt;b&gt;test&lt;/b&gt;'<emphasis>?no_esc</emphasis>}  &lt;#-- prints: &lt;b&gt;test&lt;/b&gt; --&gt;</programlisting>
 
           <para>You can also disable auto escaping for a whole section with
-          the <literal>noautoesc</literal> directive [TODO ref link]:</para>
+          the <link
+          linkend="ref_directive_noautoesc"><literal>noautoesc</literal>
+          directive</link>:</para>
 
           <programlisting role="template">${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
 <emphasis>&lt;#noautoesc&gt;</emphasis>
@@ -5399,8 +5402,9 @@ ${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
 
           <para>Auto-escaping can also be disabled fort the whole template in
           the <literal>ftl</literal> header. It can be re-enabled for a
-          section with the <literal>autoesc</literal> directive [TODO ref
-          link]:</para>
+          section with the <link
+          linkend="ref_directive_autoesc"><literal>autoesc</literal>
+          directive</link>:</para>
 
           <programlisting role="template">&lt;#ftl <emphasis>autoesc=false</emphasis>&gt;
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
@@ -5411,8 +5415,8 @@ ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;</programlisting>
 
           <para>You can also force escaping for an individual interpolation
-          when escaping is disabled with <literal>?esc</literal> [TODO ref
-          link]:</para>
+          when escaping is disabled with <link
+          linkend="ref_builtin_esc"><literal>?esc</literal></link>:</para>
 
           <programlisting role="template">&lt;#ftl <emphasis>autoesc=false</emphasis>&gt;
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
@@ -5555,8 +5559,8 @@ Foo &amp;amp;amp; bar</programlisting>
 
             <para>Note that as the output format is already known during
             template parsing (i.e., earlier then execution), using constructs
-            that aren't supported by the current output format will give error
-            during parsing.</para>
+            that aren't supported by the current output format will give <link
+            linkend="gloss.parseTimeError">parse-time error</link>.</para>
           </section>
 
           <section>
@@ -8645,9 +8649,10 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
         <literal>auto_escaping</literal>, which can be used to disable
         auto-escaping even if the current output format supports it. Using it
         is rarely advisable; disabling auto escaping normally happens inside
-        the template with the <literal>noautoesc</literal> directive [TODO ref
-        link]. None the less, it can be associated to templates just like the
-        output format.</para>
+        the template with the <link
+        linkend="ref_directive_autoesc"><literal>noautoesc</literal>
+        directive</link>. None the less, it can be associated to templates
+        just like the output format.</para>
 
         <para>To check if you have configured FreeMarker properly, you can use
         this template:</para>
@@ -11277,6 +11282,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_esc">esc</link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_ends_with">ends_with</link></para>
           </listitem>
@@ -11467,6 +11476,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_markup">markup</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_matches">matches</link></para>
           </listitem>
 
@@ -11477,6 +11490,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_new">new</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_no_esc">no_esc</link></para>
           </listitem>
 
           <listitem>
@@ -11980,6 +11997,70 @@ Green Mouse</programlisting>
           regular expression, only as plain text, but you want the comparison
           to be case-insensitive, in which case you would use
           <literal>"i"</literal> as the 3rd parameter.</para>
+        </section>
+
+        <section xml:id="ref_builtin_esc">
+          <title>esc</title>
+
+          <para><indexterm>
+              <primary>esc built-in</primary>
+            </indexterm></para>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.24.</para>
+          </note>
+
+          <para>Escapes the value with the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>,
+          and prevents the <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> of the
+          returned value (to avoid double escaping). Because of auto-escaping,
+          you usually only need this where auto-escaping was disabled:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML" <emphasis>auto_esc=false</emphasis>&gt;
+&lt;#assign s = "R&amp;D"&gt;
+${s}
+${s?esc}</programlisting>
+
+          <programlisting role="output">R&amp;D
+R&amp;amp;D</programlisting>
+
+          <para>In templates, where auto-escaping is on, using it is
+          redundant:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML"&gt;
+&lt;#assign s = "R&amp;D"&gt;
+${s}
+${s?esc} &lt;#-- ?esc is redundant here --&gt;</programlisting>
+
+          <programlisting role="output">R&amp;amp;D
+R&amp;amp;D</programlisting>
+
+          <para>This built-in works by converting the string value to a <link
+          linkend="dpgu_misc_autoescaping_movalues">markup output
+          value</link>, by escaping the string with the current output format,
+          and using the result as the markup. The resulting markup output
+          value belongs to the current output format at the point of the
+          invocation.</para>
+
+          <para>This built-in can also be applied on markup output values,
+          which it will bypass without change, as far as the input markup
+          output value belongs to the current output format. If it doesn't,
+          then the markup has to be converted to the current output format,
+          which currently (as of 2.3.24) will be only successful if that value
+          was created by escaping plain text (usually, with
+          <literal>?esc</literal>).</para>
+
+          <para>This built-in can't be used where the current output format is
+          a <link linkend="dgui_misc_autoescaping_nonmarkupof">non-markup
+          output format</link>. An attempt to do so will cause a <link
+          linkend="gloss.parseTimeError">parse-time error</link>.</para>
+
+          <para>This built-in is not related to the deprecated <link
+          linkend="ref_directive_escape"><literal>escape</literal> and
+          <literal>noescape</literal> directives</link>. In fact, the parser
+          will prevent using them on the same place, to prevent
+          confusion.</para>
         </section>
 
         <section xml:id="ref_builtin_groups">
@@ -12536,6 +12617,56 @@ Matching sub-strings:
           the <link linkend="ref_builtin_string_flags">flags</link>. Note that
           it doesn't support flag <literal>f</literal>, and ignores the
           <literal>r</literal> flag.</para>
+        </section>
+
+        <section xml:id="ref_builtin_no_esc">
+          <title>no_esc</title>
+
+          <para><indexterm>
+              <primary>no_esc built-in</primary>
+            </indexterm></para>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.24.</para>
+          </note>
+
+          <para>Prevents the <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> of a value.
+          For example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML"&gt;
+&lt;#assign s = "&lt;b&gt;Test&lt;/b&gt;"&gt;
+${s}
+${s?no_esc}</programlisting>
+
+          <programlisting role="output">&amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
+&lt;b&gt;Test&lt;/b&gt;</programlisting>
+
+          <para>This works by converting the string value to a <link
+          linkend="dpgu_misc_autoescaping_movalues">markup output
+          value</link>, which uses the string as the markup as is, and belongs
+          to the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          at the point of the invocation.</para>
+
+          <para>This built-in can also be applied on markup output values,
+          which it will bypass without change, as far as the input markup
+          output value belongs to current output format. If it doesn't, then
+          the markup has to be converted to the current output format, which
+          currently (as of 2.3.24) will be only successful if that value was
+          created by escaping plain text (usually, with
+          <literal>?esc</literal>).</para>
+
+          <para>This built-in can't be used where the current output format is
+          a <link linkend="dgui_misc_autoescaping_nonmarkupof">non-markup
+          output format</link>. An attempt to do so will cause a <link
+          linkend="gloss.parseTimeError">parse-time error</link>.</para>
+
+          <para>This built-in is not related to the deprecated <link
+          linkend="ref_directive_escape"><literal>escape</literal> and
+          <literal>noescape</literal> directives</link>. In fact, the parser
+          will prevent using them on the same place, to prevent
+          confusion.</para>
         </section>
 
         <section xml:id="ref_builtin_number">
@@ -16416,6 +16547,27 @@ Sorted by name.last:
           </informaltable>
         </section>
 
+        <section xml:id="ref_builtin_markup">
+          <title>markup</title>
+
+          <para><indexterm>
+              <primary>markup built-in</primary>
+            </indexterm></para>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.24.</para>
+          </note>
+
+          <para>Returns the markup stored inside a <link
+          linkend="dpgu_misc_autoescaping_movalues">markup output value</link>
+          as string. This is useful if the value has to be passed to a Java
+          method for a <literal>String</literal> parameter, or if we want to
+          manipulate the markup directly in the template. Note that the
+          resulting string can be converted back to markup output value with
+          <link
+          linkend="ref_builtin_no_esc"><literal>?no_esc</literal></link>.</para>
+        </section>
+
         <section xml:id="ref_builtin_namespace">
           <title>namespace</title>
 
@@ -19519,10 +19671,10 @@ ${"&amp;"}</programlisting>
         <section>
           <title>Description</title>
 
-          <para>``No Trim''. This directive disables <link
+          <para><quote>No Trim</quote>. This directive disables <link
           linkend="dgui_misc_whitespace_stripping">white-space
           stripping</link> in the line where it occurs. It also disables the
-          effect of other trim directives occuring in the same line (the
+          effect of other trim directives occurring in the same line (the
           effect of <literal>t</literal>, <literal>rt</literal>,
           <literal>lt</literal>).</para>
         </section>
@@ -24775,8 +24927,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Things related to the output format mechanism, which is
-              new in this release [TODO link to guide section]:</para>
+              <para>The most important new feature of this release is the
+              <link linkend="dgui_misc_autoescaping">auto-escaping and output
+              formats mechanism</link>, which deprecates escaping with the
+              <link linkend="ref_directive_escape"><literal>escape</literal>
+              directive</link>. These are the items related to this new
+              mechanism (see <link linkend="dgui_misc_autoescaping">early
+              linked section</link> for a guide):</para>
 
               <itemizedlist>
                 <listitem>
@@ -24791,18 +24948,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>New built-in: <literal>noEsc</literal>. Used to
-                  prevent auto-escaping, like
-                  <literal>${descriptionInHtml?noEsc}</literal>. This doesn't
+                  <para>New built-in: <link
+                  linkend="ref_builtin_no_esc"><literal>no_esc</literal></link>.
+                  Used to prevent auto-escaping, like
+                  <literal>${descriptionInHtml?no_esc}</literal>. This doesn't
                   work with <literal>&lt;#escape
                   <replaceable>...</replaceable>&gt;</literal>, only with the
-                  new auto-escaping mechanism. [TODO link to ref]</para>
+                  new auto-escaping mechanism.</para>
                 </listitem>
 
                 <listitem>
-                  <para>New built-in: <literal>esc</literal>. Used for
-                  escaping with the current output format when auto-escaping
-                  is disabled. [TODO link to ref]</para>
+                  <para>New built-in: <link
+                  linkend="ref_builtin_esc"><literal>esc</literal></link>.
+                  Used for escaping with the current output format when
+                  auto-escaping is disabled.</para>
                 </listitem>
 
                 <listitem>
@@ -35426,6 +35585,28 @@ Dekany, and Jonathan Revusky.</programlisting>
         xlink:href="http://java.sun.com/blueprints/guidelines/designing_enterprise_applications_2e/web-tier/web-tier5.html">chapter
         4.4</link> of Designing Enterprise Applications with the J2EE Platform
         blueprint.</para>
+      </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss.parseTimeError">
+      <glossterm>Parse-time error</glossterm>
+
+      <glossdef>
+        <para>An error occurring during the template parsing phase, as opposed
+        to the later template execution phase (see more explanation below).
+        The presence of a such error prevents the execution of the whole
+        template, even if the execution wouldn't use the part where the error
+        is. This is seen as an advantage, as it helps early (before
+        deployment, ideally in-editor) error detection.</para>
+
+        <para>A FreeMarker template is processed in two phases. First the
+        <emphasis>whole</emphasis> template is analyzed syntactically, which
+        is called parsing. The result of the parsing is a
+        <literal>Template</literal> Java object, which is usually cached for
+        fast reuse. Later, the already parsed template can be executed for
+        unlimited times to produce output based on the content of a <link
+        linkend="gloss.dataModel">data-model</link>. Errors occurring during
+        the parsing are called parse-time errors.</para>
       </glossdef>
     </glossentry>
 
