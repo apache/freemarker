@@ -94,6 +94,15 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
     }
     
     @Override
+    public boolean isEmpty(MO mo) throws TemplateModelException {
+        String s = mo.getPlainTextContent();
+        if (s != null) {
+            return s.length() == 0;
+        }
+        return mo.getMarkupContent().length() == 0;
+    }
+    
+    @Override
     public boolean isOutputFormatMixingAllowed() {
         return false;
     }

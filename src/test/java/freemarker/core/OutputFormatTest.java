@@ -876,6 +876,24 @@ public class OutputFormatTest extends TemplateTest {
                 ParseException.class, "noSuchFormat", "registered");
     }
     
+    @Test
+    public void testHasContentBI() throws Exception {
+        assertOutput("${htmlMarkup?hasContent?c} ${htmlPlain?hasContent?c}", "true true");
+        assertOutput("<#ftl outputFormat='HTML'>${''?esc?hasContent?c} ${''?noEsc?hasContent?c}", "false false");
+    }
+    
+    @Test
+    public void testMissingVariables() throws Exception {
+        for (String ftl : new String[] {
+                "${noSuchVar}",
+                "<#ftl outputFormat='XML'>${noSuchVar}",
+                "<#ftl outputFormat='XML'>${noSuchVar?esc}",
+                "<#ftl outputFormat='XML'>${'x'?esc + noSuchVar}"
+                }) {
+            assertErrorContains(ftl, InvalidReferenceException.class, "noSuchVar", "null or missing");
+        }
+    }
+    
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);

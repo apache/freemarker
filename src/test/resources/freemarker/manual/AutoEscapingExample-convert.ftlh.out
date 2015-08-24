@@ -1,0 +1,7 @@
+HTLM: Foo&#39;s bar {}
+XML:  Foo&apos;s bar {}
+RTF:  Foo's bar \{\}
+
+HTML: <p>Test
+XML:  Failed
+RTF:  Failed

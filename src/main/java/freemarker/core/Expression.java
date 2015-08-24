@@ -176,6 +176,9 @@ abstract public class Expression extends TemplateObject {
             return (s == null || s.length() == 0);
         } else if (model == null) {
             return true;
+        } else if (model instanceof TemplateMarkupOutputModel) { // Note: happens just after FTL string check
+            TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) model;
+            return mo.getOutputFormat().isEmpty(mo);
         } else if (model instanceof TemplateCollectionModel) {
             return !((TemplateCollectionModel) model).iterator().hasNext();
         } else if (model instanceof TemplateHashModel) {

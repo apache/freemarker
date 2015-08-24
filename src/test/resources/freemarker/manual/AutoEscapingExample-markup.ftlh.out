@@ -1,0 +1,8 @@
+
+As expected:
+<b>Test</b>
+Foo &amp; bar
+
+Double escaping:
+&lt;b&gt;Test&lt;/b&gt;
+Foo &amp;amp; bar

@@ -478,7 +478,7 @@ public class TemplateCache {
         
         IOException ioe;
         if (INIT_CAUSE != null) {
-            ioe = new IOException(message + " See cause excetion.");
+            ioe = new IOException(message);
             try {
                 INIT_CAUSE.invoke(ioe, cause);
             } catch (RuntimeException ex) {
@@ -495,7 +495,7 @@ public class TemplateCache {
     
     private void throwLoadFailedException(Throwable e) throws IOException {
         throw newIOException("There was an error loading the " +
-                "template on an earlier attempt.", e);
+                "template on an earlier attempt; see cause exception.", e);
     }
 
     private void storeNegativeLookup(TemplateKey tk, 
