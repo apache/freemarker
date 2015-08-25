@@ -746,13 +746,6 @@ All Rights Reserved.
 
           <itemizedlist>
             <listitem>
-              <para><literal>user?html</literal> gives the HTML-escaped
-              version of <literal>user</literal>, like
-              <literal>&amp;</literal> will be replaced with
-              <literal>&amp;amp;</literal></para>
-            </listitem>
-
-            <listitem>
               <para><literal>user?upper_case</literal> gives the upper case
               version of the value of <literal>user</literal> (like
               <quote>JOHN DOE</quote> instead of <quote>John
@@ -839,9 +832,9 @@ All Rights Reserved.
           </itemizedlist>
 
           <para>Built-in applications can be chained, like
-          <literal>user?upper_case?html</literal> will first convert the user
-          name to upper case, then HTML-escapes it. (This is just like you can
-          chain <literal>.</literal>-s (dots) too.)</para>
+          <literal>fruits?join(", ")?upper_case</literal> will first convert
+          the list a to a string, then converts it to upper case. (This is
+          just like you can chain <literal>.</literal>-s (dots) too.)</para>
 
           <para>You can find the <link linkend="ref_builtins">full set of
           built-ins in the Reference</link>.</para>
@@ -896,6 +889,58 @@ All Rights Reserved.
           Same logic goes for <literal>??</literal>;
           <literal>animals.python.price??</literal> versus
           <literal>(animals.python.price)??</literal>.</para>
+        </section>
+
+        <section xml:id="dgui_quickstart_template_autoescaping">
+          <title>Escaping for HTML, XML and other markup</title>
+
+          <para>When the template generates HTML, XML or other markup (like
+          RTF), characters that has special meaning in the markup need to be
+          escaped when you insert a value with
+          <literal>${<replaceable>...</replaceable>}</literal>. For example,
+          if <literal>name</literal> is <quote>Someone &amp; Co.</quote>, then
+          in HTML or XML it has to be printed as <quote>Someone
+          <emphasis>&amp;amp;</emphasis> Co.</quote>. This is called <emphasis
+          role="term">escaping</emphasis>.</para>
+
+          <para>FreeMarker will automatically escape values printed with
+          <literal>${<replaceable>...</replaceable>}</literal>-s, <emphasis>if
+          it's properly configured</emphasis>, which is the responsibility of
+          the programmers (<link
+          linkend="pgui_config_outputformatsautoesc">here's how</link>). The
+          recommended practice is using <literal>ftlh</literal> file extension
+          for HTML, and <literal>ftlx</literal> file extension for XML
+          generating templates.</para>
+
+          <para>You can easily test if auto-escaping is on with something like
+          <literal>${"&lt;"}</literal> (assuming you want HTML or XML
+          escaping). If it's not, and the configuration won't be adjusted,
+          start the template like:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML"&gt;</programlisting>
+
+          <para>Sometime the value to print deliberately contains markup, and
+          so must not be auto-escaped. In that case, you can write
+          <literal>${<replaceable>value</replaceable>?no_esc}</literal>.</para>
+
+          <para>If you need to know more about auto-escaping and output
+          formats, <link linkend="dgui_misc_autoescaping">see it in its own
+          section...</link></para>
+
+          <note>
+            <para>The kind of automatic escaping described here requires at
+            least FreeMarker 2.3.24. If you have to use an earlier version,
+            use the deprecated <link
+            linkend="ref_directive_escape"><literal>escape</literal>
+            directive</link>.</para>
+          </note>
+
+          <note>
+            <para>If escaping doesn't happen after adding the above
+            <literal>ftl</literal> header, <literal>&lt;#ftl
+            output_format="HTML" auto_esc=true&gt;</literal> might
+            helps.</para>
+          </note>
         </section>
       </section>
     </chapter>
@@ -1450,15 +1495,13 @@ The average of the price of a python and an elephant is:
 
             <itemizedlist>
               <listitem>
-                <para>... the output (the return value) is markup (HTML, XML,
-                etc.). The main reason is that the result of functions are
-                subject to automatic XML-escaping (due to the nature of
-                <literal>${<replaceable>...</replaceable>}</literal>), while
-                the output of user-defined directives are not (due to the
-                nature of
-                <literal>&lt;@<replaceable>...</replaceable>&gt;</literal>;
-                its output is assumed to be markup, and hence already
-                escaped).</para>
+                <para>... the purpose of it is generating a piece of the
+                output that's not just a single value, and typically involves
+                markup. The template language was designed for printing to the
+                output directly, piece by piece, as it goes though
+                <literal>list</literal> loops, <literal>if</literal>-s, etc.
+                Building up a string value in a variable then returning it is
+                much less convenient.</para>
               </listitem>
 
               <listitem>
@@ -1471,16 +1514,28 @@ The average of the price of a python and an elephant is:
               </listitem>
 
               <listitem>
-                <para>... it will do flow control (like for example
-                <literal>list</literal> or <literal>if</literal> directives
-                do). You just can't do that with a function/method
-                anyway.</para>
+                <para>... it will do flow control on the caller side (like for
+                example <literal>list</literal> or <literal>if</literal>
+                directives do). You just can't do that with a
+                function/method.</para>
+              </listitem>
+
+              <listitem>
+                <para>... you are using legacy escaping via the
+                <literal>escape</literal> directive (instead of <link
+                linkend="dgui_misc_autoescaping">auto-escaping</link>), and
+                the result contains markup. When you print the result with
+                <literal>${<replaceable>...</replaceable>}</literal>, the
+                markup will be escaped and thus ruined, but if it's printed by
+                a directive call
+                (<literal>&lt;@<replaceable>...</replaceable>&gt;</literal>),
+                it won't be.</para>
               </listitem>
             </itemizedlist>
 
             <para>The Java methods of FreeMarker-unaware Java objects are
             normally visible as methods in templates, regardless of the nature
-            of the Java method. That said, you have no choice there.</para>
+            of the Java method; you have no choice there.</para>
           </section>
         </section>
 
@@ -4061,64 +4116,17 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
         </section>
 
         <section>
-          <title>Guide to inserting strings; don't forget escaping!</title>
+          <title>Automatic escaping</title>
 
           <para>If the interpolation is in a <link
           linkend="dgui_template_overallstructure"><phrase
-          role="markedText">text</phrase> section</link> (i.e., not in a <link
+          role="markedText">text</phrase> section</link> (not in a <link
           linkend="dgui_template_exp_stringop_interpolation">string literal
-          expression</link>), the string that it will insert will be
-          automatically escaped if an <link
-          linkend="ref.directive.escape"><literal>escape</literal>
-          directive</link> is in effect. If you are generating HTML it's
-          strongly recommended to utilize this to prevent cross-site-scripting
-          attacks and not-well-formed HTML pages. Here's a quick
-          example:</para>
-
-          <programlisting role="template"><emphasis>&lt;#escape x as x?html&gt;</emphasis>
-  ...
-  &lt;p&gt;Title: <emphasis>${</emphasis>book.title<emphasis>}</emphasis>&lt;/p&gt;
-  &lt;p&gt;Description: <emphasis>&lt;#noescape&gt;${</emphasis>book.description<emphasis>}&lt;/#noescape&gt;</emphasis>&lt;/p&gt;
-  &lt;h2&gt;Comments:&lt;/h2&gt;
-  &lt;#list comments as comment&gt;
-    &lt;div class="comment"&gt;
-      <emphasis>${</emphasis>comment<emphasis>}</emphasis>
-    &lt;/div&gt;
-  &lt;/#list&gt;
-  ...
-<emphasis>&lt;/#escape&gt;</emphasis></programlisting>
-
-          <para>This example shows that when generating HTML you better put
-          the whole template inside the <literal>escape</literal> directive.
-          Thus, if the <literal>book.title</literal> contains
-          <literal>&amp;</literal>, it will be replaced with
-          <literal>&amp;amp;</literal> in the output so the page remains
-          well-formed HTML. If a user comment contains tags like
-          <literal>&lt;iframe&gt;</literal> (or any other element), they will
-          become to <literal>&amp;lt;iframe&amp;gt;</literal> and like,
-          rendering them harmless. But sometimes you really have HTML in the
-          data-model, like let's assume <literal>book.description</literal>
-          above is stored as HTML in the database, in which case you have to
-          neutralize the enclosing <literal>escape</literal> with a
-          <literal>noescape</literal>. Without the enclosing
-          <literal>escape</literal>, the template would look like:</para>
-
-          <programlisting role="template">  ...
-  &lt;p&gt;Title: ${book.title?html}&lt;/p&gt;
-  &lt;p&gt;Description: ${book.description}&lt;/p&gt;
-  &lt;h2&gt;Comments:&lt;/h2&gt;
-  &lt;#list comments as comment&gt;
-    &lt;div class="comment"&gt;
-      ${comment?html}
-    &lt;/div&gt;
-  &lt;/#list&gt;
-  ...</programlisting>
-
-          <para>This does the same as the earlier example, but here you may
-          forget some <literal>?html</literal>-s, which is a security risk. In
-          the earlier example you may forget some
-          <literal>noescape</literal>-s, which gives bad output too, but it's
-          at least no a security risk.</para>
+          expression</link>), the text that it inserts goes through
+          automatically escaping, <emphasis>if FreeMarker was properly
+          configured</emphasis>. <link
+          linkend="dgui_quickstart_template_autoescaping">See more about
+          escaping here...</link>.</para>
         </section>
 
         <section>
@@ -23119,28 +23127,19 @@ Test Book</programlisting>
         <section>
           <title>Don't forget escaping!</title>
 
-          <para>We have made a big mistake in all examples. We generate output
-          of HTML format, and HTML format reserves characters as
-          <literal>&lt;</literal>, <literal>&amp;</literal>, etc. So when we
-          print plain text (as the titles and paragraphs), we have to escape
-          it. Thus, the correct version of the example is:</para>
+          <para>As we generate output of HTML format in these examples, and
+          HTML format reserves characters as <literal>&lt;</literal>,
+          <literal>&amp;</literal>, etc., we have to ensure that those will be
+          escaped. For that, either FreeMarker has to be <link
+          linkend="pgui_config_outputformatsautoesc">properly
+          configured</link>, or add <literal>output_format="HTML"</literal> in
+          the template to the <literal>ftl</literal> directive calls.</para>
 
-          <programlisting role="template"><emphasis>&lt;#escape x as x?html&gt;</emphasis>
-&lt;#assign book = doc.book&gt;
-&lt;h1&gt;${book.title}&lt;/h1&gt;
-&lt;#list book.chapter as ch&gt;
-  &lt;h2&gt;${ch.title}&lt;/h2&gt;
-  &lt;#list ch.para as p&gt;
-    &lt;p&gt;${p}
-  &lt;/#list&gt;
-&lt;/#list&gt;
-<emphasis>&lt;/#escape&gt;</emphasis></programlisting>
-
-          <para>So if the book title is "Romeo &amp; Julia", the resulting
+          <para>So if the book title is "Romeo &amp; Juliet", the resulting
           HTML output will be correctly:</para>
 
           <programlisting role="output"><replaceable>...</replaceable>
-&lt;h1&gt;Romeo &amp;amp; Julia&lt;/h1&gt;
+&lt;h1&gt;Romeo &amp;amp; Juliet&lt;/h1&gt;
 <replaceable>...</replaceable></programlisting>
         </section>
       </section>
