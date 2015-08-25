@@ -24,6 +24,8 @@ import java.util.Collections;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 import freemarker.cache.ConditionalTemplateConfigurerFactory;
 import freemarker.cache.FileNameGlobMatcher;
 import freemarker.cache.OrMatcher;
@@ -183,7 +185,7 @@ public class OutputFormatTest extends TemplateTest {
                 new FileNameGlobMatcher("t.*"), tcHTML);
 
         TemplateConfigurer tcNoAutoEsc = new TemplateConfigurer();
-        tcNoAutoEsc.setAutoEscaping(false);
+        tcNoAutoEsc.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
         ConditionalTemplateConfigurerFactory tcfNoAutoEsc = new ConditionalTemplateConfigurerFactory(
                 new FileNameGlobMatcher("t.*"), tcNoAutoEsc);
 
@@ -277,13 +279,13 @@ public class OutputFormatTest extends TemplateTest {
         
         Configuration cfg = getConfiguration();
         
-        assertTrue(cfg.getAutoEscaping());
+        assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
         
         cfg.setOutputFormat(XMLOutputFormat.INSTANCE);
         
         for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
             if (!cfgAutoEscaping) {
-                cfg.setAutoEscaping(false);
+                cfg.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
             }
             
             {
@@ -350,7 +352,7 @@ public class OutputFormatTest extends TemplateTest {
                 // Cfg default is autoEscaping true
                 assertOutput(commonAutoEscFtl, "&amp;");
             } else {
-                getConfiguration().setAutoEscaping(false);
+                getConfiguration().setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
                 assertOutput(commonAutoEscFtl, "&");
             }
             
@@ -537,7 +539,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed("t.ftlh", "HTML true");
 
         addTemplate("t.ftl", commonFTL);
-        assertOutputForNamed("t.ftl", "undefined true");
+        assertOutputForNamed("t.ftl", "undefined false");
         
         addTemplate("tX.ftl", "<#ftl outputFormat='XML'>" + commonFTL);
         addTemplate("tX.ftlx", commonFTL);
@@ -546,7 +548,7 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tN.ftl", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
         assertOutputForNamed("tN.ftl", "RTF false");
         
-        assertOutput("${.output_format} ${.auto_esc?c}", "undefined true");
+        assertOutput("${.output_format} ${.auto_esc?c}", "undefined false");
     }
     
     @Test
@@ -695,6 +697,8 @@ public class OutputFormatTest extends TemplateTest {
         assertErrorContains(
                 "<#noautoEsc></#noautoEsc>",
                 "Unknown directive");
+
+        getConfiguration().setOutputFormat(XMLOutputFormat.INSTANCE);
         
         // Empty block:
         assertOutput(
@@ -714,7 +718,6 @@ public class OutputFormatTest extends TemplateTest {
         
         
         // Naming convention:
-        getConfiguration().setOutputFormat(XMLOutputFormat.INSTANCE);
         assertErrorContains(
                 "<#autoEsc></#autoesc>",
                 "convention", "#autoEsc", "#autoesc");
@@ -745,6 +748,87 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("<#ftl outputFormat='plainText'><#outputFormat 'XML'><#autoEsc></#autoEsc></#outputFormat>", "");
         assertOutput("<#ftl outputFormat='HTML'><#autoEsc></#autoEsc>", "");
         assertOutput("<#noAutoEsc></#noAutoEsc>", "");
+    }
+
+    @Test
+    public void testAutoEscPolicy() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setRegisteredCustomOutputFormats(ImmutableList.of(
+                SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
+        assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+        
+        String commonFTL = "${'.'} ${.autoEsc?c}";
+        String notEsced = ". false";
+        String esced = "\\. true";
+
+        for (int autoEscPolicy : new int[] {
+                Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY,
+                Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY,
+                Configuration.DISABLE_AUTO_ESCAPING_POLICY }) {
+            cfg.setAutoEscapingPolicy(autoEscPolicy);
+            
+            String sExpted = autoEscPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY ? esced : notEsced;
+            cfg.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE);
+            assertOutput(commonFTL, sExpted);
+            cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
+            assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, sExpted);
+            assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", sExpted);
+            
+            String dExpted = autoEscPolicy == Configuration.DISABLE_AUTO_ESCAPING_POLICY ? notEsced : esced;
+            cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
+            assertOutput(commonFTL, dExpted);
+            cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
+            assertOutput("<#ftl outputFormat='dummy'>" + commonFTL, dExpted);
+            assertOutput("<#outputFormat 'dummy'>" + commonFTL + "</#outputFormat>", dExpted);
+            
+            cfg.setOutputFormat(DummyOutputFormat.INSTANCE);
+            assertOutput(
+                    commonFTL
+                    + "<#outputFormat 'seldomEscaped'>"
+                        + commonFTL
+                        + "<#outputFormat 'dummy'>"
+                            + commonFTL
+                        + "</#outputFormat>"
+                        + commonFTL
+                        + "<#outputFormat 'plainText'>"
+                            + commonFTL
+                        + "</#outputFormat>"
+                        + commonFTL
+                        + "<#noAutoEsc>"
+                            + commonFTL
+                        + "</#noAutoEsc>"
+                        + commonFTL
+                        + "<#autoEsc>"
+                            + commonFTL
+                        + "</#autoEsc>"
+                        + commonFTL
+                    + "</#outputFormat>"
+                    + commonFTL
+                    + "<#noAutoEsc>"
+                        + commonFTL
+                    + "</#noAutoEsc>"
+                    + commonFTL
+                    + "<#autoEsc>"
+                        + commonFTL
+                    + "</#autoEsc>"
+                    + commonFTL
+                    ,
+                    dExpted
+                        + sExpted
+                            + dExpted
+                        + sExpted
+                            + notEsced
+                        + sExpted
+                            + notEsced
+                        + sExpted
+                            + esced
+                        + sExpted
+                    + dExpted
+                        + notEsced
+                    + dExpted
+                        + esced
+                    + dExpted);
+        }
     }
     
     @Test

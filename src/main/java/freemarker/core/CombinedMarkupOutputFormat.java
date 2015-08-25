@@ -76,6 +76,16 @@ public final class CombinedMarkupOutputFormat extends CommonMarkupOutputFormat<T
         return outer.isLegacyBuiltInBypassed(builtInName);
     }
 
+    @Override
+    public boolean isAutoEscapedByDefault() {
+        return outer.isAutoEscapedByDefault();
+    }
+    
+    @Override
+    public boolean isOutputFormatMixingAllowed() {
+        return outer.isOutputFormatMixingAllowed();
+    }
+
     public MarkupOutputFormat getOuterOutputFormat() {
         return outer;
     }
