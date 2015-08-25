@@ -909,8 +909,8 @@ All Rights Reserved.
           the programmers; <link
           linkend="pgui_config_outputformatsautoesc">see here how</link>). The
           recommended practice is using <literal>ftlh</literal> file extension
-          to active HTML auto-escaping, and <literal>ftlx</literal> file
-          extension to active XML auto-escaping.</para>
+          to activate HTML auto-escaping, and <literal>ftlx</literal> file
+          extension to activate XML auto-escaping.</para>
 
           <para>You can try if auto-escaping is on like
           <literal>${"&lt;"}</literal> (for HTML or XML escaping). If it's
@@ -5367,7 +5367,9 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <td>Doesn't escape. Prints markup output values (concept
                 explained <link
                 linkend="dgui_misc_autoescaping_movalues">later</link>) from
-                other output formats as is.</td>
+                other output formats as is. The default output format used
+                when no output format was explicitly set in the
+                configuration.</td>
 
                 <td>None (<literal>null</literal>)</td>
 
@@ -5378,7 +5380,8 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <td><literal>plainText</literal></td>
 
                 <td>Doesn't escape. Doesn't accept markup output values from
-                other output formats.</td>
+                other output formats. The output format inside string
+                literals.</td>
 
                 <td><literal>text/plain</literal></td>
 
@@ -5478,7 +5481,7 @@ ${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
           to the part that's literally inside the block
           (<quote>coloring</quote> logic).</para>
 
-          <para>Auto-escaping can also be disabled fort the whole template in
+          <para>Auto-escaping can also be disabled for the whole template in
           the <literal>ftl</literal> header. It can then be re-enabled for a
           section with the <link
           linkend="ref_directive_autoesc"><literal>autoesc</literal>
@@ -5534,8 +5537,8 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
           <para>Hence these can be used outside
           <literal>${<replaceable>...</replaceable>}</literal> too. For
           example, here the caller of the <literal>infoBox</literal> macro can
-          decide if the message is plain text (that hence needs escaping) or
-          HTML (that hence must not be escaped):</para>
+          decide if the message is plain text (that so needs escaping) or HTML
+          (that so mustn't be escaped):</para>
 
           <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 
@@ -5566,7 +5569,7 @@ Captured output: ${captured}</programlisting>
           <programlisting role="output">Just a string: &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
 Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
 
-          <para>because the captured output is markup output, so it won't be
+          <para>Because the captured output is markup output it wasn't
           auto-escaped.</para>
 
           <para>It's important that markup output values aren't strings, and
@@ -5610,16 +5613,15 @@ Foo &amp;amp;amp; bar</programlisting>
           <section xml:id="dgui_misc_autoescaping_nonmarkupof">
             <title>Non-markup output formats</title>
 
-            <para>An output format is says to be a non-markup format if it
+            <para>An output format is said to be a non-markup format if it
             defines no escaping rules. Examples of such output formats are the
-            <literal>undefined</literal> format (which is often the default
-            for <literal>ftl</literal> files) and the
+            <literal>undefined</literal> format and the
             <literal>plainText</literal> format.</para>
 
             <para>These formats produce no <link
             linkend="dgui_misc_autoescaping_movalues">markup output
             values</link>, hence you can't use <literal>?esc</literal> or
-            <literal>?noesc</literal> when they are the current format. You
+            <literal>?no_esc</literal> when they are the current format. You
             can use output capturing (like <literal>&lt;#assign
             captured&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>),
             but the resulting value will be a string, not a markup output
@@ -5738,14 +5740,14 @@ Failed</programlisting>
             operator</title>
 
             <para>As you certainly know, if one of the sides of the
-            <literal>+</literal> operator is a string, <link
+            <literal>+</literal> operator is a string then <link
             linkend="dgui_template_exp_stringop_concatenation">it does
             concatenation</link>. If there's a <link
             linkend="dgui_misc_autoescaping_movalues">markup output
             value</link> in one side, the other side gets promoted to markup
             output value of the same output format (if it's not already that),
-            by escaping its string value, and finally concatenating the two
-            markups. For example:</para>
+            by escaping its string value, and finally the two markups are
+            concatenated to form a new markup value. Example:</para>
 
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
@@ -5753,11 +5755,11 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             <programlisting role="output">&lt;h1&gt;Foo &amp;amp; bar&lt;/h1&gt;</programlisting>
 
             <para>If the two sides of the <literal>+</literal> operator are
-            markup values of different formats, the right side operand is
-            converted to the output format of the left side. If that's not
-            possible, then the left side operand is converted to the format of
-            the right side. If that wasn't possible either, that's an error.
-            (See the <link
+            markup values of different output formats, the right side operand
+            is converted to the output format of the left side. If that's not
+            possible, then the left side operand is converted to the output
+            format of the right side. If that wasn't possible either, that's
+            an error. (See the <link
             linkend="dgui_misc_autoescaping_mixingoutputformats">limitations
             of conversions here</link>.)</para>
           </section>
