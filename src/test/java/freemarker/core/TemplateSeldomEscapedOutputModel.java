@@ -15,15 +15,15 @@
  */
 package freemarker.core;
 
-public class DummyTemplateOutputModel extends CommonTemplateMarkupOutputModel<DummyTemplateOutputModel> {
+public class TemplateSeldomEscapedOutputModel extends CommonTemplateMarkupOutputModel<TemplateSeldomEscapedOutputModel> {
 
-    DummyTemplateOutputModel(String plainTextContent, String markupContet) {
+    TemplateSeldomEscapedOutputModel(String plainTextContent, String markupContet) {
         super(plainTextContent, markupContet);
     }
 
     @Override
-    public DummyOutputFormat getOutputFormat() {
-        return DummyOutputFormat.INSTANCE;
+    public SeldomEscapedOutputFormat getOutputFormat() {
+        return SeldomEscapedOutputFormat.INSTANCE;
     }
     
 }

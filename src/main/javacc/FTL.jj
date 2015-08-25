@@ -52,7 +52,7 @@ public class FMParser {
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
     private OutputFormat outputFormat;
-    private int autoEscapingEnum;
+    private int autoEscapingPolicy;
     private boolean autoEscaping;
     private ParserConfiguration pCfg;
 
@@ -145,8 +145,8 @@ public class FMParser {
                 new LegacyConstructorParserConfiguration(
                         strictSyntaxMode, whitespaceStripping,
                         tagSyntax, namingConvention,
-                        template != null ? template.getParserConfiguration().getAutoEscaping()
-                                : Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT,
+                        template != null ? template.getParserConfiguration().getAutoEscapingPolicy()
+                                : Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY,
                         template != null ? template.getParserConfiguration().getOutputFormat()
                                 : null,
                         template != null ? template.getParserConfiguration().getRecognizeStandardFileExtensions()
@@ -186,7 +186,7 @@ public class FMParser {
         if (pCfg instanceof LegacyConstructorParserConfiguration) {
             LegacyConstructorParserConfiguration lpCfg = (LegacyConstructorParserConfiguration) pCfg;
             lpCfg.setArithmeticEngineIfNotSet(template.getArithmeticEngine());
-            lpCfg.setAutoEscapingIfNotSet(template.getConfiguration().getAutoEscaping());
+            lpCfg.setAutoEscapingPolicyIfNotSet(template.getConfiguration().getAutoEscapingPolicy());
             lpCfg.setOutputFormatIfNotSet(template.getOutputFormat());
             lpCfg.setRecognizeStandardFileExtensionsIfNotSet(
                     template.getParserConfiguration().getRecognizeStandardFileExtensions());
@@ -200,11 +200,11 @@ public class FMParser {
             OutputFormat outputFormatFromExt;
             if (!pCfg.getRecognizeStandardFileExtensions()
                     || (outputFormatFromExt = getFormatFromStdFileExt()) == null) {
-                autoEscapingEnum = pCfg.getAutoEscaping();
+                autoEscapingPolicy = pCfg.getAutoEscapingPolicy();
                 outputFormat = pCfg.getOutputFormat();
             } else {
                 // Override it
-                autoEscapingEnum = Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT;
+                autoEscapingPolicy = Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY;
                 outputFormat = outputFormatFromExt;
             }
         }
@@ -306,18 +306,18 @@ public class FMParser {
     }
     
     /**
-     * Updates the {@link #autoEscaping} field based on the {@link #autoEscapingEnum} and {@link #outputFormat} fields.
+     * Updates the {@link #autoEscaping} field based on the {@link #autoEscapingPolicy} and {@link #outputFormat} fields.
      */
     private void recalculateAutoEscapingField() {
         if (outputFormat instanceof MarkupOutputFormat) {
-            if (autoEscapingEnum == Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT) {
-                autoEscaping = ((MarkupOutputFormat) outputFormat).isAutoEscapingByDefault();
-            } else if (autoEscapingEnum == Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED) {
+            if (autoEscapingPolicy == Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY) {
+                autoEscaping = ((MarkupOutputFormat) outputFormat).isAutoEscapedByDefault();
+            } else if (autoEscapingPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY) {
                 autoEscaping = true;
-            } else if (autoEscapingEnum == Configuration.DISABLE_AUTO_ESCAPING) {
+            } else if (autoEscapingPolicy == Configuration.DISABLE_AUTO_ESCAPING_POLICY) {
                 autoEscaping = false;
             } else {
-                throw new IllegalStateException("Unhandled autoEscaping enum: " + autoEscapingEnum);
+                throw new IllegalStateException("Unhandled autoEscaping enum: " + autoEscapingPolicy);
             }
         } else {
             autoEscaping = false;
@@ -3700,14 +3700,14 @@ AutoEscBlock AutoEsc() :
 {
     Token start, end;
     TemplateElement content;
-    int lastAutoEscapingEnum;
+    int lastAutoEscapingPolicy;
 }
 {
     start = <AUTOESC>
     {
         checkCurrentOutputFormatCanEscape(start);
-        lastAutoEscapingEnum = autoEscapingEnum;
-        autoEscapingEnum = Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED;
+        lastAutoEscapingPolicy = autoEscapingPolicy;
+        autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
         recalculateAutoEscapingField();
     }
     content = OptionalBlock()
@@ -3716,7 +3716,7 @@ AutoEscBlock AutoEsc() :
         AutoEscBlock result = new AutoEscBlock(content);
         result.setLocation(template, start, end);
         
-        autoEscapingEnum = lastAutoEscapingEnum; 
+        autoEscapingPolicy = lastAutoEscapingPolicy; 
         recalculateAutoEscapingField();
         return result;
     }
@@ -3726,13 +3726,13 @@ NoAutoEscBlock NoAutoEsc() :
 {
     Token start, end;
     TemplateElement content;
-    int lastAutoEscapingEnum;
+    int lastAutoEscapingPolicy;
 }
 {
     start = <NOAUTOESC>
     {
-        lastAutoEscapingEnum = autoEscapingEnum;
-        autoEscapingEnum = Configuration.DISABLE_AUTO_ESCAPING;
+        lastAutoEscapingPolicy = autoEscapingPolicy;
+        autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
         recalculateAutoEscapingField();
     }
     content = OptionalBlock()
@@ -3741,7 +3741,7 @@ NoAutoEscBlock NoAutoEsc() :
         NoAutoEscBlock result = new NoAutoEscBlock(content);
         result.setLocation(template, start, end);
         
-        autoEscapingEnum = lastAutoEscapingEnum;
+        autoEscapingPolicy = lastAutoEscapingPolicy;
         recalculateAutoEscapingField(); 
         return result;
     }
@@ -4063,9 +4063,9 @@ void HeaderElement() :
                         } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
                             if (getBoolean(exp, false)) {
                                 autoEscRequester = key;
-                                autoEscapingEnum = Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED;
+                                autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
                             } else {
-                                autoEscapingEnum = Configuration.DISABLE_AUTO_ESCAPING;
+                                autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
                             }
                             recalculateAutoEscapingField();
                             _TemplateAPI.setAutoEscaping(template, autoEscaping);

@@ -29,7 +29,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
     private ArithmeticEngine arithmeticEngine;
-    private Integer autoEscaping; 
+    private Integer autoEscapingPolicy; 
     private OutputFormat outputFormat;
     private Boolean recognizeStandardFileExtensions; 
     private final Version incompatibleImprovements;
@@ -42,7 +42,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         this.namingConvention = namingConvention;
         this.whitespaceStripping = whitespaceStripping;
         this.strictSyntaxMode = strictSyntaxMode;
-        this.autoEscaping = autoEscaping;
+        this.autoEscapingPolicy = autoEscaping;
         this.outputFormat = outputFormat;
         this.recognizeStandardFileExtensions = recognizeStandardFileExtensions;
         this.incompatibleImprovements = incompatibleImprovements;
@@ -82,16 +82,16 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
-    public int getAutoEscaping() {
-        if (autoEscaping == null) {
+    public int getAutoEscapingPolicy() {
+        if (autoEscapingPolicy == null) {
             throw new IllegalStateException();
         }
-        return autoEscaping.intValue();
+        return autoEscapingPolicy.intValue();
     }
     
-    void setAutoEscapingIfNotSet(int autoEscaping) {
-        if (this.autoEscaping == null) {
-            this.autoEscaping = Integer.valueOf(autoEscaping);
+    void setAutoEscapingPolicyIfNotSet(int autoEscapingPolicy) {
+        if (this.autoEscapingPolicy == null) {
+            this.autoEscapingPolicy = Integer.valueOf(autoEscapingPolicy);
         }
     }
 

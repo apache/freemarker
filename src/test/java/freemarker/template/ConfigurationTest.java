@@ -866,34 +866,34 @@ public class ConfigurationTest extends TestCase {
     public void testSetAutoEscaping() throws Exception {
        Configuration cfg = new Configuration();
     
-       assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, cfg.getAutoEscaping());
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
 
-       cfg.setAutoEscaping(Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED);
-       assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED, cfg.getAutoEscaping());
+       cfg.setAutoEscapingPolicy(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY);
+       assertEquals(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
 
-       cfg.setAutoEscaping(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT);
-       assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, cfg.getAutoEscaping());
+       cfg.setAutoEscapingPolicy(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
 
-       cfg.setAutoEscaping(Configuration.DISABLE_AUTO_ESCAPING);
-       assertEquals(Configuration.DISABLE_AUTO_ESCAPING, cfg.getAutoEscaping());
+       cfg.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
+       assertEquals(Configuration.DISABLE_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
        
-       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "enableIfSupported");
-       assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED, cfg.getAutoEscaping());
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfSupported");
+       assertEquals(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
 
-       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "enable_if_supported");
-       assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED, cfg.getAutoEscaping());
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_supported");
+       assertEquals(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
        
-       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "enableIfDefault");
-       assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, cfg.getAutoEscaping());
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfDefault");
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
 
-       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "enable_if_default");
-       assertEquals(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, cfg.getAutoEscaping());
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_default");
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
        
-       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "disable");
-       assertEquals(Configuration.DISABLE_AUTO_ESCAPING, cfg.getAutoEscaping());
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "disable");
+       assertEquals(Configuration.DISABLE_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
        
        try {
-           cfg.setAutoEscaping(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+           cfg.setAutoEscapingPolicy(Configuration.CAMEL_CASE_NAMING_CONVENTION);
            fail();
        } catch (IllegalArgumentException e) {
            // Expected

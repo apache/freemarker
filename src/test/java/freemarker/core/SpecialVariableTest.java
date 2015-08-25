@@ -61,8 +61,8 @@ public class SpecialVariableTest extends TemplateTest {
         Configuration cfg = getConfiguration();
         
         for (int autoEscaping : new int[] {
-                Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED }) {
-            cfg.setAutoEscaping(autoEscaping);
+                Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY }) {
+            cfg.setAutoEscapingPolicy(autoEscaping);
             cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
             assertOutput("${.autoEsc?c}", "true");
             assertOutput("<#ftl autoEsc=false>${.autoEsc?c}", "false");
@@ -72,7 +72,7 @@ public class SpecialVariableTest extends TemplateTest {
             assertOutput("${.autoEsc?c}", "false");
         }
         
-        cfg.setAutoEscaping(Configuration.DISABLE_AUTO_ESCAPING);
+        cfg.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
         cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
         assertOutput("${.autoEsc?c}", "false");
         assertOutput("<#ftl autoEsc=true>${.autoEsc?c}", "true");
@@ -81,7 +81,7 @@ public class SpecialVariableTest extends TemplateTest {
         cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
         assertOutput("${.autoEsc?c}", "false");
 
-        cfg.setAutoEscaping(Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT);
+        cfg.setAutoEscapingPolicy(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
         assertOutput(
                 "${.autoEsc?c} "
                 + "<#outputFormat 'HTML'>${.autoEsc?c}</#outputFormat> "

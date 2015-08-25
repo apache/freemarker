@@ -108,7 +108,7 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
     }
     
     @Override
-    public boolean isAutoEscapingByDefault() {
+    public boolean isAutoEscapedByDefault() {
         return true;
     }
 

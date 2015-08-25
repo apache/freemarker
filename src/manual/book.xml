@@ -8971,13 +8971,19 @@ cfg.setTemplateConfigurers(
         setting introduced elsewhere</link> (see examples later).</para>
 
         <para>There's also a related setting called
-        <literal>auto_escaping</literal>, which can be used to disable
-        auto-escaping even if the current output format supports it. Using it
-        is rarely advisable; disabling auto escaping normally happens inside
-        the template with the <link
+        <literal>auto_escaping_policy</literal>, which can be used to disable
+        auto-escaping even if the current output format supports it, or enable
+        auto-escaping even if the format by default doesn't escape (but it
+        supports it). Using this setting rarely advisable, as it's potentially
+        confusing for the template authors. Forcibly disabling/enabling auto
+        escaping is doable explicitly inside the template the
+        <literal>auto_esc</literal> parameter of the <link
+        linkend="ref_directive_ftl"><literal>ftl</literal> directive</link>,
+        or with the <link
         linkend="ref_directive_autoesc"><literal>noautoesc</literal>
-        directive</link>. None the less, it can be associated to templates
-        just like the output format.</para>
+        directive</link> and <link
+        linkend="ref_directive_autoesc"><literal>autoesc</literal>
+        directive</link>.</para>
 
         <para>To check if you have configured FreeMarker properly, you can use
         this template:</para>
@@ -17591,12 +17597,14 @@ Primary content continued</programlisting>
         <section>
           <title>Description</title>
 
-          <para>Enables <link
+          <para>Turns on <link
           linkend="dgui_misc_autoescaping">auto-escaping</link> in the nested
-          section. Auto-escaping is usually enabled by default, so you rarely
-          need this. Note that to escape just a single
+          section. Auto-escaping is usually enabled by default if the current
+          <link linkend="dgui_misc_autoescaping_outputformat">output
+          format</link> has auto-escaping by default, so you rarely need this.
+          Note that to escape just a single
           <literal>${<replaceable>expression</replaceable>}</literal> in a
-          place where auto-escaping is disabled, you should use
+          place where auto-escaping is disabled you should use
           <literal>${<replaceable>expression</replaceable>?esc}</literal>
           instead.</para>
 
@@ -17619,6 +17627,13 @@ ${"&amp;"}</programlisting>
   &amp;amp;
 &amp;</programlisting>
 
+          <para><literal>autoesc</literal> can't be used where the current
+          <link linkend="dgui_misc_autoescaping_outputformat">output
+          format</link> is a <link
+          linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
+          format</link> (and hence can't do escaping). Doing so is a <link
+          linkend="gloss.parseTimeError">parse-time error</link>.</para>
+
           <para><literal>autoesc</literal> can also be used nested into <link
           linkend="ref_directive_noautoesc"><literal>noautoesc</literal>
           directive</link> to re-enable auto-escaping.</para>
@@ -17627,13 +17642,6 @@ ${"&amp;"}</programlisting>
           auto-escaping is already enabled, such as even inside another
           <literal>autoesc</literal> block. Doing so is redundant but
           allowed.</para>
-
-          <para><literal>autoesc</literal> can't be used where the current
-          <link linkend="dgui_misc_autoescaping_outputformat">output
-          format</link> is a <link
-          linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
-          format</link>. Doing so is a parsing error, so the whole template
-          will be unaccessible.</para>
         </section>
       </section>
 
@@ -18003,19 +18011,26 @@ m2: &amp;lt;test&amp;gt;</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>auto_esc</literal>: A boolean constant that
-              specifies if using <link
-              linkend="dgui_misc_autoescaping">auto-escaping</link> will be
-              enabled in this template. It depends on the FreeMarker
-              configuration, but usually auto-escaping will be on if the
-              current <link
+              <para><literal>auto_esc</literal>: A boolean constant to turn
+              <link linkend="dgui_misc_autoescaping">auto-escaping</link> on
+              or off. It depends on the
+              <literal>auto_escaping_policy</literal> of the FreeMarker
+              configuration, but usually auto-escaping will be by default on,
+              if the current <link
               linkend="dgui_misc_autoescaping_outputformat">output
-              format</link> uses auto-escaping by default, so you mostly only
-              use this to disable auto-escaping (<literal>false</literal>
-              value). An attempt to explicitly enable auto-escaping with this
-              parameter when the current output format is a <link
+              format</link> uses auto-escaping by default. So you mostly use
+              this to disable auto-escaping (<literal>false</literal> value).
+              An attempt to use <literal>true</literal> value when the current
+              output format is a <link
               linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
-              format</link> will cause parse-time error.</para>
+              format</link> (which hence can't escape) will cause <link
+              linkend="gloss.parseTimeError">parse-time error</link>. Note
+              that you can turn auto-escaping on/off for only a part of the
+              template with the <link
+              linkend="ref_directive_autoesc"><literal>autoesc</literal></link>
+              and <link
+              linkend="ref_directive_noautoesc"><literal>noautoesc</literal>
+              directives</link>.</para>
             </listitem>
 
             <listitem>
@@ -19918,7 +19933,7 @@ or
           <para>Disables <link
           linkend="dgui_misc_autoescaping">auto-escaping</link> in the nested
           section. Note that to prevent escaping for just a single
-          <literal>${<replaceable>expression</replaceable>}</literal>, you
+          <literal>${<replaceable>expression</replaceable>}</literal> you
           should use
           <literal>${<replaceable>expression</replaceable>?no_esc}</literal>
           instead.</para>
@@ -19942,6 +19957,13 @@ ${"&amp;"}</programlisting>
   &amp;
 &amp;amp;</programlisting>
 
+          <para><literal>noautoesc</literal> can be used regardless of what
+          the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          is (unlike the <link
+          linkend="ref_directive_autoesc"><literal>autoesc</literal>
+          directive</link>).</para>
+
           <para><literal>noautoesc</literal> can also be used nested into
           <link linkend="ref_directive_autoesc"><literal>autoesc</literal>
           directive</link> to re-enable escaping.</para>
@@ -19950,13 +19972,6 @@ ${"&amp;"}</programlisting>
           auto-escaping is already disabled, such as even inside another
           <literal>noautoesc</literal> block. Doing so is redundant but
           allowed.</para>
-
-          <para><literal>noautoesc</literal> can be used regardless of what
-          the current <link
-          linkend="dgui_misc_autoescaping_outputformat">output format</link>
-          is (unlike the <link
-          linkend="ref_directive_autoesc"><literal>autoesc</literal>
-          directive</link>).</para>
         </section>
       </section>
 
@@ -25452,42 +25467,57 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added new configuration setting:
-              <literal>output_format</literal>. This specifies the name of the
-              <link linkend="dgui_misc_autoescaping_outputformat">output
-              format</link> (such as <literal>HTML</literal>,
-              <literal>XML</literal>, <literal>plainText</literal>, etc.) that
-              governs the <link linkend="dgui_misc_autoescaping">new
-              auto-escaping mechanism</link>. The output format can be
-              different for different templates, using the
-              <literal>template_configurers</literal> setting (<link
-              linkend="pgui_config_outputformatsautoesc">see that
-              here...</link>).</para>
-            </listitem>
+              <para>Changes related to the <link
+              linkend="dgui_misc_autoescaping">new auto-escaping
+              mechanism</link>:</para>
 
-            <listitem>
-              <para>Added new configuration setting:
-              <literal>recognize_standard_file_extensions</literal>. When
-              <literal>true</literal>, templates whose source name ends with
-              <literal>".ftlh"</literal> will get <literal>HTML</literal>
-              <literal>output_format</literal>, and those whose name ends with
-              <literal>".ftlx"</literal> get <literal>XML</literal>
-              <literal>output_format</literal>, in both cases with
-              <literal>auto_escaping</literal> on. If <link
-              linkend="pgui_config_incompatible_improvements_how_to_set">the
-              <literal>incompatible_improvements</literal> setting</link> is
-              set to 2.3.24 (or higher) then this setting defaults to
-              <literal>true</literal>. Otherwise it's
-              <literal>false</literal>, but enabling it is highly
-              recommended.</para>
-            </listitem>
+              <itemizedlist>
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>recognize_standard_file_extensions</literal>. When
+                  <literal>true</literal>, templates whose source name ends
+                  with <literal>".ftlh"</literal> will get
+                  <literal>HTML</literal> <literal>output_format</literal>,
+                  and those whose name ends with <literal>".ftlx"</literal>
+                  get <literal>XML</literal> <literal>output_format</literal>,
+                  in both cases with auto-escaping on. If <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is set to 2.3.24 (or higher) then this setting defaults to
+                  <literal>true</literal>. Otherwise it's
+                  <literal>false</literal>, but enabling it is highly
+                  recommended.</para>
+                </listitem>
 
-            <listitem>
-              <para>Added new configuration setting:
-              <literal>registered_custom_output_formats</literal>. With this
-              you can add new <literal>OutputFormat</literal>-s that templates
-              can refer to by name (like in <literal>&lt;#ftl
-              output_format="foo"&gt;</literal>).</para>
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>output_format</literal>. This specifies the name of
+                  the <link
+                  linkend="dgui_misc_autoescaping_outputformat">output
+                  format</link> (such as <literal>HTML</literal>,
+                  <literal>XML</literal>, <literal>plainText</literal>, etc.)
+                  that governs auto-escaping. The output format can be
+                  different for different templates, using the
+                  <literal>template_configurers</literal> setting (<link
+                  linkend="pgui_config_outputformatsautoesc">see here
+                  how...</link>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>registered_custom_output_formats</literal>. With
+                  this you can add new <literal>OutputFormat</literal>-s that
+                  templates can refer to by name (like in <literal>&lt;#ftl
+                  output_format="foo"&gt;</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>auto_escaping_policy</literal>. This decides when
+                  auto-escaping should be enabled depending on the current
+                  output format.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>

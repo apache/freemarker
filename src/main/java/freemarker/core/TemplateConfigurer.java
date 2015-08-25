@@ -75,7 +75,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     private Integer namingConvention;
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
-    private Integer autoEscaping;
+    private Integer autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
     private String encoding;
@@ -154,8 +154,8 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (tc.isArithmeticEngineSet()) {
             setArithmeticEngine(tc.getArithmeticEngine());
         }
-        if (tc.isAutoEscapingSet()) {
-            setAutoEscaping(tc.getAutoEscaping());
+        if (tc.isAutoEscapingPolicySet()) {
+            setAutoEscapingPolicy(tc.getAutoEscapingPolicy());
         }
         if (tc.isAutoFlushSet()) {
             setAutoFlush(tc.getAutoFlush());
@@ -386,25 +386,26 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
 
     /**
-     * Sets the output format of the template; see {@link Configuration#setAutoEscaping(int)} for more.
+     * Sets the output format of the template; see {@link Configuration#setAutoEscapingPolicy(int)} for more.
      */
-    public void setAutoEscaping(int autoEscaping) {
-        _TemplateAPI.validateAutoEscapingValue(autoEscaping);
-        this.autoEscaping = Integer.valueOf(autoEscaping);
+    public void setAutoEscapingPolicy(int autoEscapingPolicy) {
+        _TemplateAPI.validateAutoEscapingPolicyValue(autoEscapingPolicy);
+        this.autoEscapingPolicy = Integer.valueOf(autoEscapingPolicy);
     }
 
     /**
-     * The getter pair of {@link #setAutoEscaping(int)}.
+     * The getter pair of {@link #setAutoEscapingPolicy(int)}.
      */
-    public int getAutoEscaping() {
-        return autoEscaping != null ? autoEscaping.intValue() : getParentConfiguration().getAutoEscaping();
+    public int getAutoEscapingPolicy() {
+        return autoEscapingPolicy != null ? autoEscapingPolicy.intValue()
+                : getParentConfiguration().getAutoEscapingPolicy();
     }
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      */
-    public boolean isAutoEscapingSet() {
-        return autoEscaping != null;
+    public boolean isAutoEscapingPolicySet() {
+        return autoEscapingPolicy != null;
     }
 
     /**

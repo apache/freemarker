@@ -106,6 +106,6 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     /**
      * Usually {@code true}; tells if by default auto-escaping should be on for this format. 
      */
-    public abstract boolean isAutoEscapingByDefault();
+    public abstract boolean isAutoEscapedByDefault();
     
 }

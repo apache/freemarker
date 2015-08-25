@@ -672,9 +672,9 @@ public class Template extends Configurable {
     }
     
     /**
-     * Returns if the template actually uses auto-escaping (see {@link Configuration#setAutoEscaping(int)}). This value
+     * Returns if the template actually uses auto-escaping (see {@link Configuration#setAutoEscapingPolicy(int)}). This value
      * is decided by the parser based on the actual {@link OutputFormat}, and the auto-escaping enums, in order of
-     * increasing priority: {@link Configuration#getAutoEscaping()}, {@link ParserConfiguration#getAutoEscaping()}
+     * increasing priority: {@link Configuration#getAutoEscapingPolicy()}, {@link ParserConfiguration#getAutoEscapingPolicy()}
      * (which is usually provided by {@link Configuration#getTemplateConfigurers()}), and finally on the {@code #ftl}
      * header's {@code auto_esc} option in the template.
      * 

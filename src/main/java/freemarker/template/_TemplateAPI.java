@@ -108,10 +108,10 @@ public class _TemplateAPI {
         t.setOutputFormat(outputFormat);
     }
 
-    public static void validateAutoEscapingValue(int autoEscaping) {
-        if (autoEscaping != Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT
-                && autoEscaping != Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED
-                && autoEscaping != Configuration.DISABLE_AUTO_ESCAPING) {
+    public static void validateAutoEscapingPolicyValue(int autoEscaping) {
+        if (autoEscaping != Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY
+                && autoEscaping != Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY
+                && autoEscaping != Configuration.DISABLE_AUTO_ESCAPING_POLICY) {
             throw new IllegalArgumentException("\"auto_escaping\" can only be set to one of these: "
                     + "Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, "
                     + "or Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED"

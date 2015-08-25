@@ -63,8 +63,8 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
         return wrappedPCfg.getIncompatibleImprovements();
     }
 
-    public int getAutoEscaping() {
-        return autoEscaping != null ? autoEscaping.intValue() : wrappedPCfg.getAutoEscaping();
+    public int getAutoEscapingPolicy() {
+        return autoEscaping != null ? autoEscaping.intValue() : wrappedPCfg.getAutoEscapingPolicy();
     }
 
     public ArithmeticEngine getArithmeticEngine() {

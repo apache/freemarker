@@ -77,8 +77,8 @@ public final class CombinedMarkupOutputFormat extends CommonMarkupOutputFormat<T
     }
 
     @Override
-    public boolean isAutoEscapingByDefault() {
-        return outer.isAutoEscapingByDefault();
+    public boolean isAutoEscapedByDefault() {
+        return outer.isAutoEscapedByDefault();
     }
     
     @Override

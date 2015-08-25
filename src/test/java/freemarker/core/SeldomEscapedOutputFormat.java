@@ -20,22 +20,22 @@ import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
 
-public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOutputModel> {
+public class SeldomEscapedOutputFormat extends CommonMarkupOutputFormat<TemplateSeldomEscapedOutputModel> {
     
-    public static final DummyOutputFormat INSTANCE = new DummyOutputFormat();
+    public static final SeldomEscapedOutputFormat INSTANCE = new SeldomEscapedOutputFormat();
     
-    private DummyOutputFormat() {
+    private SeldomEscapedOutputFormat() {
         // hide
     }
 
     @Override
     public String getName() {
-        return "dummy";
+        return "seldomEscaped";
     }
 
     @Override
     public String getMimeType() {
-        return "text/dummy";
+        return "text/seldomEscaped";
     }
 
     @Override
@@ -54,8 +54,14 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOut
     }
 
     @Override
-    protected TemplateDummyOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
-        return new TemplateDummyOutputModel(plainTextContent, markupContent);
+    public boolean isAutoEscapedByDefault() {
+        return false;
+    }
+
+    @Override
+    protected TemplateSeldomEscapedOutputModel newTemplateMarkupOutputModel(
+            String plainTextContent, String markupContent) {
+        return new TemplateSeldomEscapedOutputModel(plainTextContent, markupContent);
     }
     
 }
