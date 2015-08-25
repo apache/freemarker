@@ -16,6 +16,7 @@
 
 package freemarker.core;
 
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -59,17 +60,23 @@ abstract class TemplateDateFormat {
      */
     public abstract String getDescription();
     
-    // This isn't used yet, as we don't have markup formatting in the template language.
-    ///**
-    // * Formats the date to markup instead of to plain text, or return {@code false} that will make FreeMarker call
-    // * {@link #format(TemplateDateModel)} and escape its result. It must not write into {@code out} when it returns
-    // * {@code false}!
-    // * It should only write to {@code out} and return {@code true} if the markup format is not the same as the
-    // * {@link #format(TemplateDateModel)} escaped.
-    // */
-    //public boolean formatAsMarkup(TemplateDateModel dateModel, boolean zonelessInput, Writer out) {
-    //    return false;
-    //}
+    /**
+     * Formats the date to markup instead of to plain text, or return {@code false} that will make FreeMarker call
+     * {@link #format(TemplateDateModel)} and escape its result. It must not write into {@code out} when it returns
+     * {@code false}! It should only write to {@code out} and return {@code true} if the markup format is not the same
+     * as the {@link #format(TemplateDateModel)} escaped.
+     */
+    public boolean formatAsMarkup(TemplateDateModel dateModel, MarkupOutputFormat outputFormat, Writer out) {
+        return false;
+    }
+
+    /**
+     * Similar to {@link #formatAsMarkup(TemplateDateModel, MarkupOutputFormat, Writer)}, but returns the formatted
+     * output, or {@code null} where the other returns {@code false}. 
+     */
+    public TemplateMarkupOutputModel formatAsMarkup(TemplateDateModel dateModel, MarkupOutputFormat outputFormat) {
+        return null;
+    }
     
     /**
      * Tells if this formatter should be re-created if the locale changes.
