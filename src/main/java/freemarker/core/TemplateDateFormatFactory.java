@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -37,8 +38,10 @@ import freemarker.template.TemplateModelException;
 abstract class TemplateDateFormatFactory {
     
     private final TimeZone timeZone;
+    protected final Configuration configuration;
     
-    public TemplateDateFormatFactory(TimeZone timeZone) {
+    public TemplateDateFormatFactory(Configuration configuration, TimeZone timeZone) {
+        this.configuration = configuration;
         this.timeZone = timeZone;
     }
 

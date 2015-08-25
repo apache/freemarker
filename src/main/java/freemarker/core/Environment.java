@@ -104,6 +104,7 @@ public final class Environment extends Configurable {
         C_NUMBER_FORMAT.setDecimalSeparatorAlwaysShown(false);
     }
 
+    private final Configuration configuration;
     private final TemplateHashModel rootDataModel;
     private final ArrayList/*<TemplateElement>*/ instructionStack = new ArrayList();
     private final ArrayList recoveredErrorStack = new ArrayList();
@@ -194,6 +195,7 @@ public final class Environment extends Configurable {
 
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
+        configuration = template.getConfiguration();
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
         this.out = out;
@@ -1085,7 +1087,7 @@ public final class Environment extends Configurable {
     }
 
     public Configuration getConfiguration() {
-        return getTemplate().getConfiguration();
+        return configuration;
     }
     
     TemplateModel getLastReturnValue() {
@@ -1276,7 +1278,7 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTXSTemplateDateFormatFactory : cachedXSTemplateDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new XSTemplateDateFormatFactory(
+                templateDateFormatFactory = new XSTemplateDateFormatFactory(configuration,
                         useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTXSTemplateDateFormatFactory
@@ -1292,7 +1294,7 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTISOTemplateDateFormatFactory : cachedISOTemplateDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new ISOTemplateDateFormatFactory(
+                templateDateFormatFactory = new ISOTemplateDateFormatFactory(configuration,
                         useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTISOTemplateDateFormatFactory
@@ -1305,7 +1307,7 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTJavaTemplateDateFormatFactory : cachedJavaTemplateDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new JavaTemplateDateFormatFactory(
+                templateDateFormatFactory = new JavaTemplateDateFormatFactory(configuration,
                         useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone(), getLocale());
                 if (useSQLDTTZ) {
                     cachedSQLDTJavaTemplateDateFormatFactory
@@ -1397,7 +1399,7 @@ public final class Environment extends Configurable {
         if (tm instanceof TemplateTransformModel) {
             ttm = (TemplateTransformModel) tm;
         } else if (exp instanceof Identifier) {
-            tm = getConfiguration().getSharedVariable(exp.toString());
+            tm = configuration.getSharedVariable(exp.toString());
             if (tm instanceof TemplateTransformModel) {
                 ttm = (TemplateTransformModel) tm;
             }
@@ -1465,7 +1467,7 @@ public final class Environment extends Configurable {
             result = rootDataModel.get(name);
         }
         if (result == null) {
-            result = getConfiguration().getSharedVariable(name);
+            result = configuration.getSharedVariable(name);
         }
         return result;
     }
@@ -1519,7 +1521,7 @@ public final class Environment extends Configurable {
      */
     public Set getKnownVariableNames() throws TemplateModelException {
         // shared vars.
-        Set set = getConfiguration().getSharedVariableNames();
+        Set set = configuration.getSharedVariableNames();
         
         // root hash
         if (rootDataModel instanceof TemplateHashModelEx) {
@@ -1764,7 +1766,7 @@ public final class Environment extends Configurable {
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel value = rootDataModel.get(key);
                 if (value == null) {
-                    value = getConfiguration().getSharedVariable(key);
+                    value = configuration.getSharedVariable(key);
                 }
                 return value;
             }
@@ -1815,7 +1817,7 @@ public final class Environment extends Configurable {
                     result = rootDataModel.get(key);
                 }
                 if (result == null) {
-                    result = getConfiguration().getSharedVariable(key);
+                    result = configuration.getSharedVariable(key);
                 }
                 return result;
             }
@@ -2008,13 +2010,13 @@ public final class Environment extends Configurable {
             // This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
             encoding = inheritedTemplate.getEncoding();
             if (encoding == null) {
-                encoding = getConfiguration().getEncoding(this.getLocale());
+                encoding = configuration.getEncoding(this.getLocale());
             }
         }
 
         Object customLookupCondition = inheritedTemplate.getCustomLookupCondition(); 
         
-        return getConfiguration().getTemplate(
+        return configuration.getTemplate(
                 name, getLocale(), customLookupCondition,
                 encoding, parseAsFTL,
                 ignoreMissing);
@@ -2153,7 +2155,7 @@ public final class Environment extends Configurable {
             return targetName;
         }
         
-        return _CacheAPI.toAbsoluteName(getConfiguration().getTemplateNameFormat(), baseName, targetName);
+        return _CacheAPI.toAbsoluteName(configuration.getTemplateNameFormat(), baseName, targetName);
     }
     
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {
@@ -2295,7 +2297,7 @@ public final class Environment extends Configurable {
     };
     
     private boolean isIcI2322OrLater() {
-        return getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+        return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
     }
 
     /**

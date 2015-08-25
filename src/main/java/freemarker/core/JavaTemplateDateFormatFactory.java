@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
@@ -36,8 +37,8 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
     private Map<String, TemplateDateFormat>[] formatCache;
 
-    public JavaTemplateDateFormatFactory(TimeZone timeZone, Locale locale) {
-        super(timeZone);
+    public JavaTemplateDateFormatFactory(Configuration configuration, TimeZone timeZone, Locale locale) {
+        super(configuration, timeZone);
         this.locale = locale;
     }
 
