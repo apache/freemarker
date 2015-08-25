@@ -1250,14 +1250,24 @@ public final class Environment extends Configurable {
         }
     }
     
+    /**
+     * @param dateType
+     *            See the similar parameter of {@link TemplateDateFormatFactory#get(int, boolean, String)}
+     * @param zonelessInput
+     *            See the similar parameter of {@link TemplateDateFormatFactory#get(int, boolean, String)}
+     * @param formatDescriptor
+     *            The string that describes the date format. See the similar parameter of
+     *            {@link TemplateDateFormatFactory#get(int, boolean, String)}
+     * @param formatDescriptorCfgSettingName
+     *            The name of the configuration setting where the {@code formatDescriptor} comes from, or {@code null}
+     *            if the format descriptor was specified directly for this formatting call.
+     */
     private TemplateDateFormat getTemplateDateFormat(
             int dateType, boolean zonelessInput,
-            boolean useSQLDTTZ, String formatDescriptor, String sourceCfgSetting)
+            boolean useSQLDTTZ, String formatDescriptor, String formatDescriptorCfgSettingName)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         final int formatDescriptionLen = formatDescriptor.length();
         
-        final TimeZone timeZone = useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone();
-                
         // As of Java 8, 'x' and 'i' (in lower case) are illegal date format letters, so this is backward-compatible.
         TemplateDateFormatFactory templateDateFormatFactory;  
         if (formatDescriptionLen > 1
@@ -1266,7 +1276,8 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTXSTemplateDateFormatFactory : cachedXSTemplateDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new XSTemplateDateFormatFactory(timeZone);
+                templateDateFormatFactory = new XSTemplateDateFormatFactory(
+                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTXSTemplateDateFormatFactory
                             = (XSTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1281,7 +1292,8 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTISOTemplateDateFormatFactory : cachedISOTemplateDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new ISOTemplateDateFormatFactory(timeZone);
+                templateDateFormatFactory = new ISOTemplateDateFormatFactory(
+                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTISOTemplateDateFormatFactory
                             = (ISOTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1293,7 +1305,8 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTJavaTemplateDateFormatFactory : cachedJavaTemplateDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new JavaTemplateDateFormatFactory(timeZone, getLocale());
+                templateDateFormatFactory = new JavaTemplateDateFormatFactory(
+                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone(), getLocale());
                 if (useSQLDTTZ) {
                     cachedSQLDTJavaTemplateDateFormatFactory
                             = (JavaTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1307,10 +1320,10 @@ public final class Environment extends Configurable {
             return templateDateFormatFactory.get(dateType, zonelessInput, formatDescriptor);
         } catch (ParseException e) {
             throw new _TemplateModelException(e.getCause(),
-                    (sourceCfgSetting == null
+                    (formatDescriptorCfgSettingName == null
                             ? (Object) "Malformed date/time format descriptor: "
                             : new Object[] {
-                                    "The value of the \"", sourceCfgSetting,
+                                    "The value of the \"", formatDescriptorCfgSettingName,
                                     "\" FreeMarker configuration setting is a malformed date/time format descriptor: "
                             }),
                     new _DelayedJQuote(formatDescriptor), ". Reason given: ",
