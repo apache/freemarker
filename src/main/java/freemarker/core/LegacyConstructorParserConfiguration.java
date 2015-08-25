@@ -29,19 +29,22 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
     private ArithmeticEngine arithmeticEngine;
-    private Boolean autoEscaping; 
+    private Integer autoEscapingPolicy; 
     private OutputFormat outputFormat;
+    private Boolean recognizeStandardFileExtensions; 
     private final Version incompatibleImprovements;
 
     public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
-            int namingConvention, Boolean autoEscaping, OutputFormat outputFormat,
+            int namingConvention, Integer autoEscaping, OutputFormat outputFormat,
+            Boolean recognizeStandardFileExtensions,
             Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
         this.whitespaceStripping = whitespaceStripping;
         this.strictSyntaxMode = strictSyntaxMode;
-        this.autoEscaping = autoEscaping;
+        this.autoEscapingPolicy = autoEscaping;
         this.outputFormat = outputFormat;
+        this.recognizeStandardFileExtensions = recognizeStandardFileExtensions;
         this.incompatibleImprovements = incompatibleImprovements;
         this.arithmeticEngine = arithmeticEngine;
     }
@@ -79,16 +82,16 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
-    public boolean getAutoEscaping() {
-        if (autoEscaping == null) {
+    public int getAutoEscapingPolicy() {
+        if (autoEscapingPolicy == null) {
             throw new IllegalStateException();
         }
-        return autoEscaping.booleanValue();
+        return autoEscapingPolicy.intValue();
     }
     
-    void setAutoEscapingIfNotSet(boolean autoEscaping) {
-        if (this.autoEscaping == null) {
-            this.autoEscaping = Boolean.valueOf(autoEscaping);
+    void setAutoEscapingPolicyIfNotSet(int autoEscapingPolicy) {
+        if (this.autoEscapingPolicy == null) {
+            this.autoEscapingPolicy = Integer.valueOf(autoEscapingPolicy);
         }
     }
 
@@ -102,6 +105,19 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     void setOutputFormatIfNotSet(OutputFormat outputFormat) {
         if (this.outputFormat == null) {
             this.outputFormat = outputFormat;
+        }
+    }
+
+    public boolean getRecognizeStandardFileExtensions() {
+        if (recognizeStandardFileExtensions == null) {
+            throw new IllegalStateException();
+        }
+        return recognizeStandardFileExtensions.booleanValue();
+    }
+    
+    void setRecognizeStandardFileExtensionsIfNotSet(boolean recognizeStandardFileExtensions) {
+        if (this.recognizeStandardFileExtensions == null) {
+            this.recognizeStandardFileExtensions = Boolean.valueOf(recognizeStandardFileExtensions);
         }
     }
 

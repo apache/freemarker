@@ -1,0 +1,8 @@
+
+  <div class="infoBox">
+    Foo &amp; bar
+  </div>
+  <div class="infoBox">
+    Foo <b>bar</b>
+  </div>
+

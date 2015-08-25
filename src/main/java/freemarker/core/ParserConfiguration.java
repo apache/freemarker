@@ -53,14 +53,19 @@ public interface ParserConfiguration {
     boolean getStrictSyntaxMode();
     
     /**
-     * See {@link Configuration#getAutoEscaping()}.
+     * See {@link Configuration#getAutoEscapingPolicy()}.
      */
-    boolean getAutoEscaping();
+    int getAutoEscapingPolicy();
     
     /**
      * See {@link Configuration#getOutputEncoding()}.
      */
     OutputFormat getOutputFormat();
+    
+    /**
+     * See {@link Configuration#getRecognizeStandardFileExtensions()}.
+     */
+    boolean getRecognizeStandardFileExtensions();
     
     /**
      * See {@link Configuration#getIncompatibleImprovements()}.

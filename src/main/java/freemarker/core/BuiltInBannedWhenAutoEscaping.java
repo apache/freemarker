@@ -15,15 +15,10 @@
  */
 package freemarker.core;
 
-public class DummyTemplateOutputModel extends CommonTemplateMarkupOutputModel<DummyTemplateOutputModel> {
-
-    DummyTemplateOutputModel(String plainTextContent, String markupContet) {
-        super(plainTextContent, markupContet);
-    }
-
-    @Override
-    public DummyOutputFormat getOutputFormat() {
-        return DummyOutputFormat.INSTANCE;
-    }
+/**
+ * A string built-in whose usage is banned when auto-escaping with a markup-output format is active.
+ * This is just a marker; the actual checking is in {@code FTL.jj}. 
+ */
+abstract class BuiltInBannedWhenAutoEscaping extends SpecialBuiltIn {
     
 }

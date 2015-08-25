@@ -28,22 +28,15 @@ import freemarker.template.utility.StringUtil;
  */
 public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFOutputModel> {
 
+    /**
+     * The only instance (singleton) of this {@link OutputFormat}.
+     */
     public static final RTFOutputFormat INSTANCE = new RTFOutputFormat();
     
     private RTFOutputFormat() {
         // Only to decrease visibility
     }
     
-    @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        StringUtil.RTFEnc(textToEsc, out);
-    }
-
-    @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("rtf");
-    }
-
     @Override
     public String getName() {
         return "RTF";
@@ -55,12 +48,22 @@ public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFO
     }
 
     @Override
-    protected String escapePlainTextToString(String plainTextContent) {
+    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+        StringUtil.RTFEnc(textToEsc, out);
+    }
+
+    @Override
+    public String escapePlainText(String plainTextContent) {
         return StringUtil.RTFEnc(plainTextContent);
     }
 
     @Override
-    protected TemplateRTFOutputModel newTOM(String plainTextContent, String markupContent) {
+    public boolean isLegacyBuiltInBypassed(String builtInName) {
+        return builtInName.equals("rtf");
+    }
+
+    @Override
+    protected TemplateRTFOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
         return new TemplateRTFOutputModel(plainTextContent, markupContent);
     }
 

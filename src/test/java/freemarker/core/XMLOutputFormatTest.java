@@ -28,9 +28,9 @@ import freemarker.template.TemplateModelException;
 public class XMLOutputFormatTest {
     
     @Test
-    public void testOutputTOM() throws TemplateModelException, IOException {
+    public void testOutputMO() throws TemplateModelException, IOException {
        StringWriter out = new StringWriter();
-       INSTANCE.output(INSTANCE.escapePlainText("a'b"), out);
+       INSTANCE.output(INSTANCE.fromPlainTextByEscaping("a'b"), out);
        assertEquals("a&apos;b", out.toString());
     }
     
@@ -39,6 +39,14 @@ public class XMLOutputFormatTest {
         StringWriter out = new StringWriter();
         INSTANCE.output("a'b", out);
         assertEquals("a&apos;b", out.toString());
+    }
+    
+    @Test
+    public void testEscaplePlainText() {
+        assertEquals("", INSTANCE.escapePlainText(""));
+        assertEquals("a", INSTANCE.escapePlainText("a"));
+        assertEquals("&lt;a&amp;b&apos;c&quot;d&gt;", INSTANCE.escapePlainText("<a&b'c\"d>"));
+        assertEquals("&lt;&gt;", INSTANCE.escapePlainText("<>"));
     }
     
     @Test

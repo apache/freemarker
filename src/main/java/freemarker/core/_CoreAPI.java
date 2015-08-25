@@ -42,6 +42,8 @@ public class _CoreAPI {
         Set/*<String>*/ names = new TreeSet();
         names.add("assign");
         names.add("attempt");
+        names.add("autoEsc");
+        names.add("autoesc");
         names.add("break");
         names.add("call");
         names.add("case");
@@ -68,11 +70,15 @@ public class _CoreAPI {
         names.add("lt");
         names.add("macro");
         names.add("nested");
+        names.add("noautoesc");
+        names.add("noAutoEsc");
         names.add("noescape");
         names.add("noEscape");
         names.add("noparse");
         names.add("noParse");
         names.add("nt");
+        names.add("outputformat");
+        names.add("outputFormat");
         names.add("recover");
         names.add("recurse");
         names.add("return");

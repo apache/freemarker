@@ -22,14 +22,14 @@ import freemarker.template.Version;
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
  */ 
-public final class _ParserConfigurationWithOverrides implements ParserConfiguration {
+public final class _ParserConfigurationWithInheritedFormat implements ParserConfiguration {
 
     private final OutputFormat outputFormat;
-    private final Boolean autoEscaping;
+    private final Integer autoEscaping;
     private final ParserConfiguration wrappedPCfg;
 
-    public _ParserConfigurationWithOverrides(ParserConfiguration wrappedPCfg, OutputFormat outputFormat,
-            Boolean autoEscaping) {
+    public _ParserConfigurationWithInheritedFormat(ParserConfiguration wrappedPCfg, OutputFormat outputFormat,
+            Integer autoEscaping) {
         this.outputFormat = outputFormat;
         this.autoEscaping = autoEscaping;
         this.wrappedPCfg = wrappedPCfg;
@@ -51,6 +51,10 @@ public final class _ParserConfigurationWithOverrides implements ParserConfigurat
         return outputFormat != null ? outputFormat : wrappedPCfg.getOutputFormat();
     }
 
+    public boolean getRecognizeStandardFileExtensions() {
+        return false;
+    }
+
     public int getNamingConvention() {
         return wrappedPCfg.getNamingConvention();
     }
@@ -59,8 +63,8 @@ public final class _ParserConfigurationWithOverrides implements ParserConfigurat
         return wrappedPCfg.getIncompatibleImprovements();
     }
 
-    public boolean getAutoEscaping() {
-        return autoEscaping != null ? autoEscaping.booleanValue() : wrappedPCfg.getAutoEscaping();
+    public int getAutoEscapingPolicy() {
+        return autoEscaping != null ? autoEscaping.intValue() : wrappedPCfg.getAutoEscapingPolicy();
     }
 
     public ArithmeticEngine getArithmeticEngine() {

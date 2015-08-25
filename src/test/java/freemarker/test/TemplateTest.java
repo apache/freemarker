@@ -16,16 +16,20 @@
 
 package freemarker.test;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 
+import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.ParseException;
@@ -60,17 +64,45 @@ public abstract class TemplateTest {
 
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
         Template t = new Template(null, ftl, getConfiguration());
-        assertOutput(t, expectedOut);
+        assertOutput(t, expectedOut, false);
     }
 
     protected void assertOutputForNamed(String name, String expectedOut) throws IOException, TemplateException {
-        assertOutput(getConfiguration().getTemplate(name), expectedOut);
+        assertOutput(getConfiguration().getTemplate(name), expectedOut, false);
+    }
+
+    protected void assertOutputForNamed(String name) throws IOException, TemplateException {
+        String expectedOut;
+        {
+            String resName = name + ".out";
+            InputStream in = this.getClass().getResourceAsStream(resName);
+            if (in == null) {
+                throw new IOException("Reference output resource not found: " + this.getClass() + ", " + resName);
+            }
+            try {
+                expectedOut = IOUtils.toString(in, "utf-8");
+            } finally {
+                in.close();
+            }
+        }
+        assertOutput(getConfiguration().getTemplate(name), expectedOut, true);
+    }
+
+    protected void assertOutput(Template t, String expectedOut) throws TemplateException, IOException {
+        assertOutput(t, expectedOut, false);
     }
     
-    protected void assertOutput(Template t, String expectedOut) throws TemplateException, IOException {
+    protected void assertOutput(Template t, String expectedOut, boolean normalizeNewlines)
+            throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         t.process(createDataModel(), out);
-        assertEquals(expectedOut, out.toString());
+        String actualOut = out.toString();
+        
+        if (normalizeNewlines) {
+            expectedOut = normalizeNewLines(expectedOut);
+            actualOut = normalizeNewLines(actualOut);
+        }
+        assertEquals(expectedOut, actualOut);
     }
     
     protected Configuration createConfiguration() throws Exception {
@@ -96,25 +128,57 @@ public abstract class TemplateTest {
     protected void addTemplate(String name, String content) {
         Configuration cfg = getConfiguration();
         TemplateLoader tl = cfg.getTemplateLoader();
-        if (tl != null && !(tl instanceof StringTemplateLoader)) {
-            throw new IllegalStateException("The template loader was already set to a non-StringTemplateLoader: " + tl);
+        StringTemplateLoader stl;
+        if (tl != null) {
+            stl = extractStringTemplateLoader(tl);
+        } else {
+            stl = new StringTemplateLoader();
+            cfg.setTemplateLoader(stl);
         }
-        if (tl == null) {
-            tl = new StringTemplateLoader();
-            cfg.setTemplateLoader(tl);
+        stl.putTemplate(name, content);
+    }
+
+    private StringTemplateLoader extractStringTemplateLoader(TemplateLoader tl) {
+        if (tl instanceof MultiTemplateLoader) {
+            MultiTemplateLoader mtl = (MultiTemplateLoader) tl;
+            for (int i = 0; i < mtl.getTemplateLoaderCount(); i++) {
+                TemplateLoader tli = mtl.getTemplateLoader(i);
+                if (tli instanceof StringTemplateLoader) {
+                    return (StringTemplateLoader) tli;
+                }
+            }
+            throw new IllegalStateException(
+                    "The template loader was a MultiTemplateLoader that didn't contain StringTemplateLoader: "
+                            + tl);
+        } else if (tl instanceof StringTemplateLoader) {
+            return (StringTemplateLoader) tl;
+        } else {
+            throw new IllegalStateException(
+                    "The template loader was already set to a non-StringTemplateLoader non-MultiTemplateLoader: "
+                            + tl);
         }
-        ((StringTemplateLoader) tl).putTemplate(name, content);
     }
     
     protected void assertErrorContains(String ftl, String... expectedSubstrings) {
-        assertErrorContains(null, ftl, expectedSubstrings);
+        assertErrorContains(null, ftl, null, expectedSubstrings);
+    }
+
+    protected void assertErrorContains(String ftl, Class<? extends Throwable> exceptionClass,
+            String... expectedSubstrings) {
+        assertErrorContains(null, ftl, exceptionClass, expectedSubstrings);
     }
 
     protected void assertErrorContainsForNamed(String name, String... expectedSubstrings) {
-        assertErrorContains(name, null, expectedSubstrings);
+        assertErrorContains(name, null, null, expectedSubstrings);
+    }
+
+    protected void assertErrorContainsForNamed(String name, Class<? extends Throwable> exceptionClass,
+            String... expectedSubstrings) {
+        assertErrorContains(name, null, exceptionClass, expectedSubstrings);
     }
     
-    private void assertErrorContains(String name, String ftl, String... expectedSubstrings) {
+    private void assertErrorContains(String name, String ftl, Class<? extends Throwable> exceptionClass,
+            String... expectedSubstrings) {
         try {
             Template t;
             if (ftl == null) {
@@ -125,10 +189,19 @@ public abstract class TemplateTest {
             t.process(createDataModel(), new StringWriter());
             fail("The tempalte had to fail");
         } catch (TemplateException e) {
+            if (exceptionClass != null) {
+                assertThat(e, instanceOf(exceptionClass));
+            }
             assertContainsAll(e.getMessageWithoutStackTop(), expectedSubstrings);
         } catch (ParseException e) {
+            if (exceptionClass != null) {
+                assertThat(e, instanceOf(exceptionClass));
+            }
             assertContainsAll(e.getEditorMessage(), expectedSubstrings);
         } catch (IOException e) {
+            if (exceptionClass != null) {
+                assertThat(e, instanceOf(exceptionClass));
+            }
             throw new RuntimeException("Unexpected exception class: " + e.getClass().getName(), e);
         }
     }
@@ -146,6 +219,10 @@ public abstract class TemplateTest {
         }
     }
     
+    private String normalizeNewLines(String s) {
+        return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
+    }
+
     public static class TestBean {
         private int x;
         private boolean b;

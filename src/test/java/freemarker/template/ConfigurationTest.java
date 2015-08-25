@@ -47,6 +47,7 @@ import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
+import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Configurable.SettingValueAssignmentException;
 import freemarker.core.Configurable.UnknownSettingException;
@@ -55,9 +56,12 @@ import freemarker.core.CustomHTMLOutputFormat;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
+import freemarker.core.RTFOutputFormat;
 import freemarker.core.UndefinedOutputFormat;
+import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -862,23 +866,38 @@ public class ConfigurationTest extends TestCase {
     public void testSetAutoEscaping() throws Exception {
        Configuration cfg = new Configuration();
     
-       assertTrue(cfg.getAutoEscaping());
-       assertFalse(cfg.isAutoEscapingExplicitlySet());
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
 
-       cfg.setAutoEscaping(false);
-       assertFalse(cfg.getAutoEscaping());
-       assertTrue(cfg.isAutoEscapingExplicitlySet());
-    
-       cfg.unsetAutoEscaping();
-       assertTrue(cfg.getAutoEscaping());
-       assertFalse(cfg.isAutoEscapingExplicitlySet());
-    
-       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_CAMEL_CASE, "true");
-       assertTrue(cfg.getAutoEscaping());
-       assertTrue(cfg.isAutoEscapingExplicitlySet());
+       cfg.setAutoEscapingPolicy(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY);
+       assertEquals(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+
+       cfg.setAutoEscapingPolicy(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+
+       cfg.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
+       assertEquals(Configuration.DISABLE_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
        
-       cfg.setSetting(Configuration.AUTO_ESCAPING_KEY_SNAKE_CASE, "default");
-       assertFalse(cfg.isAutoEscapingExplicitlySet());
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfSupported");
+       assertEquals(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_supported");
+       assertEquals(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+       
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfDefault");
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_default");
+       assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+       
+       cfg.setSetting(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "disable");
+       assertEquals(Configuration.DISABLE_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
+       
+       try {
+           cfg.setAutoEscapingPolicy(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+           fail();
+       } catch (IllegalArgumentException e) {
+           // Expected
+       }
     }
 
     public void testSetOutputFormat() throws Exception {
@@ -917,6 +936,60 @@ public class ConfigurationTest extends TestCase {
            assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }
     }
+    
+    @Test
+    public void testGetOutputFormatByName() throws Exception {
+        Configuration cfg = new Configuration();
+        
+        assertSame(HTMLOutputFormat.INSTANCE, cfg.getOutputFormat(HTMLOutputFormat.INSTANCE.getName()));
+        
+        try {
+            cfg.getOutputFormat("noSuchFormat");
+            fail();
+        } catch (UnregisteredOutputFormatException e) {
+            assertThat(e.getMessage(), containsString("noSuchFormat"));
+        }
+        
+        try {
+            cfg.getOutputFormat("HTML}");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("'{'"));
+        }
+        
+        {
+            OutputFormat of = cfg.getOutputFormat("HTML{RTF}");
+            assertThat(of, instanceOf(CombinedMarkupOutputFormat.class));
+            CombinedMarkupOutputFormat combinedOF = (CombinedMarkupOutputFormat) of;
+            assertSame(HTMLOutputFormat.INSTANCE, combinedOF.getOuterOutputFormat());
+            assertSame(RTFOutputFormat.INSTANCE, combinedOF.getInnerOutputFormat());
+        }
+
+        {
+            OutputFormat of = cfg.getOutputFormat("XML{HTML{RTF}}");
+            assertThat(of, instanceOf(CombinedMarkupOutputFormat.class));
+            CombinedMarkupOutputFormat combinedOF = (CombinedMarkupOutputFormat) of;
+            assertSame(XMLOutputFormat.INSTANCE, combinedOF.getOuterOutputFormat());
+            MarkupOutputFormat innerOF = combinedOF.getInnerOutputFormat();
+            assertThat(innerOF, instanceOf(CombinedMarkupOutputFormat.class));
+            CombinedMarkupOutputFormat innerCombinedOF = (CombinedMarkupOutputFormat) innerOF; 
+            assertSame(HTMLOutputFormat.INSTANCE, innerCombinedOF.getOuterOutputFormat());
+            assertSame(RTFOutputFormat.INSTANCE, innerCombinedOF.getInnerOutputFormat());
+        }
+        
+        try {
+            cfg.getOutputFormat("plainText{HTML}");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), allOf(containsString("plainText"), containsString("markup")));
+        }
+        try {
+            cfg.getOutputFormat("HTML{plainText}");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), allOf(containsString("plainText"), containsString("markup")));
+        }
+    }
 
     public void testSetRegisteredCustomOutputFormats() throws Exception {
         Configuration cfg = new Configuration();
@@ -936,6 +1009,41 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getCause().getMessage(), containsString(OutputFormat.class.getSimpleName()));
         }
     }
+
+    public void testSetRecognizeStandardFileExtensions() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
+     
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+
+        cfg.setRecognizeStandardFileExtensions(true);
+        assertTrue(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+     
+        cfg.unsetRecognizeStandardFileExtensions();
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+     
+        cfg.setSetting(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE, "false");
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+        
+        cfg.setSetting(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE, "default");
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+        
+        cfg.unsetRecognizeStandardFileExtensions();
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        assertTrue(cfg.getRecognizeStandardFileExtensions());
+        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        cfg.setRecognizeStandardFileExtensions(false);
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+     }
     
     public void testSetTimeZone() throws TemplateException {
         TimeZone origSysDefTZ = TimeZone.getDefault();

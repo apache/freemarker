@@ -20,10 +20,10 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
 
 /**
- * "markup output" template language data-type; stores markup (some kind of "rich text" / structured format), as opposed
- * to plain text that meant to be printed as template output. Each implementation of this type has a
+ * "markup output" template language data-type; stores markup (some kind of "rich text" / structured format, as opposed
+ * to plain text) that meant to be printed as template output. Each implementation of this type has a
  * {@link OutputFormat} subclass pair (like {@link TemplateHTMLOutputModel} has {@link HTMLOutputFormat}). This type is
- * related to the {@link Configuration#setOutputFormat(OutputFormat)} and {@link Configuration#setAutoEscaping(boolean)}
+ * related to the {@link Configuration#setOutputFormat(OutputFormat)} and {@link Configuration#setAutoEscapingPolicy(int)}
  * mechanism; see more there. Values of this type are exempt from automatic escaping with that mechanism.
  * 
  * <p>Note that {@link TemplateMarkupOutputModel}-s are by design not handled like {@link TemplateScalarModel}-s,

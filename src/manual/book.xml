@@ -746,13 +746,6 @@ All Rights Reserved.
 
           <itemizedlist>
             <listitem>
-              <para><literal>user?html</literal> gives the HTML-escaped
-              version of <literal>user</literal>, like
-              <literal>&amp;</literal> will be replaced with
-              <literal>&amp;amp;</literal></para>
-            </listitem>
-
-            <listitem>
               <para><literal>user?upper_case</literal> gives the upper case
               version of the value of <literal>user</literal> (like
               <quote>JOHN DOE</quote> instead of <quote>John
@@ -839,9 +832,9 @@ All Rights Reserved.
           </itemizedlist>
 
           <para>Built-in applications can be chained, like
-          <literal>user?upper_case?html</literal> will first convert the user
-          name to upper case, then HTML-escapes it. (This is just like you can
-          chain <literal>.</literal>-s (dots) too.)</para>
+          <literal>fruits?join(", ")?upper_case</literal> will first convert
+          the list a to a string, then converts it to upper case. (This is
+          just like you can chain <literal>.</literal>-s (dots) too.)</para>
 
           <para>You can find the <link linkend="ref_builtins">full set of
           built-ins in the Reference</link>.</para>
@@ -896,6 +889,58 @@ All Rights Reserved.
           Same logic goes for <literal>??</literal>;
           <literal>animals.python.price??</literal> versus
           <literal>(animals.python.price)??</literal>.</para>
+        </section>
+
+        <section xml:id="dgui_quickstart_template_autoescaping">
+          <title>Escaping for HTML, XML and other markup</title>
+
+          <para>When the template generates HTML, XML or other markup (like
+          RTF), characters that has special meaning in the markup need to be
+          escaped when you insert a value with
+          <literal>${<replaceable>...</replaceable>}</literal>. For example,
+          if <literal>name</literal> is <quote>Someone &amp; Co.</quote>, then
+          in HTML or XML it has to be printed as <quote>Someone
+          <emphasis>&amp;amp;</emphasis> Co.</quote>. This is called <emphasis
+          role="term">escaping</emphasis>.</para>
+
+          <para>FreeMarker will automatically escape values printed with
+          <literal>${<replaceable>...</replaceable>}</literal>-s, <emphasis>if
+          it's properly configured</emphasis>, which is the responsibility of
+          the programmers (<link
+          linkend="pgui_config_outputformatsautoesc">here's how</link>). The
+          recommended practice is using <literal>ftlh</literal> file extension
+          for HTML, and <literal>ftlx</literal> file extension for XML
+          generating templates.</para>
+
+          <para>You can easily test if auto-escaping is on with something like
+          <literal>${"&lt;"}</literal> (assuming you want HTML or XML
+          escaping). If it's not, and the configuration won't be adjusted,
+          start the template like:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML"&gt;</programlisting>
+
+          <para>Sometime the value to print deliberately contains markup, and
+          so must not be auto-escaped. In that case, you can write
+          <literal>${<replaceable>value</replaceable>?no_esc}</literal>.</para>
+
+          <para>If you need to know more about auto-escaping and output
+          formats, <link linkend="dgui_misc_autoescaping">see it in its own
+          section...</link></para>
+
+          <note>
+            <para>The kind of automatic escaping described here requires at
+            least FreeMarker 2.3.24. If you have to use an earlier version,
+            use the deprecated <link
+            linkend="ref_directive_escape"><literal>escape</literal>
+            directive</link>.</para>
+          </note>
+
+          <note>
+            <para>If escaping doesn't happen after adding the above
+            <literal>ftl</literal> header, <literal>&lt;#ftl
+            output_format="HTML" auto_esc=true&gt;</literal> might
+            helps.</para>
+          </note>
         </section>
       </section>
     </chapter>
@@ -1136,6 +1181,11 @@ brown</programlisting>
             <itemizedlist spacing="compact">
               <listitem>
                 <para><link linkend="dgui_datamodel_node">Node</link></para>
+              </listitem>
+
+              <listitem>
+                <para><link linkend="dgui_datamodel_markupoutput">Markup
+                output</link></para>
               </listitem>
             </itemizedlist>
           </listitem>
@@ -1445,15 +1495,13 @@ The average of the price of a python and an elephant is:
 
             <itemizedlist>
               <listitem>
-                <para>... the output (the return value) is markup (HTML, XML,
-                etc.). The main reason is that the result of functions are
-                subject to automatic XML-escaping (due to the nature of
-                <literal>${<replaceable>...</replaceable>}</literal>), while
-                the output of user-defined directives are not (due to the
-                nature of
-                <literal>&lt;@<replaceable>...</replaceable>&gt;</literal>;
-                its output is assumed to be markup, and hence already
-                escaped).</para>
+                <para>... the purpose of it is generating a piece of the
+                output that's not just a single value, and typically involves
+                markup. The template language was designed for printing to the
+                output directly, piece by piece, as it goes though
+                <literal>list</literal> loops, <literal>if</literal>-s, etc.
+                Building up a string value in a variable then returning it is
+                much less convenient.</para>
               </listitem>
 
               <listitem>
@@ -1466,16 +1514,28 @@ The average of the price of a python and an elephant is:
               </listitem>
 
               <listitem>
-                <para>... it will do flow control (like for example
-                <literal>list</literal> or <literal>if</literal> directives
-                do). You just can't do that with a function/method
-                anyway.</para>
+                <para>... it will do flow control on the caller side (like for
+                example <literal>list</literal> or <literal>if</literal>
+                directives do). You just can't do that with a
+                function/method.</para>
+              </listitem>
+
+              <listitem>
+                <para>... you are using legacy escaping via the
+                <literal>escape</literal> directive (instead of <link
+                linkend="dgui_misc_autoescaping">auto-escaping</link>), and
+                the result contains markup. When you print the result with
+                <literal>${<replaceable>...</replaceable>}</literal>, the
+                markup will be escaped and thus ruined, but if it's printed by
+                a directive call
+                (<literal>&lt;@<replaceable>...</replaceable>&gt;</literal>),
+                it won't be.</para>
               </listitem>
             </itemizedlist>
 
             <para>The Java methods of FreeMarker-unaware Java objects are
             normally visible as methods in templates, regardless of the nature
-            of the Java method. That said, you have no choice there.</para>
+            of the Java method; you have no choice there.</para>
           </section>
         </section>
 
@@ -1515,6 +1575,38 @@ The average of the price of a python and an elephant is:
             retrieving the topological and metainformations is described <link
             linkend="ref_builtins_node">in a later chapter</link> (that you
             don't have to understand at this point).</para>
+          </section>
+
+          <section xml:id="dgui_datamodel_markupoutput">
+            <title>Markup output</title>
+
+            <indexterm>
+              <primary>markup output</primary>
+
+              <secondary>the FTL value type</secondary>
+            </indexterm>
+
+            <para>This type is related to <link
+            linkend="dgui_misc_autoescaping">auto-escaping mechanism</link>
+            introduced FreeMarker 2.3.24; you can <link
+            linkend="dgui_misc_autoescaping_movalues">read about this type
+            there</link>. But in short, this is a value that stores text
+            that's already in the output markup format (like HTML, XML, RTF,
+            etc.), and hence must not be auto-escaped.</para>
+
+            <para>Values of this type are usually produced inside the
+            templates (like with <link
+            linkend="ref_builtin_no_esc"><literal>no_esc</literal>
+            built-in</link> or <link linkend="ref_directive_assign">output
+            capturing assignments</link>), but can also be part of the
+            data-model. Such values in the data-model are useful for example
+            if you have message resources that sometimes contain the message
+            in HTML format, rather than in plain text. If the data-model uses
+            HTML markup output values for those messages instead of strings,
+            then the template author need not know which messages contain HTML
+            and which plain text, as double escaping will be avoided
+            automatically when the message is inserted with
+            <literal>${<replaceable>...</replaceable>}</literal>.</para>
           </section>
         </section>
       </section>
@@ -1927,7 +2019,7 @@ The average of the price of a python and an elephant is:
                 <listitem>
                   <para><link
                   linkend="dgui_template_exp_stringop_interpolation">Interpolation
-                  (or concatenation)</link>:
+                  and concatenation</link>:
                   <literal>"Hello ${user}!"</literal> (or <literal>"Hello
                   " + user + "!"</literal>)</para>
                 </listitem>
@@ -2672,7 +2764,7 @@ baz
           </indexterm>
 
           <section xml:id="dgui_template_exp_stringop_interpolation">
-            <title>Interpolation (or concatenation)</title>
+            <title>Interpolation and concatenation</title>
 
             <indexterm>
               <primary>interpolation</primary>
@@ -2708,13 +2800,19 @@ baz
             deprecated <literal>#{<replaceable>...</replaceable>}</literal>)
             in string literals.
             <literal>${<replaceable>...</replaceable>}</literal> in string
-            literals <link linkend="dgui_template_valueinsertion">behaves as
-            in <phrase role="markedText">text</phrase> sections</link> (so it
-            goes through the same <emphasis>locale sensitive</emphasis> number
-            and date/time formatting), except that it never go through <link
-            linkend="ref.directive.escape">automatic escaping</link>.</para>
+            literals <link linkend="dgui_template_valueinsertion">behaves
+            similarly as in <phrase role="markedText">text</phrase>
+            sections</link> (so it goes through the same <emphasis>locale
+            sensitive</emphasis> number and date/time formatting), except that
+            no automatic escaping will happen (the deprecated <link
+            linkend="ref.directive.escape">escaping by
+            <literal>escape</literal> directive</link> has no effect there,
+            nor <link linkend="dgui_misc_autoescaping">auto-escaping</link>
+            happens as <link
+            linkend="dgui_misc_autoescaping_stringliteral">explained
+            here</link>).</para>
 
-            <para>Example (assume that user is ``Big Joe''):</para>
+            <para>Example (assume that user is <quote>Big Joe</quote>):</para>
 
             <programlisting role="template">&lt;#assign s = "Hello ${user}!"&gt;
 ${s} &lt;#-- Just to see what the value of s is --&gt;
@@ -2743,23 +2841,25 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
               boolean value, so it will cause a runtime error.</para>
             </warning>
 
-            <para>Alternatively, you can use the <literal>+</literal> operator
-            to achieve similar result:</para>
+            <para
+            xml:id="dgui_template_exp_stringop_concatenation">Alternatively,
+            you can use the <literal>+</literal> operator to achieve similar
+            result:</para>
 
             <programlisting role="template">&lt;#assign s = "Hello " + user + "!"&gt;</programlisting>
 
-            <para>This gives the same result as the example with the
+            <para>This gives the same result as the earlier example with the
             <literal>${<replaceable>...</replaceable>}</literal>.</para>
 
             <warning>
-              <para>Because <literal>+</literal> follows the same rules as
+              <para>Because <literal>+</literal> follows similar rules as
               <literal>${<replaceable>...</replaceable>}</literal>, the
               appended string is influenced by the <literal>locale</literal>,
               <literal>number_format</literal>,
               <literal>date_format</literal>, <literal>time_format</literal>,
               <literal>datetime_format</literal> and
               <literal>boolean_format</literal>, etc. settings, and thus the
-              result targets humans and isn't in generally machine parsable.
+              result targets humans and isn't in generally machine parseable.
               This mostly leads to problems with numbers, as many locales use
               grouping (thousands separators) by default, and so
               <literal>"someUrl?id=" + id</literal> becomes to something like
@@ -2770,6 +2870,17 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
               something like <literal>"someUrl?id=1234"</literal>, regardless
               of locale and format settings.</para>
             </warning>
+
+            <para>Note for advanced users that <literal>+</literal> is more
+            flexible than <literal>${<replaceable>...</replaceable>}</literal>
+            when it comes to handling <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link>, because <link
+            linkend="dgui_misc_autoescaping_concatenation"><literal>+</literal>
+            can have markup output result</link>, while <link
+            linkend="dgui_misc_autoescaping_stringliteral">string literal
+            interpolation can't</link>, as the literal must yield a
+            string.</para>
           </section>
 
           <section xml:id="dgui_template_exp_get_character">
@@ -4005,64 +4116,17 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
         </section>
 
         <section>
-          <title>Guide to inserting strings; don't forget escaping!</title>
+          <title>Automatic escaping</title>
 
           <para>If the interpolation is in a <link
           linkend="dgui_template_overallstructure"><phrase
-          role="markedText">text</phrase> section</link> (i.e., not in a <link
+          role="markedText">text</phrase> section</link> (not in a <link
           linkend="dgui_template_exp_stringop_interpolation">string literal
-          expression</link>), the string that it will insert will be
-          automatically escaped if an <link
-          linkend="ref.directive.escape"><literal>escape</literal>
-          directive</link> is in effect. If you are generating HTML it's
-          strongly recommended to utilize this to prevent cross-site-scripting
-          attacks and not-well-formed HTML pages. Here's a quick
-          example:</para>
-
-          <programlisting role="template"><emphasis>&lt;#escape x as x?html&gt;</emphasis>
-  ...
-  &lt;p&gt;Title: <emphasis>${</emphasis>book.title<emphasis>}</emphasis>&lt;/p&gt;
-  &lt;p&gt;Description: <emphasis>&lt;#noescape&gt;${</emphasis>book.description<emphasis>}&lt;/#noescape&gt;</emphasis>&lt;/p&gt;
-  &lt;h2&gt;Comments:&lt;/h2&gt;
-  &lt;#list comments as comment&gt;
-    &lt;div class="comment"&gt;
-      <emphasis>${</emphasis>comment<emphasis>}</emphasis>
-    &lt;/div&gt;
-  &lt;/#list&gt;
-  ...
-<emphasis>&lt;/#escape&gt;</emphasis></programlisting>
-
-          <para>This example shows that when generating HTML you better put
-          the whole template inside the <literal>escape</literal> directive.
-          Thus, if the <literal>book.title</literal> contains
-          <literal>&amp;</literal>, it will be replaced with
-          <literal>&amp;amp;</literal> in the output so the page remains
-          well-formed HTML. If a user comment contains tags like
-          <literal>&lt;iframe&gt;</literal> (or any other element), they will
-          become to <literal>&amp;lt;iframe&amp;gt;</literal> and like,
-          rendering them harmless. But sometimes you really have HTML in the
-          data-model, like let's assume <literal>book.description</literal>
-          above is stored as HTML in the database, in which case you have to
-          neutralize the enclosing <literal>escape</literal> with a
-          <literal>noescape</literal>. Without the enclosing
-          <literal>escape</literal>, the template would look like:</para>
-
-          <programlisting role="template">  ...
-  &lt;p&gt;Title: ${book.title?html}&lt;/p&gt;
-  &lt;p&gt;Description: ${book.description}&lt;/p&gt;
-  &lt;h2&gt;Comments:&lt;/h2&gt;
-  &lt;#list comments as comment&gt;
-    &lt;div class="comment"&gt;
-      ${comment?html}
-    &lt;/div&gt;
-  &lt;/#list&gt;
-  ...</programlisting>
-
-          <para>This does the same as the earlier example, but here you may
-          forget some <literal>?html</literal>-s, which is a security risk. In
-          the earlier example you may forget some
-          <literal>noescape</literal>-s, which gives bad output too, but it's
-          at least no a security risk.</para>
+          expression</link>), the text that it inserts goes through
+          automatically escaping, <emphasis>if FreeMarker was properly
+          configured</emphasis>. <link
+          linkend="dgui_quickstart_template_autoescaping">See more about
+          escaping here...</link>.</para>
         </section>
 
         <section>
@@ -5171,6 +5235,522 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
           organization, you should use the URL of the project homepage, such
           as <literal>/lib/example.sourceforge.net/example.ftl</literal>, or
           <literal>/lib/geocities.com/jsmith/example.ftl</literal>.</para>
+        </section>
+      </section>
+
+      <section xml:id="dgui_misc_autoescaping">
+        <title>Auto escaping and output formats</title>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>MIME type</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>HTML escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>HTML encoding</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>XML escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>XML encoding</primary>
+        </indexterm>
+
+        <para>This is a tutorial on escaping and auto-escaping in FreeMarker
+        2.3.24 and later, where <literal>#escape</literal>-based escaping was
+        deprecated.</para>
+
+        <section xml:id="dgui_misc_autoescaping_outputformat">
+          <title>Output formats</title>
+
+          <indexterm>
+            <primary>output format</primary>
+          </indexterm>
+
+          <para>Each template has an associated output format <phrase
+          role="forProgrammers">(a
+          <literal>freemarker.core.OutputFormat</literal> instance)</phrase>.
+          The output format dictates the escaping rules, which is applied on
+          all <literal>${<replaceable>...</replaceable>}</literal> (and
+          <literal>#{<replaceable>...</replaceable>}</literal>-s). It also
+          specifies a MIME type (e.g. <literal>"text/HTML"</literal>) and a
+          canonical name (e.g. <literal>"HTML"</literal>) that the embedding
+          application/framework can leverage for its own purposes.</para>
+
+          <para>It's the programmer's responsibility to <link
+          linkend="pgui_config_outputformatsautoesc">associate output format
+          to templates</link>. Furthermore it's recommended that FreeMarker is
+          configured so that templates with <literal>ftlh</literal> and
+          <literal>ftlx</literal> file extensions are automatically associated
+          with the HTML and XML output types, respectively.</para>
+
+          <para xml:id="topic.predefinedOutputFormats">The predefined set of
+          output formats are:</para>
+
+          <informaltable border="1">
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Description</th>
+
+                <th>MIME Type</th>
+
+                <th>Default implementation
+                (<literal>freemarker.core.*</literal>)</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td><literal>HTML</literal></td>
+
+                <td>Escapes <literal>&lt;</literal>, <literal>&gt;</literal>,
+                <literal>&amp;</literal>, <literal>"</literal>,
+                <literal>'</literal> as <literal>&amp;lt;</literal>,
+                <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;#39;</literal></td>
+
+                <td><literal>text/HTML</literal></td>
+
+                <td><literal>HTMLOutputFormat.INSTANCE</literal></td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr>
+                <td><literal>XML</literal></td>
+
+                <td>Escapes <literal>&lt;</literal>, <literal>&gt;</literal>,
+                <literal>&amp;</literal>, <literal>"</literal>,
+                <literal>'</literal> as <literal>&amp;lt;</literal>,
+                <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;apos;</literal></td>
+
+                <td><literal>text/xml</literal></td>
+
+                <td><literal>XMLOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>RTF</literal></td>
+
+                <td>Escapes <literal>{</literal>, <literal>}</literal>,
+                <literal>\</literal> as <literal>\{</literal>,
+                <literal>\}</literal>, <literal>\\</literal></td>
+
+                <td><literal>text/rtf</literal></td>
+
+                <td><literal>RTFOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>undefined</literal></td>
+
+                <td>Doesn't escape. Prints markup output values from other
+                output formats (concept explained later) as is.</td>
+
+                <td>None (<literal>null</literal>)</td>
+
+                <td><literal>UndefinedOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>plainText</literal></td>
+
+                <td>Doesn't escape. Doesn't accept markup output values from
+                other output formats.</td>
+
+                <td><literal>text/plain</literal></td>
+
+                <td><literal>PlainTextOutputFormat.INSTANCE</literal></td>
+              </tr>
+            </tbody>
+          </informaltable>
+
+          <para>The programmers can extend this with their your own output
+          formats.</para>
+        </section>
+
+        <section xml:id="dgui_misc_autoescaping_overrideoformat">
+          <title>Overriding the output format in templates</title>
+
+          <para>Especially in legacy applications, you will often find that
+          the output format is <literal>undefined</literal> (you can check
+          that with <literal>${.output_format}</literal>), and so no automatic
+          escaping is happening. In other cases, a common output format (like
+          HTML) is set for all templates, but a few templates needs a
+          different output format. In any case, the output format of a
+          template can be enforced in the <link
+          linkend="ref_directive_ftl">the <literal>ftl</literal>
+          header</link>:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="XML"&gt;
+${"'"}  &lt;#-- Prints: &amp;apos; --&gt;</programlisting>
+
+          <para>Note that the output format was referred by its name shown in
+          the earlier table <emphasis role="forProgrammers">(looked up via
+          <literal>Configuration.getOutputFormat(String name)</literal>,
+          actually)</emphasis>.</para>
+
+          <para>The output format can also be applied to only a section of a
+          template, like:</para>
+
+          <programlisting role="template">&lt;#-- Let's assume we have "HTML" output format by default. --&gt;
+${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
+&lt;#outputformat "XML"&gt;
+  ${"'"}  &lt;#-- Prints: &amp;apos; --&gt;
+&lt;/#outputformat&gt;
+${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
+</programlisting>
+
+          <para>So basically, each position in a template has an associated
+          output format, and it might not be the same everywhere in the same
+          file. This association is purely parse-time, so if for example you
+          call a macro from inside an <literal>outputformat</literal> block
+          that's defined outside that block, it won't get the output format of
+          it. Similarly, if you have a macro that's defined in a template with
+          HTML output format, no mater from where you call it, that macro will
+          always execute with HTML output format. This is like if you were
+          coloring each characters of the template files by output format in
+          the text editor, and then later when the templates are executed, it
+          only considers the color of the statement being executed. This gives
+          you firm control over the output format and hence escaping; you
+          don't have to consider the possible execution paths that can lead to
+          a point.</para>
+        </section>
+
+        <section xml:id="dgui_misc_autoescaping_disableautoesc">
+          <title>Disabling auto escaping</title>
+
+          <para>For a single interpolation you can disable auto-escaping with
+          <link
+          linkend="ref_builtin_no_esc"><literal>?no_esc</literal></link>:</para>
+
+          <programlisting role="template">&lt;#-- Let's assume we have "HTML" output format by default. --&gt;
+${'&lt;b&gt;test&lt;/b&gt;'}  &lt;#-- prints: &amp;lt;b&amp;gt;test&amp;lt;/b&amp;gt; --&gt;
+${'&lt;b&gt;test&lt;/b&gt;'<emphasis>?no_esc</emphasis>}  &lt;#-- prints: &lt;b&gt;test&lt;/b&gt; --&gt;</programlisting>
+
+          <para>You can also disable auto escaping for a whole section with
+          the <link
+          linkend="ref_directive_noautoesc"><literal>noautoesc</literal>
+          directive</link>:</para>
+
+          <programlisting role="template">${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
+<emphasis>&lt;#noautoesc&gt;</emphasis>
+  ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
+  ... lot more here ...
+<emphasis>&lt;/#noautoesc&gt;</emphasis>
+${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
+
+          <para>Just like <literal>outputformat</literal>, this only applies
+          to the part that's literally inside the block
+          (<quote>coloring</quote> logic).</para>
+
+          <para>Auto-escaping can also be disabled fort the whole template in
+          the <literal>ftl</literal> header. It can be re-enabled for a
+          section with the <link
+          linkend="ref_directive_autoesc"><literal>autoesc</literal>
+          directive</link>:</para>
+
+          <programlisting role="template">&lt;#ftl <emphasis>autoesc=false</emphasis>&gt;
+${'&amp;'}  &lt;#-- prints: &amp; --&gt;
+<emphasis>&lt;#autoesc&gt;</emphasis>
+  ${'&amp;'}  &lt;#-- prints: &amp;amp; --&gt;
+  ... lot more here ...
+<emphasis>&lt;/#autoesc&gt;</emphasis>
+${'&amp;'}  &lt;#-- prints: &amp; --&gt;</programlisting>
+
+          <para>You can also force escaping for an individual interpolation
+          when escaping is disabled with <link
+          linkend="ref_builtin_esc"><literal>?esc</literal></link>:</para>
+
+          <programlisting role="template">&lt;#ftl <emphasis>autoesc=false</emphasis>&gt;
+${'&amp;'}  &lt;#-- prints: &amp; --&gt;
+${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
+
+          <para>Of course, both <literal>autoesc</literal> and
+          <literal>?esc</literal> works inside <literal>noautoesc</literal>
+          blocks too.</para>
+        </section>
+
+        <section xml:id="dgui_misc_autoescaping_movalues">
+          <title><quote>Markup output</quote> values</title>
+
+          <para>In FTL, <link linkend="dgui_datamodel_basics">values has
+          types</link>, like string, number, boolean and so on. One such type
+          is called markup output. A value of that type is a piece of text
+          that's already in the output format (like HTML), and hence needs no
+          further escaping. We have already produced such values
+          earlier:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal><replaceable>s</replaceable>?esc</literal>
+              creates a markup output value out of a string value by escaping
+              all special characters in it.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal><replaceable>s</replaceable>?no_esc</literal>
+              creates a markup output value out of a string value by assuming
+              that it already stored markup and so needs no further
+              escaping</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Hence these can be used outside
+          <literal>${<replaceable>...</replaceable>}</literal> too. For
+          example, here the caller of the <literal>infoBox</literal> macro can
+          decide if the message is plain text (that hence needs escaping) or
+          HTML (that hence must not be escaped):</para>
+
+          <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;@infoBox "Foo &amp; bar" /&gt;
+&lt;@infoBox "Foo &lt;b&gt;bar&lt;/b&gt;"?no_esc /&gt;
+
+&lt;#macro infoBox message&gt;
+  &lt;div class="infoBox"&gt;
+    ${message}
+  &lt;/div&gt;
+&lt;/#macro&gt;</programlisting>
+
+          <programlisting role="output">  &lt;div class="infoBox"&gt;
+    Foo &amp;amp; bar
+  &lt;/div&gt;
+  &lt;div class="infoBox"&gt;
+    Foo &lt;b&gt;bar&lt;/b&gt;
+  &lt;/div&gt;</programlisting>
+
+          <para>Another case where you get a markup output value is output
+          capturing:</para>
+
+          <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+&lt;#assign captured&gt;&lt;b&gt;Test&lt;/b&gt;&lt;/#assign&gt;
+Just a string: ${"&lt;b&gt;Test&lt;/b&gt;"}
+Captured output: ${captured}</programlisting>
+
+          <programlisting role="output">Just a string: &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
+Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
+
+          <para>because the captured output is markup output, so it won't be
+          auto-escaped.</para>
+
+          <para>It's important that markup output values aren't strings, and
+          aren't automatically coerced to strings. Thus
+          <literal>?upper_case</literal>, <literal>?starts_with</literal>
+          etc., will give an error with them. You won't be able to pass them
+          to Java methods for <literal>String</literal> parameters either. But
+          sometimes you actually need to get the markup that's behind the
+          value as a string, and you can do that with
+          <literal><replaceable>markupOutput</replaceable>?markup</literal>.
+          Be sure you know what you are doing though. Applying string
+          operations on markup (as opposed to on plain text) can result in
+          invalid markup. Also there's the danger of possibly unintended
+          double escaping.</para>
+
+          <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;#assign markupOutput1="&lt;b&gt;Test&lt;/b&gt;"?no_esc&gt;
+&lt;#assign markupOutput2="Foo &amp; bar"?esc&gt;
+
+As expected:
+${markupOutput1}
+${markupOutput2}
+
+Double escaping:
+${markupOutput1?markup}
+${markupOutput2?markup}</programlisting>
+
+          <programlisting role="output">As expected:
+&lt;b&gt;Test&lt;/b&gt;
+Foo &amp;amp; bar
+
+Double escaping:
+&amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
+Foo &amp;amp;amp; bar</programlisting>
+        </section>
+
+        <section>
+          <title>Further details and tricky cases</title>
+
+          <section xml:id="dgui_misc_autoescaping_nonmarkupof">
+            <title>Non-markup output formats</title>
+
+            <para>An output format is called a non-markup format if it defines
+            no escaping rules. Examples of such output formats are the
+            <literal>undefined</literal> format (which is often the default
+            for <literal>ftl</literal> files) and the
+            <literal>plainText</literal> format.</para>
+
+            <para>These formats produce no <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link>, hence you can't use <literal>?esc</literal> or
+            <literal>?noesc</literal> either when they are the current format.
+            You can use output capturing (like <literal>&lt;#assign
+            captured&gt;<replaceable>...</replaceable>&lt;/#assign&gt;</literal>),
+            but the resulting value will be a string, not a markup output
+            value.</para>
+
+            <para>Furthermore, you aren't allowed to use the
+            <literal>autoesc</literal> directive or <literal>&lt;#ftl
+            auto_esc=true&gt;</literal> when the current output format is
+            non-markup.</para>
+
+            <para>Note that as the output format is already known during
+            template parsing (i.e., earlier then execution), using constructs
+            that aren't supported by the current output format will give <link
+            linkend="gloss.parseTimeError">parse-time error</link>.</para>
+          </section>
+
+          <section xml:id="dgui_misc_autoescaping_mixingoutputformats">
+            <title>Inserting markup output values from other markups</title>
+
+            <para>Each <link linkend="dgui_misc_autoescaping_movalues">markup
+            output value</link> has an associated output format. When a markup
+            output value is inserted with
+            <literal>${<replaceable>...</replaceable>}</literal> (or
+            <literal>#{<replaceable>...</replaceable>}</literal>), it has to
+            be converted to the current output format at the point of
+            insertion (if they differ). As of this writing (2.3.24), such
+            output format conversion will only be successful if the value to
+            convert was created by escaping plain text:</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;#assign mo1 = "Foo's bar {}"?esc&gt;
+HTLM: ${mo1}
+XML:  &lt;#outputformat 'XML'&gt;${mo1}&lt;/#outputformat&gt;
+RTF:  &lt;#outputformat 'RTF'&gt;${mo1}&lt;/#outputformat&gt;
+
+&lt;#assign mo2&gt;&lt;p&gt;Test&lt;/#assign&gt;
+HTML: ${mo2}
+XML:  &lt;#attempt&gt;&lt;#outputformat 'XML'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;
+RTF:  &lt;#attempt&gt;&lt;#outputformat 'RTF'&gt;${mo2}&lt;/#outputformat&gt;&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
+
+            <programlisting role="output">HTLM: Foo&amp;#39;s bar {}
+XML:  Foo&amp;apos;s bar {}
+RTF:  Foo's bar \{\}
+
+HTML: &lt;p&gt;Test
+XML:  Failed
+RTF:  Failed</programlisting>
+
+            <para>But, an output format can chose to insert pieces of other
+            output formats as is, without converting them. Among the standard
+            output formats, <literal>undefined</literal> is like that, which
+            is the output format used for templates for which no output format
+            was specified in the configuration:</para>
+
+            <programlisting role="template">&lt;#outputformat "HTML"&gt;&lt;#assign htmlMO&gt;&lt;p&gt;Test&lt;/#assign&gt;&lt;/#outputformat&gt;
+&lt;#outputformat "XML"&gt;&lt;#assign xmlMO&gt;&lt;p&gt;Test&lt;/p&gt;&lt;/#assign&gt;&lt;/#outputformat&gt;
+&lt;#outputformat "RTF"&gt;&lt;#assign rtfMO&gt;\par Test&lt;/#assign&gt;&lt;/#outputformat&gt;
+&lt;#-- We assume that we have "undefined" output format here. --&gt;
+HTML: ${htmlMO}
+XML:  ${xmlMO}
+RTF:  ${rtfMO}</programlisting>
+
+            <programlisting role="output">HTML: &lt;p&gt;Test
+XML:  &lt;p&gt;Test&lt;/p&gt;
+RTF:  \par Test</programlisting>
+          </section>
+
+          <section xml:id="dgui_misc_autoescaping_stringliteral">
+            <title>Auto-escaping and ${...} inside string literals</title>
+
+            <para>Inside string literals (quoted text expressions), the output
+            format is <literal>plainText</literal>. Thus no auto-escaping will
+            occur there:</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+&lt;#assign s = "Foo &amp; bar"&gt;
+${s}
+${"${s} &amp; baz"}</programlisting>
+
+            <programlisting role="output">Foo &amp;amp; bar
+Foo &amp;amp; bar &amp;amp; baz</programlisting>
+
+            <para>Above, because inside the string literal
+            <literal>${s}</literal> did no auto-escaping, when we print the
+            whole string we don't end up with double-escaping.</para>
+
+            <para>The <literal>plainText</literal> output format only allows
+            the inserting of markup output values that were created by
+            escaping plain text
+            (<literal><replaceable>plainText</replaceable>?esc</literal>), as
+            those are trivially convertible back to plain text. Thus only such
+            markup output values can be insert into string literals with
+            <literal>${<replaceable>...</replaceable>}</literal> (the
+            <literal>+</literal> operator is more flexible, but see that
+            later):</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+&lt;#-- Markup output value created by escaping plain text: --&gt;
+&lt;#assign mo1 = "Foo &amp; bar"?esc&gt;
+
+&lt;#-- Markup output value created outherwise: --&gt;
+&lt;#assign mo2 = "&lt;p&gt;Foo"?no_esc&gt;
+
+${"${mo1} baz"}
+&lt;#attempt&gt;${"${mo2} baz"}&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
+
+            <programlisting role="output">Foo &amp;amp; bar baz
+Failed</programlisting>
+          </section>
+
+          <section xml:id="dgui_misc_autoescaping_concatenation">
+            <title>Markup output values and the <quote>+</quote>
+            operator</title>
+
+            <para>As you certainly know, if one of the sides of the
+            <literal>+</literal> operator is a string, <link
+            linkend="dgui_template_exp_stringop_concatenation">it does
+            concatenation</link>. If there's a <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            value</link> in one side, the other side gets promoted to markup
+            output value of the same output format (if it's not already that),
+            by escaping its string value, and finally concatenating the two
+            markups. For example:</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+
+${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
+
+            <programlisting role="output">&lt;h1&gt;Foo &amp;amp; bar&lt;/h1&gt;</programlisting>
+
+            <para>If the two side of the <literal>+</literal> operator are
+            markup values of different formats, the left side operand is
+            converted to the output format of the right side, if that's not
+            possible, then the right side operand to the format of the left
+            side, and if neither was possible, that's an error. (See the <link
+            linkend="dgui_misc_autoescaping_mixingoutputformats">limitations
+            of conversions here</link>.)</para>
+          </section>
+
+          <section>
+            <title>Combined output formats</title>
+
+            <para>Combined output formats are output formats that are created
+            ad-hoc from other output formats by nesting them into each other,
+            so that the escaping of all output formats are applied. <link
+            linkend="topic.combinedOutputFormats">They are discussed
+            here...</link></para>
+          </section>
         </section>
       </section>
 
@@ -7415,17 +7995,15 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
 
           <listitem>
             <para><literal>Template</literal> layer: Settings on individual
-            templates are normally set by the
-            <literal>TemplateConfigurer</literal>-s specified with
-            <literal>Configuration.setTemplateConfigurers(<replaceable>...</replaceable>)</literal>,
-            which let you to override individual settings coming from the
-            common <literal>Configuration</literal> object, depending on the
-            name (path) of the template. [TODO example] There's a deviation
-            from this approach with the <literal>locale</literal> setting,
-            because that you can also specify to
-            <literal>Configuration.getTemplate(...)</literal> as parameter, to
-            get the template for the requested locale (so called localized
-            lookup).</para>
+            templates are normally set by <link
+            linkend="pgui_config_templateconfigurers">template configurers
+            (see them in their own chapter)</link>, which basically associate
+            setting assignments to template name (template path) patterns.
+            There's a deviation from this approach with the
+            <literal>locale</literal> setting, because that you can also
+            specify to <literal>Configuration.getTemplate(...)</literal> as
+            parameter, to get the template for the requested locale (so called
+            localized lookup).</para>
 
             <warning>
               <para>You should never set settings directly on the
@@ -8114,6 +8692,426 @@ c</programlisting>
             </listitem>
           </itemizedlist>
         </section>
+      </section>
+
+      <section xml:id="pgui_config_templateconfigurers">
+        <title>Template configurers</title>
+
+        <para>Template configurers refers to the
+        <literal>template_configurers</literal> setting of
+        <literal>Configuration</literal>
+        (<literal>Configuration.setTemplateConfigurers(<replaceable>...</replaceable>)</literal>).
+        This setting lets you override individual settings coming from the
+        common <literal>Configuration</literal> object, depending on the name
+        (path) of the template.</para>
+
+        <para>It's important to understand, however, that this setting only
+        has effect if you get templates with
+        <literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>,
+        not when you create templates directly with the
+        <literal>Template</literal> constructors. In that case it's up to you
+        to invoke this mechanism (see <literal>TemplateCache</literal> source
+        code as an example).</para>
+
+        <para>You will use these kind of objects to declare your template
+        configuration rules:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>TemplateConfigurer</literal>-s: These store the
+            actual setting assignments that you want to do. For example, this
+            <literal>TemplateConfigurer</literal> will set the encoding and
+            the output format of the matched template (and leave all other
+            settings of it alone):</para>
+
+            <programlisting role="unspecified">TemplateConfigurer tcUTF8XML = new TemplateConfigurer();
+tc.setEncoding("utf-8");
+tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
+          </listitem>
+
+          <listitem>
+            <para><literal>TemplateSourceMatcher</literal> (abstract)
+            subclasses: These define a rule that matches templates based on
+            their source name (their source path; as in
+            <literal>Template.getSourceName()</literal>), and possibly on
+            other <literal>TemplateLoader</literal>-dependent properties. For
+            example, <literal>new FileExtensionMatcher("xml")</literal>
+            matches templates that has <literal>xml</literal> file extension.
+            See all the subclasses in the Java API documentation.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>TemplateConfigurerFactory</literal>-es: This is
+            what connects <literal>TemplateConfigurer</literal> and
+            <literal>TemplateSourceMatcher</literal> together. This is the
+            Java type of the <literal>template_configurers</literal> setting.
+            See the examples below for more.</para>
+          </listitem>
+        </itemizedlist>
+
+        <simplesect>
+          <title>Example 1</title>
+
+          <para>This setup combines our earlier two example object with a
+          <literal>ConditionalTemplateConfigurerFactory</literal>, causing all
+          templates with <literal>xml</literal> extension to get UTF-8
+          encoding and XML output format:</para>
+
+          <programlisting role="unspecified">cfg.setTemplateConfigurers(
+        new ConditionalTemplateConfigurerFactory(
+                new FileExtensionMatcher("xml"),
+                tcUTF8XML));</programlisting>
+
+          <para>The same configuring is also doable if you don't have access
+          to the configuring Java code, but only to a Java
+          <literal>*.properties</literal> file or other kind of string-string
+          key value pairs (the <literal>\</literal>-s are prescribed by the
+          Java Properties file format):</para>
+
+          <programlisting role="unspecified">templateConfigurers = \
+    ConditionalTemplateConfigurerFactory( \
+        FileExtensionMatcher("xml"), \
+        TemplateConfigurer( \
+            encoding = "utf-8", \
+            outputFormat = XMLOutputFormat() \
+        ) \
+    )</programlisting>
+        </simplesect>
+
+        <simplesect>
+          <title>Example 2</title>
+
+          <para>Let's say you only need to handle templates in the
+          <literal>mail</literal> directory specially, other templates can use
+          the setting coming from the shared <literal>Configuration</literal>
+          singleton. The names of templates there must contain
+          <literal>".subject."</literal> or <literal>".body."</literal>.
+          Subject templates must get <literal>plainText</literal> output
+          format, while body templates must get <literal>HTML</literal> output
+          format. So we have to make a choice here, and that's when you need a
+          <literal>FirstMatchTemplateConfigurerFactory</literal>.</para>
+
+          <para>Assuming <literal>cfg</literal> stores the shared
+          <literal>Configuration</literal> singleton, you set this up like
+          this:</para>
+
+          <programlisting role="unspecified">cfg.setTemplateConfigurers(
+        new ConditionalTemplateConfigurerFactory(
+                new PathGlobMatcher("mail/**"),
+                new FirstMatchTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurerFactory(
+                                new FileNameGlobMatcher("*.subject.*"),
+                                tcSubject),
+                        new ConditionalTemplateConfigurerFactory(
+                                new FileNameGlobMatcher("*.body.*"),
+                                tcBody)
+                        )
+                        .noMatchErrorDetails(
+                                "Mail template names must contain \".subject.\" or \".body.\"!")
+                ));</programlisting>
+
+          <para>The equivalent configuration using a Java
+          <literal>*.properties</literal> file or other kind of string-string
+          key value pairs (the <literal>\</literal>-s are prescribed by the
+          Java Properties file format only):</para>
+
+          <programlisting role="unspecified">templateConfigurers = \
+    ConditionalTemplateConfigurerFactory( \
+        PathGlobMatcher("mail/**"), \
+        FirstMatchTemplateConfigurerFactory( \
+            ConditionalTemplateConfigurerFactory( \
+                FileNameGlobMatcher("*.subject.*"), \
+                TemplateConfigurer(outputFormat = PlainTextOutputFormat()) \
+            ), \
+            ConditionalTemplateConfigurerFactory( \
+                FileNameGlobMatcher("*.body.*"), \
+                TemplateConfigurer(outputFormat = HTMLOutputFormat()) \
+            ), \
+            noMatchErrorDetails = 'Mail template names must contain ".subject." or ".body."!' \
+        ) \
+    )</programlisting>
+        </simplesect>
+
+        <simplesect>
+          <title>Example 3</title>
+
+          <para>Let's say you want the following deviations from the shared
+          <literal>Configuration</literal> settings in your
+          application:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>All templates whose name contains
+              <literal>".stats."</literal> should use ISO date/time format and
+              UTC time zone</para>
+            </listitem>
+
+            <listitem>
+              <para>All templates inside the <literal>mail</literal> directory
+              should use UTF-8 encoding</para>
+            </listitem>
+
+            <listitem>
+              <para>Templates with <literal>xml</literal> file extension
+              should use XML <literal>output_format</literal>, templates with
+              <literal>html</literal> or <literal>htm</literal> extension
+              should use HTML output format. For other templates, the shared
+              <literal>Configuration</literal> can dictate the
+              <literal>output_format</literal>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Here we have 3 independent concerns, and possibly multiple (or
+          none) of those apply to a template; that's when you need a
+          <literal>MergingTemplateConfigurerFactory</literal>. The last point
+          describes a rule where you have mutually exclusive choices; that's
+          when you need a
+          <literal>FirstMatchTemplateConfigurerFactory</literal>, but this
+          time no choice is also allowed. Here's the source code, assuming
+          <literal>cfg</literal> stores the shared
+          <literal>Configuration</literal> instance:</para>
+
+          <programlisting role="unspecified">TemplateConfigurer tcStats = new TemplateConfigurer();
+tcStats.setDateTimeFormat("iso");
+tcStats.setDateFormat("iso");
+tcStats.setTimeFormat("iso");
+tcStats.setTimeZone(DateUtil.UTC);
+
+TemplateConfigurer tcMail = new TemplateConfigurer();
+tcMail.setEncoding("utf-8");
+
+TemplateConfigurer tcHTML = new TemplateConfigurer();
+tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+TemplateConfigurer tcXML = new TemplateConfigurer();
+tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurers(
+        new MergingTemplateConfigurerFactory(
+                new ConditionalTemplateConfigurerFactory(
+                        new FileNameGlobMatcher("*.stats.*"),
+                        tcStats),
+                new ConditionalTemplateConfigurerFactory(
+                        new PathGlobMatcher("mail/**"),
+                        tcMail),
+                new FirstMatchTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurerFactory(
+                                new FileExtensionMatcher("xml"),
+                                tcXML),
+                        new ConditionalTemplateConfigurerFactory(
+                                new OrMatcher(
+                                        new FileExtensionMatcher("html"),
+                                        new FileExtensionMatcher("htm")),
+                                tcHTML)
+                ).allowNoMatch(true)
+        )
+);</programlisting>
+
+          <para>The equivalent configuration using a Java
+          <literal>*.properties</literal> file or other kind of string-string
+          key value pairs (the <literal>\</literal>-s are prescribed by the
+          Java Properties file format only):</para>
+
+          <programlisting role="unspecified">templateConfigurers = \
+    MergingTemplateConfigurerFactory( \
+        ConditionalTemplateConfigurerFactory( \
+            FileNameGlobMatcher("*.stats.*"), \
+            TemplateConfigurer( \
+                dateTimeFormat = "iso", \
+                dateFormat = "iso", \
+                timeFormat = "iso", \
+                timeZone = TimeZone("UTC") \
+            ) \
+        ), \
+        ConditionalTemplateConfigurerFactory( \
+            PathGlobMatcher("mail/**"), \
+            TemplateConfigurer(encoding = "utf-8") \
+        ), \
+        FirstMatchTemplateConfigurerFactory( \
+            ConditionalTemplateConfigurerFactory( \
+                FileExtensionMatcher("xml"), \
+                TemplateConfigurer(outputFormat = XMLOutputFormat()) \
+            ), \
+            ConditionalTemplateConfigurerFactory( \
+                OrMatcher( \
+                    FileExtensionMatcher("html"), \
+                    FileExtensionMatcher("htm") \
+                ), \
+                TemplateConfigurer(outputFormat = HTMLOutputFormat()) \
+            ), \
+            allowNoMatch = true \
+        ) \
+    )</programlisting>
+        </simplesect>
+      </section>
+
+      <section xml:id="pgui_config_outputformatsautoesc">
+        <title>Associating output formats with templates</title>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>output format</primary>
+        </indexterm>
+
+        <para>The output format associated with a template decides if and what
+        kind of auto-escaping is used in that template (unless the template
+        <link linkend="dgui_misc_autoescaping_overrideoformat">overrides that
+        with directives</link>). By default, templates has
+        <quote>undefined</quote> output format associated, which does no
+        escaping, and in general gives the behavior that you would expect from
+        a template engine that doesn't care about output formats and escaping.
+        However, if the <literal>recognize_standard_file_extensions</literal>
+        <link linkend="pgui_config_settings">setting</link> is
+        <literal>true</literal> (which is the default with <link
+        linkend="pgui_config_incompatible_improvements">the
+        <literal>incompatible_improvements</literal> setting</link> set to
+        2.3.24 or higher), templates whose source name ends with
+        <literal>".ftlh"</literal> get <quote>HTML</quote> output format, and
+        those with <literal>".ftlx"</literal> get <quote>XML</quote> output
+        format. Using the <literal>ftlh</literal> and <literal>ftlx</literal>
+        file extensions is the recommended way of activating HTML and XML
+        auto-escaping. You can also associate output formats to templates
+        based on arbitrary name patterns with the <link
+        linkend="pgui_config_templateconfigurers"><literal>template_configurers</literal>
+        setting introduced elsewhere</link> (see examples later).</para>
+
+        <para>There's also a related setting called
+        <literal>auto_escaping_policy</literal>, which can be used to disable
+        auto-escaping even if the current output format supports it, or enable
+        auto-escaping even if the format by default doesn't escape (but it
+        supports it). Using this setting rarely advisable, as it's potentially
+        confusing for the template authors. Forcibly disabling/enabling auto
+        escaping is doable explicitly inside the template the
+        <literal>auto_esc</literal> parameter of the <link
+        linkend="ref_directive_ftl"><literal>ftl</literal> directive</link>,
+        or with the <link
+        linkend="ref_directive_autoesc"><literal>noautoesc</literal>
+        directive</link> and <link
+        linkend="ref_directive_autoesc"><literal>autoesc</literal>
+        directive</link>.</para>
+
+        <para>To check if you have configured FreeMarker properly, you can use
+        this template:</para>
+
+        <programlisting role="template">&lt;p&gt;Output format: ${.output_format}
+&lt;p&gt;Auto-escaping enabled: ${.auto_esc?c}</programlisting>
+
+        <para>See the <link linkend="topic.predefinedOutputFormats">table of
+        predefined output formats here...</link></para>
+
+        <para>Configuration examples:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>To enable automatic output format associations to
+            <literal>*.ftlh</literal> and <literal>*.ftlx</literal>:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Either use <literal>incompatible_improvements</literal>
+                2.3.24 or higher: see <link
+                linkend="pgui_config_incompatible_improvements_how_to_set">how
+                to set
+                <literal>incompatible_improvements</literal></link></para>
+              </listitem>
+
+              <listitem>
+                <para>Or, enable standard file extension recognizing
+                explicitly:</para>
+
+                <programlisting role="unspecified">// Where you initalize the Configuration singletion, add:
+cfg.setRecognizeStandardFileExtensions(true);</programlisting>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Let's say you want to associate all templates in the
+            <literal>mail</literal> directory to the HTML output format. You
+            could achieve that like this (assuming that you are getting the
+            templates with
+            <literal>cfg.getTemplate(<replaceable>...</replaceable>)</literal>,
+            and not instantiating them yourself):</para>
+
+            <programlisting role="unspecified">// Where you initalize the Configuration singletion, add:
+
+TemplateConfigurer tcHTML = new TemplateConfigurer();
+tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurers(
+        new ConditionalTemplateConfigurerFactory(
+                new PathGlobMatcher("mail/**"),
+                tcHTML));</programlisting>
+
+            <para>or if you are configuring FreeMarker from Java
+            <literal>*.properties</literal> file (the <literal>\</literal>-s
+            are prescribed by the Java Properties file format):</para>
+
+            <programlisting role="unspecified">templateConfigurers = \
+    ConditionalTemplateConfigurerFactory( \
+        PathGlobMatcher("mail/**"), \
+        TemplateConfigurer(outputFormat = HTMLOutputFormat()))</programlisting>
+          </listitem>
+
+          <listitem>
+            <para>Let's say you want to associate templates with
+            <literal>xml</literal> extension to the XML output format,
+            templates with <literal>html</literal> and <literal>htm</literal>
+            extension to the HTML output format, and templates with
+            <literal>rtf</literal> extension to the <literal>RTF</literal>
+            output format. You could achieve that like this (assuming that you
+            are getting the templates with
+            <literal>cfg.getTemplate(<replaceable>...</replaceable>)</literal>,
+            and not instantiating them yourself):</para>
+
+            <programlisting role="unspecified">TemplateConfigurer tcHTML = new TemplateConfigurer();
+tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+
+TemplateConfigurer tcXML = new TemplateConfigurer();
+tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
+
+TemplateConfigurer tcRTF = new TemplateConfigurer();
+tcRTF.setOutputFormat(RTFOutputFormat.INSTANCE);
+
+cfg.setTemplateConfigurers(
+        new FirstMatchTemplateConfigurerFactory(
+                new ConditionalTemplateConfigurerFactory(
+                        new FileExtensionMatcher("xml"),
+                        tcXML),
+                new ConditionalTemplateConfigurerFactory(
+                        new OrMatcher(
+                                new FileExtensionMatcher("html"),
+                                new FileExtensionMatcher("htm")),
+                        tcHTML),
+                new ConditionalTemplateConfigurerFactory(
+                        new FileExtensionMatcher("rtf"),
+                        tcRTF)
+        ).allowNoMatch(true)
+);</programlisting>
+
+            <para>or if you are configuring FreeMarker from Java
+            <literal>*.properties</literal> file (the <literal>\</literal>-s
+            are prescribed by the Java Properties file format):</para>
+
+            <programlisting role="unspecified">templateConfigurers = \
+    FirstMatchTemplateConfigurerFactory( \
+        ConditionalTemplateConfigurerFactory( \
+            FileExtensionMatcher("xml"), \
+            TemplateConfigurer(outputFormat = XMLOutputFormat())), \
+        ConditionalTemplateConfigurerFactory( \
+            OrMatcher( \
+                FileExtensionMatcher("html"), \
+                FileExtensionMatcher("htm")), \
+            TemplateConfigurer(outputFormat = HTMLOutputFormat())), \
+        ConditionalTemplateConfigurerFactory( \
+            FileExtensionMatcher("rtf"), \
+            TemplateConfigurer(outputFormat = RTFOutputFormat())), \
+        allowNoMatch = true)</programlisting>
+          </listitem>
+        </itemizedlist>
       </section>
 
       <section xml:id="pgui_config_incompatible_improvements">
@@ -10521,10 +11519,10 @@ grant codeBase "file:/path/to/freemarker.jar"
         <note>
           <para>As of FreeMarker 2.3.23, you can use camel case instead of
           snake case for directive names, like <literal>startsWith</literal>
-          instead of <literal>starts_with</literal>. But know that then
-          withing the same template, FreeMarker will enforce the usage of
-          camel case for all identifiers that are part of the template
-          language (user defined names are not affected).</para>
+          instead of <literal>starts_with</literal>. But know that then within
+          the same template, FreeMarker will enforce the usage of camel case
+          for all identifiers that are part of the template language (user
+          defined names are not affected).</para>
         </note>
 
         <indexterm>
@@ -10617,6 +11615,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_numType">double</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_esc">esc</link></para>
           </listitem>
 
           <listitem>
@@ -10810,6 +11812,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_markup">markup</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_matches">matches</link></para>
           </listitem>
 
@@ -10820,6 +11826,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_new">new</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_no_esc">no_esc</link></para>
           </listitem>
 
           <listitem>
@@ -11325,6 +12335,70 @@ Green Mouse</programlisting>
           <literal>"i"</literal> as the 3rd parameter.</para>
         </section>
 
+        <section xml:id="ref_builtin_esc">
+          <title>esc</title>
+
+          <para><indexterm>
+              <primary>esc built-in</primary>
+            </indexterm></para>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.24.</para>
+          </note>
+
+          <para>Escapes the value with the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>,
+          and prevents the <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> of the
+          returned value (to avoid double escaping). Because of auto-escaping,
+          you usually only need this where auto-escaping was disabled:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML" <emphasis>auto_esc=false</emphasis>&gt;
+&lt;#assign s = "R&amp;D"&gt;
+${s}
+${s?esc}</programlisting>
+
+          <programlisting role="output">R&amp;D
+R&amp;amp;D</programlisting>
+
+          <para>In templates, where auto-escaping is on, using it is
+          redundant:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML"&gt;
+&lt;#assign s = "R&amp;D"&gt;
+${s}
+${s?esc} &lt;#-- ?esc is redundant here --&gt;</programlisting>
+
+          <programlisting role="output">R&amp;amp;D
+R&amp;amp;D</programlisting>
+
+          <para>This built-in works by converting the string value to a <link
+          linkend="dgui_misc_autoescaping_movalues">markup output
+          value</link>, by escaping the string with the current output format,
+          and using the result as the markup. The resulting markup output
+          value belongs to the current output format at the point of the
+          invocation.</para>
+
+          <para>This built-in can also be applied on markup output values,
+          which it will bypass without change, as far as the input markup
+          output value belongs to the current output format. If it doesn't,
+          then the markup has to be converted to the current output format,
+          which currently (as of 2.3.24) will be only successful if that value
+          was created by escaping plain text (usually, with
+          <literal>?esc</literal>).</para>
+
+          <para>This built-in can't be used where the current output format is
+          a <link linkend="dgui_misc_autoescaping_nonmarkupof">non-markup
+          output format</link>. An attempt to do so will cause a <link
+          linkend="gloss.parseTimeError">parse-time error</link>.</para>
+
+          <para>This built-in is not related to the deprecated <link
+          linkend="ref_directive_escape"><literal>escape</literal> and
+          <literal>noescape</literal> directives</link>. In fact, the parser
+          will prevent using them on the same place, to prevent
+          confusion.</para>
+        </section>
+
         <section xml:id="ref_builtin_groups">
           <title>groups</title>
 
@@ -11338,7 +12412,7 @@ Green Mouse</programlisting>
         </section>
 
         <section xml:id="ref_builtin_html">
-          <title>html</title>
+          <title>html (deprecated)</title>
 
           <indexterm>
             <primary>escaping</primary>
@@ -11349,6 +12423,18 @@ Green Mouse</programlisting>
           <indexterm>
             <primary>html built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses HTML <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <para>The string as HTML markup. That is, the string with
           all:</para>
@@ -11380,7 +12466,8 @@ Green Mouse</programlisting>
               programmers has <link
               linkend="pgui_config_incompatible_improvements_how_to_set">set
               the <literal>incompatible_improvements</literal> setting</link>
-              to <literal>2.3.20</literal> or higher. Otherwise
+              to 2.3.24 or higher (also if it's set to 2.3.20 or higher and
+              you are outside a string literal). Otherwise
               <literal>'</literal> won't be replaced, so you must use
               quotation mark (<literal>"</literal>, not <literal>'</literal>)
               to quote attribute values where you want to insert a value
@@ -11880,6 +12967,56 @@ Matching sub-strings:
           <literal>r</literal> flag.</para>
         </section>
 
+        <section xml:id="ref_builtin_no_esc">
+          <title>no_esc</title>
+
+          <para><indexterm>
+              <primary>no_esc built-in</primary>
+            </indexterm></para>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.24.</para>
+          </note>
+
+          <para>Prevents the <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> of a value.
+          For example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="HTML"&gt;
+&lt;#assign s = "&lt;b&gt;Test&lt;/b&gt;"&gt;
+${s}
+${s?no_esc}</programlisting>
+
+          <programlisting role="output">&amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
+&lt;b&gt;Test&lt;/b&gt;</programlisting>
+
+          <para>This works by converting the string value to a <link
+          linkend="dgui_misc_autoescaping_movalues">markup output
+          value</link>, which uses the string as the markup as is, and belongs
+          to the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          at the point of the invocation.</para>
+
+          <para>This built-in can also be applied on markup output values,
+          which it will bypass without change, as far as the input markup
+          output value belongs to current output format. If it doesn't, then
+          the markup has to be converted to the current output format, which
+          currently (as of 2.3.24) will be only successful if that value was
+          created by escaping plain text (usually, with
+          <literal>?esc</literal>).</para>
+
+          <para>This built-in can't be used where the current output format is
+          a <link linkend="dgui_misc_autoescaping_nonmarkupof">non-markup
+          output format</link>. An attempt to do so will cause a <link
+          linkend="gloss.parseTimeError">parse-time error</link>.</para>
+
+          <para>This built-in is not related to the deprecated <link
+          linkend="ref_directive_escape"><literal>escape</literal> and
+          <literal>noescape</literal> directives</link>. In fact, the parser
+          will prevent using them on the same place, to prevent
+          confusion.</para>
+        </section>
+
         <section xml:id="ref_builtin_number">
           <title>number</title>
 
@@ -12075,7 +13212,19 @@ foobar</programlisting>
         </section>
 
         <section xml:id="ref_builtin_rtf">
-          <title>rtf</title>
+          <title>rtf (deprecated)</title>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses RTF <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <indexterm>
             <primary>rtf built-in</primary>
@@ -12531,7 +13680,19 @@ ${x?url}</programlisting>
         </section>
 
         <section xml:id="ref_builtin_xhtml">
-          <title>xhtml</title>
+          <title>xhtml (deprecated)</title>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses HTML <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <indexterm>
             <primary>xhtml built-in</primary>
@@ -12577,7 +13738,7 @@ ${x?url}</programlisting>
           built-in escapes <literal>'</literal> as
           <literal>&amp;#39;</literal> instead of as
           <literal>&amp;apos;</literal>, because some older browsers don't
-          interpret <literal>&amp;apos;</literal> correctly.</para>
+          know <literal>&amp;apos;</literal>.</para>
 
           <warning>
             <para>When inserting the value of an attribute, always quote it,
@@ -12590,7 +13751,19 @@ ${x?url}</programlisting>
         </section>
 
         <section xml:id="ref_builtin_xml">
-          <title>xml</title>
+          <title>xml (deprecated)</title>
+
+          <note>
+            <para>This built-in is <emphasis>deprecated</emphasis> by the
+            <link linkend="dgui_misc_autoescaping">auto-escaping
+            mechanism</link> introduced in 2.3.24. To prevent double escaping
+            and confusion in general, using this built-in on places where
+            auto-escaping is active is a <link
+            linkend="gloss.parseTimeError">parse-time error</link>. To help
+            migration, this built-in silently bypasses XML and HTML <link
+            linkend="dgui_misc_autoescaping_movalues">markup output
+            values</link> without changing them.</para>
+          </note>
 
           <indexterm>
             <primary>xml built-in</primary>
@@ -12964,14 +14137,15 @@ rif: foo XYr baar</programlisting>
           grouping separators).</para>
 
           <para>If the <literal>incompatible_imporvements</literal> FreeMarker
-          configuration setting is set to 2.3.21 (or higher), this built-in
-          will return <literal>"INF"</literal>, <literal>"-INF"</literal> and
-          <literal>"NaN"</literal> for positive/negative infinity and IEEE
-          floating point Not-a-Number, respectively. These are the XML Schema
-          compatible representations of these special values. (Earlier it has
-          returned what <literal>java.text.DecimalFormat</literal> did with US
-          locale, none of which is understood by any (common) computer
-          language.)</para>
+          configuration setting is set to 2.3.24 or higher (also if it's set
+          to 2.3.20 or higher and you are outside a string literal), this
+          built-in will return <literal>"INF"</literal>,
+          <literal>"-INF"</literal> and <literal>"NaN"</literal> for
+          positive/negative infinity and IEEE floating point Not-a-Number,
+          respectively. These are the XML Schema compatible representations of
+          these special values. (Earlier it has returned what
+          <literal>java.text.DecimalFormat</literal> did with US locale, none
+          of which is understood by any (common) computer language.)</para>
 
           <para>Note that this built-in <link
           linkend="ref_builtin_c_boolean">also works on
@@ -13554,10 +14728,11 @@ Last updated time: 08:00:54 PM</programlisting>
                   the <literal>incompatible_improvements</literal> (often set
                   via the Java <literal>Configuration</literal> constructor
                   parameter) FreeMarker configuration setting is at least
-                  2.3.21. This is because most databases store time values
-                  that aren't in any time zone, but just store hour, minute,
-                  second, and decimal second field values, so showing the time
-                  zone doesn't make sense.</para>
+                  2.3.21 (or 2.3.24 when you are inside a string literal).
+                  This is because most databases store time values that aren't
+                  in any time zone, but just store hour, minute, second, and
+                  decimal second field values, so showing the time zone
+                  doesn't make sense.</para>
                 </listitem>
               </itemizedlist>
 
@@ -15496,19 +16671,21 @@ Sorted by name.last:
           </indexterm>
 
           <para>It is <literal>true</literal> if the variable exists (and
-          isn't Java <literal>null</literal>) and is not ``empty'', otherwise
-          it is <literal>false</literal>. The meaning of ``empty'' depends on
-          the concrete case. This follows intuitive common-sense ideas. The
-          following are empty: a string with 0 length, sequence or hash with
-          no sub variables, a collection which has passed the last element. If
-          the value is not a string or sequence or hash or collection, then it
-          counts as non-empty if it's a number or a date or a boolean (e.g.
-          <literal>0</literal> and <literal>false</literal> are not empty),
-          otherwise it counts as empty. Note that when your data-model
-          implements multiple template model interfaces you may get unexpected
-          results. However, when in doubt you can use always use
-          <literal>expr!?size &gt; 0</literal> or <literal>expr!?length &gt;
-          0</literal> instead of <literal>expr?has_content</literal>.</para>
+          isn't Java <literal>null</literal>) and is not <quote>empty</quote>,
+          otherwise it is <literal>false</literal>. The meaning of
+          <quote>empty</quote> depends on the concrete case. This follows
+          intuitive common-sense ideas. The following are empty: a string with
+          0 length, a <link linkend="dgui_misc_autoescaping_movalues">markup
+          output value</link> with 0 length markup, a sequence or hash with no
+          sub variables, a collection which has passed the last element. If
+          the value is not of any of these types, then it counts as non-empty
+          if it's a number or a date or a boolean (e.g. <literal>0</literal>
+          and <literal>false</literal> are not empty), otherwise it counts as
+          empty. Note that when your data-model implements multiple template
+          model interfaces you may get unexpected results. However, when in
+          doubt you can use always use <literal>expr!?size &gt; 0</literal> or
+          <literal>expr!?length &gt; 0</literal> instead of
+          <literal>expr?has_content</literal>.</para>
 
           <para>This buit-in is exceptional in that you can use the
           parentheses trick like with the <link
@@ -15756,6 +16933,27 @@ Sorted by name.last:
           </informaltable>
         </section>
 
+        <section xml:id="ref_builtin_markup">
+          <title>markup</title>
+
+          <para><indexterm>
+              <primary>markup built-in</primary>
+            </indexterm></para>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.24.</para>
+          </note>
+
+          <para>Returns the markup stored inside a <link
+          linkend="dgui_misc_autoescaping_movalues">markup output value</link>
+          as string. This is useful if the value has to be passed to a Java
+          method for a <literal>String</literal> parameter, or if we want to
+          manipulate the markup directly in the template. Note that the
+          resulting string can be converted back to markup output value with
+          <link
+          linkend="ref_builtin_no_esc"><literal>?no_esc</literal></link>.</para>
+        </section>
+
         <section xml:id="ref_builtin_namespace">
           <title>namespace</title>
 
@@ -15881,10 +17079,10 @@ May 16, 2011
         <note>
           <para>As of FreeMarker 2.3.23, you can use camel case instead of
           all-lower-case for directive names, like <literal>noParse</literal>
-          instead of <literal>noparse</literal>. But know that then withing
-          the same template, FreeMarker will enforce the usage of camel case
-          for all identifiers that are part of the template language (user
-          defined names are not affected).</para>
+          instead of <literal>noparse</literal>. But know that then within the
+          same template, FreeMarker will enforce the usage of camel case for
+          all identifiers that are part of the template language (user defined
+          names are not affected).</para>
         </note>
 
         <indexterm>
@@ -15898,6 +17096,10 @@ May 16, 2011
 
           <listitem>
             <para><link linkend="ref.directive.attempt">attempt</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_directive_autoesc">autoesc</link></para>
           </listitem>
 
           <listitem>
@@ -15992,6 +17194,11 @@ May 16, 2011
 
           <listitem>
             <para><link
+            linkend="ref_directive_noautoesc">noautoesc</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref.directive.noescape">noescape</link></para>
           </listitem>
 
@@ -16001,6 +17208,11 @@ May 16, 2011
 
           <listitem>
             <para><link linkend="ref.directive.nt">nt</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_directive_outputformat">outputformat</link></para>
           </listitem>
 
           <listitem>
@@ -16362,6 +17574,85 @@ Primary content continued</programlisting>
         </section>
       </section>
 
+      <section xml:id="ref_directive_autoesc">
+        <title>autoesc</title>
+
+        <anchor xml:id="ref.directive.autoesc"/>
+
+        <indexterm>
+          <primary>autoesc directive</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <section>
+          <title>Synopsis</title>
+
+          <programlisting role="metaTemplate"><literal>&lt;#autoesc&gt;
+  <replaceable>...</replaceable>
+&lt;/#autoesc&gt;</literal>
+</programlisting>
+
+          <para>Camel case name variant: <literal>autoEsc</literal></para>
+        </section>
+
+        <section>
+          <title>Description</title>
+
+          <para>Turns on <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> in the nested
+          section. Auto-escaping is usually enabled by default if the current
+          <link linkend="dgui_misc_autoescaping_outputformat">output
+          format</link> has auto-escaping by default, so you rarely need this.
+          Note that to escape just a single
+          <literal>${<replaceable>expression</replaceable>}</literal> in a
+          place where auto-escaping is disabled you should use
+          <literal>${<replaceable>expression</replaceable>?esc}</literal>
+          instead.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="XML" auto_esc=false&gt;
+${"&amp;"}
+&lt;#autoesc&gt;
+  ${"&amp;"}
+  ...
+  ${"&amp;"}
+&lt;/#autoesc&gt;
+${"&amp;"}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">&amp;
+  &amp;amp;
+  ...
+  &amp;amp;
+&amp;</programlisting>
+
+          <para><literal>autoesc</literal> can't be used where the current
+          <link linkend="dgui_misc_autoescaping_outputformat">output
+          format</link> is a <link
+          linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
+          format</link> (and hence can't do escaping). Doing so is a <link
+          linkend="gloss.parseTimeError">parse-time error</link>.</para>
+
+          <para><literal>autoesc</literal> can also be used nested into <link
+          linkend="ref_directive_noautoesc"><literal>noautoesc</literal>
+          directive</link> to re-enable auto-escaping.</para>
+
+          <para><literal>autoesc</literal> can be used on places where
+          auto-escaping is already enabled, such as even inside another
+          <literal>autoesc</literal> block. Doing so is redundant but
+          allowed.</para>
+        </section>
+      </section>
+
       <section xml:id="ref_directive_compress">
         <title>compress</title>
 
@@ -16421,7 +17712,7 @@ I said, test only)</programlisting>
       </section>
 
       <section xml:id="ref_directive_escape">
-        <title>escape, noescape</title>
+        <title>escape, noescape (deprecated)</title>
 
         <anchor xml:id="ref.directive.escape"/>
 
@@ -16445,10 +17736,22 @@ I said, test only)</programlisting>
   <replaceable>...</replaceable>
 &lt;/#escape&gt;</literal>
 </programlisting>
+
+          <para>Camel case name variant: <literal>noEscape</literal></para>
         </section>
 
         <section>
           <title>Description</title>
+
+          <note>
+            <para>These directives are <emphasis>deprecated</emphasis> by
+            <link linkend="dgui_misc_autoescaping">output-format-based
+            auto-escaping</link> since 2.3.24. Furthermore, on places that use
+            auto-escaping (with an output format that actually does escaping)
+            you aren't allowed to use the <literal>escape</literal> directive
+            (as you will find out from the parsing error message
+            anyway).</para>
+          </note>
 
           <para>When you surround a part of the template with an escape
           directive, interpolations
@@ -16690,9 +17993,54 @@ m2: &amp;lt;test&amp;gt;</programlisting>
           here has the highest precedence, that is, they will be used for the
           template regardless of any FreeMarker configuration settings.</para>
 
-          <para>Parameters:</para>
+          <para>Possible parameters:</para>
 
           <itemizedlist>
+            <listitem>
+              <para><literal>attributes</literal>: This is a hash that
+              associates arbitrary attributes (name-value pairs) to the
+              template. The values of the attributes can be of any type
+              (string, number, sequence... etc.). FreeMarker doesn't try to
+              understand the meaning of the attributes. It's up to the
+              application that encapsulates FreeMarker (as a Web application
+              framework). Thus, the set of allowed attributes and their
+              semantic is application (Web application framework) dependent.
+              <phrase role="forProgrammers">Programmers: you can get the
+              attributes associated with a <literal>Template</literal> object
+              with its <literal>getCustomAttributeNames</literal> and
+              <literal>getCustomAttribute</literal> methods (inherited from
+              <literal>freemarker.core.Configurable</literal>). As the
+              template attributes are associated with the
+              <literal>Template</literal> object when the template is parsed,
+              the attributes can be read anytime, the template need not be
+              executed. The methods mentioned return the attribute values
+              unwrapped, that is, with FreeMarker independent type as
+              <literal>java.util.List</literal>.</phrase></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>auto_esc</literal>: A boolean constant to turn
+              <link linkend="dgui_misc_autoescaping">auto-escaping</link> on
+              or off. It depends on the
+              <literal>auto_escaping_policy</literal> of the FreeMarker
+              configuration, but usually auto-escaping will be by default on,
+              if the current <link
+              linkend="dgui_misc_autoescaping_outputformat">output
+              format</link> uses auto-escaping by default. So you mostly use
+              this to disable auto-escaping (<literal>false</literal> value).
+              An attempt to use <literal>true</literal> value when the current
+              output format is a <link
+              linkend="dgui_misc_autoescaping_nonmarkupof">non-markup output
+              format</link> (which hence can't escape) will cause <link
+              linkend="gloss.parseTimeError">parse-time error</link>. Note
+              that you can turn auto-escaping on/off for only a part of the
+              template with the <link
+              linkend="ref_directive_autoesc"><literal>autoesc</literal></link>
+              and <link
+              linkend="ref_directive_noautoesc"><literal>noautoesc</literal>
+              directives</link>.</para>
+            </listitem>
+
             <listitem>
               <para><literal>encoding</literal>: With this you can specify the
               encoding (charset) of the template in the template file itself.
@@ -16712,48 +18060,6 @@ m2: &amp;lt;test&amp;gt;</programlisting>
               valid values of this parameter are MIME-preferred charset names
               from the IANA Charset Registry, like ISO-8859-5, UTF-8 or
               Shift_JIS.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>strip_whitespace</literal>: This enables/disables
-              <link linkend="dgui_misc_whitespace_stripping">white-space
-              stripping</link>. Valid values are the boolean constants
-              <literal>true</literal> and <literal>false</literal>. (And for
-              backward compatibility, strings <literal>"yes"</literal>,
-              <literal>"no"</literal>, <literal>"true"</literal>,
-              <literal>"false"</literal>). The default value (i.e. when you
-              don't use this parameter) depends on the FreeMarker
-              configuration set by the programmers, but it should be
-              <literal>true</literal> for new projects.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>strip_text</literal>: When enabled, all top-level
-              text in a template is removed when the template is parsed. This
-              does not affect text within macros, directives, or
-              interpolations. Valid values are the boolean constants
-              <literal>true</literal> and <literal>false</literal>. (And for
-              backward compatibility, strings <literal>"yes"</literal>,
-              <literal>"no"</literal>, <literal>"true"</literal>,
-              <literal>"false"</literal>). The default value (i.e. when you
-              don't use this parameter) is <literal>false</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>strict_syntax</literal>: This turns on/off
-              ``strict syntax''. Valid values are the boolean constants
-              <literal>true</literal> and <literal>false</literal>. (And for
-              backward compatibility, strings <literal>"yes"</literal>,
-              <literal>"no"</literal>, <literal>"true"</literal>,
-              <literal>"false"</literal>). The default value (i.e. when you
-              don't use this parameter) depends on the FreeMarker
-              configuration set by the programmers, but it should be
-              <literal>true</literal> for new projects. <phrase
-              role="forProgrammers">(Programmers: you must set explicitly this
-              setting to <literal>true</literal> for this:
-              <literal>config.setStrictSyntaxMode(true);</literal>)</phrase>
-              For more information read: <xref
-              linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
             <listitem>
@@ -16798,27 +18104,78 @@ m2: &amp;lt;test&amp;gt;</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>attributes</literal>: This is a hash that
-              associates arbitrary attributes (name-value pairs) to the
-              template. The values of the attributes can be of any type
-              (string, number, sequence... etc.). FreeMarker doesn't try to
-              understand the meaning of the attributes. It's up to the
-              application that encapsulates FreeMarker (as a Web application
-              framework). Thus, the set of allowed attributes and their
-              semantic is application (Web application framework) dependent.
-              <phrase role="forProgrammers">Programmers: you can get the
-              attributes associated with a <literal>Template</literal> object
-              with its <literal>getCustomAttributeNames</literal> and
-              <literal>getCustomAttribute</literal> methods (inherited from
-              <literal>freemarker.core.Configurable</literal>). As the
-              template attributes are associated with the
-              <literal>Template</literal> object when the template is parsed,
-              the attributes can be read anytime, the template need not be
-              executed. The methods mentioned return the attribute values
-              unwrapped, that is, with FreeMarker independent type as
-              <literal>java.util.List</literal>.</phrase></para>
+              <para><literal>output_format</literal>: Specifies the <link
+              linkend="dgui_misc_autoescaping_outputformat">output
+              format</link> of this template. This must be a string literal,
+              which refers to the name of the output format. See the <link
+              linkend="topic.predefinedOutputFormats">table of predefined
+              output formats here</link>. Other names can exist if the
+              programmers has added them via the
+              <literal>registered_custom_output_formats</literal>
+              configuration setting
+              (<literal>Configuration.setRegisteredCustomOutputFormats(<replaceable>...</replaceable>)</literal>).
+              The referred output format must be known by the
+              <literal>Configuration</literal>, or else a <link
+              linkend="gloss.parseTimeError">parse-time error </link>will
+              occur. The name can also refer to a so called combined output
+              format as
+              <literal>"<replaceable>outerFormatName</replaceable>{<replaceable>innerFormatName</replaceable>}"</literal>;
+              <link linkend="topic.combinedOutputFormats">see more about
+              combined output formats here</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>strict_syntax</literal>: This turns on/off
+              ``strict syntax''. Valid values are the boolean constants
+              <literal>true</literal> and <literal>false</literal>. (And for
+              backward compatibility, strings <literal>"yes"</literal>,
+              <literal>"no"</literal>, <literal>"true"</literal>,
+              <literal>"false"</literal>). The default value (i.e. when you
+              don't use this parameter) depends on the FreeMarker
+              configuration set by the programmers, but it should be
+              <literal>true</literal> for new projects. <phrase
+              role="forProgrammers">(Programmers: you must set explicitly this
+              setting to <literal>true</literal> for this:
+              <literal>config.setStrictSyntaxMode(true);</literal>)</phrase>
+              For more information read: <xref
+              linkend="ref_depr_oldsyntax"/></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>strip_text</literal>: When enabled, all top-level
+              text in a template is removed when the template is parsed. This
+              does not affect text within macros, directives, or
+              interpolations. Valid values are the boolean constants
+              <literal>true</literal> and <literal>false</literal>. (And for
+              backward compatibility, strings <literal>"yes"</literal>,
+              <literal>"no"</literal>, <literal>"true"</literal>,
+              <literal>"false"</literal>). The default value (i.e. when you
+              don't use this parameter) is <literal>false</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>strip_whitespace</literal>: This enables/disables
+              <link linkend="dgui_misc_whitespace_stripping">white-space
+              stripping</link>. Valid values are the boolean constants
+              <literal>true</literal> and <literal>false</literal>. (And for
+              backward compatibility, strings <literal>"yes"</literal>,
+              <literal>"no"</literal>, <literal>"true"</literal>,
+              <literal>"false"</literal>). The default value (i.e. when you
+              don't use this parameter) depends on the FreeMarker
+              configuration set by the programmers, but it should be
+              <literal>true</literal> for new projects.</para>
             </listitem>
           </itemizedlist>
+
+          <note>
+            <para>As of FreeMarker 2.3.23, you can use camel case instead of
+            snake case for parameter names, like
+            <literal>outputFormat</literal> instead of
+            <literal>output_format</literal>. But know that then within the
+            same template, FreeMarker will enforce the usage of camel case for
+            all identifiers that are part of the template language (user
+            defined names are not affected).</para>
+          </note>
 
           <para>This directive also determines if the template uses angle
           bracket syntax (e.g. <literal>&lt;#include 'foo.ftl'&gt;</literal>)
@@ -17090,6 +18447,8 @@ or
 
           <para>The <literal>elseif</literal>-s and the
           <literal>else</literal> are optional.</para>
+
+          <para>Camel case name variant: <literal>elseIf</literal></para>
         </section>
 
         <section>
@@ -18548,6 +19907,82 @@ or
         </section>
       </section>
 
+      <section xml:id="ref_directive_noautoesc">
+        <title>noautoesc</title>
+
+        <anchor xml:id="ref.directive.noautoesc"/>
+
+        <indexterm>
+          <primary>noautoesc directive</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <section>
+          <title>Synopsis</title>
+
+          <programlisting role="metaTemplate"><literal>&lt;#noautoesc&gt;
+  <replaceable>...</replaceable>
+&lt;/#noautoesc&gt;</literal>
+</programlisting>
+
+          <para>Camel case name variant: <literal>noAutoEsc</literal></para>
+        </section>
+
+        <section>
+          <title>Description</title>
+
+          <para>Disables <link
+          linkend="dgui_misc_autoescaping">auto-escaping</link> in the nested
+          section. Note that to prevent escaping for just a single
+          <literal>${<replaceable>expression</replaceable>}</literal> you
+          should use
+          <literal>${<replaceable>expression</replaceable>?no_esc}</literal>
+          instead.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="XML"&gt;
+${"&amp;"}
+&lt;#noautoesc&gt;
+  ${"&amp;"}
+  ...
+  ${"&amp;"}
+&lt;/#noautoesc&gt;
+${"&amp;"}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">&amp;amp;
+  &amp;
+  ...
+  &amp;
+&amp;amp;</programlisting>
+
+          <para><literal>noautoesc</literal> can be used regardless of what
+          the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          is (unlike the <link
+          linkend="ref_directive_autoesc"><literal>autoesc</literal>
+          directive</link>).</para>
+
+          <para><literal>noautoesc</literal> can also be used nested into
+          <link linkend="ref_directive_autoesc"><literal>autoesc</literal>
+          directive</link> to re-enable escaping.</para>
+
+          <para><literal>noautoesc</literal> can be used on places where
+          auto-escaping is already disabled, such as even inside another
+          <literal>noautoesc</literal> block. Doing so is redundant but
+          allowed.</para>
+        </section>
+      </section>
+
       <section xml:id="ref_directive_noparse">
         <title>noparse</title>
 
@@ -18565,6 +20000,8 @@ or
   <replaceable>...</replaceable>
 &lt;/#noparse&gt;</literal>
 </programlisting>
+
+          <para>Camel case name variant: <literal>noParse</literal></para>
         </section>
 
         <section>
@@ -18633,12 +20070,149 @@ or
         <section>
           <title>Description</title>
 
-          <para>``No Trim''. This directive disables <link
+          <para><quote>No Trim</quote>. This directive disables <link
           linkend="dgui_misc_whitespace_stripping">white-space
           stripping</link> in the line where it occurs. It also disables the
-          effect of other trim directives occuring in the same line (the
+          effect of other trim directives occurring in the same line (the
           effect of <literal>t</literal>, <literal>rt</literal>,
           <literal>lt</literal>).</para>
+        </section>
+      </section>
+
+      <section xml:id="ref_directive_outputformat">
+        <title>outputformat</title>
+
+        <anchor xml:id="ref.directive.outputformat"/>
+
+        <indexterm>
+          <primary>outputformat directive</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>auto-escaping</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>escaping</primary>
+        </indexterm>
+
+        <section>
+          <title>Synopsis</title>
+
+          <programlisting role="metaTemplate"><literal>&lt;#outputformat <replaceable>formatName</replaceable>&gt;
+  <replaceable>...</replaceable>
+&lt;/#outputFormat&gt;</literal>
+</programlisting>
+
+          <para>Where:</para>
+
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para><literal><replaceable>formatName</replaceable></literal>:
+              A constant string (can't contain runtime expressions!). The name
+              of the output format; see the <link
+              linkend="topic.predefinedOutputFormats">table of the predefined
+              output formats here</link>. Other names can exist if the
+              programmers has added them via the
+              <literal>registered_custom_output_formats</literal>
+              configuration setting
+              (<literal>Configuration.setRegisteredCustomOutputFormats(<replaceable>...</replaceable>)</literal>).
+              The referred output format must be known by the
+              <literal>Configuration</literal>, or else a parse-time error
+              will occur. The name can also refer to a so called combined
+              output format as
+              <literal>"<replaceable>outerFormatName</replaceable>{<replaceable>innerFormatName</replaceable>}"</literal>,
+              or
+              <literal>"{<replaceable>innerFormatName</replaceable>}"</literal>;
+              <link linkend="topic.combinedOutputFormats">see this
+              later</link>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Camel case name variant:
+          <literal>outputFormat</literal></para>
+        </section>
+
+        <section>
+          <title>Description</title>
+
+          <para>Sets the <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          to the specified one inside the nested block.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#ftl output_format="XML"&gt;
+XML escaping: ${"&amp;{}"}
+&lt;#outputformat "RTF"&gt;
+  RTF escaping: ${"&amp;{}"}
+&lt;/#outputformat&gt;
+&lt;#outputformat "plainText"&gt;
+  No escsaping: ${"&amp;{}"}
+&lt;/#outputformat&gt;
+XML escsaping: ${"&amp;{}"}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">XML escsaping: &amp;amp;{}
+  RTF escaping: &amp;\{\}
+  No escsaping: &amp;{}
+XML escsaping: &amp;amp;{}</programlisting>
+
+          <simplesect xml:id="topic.combinedOutputFormats">
+            <title>Combined (nested) output formats</title>
+
+            <para>When <literal>outputformat</literal>-s are nested into each
+            other, normally, only the innermost output format will count. For
+            example:</para>
+
+            <programlisting role="template">&lt;#ftl output_format="XML"&gt;
+${"'{}"}
+&lt;#outputformat "HTML"&gt;
+  ${"'{}"}
+  &lt;#outputformat "RTF"&gt;
+    ${"'{}"}
+  &lt;/#outputformat&gt;
+&lt;/#outputformat&gt;</programlisting>
+
+            <para>will output:</para>
+
+            <programlisting role="output">&amp;apos;{}
+  &amp;#39;{}
+    '\{\}</programlisting>
+
+            <para>Sometimes what you want though is applying all enclosing
+            output formats. Like the 2nd
+            <literal>${<replaceable>...</replaceable>}</literal> should be
+            escaped with <literal>"HTML"</literal> and then with
+            <literal>"XML"</literal>, and the 3rd
+            <literal>${<replaceable>...</replaceable>}</literal> should be
+            escaped with <literal>"RTF"</literal> and then with
+            <literal>"HTML"</literal> and then with <literal>"XML"</literal>.
+            These are called combined output formats, and can be referred by
+            names like <literal>"XML{HTML}"</literal> and
+            <literal>"XML{HTLM{RTF}}"</literal> respectively. We could use
+            these names in the earlier two <literal>outputformat</literal>
+            calls, however, there's a shorthand where you inherit the part
+            outside the <literal>{<replaceable>...</replaceable>}</literal>
+            from the enclosing output format:</para>
+
+            <programlisting role="template">&lt;#ftl outputFormat='XML'&gt;
+${"'{}"}
+&lt;#outputFormat '{HTML}'&gt;&lt;#-- Same as XML{HTML} --&gt;
+  ${"'{}"}
+  &lt;#outputFormat '{RTF}'&gt;&lt;#-- Same as XML{HTML{RTF}} --&gt;
+    ${"'{}"}
+  &lt;/#outputFormat&gt;
+&lt;/#outputFormat&gt;
+</programlisting>
+
+            <para>will output:</para>
+
+            <programlisting role="output">&amp;apos;{}
+  &amp;amp;#39;{}
+    &amp;amp;#39;\{\}</programlisting>
+          </simplesect>
         </section>
       </section>
 
@@ -19902,7 +21476,7 @@ There was no specific handler for node y
       <note>
         <para>As of FreeMarker 2.3.23, you can use camel case instead of snake
         case for special variable names, like <literal>dataModel</literal>
-        instead of <literal>data_model</literal>. But know that then withing
+        instead of <literal>data_model</literal>. But know that then within
         the same template, FreeMarker will enforce the usage of camel case for
         all identifiers that are part of the template language (user defined
         names are not affected).</para>
@@ -20077,6 +21651,16 @@ There was no specific handler for node y
           Usage examples: "<literal>Page generated: ${.now}</literal>",
           "<literal>Today is ${.now?date}</literal>", "<literal>The current
           time is ${.now?time}</literal>".</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
+              <primary>output format</primary>
+            </indexterm> Returns the name of the current <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>.
+          This value is never missing/null. It's maybe the string
+          <literal>"undefined"</literal>, which is just the name of the
+          default output format.</para>
         </listitem>
 
         <listitem>
@@ -21543,28 +23127,19 @@ Test Book</programlisting>
         <section>
           <title>Don't forget escaping!</title>
 
-          <para>We have made a big mistake in all examples. We generate output
-          of HTML format, and HTML format reserves characters as
-          <literal>&lt;</literal>, <literal>&amp;</literal>, etc. So when we
-          print plain text (as the titles and paragraphs), we have to escape
-          it. Thus, the correct version of the example is:</para>
+          <para>As we generate output of HTML format in these examples, and
+          HTML format reserves characters as <literal>&lt;</literal>,
+          <literal>&amp;</literal>, etc., we have to ensure that those will be
+          escaped. For that, either FreeMarker has to be <link
+          linkend="pgui_config_outputformatsautoesc">properly
+          configured</link>, or add <literal>output_format="HTML"</literal> in
+          the template to the <literal>ftl</literal> directive calls.</para>
 
-          <programlisting role="template"><emphasis>&lt;#escape x as x?html&gt;</emphasis>
-&lt;#assign book = doc.book&gt;
-&lt;h1&gt;${book.title}&lt;/h1&gt;
-&lt;#list book.chapter as ch&gt;
-  &lt;h2&gt;${ch.title}&lt;/h2&gt;
-  &lt;#list ch.para as p&gt;
-    &lt;p&gt;${p}
-  &lt;/#list&gt;
-&lt;/#list&gt;
-<emphasis>&lt;/#escape&gt;</emphasis></programlisting>
-
-          <para>So if the book title is "Romeo &amp; Julia", the resulting
+          <para>So if the book title is "Romeo &amp; Juliet", the resulting
           HTML output will be correctly:</para>
 
           <programlisting role="output"><replaceable>...</replaceable>
-&lt;h1&gt;Romeo &amp;amp; Julia&lt;/h1&gt;
+&lt;h1&gt;Romeo &amp;amp; Juliet&lt;/h1&gt;
 <replaceable>...</replaceable></programlisting>
         </section>
       </section>
@@ -23752,8 +25327,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Things related to the output format mechanism, which is
-              new in this release [TODO link to guide section]:</para>
+              <para>The most important new feature of this release is the
+              <link linkend="dgui_misc_autoescaping">auto-escaping and output
+              formats mechanism</link>, which deprecates escaping with the
+              <link linkend="ref_directive_escape"><literal>escape</literal>
+              directive</link>. These are the items related to this new
+              mechanism (see <link linkend="dgui_misc_autoescaping">early
+              linked section</link> for a guide):</para>
 
               <itemizedlist>
                 <listitem>
@@ -23768,30 +25348,49 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>New built-in: <literal>noEsc</literal>. Used to
-                  prevent auto-escaping, like
-                  <literal>${descriptionInHtml?noEsc}</literal>. This doesn't
+                  <para>New built-in: <link
+                  linkend="ref_builtin_no_esc"><literal>no_esc</literal></link>.
+                  Used to prevent auto-escaping, like
+                  <literal>${descriptionInHtml?no_esc}</literal>. This doesn't
                   work with <literal>&lt;#escape
                   <replaceable>...</replaceable>&gt;</literal>, only with the
-                  new auto-escaping mechanism. [TODO link to ref]</para>
+                  new auto-escaping mechanism.</para>
                 </listitem>
 
                 <listitem>
-                  <para>New built-in: <literal>esc</literal>. Used for
-                  escaping with the current output format when auto-escaping
-                  is disabled. [TODO link to ref]</para>
+                  <para>New FTL type, <quote>markup output</quote>. This is
+                  somewhat similar to string, but values of this type aren't
+                  auto-escaped by the new escaping mechanism, because they are
+                  known to already hold markup. (For example,
+                  <literal>?esc</literal> and <literal>?no_esc</literal>
+                  returns a value of this type, hence their results are
+                  protected from double-escaping problems.)</para>
                 </listitem>
 
                 <listitem>
-                  <para>New directive: <literal>outputFormat</literal>, used
+                  <para>New built-in: <link
+                  linkend="ref_builtin_esc"><literal>esc</literal></link>.
+                  Used for escaping with the current output format when
+                  auto-escaping is disabled.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new built-in: <literal>markup</literal>. This
+                  returns the markup of a <link
+                  linkend="dgui_misc_autoescaping_movalues">markup output
+                  value</link> as a string.</para>
+                </listitem>
+
+                <listitem>
+                  <para>New directive: <literal>outputformat</literal>, used
                   to change the output format for a section of a template,
                   like <literal>&lt;#outputformat
                   "XML"&gt;<replaceable>...</replaceable>&lt;/#outputformat&gt;</literal></para>
                 </listitem>
 
                 <listitem>
-                  <para>New directives: <literal>noAutoEsc</literal> and
-                  <literal>autoEsc</literal>, used to turn auto-escaping off
+                  <para>New directives: <literal>noautoesc</literal> and
+                  <literal>autoesc</literal>, used to turn auto-escaping off
                   and on for a section of a template, like
                   <literal>&lt;#noautoesc&gt;<replaceable>...</replaceable>&lt;/#noautoesc&gt;</literal>.</para>
                 </listitem>
@@ -23804,19 +25403,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para>New built-in variable, <literal>.auto_esc</literal>,
-                  returns the boolean value of the
-                  <literal>auto_escaping</literal> setting at the place of
-                  invocation.</para>
-                </listitem>
-
-                <listitem>
-                  <para>New FTL type, <quote>markup output</quote>. This is
-                  somewhat similar to string, but values of this type aren't
-                  auto-escaped by the new escaping mechanism, because they are
-                  known to already hold markup. (For example,
-                  <literal>?esc</literal> and <literal>?noEsc</literal>
-                  returns a value of this type, hence their results are
-                  protected from double-escaping problems.)</para>
+                  returns the boolean that tells if auto-escaping is active at
+                  the place of invocation.</para>
                 </listitem>
 
                 <listitem>
@@ -23839,9 +25427,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new built-in: <literal>markup</literal>. This
-                  returns the markup of a value of <quote>markup
-                  output</quote> type as a string.</para>
+                  <para>The <literal>has_content</literal> built-in now
+                  supports markup output values, considering 0 length markup
+                  as empty.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23869,47 +25457,66 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added new configuration setting:
-              <literal>template_configurers</literal> (or
-              <literal>templateConfigurers</literal>). This allows overriding
+              <literal>template_configurers</literal>. This allows overriding
               the settings coming from the shared
               <literal>Configuration</literal> object for individual
-              templates, based on template name patterns. [TODO describe this
-              more, link to example]</para>
+              templates, based on template name patterns. <link
+              linkend="pgui_config_templateconfigurers">See more
+              here...</link></para>
             </listitem>
 
             <listitem>
-              <para>Added new configuration setting:
-              <literal>output_format</literal> (or
-              <literal>outputFormat</literal>). This specifies the name of the
-              output format (such as <literal>HTML</literal>,
-              <literal>XML</literal>, <literal>plainText</literal>, etc.) that
-              governs the new auto-escaping mechanism. The output format can
-              be different for different templates, using the
-              <literal>template_configurers</literal> setting. [TODO describe
-              this more]</para>
-            </listitem>
+              <para>Changes related to the <link
+              linkend="dgui_misc_autoescaping">new auto-escaping
+              mechanism</link>:</para>
 
-            <listitem>
-              <para>If <link
-              linkend="pgui_config_incompatible_improvements_how_to_set">the
-              <literal>incompatible_improvements</literal> setting</link> is
-              set to 2.3.24 (or higher), templates whose name ends with
-              <literal>ftlh</literal> file extension will automatically get
-              <literal>HTML</literal> <literal>output_format</literal>, and
-              those with <literal>ftlx</literal> file extension automatically
-              get <literal>XML</literal> <literal>output_format</literal>, in
-              both cases with <literal>auto_escaping</literal> on. (These can
-              be overridden with <literal>template_configurers</literal> of
-              course.)</para>
-            </listitem>
+              <itemizedlist>
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>recognize_standard_file_extensions</literal>. When
+                  <literal>true</literal>, templates whose source name ends
+                  with <literal>".ftlh"</literal> will get
+                  <literal>HTML</literal> <literal>output_format</literal>,
+                  and those whose name ends with <literal>".ftlx"</literal>
+                  get <literal>XML</literal> <literal>output_format</literal>,
+                  in both cases with auto-escaping on. If <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is set to 2.3.24 (or higher) then this setting defaults to
+                  <literal>true</literal>. Otherwise it's
+                  <literal>false</literal>, but enabling it is highly
+                  recommended.</para>
+                </listitem>
 
-            <listitem>
-              <para>Added new configuration setting:
-              <literal>registered_custom_output_formats</literal> (or
-              <literal>registeredCustomOutputFormats</literal>). With this you
-              can add new <literal>OutputFormat</literal>-s that templates can
-              refer to by name (like in <literal>&lt;#ftl
-              output_format="foo"&gt;</literal>).</para>
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>output_format</literal>. This specifies the name of
+                  the <link
+                  linkend="dgui_misc_autoescaping_outputformat">output
+                  format</link> (such as <literal>HTML</literal>,
+                  <literal>XML</literal>, <literal>plainText</literal>, etc.)
+                  that governs auto-escaping. The output format can be
+                  different for different templates, using the
+                  <literal>template_configurers</literal> setting (<link
+                  linkend="pgui_config_outputformatsautoesc">see here
+                  how...</link>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>registered_custom_output_formats</literal>. With
+                  this you can add new <literal>OutputFormat</literal>-s that
+                  templates can refer to by name (like in <literal>&lt;#ftl
+                  output_format="foo"&gt;</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new configuration setting:
+                  <literal>auto_escaping_policy</literal>. This decides when
+                  auto-escaping should be enabled depending on the current
+                  output format.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -23980,8 +25587,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed, only with
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>): Expressions inside interpolations that were
+              inside <emphasis>string literal expressions</emphasis> (not
+              <literal>${<replaceable>...</replaceable>}</literal>-s in
+              general), like in <literal>&lt;#assign s="Hello
+              ${name}!"&gt;</literal>, always used
+              <literal>incompatibleImprovements</literal> 0 (2.3.0 in effect).
+              This means that expressions inside string literals had missed
+              the <literal>?html</literal>,
+              <literal>?iso_<replaceable>...</replaceable></literal>,
+              <literal>?is_enumerable</literal>, <literal>?c</literal>, etc.
+              fixes/improvements.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: The (rarely used) cause exception of
               <literal>ParseException</literal>-s wasn't set</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When the
+              <literal>incomaptible_improvements</literal> setting of an
+              existing <literal>Configuration</literal> was changed, the
+              template cache sometimes wasn't recreated, hence old templates
+              could survive.</para>
             </listitem>
 
             <listitem>
@@ -34325,6 +35957,20 @@ Dekany, and Jonathan Revusky.</programlisting>
       </glossdef>
     </glossentry>
 
+    <glossentry xml:id="gloss.markupOutputValue">
+      <glossterm>Markup output value</glossterm>
+
+      <glossdef>
+        <para>A value with FTL type <quote>markup output</quote>. This type is
+        related to <link linkend="dgui_misc_autoescaping">auto-escaping
+        mechanism</link>; you can <link
+        linkend="dgui_misc_autoescaping_movalues">read about this type
+        there</link>. But in short, this is a value that stores text that's
+        already in the output markup format (like HTML, XML, RTF, etc.), and
+        hence must not be auto-escaped.</para>
+      </glossdef>
+    </glossentry>
+
     <glossentry xml:id="gloss.methodVariable">
       <glossterm>Method</glossterm>
 
@@ -34380,6 +36026,28 @@ Dekany, and Jonathan Revusky.</programlisting>
         xlink:href="http://java.sun.com/blueprints/guidelines/designing_enterprise_applications_2e/web-tier/web-tier5.html">chapter
         4.4</link> of Designing Enterprise Applications with the J2EE Platform
         blueprint.</para>
+      </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss.parseTimeError">
+      <glossterm>Parse-time error</glossterm>
+
+      <glossdef>
+        <para>An error occurring during the template parsing phase, as opposed
+        to the later template execution phase (see more explanation below).
+        The presence of a such error prevents the execution of the whole
+        template, even if the execution wouldn't use the part where the error
+        is. This is seen as an advantage, as it helps early (before
+        deployment, ideally in-editor) error detection.</para>
+
+        <para>A FreeMarker template is processed in two phases. First the
+        <emphasis>whole</emphasis> template is analyzed syntactically, which
+        is called parsing. The result of the parsing is a
+        <literal>Template</literal> Java object, which is usually cached for
+        fast reuse. Later, the already parsed template can be executed for
+        unlimited times to produce output based on the content of a <link
+        linkend="gloss.dataModel">data-model</link>. Errors occurring during
+        the parsing are called parse-time errors.</para>
       </glossdef>
     </glossentry>
 

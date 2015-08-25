@@ -20,32 +20,12 @@ import java.io.Writer;
 
 import freemarker.template.TemplateModelException;
 
-public class DummyOutputFormat extends CommonMarkupOutputFormat<DummyTemplateOutputModel> {
+public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOutputModel> {
     
     public static final DummyOutputFormat INSTANCE = new DummyOutputFormat();
     
     private DummyOutputFormat() {
         // hide
-    }
-
-    @Override
-    protected String escapePlainTextToString(String plainTextContent) {
-        return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
-    }
-
-    @Override
-    protected DummyTemplateOutputModel newTOM(String plainTextContent, String markupContent) {
-        return new DummyTemplateOutputModel(plainTextContent, markupContent);
-    }
-
-    @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        out.write(escapePlainTextToString(textToEsc));
-    }
-
-    @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return false;
     }
 
     @Override
@@ -56,6 +36,26 @@ public class DummyOutputFormat extends CommonMarkupOutputFormat<DummyTemplateOut
     @Override
     public String getMimeType() {
         return "text/dummy";
+    }
+
+    @Override
+    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+        out.write(escapePlainText(textToEsc));
+    }
+
+    @Override
+    public String escapePlainText(String plainTextContent) {
+        return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
+    }
+
+    @Override
+    public boolean isLegacyBuiltInBypassed(String builtInName) {
+        return false;
+    }
+
+    @Override
+    protected TemplateDummyOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
+        return new TemplateDummyOutputModel(plainTextContent, markupContent);
     }
     
 }

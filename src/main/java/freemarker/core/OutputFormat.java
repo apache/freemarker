@@ -19,12 +19,23 @@ import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Encapsulates the {@link TemplateMarkupOutputModel} factories and {@code TemplateOutputModel} operations, and other meta
- * information (like MIME type) about a certain output format.
+ * Encapsulates the {@link TemplateMarkupOutputModel} factories and {@code TemplateOutputModel} operations, and other
+ * meta information (like MIME type) about a certain output format.
  * 
  * @since 2.3.24
  */
 public abstract class OutputFormat {
+
+    /**
+     * The short name we used to refer to this format (like in the {@code #ftl} header).
+     */
+    public abstract String getName();
+    
+    /**
+     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
+     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
+     */
+    public abstract String getMimeType();
 
     /**
      * Tells if this output format allows inserting {@link TemplateMarkupOutputModel}-s of another output formats into it. If
@@ -39,24 +50,27 @@ public abstract class OutputFormat {
      * <p>{@code true} value is used by {@link UndefinedOutputFormat}.
      */
     public abstract boolean isOutputFormatMixingAllowed();
-    
-    /**
-     * The short name we used to refer to this format (like in the {@code #ftl} header).
-     */
-    public abstract String getName();
-    
-    /**
-     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
-     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
-     */
-    public abstract String getMimeType();
 
+    /**
+     * Returns the short description of this format, to be used in error messages.
+     * Override {@link #toStringExtraProperties()} to customize this.
+     */
     @Override
     public final String toString() {
+        String extras = toStringExtraProperties();
         return getName() + "("
                 + "mimeType=" + StringUtil.jQuote(getMimeType()) + ", "
                 + "class=" + ClassUtil.getShortClassNameOfObject(this, true)
+                + (extras.length() != 0 ? ", " : "") + extras
                 + ")";
+    }
+    
+    /**
+     * Should be like {@code "foo=\"something\", bar=123"}; this will be inserted inside the parentheses in
+     * {@link #toString()}. 
+     */
+    protected String toStringExtraProperties() {
+        return "";
     }
 
 }
