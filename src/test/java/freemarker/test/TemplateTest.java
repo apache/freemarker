@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -71,6 +72,7 @@ public abstract class TemplateTest {
         assertOutput(getConfiguration().getTemplate(name), expectedOut, false);
     }
 
+    @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
     protected void assertOutputForNamed(String name) throws IOException, TemplateException {
         String expectedOut;
         {
