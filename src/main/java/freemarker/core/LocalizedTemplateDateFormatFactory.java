@@ -22,43 +22,67 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
 
 /**
- * Creates {@link TemplateDateFormat}-s for a fixed time zone, and if it producers formatters that are sensitive
- * to locale, for a fixed locale. Thus, FreeMarker should maintain a separate instance for each time zone that's
- * frequently used, or if {@link #isLocaleBound()} is {@code true}, for each {@link TimeZone}-{@link Locale}
- * permutation that's frequently used. Reusing the factories is useful as some factories cache instances internally for
- * the {@code dateType}-{@code formatDescriptor} pairs.
+ * Creates {@link TemplateDateFormat}-s for a fixed time zone locale (if it producers formatters that are sensitive to
+ * those). Typically, within the same {@link Environment}, the same factory is used to create all the
+ * {@link TemplateDateFormat}-s of the same formatter type, as far as the locale remains the same. Thus factories might
+ * want to cache instances internally with the {@code #get(int, boolean, String)} parameters as the key.
  * 
- * <p>{@link TemplateDateFormatFactory}-es need not be thread-safe. Currently (2.3.21) they are (re)used only from
- * within a single {@link Environment} instance.
+ * <p>
+ * Note that currently (2.3.24) FreeMarker maintains a separate factory instance for the normal and the SQL time zone,
+ * if they differ. As SQL and non-SQL values my occur mixed, keeping both factories can make caching more efficient.
+ * 
+ * <p>
+ * {@link LocalizedTemplateDateFormatFactory}-es need not be thread-safe as they are bound to a a single
+ * {@link Environment} instance.
+ * 
+ * @since 2.3.24
  */
-abstract class TemplateDateFormatFactory {
+public abstract class LocalizedTemplateDateFormatFactory {
     
+    private final Environment env;
     private final TimeZone timeZone;
-    protected final Configuration configuration;
+    private final Locale locale;
     
-    public TemplateDateFormatFactory(Configuration configuration, TimeZone timeZone) {
-        this.configuration = configuration;
+    /**
+     * @param env Not {@code null} (when FreeMarker calls the constructor)
+     * @param timeZone Might be {@code null} if {@link #isTimeZoneBound()} is {@code false}
+     * @param locale Might be {@code null} if {@link #isLocaleBound()} is {@code false}
+     */
+    public LocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone, Locale locale) {
+        this.env = env;
         this.timeZone = timeZone;
+        this.locale = locale;
     }
 
-    public TimeZone getTimeZone() {
+    public final TimeZone getTimeZone() {
         return timeZone;
+    }
+
+    public final Locale getLocale() {
+        return locale;
+    }
+    
+    /**
+     * Currently always returns {@code true}; this method exists to reserve the place for a non-final version later.
+     */
+    public final boolean isTimeZoneBound() {
+        return true;
     }
 
     /**
      * Whether this factory is sensitive to {@link Locale}; if the created {@link TemplateDateFormat}-s are, then
-     * the factory should be too {@code true}.   
+     * the factory should be too {@code true}. Note that even if it's not sensitive to it, it's still sensitive to
+     * the time-zone, so this factory is still "localized".  
      */
     public abstract boolean isLocaleBound();
     
     /**
      * Returns the {@link TemplateDateFormat} for the {@code dateType} and {@code formatDescriptor} given via the
      * arguments, and the {@code TimeZone} and {@code Locale} (if that's relevant) to which the
-     * {@link TemplateDateFormatFactory} belongs to.
+     * {@link LocalizedTemplateDateFormatFactory} belongs to.
      * 
      * @param dateType
      *            {@line TemplateDateModel#DATE}, {@line TemplateDateModel#TIME}, {@line TemplateDateModel#DATETIME} or
@@ -83,7 +107,7 @@ abstract class TemplateDateFormatFactory {
      *            The string used as the {@code ..._format} configuration setting value (among others), like
      *            {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"}. The implementation is only supposed to understand a
      *            particular kind of format descriptor, for which FreeMarker routes to this factory. (Like, the
-     *            {@link ISOTemplateDateFormatFactory} is only called for format descriptors that start with "iso".)
+     *            {@link ISOLocalizedTemplateDateFormatFactory} is only called for format descriptors that start with "iso".)
      * 
      * @throws ParseException
      *             if the {@code formatDescriptor} is malformed

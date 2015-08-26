@@ -18,19 +18,18 @@ package freemarker.core;
 
 import java.util.TimeZone;
 
-import freemarker.template.Configuration;
 import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.DateUtil.TrivialCalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.TrivialDateToISO8601CalendarFactory;
 
-abstract class ISOLikeTemplateDateFormatFactory extends TemplateDateFormatFactory {
+abstract class ISOLikeLocalizedTemplateDateFormatFactory extends LocalizedTemplateDateFormatFactory {
     
     private DateToISO8601CalendarFactory dateToCalenderFieldsCalculator;
     private CalendarFieldsToDateConverter calendarFieldsToDateConverter;
 
-    public ISOLikeTemplateDateFormatFactory(Configuration configuration, TimeZone timeZone) {
-        super(configuration, timeZone);
+    public ISOLikeLocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
+        super(env, timeZone, null);
     }
 
     @Override

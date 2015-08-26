@@ -18,12 +18,10 @@ package freemarker.core;
 
 import java.util.TimeZone;
 
-import freemarker.template.Configuration;
+class ISOLocalizedTemplateDateFormatFactory extends ISOLikeLocalizedTemplateDateFormatFactory {
 
-class ISOTemplateDateFormatFactory extends ISOLikeTemplateDateFormatFactory {
-
-    public ISOTemplateDateFormatFactory(Configuration configuration, TimeZone timeZone) {
-        super(configuration, timeZone);
+    public ISOLocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
+        super(env, timeZone);
     }
 
     @Override

@@ -97,4 +97,11 @@ public abstract class TemplateDateFormat {
      */
     public abstract boolean isLocaleBound();
 
+    /**
+     * Tells if this formatter should be re-created if the time zone changes. Currently always {@code true}.
+     */
+    public final boolean isTimeZoneBound() {
+        return true;
+    }
+    
 }

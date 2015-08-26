@@ -31,7 +31,7 @@ final class ISOTemplateDateFormat extends ISOLikeTemplateDateFormat {
             String settingValue, int parsingStart,
             int dateType, boolean zonelessInput,
             TimeZone timeZone,
-            ISOLikeTemplateDateFormatFactory factory)
+            ISOLikeLocalizedTemplateDateFormatFactory factory)
             throws ParseException, UnknownDateTypeFormattingUnsupportedException {
         super(settingValue, parsingStart, dateType, zonelessInput, timeZone, factory);
     }
