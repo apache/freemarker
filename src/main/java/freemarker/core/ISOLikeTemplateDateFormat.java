@@ -235,6 +235,15 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     public final boolean isLocaleBound() {
         return false;
     }
+    
+    /**
+     * Always returns {@code null} (there's no markup format).
+     */
+    @Override
+    public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
+            MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
+        return null;
+    }
 
     protected abstract boolean isXSMode();
 
