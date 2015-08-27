@@ -23,13 +23,13 @@ import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.DateUtil.TrivialCalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.TrivialDateToISO8601CalendarFactory;
 
-abstract class ISOLikeTemplateDateFormatFactory extends TemplateDateFormatFactory {
+abstract class ISOLikeLocalizedTemplateDateFormatFactory extends LocalizedTemplateDateFormatFactory {
     
     private DateToISO8601CalendarFactory dateToCalenderFieldsCalculator;
     private CalendarFieldsToDateConverter calendarFieldsToDateConverter;
 
-    public ISOLikeTemplateDateFormatFactory(TimeZone timeZone) {
-        super(timeZone);
+    public ISOLikeLocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
+        super(env, timeZone, null);
     }
 
     @Override

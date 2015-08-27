@@ -16,6 +16,8 @@
 
 package freemarker.core;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -30,9 +32,10 @@ import freemarker.template.TemplateModelException;
  * <p>Implementations need not be thread-safe. Usually, instances are bound to a single {@link Environment}, and
  * {@link Environment}-s are thread-local objects. As the {@link Environment} is recreated for each top-level template
  * processing, constructing these object should be cheap, or else the factory of the instances should do some caching.
+ * 
+ * @since 2.3.24
  */
-// [Advanced formatting: planned public]
-abstract class TemplateDateFormat {
+public abstract class TemplateDateFormat {
     
     /**
      * @param dateModel The date/time/dateTime to format. Most implementations will just work with the return value of
@@ -50,6 +53,36 @@ abstract class TemplateDateFormat {
             throws UnformattableDateException, TemplateModelException;
 
     /**
+     * Formats the date/time/dateTime to markup instead of to plain text, or returns {@code null} that will make
+     * FreeMarker call {@link #format(TemplateDateModel)} and escape its result. If the markup format would be just the
+     * result of {@link #format(TemplateDateModel)} escaped, it should return {@code null}.
+     */
+    public abstract <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
+            MarkupOutputFormat<MO> outputFormat)
+                    throws UnformattableNumberException, TemplateModelException;
+    
+    /**
+     * Same as {@link #format(TemplateDateModel, MarkupOutputFormat)}, but prints the result to a {@link Writer}
+     * instead of returning it. This can be utilized for some optimizatoin. In the case where
+     * {@link #format(TemplateDateModel, MarkupOutputFormat)} would return {@code null}, it returns {@code false}. It
+     * writes to the {@link Writer} exactly if the return value is {@code true}.
+     * 
+     * <p>
+     * The default implementation in {@link TemplateNumberFormat} builds on calls
+     * {@link #format(TemplateDateModel, MarkupOutputFormat)} and writes its result to the {@link Writer}.
+     */
+    public <MO extends TemplateMarkupOutputModel> boolean format(TemplateDateModel dateModel,
+            MarkupOutputFormat<MO> outputFormat, Writer out)
+                    throws UnformattableNumberException, TemplateModelException, IOException {
+        MO mo = format(dateModel, outputFormat);
+        if (mo == null) {
+            return false;
+        }
+        mo.getOutputFormat().output(mo, out);
+        return true;
+    }
+
+    /**
      * @return The interpretation of the text as {@link Date}. Can't be {@code null}.
      */
     public abstract Date parse(String s) throws java.text.ParseException;
@@ -59,21 +92,16 @@ abstract class TemplateDateFormat {
      */
     public abstract String getDescription();
     
-    // This isn't used yet, as we don't have markup formatting in the template language.
-    ///**
-    // * Formats the date to markup instead of to plain text, or return {@code false} that will make FreeMarker call
-    // * {@link #format(TemplateDateModel)} and escape its result. It must not write into {@code out} when it returns
-    // * {@code false}!
-    // * It should only write to {@code out} and return {@code true} if the markup format is not the same as the
-    // * {@link #format(TemplateDateModel)} escaped.
-    // */
-    //public boolean formatAsMarkup(TemplateDateModel dateModel, boolean zonelessInput, Writer out) {
-    //    return false;
-    //}
-    
     /**
      * Tells if this formatter should be re-created if the locale changes.
      */
     public abstract boolean isLocaleBound();
 
+    /**
+     * Tells if this formatter should be re-created if the time zone changes. Currently always {@code true}.
+     */
+    public final boolean isTimeZoneBound() {
+        return true;
+    }
+    
 }

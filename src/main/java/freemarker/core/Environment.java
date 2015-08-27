@@ -105,6 +105,7 @@ public final class Environment extends Configurable {
         C_NUMBER_FORMAT.setDecimalSeparatorAlwaysShown(false);
     }
 
+    private final Configuration configuration;
     private final TemplateHashModel rootDataModel;
     private final ArrayList/*<TemplateElement>*/ instructionStack = new ArrayList();
     private final ArrayList recoveredErrorStack = new ArrayList();
@@ -134,12 +135,12 @@ public final class Environment extends Configurable {
     private static final int CACHED_TDFS_LENGTH = CACHED_TDFS_DEF_SYS_TZ_OFFS * 2;
     private static final int CACHED_TDFS_SQL_D_T_TZ_OFFS = CACHED_TDFS_DEF_SYS_TZ_OFFS;
     
-    private XSTemplateDateFormatFactory cachedXSTemplateDateFormatFactory;
-    private XSTemplateDateFormatFactory cachedSQLDTXSTemplateDateFormatFactory;
-    private ISOTemplateDateFormatFactory cachedISOTemplateDateFormatFactory;
-    private ISOTemplateDateFormatFactory cachedSQLDTISOTemplateDateFormatFactory;
-    private JavaTemplateDateFormatFactory cachedJavaTemplateDateFormatFactory;
-    private JavaTemplateDateFormatFactory cachedSQLDTJavaTemplateDateFormatFactory;
+    private XSLocalizedTemplateDateFormatFactory cachedXSLocTempDateFormatFactory;
+    private XSLocalizedTemplateDateFormatFactory cachedSQLDTXSLocTempDateFormatFactory;
+    private ISOLocalizedTemplateDateFormatFactory cachedISOLocTempDateFormatFactory;
+    private ISOLocalizedTemplateDateFormatFactory cachedSQLDTISOLocTempDateFormatFactory;
+    private JavaLocalizedTemplateDateFormatFactory cachedJavaLocTempDateFormatFactory;
+    private JavaLocalizedTemplateDateFormatFactory cachedSQLDTJavaLocTempDateFormatFactory;
     
     /** Caches the result of {@link #isSQLDateAndTimeTimeZoneSameAsNormal()}. */
     private Boolean cachedSQLDateAndTimeTimeZoneSameAsNormal;
@@ -197,6 +198,7 @@ public final class Environment extends Configurable {
 
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
+        configuration = template.getConfiguration();
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
         this.currentTemplate = getMainTemplate();
@@ -281,9 +283,9 @@ public final class Environment extends Configurable {
         cachedNumberFormat = null;
         
         cachedTemplateDateFormats = null;
-        cachedXSTemplateDateFormatFactory = cachedSQLDTXSTemplateDateFormatFactory = null;
-        cachedISOTemplateDateFormatFactory = cachedSQLDTISOTemplateDateFormatFactory = null;
-        cachedJavaTemplateDateFormatFactory = cachedSQLDTJavaTemplateDateFormatFactory = null;
+        cachedXSLocTempDateFormatFactory = cachedSQLDTXSLocTempDateFormatFactory = null;
+        cachedISOLocTempDateFormatFactory = cachedSQLDTISOLocTempDateFormatFactory = null;
+        cachedJavaLocTempDateFormatFactory = cachedSQLDTJavaLocTempDateFormatFactory = null;
         
         cachedCollator = null;
         cachedURLEscapingCharset = null;
@@ -846,25 +848,25 @@ public final class Environment extends Configurable {
                 }
             }
 
-            if (cachedXSTemplateDateFormatFactory != null && cachedXSTemplateDateFormatFactory.isLocaleBound()) {
-                cachedXSTemplateDateFormatFactory = null;
+            if (cachedXSLocTempDateFormatFactory != null && cachedXSLocTempDateFormatFactory.isLocaleBound()) {
+                cachedXSLocTempDateFormatFactory = null;
             }
-            if (cachedSQLDTXSTemplateDateFormatFactory != null && cachedSQLDTXSTemplateDateFormatFactory.isLocaleBound()) {
-                cachedSQLDTXSTemplateDateFormatFactory = null;
-            }
-
-            if (cachedISOTemplateDateFormatFactory != null && cachedISOTemplateDateFormatFactory.isLocaleBound()) {
-                cachedISOTemplateDateFormatFactory = null;
-            }
-            if (cachedSQLDTISOTemplateDateFormatFactory != null && cachedSQLDTISOTemplateDateFormatFactory.isLocaleBound()) {
-                cachedSQLDTISOTemplateDateFormatFactory = null;
+            if (cachedSQLDTXSLocTempDateFormatFactory != null && cachedSQLDTXSLocTempDateFormatFactory.isLocaleBound()) {
+                cachedSQLDTXSLocTempDateFormatFactory = null;
             }
 
-            if (cachedJavaTemplateDateFormatFactory != null && cachedJavaTemplateDateFormatFactory.isLocaleBound()) {
-                cachedJavaTemplateDateFormatFactory = null;
+            if (cachedISOLocTempDateFormatFactory != null && cachedISOLocTempDateFormatFactory.isLocaleBound()) {
+                cachedISOLocTempDateFormatFactory = null;
             }
-            if (cachedSQLDTJavaTemplateDateFormatFactory != null && cachedSQLDTJavaTemplateDateFormatFactory.isLocaleBound()) {
-                cachedSQLDTJavaTemplateDateFormatFactory = null;
+            if (cachedSQLDTISOLocTempDateFormatFactory != null && cachedSQLDTISOLocTempDateFormatFactory.isLocaleBound()) {
+                cachedSQLDTISOLocTempDateFormatFactory = null;
+            }
+
+            if (cachedJavaLocTempDateFormatFactory != null && cachedJavaLocTempDateFormatFactory.isLocaleBound()) {
+                cachedJavaLocTempDateFormatFactory = null;
+            }
+            if (cachedSQLDTJavaLocTempDateFormatFactory != null && cachedSQLDTJavaLocTempDateFormatFactory.isLocaleBound()) {
+                cachedSQLDTJavaLocTempDateFormatFactory = null;
             }
             
             cachedCollator = null;
@@ -883,9 +885,9 @@ public final class Environment extends Configurable {
                 }
             }
             
-            cachedXSTemplateDateFormatFactory = null;
-            cachedISOTemplateDateFormatFactory = null;
-            cachedJavaTemplateDateFormatFactory = null;
+            cachedXSLocTempDateFormatFactory = null;
+            cachedISOLocTempDateFormatFactory = null;
+            cachedJavaLocTempDateFormatFactory = null;
             
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
@@ -903,9 +905,9 @@ public final class Environment extends Configurable {
                 }
             }
             
-            cachedSQLDTXSTemplateDateFormatFactory = null;
-            cachedSQLDTISOTemplateDateFormatFactory = null;
-            cachedSQLDTJavaTemplateDateFormatFactory = null;
+            cachedSQLDTXSLocTempDateFormatFactory = null;
+            cachedSQLDTISOLocTempDateFormatFactory = null;
+            cachedSQLDTJavaLocTempDateFormatFactory = null;
             
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
@@ -1096,7 +1098,7 @@ public final class Environment extends Configurable {
     }
 
     public Configuration getConfiguration() {
-        return getTemplate().getConfiguration();
+        return configuration;
     }
     
     TemplateModel getLastReturnValue() {
@@ -1261,28 +1263,40 @@ public final class Environment extends Configurable {
         }
     }
     
+    /**
+     * @param dateType
+     *            See the similar parameter of {@link LocalizedTemplateDateFormatFactory#get(int, boolean, String)}
+     * @param zonelessInput
+     *            See the similar parameter of {@link LocalizedTemplateDateFormatFactory#get(int, boolean, String)}
+     * @param formatDescriptor
+     *            The string that describes the date format. See the similar parameter of
+     *            {@link LocalizedTemplateDateFormatFactory#get(int, boolean, String)}
+     * @param formatDescriptorCfgSettingName
+     *            The name of the configuration setting where the {@code formatDescriptor} comes from, or {@code null}
+     *            if the format descriptor was specified directly for this formatting call.
+     */
     private TemplateDateFormat getTemplateDateFormat(
             int dateType, boolean zonelessInput,
-            boolean useSQLDTTZ, String formatDescriptor, String sourceCfgSetting)
+            boolean useSQLDTTZ, String formatDescriptor, String formatDescriptorCfgSettingName)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         final int formatDescriptionLen = formatDescriptor.length();
         
-        final TimeZone timeZone = useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone();
-                
         // As of Java 8, 'x' and 'i' (in lower case) are illegal date format letters, so this is backward-compatible.
-        TemplateDateFormatFactory templateDateFormatFactory;  
+        LocalizedTemplateDateFormatFactory templateDateFormatFactory;  
         if (formatDescriptionLen > 1
                 && formatDescriptor.charAt(0) == 'x'
                 && formatDescriptor.charAt(1) == 's') {
             templateDateFormatFactory = useSQLDTTZ
-                    ? cachedSQLDTXSTemplateDateFormatFactory : cachedXSTemplateDateFormatFactory;
+                    ? cachedSQLDTXSLocTempDateFormatFactory : cachedXSLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new XSTemplateDateFormatFactory(timeZone);
+                templateDateFormatFactory = new XSLocalizedTemplateDateFormatFactory(
+                        this,
+                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
-                    cachedSQLDTXSTemplateDateFormatFactory
-                            = (XSTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedSQLDTXSLocTempDateFormatFactory
+                            = (XSLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
                 } else {
-                    cachedXSTemplateDateFormatFactory = (XSTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedXSLocTempDateFormatFactory = (XSLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
         } else if (formatDescriptionLen > 2
@@ -1290,26 +1304,30 @@ public final class Environment extends Configurable {
                 && formatDescriptor.charAt(1) == 's'
                 && formatDescriptor.charAt(2) == 'o') {
             templateDateFormatFactory = useSQLDTTZ
-                    ? cachedSQLDTISOTemplateDateFormatFactory : cachedISOTemplateDateFormatFactory;
+                    ? cachedSQLDTISOLocTempDateFormatFactory : cachedISOLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new ISOTemplateDateFormatFactory(timeZone);
+                templateDateFormatFactory = new ISOLocalizedTemplateDateFormatFactory(
+                        this,
+                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
-                    cachedSQLDTISOTemplateDateFormatFactory
-                            = (ISOTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedSQLDTISOLocTempDateFormatFactory
+                            = (ISOLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
                 } else {
-                    cachedISOTemplateDateFormatFactory = (ISOTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedISOLocTempDateFormatFactory = (ISOLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
         } else {
             templateDateFormatFactory = useSQLDTTZ
-                    ? cachedSQLDTJavaTemplateDateFormatFactory : cachedJavaTemplateDateFormatFactory;
+                    ? cachedSQLDTJavaLocTempDateFormatFactory : cachedJavaLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new JavaTemplateDateFormatFactory(timeZone, getLocale());
+                templateDateFormatFactory = new JavaLocalizedTemplateDateFormatFactory(
+                        this,
+                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone(), getLocale());
                 if (useSQLDTTZ) {
-                    cachedSQLDTJavaTemplateDateFormatFactory
-                            = (JavaTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedSQLDTJavaLocTempDateFormatFactory
+                            = (JavaLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
                 } else {
-                    cachedJavaTemplateDateFormatFactory = (JavaTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedJavaLocTempDateFormatFactory = (JavaLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
         }
@@ -1318,10 +1336,10 @@ public final class Environment extends Configurable {
             return templateDateFormatFactory.get(dateType, zonelessInput, formatDescriptor);
         } catch (ParseException e) {
             throw new _TemplateModelException(e.getCause(),
-                    (sourceCfgSetting == null
+                    (formatDescriptorCfgSettingName == null
                             ? (Object) "Malformed date/time format descriptor: "
                             : new Object[] {
-                                    "The value of the \"", sourceCfgSetting,
+                                    "The value of the \"", formatDescriptorCfgSettingName,
                                     "\" FreeMarker configuration setting is a malformed date/time format descriptor: "
                             }),
                     new _DelayedJQuote(formatDescriptor), ". Reason given: ",
@@ -1395,7 +1413,7 @@ public final class Environment extends Configurable {
         if (tm instanceof TemplateTransformModel) {
             ttm = (TemplateTransformModel) tm;
         } else if (exp instanceof Identifier) {
-            tm = getConfiguration().getSharedVariable(exp.toString());
+            tm = configuration.getSharedVariable(exp.toString());
             if (tm instanceof TemplateTransformModel) {
                 ttm = (TemplateTransformModel) tm;
             }
@@ -1463,7 +1481,7 @@ public final class Environment extends Configurable {
             result = rootDataModel.get(name);
         }
         if (result == null) {
-            result = getConfiguration().getSharedVariable(name);
+            result = configuration.getSharedVariable(name);
         }
         return result;
     }
@@ -1517,7 +1535,7 @@ public final class Environment extends Configurable {
      */
     public Set getKnownVariableNames() throws TemplateModelException {
         // shared vars.
-        Set set = getConfiguration().getSharedVariableNames();
+        Set set = configuration.getSharedVariableNames();
         
         // root hash
         if (rootDataModel instanceof TemplateHashModelEx) {
@@ -1762,7 +1780,7 @@ public final class Environment extends Configurable {
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel value = rootDataModel.get(key);
                 if (value == null) {
-                    value = getConfiguration().getSharedVariable(key);
+                    value = configuration.getSharedVariable(key);
                 }
                 return value;
             }
@@ -1813,7 +1831,7 @@ public final class Environment extends Configurable {
                     result = rootDataModel.get(key);
                 }
                 if (result == null) {
-                    result = getConfiguration().getSharedVariable(key);
+                    result = configuration.getSharedVariable(key);
                 }
                 return result;
             }
@@ -2006,13 +2024,13 @@ public final class Environment extends Configurable {
             // This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
             encoding = inheritedTemplate.getEncoding();
             if (encoding == null) {
-                encoding = getConfiguration().getEncoding(this.getLocale());
+                encoding = configuration.getEncoding(this.getLocale());
             }
         }
 
         Object customLookupCondition = inheritedTemplate.getCustomLookupCondition(); 
         
-        return getConfiguration().getTemplate(
+        return configuration.getTemplate(
                 name, getLocale(), customLookupCondition,
                 encoding, parseAsFTL,
                 ignoreMissing);
@@ -2157,7 +2175,7 @@ public final class Environment extends Configurable {
             return targetName;
         }
         
-        return _CacheAPI.toAbsoluteName(getConfiguration().getTemplateNameFormat(), baseName, targetName);
+        return _CacheAPI.toAbsoluteName(configuration.getTemplateNameFormat(), baseName, targetName);
     }
     
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {
@@ -2312,7 +2330,7 @@ public final class Environment extends Configurable {
     };
     
     private boolean isIcI2322OrLater() {
-        return getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+        return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
     }
 
     /**

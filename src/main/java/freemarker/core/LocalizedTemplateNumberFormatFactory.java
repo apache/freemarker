@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
-
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because of the value/properties of the
- * {@link TemplateDateModel}.  The most often used subclass is {@link UnknownDateTypeFormattingUnsupportedException}.
+ * Creates {@link TemplateNumberFormat}-s for a fixed locale (if it producers formatters that are sensitive to locale).
+ * Typically, within the same {@link Environment}, the same factory is used to create all the
+ * {@link TemplateNumberFormat}-s of the same formatter type, as far as the locale remains the same. Thus factories
+ * might want to cache instances internally with the {@code formatDescriptor} as key.
+ * 
+ * <p>
+ * {@link LocalizedTemplateDateFormatFactory}-es need not be thread-safe. Currently (2.3.24) they are (re)used only from
+ * within a single {@link Environment} instance.
  * 
  * @since 2.3.24
  */
-public abstract class UnformattableDateException extends Exception {
-
-    public UnformattableDateException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public UnformattableDateException(String message) {
-        super(message);
-    }
+public abstract class LocalizedTemplateNumberFormatFactory {
 
 }
