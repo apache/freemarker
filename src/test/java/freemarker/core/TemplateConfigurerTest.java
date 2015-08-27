@@ -40,6 +40,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableMap;
+
 import freemarker.template.Configuration;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
@@ -158,6 +160,10 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("timeFormat", "@HH:mm");
         SETTING_ASSIGNMENTS.put("timeZone", NON_DEFAULT_TZ);
         SETTING_ASSIGNMENTS.put("arithmeticEngine", ArithmeticEngine.CONSERVATIVE_ENGINE);
+        SETTING_ASSIGNMENTS.put("customNumberFormats",
+                ImmutableMap.of("dummy", DummyTemplateNumberFormatFactory.INSTANCE));
+        SETTING_ASSIGNMENTS.put("customDateFormats",
+                ImmutableMap.of("dummy", DummyTemplateDateFormatFactory.INSTANCE));
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);
@@ -739,7 +745,7 @@ public class TemplateConfigurerTest {
         }
     }
 
-    private void checkAllIsSetFalseExcept(TemplateConfigurer tc, String trueSetting)
+    private void checkAllIsSetFalseExcept(TemplateConfigurer tc, String setSetting)
             throws SecurityException, IntrospectionException,
             IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true, true)) {
@@ -751,10 +757,10 @@ public class TemplateConfigurerTest {
                 fail("Missing " + isSetMethodName + " method for \"" + pd.getName() + "\".");
                 return;
             }
-            if (pd.getName().equals(trueSetting)) {
-                assertTrue((Boolean) (isSetMethod.invoke(tc)));
+            if (pd.getName().equals(setSetting)) {
+                assertTrue(isSetMethod + " should return true", (Boolean) (isSetMethod.invoke(tc)));
             } else {
-                assertFalse((Boolean) (isSetMethod.invoke(tc)));
+                assertFalse(isSetMethod + " should return false", (Boolean) (isSetMethod.invoke(tc)));
             }
         }
     }

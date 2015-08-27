@@ -25,7 +25,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -91,7 +90,7 @@ public final class Environment extends Configurable {
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
     private static final Logger ATTEMPT_LOGGER = Logger.getLogger("freemarker.runtime.attempt");
 
-    private static final Map JAVA_NUMBER_FORMATS = new HashMap();
+    private static final Map<NumberFormatKey, NumberFormat> GLOBAL_CACHED_NUMBER_FORMATS = new HashMap();
 
     // Do not use this object directly; clone it first! DecimalFormat isn't
     // thread-safe.
@@ -110,7 +109,7 @@ public final class Environment extends Configurable {
     private final ArrayList recoveredErrorStack = new ArrayList();
 
     private NumberFormat cachedNumberFormat;
-    private Map cachedNumberFormats;
+    private Map<String, NumberFormat> cachedNumberFormats;
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
@@ -1104,19 +1103,19 @@ public final class Environment extends Configurable {
 
     NumberFormat getNumberFormatObject(String pattern) {
         if (cachedNumberFormats == null) {
-            cachedNumberFormats = new HashMap();
+            cachedNumberFormats = new HashMap<String, NumberFormat>();
         }
 
-        NumberFormat format = (NumberFormat) cachedNumberFormats.get(pattern);
+        NumberFormat format = cachedNumberFormats.get(pattern);
         if (format != null) {
             return format;
         }
 
         // Get format from global format cache
-        synchronized (JAVA_NUMBER_FORMATS) {
+        synchronized (GLOBAL_CACHED_NUMBER_FORMATS) {
             Locale locale = getLocale();
             NumberFormatKey fk = new NumberFormatKey(pattern, locale);
-            format = (NumberFormat) JAVA_NUMBER_FORMATS.get(fk);
+            format = GLOBAL_CACHED_NUMBER_FORMATS.get(fk);
             if (format == null) {
                 // Add format to global format cache. Note this is
                 // globally done once per locale per pattern.
@@ -1131,7 +1130,7 @@ public final class Environment extends Configurable {
                 } else {
                     format = new DecimalFormat(pattern, new DecimalFormatSymbols(getLocale()));
                 }
-                JAVA_NUMBER_FORMATS.put(fk, format);
+                GLOBAL_CACHED_NUMBER_FORMATS.put(fk, format);
             }
         }
 
@@ -1323,7 +1322,7 @@ public final class Environment extends Configurable {
 
         try {
             return templateDateFormatFactory.get(dateType, zonelessInput, formatDescriptor);
-        } catch (ParseException e) {
+        } catch (InvalidFormatDescriptorException e) {
             throw new _TemplateModelException(e.getCause(),
                     (formatDescriptorCfgSettingName == null
                             ? (Object) "Malformed date/time format descriptor: "
@@ -1331,7 +1330,7 @@ public final class Environment extends Configurable {
                                     "The value of the \"", formatDescriptorCfgSettingName,
                                     "\" FreeMarker configuration setting is a malformed date/time format descriptor: "
                             }),
-                    new _DelayedJQuote(formatDescriptor), ". Reason given: ",
+                    new _DelayedJQuote(e.getFormatDescriptor()), ". Reason given: ",
                     e.getMessage());
         }
     }

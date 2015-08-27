@@ -38,7 +38,7 @@ import freemarker.template.TemplateNumberModel;
 public abstract class TemplateNumberFormat {
 
     /**
-     * @param dateModel
+     * @param numberModel
      *            The date/time/dateTime to format. Most implementations will just work with the return value of
      *            {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
      *            a custom {@link TemplateDateModel} implementation.
@@ -52,7 +52,7 @@ public abstract class TemplateNumberFormat {
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
-    public abstract String format(TemplateNumberModel dateModel)
+    public abstract String format(TemplateNumberModel numberModel)
             throws UnformattableNumberException, TemplateModelException;
 
     /**

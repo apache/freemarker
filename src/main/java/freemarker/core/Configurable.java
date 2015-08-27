@@ -300,6 +300,8 @@ public class Configurable {
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
     private Boolean logTemplateExceptions;
+    private Map<String, TemplateDateFormatFactory> customDateFormats;
+    private Map<String, TemplateNumberFormatFactory> customNumberFormats;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -378,6 +380,9 @@ public class Configurable {
         setBooleanFormat(C_TRUE_FALSE);
         
         customAttributes = new HashMap();
+        
+        customDateFormats = Collections.emptyMap();
+        customNumberFormats = Collections.emptyMap();
     }
 
     /**
@@ -702,7 +707,7 @@ public class Configurable {
         this.numberFormat = numberFormat;
         properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
     }
-
+    
     /**
      * Getter pair of {@link #setNumberFormat(String)}. 
      */
@@ -718,7 +723,37 @@ public class Configurable {
     public boolean isNumberFormatSet() {
         return numberFormat != null;
     }
-            
+    
+    /**
+     * Getter pair of {@link #setCustomNumberFormats(Map)};  do not modify the returned {@link Map}!
+     * 
+     * @since 2.3.24
+     */
+    public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
+        return customNumberFormats == null ? parent.getCustomNumberFormats() : customNumberFormats;
+    }
+    
+    /**
+     * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
+     * number_format} settings with values starting with <code>@<i>name</i></code>.
+     * 
+     * @param customNumberFormats
+     *            Can't be {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    public void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats) {
+        NullArgumentException.check("customNumberFormats", customNumberFormats);
+        this.customNumberFormats = customNumberFormats;
+    }
+    
+    /**
+     * @since 2.3.24
+     */
+    public boolean isCustomNumberFormatsSet() {
+        return customNumberFormats != null;
+    }
+
     /**
      * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
      * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
@@ -1000,6 +1035,37 @@ public class Configurable {
         return dateTimeFormat != null;
     }
     
+    /**
+     * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}!
+     * 
+     * @since 2.3.24
+     */
+    public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
+        return customDateFormats == null ? parent.getCustomDateFormats() : customDateFormats;
+    }
+
+    /**
+     * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
+     * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
+     * datetime_format} settings with values starting with <code>@<i>name</i></code>.
+     *
+     * @param customDateFormats
+     *            Can't be {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    public void setCustomDateFormats(Map<String, TemplateDateFormatFactory> customDateFormats) {
+        NullArgumentException.check("customDateFormats", customDateFormats);
+        this.customDateFormats = customDateFormats;
+    }
+    
+    /**
+     * @since 2.3.24
+     */
+    public boolean isCustomDateFormatsSet() {
+        return this.customDateFormats != null;
+    }
+
     /**
      * Sets the exception handler used to handle exceptions occurring inside templates.
      * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:

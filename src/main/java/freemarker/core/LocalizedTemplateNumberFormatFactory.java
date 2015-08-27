@@ -15,6 +15,10 @@
  */
 package freemarker.core;
 
+import java.util.Locale;
+
+import freemarker.template.TemplateModelException;
+
 /**
  * Creates {@link TemplateNumberFormat}-s for a fixed locale (if it producers formatters that are sensitive to locale).
  * Typically, within the same {@link Environment}, the same factory is used to create all the
@@ -29,4 +33,26 @@ package freemarker.core;
  */
 public abstract class LocalizedTemplateNumberFormatFactory {
 
+    private final Environment env;
+    private final Locale locale;
+    
+    /**
+     * @param env
+     *            Can be {@code null} if this factory doesn't depend on the {@link Environment}.
+     * @param locale
+     *            Might be {@code null} if {@link #isLocaleBound()} is {@code false}
+     */
+    public LocalizedTemplateNumberFormatFactory(Environment env, Locale locale) {
+        this.env = env;
+        this.locale = locale;
+    }
+
+    /**
+     * Whether this the {@link TemplateNumberFormat} created by this factory are sensitive about {@link Locale}.  
+     */
+    public abstract boolean isLocaleBound();
+    
+    public abstract TemplateNumberFormat get(String formatDescriptor)
+            throws java.text.ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException;
+    
 }

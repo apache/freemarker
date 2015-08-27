@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -47,9 +46,12 @@ public abstract class LocalizedTemplateDateFormatFactory {
     private final Locale locale;
     
     /**
-     * @param env Not {@code null} (when FreeMarker calls the constructor)
-     * @param timeZone Might be {@code null} if {@link #isTimeZoneBound()} is {@code false}
-     * @param locale Might be {@code null} if {@link #isLocaleBound()} is {@code false}
+     * @param env
+     *            Can be {@code null} if this factory doesn't depend on the {@link Environment}.
+     * @param timeZone
+     *            Might be {@code null} if {@link #isTimeZoneBound()} is {@code false}
+     * @param locale
+     *            Might be {@code null} if {@link #isLocaleBound()} is {@code false}
      */
     public LocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone, Locale locale) {
         this.env = env;
@@ -73,9 +75,9 @@ public abstract class LocalizedTemplateDateFormatFactory {
     }
 
     /**
-     * Whether this factory is sensitive to {@link Locale}; if the created {@link TemplateDateFormat}-s are, then
-     * the factory should be too {@code true}. Note that even if it's not sensitive to it, it's still sensitive to
-     * the time-zone, so this factory is still "localized".  
+     * Whether this the {@link TemplateDateFormat} created by this factory are sensitive about {@link Locale}. Note that
+     * even if it's not sensitive to it, it can be still sensitive to the time-zone, so this factory is still maybe
+     * "localized".
      */
     public abstract boolean isLocaleBound();
     
@@ -107,9 +109,10 @@ public abstract class LocalizedTemplateDateFormatFactory {
      *            The string used as the {@code ..._format} configuration setting value (among others), like
      *            {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"}. The implementation is only supposed to understand a
      *            particular kind of format descriptor, for which FreeMarker routes to this factory. (Like, the
-     *            {@link ISOLocalizedTemplateDateFormatFactory} is only called for format descriptors that start with "iso".)
+     *            {@link ISOLocalizedTemplateDateFormatFactory} is only called for format descriptors that start with
+     *            "iso".)
      * 
-     * @throws ParseException
+     * @throws InvalidFormatDescriptorException
      *             if the {@code formatDescriptor} is malformed
      * @throws TemplateModelException
      *             if the {@code dateType} is unsupported by the formatter
@@ -118,6 +121,7 @@ public abstract class LocalizedTemplateDateFormatFactory {
      *             implementation.
      */
     public abstract TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
-            throws java.text.ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException;
+            throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
+            InvalidFormatDescriptorException;
     
 }
