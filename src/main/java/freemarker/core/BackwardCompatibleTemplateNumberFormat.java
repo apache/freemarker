@@ -13,26 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateNumberModel;
-
 /**
- * Thrown when a {@link TemplateNumberModel} can't be formatted because of the value/properties of the
- * {@link TemplateNumberModel}. For example, some formatters might can't format NaN, or can't display numbers above
- * certain magnitude.
+ * Only exists for emulating pre-2.3.24-IcI {@code ?string} behavior. 
  * 
  * @since 2.3.24
  */
-public class UnformattableNumberException extends Exception {
+abstract class BackwardCompatibleTemplateNumberFormat extends TemplateNumberFormat {
 
-    public UnformattableNumberException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public UnformattableNumberException(String message) {
-        super(message);
-    }
+    abstract String format(Number number) throws UnformattableNumberException;
 
 }

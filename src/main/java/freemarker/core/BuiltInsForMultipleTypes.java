@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -564,15 +563,20 @@ class BuiltInsForMultipleTypes {
             TemplateScalarModel,
             TemplateHashModel,
             TemplateMethodModel {
-            private final Number number;
+            private final TemplateNumberModel numberModel;
             private final Environment env;
-            private final NumberFormat defaultFormat;
+            private final TemplateNumberFormat defaultFormat;
             private String cachedValue;
     
-            NumberFormatter(Number number, Environment env) {
-                this.number = number;
+            NumberFormatter(TemplateNumberModel numberModel, Environment env) throws TemplateException {
+                this.numberModel = numberModel;
                 this.env = env;
-                defaultFormat = env.getNumberFormatObject(env.getNumberFormat());
+                try {
+                    defaultFormat = env.getNumberFormatObject(env.getNumberFormat());
+                } catch (InvalidFormatDescriptorException e) {
+                    throw new _MiscTemplateException(
+                            stringBI.this, e, this, "Failed to get default number format; see cause exception");
+                }
             }
     
             public Object exec(List args) throws TemplateModelException {
@@ -580,13 +584,23 @@ class BuiltInsForMultipleTypes {
                 return get((String) args.get(0));
             }
     
-            public TemplateModel get(String key) {
-                return new SimpleScalar(env.getNumberFormatObject(key).format(number));
+            public TemplateModel get(String key) throws TemplateModelException {
+                try {
+                    return new SimpleScalar(env.formatNumber(numberModel, key, target));
+                } catch (TemplateException e) {
+                    throw new _TemplateModelException(
+                            target, env, e, "Failed to format number; see cause exception"); 
+                }
             }
             
-            public String getAsString() {
+            public String getAsString() throws TemplateModelException {
                 if (cachedValue == null) {
-                    cachedValue = defaultFormat.format(number);
+                    try {
+                        cachedValue = env.formatNumber(numberModel, target);
+                    } catch (TemplateException e) {
+                        throw new _TemplateModelException(
+                                target, env, e, "Failed to format number; see cause exception"); 
+                    }
                 }
                 return cachedValue;
             }
@@ -600,7 +614,9 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel) model, target), env);
+                TemplateNumberModel numberModel = (TemplateNumberModel) model;
+                Number num = EvalUtil.modelToNumber(numberModel, target);
+                return new NumberFormatter(numberModel, env);
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel) model;
                 return new DateFormatter(dm, env);

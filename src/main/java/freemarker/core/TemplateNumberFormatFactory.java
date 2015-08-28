@@ -22,13 +22,13 @@ import freemarker.template.Configuration;
 /**
  * Factory for a certain type of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or
  * one-per-{@link Configuration}), and so must be thread-safe. It doesn't create {@link TemplateNumberFormat} directly,
- * instead it creates {@link LocalizedTemplateNumberFormatFactory}-s which are single-thread locale-bound objects that
+ * instead it creates {@link LocalTemplateNumberFormatFactory}-s which are single-thread locale-bound objects that
  * provide the actual {@link TemplateNumberFormat}-s based on the provided parameters (like possibly a pattern string).
  * 
  * @since 2.3.24
  */
 public abstract class TemplateNumberFormatFactory {
     
-    public abstract LocalizedTemplateNumberFormatFactory getLocalizedFactory(Environment env, Locale locale);
+    public abstract LocalTemplateNumberFormatFactory getLocalizedFactory(Environment env, Locale locale);
 
 }

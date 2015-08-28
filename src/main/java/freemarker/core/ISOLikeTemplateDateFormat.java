@@ -31,7 +31,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     
     private static final String XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE
             = "Less than seconds accuracy isn't allowed by the XML Schema format";
-    private final ISOLikeLocalizedTemplateDateFormatFactory factory; 
+    private final ISOLikeLocalTemplateDateFormatFactory factory; 
     protected final int dateType;
     protected final boolean zonelessInput;
     protected final TimeZone timeZone;
@@ -48,7 +48,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
             final String formatDesc, int parsingStart,
             int dateType, boolean zonelessInput,
             TimeZone timeZone,
-            ISOLikeLocalizedTemplateDateFormatFactory factory)
+            ISOLikeLocalTemplateDateFormatFactory factory)
             throws InvalidFormatDescriptorException, UnknownDateTypeFormattingUnsupportedException {
         this.factory = factory;
         if (dateType == TemplateDateModel.UNKNOWN) {

@@ -16,20 +16,18 @@
 
 package freemarker.core;
 
-import java.util.TimeZone;
-
 import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.DateUtil.TrivialCalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.TrivialDateToISO8601CalendarFactory;
 
-abstract class ISOLikeLocalizedTemplateDateFormatFactory extends LocalizedTemplateDateFormatFactory {
+abstract class ISOLikeLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
     
     private DateToISO8601CalendarFactory dateToCalenderFieldsCalculator;
     private CalendarFieldsToDateConverter calendarFieldsToDateConverter;
 
-    public ISOLikeLocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
-        super(env, timeZone, null);
+    public ISOLikeLocalTemplateDateFormatFactory(Environment env) {
+        super(env);
     }
 
     @Override
@@ -55,4 +53,14 @@ abstract class ISOLikeLocalizedTemplateDateFormatFactory extends LocalizedTempla
         return r;
     }
 
+    @Override
+    protected void onLocaleChanged() {
+        // No op
+    }
+
+    @Override
+    protected void onTimeZoneChanged() {
+        // No op
+    }
+    
 }

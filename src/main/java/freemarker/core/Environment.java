@@ -58,6 +58,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
@@ -90,8 +91,6 @@ public final class Environment extends Configurable {
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
     private static final Logger ATTEMPT_LOGGER = Logger.getLogger("freemarker.runtime.attempt");
 
-    private static final Map<NumberFormatKey, NumberFormat> GLOBAL_CACHED_NUMBER_FORMATS = new HashMap();
-
     // Do not use this object directly; clone it first! DecimalFormat isn't
     // thread-safe.
     private static final DecimalFormat C_NUMBER_FORMAT
@@ -108,8 +107,8 @@ public final class Environment extends Configurable {
     private final ArrayList/*<TemplateElement>*/ instructionStack = new ArrayList();
     private final ArrayList recoveredErrorStack = new ArrayList();
 
-    private NumberFormat cachedNumberFormat;
-    private Map<String, NumberFormat> cachedNumberFormats;
+    private TemplateNumberFormat cachedNumberFormat;
+    private Map<String, TemplateNumberFormat> cachedNumberFormats;
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
@@ -133,16 +132,17 @@ public final class Environment extends Configurable {
     private static final int CACHED_TDFS_LENGTH = CACHED_TDFS_DEF_SYS_TZ_OFFS * 2;
     private static final int CACHED_TDFS_SQL_D_T_TZ_OFFS = CACHED_TDFS_DEF_SYS_TZ_OFFS;
     
-    private XSLocalizedTemplateDateFormatFactory cachedXSLocTempDateFormatFactory;
-    private XSLocalizedTemplateDateFormatFactory cachedSQLDTXSLocTempDateFormatFactory;
-    private ISOLocalizedTemplateDateFormatFactory cachedISOLocTempDateFormatFactory;
-    private ISOLocalizedTemplateDateFormatFactory cachedSQLDTISOLocTempDateFormatFactory;
-    private JavaLocalizedTemplateDateFormatFactory cachedJavaLocTempDateFormatFactory;
-    private JavaLocalizedTemplateDateFormatFactory cachedSQLDTJavaLocTempDateFormatFactory;
+    private XSLocalTemplateDateFormatFactory cachedXSLocTempDateFormatFactory;
+    private XSLocalTemplateDateFormatFactory cachedSQLDTXSLocTempDateFormatFactory;
+    private ISOLocalTemplateDateFormatFactory cachedISOLocTempDateFormatFactory;
+    private ISOLocalTemplateDateFormatFactory cachedSQLDTISOLocTempDateFormatFactory;
+    private JavaLocalTemplateDateFormatFactory cachedJavaLocTempDateFormatFactory;
+    private JavaLocalTemplateDateFormatFactory cachedSQLDTJavaLocTempDateFormatFactory;
     
     /** Caches the result of {@link #isSQLDateAndTimeTimeZoneSameAsNormal()}. */
     private Boolean cachedSQLDateAndTimeTimeZoneSameAsNormal;
     
+    private JavaLocalTemplateNumberFormatFactory javaLocTempNumberFormatFactory;
     private NumberFormat cNumberFormat;
     
     /**
@@ -826,6 +826,10 @@ public final class Environment extends Configurable {
         if (!locale.equals(prevLocale)) {
             cachedNumberFormats = null;
             cachedNumberFormat = null;
+            
+            if (javaLocTempNumberFormatFactory != null) {
+                javaLocTempNumberFormatFactory.setLocale(locale);
+            }
     
             if (cachedTemplateDateFormats != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i++) {
@@ -1033,13 +1037,37 @@ public final class Environment extends Configurable {
         return out;
     }
 
-    String formatNumber(Number number) {
+    /**
+     * Format number with the default number format.
+     */
+    String formatNumber(TemplateNumberModel number, Expression exp) throws TemplateException {
         if (cachedNumberFormat == null) {
-            cachedNumberFormat = getNumberFormatObject(getNumberFormat());
+            try {
+                cachedNumberFormat = getNumberFormatObject(getNumberFormat());
+            } catch (InvalidFormatDescriptorException e) {
+                throw new _MiscTemplateException(exp, e, this, "Failed to get number format; see cause exception");
+            }
         }
-        return cachedNumberFormat.format(number);
+        try {
+            return cachedNumberFormat.format(number);
+        } catch (UnformattableNumberException e) {
+            throw new _MiscTemplateException(exp, e, this, "Failed to format number; see cause exception");
+        }
     }
 
+    /**
+     * Format number with the number format specified as the parameter.
+     */
+    String formatNumber(TemplateNumberModel number, String formatDesc, Expression exp) throws TemplateException {
+        try {
+            return getNumberFormatObject(formatDesc).format(number);
+        } catch (InvalidFormatDescriptorException e) {
+            throw new _MiscTemplateException(exp, e, this, "Failed to get number format; see cause exception");
+        } catch (UnformattableNumberException e) {
+            throw new _MiscTemplateException(exp, e, this, "Failed to format number; see cause exception");
+        }
+    }
+    
     @Override
     public void setNumberFormat(String formatName) {
         super.setNumberFormat(formatName);
@@ -1101,42 +1129,23 @@ public final class Environment extends Configurable {
         this.lastReturnValue = null;
     }
 
-    NumberFormat getNumberFormatObject(String pattern) {
+    TemplateNumberFormat getNumberFormatObject(String formatDesc) throws InvalidFormatDescriptorException {
         if (cachedNumberFormats == null) {
-            cachedNumberFormats = new HashMap<String, NumberFormat>();
+            cachedNumberFormats = new HashMap<String, TemplateNumberFormat>();
         }
 
-        NumberFormat format = cachedNumberFormats.get(pattern);
+        TemplateNumberFormat format = cachedNumberFormats.get(formatDesc);
         if (format != null) {
             return format;
         }
 
-        // Get format from global format cache
-        synchronized (GLOBAL_CACHED_NUMBER_FORMATS) {
-            Locale locale = getLocale();
-            NumberFormatKey fk = new NumberFormatKey(pattern, locale);
-            format = GLOBAL_CACHED_NUMBER_FORMATS.get(fk);
-            if (format == null) {
-                // Add format to global format cache. Note this is
-                // globally done once per locale per pattern.
-                if ("number".equals(pattern)) {
-                    format = NumberFormat.getNumberInstance(locale);
-                } else if ("currency".equals(pattern)) {
-                    format = NumberFormat.getCurrencyInstance(locale);
-                } else if ("percent".equals(pattern)) {
-                    format = NumberFormat.getPercentInstance(locale);
-                } else if ("computer".equals(pattern)) {
-                    format = getCNumberFormat();
-                } else {
-                    format = new DecimalFormat(pattern, new DecimalFormatSymbols(getLocale()));
-                }
-                GLOBAL_CACHED_NUMBER_FORMATS.put(fk, format);
-            }
+        if (javaLocTempNumberFormatFactory == null) {
+            javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this);
+            javaLocTempNumberFormatFactory.setLocale(getLocale());
         }
+        format = javaLocTempNumberFormatFactory.get(formatDesc);
 
-        // Clone it and store the clone in the local cache
-        format = (NumberFormat) format.clone();
-        cachedNumberFormats.put(pattern, format);
+        cachedNumberFormats.put(formatDesc, format);
         return format;
     }
 
@@ -1253,38 +1262,38 @@ public final class Environment extends Configurable {
     
     /**
      * @param dateType
-     *            See the similar parameter of {@link LocalizedTemplateDateFormatFactory#get(int, boolean, String)}
+     *            See the similar parameter of {@link LocalTemplateDateFormatFactory#get(int, boolean, String)}
      * @param zonelessInput
-     *            See the similar parameter of {@link LocalizedTemplateDateFormatFactory#get(int, boolean, String)}
+     *            See the similar parameter of {@link LocalTemplateDateFormatFactory#get(int, boolean, String)}
      * @param formatDescriptor
      *            The string that describes the date format. See the similar parameter of
-     *            {@link LocalizedTemplateDateFormatFactory#get(int, boolean, String)}
+     *            {@link LocalTemplateDateFormatFactory#get(int, boolean, String)}
      * @param formatDescriptorCfgSettingName
      *            The name of the configuration setting where the {@code formatDescriptor} comes from, or {@code null}
      *            if the format descriptor was specified directly for this formatting call.
      */
     private TemplateDateFormat getTemplateDateFormat(
-            int dateType, boolean zonelessInput,
-            boolean useSQLDTTZ, String formatDescriptor, String formatDescriptorCfgSettingName)
+            int dateType, boolean zonelessInput, boolean useSQLDTTZ, String formatDescriptor,
+            String formatDescriptorCfgSettingName)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         final int formatDescriptionLen = formatDescriptor.length();
         
         // As of Java 8, 'x' and 'i' (in lower case) are illegal date format letters, so this is backward-compatible.
-        LocalizedTemplateDateFormatFactory templateDateFormatFactory;  
+        LocalTemplateDateFormatFactory templateDateFormatFactory;  
         if (formatDescriptionLen > 1
                 && formatDescriptor.charAt(0) == 'x'
                 && formatDescriptor.charAt(1) == 's') {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTXSLocTempDateFormatFactory : cachedXSLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new XSLocalizedTemplateDateFormatFactory(
-                        this,
-                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new XSLocalTemplateDateFormatFactory(this);
+                // templateDateFormatFactory.setLocale() not needed for this factory
+                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTXSLocTempDateFormatFactory
-                            = (XSLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
+                            = (XSLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 } else {
-                    cachedXSLocTempDateFormatFactory = (XSLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedXSLocTempDateFormatFactory = (XSLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
         } else if (formatDescriptionLen > 2
@@ -1294,28 +1303,28 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTISOLocTempDateFormatFactory : cachedISOLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new ISOLocalizedTemplateDateFormatFactory(
-                        this,
-                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new ISOLocalTemplateDateFormatFactory(this);
+                // templateDateFormatFactory.setLocale() not needed for this factory
+                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTISOLocTempDateFormatFactory
-                            = (ISOLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
+                            = (ISOLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 } else {
-                    cachedISOLocTempDateFormatFactory = (ISOLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedISOLocTempDateFormatFactory = (ISOLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
         } else {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTJavaLocTempDateFormatFactory : cachedJavaLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new JavaLocalizedTemplateDateFormatFactory(
-                        this,
-                        useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone(), getLocale());
+                templateDateFormatFactory = new JavaLocalTemplateDateFormatFactory(this);
+                templateDateFormatFactory.setLocale(getLocale());
+                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTJavaLocTempDateFormatFactory
-                            = (JavaLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
+                            = (JavaLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 } else {
-                    cachedJavaLocTempDateFormatFactory = (JavaLocalizedTemplateDateFormatFactory) templateDateFormatFactory;
+                    cachedJavaLocTempDateFormatFactory = (JavaLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
         }
@@ -2233,30 +2242,6 @@ public final class Environment extends Configurable {
             return element;
         }
         
-    }
-
-    private static final class NumberFormatKey {
-        private final String pattern;
-        private final Locale locale;
-
-        NumberFormatKey(String pattern, Locale locale) {
-            this.pattern = pattern;
-            this.locale = locale;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof NumberFormatKey) {
-                NumberFormatKey fk = (NumberFormatKey) o;
-                return fk.pattern.equals(pattern) && fk.locale.equals(locale);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return pattern.hashCode() ^ locale.hashCode();
-        }
     }
     
     public class Namespace extends SimpleHash {

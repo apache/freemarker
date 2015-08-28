@@ -27,14 +27,14 @@ import java.util.TimeZone;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
-class JavaLocalizedTemplateDateFormatFactory extends LocalizedTemplateDateFormatFactory {
+class JavaLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
 
     private static final Map<DateFormatKey, DateFormat> GLOBAL_FORMAT_CACHE = new HashMap<DateFormatKey, DateFormat>();
     
     private Map<String, TemplateDateFormat>[] formatCache;
 
-    public JavaLocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone, Locale locale) {
-        super(env, timeZone, locale);
+    public JavaLocalTemplateDateFormatFactory(Environment env) {
+        super(env);
     }
 
     @Override
@@ -169,6 +169,16 @@ class JavaLocalizedTemplateDateFormatFactory extends LocalizedTemplateDateFormat
             return DateFormat.FULL;
         }
         return -1;
+    }
+
+    @Override
+    protected void onLocaleChanged() {
+        formatCache = null;
+    }
+
+    @Override
+    protected void onTimeZoneChanged() {
+        formatCache = null;
     }
     
 }

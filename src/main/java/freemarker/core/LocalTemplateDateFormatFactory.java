@@ -24,45 +24,73 @@ import java.util.TimeZone;
 import freemarker.template.TemplateModelException;
 
 /**
- * Creates {@link TemplateDateFormat}-s for a fixed time zone locale (if it producers formatters that are sensitive to
- * those). Typically, within the same {@link Environment}, the same factory is used to create all the
- * {@link TemplateDateFormat}-s of the same formatter type, as far as the locale remains the same. Thus factories might
- * want to cache instances internally with the {@code #get(int, boolean, String)} parameters as the key.
+ * Creates {@link TemplateDateFormat}-s for a fixed {@link Environment}, and thus for as single thread. Typically, the
+ * same factory will be used to create all the {@link TemplateDateFormat}-s of the same formatter type. Thus factories
+ * might want to cache instances internally with the {@code #get(int, boolean, String)} parameters as the key.
  * 
  * <p>
  * Note that currently (2.3.24) FreeMarker maintains a separate factory instance for the normal and the SQL time zone,
- * if they differ. As SQL and non-SQL values my occur mixed, keeping both factories can make caching more efficient.
+ * if they differ. As SQL and non-SQL values my occur mixed, keeping both factories can avoid cache flushes
+ * do to {@link #setTimeZone(TimeZone)} calls inside the factory.
  * 
  * <p>
- * {@link LocalizedTemplateDateFormatFactory}-es need not be thread-safe as they are bound to a a single
- * {@link Environment} instance.
+ * {@link LocalTemplateDateFormatFactory}-es need not be thread-safe as they are bound to a a single {@link Environment}
+ * instance.
  * 
  * @since 2.3.24
  */
-public abstract class LocalizedTemplateDateFormatFactory {
+public abstract class LocalTemplateDateFormatFactory {
     
     private final Environment env;
-    private final TimeZone timeZone;
-    private final Locale locale;
+    private TimeZone timeZone;
+    private Locale locale;
     
     /**
      * @param env
-     *            Can be {@code null} if this factory doesn't depend on the {@link Environment}.
-     * @param timeZone
-     *            Might be {@code null} if {@link #isTimeZoneBound()} is {@code false}
-     * @param locale
-     *            Might be {@code null} if {@link #isLocaleBound()} is {@code false}
+     *            Can be {@code null} if the extending factory class doesn't care about the {@link Environment}.
      */
-    public LocalizedTemplateDateFormatFactory(Environment env, TimeZone timeZone, Locale locale) {
+    public LocalTemplateDateFormatFactory(Environment env) {
         this.env = env;
-        this.timeZone = timeZone;
-        this.locale = locale;
     }
 
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+        onLocaleChanged();
+    }
+    
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+        onTimeZoneChanged();
+    }
+    
+    /**
+     * Called after the locale was changed, or was initially set. This method should execute very fast; it's primarily
+     * for invalidating caches. If anything long is needed, it should be postponed until a formatter is actually
+     * requested. 
+     */
+    protected abstract void onLocaleChanged();
+    
+    /**
+     * Called after the time zone was changed, or was initially set. This method should execute very fast; it's
+     * primarily for invalidating caches. If anything long is needed, it should be postponed until a formatter is
+     * actually requested.
+     */
+    protected abstract void onTimeZoneChanged();
+    
+    public Environment getEnvironment() {
+        return env;
+    }
+
+    /**
+     * @return When {@link #get} is called, it must be already non-{@code null}.
+     */
     public final TimeZone getTimeZone() {
         return timeZone;
     }
 
+    /**
+     * @return When {@link #get} is called, it must be already non-{@code null}.
+     */
     public final Locale getLocale() {
         return locale;
     }
@@ -83,8 +111,12 @@ public abstract class LocalizedTemplateDateFormatFactory {
     
     /**
      * Returns the {@link TemplateDateFormat} for the {@code dateType} and {@code formatDescriptor} given via the
-     * arguments, and the {@code TimeZone} and {@code Locale} (if that's relevant) to which the
-     * {@link LocalizedTemplateDateFormatFactory} belongs to.
+     * arguments. The returned formatter can be a new instance or a reused (cached) instance.
+     * 
+     * <p>
+     * The locale and time zone must be already set to non-{@code null} with {@link #setLocale(Locale)} and
+     * {@link #setTimeZone(TimeZone)} before calling this method. The returned formatter, if the locale or time zone
+     * matters for it, should be bound to the locale and time zone that was in effect when this method was called.
      * 
      * @param dateType
      *            {@line TemplateDateModel#DATE}, {@line TemplateDateModel#TIME}, {@line TemplateDateModel#DATETIME} or
@@ -109,7 +141,7 @@ public abstract class LocalizedTemplateDateFormatFactory {
      *            The string used as the {@code ..._format} configuration setting value (among others), like
      *            {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"}. The implementation is only supposed to understand a
      *            particular kind of format descriptor, for which FreeMarker routes to this factory. (Like, the
-     *            {@link ISOLocalizedTemplateDateFormatFactory} is only called for format descriptors that start with
+     *            {@link ISOLocalTemplateDateFormatFactory} is only called for format descriptors that start with
      *            "iso".)
      * 
      * @throws InvalidFormatDescriptorException

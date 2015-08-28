@@ -38,12 +38,12 @@ public class DummyTemplateDateFormatFactory extends TemplateDateFormatFactory {
         return DummyLocalizedTemplateDateFormatFactory.INSTANCE;
     }
     
-    private static class DummyLocalizedTemplateDateFormatFactory extends LocalizedTemplateDateFormatFactory {
+    private static class DummyLocalizedTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
 
         private static final DummyLocalizedTemplateDateFormatFactory INSTANCE = new DummyLocalizedTemplateDateFormatFactory();
 
         private DummyLocalizedTemplateDateFormatFactory() {
-            super(null, null, null);
+            super(null);
         }
 
         @Override
@@ -54,6 +54,16 @@ public class DummyTemplateDateFormatFactory extends TemplateDateFormatFactory {
         @Override
         public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor) {
             return DummyTemplateDateFormat.INSTANCE;
+        }
+
+        @Override
+        protected void onLocaleChanged() {
+            // No op
+        }
+
+        @Override
+        protected void onTimeZoneChanged() {
+            // No op
         }
         
     }

@@ -350,7 +350,7 @@ class EvalUtil {
             boolean allowTOM,
             Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return env.formatNumber(modelToNumber((TemplateNumberModel) tm, exp));
+            return env.formatNumber((TemplateNumberModel) tm, exp);
         } else if (tm instanceof TemplateDateModel) {
             return env.formatDate((TemplateDateModel) tm, exp);
         } else if (allowTOM && tm instanceof TemplateMarkupOutputModel) {

@@ -15,31 +15,28 @@
  */
 package freemarker.core;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
+import java.text.NumberFormat;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 
-class JavaTemplateNumberFormat extends TemplateNumberFormat {
+class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
     
     private final String pattern;
-    private final DecimalFormat decimalFormat;
-    
-    public JavaTemplateNumberFormat(String pattern, Locale locale) throws InvalidFormatDescriptorException {
+    private final NumberFormat jFormat;
+
+    public JavaTemplateNumberFormat(NumberFormat jFormat, String pattern) {
         this.pattern = pattern;
-        try {
-            decimalFormat = new DecimalFormat(pattern, new DecimalFormatSymbols(locale));
-        } catch (IllegalArgumentException e) {
-            String msg = e.getMessage();
-            throw new InvalidFormatDescriptorException(msg != null ? msg : "Invalid DecimalFormat pattern", pattern, e);
-        }
+        this.jFormat = jFormat;
     }
 
     @Override
     public String format(TemplateNumberModel numberModel) throws UnformattableNumberException, TemplateModelException {
-        return decimalFormat.format(numberModel.getAsNumber());
+        Number number = numberModel.getAsNumber();
+        if (number == null) {
+            throw new UnformattableNumberException("The number model has contained null as the number.");
+        }
+        return format(number);
     }
 
     @Override
@@ -56,6 +53,11 @@ class JavaTemplateNumberFormat extends TemplateNumberFormat {
     @Override
     public boolean isLocaleBound() {
         return true;
+    }
+
+    @Override
+    String format(Number number) throws UnformattableNumberException {
+        return jFormat.format(number);
     }
 
 }

@@ -15,7 +15,6 @@
  */
 package freemarker.core;
 
-import java.text.ParseException;
 import java.util.Locale;
 
 import freemarker.template.TemplateModelException;
@@ -34,23 +33,22 @@ public class DummyTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         return DummyLocalizedTemplateNumberFormatFactory.INSTANCE;
     }
     
-    private static class DummyLocalizedTemplateNumberFormatFactory extends LocalizedTemplateNumberFormatFactory {
+    private static class DummyLocalizedTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
 
         private static final DummyLocalizedTemplateNumberFormatFactory INSTANCE = new DummyLocalizedTemplateNumberFormatFactory();
 
         private DummyLocalizedTemplateNumberFormatFactory() {
-            super(null, null);
+            super(null);
         }
 
         @Override
-        public boolean isLocaleBound() {
-            return false;
-        }
-
-        @Override
-        public TemplateNumberFormat get(String formatDescriptor)
-                throws ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
+        public TemplateNumberFormat get(String formatDescriptor) {
             return DummyTemplateNumberFormat.INSTANCE;
+        }
+
+        @Override
+        protected void onLocaleChanged() {
+            // No op
         }
         
     }

@@ -23,7 +23,7 @@ import freemarker.template.Configuration;
 /**
  * Factory for a certain type of date/time/dateTime formatting ({@link TemplateDateFormat}). Usually a singleton
  * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe. It doesn't create
- * {@link TemplateNumberFormat} directly, instead it creates {@link LocalizedTemplateDateFormatFactory}-s which are
+ * {@link TemplateNumberFormat} directly, instead it creates {@link LocalTemplateDateFormatFactory}-s which are
  * single-thread locale-bound objects that provide the actual {@link TemplateDateFormat}-s based on the provided
  * parameters (like possibly a pattern string).
  * 
@@ -31,6 +31,6 @@ import freemarker.template.Configuration;
  */
 public abstract class TemplateDateFormatFactory {
     
-    public abstract LocalizedTemplateDateFormatFactory getLocalizedFactory(Environment env, Locale locale, TimeZone tz);
+    public abstract LocalTemplateDateFormatFactory getLocalizedFactory(Environment env, Locale locale, TimeZone tz);
 
 }

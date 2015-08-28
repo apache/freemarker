@@ -60,8 +60,8 @@ public abstract class TemplateNumberFormat {
      * {@link #format(TemplateNumberModel)} and escape its result. If the markup format would be just the result of
      * {@link #format(TemplateNumberModel)} escaped, it should return {@code null}.
      */
-    public abstract <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
-            MarkupOutputFormat<MO> outputFormat)
+    public abstract <MO extends TemplateMarkupOutputModel> MO format(
+            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat)
                     throws UnformattableNumberException, TemplateModelException;
     
     /**
@@ -74,8 +74,8 @@ public abstract class TemplateNumberFormat {
      * The default implementation in {@link TemplateNumberFormat} builds on calls
      * {@link #format(TemplateNumberModel, MarkupOutputFormat)} and writes its result to the {@link Writer}.
      */
-    public <MO extends TemplateMarkupOutputModel> boolean format(TemplateNumberModel dateModel,
-            MarkupOutputFormat<MO> outputFormat, Writer out)
+    public <MO extends TemplateMarkupOutputModel> boolean format(
+            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat, Writer out)
                     throws UnformattableNumberException, TemplateModelException, IOException {
         MO mo = format(dateModel, outputFormat);
         if (mo == null) {

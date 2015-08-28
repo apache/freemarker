@@ -34,7 +34,7 @@ final class XSTemplateDateFormat extends ISOLikeTemplateDateFormat {
             int dateType,
             boolean zonelessInput,
             TimeZone timeZone,
-            ISOLikeLocalizedTemplateDateFormatFactory factory)
+            ISOLikeLocalTemplateDateFormatFactory factory)
             throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatDescriptorException {
         super(settingValue, parsingStart, dateType, zonelessInput, timeZone, factory);
     }
