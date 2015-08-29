@@ -22,11 +22,11 @@ import freemarker.template.TemplateNumberModel;
 
 final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
     
-    private final String pattern;
+    private final String formatDesc;
     private final NumberFormat javaNumberFormat;
 
-    public JavaTemplateNumberFormat(NumberFormat javaNumberFormat, String pattern) {
-        this.pattern = pattern;
+    public JavaTemplateNumberFormat(NumberFormat javaNumberFormat, String formatDesc) {
+        this.formatDesc = formatDesc;
         this.javaNumberFormat = javaNumberFormat;
     }
 
@@ -46,11 +46,6 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
     }
 
     @Override
-    public String getDescription() {
-        return pattern;
-    }
-
-    @Override
     public boolean isLocaleBound() {
         return true;
     }
@@ -62,6 +57,11 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
 
     public NumberFormat getJavaNumberFormat() {
         return javaNumberFormat;
+    }
+
+    @Override
+    public String getDescription() {
+        return formatDesc;
     }
 
 }

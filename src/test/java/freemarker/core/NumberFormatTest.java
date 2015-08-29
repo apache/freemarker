@@ -3,10 +3,12 @@ package freemarker.core;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Collections;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
 import freemarker.test.TemplateTest;
@@ -17,8 +19,11 @@ public class NumberFormatTest extends TemplateTest {
     public void setup() {
         Configuration cfg = getConfiguration();
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        cfg.setLocale(Locale.US);
         
-        cfg.setCustomNumberFormats(Collections.singletonMap("hex", HexTemplateNumberFormatFactory.INSTANCE));
+        cfg.setCustomNumberFormats(ImmutableMap.of(
+                "hex", HexTemplateNumberFormatFactory.INSTANCE,
+                "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
     }
 
     @Test
@@ -55,7 +60,23 @@ public class NumberFormatTest extends TemplateTest {
     @Test
     public void testUnformattableNumber() throws Exception {
         getConfiguration().setNumberFormat("@hex");
-        assertErrorContains("${1.1}", "@hex", "doesn't fit into an int");
+        assertErrorContains("${1.1}", "hexadecimal int", "doesn't fit into an int");
+    }
+
+    @Test
+    public void testLocaleSensitive() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setNumberFormat("@loc");
+        assertOutput("${1.1}", "1.1_en_US");
+        cfg.setLocale(Locale.GERMANY);
+        assertOutput("${1.1}", "1.1_de_DE");
+    }
+
+    @Test
+    public void testLocaleSensitive2() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setNumberFormat("@loc");
+        assertOutput("${1.1} <#setting locale='de_DE'>${1.1}", "1.1_en_US 1.1_de_DE");
     }
     
 }

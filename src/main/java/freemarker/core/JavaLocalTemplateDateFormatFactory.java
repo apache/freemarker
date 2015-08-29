@@ -37,11 +37,6 @@ class JavaLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory 
         super(env);
     }
 
-    @Override
-    public boolean isLocaleBound() {
-        return true;
-    }
-
     /**
      * @param zonelessInput Has no effect in this implementation.
      */

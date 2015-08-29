@@ -47,11 +47,6 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         }
 
         @Override
-        public boolean isLocaleBound() {
-            return false;
-        }
-
-        @Override
         public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor) {
             return EpochMillisTemplateDateFormat.INSTANCE;
         }
@@ -81,11 +76,6 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         }
 
         @Override
-        public String getDescription() {
-            return "epochMillis";
-        }
-
-        @Override
         public boolean isLocaleBound() {
             return false;
         }
@@ -104,6 +94,13 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
                 throw new ParseException("Malformed long", 0);
             }
         }
+
+        @Override
+        public String getDescription() {
+            return "millis since the epoch";
+        }
+
+        
         
     }
 

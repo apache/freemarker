@@ -78,13 +78,13 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         }
 
         @Override
-        public String getDescription() {
-            return "hex";
+        public boolean isLocaleBound() {
+            return false;
         }
 
         @Override
-        public boolean isLocaleBound() {
-            return false;
+        public String getDescription() {
+            return "hexadecimal int";
         }
         
     }

@@ -110,7 +110,7 @@ public final class Environment extends Configurable {
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
     private Map<String, TemplateNumberFormat> cachedTemplateNumberFormats;
-    private Map<String, LocalTemplateNumberFormatFactory> cachedTemplateNumberFormatFactories;
+    private Map<String, LocalTemplateNumberFormatFactory> cachedLocalTemplateNumberFormatFactories;
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
@@ -827,7 +827,14 @@ public final class Environment extends Configurable {
         super.setLocale(locale);
         if (!locale.equals(prevLocale)) {
             cachedTemplateNumberFormats = null;
-            cachedTemplateNumberFormat = null;
+            if (cachedTemplateNumberFormat != null && cachedTemplateNumberFormat.isLocaleBound()) {
+                cachedTemplateNumberFormat = null;
+            }
+            if (cachedLocalTemplateNumberFormatFactories != null) {
+                for (LocalTemplateNumberFormatFactory factory : cachedLocalTemplateNumberFormatFactories.values()) {
+                    factory.setLocale(locale);
+                }
+            }
             
             if (javaLocTempNumberFormatFactory != null) {
                 javaLocTempNumberFormatFactory.setLocale(locale);
@@ -842,25 +849,25 @@ public final class Environment extends Configurable {
                 }
             }
 
-            if (cachedXSLocTempDateFormatFactory != null && cachedXSLocTempDateFormatFactory.isLocaleBound()) {
-                cachedXSLocTempDateFormatFactory = null;
+            if (cachedXSLocTempDateFormatFactory != null) {
+                cachedXSLocTempDateFormatFactory.setLocale(locale);
             }
-            if (cachedSQLDTXSLocTempDateFormatFactory != null && cachedSQLDTXSLocTempDateFormatFactory.isLocaleBound()) {
-                cachedSQLDTXSLocTempDateFormatFactory = null;
-            }
-
-            if (cachedISOLocTempDateFormatFactory != null && cachedISOLocTempDateFormatFactory.isLocaleBound()) {
-                cachedISOLocTempDateFormatFactory = null;
-            }
-            if (cachedSQLDTISOLocTempDateFormatFactory != null && cachedSQLDTISOLocTempDateFormatFactory.isLocaleBound()) {
-                cachedSQLDTISOLocTempDateFormatFactory = null;
+            if (cachedSQLDTXSLocTempDateFormatFactory != null) {
+                cachedSQLDTXSLocTempDateFormatFactory.setLocale(locale);;
             }
 
-            if (cachedJavaLocTempDateFormatFactory != null && cachedJavaLocTempDateFormatFactory.isLocaleBound()) {
-                cachedJavaLocTempDateFormatFactory = null;
+            if (cachedISOLocTempDateFormatFactory != null) {
+                cachedISOLocTempDateFormatFactory.setLocale(locale);
             }
-            if (cachedSQLDTJavaLocTempDateFormatFactory != null && cachedSQLDTJavaLocTempDateFormatFactory.isLocaleBound()) {
-                cachedSQLDTJavaLocTempDateFormatFactory = null;
+            if (cachedSQLDTISOLocTempDateFormatFactory != null) {
+                cachedSQLDTISOLocTempDateFormatFactory.setLocale(locale);
+            }
+
+            if (cachedJavaLocTempDateFormatFactory != null) {
+                cachedJavaLocTempDateFormatFactory.setLocale(locale);
+            }
+            if (cachedSQLDTJavaLocTempDateFormatFactory != null) {
+                cachedSQLDTJavaLocTempDateFormatFactory.setLocale(locale);
             }
             
             cachedCollator = null;
@@ -1039,48 +1046,152 @@ public final class Environment extends Configurable {
         return out;
     }
 
+    @Override
+    public void setNumberFormat(String formatName) {
+        super.setNumberFormat(formatName);
+        cachedTemplateNumberFormat = null;
+    }
+
     /**
      * Format number with the default number format.
      */
     String formatNumber(TemplateNumberModel number, Expression exp) throws TemplateException {
-        if (cachedTemplateNumberFormat == null) {
-            String formatDesc = getNumberFormat();
-            try {
-                cachedTemplateNumberFormat = getTemplateNumberFormat(formatDesc);
-            } catch (InvalidFormatDescriptorException e) {
-                throw new _MiscTemplateException(exp, e, this,
-                        "Failed to get number format for the default format descriptor, ",
-                        new _DelayedJQuote(formatDesc), "; see cause exception");
-            }
-        }
-        try {
-            return cachedTemplateNumberFormat.format(number);
-        } catch (UnformattableNumberException e) {
-            throw new _MiscTemplateException(exp, e, this, "Failed to format number with "
-                    + new _DelayedJQuote(getNumberFormat()) + ": " + e.getMessage());
-        }
+        return formatNumber(number, getTemplateNumberFormat(exp), exp);
     }
 
     /**
      * Format number with the number format specified as the parameter.
      */
     String formatNumber(TemplateNumberModel number, String formatDesc, Expression exp) throws TemplateException {
+        return formatNumber(number, getTemplateNumberFormat(formatDesc, exp), exp);
+    }
+
+    String formatNumber(TemplateNumberModel number, TemplateNumberFormat format, Expression exp)
+            throws TemplateModelException, _MiscTemplateException {
         try {
-            return getTemplateNumberFormat(formatDesc).format(number);
-        } catch (InvalidFormatDescriptorException e) {
-            throw new _MiscTemplateException(exp, e, this,
-                    "Failed to get number format for the format descriptor, ",
-                    new _DelayedJQuote(formatDesc), "; see cause exception");
+            return format.format(number);
         } catch (UnformattableNumberException e) {
-            throw new _MiscTemplateException(exp, e, this, "Failed to format number with "
-                    + new _DelayedJQuote(getNumberFormat()) + ": " + e.getMessage());
+            throw new _MiscTemplateException(exp, e, this,
+                    "Failed to format number with ", new _DelayedJQuote(format.getDescription()), ": ",
+                    e.getMessage());
         }
     }
+
+    /**
+     * Returns the current number format.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatDescriptorException {
+        TemplateNumberFormat format = cachedTemplateNumberFormat;
+        if (format == null) {
+            format = getTemplateNumberFormat(getNumberFormat());
+            cachedTemplateNumberFormat = format;
+        }
+        return format;
+    }
+
+    /**
+     * Returns the number format for the given format descriptor. The returned value shouldn't be stored for later
+     * reuse, as the returned instance can be different when this method is called later again, for example if the
+     * locale has been changed since then.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateNumberFormat getTemplateNumberFormat(String formatDesc) throws InvalidFormatDescriptorException {
+        if (cachedTemplateNumberFormats == null) {
+            cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
+        }
     
-    @Override
-    public void setNumberFormat(String formatName) {
-        super.setNumberFormat(formatName);
-        cachedTemplateNumberFormat = null;
+        {
+            TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatDesc);
+            if (format != null) {
+                return format;
+            }
+        }
+    
+        TemplateNumberFormat format;
+        int ln = formatDesc.length();
+        char c;
+        if (ln > 0 && formatDesc.charAt(0) == '@') {
+            String name;
+            {
+                int endIdx;
+                findNameEnd: for (endIdx = 1; endIdx < ln; endIdx++) {
+                    c = formatDesc.charAt(endIdx);
+                    if (c == ' ' || c == '_') {
+                        break findNameEnd;
+                    }
+                }
+                name = formatDesc.substring(1, endIdx);
+            }
+            
+            LocalTemplateNumberFormatFactory localFormatFactory =
+                    cachedLocalTemplateNumberFormatFactories != null ? cachedLocalTemplateNumberFormatFactories.get(name) : null;
+            if (localFormatFactory == null) {
+                TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
+                if (formatFactory == null) {
+                    throw new InvalidFormatDescriptorException(
+                            "No custom number format was defined with name " + StringUtil.jQuote(name), formatDesc);
+                }
+                localFormatFactory = formatFactory.createLocalFactory(this, getLocale());
+                if (cachedLocalTemplateNumberFormatFactories == null) {
+                    cachedLocalTemplateNumberFormatFactories = new HashMap<String, LocalTemplateNumberFormatFactory>();
+                }
+                cachedLocalTemplateNumberFormatFactories.put(name, localFormatFactory);
+            }
+            
+            format = localFormatFactory.get(formatDesc);
+        } else {
+            if (javaLocTempNumberFormatFactory == null) {
+                javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this);
+                javaLocTempNumberFormatFactory.setLocale(getLocale());
+            }
+            format = javaLocTempNumberFormatFactory.get(formatDesc);
+        }
+    
+        cachedTemplateNumberFormats.put(formatDesc, format);
+        return format;
+    }
+
+    /**
+     * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in.
+     * This is always US English <code>"0.################"</code>, without
+     * grouping and without superfluous decimal separator.
+     */
+    public NumberFormat getCNumberFormat() {
+        // It can't be cached in a static field, because DecimalFormat-s aren't
+        // thread-safe.
+        if (cNumberFormat == null) {
+            cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT.clone();
+        }
+        return cNumberFormat;
+    }
+
+    TemplateNumberFormat getTemplateNumberFormat(Expression exp)
+            throws _MiscTemplateException {
+        TemplateNumberFormat format;
+        try {
+            format = getTemplateNumberFormat();
+        } catch (InvalidFormatDescriptorException e) {
+            throw new _MiscTemplateException(exp, e, this,
+                    "Failed to get number format object for the current number format string, ",
+                    new _DelayedJQuote(getNumberFormat()), "; see cause exception");
+        }
+        return format;
+    }
+
+    TemplateNumberFormat getTemplateNumberFormat(String formatDesc, Expression exp)
+            throws _MiscTemplateException {
+        TemplateNumberFormat format;
+        try {
+            format = getTemplateNumberFormat(formatDesc);
+        } catch (InvalidFormatDescriptorException e) {
+            throw new _MiscTemplateException(exp, e, this,
+                    "Failed to get number format object for the ", new _DelayedJQuote(formatDesc),
+                    " number format string; see cause exception");
+        }
+        return format;
     }
 
     @Override
@@ -1136,62 +1247,6 @@ public final class Environment extends Configurable {
     
     void clearLastReturnValue() {
         this.lastReturnValue = null;
-    }
-
-    TemplateNumberFormat getTemplateNumberFormat(String formatDesc) throws InvalidFormatDescriptorException {
-        if (cachedTemplateNumberFormats == null) {
-            cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
-        }
-
-        {
-            TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatDesc);
-            if (format != null) {
-                return format;
-            }
-        }
-
-        TemplateNumberFormat format;
-        int ln = formatDesc.length();
-        char c;
-        if (ln > 0 && formatDesc.charAt(0) == '@') {
-            String name;
-            {
-                int endIdx;
-                findNameEnd: for (endIdx = 1; endIdx < ln; endIdx++) {
-                    c = formatDesc.charAt(endIdx);
-                    if (c == ' ' || c == '_') {
-                        break findNameEnd;
-                    }
-                }
-                name = formatDesc.substring(1, endIdx);
-            }
-            
-            LocalTemplateNumberFormatFactory localFormatFactory =
-                    cachedTemplateNumberFormatFactories != null ? cachedTemplateNumberFormatFactories.get(name) : null;
-            if (localFormatFactory == null) {
-                TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
-                if (formatFactory == null) {
-                    throw new InvalidFormatDescriptorException(
-                            "No custom number format was defined with name " + StringUtil.jQuote(name), formatDesc);
-                }
-                localFormatFactory = formatFactory.createLocalFactory(this, getLocale());
-                if (cachedTemplateNumberFormatFactories == null) {
-                    cachedTemplateNumberFormatFactories = new HashMap<String, LocalTemplateNumberFormatFactory>();
-                }
-                cachedTemplateNumberFormatFactories.put(name, localFormatFactory);
-            }
-            
-            format = localFormatFactory.get(formatDesc);
-        } else {
-            if (javaLocTempNumberFormatFactory == null) {
-                javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this);
-                javaLocTempNumberFormatFactory.setLocale(getLocale());
-            }
-            format = javaLocTempNumberFormatFactory.get(formatDesc);
-        }
-
-        cachedTemplateNumberFormats.put(formatDesc, format);
-        return format;
     }
 
     String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr) throws TemplateModelException {
@@ -1435,20 +1490,6 @@ public final class Environment extends Configurable {
         return isoBuiltInCalendarFactory;
     }
     
-    /**
-     * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in.
-     * This is always US English <code>"0.################"</code>, without
-     * grouping and without superfluous decimal separator.
-     */
-    public NumberFormat getCNumberFormat() {
-        // It can't be cached in a static field, because DecimalFormat-s aren't
-        // thread-safe.
-        if (cNumberFormat == null) {
-            cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT.clone();
-        }
-        return cNumberFormat;
-    }
-
     TemplateTransformModel getTransform(Expression exp) throws TemplateException {
         TemplateTransformModel ttm = null;
         TemplateModel tm = exp.eval(this);

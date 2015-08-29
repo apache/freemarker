@@ -572,10 +572,11 @@ class BuiltInsForMultipleTypes {
                 this.numberModel = numberModel;
                 this.env = env;
                 try {
-                    defaultFormat = env.getTemplateNumberFormat(env.getNumberFormat());
-                } catch (InvalidFormatDescriptorException e) {
-                    throw new _MiscTemplateException(
-                            stringBI.this, e, env, "Failed to get default number format; see cause exception");
+                    defaultFormat = env.getTemplateNumberFormat(stringBI.this);
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw new _TemplateModelException(
+                            target, e.getCause(), env, e.getMessage()); 
                 }
             }
     
@@ -588,6 +589,7 @@ class BuiltInsForMultipleTypes {
                 try {
                     return new SimpleScalar(env.formatNumber(numberModel, key, target));
                 } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
                     throw new _TemplateModelException(
                             target, e.getCause(), env, e.getMessage()); 
                 }
@@ -596,8 +598,9 @@ class BuiltInsForMultipleTypes {
             public String getAsString() throws TemplateModelException {
                 if (cachedValue == null) {
                     try {
-                        cachedValue = env.formatNumber(numberModel, target);
+                        cachedValue = env.formatNumber(numberModel, defaultFormat, target);
                     } catch (TemplateException e) {
+                        // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
                         throw new _TemplateModelException(
                                 target, e.getCause(), env, e.getMessage()); 
                     }

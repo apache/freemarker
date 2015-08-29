@@ -96,20 +96,6 @@ public abstract class LocalTemplateDateFormatFactory {
     }
     
     /**
-     * Currently always returns {@code true}; this method exists to reserve the place for a non-final version later.
-     */
-    public final boolean isTimeZoneBound() {
-        return true;
-    }
-
-    /**
-     * Whether this the {@link TemplateDateFormat} created by this factory are sensitive about {@link Locale}. Note that
-     * even if it's not sensitive to it, it can be still sensitive to the time-zone, so this factory is still maybe
-     * "localized".
-     */
-    public abstract boolean isLocaleBound();
-    
-    /**
      * Returns the {@link TemplateDateFormat} for the {@code dateType} and {@code formatDescriptor} given via the
      * arguments. The returned formatter can be a new instance or a reused (cached) instance.
      * 

@@ -30,11 +30,6 @@ abstract class ISOLikeLocalTemplateDateFormatFactory extends LocalTemplateDateFo
         super(env);
     }
 
-    @Override
-    public boolean isLocaleBound() {
-        return false;
-    }
-
     public DateToISO8601CalendarFactory getISOBuiltInCalendar() {
         DateToISO8601CalendarFactory r = dateToCalenderFieldsCalculator;
         if (r == null) {
