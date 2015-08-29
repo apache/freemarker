@@ -25,24 +25,24 @@ import org.apache.commons.lang.NotImplementedException;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
-public class DummyTemplateDateFormatFactory extends TemplateDateFormatFactory {
+public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
-    public static final DummyTemplateDateFormatFactory INSTANCE = new DummyTemplateDateFormatFactory();
+    public static final EpochMillisTemplateDateFormatFactory INSTANCE = new EpochMillisTemplateDateFormatFactory();
     
-    private DummyTemplateDateFormatFactory() {
+    private EpochMillisTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
     
     @Override
-    public DummyLocalizedTemplateDateFormatFactory getLocalizedFactory(Environment env, Locale locale, TimeZone tz) {
-        return DummyLocalizedTemplateDateFormatFactory.INSTANCE;
+    public EpochMillisLocalTemplateDateFormatFactory createLocalFactory(Environment env, Locale locale, TimeZone tz) {
+        return EpochMillisLocalTemplateDateFormatFactory.INSTANCE;
     }
     
-    private static class DummyLocalizedTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
+    private static class EpochMillisLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
 
-        private static final DummyLocalizedTemplateDateFormatFactory INSTANCE = new DummyLocalizedTemplateDateFormatFactory();
+        private static final EpochMillisLocalTemplateDateFormatFactory INSTANCE = new EpochMillisLocalTemplateDateFormatFactory();
 
-        private DummyLocalizedTemplateDateFormatFactory() {
+        private EpochMillisLocalTemplateDateFormatFactory() {
             super(null);
         }
 
@@ -53,7 +53,7 @@ public class DummyTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
         @Override
         public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor) {
-            return DummyTemplateDateFormat.INSTANCE;
+            return EpochMillisTemplateDateFormat.INSTANCE;
         }
 
         @Override
@@ -68,21 +68,21 @@ public class DummyTemplateDateFormatFactory extends TemplateDateFormatFactory {
         
     }
     
-    private static class DummyTemplateDateFormat extends TemplateDateFormat {
+    private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
 
-        private static final DummyTemplateDateFormat INSTANCE = new DummyTemplateDateFormat();
+        private static final EpochMillisTemplateDateFormat INSTANCE = new EpochMillisTemplateDateFormat();
         
-        private DummyTemplateDateFormat() { }
+        private EpochMillisTemplateDateFormat() { }
         
         @Override
         public String format(TemplateDateModel dateModel)
                 throws UnformattableDateException, TemplateModelException {
-            return "dummy" + dateModel.getAsDate().getTime();
+            return String.valueOf(dateModel.getAsDate().getTime());
         }
 
         @Override
         public String getDescription() {
-            return "dummy";
+            return "epochMillis";
         }
 
         @Override
@@ -98,7 +98,11 @@ public class DummyTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
         @Override
         public Date parse(String s) throws ParseException {
-            throw new NotImplementedException();
+            try {
+                return new Date(Long.parseLong(s));
+            } catch (NumberFormatException e) {
+                throw new ParseException("Malformed long", 0);
+            }
         }
         
     }

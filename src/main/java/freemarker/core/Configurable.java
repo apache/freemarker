@@ -300,8 +300,8 @@ public class Configurable {
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
     private Boolean logTemplateExceptions;
-    private Map<String, TemplateDateFormatFactory> customDateFormats;
-    private Map<String, TemplateNumberFormatFactory> customNumberFormats;
+    private Map<String, ? extends TemplateDateFormatFactory> customDateFormats;
+    private Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -729,7 +729,7 @@ public class Configurable {
      * 
      * @since 2.3.24
      */
-    public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
+    public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats() {
         return customNumberFormats == null ? parent.getCustomNumberFormats() : customNumberFormats;
     }
     
@@ -742,7 +742,7 @@ public class Configurable {
      * 
      * @since 2.3.24
      */
-    public void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats) {
+    public void setCustomNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats) {
         NullArgumentException.check("customNumberFormats", customNumberFormats);
         this.customNumberFormats = customNumberFormats;
     }
@@ -754,6 +754,22 @@ public class Configurable {
         return customNumberFormats != null;
     }
 
+    /**
+     * Gets the custom name format registered for the name.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
+        TemplateNumberFormatFactory r;
+        if (customNumberFormats != null) {
+            r = customNumberFormats.get(name);
+            if (r != null) {
+                return r;
+            }
+        }
+        return parent != null ? parent.getCustomNumberFormat(name) : null;
+    }
+    
     /**
      * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
      * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
@@ -1040,7 +1056,7 @@ public class Configurable {
      * 
      * @since 2.3.24
      */
-    public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
+    public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormats() {
         return customDateFormats == null ? parent.getCustomDateFormats() : customDateFormats;
     }
 
@@ -1054,7 +1070,7 @@ public class Configurable {
      * 
      * @since 2.3.24
      */
-    public void setCustomDateFormats(Map<String, TemplateDateFormatFactory> customDateFormats) {
+    public void setCustomDateFormats(Map<String, ? extends TemplateDateFormatFactory> customDateFormats) {
         NullArgumentException.check("customDateFormats", customDateFormats);
         this.customDateFormats = customDateFormats;
     }
@@ -1066,6 +1082,22 @@ public class Configurable {
         return this.customDateFormats != null;
     }
 
+    /**
+     * Gets the custom name format registered for the name.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateDateFormatFactory getCustomDateFormat(String name) {
+        TemplateDateFormatFactory r;
+        if (customDateFormats != null) {
+            r = customDateFormats.get(name);
+            if (r != null) {
+                return r;
+            }
+        }
+        return parent != null ? parent.getCustomDateFormat(name) : null;
+    }
+    
     /**
      * Sets the exception handler used to handle exceptions occurring inside templates.
      * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:

@@ -20,14 +20,14 @@ import java.text.NumberFormat;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 
-class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
+final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
     
     private final String pattern;
-    private final NumberFormat jFormat;
+    private final NumberFormat javaNumberFormat;
 
-    public JavaTemplateNumberFormat(NumberFormat jFormat, String pattern) {
+    public JavaTemplateNumberFormat(NumberFormat javaNumberFormat, String pattern) {
         this.pattern = pattern;
-        this.jFormat = jFormat;
+        this.javaNumberFormat = javaNumberFormat;
     }
 
     @Override
@@ -57,7 +57,11 @@ class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
 
     @Override
     String format(Number number) throws UnformattableNumberException {
-        return jFormat.format(number);
+        return javaNumberFormat.format(number);
+    }
+
+    public NumberFormat getJavaNumberFormat() {
+        return javaNumberFormat;
     }
 
 }

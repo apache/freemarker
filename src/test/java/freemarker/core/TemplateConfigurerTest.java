@@ -161,9 +161,9 @@ public class TemplateConfigurerTest {
         SETTING_ASSIGNMENTS.put("timeZone", NON_DEFAULT_TZ);
         SETTING_ASSIGNMENTS.put("arithmeticEngine", ArithmeticEngine.CONSERVATIVE_ENGINE);
         SETTING_ASSIGNMENTS.put("customNumberFormats",
-                ImmutableMap.of("dummy", DummyTemplateNumberFormatFactory.INSTANCE));
+                ImmutableMap.of("dummy", HexTemplateNumberFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("customDateFormats",
-                ImmutableMap.of("dummy", DummyTemplateDateFormatFactory.INSTANCE));
+                ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);

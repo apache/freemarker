@@ -19,31 +19,32 @@ import java.util.Locale;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.NumberUtil;
 
-public class DummyTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
 
-    public static final DummyTemplateNumberFormatFactory INSTANCE = new DummyTemplateNumberFormatFactory();
+    public static final HexTemplateNumberFormatFactory INSTANCE = new HexTemplateNumberFormatFactory();
     
-    private DummyTemplateNumberFormatFactory() {
+    private HexTemplateNumberFormatFactory() {
         // Defined to decrease visibility
     }
     
     @Override
-    public DummyLocalizedTemplateNumberFormatFactory getLocalizedFactory(Environment env, Locale locale) {
-        return DummyLocalizedTemplateNumberFormatFactory.INSTANCE;
+    public HexLocalizedTemplateNumberFormatFactory createLocalFactory(Environment env, Locale locale) {
+        return HexLocalizedTemplateNumberFormatFactory.INSTANCE;
     }
     
-    private static class DummyLocalizedTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
+    private static class HexLocalizedTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
 
-        private static final DummyLocalizedTemplateNumberFormatFactory INSTANCE = new DummyLocalizedTemplateNumberFormatFactory();
+        private static final HexLocalizedTemplateNumberFormatFactory INSTANCE = new HexLocalizedTemplateNumberFormatFactory();
 
-        private DummyLocalizedTemplateNumberFormatFactory() {
+        private HexLocalizedTemplateNumberFormatFactory() {
             super(null);
         }
 
         @Override
         public TemplateNumberFormat get(String formatDescriptor) {
-            return DummyTemplateNumberFormat.INSTANCE;
+            return HexTemplateNumberFormat.INSTANCE;
         }
 
         @Override
@@ -53,16 +54,21 @@ public class DummyTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         
     }
     
-    private static class DummyTemplateNumberFormat extends TemplateNumberFormat {
+    private static class HexTemplateNumberFormat extends TemplateNumberFormat {
 
-        private static final DummyTemplateNumberFormat INSTANCE = new DummyTemplateNumberFormat();
+        private static final HexTemplateNumberFormat INSTANCE = new HexTemplateNumberFormat();
         
-        private DummyTemplateNumberFormat() { }
+        private HexTemplateNumberFormat() { }
         
         @Override
         public String format(TemplateNumberModel numberModel)
                 throws UnformattableNumberException, TemplateModelException {
-            return "dummy" + numberModel.getAsNumber();
+            Number n = numberModel.getAsNumber();
+            try {
+                return Integer.toHexString(NumberUtil.toIntExact(n));
+            } catch (ArithmeticException e) {
+                throw new UnformattableNumberException(n + " doesn't fit into an int");
+            }
         }
 
         @Override
@@ -73,7 +79,7 @@ public class DummyTemplateNumberFormatFactory extends TemplateNumberFormatFactor
 
         @Override
         public String getDescription() {
-            return "dummy";
+            return "hex";
         }
 
         @Override

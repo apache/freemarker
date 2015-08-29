@@ -29,6 +29,6 @@ import freemarker.template.Configuration;
  */
 public abstract class TemplateNumberFormatFactory {
     
-    public abstract LocalTemplateNumberFormatFactory getLocalizedFactory(Environment env, Locale locale);
+    public abstract LocalTemplateNumberFormatFactory createLocalFactory(Environment env, Locale locale);
 
 }

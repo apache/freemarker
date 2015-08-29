@@ -31,6 +31,6 @@ import freemarker.template.Configuration;
  */
 public abstract class TemplateDateFormatFactory {
     
-    public abstract LocalTemplateDateFormatFactory getLocalizedFactory(Environment env, Locale locale, TimeZone tz);
+    public abstract LocalTemplateDateFormatFactory createLocalFactory(Environment env, Locale locale, TimeZone tz);
 
 }

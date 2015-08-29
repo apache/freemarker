@@ -572,10 +572,10 @@ class BuiltInsForMultipleTypes {
                 this.numberModel = numberModel;
                 this.env = env;
                 try {
-                    defaultFormat = env.getNumberFormatObject(env.getNumberFormat());
+                    defaultFormat = env.getTemplateNumberFormat(env.getNumberFormat());
                 } catch (InvalidFormatDescriptorException e) {
                     throw new _MiscTemplateException(
-                            stringBI.this, e, this, "Failed to get default number format; see cause exception");
+                            stringBI.this, e, env, "Failed to get default number format; see cause exception");
                 }
             }
     
@@ -589,7 +589,7 @@ class BuiltInsForMultipleTypes {
                     return new SimpleScalar(env.formatNumber(numberModel, key, target));
                 } catch (TemplateException e) {
                     throw new _TemplateModelException(
-                            target, env, e, "Failed to format number; see cause exception"); 
+                            target, e.getCause(), env, e.getMessage()); 
                 }
             }
             
@@ -599,7 +599,7 @@ class BuiltInsForMultipleTypes {
                         cachedValue = env.formatNumber(numberModel, target);
                     } catch (TemplateException e) {
                         throw new _TemplateModelException(
-                                target, env, e, "Failed to format number; see cause exception"); 
+                                target, e.getCause(), env, e.getMessage()); 
                     }
                 }
                 return cachedValue;
