@@ -118,7 +118,7 @@ public final class Environment extends Configurable {
      * like ${lastModified?string.iso}.
      * 
      * <p>The index of the array is calculated from what kind of formatter we want
-     * (see {@link #getCachedTemplateDateFormatIndex(int, boolean, boolean)}):<br>
+     * (see {@link #getTemplateDateFormatCacheArrayIndex(int, boolean, boolean)}):<br>
      * Zoned input:                  0: U,  1: T,  2: D,  3: DT<br>
      * Zoneless input:               4: U,  5: T,  6: D,  7: DT<br>
      * Sys def TZ + Zoned input:     8: U,  9: T, 10: D, 11: DT<br>
@@ -128,7 +128,9 @@ public final class Environment extends Configurable {
      * when first needed the array will be created. The array elements also start out as {@code null}-s, and they
      * are filled as the particular kind of formatter is first needed.
      */
-    private TemplateDateFormat[] cachedTemplateDateFormats;
+    private TemplateDateFormat[] cachedTempDateFormatArray;
+    /** Similar to {@link #cachedTempDateFormatArray}, but used when a formatting string was specified. */
+    private HashMap<String, TemplateDateFormat>[] cachedTempDateFormatsByFmtStrArray;
     private static final int CACHED_TDFS_ZONELESS_INPUT_OFFS = 4;
     private static final int CACHED_TDFS_DEF_SYS_TZ_OFFS = CACHED_TDFS_ZONELESS_INPUT_OFFS * 2;
     private static final int CACHED_TDFS_LENGTH = CACHED_TDFS_DEF_SYS_TZ_OFFS * 2;
@@ -280,7 +282,8 @@ public final class Environment extends Configurable {
         cachedTemplateNumberFormats = null;
         cachedTemplateNumberFormat = null;
         
-        cachedTemplateDateFormats = null;
+        cachedTempDateFormatArray = null;
+        cachedTempDateFormatsByFmtStrArray = null;
         cachedXSLocTempDateFormatFactory = cachedSQLDTXSLocTempDateFormatFactory = null;
         cachedISOLocTempDateFormatFactory = cachedSQLDTISOLocTempDateFormatFactory = null;
         cachedJavaLocTempDateFormatFactory = cachedSQLDTJavaLocTempDateFormatFactory = null;
@@ -840,14 +843,16 @@ public final class Environment extends Configurable {
                 javaLocTempNumberFormatFactory.setLocale(locale);
             }
     
-            if (cachedTemplateDateFormats != null) {
+            if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i++) {
-                    final TemplateDateFormat f = cachedTemplateDateFormats[i];
+                    final TemplateDateFormat f = cachedTempDateFormatArray[i];
                     if (f != null && f.isLocaleBound()) {
-                        cachedTemplateDateFormats[i] = null;
+                        cachedTempDateFormatArray[i] = null;
                     }
                 }
             }
+            
+            cachedTempDateFormatsByFmtStrArray = null;
 
             if (cachedXSLocTempDateFormatFactory != null) {
                 cachedXSLocTempDateFormatFactory.setLocale(locale);
@@ -880,9 +885,14 @@ public final class Environment extends Configurable {
         super.setTimeZone(timeZone);
         
         if (!timeZone.equals(prevTimeZone)) {
-            if (cachedTemplateDateFormats != null) {
+            if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_SQL_D_T_TZ_OFFS; i++) {
-                    cachedTemplateDateFormats[i] = null;
+                    cachedTempDateFormatArray[i] = null;
+                }
+            }
+            if (cachedTempDateFormatsByFmtStrArray != null) {
+                for (int i = 0; i < CACHED_TDFS_SQL_D_T_TZ_OFFS; i++) {
+                    cachedTempDateFormatsByFmtStrArray[i] = null;
                 }
             }
             
@@ -900,9 +910,17 @@ public final class Environment extends Configurable {
         super.setSQLDateAndTimeTimeZone(timeZone);
         
         if (!nullSafeEquals(timeZone, prevTimeZone)) {
-            if (cachedTemplateDateFormats != null) {
+            if (cachedTempDateFormatArray != null) {
                 for (int i = CACHED_TDFS_SQL_D_T_TZ_OFFS; i < CACHED_TDFS_LENGTH; i++) {
-                    cachedTemplateDateFormats[i] = null;
+                    TemplateDateFormat format = cachedTempDateFormatArray[i];
+                    if (format != null && format.isTimeZoneBound()) {
+                        cachedTempDateFormatArray[i] = null;
+                    }
+                }
+            }
+            if (cachedTempDateFormatsByFmtStrArray != null) {
+                for (int i = CACHED_TDFS_SQL_D_T_TZ_OFFS; i < CACHED_TDFS_LENGTH; i++) {
+                    cachedTempDateFormatsByFmtStrArray[i] = null; 
                 }
             }
             
@@ -1093,7 +1111,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.24
      */
-    public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatStringException {
+    TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatStringException {
         TemplateNumberFormat format = cachedTemplateNumberFormat;
         if (format == null) {
             format = getTemplateNumberFormat(getNumberFormat());
@@ -1112,7 +1130,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.24
      */
-    public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
+    TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
         if (cachedTemplateNumberFormats == null) {
             cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
         } else {
@@ -1211,9 +1229,9 @@ public final class Environment extends Configurable {
         String prevTimeFormat = getTimeFormat();
         super.setTimeFormat(timeFormat);
         if (!timeFormat.equals(prevTimeFormat)) {
-            if (cachedTemplateDateFormats != null) {
+            if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
-                    cachedTemplateDateFormats[i + TemplateDateModel.TIME] = null;
+                    cachedTempDateFormatArray[i + TemplateDateModel.TIME] = null;
                 }
             }
         }
@@ -1224,9 +1242,9 @@ public final class Environment extends Configurable {
         String prevDateFormat = getDateFormat();
         super.setDateFormat(dateFormat);
         if (!dateFormat.equals(prevDateFormat)) {
-            if (cachedTemplateDateFormats != null) {
+            if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
-                    cachedTemplateDateFormats[i + TemplateDateModel.DATE] = null;
+                    cachedTempDateFormatArray[i + TemplateDateModel.DATE] = null;
                 }
             }
         }
@@ -1237,9 +1255,9 @@ public final class Environment extends Configurable {
         String prevDateTimeFormat = getDateTimeFormat();
         super.setDateTimeFormat(dateTimeFormat);
         if (!dateTimeFormat.equals(prevDateTimeFormat)) {
-            if (cachedTemplateDateFormats != null) {
+            if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
-                    cachedTemplateDateFormats[i + TemplateDateModel.DATETIME] = null;
+                    cachedTempDateFormatArray[i + TemplateDateModel.DATETIME] = null;
                 }
             }
         }
@@ -1281,7 +1299,8 @@ public final class Environment extends Configurable {
         boolean isSQLDateOrTime = isSQLDateOrTimeClass(date.getClass());
         try {
             return getTemplateDateFormat(
-                    tdm.getDateType(), isSQLDateOrTime, shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, null)
+                    tdm.getDateType(), isSQLDateOrTime, shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, true,
+                    null)
                     .format(tdm);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
@@ -1316,14 +1335,14 @@ public final class Environment extends Configurable {
         if (dateType == TemplateDateModel.UNKNOWN) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, null);
         }
-        int cacheIdx = getCachedTemplateDateFormatIndex(dateType, isSQLDateOrTime, useSQLDTTZ);
-        TemplateDateFormat[] cachedTemplateDateFormats = this.cachedTemplateDateFormats;
+        int cacheIdx = getTemplateDateFormatCacheArrayIndex(dateType, isSQLDateOrTime, useSQLDTTZ);
+        TemplateDateFormat[] cachedTemplateDateFormats = this.cachedTempDateFormatArray;
         if (cachedTemplateDateFormats == null) {
             cachedTemplateDateFormats = new TemplateDateFormat[CACHED_TDFS_LENGTH];
-            this.cachedTemplateDateFormats = cachedTemplateDateFormats; 
+            this.cachedTempDateFormatArray = cachedTemplateDateFormats; 
         }
-        TemplateDateFormat f = cachedTemplateDateFormats[cacheIdx];
-        if (f == null) {
+        TemplateDateFormat format = cachedTemplateDateFormats[cacheIdx];
+        if (format == null) {
             final String settingName;
             final String settingValue;
             switch (dateType) {
@@ -1343,14 +1362,14 @@ public final class Environment extends Configurable {
                 throw new _TemplateModelException("Invalid date type enum: ", Integer.valueOf(dateType));
             } // switch
 
-            f = getTemplateDateFormat(
+            format = getTemplateDateFormat(
                     dateType, isSQLDateOrTime,
-                    useSQLDTTZ, settingValue, settingName);
+                    useSQLDTTZ, settingValue, false,
+                    settingName);
             
-            cachedTemplateDateFormats[cacheIdx] = f;
+            cachedTemplateDateFormats[cacheIdx] = format;
         }
-        return f;
-        
+        return format;
     }
     
     /**
@@ -1366,7 +1385,8 @@ public final class Environment extends Configurable {
             boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
             return getTemplateDateFormat(
                     dateType, isSQLDateOrTime,
-                    shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, null);
+                    shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, true,
+                    null);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
         }
@@ -1385,9 +1405,39 @@ public final class Environment extends Configurable {
      *            if the format string was specified directly for this formatting call.
      */
     private TemplateDateFormat getTemplateDateFormat(
-            int dateType, boolean zonelessInput, boolean useSQLDTTZ, String formatString,
+            int dateType, boolean zonelessInput, boolean useSQLDTTZ, String formatString, boolean cacheByFormatString,
             String formatStringCfgSettingName)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
+        HashMap<String, TemplateDateFormat> cachedFormatsByFormatString;
+        if (cacheByFormatString) {
+            HashMap<String, TemplateDateFormat>[] cachedTempDateFormatsByFmtStrArray
+                    = this.cachedTempDateFormatsByFmtStrArray;
+            if (cachedTempDateFormatsByFmtStrArray == null) {
+                cachedTempDateFormatsByFmtStrArray = new HashMap[CACHED_TDFS_LENGTH];
+                this.cachedTempDateFormatsByFmtStrArray = cachedTempDateFormatsByFmtStrArray; 
+            }
+            
+            TemplateDateFormat format;
+            {
+                int cacheArrIdx = getTemplateDateFormatCacheArrayIndex(dateType, zonelessInput, useSQLDTTZ);
+                cachedFormatsByFormatString = cachedTempDateFormatsByFmtStrArray[cacheArrIdx];
+                if (cachedFormatsByFormatString == null) {
+                    cachedFormatsByFormatString = new HashMap<String, TemplateDateFormat>(4);
+                    cachedTempDateFormatsByFmtStrArray[cacheArrIdx] = cachedFormatsByFormatString;
+                    format = null;
+                } else {
+                    format = cachedFormatsByFormatString.get(formatString);
+                }
+            }
+            
+            if (format != null) {
+                return format;
+            }
+            // Cache miss; falls through
+        } else {
+            cachedFormatsByFormatString = null;
+        }
+        
         final int formatStringLen = formatString.length();
         final String formatParams;
         
@@ -1443,7 +1493,11 @@ public final class Environment extends Configurable {
         }
 
         try {
-            return templateDateFormatFactory.get(dateType, zonelessInput, formatParams);
+            TemplateDateFormat format = templateDateFormatFactory.get(dateType, zonelessInput, formatParams);
+            if (cachedFormatsByFormatString != null) {  // if the cachedByFormatString param is true            
+                cachedFormatsByFormatString.put(formatString, format);
+            }
+            return format;
         } catch (InvalidFormatParametersException e) {
             throw new _TemplateModelException(e.getCause(),
                     (formatStringCfgSettingName == null
@@ -1483,7 +1537,7 @@ public final class Environment extends Configurable {
                                             || java.sql.Time.class.isAssignableFrom(dateClass))));
     }
     
-    private int getCachedTemplateDateFormatIndex(int dateType, boolean zonelessInput, boolean sqlDTTZ) {
+    private int getTemplateDateFormatCacheArrayIndex(int dateType, boolean zonelessInput, boolean sqlDTTZ) {
         return dateType
                 + (zonelessInput ? CACHED_TDFS_ZONELESS_INPUT_OFFS : 0)
                 + (sqlDTTZ ? CACHED_TDFS_SQL_D_T_TZ_OFFS : 0);
