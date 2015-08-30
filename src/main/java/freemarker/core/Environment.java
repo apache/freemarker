@@ -1077,6 +1077,17 @@ public final class Environment extends Configurable {
         }
     }
 
+    String formatNumber(Number number, BackwardCompatibleTemplateNumberFormat format, Expression exp)
+            throws TemplateModelException, _MiscTemplateException {
+        try {
+            return format.format(number);
+        } catch (UnformattableNumberException e) {
+            throw new _MiscTemplateException(exp, e, this,
+                    "Failed to format number with ", new _DelayedJQuote(format.getDescription()), ": ",
+                    e.getMessage());
+        }
+    }
+    
     /**
      * Returns the current number format.
      * 

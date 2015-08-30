@@ -47,6 +47,8 @@ import freemarker.test.templatesuite.TemplateTestSuite;
 public abstract class TemplateTest {
     
     private Configuration configuration;
+    private boolean dataModelCreated;
+    private Object dataModel;
 
     protected final Configuration getConfiguration() {
         if (configuration == null) {
@@ -97,7 +99,7 @@ public abstract class TemplateTest {
     protected void assertOutput(Template t, String expectedOut, boolean normalizeNewlines)
             throws TemplateException, IOException {
         StringWriter out = new StringWriter();
-        t.process(createDataModel(), out);
+        t.process(getDataModel(), out);
         String actualOut = out.toString();
         
         if (normalizeNewlines) {
@@ -111,6 +113,14 @@ public abstract class TemplateTest {
         return new Configuration(Configuration.VERSION_2_3_0);
     }
 
+    protected Object getDataModel() {
+        if (!dataModelCreated) {
+            dataModel = createDataModel();
+            dataModelCreated = true;
+        }
+        return dataModel;
+    }
+    
     protected Object createDataModel() {
         return null;
     }
@@ -139,7 +149,7 @@ public abstract class TemplateTest {
         }
         stl.putTemplate(name, content);
     }
-
+    
     private StringTemplateLoader extractStringTemplateLoader(TemplateLoader tl) {
         if (tl instanceof MultiTemplateLoader) {
             MultiTemplateLoader mtl = (MultiTemplateLoader) tl;
@@ -158,6 +168,19 @@ public abstract class TemplateTest {
             throw new IllegalStateException(
                     "The template loader was already set to a non-StringTemplateLoader non-MultiTemplateLoader: "
                             + tl);
+        }
+    }
+
+    protected void addToDataModel(String name, Object value) {
+        Object dm = getDataModel();
+        if (dm == null) {
+            dm = new HashMap<String, Object>();
+            dataModel = dm;
+        }
+        if (dm instanceof Map) {
+            ((Map) dm).put(name, value);
+        } else {
+            throw new IllegalStateException("Can't add to non-Map data-model: " + dm);
         }
     }
     
@@ -188,7 +211,7 @@ public abstract class TemplateTest {
             } else {
                 t = new Template("adhoc", ftl, getConfiguration());
             }
-            t.process(createDataModel(), new StringWriter());
+            t.process(getDataModel(), new StringWriter());
             fail("The tempalte had to fail");
             return null;
         } catch (TemplateException e) {
