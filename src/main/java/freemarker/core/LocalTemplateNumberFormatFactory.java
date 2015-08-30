@@ -36,14 +36,15 @@ public abstract class LocalTemplateNumberFormatFactory {
     /**
      * @param env
      *            Can be {@code null} if the extending factory class doesn't care about the {@link Environment}.
+     * @param locale
+     *            The initial locale of this factory; it can be changed later with {@link #setLocale(Locale)}.
+     *            Can be {@code null} if the factory implementation doesn't use it.
      */
-    public LocalTemplateNumberFormatFactory(Environment env) {
+    public LocalTemplateNumberFormatFactory(Environment env, Locale locale) {
         this.env = env;
+        this.locale = locale;
     }
 
-    /**
-     * @return When {@link #get(String)} is called, it must be already non-{@code null}.
-     */
     public Locale getLocale() {
         return locale;
     }

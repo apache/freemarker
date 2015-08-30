@@ -16,6 +16,8 @@
 
 package freemarker.core;
 
+import java.util.TimeZone;
+
 import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.DateUtil.TrivialCalendarFieldsToDateConverter;
@@ -26,8 +28,8 @@ abstract class ISOLikeLocalTemplateDateFormatFactory extends LocalTemplateDateFo
     private DateToISO8601CalendarFactory dateToCalenderFieldsCalculator;
     private CalendarFieldsToDateConverter calendarFieldsToDateConverter;
 
-    public ISOLikeLocalTemplateDateFormatFactory(Environment env) {
-        super(env);
+    public ISOLikeLocalTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
+        super(env, null, timeZone);
     }
 
     public DateToISO8601CalendarFactory getISOBuiltInCalendar() {

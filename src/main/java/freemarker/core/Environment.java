@@ -1160,8 +1160,7 @@ public final class Environment extends Configurable {
             format = localFormatFactory.get(params);
         } else {
             if (javaLocTempNumberFormatFactory == null) {
-                javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this);
-                javaLocTempNumberFormatFactory.setLocale(getLocale());
+                javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this, getLocale());
             }
             format = javaLocTempNumberFormatFactory.get(formatString);
         }
@@ -1403,9 +1402,8 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTXSLocTempDateFormatFactory : cachedXSLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new XSLocalTemplateDateFormatFactory(this);
-                // templateDateFormatFactory.setLocale() not needed for this factory
-                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new XSLocalTemplateDateFormatFactory(
+                        this, useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTXSLocTempDateFormatFactory
                             = (XSLocalTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1421,9 +1419,8 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTISOLocTempDateFormatFactory : cachedISOLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new ISOLocalTemplateDateFormatFactory(this);
-                // templateDateFormatFactory.setLocale() not needed for this factory
-                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new ISOLocalTemplateDateFormatFactory(
+                        this, useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTISOLocTempDateFormatFactory
                             = (ISOLocalTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1436,9 +1433,8 @@ public final class Environment extends Configurable {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTJavaLocTempDateFormatFactory : cachedJavaLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new JavaLocalTemplateDateFormatFactory(this);
-                templateDateFormatFactory.setLocale(getLocale());
-                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new JavaLocalTemplateDateFormatFactory(
+                        this, getLocale(), useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTJavaLocTempDateFormatFactory
                             = (JavaLocalTemplateDateFormatFactory) templateDateFormatFactory;

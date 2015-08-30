@@ -33,8 +33,8 @@ class JavaLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory 
     
     private Map<String, TemplateDateFormat>[] formatCache;
 
-    public JavaLocalTemplateDateFormatFactory(Environment env) {
-        super(env);
+    public JavaLocalTemplateDateFormatFactory(Environment env, Locale locale, TimeZone timeZone) {
+        super(env, locale, timeZone);
     }
 
     /**

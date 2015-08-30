@@ -36,8 +36,7 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
     private static class LocaleSensitiveLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
 
         LocaleSensitiveLocalTemplateNumberFormatFactory(Locale locale) {
-            super(null);
-            setLocale(locale);
+            super(null, locale);
         }
 
         @Override

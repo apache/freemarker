@@ -49,9 +49,17 @@ public abstract class LocalTemplateDateFormatFactory {
     /**
      * @param env
      *            Can be {@code null} if the extending factory class doesn't care about the {@link Environment}.
+     * @param locale
+     *            The initial locale of this factory; it can be changed later with {@link #setLocale(Locale)}.
+     *            Can be {@code null} if the factory implementation doesn't use it.
+     * @param timeZone
+     *            The initial time zone of this factory; it can be changed later with {@link #setTimeZone(TimeZone)}.
+     *            Can be {@code null} if the factory implementation doesn't use it.
      */
-    public LocalTemplateDateFormatFactory(Environment env) {
+    public LocalTemplateDateFormatFactory(Environment env, Locale locale, TimeZone timeZone) {
         this.env = env;
+        this.locale = locale;
+        this.timeZone = timeZone;
     }
 
     public void setLocale(Locale locale) {
@@ -65,9 +73,9 @@ public abstract class LocalTemplateDateFormatFactory {
     }
     
     /**
-     * Called after the locale was changed, or was initially set. This method should execute very fast; it's primarily
-     * for invalidating caches. If anything long is needed, it should be postponed until a formatter is actually
-     * requested. 
+     * Called after the locale was changed (not after it was initially set). This method should execute very fast; it's
+     * primarily for invalidating caches. If anything long is needed, it should be postponed until a formatter is
+     * actually requested.
      */
     protected abstract void onLocaleChanged();
     
@@ -82,16 +90,10 @@ public abstract class LocalTemplateDateFormatFactory {
         return env;
     }
 
-    /**
-     * @return When {@link #get} is called, it must be already non-{@code null}.
-     */
     public final TimeZone getTimeZone() {
         return timeZone;
     }
 
-    /**
-     * @return When {@link #get} is called, it must be already non-{@code null}.
-     */
     public final Locale getLocale() {
         return locale;
     }

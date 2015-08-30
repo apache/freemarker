@@ -39,7 +39,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         private static final HexLocalizedTemplateNumberFormatFactory INSTANCE = new HexLocalizedTemplateNumberFormatFactory();
 
         private HexLocalizedTemplateNumberFormatFactory() {
-            super(null);
+            super(null, null);
         }
 
         @Override

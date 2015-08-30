@@ -35,8 +35,8 @@ class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFact
     
     private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
     
-    JavaLocalTemplateNumberFormatFactory(Environment env) {
-        super(env);
+    JavaLocalTemplateNumberFormatFactory(Environment env, Locale locale) {
+        super(env, locale);
     }
 
     @Override

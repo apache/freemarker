@@ -16,10 +16,12 @@
 
 package freemarker.core;
 
+import java.util.TimeZone;
+
 class XSLocalTemplateDateFormatFactory extends ISOLikeLocalTemplateDateFormatFactory {
 
-    public XSLocalTemplateDateFormatFactory(Environment env) {
-        super(env);
+    public XSLocalTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
+        super(env, timeZone);
     }
 
     @Override

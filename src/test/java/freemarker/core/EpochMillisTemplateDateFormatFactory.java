@@ -43,7 +43,7 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         private static final EpochMillisLocalTemplateDateFormatFactory INSTANCE = new EpochMillisLocalTemplateDateFormatFactory();
 
         private EpochMillisLocalTemplateDateFormatFactory() {
-            super(null);
+            super(null, null, null);
         }
 
         @Override
