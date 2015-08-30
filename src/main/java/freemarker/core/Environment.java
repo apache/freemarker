@@ -1072,7 +1072,7 @@ public final class Environment extends Configurable {
             return format.format(number);
         } catch (UnformattableNumberException e) {
             throw new _MiscTemplateException(exp, e, this,
-                    "Failed to format number with ", new _DelayedJQuote(format.getDescription()), ": ",
+                    "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
                     e.getMessage());
         }
     }

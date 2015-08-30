@@ -123,6 +123,13 @@ public class NumberFormatTest extends TemplateTest {
                 + "${s1} ${s2}",
                 "123 124");
     }
+
+    @Test
+    public void testNullInNumberModel() throws Exception {
+        addToDataModel("n", new MutableTemplateNumberModel());
+        assertErrorContains("${n}", "nothing inside it");
+        assertErrorContains("${n?string}", "nothing inside it");
+    }
     
     private static class MutableTemplateNumberModel implements TemplateNumberModel {
         

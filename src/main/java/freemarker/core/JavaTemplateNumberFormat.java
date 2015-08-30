@@ -32,10 +32,7 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
 
     @Override
     public String format(TemplateNumberModel numberModel) throws UnformattableNumberException, TemplateModelException {
-        Number number = numberModel.getAsNumber();
-        if (number == null) {
-            throw new UnformattableNumberException("The number model has contained null as the number.");
-        }
+        Number number = getNonNullNumber(numberModel);
         return format(number);
     }
 

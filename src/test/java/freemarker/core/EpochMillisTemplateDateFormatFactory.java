@@ -72,7 +72,7 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         @Override
         public String format(TemplateDateModel dateModel)
                 throws UnformattableDateException, TemplateModelException {
-            return String.valueOf(dateModel.getAsDate().getTime());
+            return String.valueOf(getNonNullDate(dateModel).getTime());
         }
 
         @Override
