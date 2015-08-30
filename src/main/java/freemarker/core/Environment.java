@@ -1115,9 +1115,7 @@ public final class Environment extends Configurable {
     public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
         if (cachedTemplateNumberFormats == null) {
             cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
-        }
-    
-        {
+        } else {
             TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
             if (format != null) {
                 return format;
@@ -1134,12 +1132,11 @@ public final class Environment extends Configurable {
                 findParamsStart: for (endIdx = 1; endIdx < ln; endIdx++) {
                     char c = formatString.charAt(endIdx);
                     if (c == ' ' || c == '_') {
-                        endIdx++;
                         break findParamsStart;
                     }
                 }
                 name = formatString.substring(1, endIdx);
-                params = endIdx != ln ? formatString.substring(endIdx) : "";
+                params = endIdx < ln ? formatString.substring(endIdx + 1) : "";
             }
             
             LocalTemplateNumberFormatFactory localFormatFactory =
@@ -1191,7 +1188,7 @@ public final class Environment extends Configurable {
         } catch (InvalidFormatStringException e) {
             throw new _MiscTemplateException(exp, e, this,
                     "Failed to get number format object for the current number format string, ",
-                    new _DelayedJQuote(getNumberFormat()), "; see cause exception");
+                    new _DelayedJQuote(getNumberFormat()), ": " + e.getMessage());
         }
         return format;
     }
@@ -1204,7 +1201,7 @@ public final class Environment extends Configurable {
         } catch (InvalidFormatStringException e) {
             throw new _MiscTemplateException(exp, e, this,
                     "Failed to get number format object for the ", new _DelayedJQuote(formatString),
-                    " number format string; see cause exception");
+                    " number format string: " + e.getMessage());
         }
         return format;
     }
