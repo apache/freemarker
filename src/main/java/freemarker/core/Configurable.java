@@ -758,9 +758,11 @@ public class Configurable {
                         "Format names can't start with '@'. '@' is only used when referring to them from format "
                         + "strings. In: " + name);
             }
-            if (name.indexOf('@') != -1 || name.indexOf('_') != -1 || name.indexOf(' ') != -1) {
-                throw new IllegalArgumentException("Format names can't contain '@', '_' and space, but this did: "
-                        + name);
+            for (int i = 0; i < name.length(); i++) {
+                // Note that we deliberately don't allow "_" here.
+                if (!Character.isLetterOrDigit(name.charAt(i))) {
+                    throw new IllegalArgumentException("Format name can only contain letters and digits: " + name);
+                }
             }
         }
     }
