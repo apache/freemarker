@@ -16,17 +16,12 @@
 package freemarker.core;
 
 /**
- * Creates {@link TemplateNumberFormat}-s for a fixed locale (if it producers formatters that are sensitive to locale).
- * Typically, within the same {@link Environment}, the same factory is used to create all the
- * {@link TemplateNumberFormat}-s of the same formatter type, as far as the locale remains the same. Thus factories
- * might want to cache instances internally with the {@code formatDescriptor} as key.
- * 
- * <p>
- * {@link LocalizedTemplateDateFormatFactory}-es need not be thread-safe. Currently (2.3.24) they are (re)used only from
- * within a single {@link Environment} instance.
+ * Only exists for emulating pre-2.3.24-IcI {@code ?string} behavior. 
  * 
  * @since 2.3.24
  */
-public abstract class LocalizedTemplateNumberFormatFactory {
+abstract class BackwardCompatibleTemplateNumberFormat extends TemplateNumberFormat {
+
+    abstract String format(Number number) throws UnformattableNumberException;
 
 }

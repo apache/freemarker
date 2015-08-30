@@ -13,26 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateNumberModel;
-
 /**
- * Thrown when a {@link TemplateNumberModel} can't be formatted because of the value/properties of the
- * {@link TemplateNumberModel}. For example, some formatters might can't format NaN, or can't display numbers above
- * certain magnitude.
+ * Used when creating {@link TemplateDateFormat}-s and {@link TemplateNumberFormat}-s to indicate that the format
+ * descriptor string (often some kind of pattern) is malformed.
  * 
  * @since 2.3.24
  */
-public class UnformattableNumberException extends Exception {
+public class InvalidFormatDescriptorException extends Exception {
+    
+    private final String formatDescriptor;
 
-    public UnformattableNumberException(String message, Throwable cause) {
+    public InvalidFormatDescriptorException(String message, String formatDescriptor, Throwable cause) {
         super(message, cause);
+        this.formatDescriptor = formatDescriptor;
     }
 
-    public UnformattableNumberException(String message) {
-        super(message);
+    public InvalidFormatDescriptorException(String message, String formatDescriptor) {
+        this(message, formatDescriptor, null);
+    }
+
+    
+    public String getFormatDescriptor() {
+        return formatDescriptor;
     }
 
 }

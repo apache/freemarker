@@ -38,7 +38,7 @@ import freemarker.template.TemplateNumberModel;
 public abstract class TemplateNumberFormat {
 
     /**
-     * @param dateModel
+     * @param numberModel
      *            The date/time/dateTime to format. Most implementations will just work with the return value of
      *            {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
      *            a custom {@link TemplateDateModel} implementation.
@@ -52,7 +52,7 @@ public abstract class TemplateNumberFormat {
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
-    public abstract String format(TemplateNumberModel dateModel)
+    public abstract String format(TemplateNumberModel numberModel)
             throws UnformattableNumberException, TemplateModelException;
 
     /**
@@ -60,8 +60,8 @@ public abstract class TemplateNumberFormat {
      * {@link #format(TemplateNumberModel)} and escape its result. If the markup format would be just the result of
      * {@link #format(TemplateNumberModel)} escaped, it should return {@code null}.
      */
-    public abstract <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
-            MarkupOutputFormat<MO> outputFormat)
+    public abstract <MO extends TemplateMarkupOutputModel> MO format(
+            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat)
                     throws UnformattableNumberException, TemplateModelException;
     
     /**
@@ -74,8 +74,8 @@ public abstract class TemplateNumberFormat {
      * The default implementation in {@link TemplateNumberFormat} builds on calls
      * {@link #format(TemplateNumberModel, MarkupOutputFormat)} and writes its result to the {@link Writer}.
      */
-    public <MO extends TemplateMarkupOutputModel> boolean format(TemplateNumberModel dateModel,
-            MarkupOutputFormat<MO> outputFormat, Writer out)
+    public <MO extends TemplateMarkupOutputModel> boolean format(
+            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat, Writer out)
                     throws UnformattableNumberException, TemplateModelException, IOException {
         MO mo = format(dateModel, outputFormat);
         if (mo == null) {

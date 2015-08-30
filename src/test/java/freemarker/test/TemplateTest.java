@@ -161,13 +161,13 @@ public abstract class TemplateTest {
         }
     }
     
-    protected void assertErrorContains(String ftl, String... expectedSubstrings) {
-        assertErrorContains(null, ftl, null, expectedSubstrings);
+    protected Throwable assertErrorContains(String ftl, String... expectedSubstrings) {
+        return assertErrorContains(null, ftl, null, expectedSubstrings);
     }
 
-    protected void assertErrorContains(String ftl, Class<? extends Throwable> exceptionClass,
+    protected Throwable assertErrorContains(String ftl, Class<? extends Throwable> exceptionClass,
             String... expectedSubstrings) {
-        assertErrorContains(null, ftl, exceptionClass, expectedSubstrings);
+        return assertErrorContains(null, ftl, exceptionClass, expectedSubstrings);
     }
 
     protected void assertErrorContainsForNamed(String name, String... expectedSubstrings) {
@@ -179,7 +179,7 @@ public abstract class TemplateTest {
         assertErrorContains(name, null, exceptionClass, expectedSubstrings);
     }
     
-    private void assertErrorContains(String name, String ftl, Class<? extends Throwable> exceptionClass,
+    private Throwable assertErrorContains(String name, String ftl, Class<? extends Throwable> exceptionClass,
             String... expectedSubstrings) {
         try {
             Template t;
@@ -190,16 +190,19 @@ public abstract class TemplateTest {
             }
             t.process(createDataModel(), new StringWriter());
             fail("The tempalte had to fail");
+            return null;
         } catch (TemplateException e) {
             if (exceptionClass != null) {
                 assertThat(e, instanceOf(exceptionClass));
             }
             assertContainsAll(e.getMessageWithoutStackTop(), expectedSubstrings);
+            return e;
         } catch (ParseException e) {
             if (exceptionClass != null) {
                 assertThat(e, instanceOf(exceptionClass));
             }
             assertContainsAll(e.getEditorMessage(), expectedSubstrings);
+            return e;
         } catch (IOException e) {
             if (exceptionClass != null) {
                 assertThat(e, instanceOf(exceptionClass));
