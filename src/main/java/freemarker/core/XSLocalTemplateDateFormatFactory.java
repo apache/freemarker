@@ -16,18 +16,20 @@
 
 package freemarker.core;
 
+import java.util.TimeZone;
+
 class XSLocalTemplateDateFormatFactory extends ISOLikeLocalTemplateDateFormatFactory {
 
-    public XSLocalTemplateDateFormatFactory(Environment env) {
-        super(env);
+    public XSLocalTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
+        super(env, timeZone);
     }
 
     @Override
-    public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
-            throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatDescriptorException {
+    public TemplateDateFormat get(int dateType, boolean zonelessInput, String params)
+            throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
         // We don't cache these as creating them is cheap (only 10% speedup of ${d?string.xs} with caching)
         return new XSTemplateDateFormat(
-                formatDescriptor, 2,
+                params, 2,
                 dateType, zonelessInput,
                 getTimeZone(), this);
     }

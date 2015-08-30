@@ -747,9 +747,27 @@ public class Configurable {
      */
     public void setCustomNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats) {
         NullArgumentException.check("customNumberFormats", customNumberFormats);
+        validateFormatNames(customNumberFormats.keySet());
         this.customNumberFormats = customNumberFormats;
     }
     
+    private void validateFormatNames(Set<String> keySet) {
+        for (String name : keySet) {
+            if (name.length() == 0) {
+                throw new IllegalArgumentException("Format names can't be 0 length");
+            }
+            if (name.charAt(0) == '@') {
+                throw new IllegalArgumentException(
+                        "Format names can't start with '@'. '@' is only used when referring to them from format "
+                        + "strings. In: " + name);
+            }
+            if (name.indexOf('@') != -1 || name.indexOf('_') != -1 || name.indexOf(' ') != -1) {
+                throw new IllegalArgumentException("Format names can't contain '@', '_' and space, but this did: "
+                        + name);
+            }
+        }
+    }
+
     /**
      * @since 2.3.24
      */
@@ -1075,6 +1093,7 @@ public class Configurable {
      */
     public void setCustomDateFormats(Map<String, ? extends TemplateDateFormatFactory> customDateFormats) {
         NullArgumentException.check("customDateFormats", customDateFormats);
+        validateFormatNames(customDateFormats.keySet());
         this.customDateFormats = customDateFormats;
     }
     

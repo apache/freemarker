@@ -43,11 +43,13 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         private static final EpochMillisLocalTemplateDateFormatFactory INSTANCE = new EpochMillisLocalTemplateDateFormatFactory();
 
         private EpochMillisLocalTemplateDateFormatFactory() {
-            super(null);
+            super(null, null, null);
         }
 
         @Override
-        public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor) {
+        public TemplateDateFormat get(int dateType, boolean zonelessInput, String params)
+                throws InvalidFormatParametersException {
+            TemplateNumberFormatUtil.checkHasNoParameters(params);
             return EpochMillisTemplateDateFormat.INSTANCE;
         }
 
@@ -72,7 +74,7 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         @Override
         public String format(TemplateDateModel dateModel)
                 throws UnformattableDateException, TemplateModelException {
-            return String.valueOf(dateModel.getAsDate().getTime());
+            return String.valueOf(getNonNullDate(dateModel).getTime());
         }
 
         @Override

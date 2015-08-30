@@ -565,19 +565,23 @@ class BuiltInsForMultipleTypes {
             TemplateHashModel,
             TemplateMethodModel {
             private final TemplateNumberModel numberModel;
+            private final Number number;
             private final Environment env;
             private final TemplateNumberFormat defaultFormat;
             private String cachedValue;
     
             NumberFormatter(TemplateNumberModel numberModel, Environment env) throws TemplateException {
-                this.numberModel = numberModel;
                 this.env = env;
+                
+                // As we format lazily, we need a snapshot of the format inputs:
+                this.numberModel = numberModel;
+                number = EvalUtil.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
                 try {
                     defaultFormat = env.getTemplateNumberFormat(stringBI.this);
                 } catch (TemplateException e) {
                     // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
                     throw new _TemplateModelException(
-                            target, e.getCause(), env, e.getMessage()); 
+                            stringBI.this, e.getCause(), env, e.getMessage()); 
                 }
             }
     
@@ -587,19 +591,40 @@ class BuiltInsForMultipleTypes {
             }
     
             public TemplateModel get(String key) throws TemplateModelException {
+                TemplateNumberFormat format;
                 try {
-                    return new SimpleScalar(env.formatNumber(numberModel, key, target));
+                    format = env.getTemplateNumberFormat(key, stringBI.this);
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw new _TemplateModelException(
+                            stringBI.this, e.getCause(), env, e.getMessage()); 
+                }
+                
+                String result;
+                try {
+                    if (format instanceof BackwardCompatibleTemplateNumberFormat) {
+                        result = env.formatNumber(number, (BackwardCompatibleTemplateNumberFormat) format, target);
+                    } else {
+                        result = env.formatNumber(numberModel, format, target);
+                    }
                 } catch (TemplateException e) {
                     // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
                     throw new _TemplateModelException(
                             target, e.getCause(), env, e.getMessage()); 
                 }
+                
+                return new SimpleScalar(result);
             }
             
             public String getAsString() throws TemplateModelException {
                 if (cachedValue == null) {
                     try {
-                        cachedValue = env.formatNumber(numberModel, defaultFormat, target);
+                        if (defaultFormat instanceof BackwardCompatibleTemplateNumberFormat) {
+                            cachedValue = env.formatNumber(
+                                    number, (BackwardCompatibleTemplateNumberFormat) defaultFormat, target);
+                        } else {
+                            cachedValue = env.formatNumber(numberModel, defaultFormat, target);
+                        }
                     } catch (TemplateException e) {
                         // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
                         throw new _TemplateModelException(

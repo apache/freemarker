@@ -22,20 +22,17 @@ import freemarker.template.TemplateNumberModel;
 
 final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFormat {
     
-    private final String formatDesc;
+    private final String formatString;
     private final NumberFormat javaNumberFormat;
 
-    public JavaTemplateNumberFormat(NumberFormat javaNumberFormat, String formatDesc) {
-        this.formatDesc = formatDesc;
+    public JavaTemplateNumberFormat(NumberFormat javaNumberFormat, String formatString) {
+        this.formatString = formatString;
         this.javaNumberFormat = javaNumberFormat;
     }
 
     @Override
     public String format(TemplateNumberModel numberModel) throws UnformattableNumberException, TemplateModelException {
-        Number number = numberModel.getAsNumber();
-        if (number == null) {
-            throw new UnformattableNumberException("The number model has contained null as the number.");
-        }
+        Number number = TemplateNumberFormatUtil.getNonNullNumber(numberModel);
         return format(number);
     }
 
@@ -61,7 +58,7 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
 
     @Override
     public String getDescription() {
-        return formatDesc;
+        return formatString;
     }
 
 }

@@ -35,32 +35,32 @@ class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFact
     
     private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
     
-    JavaLocalTemplateNumberFormatFactory(Environment env) {
-        super(env);
+    JavaLocalTemplateNumberFormatFactory(Environment env, Locale locale) {
+        super(env, locale);
     }
 
     @Override
-    public TemplateNumberFormat get(String formatDesc)
-            throws InvalidFormatDescriptorException {
+    public TemplateNumberFormat get(String params)
+            throws InvalidFormatParametersException {
         Locale locale = getLocale();
-        NumberFormatKey fk = new NumberFormatKey(formatDesc, locale);
+        NumberFormatKey fk = new NumberFormatKey(params, locale);
         NumberFormat jFormat = GLOBAL_NUMBER_FORMAT_CACHE.get(fk);
         if (jFormat == null) {
-            if ("number".equals(formatDesc)) {
+            if ("number".equals(params)) {
                 jFormat = NumberFormat.getNumberInstance(locale);
-            } else if ("currency".equals(formatDesc)) {
+            } else if ("currency".equals(params)) {
                 jFormat = NumberFormat.getCurrencyInstance(locale);
-            } else if ("percent".equals(formatDesc)) {
+            } else if ("percent".equals(params)) {
                 jFormat = NumberFormat.getPercentInstance(locale);
-            } else if ("computer".equals(formatDesc)) {
+            } else if ("computer".equals(params)) {
                 jFormat = getEnvironment().getCNumberFormat();
             } else {
                 try {
-                    jFormat = new DecimalFormat(formatDesc, new DecimalFormatSymbols(locale));
+                    jFormat = new DecimalFormat(params, new DecimalFormatSymbols(locale));
                 } catch (IllegalArgumentException e) {
                     String msg = e.getMessage();
-                    throw new InvalidFormatDescriptorException(
-                            msg != null ? msg : "Invalid DecimalFormat pattern", formatDesc, e);
+                    throw new InvalidFormatParametersException(
+                            msg != null ? msg : "Invalid DecimalFormat pattern", e);
                 }
             }
 
@@ -87,7 +87,7 @@ class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFact
             // JFormat-s aren't thread-safe; must clone it
             jFormat = (NumberFormat) jFormat.clone();
         }
-        return new JavaTemplateNumberFormat(jFormat, formatDesc); 
+        return new JavaTemplateNumberFormat(jFormat, params); 
     }
 
     private static final class NumberFormatKey {

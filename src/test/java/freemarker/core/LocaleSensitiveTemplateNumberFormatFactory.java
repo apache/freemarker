@@ -36,12 +36,12 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
     private static class LocaleSensitiveLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
 
         LocaleSensitiveLocalTemplateNumberFormatFactory(Locale locale) {
-            super(null);
-            setLocale(locale);
+            super(null, locale);
         }
 
         @Override
-        public TemplateNumberFormat get(String formatDescriptor) {
+        public TemplateNumberFormat get(String params) throws InvalidFormatParametersException {
+            TemplateNumberFormatUtil.checkHasNoParameters(params);
             return new LocaleSensitiveTemplateNumberFormat(getLocale());
         }
 

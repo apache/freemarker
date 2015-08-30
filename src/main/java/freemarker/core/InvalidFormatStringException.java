@@ -17,26 +17,18 @@ package freemarker.core;
 
 /**
  * Used when creating {@link TemplateDateFormat}-s and {@link TemplateNumberFormat}-s to indicate that the format
- * descriptor string (often some kind of pattern) is malformed.
+ * string (like the value of the {@code dateFormat} setting) is malformed.
  * 
  * @since 2.3.24
  */
-public class InvalidFormatDescriptorException extends Exception {
+public abstract class InvalidFormatStringException extends Exception {
     
-    private final String formatDescriptor;
-
-    public InvalidFormatDescriptorException(String message, String formatDescriptor, Throwable cause) {
+    public InvalidFormatStringException(String message, Throwable cause) {
         super(message, cause);
-        this.formatDescriptor = formatDescriptor;
     }
 
-    public InvalidFormatDescriptorException(String message, String formatDescriptor) {
-        this(message, formatDescriptor, null);
-    }
-
-    
-    public String getFormatDescriptor() {
-        return formatDescriptor;
+    public InvalidFormatStringException(String message) {
+        this(message, null);
     }
 
 }

@@ -103,5 +103,17 @@ public abstract class TemplateDateFormat {
     public final boolean isTimeZoneBound() {
         return true;
     }
-    
+
+    /**
+     * Utility method to extract the {@link Date} from an {@link TemplateDateModel}, and throw
+     * {@link UnformattableDateException} with a standard error message if that's {@code null}.
+     */
+    protected Date getNonNullDate(TemplateDateModel dateModel) throws TemplateModelException {
+        Date date = dateModel.getAsDate();
+        if (date == null) {
+            throw EvalUtil.newModelHasStoredNullException(Date.class, dateModel, null);
+        }
+        return date;
+    }
+        
 }

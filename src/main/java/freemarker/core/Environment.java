@@ -1072,11 +1072,22 @@ public final class Environment extends Configurable {
     /**
      * Format number with the number format specified as the parameter.
      */
-    String formatNumber(TemplateNumberModel number, String formatDesc, Expression exp) throws TemplateException {
-        return formatNumber(number, getTemplateNumberFormat(formatDesc, exp), exp);
+    String formatNumber(TemplateNumberModel number, String formatString, Expression exp) throws TemplateException {
+        return formatNumber(number, getTemplateNumberFormat(formatString, exp), exp);
     }
 
     String formatNumber(TemplateNumberModel number, TemplateNumberFormat format, Expression exp)
+            throws TemplateModelException, _MiscTemplateException {
+        try {
+            return format.format(number);
+        } catch (UnformattableNumberException e) {
+            throw new _MiscTemplateException(exp, e, this,
+                    "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                    e.getMessage());
+        }
+    }
+
+    String formatNumber(Number number, BackwardCompatibleTemplateNumberFormat format, Expression exp)
             throws TemplateModelException, _MiscTemplateException {
         try {
             return format.format(number);
@@ -1086,13 +1097,13 @@ public final class Environment extends Configurable {
                     e.getMessage());
         }
     }
-
+    
     /**
      * Returns the current number format.
      * 
      * @since 2.3.24
      */
-    public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatDescriptorException {
+    public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatStringException {
         TemplateNumberFormat format = cachedTemplateNumberFormat;
         if (format == null) {
             format = getTemplateNumberFormat(getNumberFormat());
@@ -1102,38 +1113,43 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the number format for the given format descriptor. The returned value shouldn't be stored for later
-     * reuse, as the returned instance can be different when this method is called later again, for example if the
-     * locale has been changed since then.
+     * Returns the number format for the given format string. The returned value shouldn't be stored for later reuse, as
+     * the returned instance can be different when this method is called later again, for example if the locale has been
+     * changed since then.
+     * 
+     * @param formatString
+     *            A string that you could also use as the value of the {@code numberFormat} configuration setting.
      * 
      * @since 2.3.24
      */
-    public TemplateNumberFormat getTemplateNumberFormat(String formatDesc) throws InvalidFormatDescriptorException {
+    public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
         if (cachedTemplateNumberFormats == null) {
             cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
         }
     
         {
-            TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatDesc);
+            TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
             if (format != null) {
                 return format;
             }
         }
     
         TemplateNumberFormat format;
-        int ln = formatDesc.length();
-        char c;
-        if (ln > 0 && formatDesc.charAt(0) == '@') {
-            String name;
+        int ln = formatString.length();
+        if (ln > 0 && formatString.charAt(0) == '@') {
+            final String name;
+            final String params;
             {
                 int endIdx;
-                findNameEnd: for (endIdx = 1; endIdx < ln; endIdx++) {
-                    c = formatDesc.charAt(endIdx);
+                findParamsStart: for (endIdx = 1; endIdx < ln; endIdx++) {
+                    char c = formatString.charAt(endIdx);
                     if (c == ' ' || c == '_') {
-                        break findNameEnd;
+                        endIdx++;
+                        break findParamsStart;
                     }
                 }
-                name = formatDesc.substring(1, endIdx);
+                name = formatString.substring(1, endIdx);
+                params = endIdx != ln ? formatString.substring(endIdx) : "";
             }
             
             LocalTemplateNumberFormatFactory localFormatFactory =
@@ -1141,8 +1157,8 @@ public final class Environment extends Configurable {
             if (localFormatFactory == null) {
                 TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
                 if (formatFactory == null) {
-                    throw new InvalidFormatDescriptorException(
-                            "No custom number format was defined with name " + StringUtil.jQuote(name), formatDesc);
+                    throw new UndefinedCustomFormatException(
+                            "No custom number format was defined with name " + StringUtil.jQuote(name));
                 }
                 localFormatFactory = formatFactory.createLocalFactory(this, getLocale());
                 if (cachedLocalTemplateNumberFormatFactories == null) {
@@ -1151,16 +1167,15 @@ public final class Environment extends Configurable {
                 cachedLocalTemplateNumberFormatFactories.put(name, localFormatFactory);
             }
             
-            format = localFormatFactory.get(formatDesc);
+            format = localFormatFactory.get(params);
         } else {
             if (javaLocTempNumberFormatFactory == null) {
-                javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this);
-                javaLocTempNumberFormatFactory.setLocale(getLocale());
+                javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this, getLocale());
             }
-            format = javaLocTempNumberFormatFactory.get(formatDesc);
+            format = javaLocTempNumberFormatFactory.get(formatString);
         }
     
-        cachedTemplateNumberFormats.put(formatDesc, format);
+        cachedTemplateNumberFormats.put(formatString, format);
         return format;
     }
 
@@ -1183,7 +1198,7 @@ public final class Environment extends Configurable {
         TemplateNumberFormat format;
         try {
             format = getTemplateNumberFormat();
-        } catch (InvalidFormatDescriptorException e) {
+        } catch (InvalidFormatStringException e) {
             throw new _MiscTemplateException(exp, e, this,
                     "Failed to get number format object for the current number format string, ",
                     new _DelayedJQuote(getNumberFormat()), "; see cause exception");
@@ -1191,14 +1206,14 @@ public final class Environment extends Configurable {
         return format;
     }
 
-    TemplateNumberFormat getTemplateNumberFormat(String formatDesc, Expression exp)
+    TemplateNumberFormat getTemplateNumberFormat(String formatString, Expression exp)
             throws _MiscTemplateException {
         TemplateNumberFormat format;
         try {
-            format = getTemplateNumberFormat(formatDesc);
-        } catch (InvalidFormatDescriptorException e) {
+            format = getTemplateNumberFormat(formatString);
+        } catch (InvalidFormatStringException e) {
             throw new _MiscTemplateException(exp, e, this,
-                    "Failed to get number format object for the ", new _DelayedJQuote(formatDesc),
+                    "Failed to get number format object for the ", new _DelayedJQuote(formatString),
                     " number format string; see cause exception");
         }
         return format;
@@ -1273,13 +1288,13 @@ public final class Environment extends Configurable {
         }
     }
 
-    String formatDate(TemplateDateModel tdm, String formatDescriptor, Expression tdmSourceExpr)
+    String formatDate(TemplateDateModel tdm, String formatString, Expression tdmSourceExpr)
             throws TemplateModelException {
         Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
         boolean isSQLDateOrTime = isSQLDateOrTimeClass(date.getClass());
         try {
             return getTemplateDateFormat(
-                    tdm.getDateType(), isSQLDateOrTime, shouldUseSQLDTTimeZone(isSQLDateOrTime), formatDescriptor, null)
+                    tdm.getDateType(), isSQLDateOrTime, shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, null)
                     .format(tdm);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
@@ -1352,19 +1367,19 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * @param dateType {@link TemplateDateModel#UNKNOWN} is accepted or not depending on the {@code formatDescriptor}
+     * @param dateType {@link TemplateDateModel#UNKNOWN} is accepted or not depending on the {@code formatString}
      *     value. When it isn't, a {@link TemplateModelException} will be thrown.
      * @param dateClass The exact class of the date object, such as {@link java.sql.Timestamp}. 
-     * @param formatDescriptor Like "iso m" or "dd.MM.yyyy HH:mm" 
+     * @param formatString Like "iso m" or "dd.MM.yyyy HH:mm" 
      */
     TemplateDateFormat getTemplateDateFormat(
-            int dateType, Class/*<? extends Date>*/ dateClass, String formatDescriptor, Expression dateSourceExpr)
+            int dateType, Class/*<? extends Date>*/ dateClass, String formatString, Expression dateSourceExpr)
             throws TemplateModelException {
         try {
             boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
             return getTemplateDateFormat(
                     dateType, isSQLDateOrTime,
-                    shouldUseSQLDTTimeZone(isSQLDateOrTime), formatDescriptor, null);
+                    shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, null);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
         }
@@ -1375,30 +1390,30 @@ public final class Environment extends Configurable {
      *            See the similar parameter of {@link LocalTemplateDateFormatFactory#get(int, boolean, String)}
      * @param zonelessInput
      *            See the similar parameter of {@link LocalTemplateDateFormatFactory#get(int, boolean, String)}
-     * @param formatDescriptor
+     * @param formatString
      *            The string that describes the date format. See the similar parameter of
      *            {@link LocalTemplateDateFormatFactory#get(int, boolean, String)}
-     * @param formatDescriptorCfgSettingName
-     *            The name of the configuration setting where the {@code formatDescriptor} comes from, or {@code null}
-     *            if the format descriptor was specified directly for this formatting call.
+     * @param formatStringCfgSettingName
+     *            The name of the configuration setting where the {@code formatZtring} comes from, or {@code null}
+     *            if the format string was specified directly for this formatting call.
      */
     private TemplateDateFormat getTemplateDateFormat(
-            int dateType, boolean zonelessInput, boolean useSQLDTTZ, String formatDescriptor,
-            String formatDescriptorCfgSettingName)
+            int dateType, boolean zonelessInput, boolean useSQLDTTZ, String formatString,
+            String formatStringCfgSettingName)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
-        final int formatDescriptionLen = formatDescriptor.length();
+        final int formatStringLen = formatString.length();
+        final String formatParams;
         
         // As of Java 8, 'x' and 'i' (in lower case) are illegal date format letters, so this is backward-compatible.
         LocalTemplateDateFormatFactory templateDateFormatFactory;  
-        if (formatDescriptionLen > 1
-                && formatDescriptor.charAt(0) == 'x'
-                && formatDescriptor.charAt(1) == 's') {
+        if (formatStringLen > 1
+                && formatString.charAt(0) == 'x'
+                && formatString.charAt(1) == 's') {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTXSLocTempDateFormatFactory : cachedXSLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new XSLocalTemplateDateFormatFactory(this);
-                // templateDateFormatFactory.setLocale() not needed for this factory
-                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new XSLocalTemplateDateFormatFactory(
+                        this, useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTXSLocTempDateFormatFactory
                             = (XSLocalTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1406,16 +1421,16 @@ public final class Environment extends Configurable {
                     cachedXSLocTempDateFormatFactory = (XSLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
-        } else if (formatDescriptionLen > 2
-                && formatDescriptor.charAt(0) == 'i'
-                && formatDescriptor.charAt(1) == 's'
-                && formatDescriptor.charAt(2) == 'o') {
+            formatParams = formatString; // for speed, we don't remove the prefix
+        } else if (formatStringLen > 2
+                && formatString.charAt(0) == 'i'
+                && formatString.charAt(1) == 's'
+                && formatString.charAt(2) == 'o') {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTISOLocTempDateFormatFactory : cachedISOLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new ISOLocalTemplateDateFormatFactory(this);
-                // templateDateFormatFactory.setLocale() not needed for this factory
-                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new ISOLocalTemplateDateFormatFactory(
+                        this, useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTISOLocTempDateFormatFactory
                             = (ISOLocalTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1423,13 +1438,13 @@ public final class Environment extends Configurable {
                     cachedISOLocTempDateFormatFactory = (ISOLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
+            formatParams = formatString; // for speed, we don't remove the prefix
         } else {
             templateDateFormatFactory = useSQLDTTZ
                     ? cachedSQLDTJavaLocTempDateFormatFactory : cachedJavaLocTempDateFormatFactory;
             if (templateDateFormatFactory == null) {
-                templateDateFormatFactory = new JavaLocalTemplateDateFormatFactory(this);
-                templateDateFormatFactory.setLocale(getLocale());
-                templateDateFormatFactory.setTimeZone(useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
+                templateDateFormatFactory = new JavaLocalTemplateDateFormatFactory(
+                        this, getLocale(), useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone());
                 if (useSQLDTTZ) {
                     cachedSQLDTJavaLocTempDateFormatFactory
                             = (JavaLocalTemplateDateFormatFactory) templateDateFormatFactory;
@@ -1437,19 +1452,20 @@ public final class Environment extends Configurable {
                     cachedJavaLocTempDateFormatFactory = (JavaLocalTemplateDateFormatFactory) templateDateFormatFactory;
                 }
             }
+            formatParams = formatString;
         }
 
         try {
-            return templateDateFormatFactory.get(dateType, zonelessInput, formatDescriptor);
-        } catch (InvalidFormatDescriptorException e) {
+            return templateDateFormatFactory.get(dateType, zonelessInput, formatParams);
+        } catch (InvalidFormatParametersException e) {
             throw new _TemplateModelException(e.getCause(),
-                    (formatDescriptorCfgSettingName == null
-                            ? (Object) "Malformed date/time format descriptor: "
+                    (formatStringCfgSettingName == null
+                            ? (Object) "Malformed date/time format string: "
                             : new Object[] {
-                                    "The value of the \"", formatDescriptorCfgSettingName,
-                                    "\" FreeMarker configuration setting is a malformed date/time format descriptor: "
+                                    "The value of the \"", formatStringCfgSettingName,
+                                    "\" FreeMarker configuration setting is a malformed date/time format string: "
                             }),
-                    new _DelayedJQuote(e.getFormatDescriptor()), ". Reason given: ",
+                    new _DelayedJQuote(formatString), ". Reason given: ",
                     e.getMessage());
         }
     }
