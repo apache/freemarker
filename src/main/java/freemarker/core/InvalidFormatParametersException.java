@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
-class ISOLocalTemplateDateFormatFactory extends ISOLikeLocalTemplateDateFormatFactory {
-
-    public ISOLocalTemplateDateFormatFactory(Environment env) {
-        super(env);
+/**
+ * Used when creating {@link TemplateDateFormat}-s and {@link TemplateNumberFormat}-s to indicate that the parameters
+ * part of the format string (like some kind of pattern) is malformed.
+ * 
+ * @since 2.3.24
+ */
+public final class InvalidFormatParametersException extends InvalidFormatStringException {
+    
+    public InvalidFormatParametersException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public TemplateDateFormat get(int dateType, boolean zonelessInput, String params)
-            throws InvalidFormatParametersException, UnknownDateTypeFormattingUnsupportedException {
-        // We don't cache these as creating them is cheap (only 10% speedup of ${d?string.xs} with caching)
-        return new ISOTemplateDateFormat(
-                params, 3,
-                dateType, zonelessInput,
-                getTimeZone(), this);
+    public InvalidFormatParametersException(String message) {
+        this(message, null);
     }
 
 }

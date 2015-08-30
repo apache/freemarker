@@ -20,7 +20,7 @@ import java.util.Locale;
 /**
  * Creates {@link TemplateNumberFormat}-s for a {@link Environment}. The same factory is used to create all the
  * {@link TemplateNumberFormat}-s of the same formatter type. Thus factories might want to cache instances internally
- * with the {@code formatDescriptor} as key.
+ * with the {@code params} as key.
  * 
  * <p>
  * {@link LocalTemplateDateFormatFactory}-es need not be thread-safe. Currently (2.3.24) they are (re)used only from
@@ -72,8 +72,12 @@ public abstract class LocalTemplateNumberFormatFactory {
      * The locale must be already set to non-{@code null} with {@link #setLocale(Locale)} before calling this method.
      * The returned formatter, if the locale matters for it, should be bound to the locale that was in effect when this
      * method was called.
+     * 
+     * @param params
+     *            The string that further describes how the format should look. The format of this string is up to the
+     *            {@link LocalTemplateDateFormatFactory} implementation. Note {@code null}, often an empty string.
      */
-    public abstract TemplateNumberFormat get(String formatDescriptor)
-            throws InvalidFormatDescriptorException;
+    public abstract TemplateNumberFormat get(String params)
+            throws InvalidFormatParametersException;
     
 }

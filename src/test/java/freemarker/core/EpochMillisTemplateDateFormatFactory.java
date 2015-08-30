@@ -47,7 +47,9 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         }
 
         @Override
-        public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor) {
+        public TemplateDateFormat get(int dateType, boolean zonelessInput, String params)
+                throws InvalidFormatParametersException {
+            TemplateNumberFormatUtil.checkHasNoParameters(params);
             return EpochMillisTemplateDateFormat.INSTANCE;
         }
 

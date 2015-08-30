@@ -97,17 +97,4 @@ public abstract class TemplateNumberFormat {
 
     // We don't have parse(...) method, because currently FTL only parses to number with the ArithmeticEngine.
     
-    /**
-     * Utility method to extract the {@link Number} from an {@link TemplateNumberModel}, and throw
-     * {@link UnformattableNumberException} with a standard error message if that's {@code null}.
-     */
-    protected Number getNonNullNumber(TemplateNumberModel numberModel)
-            throws TemplateModelException, UnformattableNumberException {
-        Number number = numberModel.getAsNumber();
-        if (number == null) {
-            throw EvalUtil.newModelHasStoredNullException(Number.class, numberModel, null);
-        }
-        return number;
-    }
-    
 }

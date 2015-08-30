@@ -40,16 +40,16 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     protected final int accuracy;
 
     /**
-     * @param formatDesc The value of the ..._format setting, like "iso nz".
+     * @param formatString The value of the ..._format setting, like "iso nz".
      * @param parsingStart The index of the char in the {@code settingValue} that directly after the prefix that has
      *     indicated the exact formatter class (like "iso" or "xs") 
      */
     public ISOLikeTemplateDateFormat(
-            final String formatDesc, int parsingStart,
+            final String formatString, int parsingStart,
             int dateType, boolean zonelessInput,
             TimeZone timeZone,
             ISOLikeLocalTemplateDateFormatFactory factory)
-            throws InvalidFormatDescriptorException, UnknownDateTypeFormattingUnsupportedException {
+            throws InvalidFormatParametersException, UnknownDateTypeFormattingUnsupportedException {
         this.factory = factory;
         if (dateType == TemplateDateModel.UNKNOWN) {
             throw new UnknownDateTypeFormattingUnsupportedException();
@@ -58,20 +58,20 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         this.dateType = dateType;
         this.zonelessInput = zonelessInput;
         
-        final int ln = formatDesc.length();
+        final int ln = formatString.length();
         boolean afterSeparator = false;
         int i = parsingStart;
         int accuracy = DateUtil.ACCURACY_MILLISECONDS;
         Boolean showZoneOffset = null;
         Boolean forceUTC = Boolean.FALSE;
         while (i < ln) {
-            final char c = formatDesc.charAt(i++);
+            final char c = formatString.charAt(i++);
             if (c == '_' || c == ' ') {
                 afterSeparator = true;
             } else {
                 if (!afterSeparator) {
-                    throw new InvalidFormatDescriptorException(
-                            "Missing space or \"_\" before \"" + c + "\" (at char pos. " + i + ").", formatDesc);
+                    throw new InvalidFormatParametersException(
+                            "Missing space or \"_\" before \"" + c + "\" (at char pos. " + i + ").");
                 }
                 
                 switch (c) {
@@ -79,27 +79,26 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                 case 'm':
                 case 's':
                     if (accuracy != DateUtil.ACCURACY_MILLISECONDS) {
-                        throw new InvalidFormatDescriptorException(
+                        throw new InvalidFormatParametersException(
                                 "Character \"" + c + "\" is unexpected as accuracy was already specified earlier "
-                                + "(at char pos. " + i + ").",
-                                formatDesc);
+                                + "(at char pos. " + i + ").");
                     }
                     switch (c) {
                     case 'h':
                         if (isXSMode()) {
-                            throw new InvalidFormatDescriptorException(
-                                    XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE, formatDesc);
+                            throw new InvalidFormatParametersException(
+                                    XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE);
                         }
                         accuracy = DateUtil.ACCURACY_HOURS;
                         break;
                     case 'm':
-                        if (i < ln && formatDesc.charAt(i) == 's') {
+                        if (i < ln && formatString.charAt(i) == 's') {
                             i++;
                             accuracy = DateUtil.ACCURACY_MILLISECONDS_FORCED;
                         } else {
                             if (isXSMode()) {
-                                throw new InvalidFormatDescriptorException(
-                                        XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE, formatDesc);
+                                throw new InvalidFormatParametersException(
+                                        XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE);
                             }
                             accuracy = DateUtil.ACCURACY_MINUTES;
                         }
@@ -110,8 +109,8 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                     }
                     break;
                 case 'f':
-                    if (i < ln && formatDesc.charAt(i) == 'u') {
-                        checkForceUTCNotSet(forceUTC, formatDesc);
+                    if (i < ln && formatString.charAt(i) == 'u') {
+                        checkForceUTCNotSet(forceUTC);
                         i++;
                         forceUTC = Boolean.TRUE;
                         break;
@@ -119,41 +118,40 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                     // Falls through
                 case 'n':
                     if (showZoneOffset != null) {
-                        throw new InvalidFormatDescriptorException(
+                        throw new InvalidFormatParametersException(
                                 "Character \"" + c + "\" is unexpected as zone offset visibility was already "
-                                + "specified earlier. (at char pos. " + i + ").", formatDesc);
+                                + "specified earlier. (at char pos. " + i + ").");
                     }
                     switch (c) {
                     case 'n':
-                        if (i < ln && formatDesc.charAt(i) == 'z') {
+                        if (i < ln && formatString.charAt(i) == 'z') {
                             i++;
                             showZoneOffset = Boolean.FALSE;
                         } else {
-                            throw new InvalidFormatDescriptorException(
-                                    "\"n\" must be followed by \"z\" (at char pos. " + i + ").", formatDesc);
+                            throw new InvalidFormatParametersException(
+                                    "\"n\" must be followed by \"z\" (at char pos. " + i + ").");
                         }
                         break;
                     case 'f':
-                        if (i < ln && formatDesc.charAt(i) == 'z') {
+                        if (i < ln && formatString.charAt(i) == 'z') {
                             i++;
                             showZoneOffset = Boolean.TRUE;
                         } else {
-                            throw new InvalidFormatDescriptorException(
-                                    "\"f\" must be followed by \"z\" (at char pos. " + i + ").", formatDesc);
+                            throw new InvalidFormatParametersException(
+                                    "\"f\" must be followed by \"z\" (at char pos. " + i + ").");
                         }
                         break;
                     }
                     break;
                 case 'u':
-                    checkForceUTCNotSet(forceUTC, formatDesc);
+                    checkForceUTCNotSet(forceUTC);
                     forceUTC = null;  // means UTC will be used except for zonelessInput
                     break;
                 default:
-                    throw new InvalidFormatDescriptorException(
+                    throw new InvalidFormatParametersException(
                             "Unexpected character, " + StringUtil.jQuote(String.valueOf(c))
                             + ". Expected the beginning of one of: h, m, s, ms, nz, fz, u"
-                            + " (at char pos. " + i + ").",
-                            formatDesc);
+                            + " (at char pos. " + i + ").");
                 } // switch
                 afterSeparator = false;
             } // else
@@ -165,10 +163,10 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         this.timeZone = timeZone;
     }
 
-    private void checkForceUTCNotSet(Boolean fourceUTC, String formatDesc) throws InvalidFormatDescriptorException {
+    private void checkForceUTCNotSet(Boolean fourceUTC) throws InvalidFormatParametersException {
         if (fourceUTC != Boolean.FALSE) {
-            throw new InvalidFormatDescriptorException(
-                    "The UTC usage option was already set earlier.", formatDesc);
+            throw new InvalidFormatParametersException(
+                    "The UTC usage option was already set earlier.");
         }
     }
     

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -96,7 +97,7 @@ public abstract class LocalTemplateDateFormatFactory {
     }
     
     /**
-     * Returns the {@link TemplateDateFormat} for the {@code dateType} and {@code formatDescriptor} given via the
+     * Returns the {@link TemplateDateFormat} for the {@code dateType} and {@code params} given via the
      * arguments. The returned formatter can be a new instance or a reused (cached) instance.
      * 
      * <p>
@@ -105,8 +106,8 @@ public abstract class LocalTemplateDateFormatFactory {
      * matters for it, should be bound to the locale and time zone that was in effect when this method was called.
      * 
      * @param dateType
-     *            {@line TemplateDateModel#DATE}, {@line TemplateDateModel#TIME}, {@line TemplateDateModel#DATETIME} or
-     *            {@line TemplateDateModel#UNKNOWN}. Supporting {@line TemplateDateModel#UNKNOWN} is not necessary, in
+     *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, {@link TemplateDateModel#DATETIME} or
+     *            {@link TemplateDateModel#UNKNOWN}. Supporting {@link TemplateDateModel#UNKNOWN} is not necessary, in
      *            which case the method should throw an {@link UnknownDateTypeFormattingUnsupportedException} exception.
      * 
      * @param zonelessInput
@@ -123,23 +124,20 @@ public abstract class LocalTemplateDateFormatFactory {
      *            configuration settings and such, so you should rely on this rule, just accept what this parameter
      *            says.
      * 
-     * @param formatDescriptor
-     *            The string used as the {@code ..._format} configuration setting value (among others), like
-     *            {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"}. The implementation is only supposed to understand a
-     *            particular kind of format descriptor, for which FreeMarker routes to this factory. (Like, the
-     *            {@link ISOLocalTemplateDateFormatFactory} is only called for format descriptors that start with
-     *            "iso".)
+     * @param params
+     *            The string that further describes how the format should look. The format of this string is up to the
+     *            {@link LocalTemplateDateFormatFactory} implementation. Note {@code null}, often an empty string.
      * 
-     * @throws InvalidFormatDescriptorException
-     *             if the {@code formatDescriptor} is malformed
+     * @throws InvalidFormatParametersException
+     *             if the {@code params} is malformed
      * @throws TemplateModelException
      *             if the {@code dateType} is unsupported by the formatter
      * @throws UnknownDateTypeFormattingUnsupportedException
-     *             if {@code dateType} is {@line TemplateDateModel#UNKNOWN}, and that's unsupported by the formatter
+     *             if {@code dateType} is {@link TemplateDateModel#UNKNOWN}, and that's unsupported by the formatter
      *             implementation.
      */
-    public abstract TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
-            throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
-            InvalidFormatDescriptorException;
+    public abstract TemplateDateFormat get(int dateType, boolean zonelessInput, String params)
+                    throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
+                    InvalidFormatParametersException;
     
 }
