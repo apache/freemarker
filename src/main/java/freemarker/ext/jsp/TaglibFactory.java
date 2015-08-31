@@ -48,6 +48,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
@@ -721,6 +722,16 @@ public class TaglibFactory implements TemplateHashModel {
                 } finally {
                     zipIn.close();
                 }
+            } catch (ZipException e) {
+                // ZipException messages miss the zip URL 
+                IOException ioe = new IOException("Error reading ZIP (see cause excepetion) from: "
+                            + rawJarContentUrlEF);
+                try {
+                    ioe.initCause(e);
+                } catch (Exception e2) {
+                    throw e;
+                }
+                throw ioe;
             } finally {
                 in.close();
             }
