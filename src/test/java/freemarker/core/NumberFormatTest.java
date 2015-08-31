@@ -47,21 +47,23 @@ public class NumberFormatTest extends TemplateTest {
         
         cfg.setCustomNumberFormats(ImmutableMap.of(
                 "hex", HexTemplateNumberFormatFactory.INSTANCE,
-                "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
+                "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE,
+                "base", BaseNTemplateNumberFormatFactory.INSTANCE));
     }
 
     @Test
     public void testUnknownNumberFormat() throws Exception {
         {
             getConfiguration().setNumberFormat("@noSuchFormat");
-            Throwable exc = assertErrorContains("${1}", "\"@noSuchFormat\"");
-            assertThat(exc.getCause().getMessage(), containsString("\"noSuchFormat\""));
+            Throwable exc = assertErrorContains("${1}", "\"@noSuchFormat\"", "\"noSuchFormat\"");
+            assertThat(exc.getCause(), instanceOf(UndefinedCustomFormatException.class));
         }
 
         {
             getConfiguration().setNumberFormat("number");
-            Throwable exc = assertErrorContains("${1?string('@noSuchFormat2')}", "\"@noSuchFormat2\"");
-            assertThat(exc.getCause().getMessage(), containsString("\"noSuchFormat2\""));
+            Throwable exc = assertErrorContains("${1?string('@noSuchFormat2')}",
+                    "\"@noSuchFormat2\"", "\"noSuchFormat2\"");
+            assertThat(exc.getCause(), instanceOf(UndefinedCustomFormatException.class));
         }
     }
     
@@ -107,6 +109,19 @@ public class NumberFormatTest extends TemplateTest {
         assertOutput("${1.1} <#setting locale='de_DE'>${1.1}", "1.1_en_US 1.1_de_DE");
     }
 
+    @Test
+    public void testParameterized() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setNumberFormat("@base 2");
+        assertOutput("${11}", "1011");
+        assertOutput("${11?string}", "1011");
+        assertOutput("${11?string.@base_3}", "102");
+        
+        assertErrorContains("${11?string.@base_xyz}", "\"@base_xyz\"", "\"xyz\"");
+        cfg.setNumberFormat("@base");
+        assertErrorContains("${11}", "\"@base\"", "format parameter is required");
+    }
+    
     /**
      * ?string formats lazily (at least in 2.3.x), so it must make a snapshot of the format inputs when it's called.
      */
