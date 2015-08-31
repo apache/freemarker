@@ -25,13 +25,14 @@ import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
 /**
- * Represents a date/time/dateTime format; used in templates for formatting and parsing with that format.
- * This is similar to Java's {@link DateFormat}, but made to fit the requirements of FreeMarker. Also, it makes
- * easier to define formats that can't be represented with Java's existing {@link DateFormat} implementations.
+ * Represents a date/time/dateTime format; used in templates for formatting and parsing with that format. This is
+ * similar to Java's {@link DateFormat}, but made to fit the requirements of FreeMarker. Also, it makes easier to define
+ * formats that can't be represented with Java's existing {@link DateFormat} implementations.
  * 
- * <p>Implementations need not be thread-safe. Usually, instances are bound to a single {@link Environment}, and
- * {@link Environment}-s are thread-local objects. As the {@link Environment} is recreated for each top-level template
- * processing, constructing these object should be cheap, or else the factory of the instances should do some caching.
+ * <p>
+ * Implementations need not be thread-safe if the {@link TemplateNumberFormatFactory} doesn't recycle them among
+ * different {@link Environment}-s. As far as FreeMarker's concerned, instances are bound to a single
+ * {@link Environment}, and {@link Environment}-s are thread-local objects.
  * 
  * @since 2.3.24
  */

@@ -28,16 +28,23 @@ import freemarker.template.Configuration;
 public abstract class TemplateNumberFormatFactory {
 
     /**
-     * Returns a formatter for the given parameter. The returned formatter can be a new instance or a reused (cached)
-     * instance.
+     * Returns a formatter for the given parameters.
+     * 
+     * <p>
+     * The returned formatter can be a new instance or a reused (cached) instance. Note that {@link Environment} itself
+     * caches the returned instances, though that cache is lost with the {@link Environment} (i.e., when the top-level
+     * template execution ends), also it might flushes lot of entries if the locale or time zone is changed during
+     * template execution. So caching on the factory level is still useful, unless creating the formatters is
+     * sufficiently cheap.
      * 
      * @param params
      *            The string that further describes how the format should look. For example, when the
      *            {@link Configurable#getNumberFormat() numberFormat} is {@code "@fooBar 1, 2"}, then it will be
      *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
-     *            {@link TemplateDateFormatFactory} implementation. Not {@code null}, often an empty string.
+     *            {@link TemplateNumberFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param locale
-     *            The locale to format for.
+     *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
+     *            forever (i.e. locale changes in the {@link Environment} shouldn't be followed).
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
      *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
