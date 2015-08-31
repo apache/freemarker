@@ -13,24 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
-
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because of the value/properties of the
- * {@link TemplateDateModel}.  The most often used subclass is {@link UnknownDateTypeFormattingUnsupportedException}.
- * 
  * @since 2.3.24
  */
-public abstract class UnformattableDateException extends Exception {
+public class UndefinedCustomFormatException extends InvalidFormatStringException {
 
-    public UnformattableDateException(String message, Throwable cause) {
+    public UndefinedCustomFormatException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnformattableDateException(String message) {
+    public UndefinedCustomFormatException(String message) {
         super(message);
     }
 

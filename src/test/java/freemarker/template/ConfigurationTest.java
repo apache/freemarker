@@ -34,6 +34,7 @@ import java.util.TimeZone;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.CacheStorageWithGetSize;
@@ -55,7 +56,9 @@ import freemarker.core.ConfigurableTest;
 import freemarker.core.CustomHTMLOutputFormat;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
+import freemarker.core.EpochMillisTemplateDateFormatFactory;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
@@ -1292,6 +1295,90 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1000L * 60 * 60, cfg.getTemplateUpdateDelayMilliseconds());
         cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "2h");
         assertEquals(1000L * 60 * 60 * 2, cfg.getTemplateUpdateDelayMilliseconds());
+    }
+    
+    @Test
+    public void testSetCustomNumberFormat() {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        
+        try {
+            cfg.setCustomNumberFormats(null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("null"));
+        }
+
+        try {
+            cfg.setCustomNumberFormats(Collections.singletonMap("", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("0 length"));
+        }
+
+        try {
+            cfg.setCustomNumberFormats(Collections.singletonMap("a_b", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a_b"));
+        }
+
+        try {
+            cfg.setCustomNumberFormats(Collections.singletonMap("a b", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a b"));
+        }
+        
+        try {
+            cfg.setCustomNumberFormats(ImmutableMap.of(
+                    "a", HexTemplateNumberFormatFactory.INSTANCE,
+                    "@wrong", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("@wrong"));
+        }
+    }
+    
+    @Test
+    public void testSetCustomDateFormat() {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        
+        try {
+            cfg.setCustomDateFormats(null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("null"));
+        }
+        
+        try {
+            cfg.setCustomDateFormats(Collections.singletonMap("", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("0 length"));
+        }
+
+        try {
+            cfg.setCustomDateFormats(Collections.singletonMap("a_b", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a_b"));
+        }
+
+        try {
+            cfg.setCustomDateFormats(Collections.singletonMap("a b", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a b"));
+        }
+        
+        try {
+            cfg.setCustomDateFormats(ImmutableMap.of(
+                    "a", EpochMillisTemplateDateFormatFactory.INSTANCE,
+                    "@wrong", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("@wrong"));
+        }
     }
     
     public void testNamingConventionSetSetting() throws TemplateException {

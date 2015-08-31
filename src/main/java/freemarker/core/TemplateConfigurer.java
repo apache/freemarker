@@ -166,6 +166,12 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (tc.isClassicCompatibleSet()) {
             setClassicCompatibleAsInt(tc.getClassicCompatibleAsInt());
         }
+        if (tc.isCustomDateFormatsSet()) {
+            setCustomDateFormats(tc.getCustomDateFormats());
+        }
+        if (tc.isCustomNumberFormatsSet()) {
+            setCustomNumberFormats(tc.getCustomNumberFormats());
+        }
         if (tc.isDateFormatSet()) {
             setDateFormat(tc.getDateFormat());
         }
@@ -174,9 +180,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (tc.isEncodingSet()) {
             setEncoding(tc.getEncoding());
-        }
-        if (tc.isRecognizeStandardFileExtensionsSet()) {
-            setRecognizeStandardFileExtensions(tc.getRecognizeStandardFileExtensions());
         }
         if (tc.isLocaleSet()) {
             setLocale(tc.getLocale());
@@ -201,6 +204,9 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (tc.isOutputFormatSet()) {
             setOutputFormat(tc.getOutputFormat());
+        }
+        if (tc.isRecognizeStandardFileExtensionsSet()) {
+            setRecognizeStandardFileExtensions(tc.getRecognizeStandardFileExtensions());
         }
         if (tc.isShowErrorTipsSet()) {
             setShowErrorTips(tc.getShowErrorTips());
@@ -269,6 +275,12 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         }
         if (isClassicCompatibleSet() && !template.isClassicCompatibleSet()) {
             template.setClassicCompatibleAsInt(getClassicCompatibleAsInt());
+        }
+        if (isCustomDateFormatsSet() && !template.isCustomDateFormatsSet()) {
+            template.setCustomDateFormats(getCustomDateFormats());
+        }
+        if (isCustomNumberFormatsSet() && !template.isCustomNumberFormatsSet()) {
+            template.setCustomNumberFormats(getCustomNumberFormats());
         }
         if (isDateFormatSet() && !template.isDateFormatSet()) {
             template.setDateFormat(getDateFormat());
@@ -531,6 +543,8 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
                 || isAutoFlushSet()
                 || isBooleanFormatSet()
                 || isClassicCompatibleSet()
+                || isCustomDateFormatsSet()
+                || isCustomNumberFormatsSet()
                 || isDateFormatSet()
                 || isDateTimeFormatSet()
                 || isLocaleSet()
@@ -545,6 +559,6 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
                 || isTimeFormatSet()
                 || isTimeZoneSet()
                 || isURLEscapingCharsetSet();
-    }
+        }
     
 }

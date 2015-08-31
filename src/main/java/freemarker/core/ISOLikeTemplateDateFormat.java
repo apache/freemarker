@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -32,7 +31,8 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     
     private static final String XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE
             = "Less than seconds accuracy isn't allowed by the XML Schema format";
-    private final ISOLikeTemplateDateFormatFactory factory; 
+    private final ISOLikeTemplateDateFormatFactory factory;
+    private final Environment env;
     protected final int dateType;
     protected final boolean zonelessInput;
     protected final TimeZone timeZone;
@@ -41,17 +41,18 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     protected final int accuracy;
 
     /**
-     * @param settingValue The value of the ..._format setting, like "iso nz".
+     * @param formatString The value of the ..._format setting, like "iso nz".
      * @param parsingStart The index of the char in the {@code settingValue} that directly after the prefix that has
      *     indicated the exact formatter class (like "iso" or "xs") 
      */
     public ISOLikeTemplateDateFormat(
-            String settingValue, int parsingStart,
+            final String formatString, int parsingStart,
             int dateType, boolean zonelessInput,
             TimeZone timeZone,
-            ISOLikeTemplateDateFormatFactory factory)
-            throws ParseException, UnknownDateTypeFormattingUnsupportedException {
+            ISOLikeTemplateDateFormatFactory factory, Environment env)
+            throws InvalidFormatParametersException, UnknownDateTypeFormattingUnsupportedException {
         this.factory = factory;
+        this.env = env;
         if (dateType == TemplateDateModel.UNKNOWN) {
             throw new UnknownDateTypeFormattingUnsupportedException();
         }
@@ -59,20 +60,20 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         this.dateType = dateType;
         this.zonelessInput = zonelessInput;
         
-        final int ln = settingValue.length();
+        final int ln = formatString.length();
         boolean afterSeparator = false;
         int i = parsingStart;
         int accuracy = DateUtil.ACCURACY_MILLISECONDS;
         Boolean showZoneOffset = null;
         Boolean forceUTC = Boolean.FALSE;
         while (i < ln) {
-            final char c = settingValue.charAt(i++);
+            final char c = formatString.charAt(i++);
             if (c == '_' || c == ' ') {
                 afterSeparator = true;
             } else {
                 if (!afterSeparator) {
-                    throw new java.text.ParseException(
-                            "Missing space or \"_\" before \"" + c + "\"", i);
+                    throw new InvalidFormatParametersException(
+                            "Missing space or \"_\" before \"" + c + "\" (at char pos. " + i + ").");
                 }
                 
                 switch (c) {
@@ -80,23 +81,26 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                 case 'm':
                 case 's':
                     if (accuracy != DateUtil.ACCURACY_MILLISECONDS) {
-                        throw new java.text.ParseException(
-                                "Character \"" + c + "\" is unexpected as accuracy was already specified earlier." , i);
+                        throw new InvalidFormatParametersException(
+                                "Character \"" + c + "\" is unexpected as accuracy was already specified earlier "
+                                + "(at char pos. " + i + ").");
                     }
                     switch (c) {
                     case 'h':
                         if (isXSMode()) {
-                            throw new java.text.ParseException(XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE, i);
+                            throw new InvalidFormatParametersException(
+                                    XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE);
                         }
                         accuracy = DateUtil.ACCURACY_HOURS;
                         break;
                     case 'm':
-                        if (i < ln && settingValue.charAt(i) == 's') {
+                        if (i < ln && formatString.charAt(i) == 's') {
                             i++;
                             accuracy = DateUtil.ACCURACY_MILLISECONDS_FORCED;
                         } else {
                             if (isXSMode()) {
-                                throw new java.text.ParseException(XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE, i);
+                                throw new InvalidFormatParametersException(
+                                        XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE);
                             }
                             accuracy = DateUtil.ACCURACY_MINUTES;
                         }
@@ -107,8 +111,8 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                     }
                     break;
                 case 'f':
-                    if (i < ln && settingValue.charAt(i) == 'u') {
-                        checkForceUTCNotSet(forceUTC, i);
+                    if (i < ln && formatString.charAt(i) == 'u') {
+                        checkForceUTCNotSet(forceUTC);
                         i++;
                         forceUTC = Boolean.TRUE;
                         break;
@@ -116,38 +120,40 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                     // Falls through
                 case 'n':
                     if (showZoneOffset != null) {
-                        throw new java.text.ParseException(
+                        throw new InvalidFormatParametersException(
                                 "Character \"" + c + "\" is unexpected as zone offset visibility was already "
-                                + "specified earlier." , i);
+                                + "specified earlier. (at char pos. " + i + ").");
                     }
                     switch (c) {
                     case 'n':
-                        if (i < ln && settingValue.charAt(i) == 'z') {
+                        if (i < ln && formatString.charAt(i) == 'z') {
                             i++;
                             showZoneOffset = Boolean.FALSE;
                         } else {
-                            throw new java.text.ParseException("\"n\" must be followed by \"z\"", i);
+                            throw new InvalidFormatParametersException(
+                                    "\"n\" must be followed by \"z\" (at char pos. " + i + ").");
                         }
                         break;
                     case 'f':
-                        if (i < ln && settingValue.charAt(i) == 'z') {
+                        if (i < ln && formatString.charAt(i) == 'z') {
                             i++;
                             showZoneOffset = Boolean.TRUE;
                         } else {
-                            throw new java.text.ParseException("\"f\" must be followed by \"z\"", i);
+                            throw new InvalidFormatParametersException(
+                                    "\"f\" must be followed by \"z\" (at char pos. " + i + ").");
                         }
                         break;
                     }
                     break;
                 case 'u':
-                    checkForceUTCNotSet(forceUTC, i);
+                    checkForceUTCNotSet(forceUTC);
                     forceUTC = null;  // means UTC will be used except for zonelessInput
                     break;
                 default:
-                    throw new java.text.ParseException(
+                    throw new InvalidFormatParametersException(
                             "Unexpected character, " + StringUtil.jQuote(String.valueOf(c))
-                            + ". Expected the beginning of one of: h, m, s, ms, nz, fz, u",
-                            i);
+                            + ". Expected the beginning of one of: h, m, s, ms, nz, fz, u"
+                            + " (at char pos. " + i + ").");
                 } // switch
                 afterSeparator = false;
             } // else
@@ -159,16 +165,16 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         this.timeZone = timeZone;
     }
 
-    private void checkForceUTCNotSet(Boolean fourceUTC, int i) throws ParseException {
+    private void checkForceUTCNotSet(Boolean fourceUTC) throws InvalidFormatParametersException {
         if (fourceUTC != Boolean.FALSE) {
-            throw new java.text.ParseException(
-                    "The UTC usage option was already set earlier." , i);
+            throw new InvalidFormatParametersException(
+                    "The UTC usage option was already set earlier.");
         }
     }
     
     @Override
     public final String format(TemplateDateModel dateModel) throws TemplateModelException {
-        final Date date = dateModel.getAsDate();
+        final Date date = getNonNullDate(dateModel);
         return format(
                 date,
                 dateType != TemplateDateModel.TIME,
@@ -178,7 +184,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                         : showZoneOffset.booleanValue(),
                 accuracy,
                 (forceUTC == null ? !zonelessInput : forceUTC.booleanValue()) ? DateUtil.UTC : timeZone,
-                factory.getISOBuiltInCalendar());
+                factory.getISOBuiltInCalendar(env));
     }
     
     protected abstract String format(Date date,
@@ -189,7 +195,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
 
     @Override
     public final Date parse(String s) throws java.text.ParseException {
-        CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator();
+        CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator(env);
         TimeZone tz = forceUTC != Boolean.FALSE ? DateUtil.UTC : timeZone;
         if (dateType == TemplateDateModel.DATE) {
             return parseDate(s, tz, calToDateConverter);
@@ -234,6 +240,20 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     @Override
     public final boolean isLocaleBound() {
         return false;
+    }
+    
+    @Override
+    public boolean isTimeZoneBound() {
+        return true;
+    }
+
+    /**
+     * Always returns {@code null} (there's no markup format).
+     */
+    @Override
+    public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
+            MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
+        return null;
     }
 
     protected abstract boolean isXSMode();

@@ -17,6 +17,7 @@
 package freemarker.core;
 
 import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 
@@ -38,8 +39,8 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
     }
 
     @Override
-    public String evalAndCoerceToString(Environment env) {
-        return env.formatNumber(value);
+    public String evalAndCoerceToString(Environment env) throws TemplateException {
+        return env.formatNumber(this, this);
     }
 
     public Number getAsNumber() {

@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -46,6 +47,8 @@ import freemarker.test.templatesuite.TemplateTestSuite;
 public abstract class TemplateTest {
     
     private Configuration configuration;
+    private boolean dataModelCreated;
+    private Object dataModel;
 
     protected final Configuration getConfiguration() {
         if (configuration == null) {
@@ -71,6 +74,7 @@ public abstract class TemplateTest {
         assertOutput(getConfiguration().getTemplate(name), expectedOut, false);
     }
 
+    @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
     protected void assertOutputForNamed(String name) throws IOException, TemplateException {
         String expectedOut;
         {
@@ -95,7 +99,7 @@ public abstract class TemplateTest {
     protected void assertOutput(Template t, String expectedOut, boolean normalizeNewlines)
             throws TemplateException, IOException {
         StringWriter out = new StringWriter();
-        t.process(createDataModel(), out);
+        t.process(getDataModel(), out);
         String actualOut = out.toString();
         
         if (normalizeNewlines) {
@@ -109,6 +113,14 @@ public abstract class TemplateTest {
         return new Configuration(Configuration.VERSION_2_3_0);
     }
 
+    protected Object getDataModel() {
+        if (!dataModelCreated) {
+            dataModel = createDataModel();
+            dataModelCreated = true;
+        }
+        return dataModel;
+    }
+    
     protected Object createDataModel() {
         return null;
     }
@@ -137,7 +149,7 @@ public abstract class TemplateTest {
         }
         stl.putTemplate(name, content);
     }
-
+    
     private StringTemplateLoader extractStringTemplateLoader(TemplateLoader tl) {
         if (tl instanceof MultiTemplateLoader) {
             MultiTemplateLoader mtl = (MultiTemplateLoader) tl;
@@ -158,14 +170,27 @@ public abstract class TemplateTest {
                             + tl);
         }
     }
+
+    protected void addToDataModel(String name, Object value) {
+        Object dm = getDataModel();
+        if (dm == null) {
+            dm = new HashMap<String, Object>();
+            dataModel = dm;
+        }
+        if (dm instanceof Map) {
+            ((Map) dm).put(name, value);
+        } else {
+            throw new IllegalStateException("Can't add to non-Map data-model: " + dm);
+        }
+    }
     
-    protected void assertErrorContains(String ftl, String... expectedSubstrings) {
-        assertErrorContains(null, ftl, null, expectedSubstrings);
+    protected Throwable assertErrorContains(String ftl, String... expectedSubstrings) {
+        return assertErrorContains(null, ftl, null, expectedSubstrings);
     }
 
-    protected void assertErrorContains(String ftl, Class<? extends Throwable> exceptionClass,
+    protected Throwable assertErrorContains(String ftl, Class<? extends Throwable> exceptionClass,
             String... expectedSubstrings) {
-        assertErrorContains(null, ftl, exceptionClass, expectedSubstrings);
+        return assertErrorContains(null, ftl, exceptionClass, expectedSubstrings);
     }
 
     protected void assertErrorContainsForNamed(String name, String... expectedSubstrings) {
@@ -177,7 +202,7 @@ public abstract class TemplateTest {
         assertErrorContains(name, null, exceptionClass, expectedSubstrings);
     }
     
-    private void assertErrorContains(String name, String ftl, Class<? extends Throwable> exceptionClass,
+    private Throwable assertErrorContains(String name, String ftl, Class<? extends Throwable> exceptionClass,
             String... expectedSubstrings) {
         try {
             Template t;
@@ -186,18 +211,21 @@ public abstract class TemplateTest {
             } else {
                 t = new Template("adhoc", ftl, getConfiguration());
             }
-            t.process(createDataModel(), new StringWriter());
+            t.process(getDataModel(), new StringWriter());
             fail("The tempalte had to fail");
+            return null;
         } catch (TemplateException e) {
             if (exceptionClass != null) {
                 assertThat(e, instanceOf(exceptionClass));
             }
             assertContainsAll(e.getMessageWithoutStackTop(), expectedSubstrings);
+            return e;
         } catch (ParseException e) {
             if (exceptionClass != null) {
                 assertThat(e, instanceOf(exceptionClass));
             }
             assertContainsAll(e.getEditorMessage(), expectedSubstrings);
+            return e;
         } catch (IOException e) {
             if (exceptionClass != null) {
                 assertThat(e, instanceOf(exceptionClass));

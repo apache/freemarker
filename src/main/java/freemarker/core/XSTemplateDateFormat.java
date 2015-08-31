@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -35,9 +34,10 @@ final class XSTemplateDateFormat extends ISOLikeTemplateDateFormat {
             int dateType,
             boolean zonelessInput,
             TimeZone timeZone,
-            ISOLikeTemplateDateFormatFactory factory)
-            throws ParseException, UnknownDateTypeFormattingUnsupportedException {
-        super(settingValue, parsingStart, dateType, zonelessInput, timeZone, factory);
+            ISOLikeTemplateDateFormatFactory factory,
+            Environment env)
+            throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
+        super(settingValue, parsingStart, dateType, zonelessInput, timeZone, factory, env);
     }
     
     @Override

@@ -16,21 +16,22 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateNumberModel;
 
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because of the value/properties of the
- * {@link TemplateDateModel}.  The most often used subclass is {@link UnknownDateTypeFormattingUnsupportedException}.
+ * Thrown when a {@link TemplateNumberModel} can't be formatted because of the value/properties of the
+ * {@link TemplateNumberModel}. For example, some formatters might can't format NaN, or can't display numbers above
+ * certain magnitude.
  * 
  * @since 2.3.24
  */
-public abstract class UnformattableDateException extends Exception {
+public class UnformattableNumberException extends Exception {
 
-    public UnformattableDateException(String message, Throwable cause) {
+    public UnformattableNumberException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnformattableDateException(String message) {
+    public UnformattableNumberException(String message) {
         super(message);
     }
 

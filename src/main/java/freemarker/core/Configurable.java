@@ -300,6 +300,8 @@ public class Configurable {
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
     private Boolean logTemplateExceptions;
+    private Map<String, ? extends TemplateDateFormatFactory> customDateFormats;
+    private Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -378,6 +380,9 @@ public class Configurable {
         setBooleanFormat(C_TRUE_FALSE);
         
         customAttributes = new HashMap();
+        
+        customDateFormats = Collections.emptyMap();
+        customNumberFormats = Collections.emptyMap();
     }
 
     /**
@@ -702,7 +707,7 @@ public class Configurable {
         this.numberFormat = numberFormat;
         properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
     }
-
+    
     /**
      * Getter pair of {@link #setNumberFormat(String)}. 
      */
@@ -718,7 +723,73 @@ public class Configurable {
     public boolean isNumberFormatSet() {
         return numberFormat != null;
     }
-            
+    
+    /**
+     * Getter pair of {@link #setCustomNumberFormats(Map)};  do not modify the returned {@link Map}!
+     * 
+     * @since 2.3.24
+     */
+    public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats() {
+        return customNumberFormats == null ? parent.getCustomNumberFormats() : customNumberFormats;
+    }
+    
+    /**
+     * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
+     * number_format} settings with values starting with <code>@<i>name</i></code>.
+     * 
+     * @param customNumberFormats
+     *            Can't be {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    public void setCustomNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats) {
+        NullArgumentException.check("customNumberFormats", customNumberFormats);
+        validateFormatNames(customNumberFormats.keySet());
+        this.customNumberFormats = customNumberFormats;
+    }
+    
+    private void validateFormatNames(Set<String> keySet) {
+        for (String name : keySet) {
+            if (name.length() == 0) {
+                throw new IllegalArgumentException("Format names can't be 0 length");
+            }
+            if (name.charAt(0) == '@') {
+                throw new IllegalArgumentException(
+                        "Format names can't start with '@'. '@' is only used when referring to them from format "
+                        + "strings. In: " + name);
+            }
+            for (int i = 0; i < name.length(); i++) {
+                // Note that we deliberately don't allow "_" here.
+                if (!Character.isLetterOrDigit(name.charAt(i))) {
+                    throw new IllegalArgumentException("Format name can only contain letters and digits: " + name);
+                }
+            }
+        }
+    }
+
+    /**
+     * @since 2.3.24
+     */
+    public boolean isCustomNumberFormatsSet() {
+        return customNumberFormats != null;
+    }
+
+    /**
+     * Gets the custom name format registered for the name.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
+        TemplateNumberFormatFactory r;
+        if (customNumberFormats != null) {
+            r = customNumberFormats.get(name);
+            if (r != null) {
+                return r;
+            }
+        }
+        return parent != null ? parent.getCustomNumberFormat(name) : null;
+    }
+    
     /**
      * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
      * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
@@ -998,6 +1069,54 @@ public class Configurable {
      */
     public boolean isDateTimeFormatSet() {
         return dateTimeFormat != null;
+    }
+    
+    /**
+     * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}!
+     * 
+     * @since 2.3.24
+     */
+    public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormats() {
+        return customDateFormats == null ? parent.getCustomDateFormats() : customDateFormats;
+    }
+
+    /**
+     * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
+     * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
+     * datetime_format} settings with values starting with <code>@<i>name</i></code>.
+     *
+     * @param customDateFormats
+     *            Can't be {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    public void setCustomDateFormats(Map<String, ? extends TemplateDateFormatFactory> customDateFormats) {
+        NullArgumentException.check("customDateFormats", customDateFormats);
+        validateFormatNames(customDateFormats.keySet());
+        this.customDateFormats = customDateFormats;
+    }
+    
+    /**
+     * @since 2.3.24
+     */
+    public boolean isCustomDateFormatsSet() {
+        return this.customDateFormats != null;
+    }
+
+    /**
+     * Gets the custom name format registered for the name.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateDateFormatFactory getCustomDateFormat(String name) {
+        TemplateDateFormatFactory r;
+        if (customDateFormats != null) {
+            r = customDateFormats.get(name);
+            if (r != null) {
+                return r;
+            }
+        }
+        return parent != null ? parent.getCustomDateFormat(name) : null;
     }
     
     /**

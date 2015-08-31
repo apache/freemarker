@@ -19,6 +19,10 @@ package freemarker.template;
 
 /**
  * "boolean" template language data type; same as in Java; either {@code true} or {@code false}.
+ * 
+ * <p>
+ * Objects of this type should be immutable, that is, calling {@link #getAsBoolean()} should always return the same
+ * value as for the first time.
  */
 public interface TemplateBooleanModel extends TemplateModel {
 

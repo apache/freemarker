@@ -17,121 +17,120 @@
 package freemarker.core;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 
+import freemarker.log.Logger;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
 class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
-
-    private static final Map JAVA_DATE_FORMATS = new HashMap();
     
-    private final Locale locale; 
+    static final JavaTemplateDateFormatFactory INSTANCE = new JavaTemplateDateFormatFactory(); 
     
-    private Map/*<TemplateDateFormat>*/[] formatCache;
+    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
-    public JavaTemplateDateFormatFactory(TimeZone timeZone, Locale locale) {
-        super(timeZone);
-        this.locale = locale;
+    private static final ConcurrentHashMap<CacheKey, DateFormat> GLOBAL_FORMAT_CACHE
+            = new ConcurrentHashMap<CacheKey, DateFormat>();
+    private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
+    
+    private JavaTemplateDateFormatFactory() {
+        // Can't be instantiated
     }
-
+    
+    /**
+     * @param zonelessInput
+     *            Has no effect in this implementation.
+     */
     @Override
-    public boolean isLocaleBound() {
-        return true;
+    public TemplateDateFormat get(int dateType, boolean zonelessInput, String params, Locale locale, TimeZone timeZone,
+            Environment env) throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
+                    InvalidFormatParametersException {
+        return new JavaTemplateDateFormat(getJavaDateFormat(dateType, params, locale, timeZone));
     }
 
     /**
-     * @param zonelessInput Has no effect in this implementation.
+     * Returns a "private" copy (not in the global cache) for the given format.  
      */
-    @Override
-    public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
-            throws ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
-        Map/*<TemplateDateFormat>*/[] formatCache = this.formatCache;
-        if (formatCache == null) {
-            formatCache = new Map[4]; // Index 0..3: values of TemplateDateModel's date type constants
-            this.formatCache = formatCache; 
-        }
-        
-        Map/*<TemplateDateFormat>*/ formatsForDateType = formatCache[dateType];
-        if (formatsForDateType == null) {
-            formatsForDateType = new HashMap/*<TemplateDateFormat>*/();
-            formatCache[dateType] = formatsForDateType; 
-        }
-
-        TemplateDateFormat format = (TemplateDateFormat) formatsForDateType.get(formatDescriptor);
-        if (format == null) {
-            format = new JavaTemplateDateFormat(getJavaDateFormat(dateType, formatDescriptor));
-            formatsForDateType.put(formatDescriptor, format);
-        }
-        return format;
-    }
-
-    private DateFormat getJavaDateFormat(int dateType, String nameOrPattern)
-            throws UnknownDateTypeFormattingUnsupportedException, ParseException {
+    private DateFormat getJavaDateFormat(int dateType, String nameOrPattern, Locale locale, TimeZone timeZone)
+            throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
 
         // Get DateFormat from global cache:
-        DateFormatKey cacheKey = new DateFormatKey(
-                dateType, nameOrPattern, locale, getTimeZone());
-        DateFormat jDateFormat;
-        synchronized (JAVA_DATE_FORMATS) {
-            jDateFormat = (DateFormat) JAVA_DATE_FORMATS.get(cacheKey);
-            if (jDateFormat == null) {
-                // Add format to global format cache.
-                StringTokenizer tok = new StringTokenizer(nameOrPattern, "_");
-                int tok1Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
-                if (tok1Style != -1) {
-                    switch (dateType) {
-                        case TemplateDateModel.UNKNOWN: {
-                            throw new UnknownDateTypeFormattingUnsupportedException();
-                        }
-                        case TemplateDateModel.TIME: {
-                            jDateFormat = DateFormat.getTimeInstance(tok1Style, cacheKey.locale);
-                            break;
-                        }
-                        case TemplateDateModel.DATE: {
-                            jDateFormat = DateFormat.getDateInstance(tok1Style, cacheKey.locale);
-                            break;
-                        }
-                        case TemplateDateModel.DATETIME: {
-                            int tok2Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : tok1Style;
-                            if (tok2Style != -1) {
-                                jDateFormat = DateFormat.getDateTimeInstance(tok1Style, tok2Style, cacheKey.locale);
-                            }
-                            break;
-                        }
-                    }
-                }
-                if (jDateFormat == null) {
-                    try {
-                        jDateFormat = new SimpleDateFormat(nameOrPattern, cacheKey.locale);
-                    } catch (IllegalArgumentException e) {
-                        final String msg = e.getMessage();
-                        throw new ParseException(msg != null ? msg : "Illegal SimpleDateFormat pattern", 0);
-                    }
-                }
-                jDateFormat.setTimeZone(cacheKey.timeZone);
-                
-                JAVA_DATE_FORMATS.put(cacheKey, jDateFormat);
-            }  // if cache miss
-        }  // sync
+        CacheKey cacheKey = new CacheKey(dateType, nameOrPattern, locale, timeZone);
+        DateFormat jFormat;
         
-        // Store the value from the global cache in to the local cache:
-        return (DateFormat) jDateFormat.clone();  // For thread safety
+        jFormat = GLOBAL_FORMAT_CACHE.get(cacheKey);
+        if (jFormat == null) {
+            // Add format to global format cache.
+            StringTokenizer tok = new StringTokenizer(nameOrPattern, "_");
+            int tok1Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
+            if (tok1Style != -1) {
+                switch (dateType) {
+                    case TemplateDateModel.UNKNOWN: {
+                        throw new UnknownDateTypeFormattingUnsupportedException();
+                    }
+                    case TemplateDateModel.TIME: {
+                        jFormat = DateFormat.getTimeInstance(tok1Style, cacheKey.locale);
+                        break;
+                    }
+                    case TemplateDateModel.DATE: {
+                        jFormat = DateFormat.getDateInstance(tok1Style, cacheKey.locale);
+                        break;
+                    }
+                    case TemplateDateModel.DATETIME: {
+                        int tok2Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : tok1Style;
+                        if (tok2Style != -1) {
+                            jFormat = DateFormat.getDateTimeInstance(tok1Style, tok2Style, cacheKey.locale);
+                        }
+                        break;
+                    }
+                }
+            }
+            if (jFormat == null) {
+                try {
+                    jFormat = new SimpleDateFormat(nameOrPattern, cacheKey.locale);
+                } catch (IllegalArgumentException e) {
+                    final String msg = e.getMessage();
+                    throw new InvalidFormatParametersException(
+                            msg != null ? msg : "Invalid SimpleDateFormat pattern", e);
+                }
+            }
+            jFormat.setTimeZone(cacheKey.timeZone);
+            
+            if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
+                boolean triggered = false;
+                synchronized (JavaTemplateNumberFormatFactory.class) {
+                    if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
+                        triggered = true;
+                        GLOBAL_FORMAT_CACHE.clear();
+                    }
+                }
+                if (triggered) {
+                    LOG.warn("Global Java DateFormat cache has exceeded " + LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE
+                            + " entries => cache flushed. "
+                            + "Typical cause: Some template generates high variety of format pattern strings.");
+                }
+            }
+            
+            DateFormat prevJFormat = GLOBAL_FORMAT_CACHE.putIfAbsent(cacheKey, jFormat);
+            if (prevJFormat != null) {
+                jFormat = prevJFormat;
+            }
+        }  // if cache miss
+        
+        return (DateFormat) jFormat.clone();  // For thread safety
     }
 
-    private static final class DateFormatKey {
+    private static final class CacheKey {
         private final int dateType;
         private final String pattern;
         private final Locale locale;
         private final TimeZone timeZone;
 
-        DateFormatKey(int dateType, String pattern, Locale locale, TimeZone timeZone) {
+        CacheKey(int dateType, String pattern, Locale locale, TimeZone timeZone) {
             this.dateType = dateType;
             this.pattern = pattern;
             this.locale = locale;
@@ -140,8 +139,8 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof DateFormatKey) {
-                DateFormatKey fk = (DateFormatKey) o;
+            if (o instanceof CacheKey) {
+                CacheKey fk = (CacheKey) o;
                 return dateType == fk.dateType && fk.pattern.equals(pattern) && fk.locale.equals(locale)
                         && fk.timeZone.equals(timeZone);
             }

@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -564,15 +563,25 @@ class BuiltInsForMultipleTypes {
             TemplateScalarModel,
             TemplateHashModel,
             TemplateMethodModel {
+            private final TemplateNumberModel numberModel;
             private final Number number;
             private final Environment env;
-            private final NumberFormat defaultFormat;
+            private final TemplateNumberFormat defaultFormat;
             private String cachedValue;
     
-            NumberFormatter(Number number, Environment env) {
-                this.number = number;
+            NumberFormatter(TemplateNumberModel numberModel, Environment env) throws TemplateException {
                 this.env = env;
-                defaultFormat = env.getNumberFormatObject(env.getNumberFormat());
+                
+                // As we format lazily, we need a snapshot of the format inputs:
+                this.numberModel = numberModel;
+                number = EvalUtil.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
+                try {
+                    defaultFormat = env.getTemplateNumberFormat(stringBI.this);
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw new _TemplateModelException(
+                            stringBI.this, e.getCause(), env, e.getMessage()); 
+                }
             }
     
             public Object exec(List args) throws TemplateModelException {
@@ -580,13 +589,46 @@ class BuiltInsForMultipleTypes {
                 return get((String) args.get(0));
             }
     
-            public TemplateModel get(String key) {
-                return new SimpleScalar(env.getNumberFormatObject(key).format(number));
+            public TemplateModel get(String key) throws TemplateModelException {
+                TemplateNumberFormat format;
+                try {
+                    format = env.getTemplateNumberFormat(key, stringBI.this);
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw new _TemplateModelException(
+                            stringBI.this, e.getCause(), env, e.getMessage()); 
+                }
+                
+                String result;
+                try {
+                    if (format instanceof BackwardCompatibleTemplateNumberFormat) {
+                        result = env.formatNumber(number, (BackwardCompatibleTemplateNumberFormat) format, target);
+                    } else {
+                        result = env.formatNumber(numberModel, format, target);
+                    }
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw new _TemplateModelException(
+                            target, e.getCause(), env, e.getMessage()); 
+                }
+                
+                return new SimpleScalar(result);
             }
             
-            public String getAsString() {
+            public String getAsString() throws TemplateModelException {
                 if (cachedValue == null) {
-                    cachedValue = defaultFormat.format(number);
+                    try {
+                        if (defaultFormat instanceof BackwardCompatibleTemplateNumberFormat) {
+                            cachedValue = env.formatNumber(
+                                    number, (BackwardCompatibleTemplateNumberFormat) defaultFormat, target);
+                        } else {
+                            cachedValue = env.formatNumber(numberModel, defaultFormat, target);
+                        }
+                    } catch (TemplateException e) {
+                        // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                        throw new _TemplateModelException(
+                                target, e.getCause(), env, e.getMessage()); 
+                    }
                 }
                 return cachedValue;
             }
@@ -600,7 +642,9 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel) model, target), env);
+                TemplateNumberModel numberModel = (TemplateNumberModel) model;
+                Number num = EvalUtil.modelToNumber(numberModel, target);
+                return new NumberFormatter(numberModel, env);
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel) model;
                 return new DateFormatter(dm, env);

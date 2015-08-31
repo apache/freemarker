@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
-
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because of the value/properties of the
- * {@link TemplateDateModel}.  The most often used subclass is {@link UnknownDateTypeFormattingUnsupportedException}.
+ * Only exists for emulating pre-2.3.24-IcI {@code ?string} behavior. 
  * 
  * @since 2.3.24
  */
-public abstract class UnformattableDateException extends Exception {
+abstract class BackwardCompatibleTemplateNumberFormat extends TemplateNumberFormat {
 
-    public UnformattableDateException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public UnformattableDateException(String message) {
-        super(message);
-    }
+    abstract String format(Number number) throws UnformattableNumberException;
 
 }
