@@ -507,7 +507,7 @@ public final class Environment extends Configurable {
             currentNamespace = invokingMacroContext.nestedContentNamespace;
             
             final Configurable prevParent;
-            final boolean parentReplacementOn = isIcI2322OrLater();
+            final boolean parentReplacementOn = isBeforeIcI2322();
             prevParent = getParent();
             if (parentReplacementOn) {
                 setParent(currentNamespace.getTemplate());
@@ -1101,20 +1101,23 @@ public final class Environment extends Configurable {
         }
     
         TemplateNumberFormat format;
-        int ln = formatString.length();
-        if (ln > 0 && formatString.charAt(0) == '@') {
+        int formatStringLen = formatString.length();
+        if (formatStringLen > 1
+                && formatString.charAt(0) == '@'
+                && formatString.charAt(1) != '@'
+                && isIcI2324OrLater()) {
             final String name;
             final String params;
             {
                 int endIdx;
-                findParamsStart: for (endIdx = 1; endIdx < ln; endIdx++) {
+                findParamsStart: for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
                     char c = formatString.charAt(endIdx);
                     if (c == ' ' || c == '_') {
                         break findParamsStart;
                     }
                 }
                 name = formatString.substring(1, endIdx);
-                params = endIdx < ln ? formatString.substring(endIdx + 1) : "";
+                params = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
             
             TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
@@ -1125,6 +1128,13 @@ public final class Environment extends Configurable {
             
             format = formatFactory.get(params, getLocale(), this);
         } else {
+            if (formatStringLen > 1
+                    && formatString.charAt(0) == '@'
+                    && formatString.charAt(1) == '@'
+                    && isIcI2324OrLater()) {
+                // Unescape @ escaped as @@
+                formatString = formatString.substring(1);
+            }
             format = JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, getLocale(), this);
         }
     
@@ -1415,7 +1425,10 @@ public final class Environment extends Configurable {
                     && formatString.charAt(2) == 'o') {
                 formatFactory = ISOTemplateDateFormatFactory.INSTANCE;
                 formatParams = formatString; // for speed, we don't remove the prefix
-            } else if (firstChar == '@') {
+            } else if (firstChar == '@'
+                    && formatStringLen > 1
+                    && formatString.charAt(1) != '@'
+                    && isIcI2324OrLater()) {
                 final String name;
                 {
                     int endIdx;
@@ -1435,6 +1448,14 @@ public final class Environment extends Configurable {
                             "No custom date format was defined with name " + StringUtil.jQuote(name));
                 }
             } else {
+                if (firstChar == '@'
+                        && formatStringLen > 1
+                        && formatString.charAt(1) == '@'
+                        && isIcI2324OrLater()) {
+                    // Unescape @ escaped as @@
+                    formatString = formatString.substring(1);
+                }
+                
                 formatFactory = JavaTemplateDateFormatFactory.INSTANCE;
                 formatParams = formatString;
             }
@@ -2145,7 +2166,7 @@ public final class Environment extends Configurable {
     public void include(Template includedTemplate)
     throws TemplateException, IOException {
         final Template prevTemplate;
-        final boolean parentReplacementOn = isIcI2322OrLater();
+        final boolean parentReplacementOn = isBeforeIcI2322();
         prevTemplate = getTemplate();
         if (parentReplacementOn) {
             setParent(includedTemplate);
@@ -2425,10 +2446,14 @@ public final class Environment extends Configurable {
         }
     };
     
-    private boolean isIcI2322OrLater() {
+    private boolean isBeforeIcI2322() {
         return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
     }
 
+    private boolean isIcI2324OrLater() {
+        return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
+    }
+    
     /**
      * See {@link #setFastInvalidReferenceExceptions(boolean)}. 
      */

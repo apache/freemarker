@@ -28,6 +28,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
+import freemarker.template.SimpleDate;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
@@ -159,6 +160,22 @@ public class DateFormatTest extends TemplateTest {
         addToDataModel("n", new MutableTemplateDateModel());
         assertErrorContains("${n}", "nothing inside it");
         assertErrorContains("${n?string}", "nothing inside it");
+    }
+    
+    @Test
+    public void testIcIAndEscaping() throws Exception {
+        Configuration cfg = getConfiguration();
+        addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@epoch");
+        assertOutput("${d}", "12345678");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
+        cfg.setDateTimeFormat("@epoch");
+        assertErrorContains("${d}", "\"@epoch\"");
     }
     
     private static class MutableTemplateDateModel implements TemplateDateModel {

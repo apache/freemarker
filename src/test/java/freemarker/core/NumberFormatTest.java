@@ -161,6 +161,21 @@ public class NumberFormatTest extends TemplateTest {
         assertErrorContains("${n?string}", "nothing inside it");
     }
     
+    @Test
+    public void testIcIAndEscaping() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@hex");
+        assertOutput("${10}", "a");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
+        cfg.setNumberFormat("@hex");
+        assertOutput("${10}", "@hex10");
+    }
+    
     private static class MutableTemplateNumberModel implements TemplateNumberModel {
         
         private Number number;
