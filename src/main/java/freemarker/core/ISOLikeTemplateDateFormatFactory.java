@@ -16,48 +16,34 @@
 
 package freemarker.core;
 
-import java.util.TimeZone;
-
 import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.DateUtil.TrivialCalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.TrivialDateToISO8601CalendarFactory;
 
-abstract class ISOLikeLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
+abstract class ISOLikeTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
-    private DateToISO8601CalendarFactory dateToCalenderFieldsCalculator;
-    private CalendarFieldsToDateConverter calendarFieldsToDateConverter;
+    private static final Object DATE_TO_CAL_CONVERTER_KEY = new Object();
+    private static final Object CAL_TO_DATE_CONVERTER_KEY = new Object();
+    
+    protected ISOLikeTemplateDateFormatFactory() { }
 
-    public ISOLikeLocalTemplateDateFormatFactory(Environment env, TimeZone timeZone) {
-        super(env, null, timeZone);
-    }
-
-    public DateToISO8601CalendarFactory getISOBuiltInCalendar() {
-        DateToISO8601CalendarFactory r = dateToCalenderFieldsCalculator;
+    public DateToISO8601CalendarFactory getISOBuiltInCalendar(Environment env) {
+        DateToISO8601CalendarFactory r = (DateToISO8601CalendarFactory) env.getCustomState(DATE_TO_CAL_CONVERTER_KEY);
         if (r == null) {
             r = new TrivialDateToISO8601CalendarFactory();
-            dateToCalenderFieldsCalculator = r;
+            env.setCustomState(DATE_TO_CAL_CONVERTER_KEY, r);
         }
         return r;
     }
 
-    public CalendarFieldsToDateConverter getCalendarFieldsToDateCalculator() {
-        CalendarFieldsToDateConverter r = calendarFieldsToDateConverter;
+    public CalendarFieldsToDateConverter getCalendarFieldsToDateCalculator(Environment env) {
+        CalendarFieldsToDateConverter r = (CalendarFieldsToDateConverter) env.getCustomState(CAL_TO_DATE_CONVERTER_KEY);
         if (r == null) {
             r = new TrivialCalendarFieldsToDateConverter();
-            calendarFieldsToDateConverter = r;
+            env.setCustomState(CAL_TO_DATE_CONVERTER_KEY, r);
         }
         return r;
-    }
-
-    @Override
-    protected void onLocaleChanged() {
-        // No op
-    }
-
-    @Override
-    protected void onTimeZoneChanged() {
-        // No op
     }
     
 }

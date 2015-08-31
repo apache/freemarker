@@ -21,14 +21,35 @@ import freemarker.template.Configuration;
 
 /**
  * Factory for a certain type of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or
- * one-per-{@link Configuration}), and so must be thread-safe. It doesn't create {@link TemplateNumberFormat} directly,
- * instead it creates {@link LocalTemplateNumberFormatFactory}-s which are single-thread locale-bound objects that
- * provide the actual {@link TemplateNumberFormat}-s based on the provided parameters (like possibly a pattern string).
+ * one-per-{@link Configuration}), and so must be thread-safe.
  * 
  * @since 2.3.24
  */
 public abstract class TemplateNumberFormatFactory {
-    
-    public abstract LocalTemplateNumberFormatFactory createLocalFactory(Environment env, Locale locale);
+
+    /**
+     * Returns a formatter for the given parameters.
+     * 
+     * <p>
+     * The returned formatter can be a new instance or a reused (cached) instance. Note that {@link Environment} itself
+     * caches the returned instances, though that cache is lost with the {@link Environment} (i.e., when the top-level
+     * template execution ends), also it might flushes lot of entries if the locale or time zone is changed during
+     * template execution. So caching on the factory level is still useful, unless creating the formatters is
+     * sufficiently cheap.
+     * 
+     * @param params
+     *            The string that further describes how the format should look. For example, when the
+     *            {@link Configurable#getNumberFormat() numberFormat} is {@code "@fooBar 1, 2"}, then it will be
+     *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
+     *            {@link TemplateNumberFormatFactory} implementation. Not {@code null}, often an empty string.
+     * @param locale
+     *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
+     *            forever (i.e. locale changes in the {@link Environment} shouldn't be followed).
+     * @param env
+     *            The runtime environment from which the formatting was called. This is mostly meant to be used for
+     *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
+     */
+    public abstract TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException;
 
 }

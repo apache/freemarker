@@ -15,22 +15,76 @@
  */
 package freemarker.core;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import freemarker.template.Configuration;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * Factory for a certain type of date/time/dateTime formatting ({@link TemplateDateFormat}). Usually a singleton
- * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe. It doesn't create
- * {@link TemplateNumberFormat} directly, instead it creates {@link LocalTemplateDateFormatFactory}-s which are
- * single-thread locale-bound objects that provide the actual {@link TemplateDateFormat}-s based on the provided
- * parameters (like possibly a pattern string).
+ * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe.
  * 
  * @since 2.3.24
  */
 public abstract class TemplateDateFormatFactory {
     
-    public abstract LocalTemplateDateFormatFactory createLocalFactory(Environment env, Locale locale, TimeZone tz);
+    /**
+     * Returns a formatter for the given parameters.
+     * 
+     * <p>
+     * The returned formatter can be a new instance or a reused (cached) instance. Note that {@link Environment} itself
+     * caches the returned instances, though that cache is lost with the {@link Environment} (i.e., when the top-level
+     * template execution ends), also it might flushes lot of entries if the locale or time zone is changed during
+     * template execution. So caching on the factory level is still useful, unless creating the formatters is
+     * sufficiently cheap.
+     * 
+     * @param dateType
+     *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, {@link TemplateDateModel#DATETIME} or
+     *            {@link TemplateDateModel#UNKNOWN}. Supporting {@link TemplateDateModel#UNKNOWN} is not necessary, in
+     *            which case the method should throw an {@link UnknownDateTypeFormattingUnsupportedException} exception.
+     * @param zonelessInput
+     *            Indicates that the input Java {@link Date} is not from a time zone aware source. When this is
+     *            {@code true}, the formatters shouldn't override the time zone provided to its constructor (most
+     *            formatters don't do that anyway), and it shouldn't show the time zone, if it can hide it (like a
+     *            {@link SimpleDateFormat} pattern-based formatter may can't do that, as the pattern prescribes what to
+     *            show).
+     * 
+     *            <p>
+     *            As of FreeMarker 2.3.21, this is {@code true} exactly when the date is an SQL "date without time of
+     *            the day" (i.e., a {@link java.sql.Date java.sql.Date}) or an SQL "time of the day" value (i.e., a
+     *            {@link java.sql.Time java.sql.Time}, although this rule can change in future, depending on
+     *            configuration settings and such, so you should rely on this rule, just accept what this parameter
+     *            says.
+     * @param params
+     *            The string that further describes how the format should look. For example, when the
+     *            {@link Configurable#getDateFormat() dateFormat} is {@code "@fooBar 1, 2"}, then it will be
+     *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
+     *            {@link TemplateDateFormatFactory} implementation. Not {@code null}, often an empty string.
+     * @param locale
+     *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
+     *            forever (i.e. locale changes in the {@link Environment} shouldn't be followed).
+     * @param timeZone
+     *            The time zone to format for. Not {@code null}. The resulting format should be bound to this time zone
+     *            forever (i.e. time zone changes in the {@link Environment} shouldn't be followed).
+     * @param env
+     *            The runtime environment from which the formatting was called. This is mostly meant to be used for
+     *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
+     * 
+     * @throws InvalidFormatParametersException
+     *             if the {@code params} is malformed
+     * @throws TemplateModelException
+     *             if the {@code dateType} is unsupported by the formatter
+     * @throws UnknownDateTypeFormattingUnsupportedException
+     *             if {@code dateType} is {@link TemplateDateModel#UNKNOWN}, and that's unsupported by the formatter
+     *             implementation.
+     */
+    public abstract TemplateDateFormat get(int dateType, boolean zonelessInput, String params,
+            Locale locale, TimeZone timeZone, Environment env)
+                    throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
+                    InvalidFormatParametersException;
 
 }

@@ -31,7 +31,8 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     
     private static final String XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE
             = "Less than seconds accuracy isn't allowed by the XML Schema format";
-    private final ISOLikeLocalTemplateDateFormatFactory factory; 
+    private final ISOLikeTemplateDateFormatFactory factory;
+    private final Environment env;
     protected final int dateType;
     protected final boolean zonelessInput;
     protected final TimeZone timeZone;
@@ -48,9 +49,10 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
             final String formatString, int parsingStart,
             int dateType, boolean zonelessInput,
             TimeZone timeZone,
-            ISOLikeLocalTemplateDateFormatFactory factory)
+            ISOLikeTemplateDateFormatFactory factory, Environment env)
             throws InvalidFormatParametersException, UnknownDateTypeFormattingUnsupportedException {
         this.factory = factory;
+        this.env = env;
         if (dateType == TemplateDateModel.UNKNOWN) {
             throw new UnknownDateTypeFormattingUnsupportedException();
         }
@@ -182,7 +184,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                         : showZoneOffset.booleanValue(),
                 accuracy,
                 (forceUTC == null ? !zonelessInput : forceUTC.booleanValue()) ? DateUtil.UTC : timeZone,
-                factory.getISOBuiltInCalendar());
+                factory.getISOBuiltInCalendar(env));
     }
     
     protected abstract String format(Date date,
@@ -193,7 +195,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
 
     @Override
     public final Date parse(String s) throws java.text.ParseException {
-        CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator();
+        CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator(env);
         TimeZone tz = forceUTC != Boolean.FALSE ? DateUtil.UTC : timeZone;
         if (dateType == TemplateDateModel.DATE) {
             return parseDate(s, tz, calToDateConverter);

@@ -27,53 +27,36 @@ import java.util.TimeZone;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
-class JavaLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
+class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
     private static final Map<DateFormatKey, DateFormat> GLOBAL_FORMAT_CACHE = new HashMap<DateFormatKey, DateFormat>();
     
-    private Map<String, TemplateDateFormat>[] formatCache;
-
-    public JavaLocalTemplateDateFormatFactory(Environment env, Locale locale, TimeZone timeZone) {
-        super(env, locale, timeZone);
+    static final JavaTemplateDateFormatFactory INSTANCE = new JavaTemplateDateFormatFactory(); 
+    
+    private JavaTemplateDateFormatFactory() {
+        // Can't be instantiated
     }
-
+    
     /**
      * @param zonelessInput
      *            Has no effect in this implementation.
      */
     @Override
-    public TemplateDateFormat get(int dateType, boolean zonelessInput, String params)
-            throws InvalidFormatParametersException, TemplateModelException,
-            UnknownDateTypeFormattingUnsupportedException {
-        Map<String, TemplateDateFormat>[] formatCache = this.formatCache;
-        if (formatCache == null) {
-            formatCache = new Map[4]; // Index 0..3: values of TemplateDateModel's date type constants
-            this.formatCache = formatCache; 
-        }
-        
-        Map<String, TemplateDateFormat> formatsForDateType = formatCache[dateType];
-        if (formatsForDateType == null) {
-            formatsForDateType = new HashMap();
-            formatCache[dateType] = formatsForDateType; 
-        }
-
-        TemplateDateFormat format = formatsForDateType.get(params);
-        if (format == null) {
-            format = new JavaTemplateDateFormat(getJavaDateFormat(dateType, params));
-            formatsForDateType.put(params, format);
-        }
-        return format;
+    public TemplateDateFormat get(int dateType, boolean zonelessInput, String params, Locale locale, TimeZone timeZone,
+            Environment env) throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
+                    InvalidFormatParametersException {
+        return new JavaTemplateDateFormat(getJavaDateFormat(dateType, params, locale, timeZone));
     }
 
     /**
      * Returns a "private" copy (not in the global cache) for the given format.  
      */
-    private DateFormat getJavaDateFormat(int dateType, String nameOrPattern)
+    private DateFormat getJavaDateFormat(int dateType, String nameOrPattern, Locale locale, TimeZone timeZone)
             throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
 
         // Get DateFormat from global cache:
         DateFormatKey cacheKey = new DateFormatKey(
-                dateType, nameOrPattern, getLocale(), getTimeZone());
+                dateType, nameOrPattern, locale, timeZone);
         DateFormat jDateFormat;
         synchronized (GLOBAL_FORMAT_CACHE) {
             jDateFormat = GLOBAL_FORMAT_CACHE.get(cacheKey);
@@ -164,16 +147,6 @@ class JavaLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory 
             return DateFormat.FULL;
         }
         return -1;
-    }
-
-    @Override
-    protected void onLocaleChanged() {
-        formatCache = null;
-    }
-
-    @Override
-    protected void onTimeZoneChanged() {
-        formatCache = null;
     }
     
 }

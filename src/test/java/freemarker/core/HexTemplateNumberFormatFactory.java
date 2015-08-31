@@ -30,31 +30,12 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
     }
     
     @Override
-    public HexLocalizedTemplateNumberFormatFactory createLocalFactory(Environment env, Locale locale) {
-        return HexLocalizedTemplateNumberFormatFactory.INSTANCE;
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException {
+        TemplateNumberFormatUtil.checkHasNoParameters(params);
+        return HexTemplateNumberFormat.INSTANCE;
     }
-    
-    private static class HexLocalizedTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
 
-        private static final HexLocalizedTemplateNumberFormatFactory INSTANCE = new HexLocalizedTemplateNumberFormatFactory();
-
-        private HexLocalizedTemplateNumberFormatFactory() {
-            super(null, null);
-        }
-
-        @Override
-        public TemplateNumberFormat get(String params) throws InvalidFormatParametersException {
-            TemplateNumberFormatUtil.checkHasNoParameters(params);
-            return HexTemplateNumberFormat.INSTANCE;
-        }
-
-        @Override
-        protected void onLocaleChanged() {
-            // No op
-        }
-        
-    }
-    
     private static class HexTemplateNumberFormat extends TemplateNumberFormat {
 
         private static final HexTemplateNumberFormat INSTANCE = new HexTemplateNumberFormat();

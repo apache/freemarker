@@ -34,37 +34,13 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
     }
     
     @Override
-    public EpochMillisLocalTemplateDateFormatFactory createLocalFactory(Environment env, Locale locale, TimeZone tz) {
-        return EpochMillisLocalTemplateDateFormatFactory.INSTANCE;
+    public TemplateDateFormat get(int dateType, boolean zonelessInput, String params, Locale locale, TimeZone timeZone,
+            Environment env) throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
+                    InvalidFormatParametersException {
+        TemplateNumberFormatUtil.checkHasNoParameters(params);
+        return EpochMillisTemplateDateFormat.INSTANCE;
     }
-    
-    private static class EpochMillisLocalTemplateDateFormatFactory extends LocalTemplateDateFormatFactory {
 
-        private static final EpochMillisLocalTemplateDateFormatFactory INSTANCE = new EpochMillisLocalTemplateDateFormatFactory();
-
-        private EpochMillisLocalTemplateDateFormatFactory() {
-            super(null, null, null);
-        }
-
-        @Override
-        public TemplateDateFormat get(int dateType, boolean zonelessInput, String params)
-                throws InvalidFormatParametersException {
-            TemplateNumberFormatUtil.checkHasNoParameters(params);
-            return EpochMillisTemplateDateFormat.INSTANCE;
-        }
-
-        @Override
-        protected void onLocaleChanged() {
-            // No op
-        }
-
-        @Override
-        protected void onTimeZoneChanged() {
-            // No op
-        }
-        
-    }
-    
     private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
 
         private static final EpochMillisTemplateDateFormat INSTANCE = new EpochMillisTemplateDateFormat();

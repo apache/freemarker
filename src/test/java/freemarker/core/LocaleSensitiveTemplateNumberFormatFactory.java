@@ -29,62 +29,45 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
     }
     
     @Override
-    public LocaleSensitiveLocalTemplateNumberFormatFactory createLocalFactory(Environment env, Locale locale) {
-        return new LocaleSensitiveLocalTemplateNumberFormatFactory(locale);
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException {
+        TemplateNumberFormatUtil.checkHasNoParameters(params);
+        return new LocaleSensitiveTemplateNumberFormat(locale);
     }
+
+    private static class LocaleSensitiveTemplateNumberFormat extends TemplateNumberFormat {
     
-    private static class LocaleSensitiveLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
-
-        LocaleSensitiveLocalTemplateNumberFormatFactory(Locale locale) {
-            super(null, locale);
-        }
-
-        @Override
-        public TemplateNumberFormat get(String params) throws InvalidFormatParametersException {
-            TemplateNumberFormatUtil.checkHasNoParameters(params);
-            return new LocaleSensitiveTemplateNumberFormat(getLocale());
-        }
-
-        @Override
-        protected void onLocaleChanged() {
-            // No op
+        private final Locale locale;
+        
+        private LocaleSensitiveTemplateNumberFormat(Locale locale) {
+            this.locale = locale;
         }
         
-        private static class LocaleSensitiveTemplateNumberFormat extends TemplateNumberFormat {
-
-            private final Locale locale;
-            
-            private LocaleSensitiveTemplateNumberFormat(Locale locale) {
-                this.locale = locale;
+        @Override
+        public String format(TemplateNumberModel numberModel)
+                throws UnformattableNumberException, TemplateModelException {
+            Number n = numberModel.getAsNumber();
+            try {
+                return n + "_" + locale;
+            } catch (ArithmeticException e) {
+                throw new UnformattableNumberException(n + " doesn't fit into an int");
             }
-            
-            @Override
-            public String format(TemplateNumberModel numberModel)
-                    throws UnformattableNumberException, TemplateModelException {
-                Number n = numberModel.getAsNumber();
-                try {
-                    return n + "_" + locale;
-                } catch (ArithmeticException e) {
-                    throw new UnformattableNumberException(n + " doesn't fit into an int");
-                }
-            }
-
-            @Override
-            public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
-                    MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
-                return null;
-            }
-
-            @Override
-            public boolean isLocaleBound() {
-                return true;
-            }
-
-            @Override
-            public String getDescription() {
-                return "test locale sensitive";
-            }
-            
+        }
+    
+        @Override
+        public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
+                MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
+            return null;
+        }
+    
+        @Override
+        public boolean isLocaleBound() {
+            return true;
+        }
+    
+        @Override
+        public String getDescription() {
+            return "test locale sensitive";
         }
         
     }
