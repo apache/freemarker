@@ -42,6 +42,20 @@ public class DateFormatTest extends TemplateTest {
     }
 
     @Test
+    public void testCustomFormat() throws Exception {
+        addToDataModel("d", new Date(123456789));
+        assertOutput(
+                "${d?string.@epoch} ${d?string.@epoch} <#setting locale='de_DE'>${d?string.@epoch}",
+                "123456789 123456789 123456789");
+        
+        getConfiguration().setDateTimeFormat("@epoch");
+        assertOutput(
+                "<#assign d = d?datetime>"
+                + "${d} ${d?string} <#setting locale='de_DE'>${d}",
+                "123456789 123456789 123456789");
+    }
+    
+    @Test
     public void testWrongFormatStrings() throws Exception {
         getConfiguration().setDateTimeFormat("x1");
         assertErrorContains("${.now}", "\"x1\"", "'x'");
