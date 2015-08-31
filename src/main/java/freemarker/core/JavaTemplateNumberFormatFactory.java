@@ -32,9 +32,8 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
-    private static final ConcurrentHashMap<NumberFormatKey, NumberFormat> GLOBAL_NUMBER_FORMAT_CACHE
-            = new ConcurrentHashMap();
-    
+    private static final ConcurrentHashMap<CacheKey, NumberFormat> GLOBAL_FORMAT_CACHE
+            = new ConcurrentHashMap<CacheKey, NumberFormat>();
     private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
     
     private JavaTemplateNumberFormatFactory() {
@@ -44,8 +43,8 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
-        NumberFormatKey fk = new NumberFormatKey(params, locale);
-        NumberFormat jFormat = GLOBAL_NUMBER_FORMAT_CACHE.get(fk);
+        CacheKey cacheKey = new CacheKey(params, locale);
+        NumberFormat jFormat = GLOBAL_FORMAT_CACHE.get(cacheKey);
         if (jFormat == null) {
             if ("number".equals(params)) {
                 jFormat = NumberFormat.getNumberInstance(locale);
@@ -65,12 +64,12 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
                 }
             }
 
-            if (GLOBAL_NUMBER_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
+            if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
                 boolean triggered = false;
                 synchronized (JavaTemplateNumberFormatFactory.class) {
-                    if (GLOBAL_NUMBER_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
+                    if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
                         triggered = true;
-                        GLOBAL_NUMBER_FORMAT_CACHE.clear();
+                        GLOBAL_FORMAT_CACHE.clear();
                     }
                 }
                 if (triggered) {
@@ -80,30 +79,31 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
                 }
             }
             
-            NumberFormat prevJFormat = GLOBAL_NUMBER_FORMAT_CACHE.putIfAbsent(fk, jFormat);
+            NumberFormat prevJFormat = GLOBAL_FORMAT_CACHE.putIfAbsent(cacheKey, jFormat);
             if (prevJFormat != null) {
                 jFormat = prevJFormat;
             }
+        }  // if cache miss
         
-            // JFormat-s aren't thread-safe; must clone it
-            jFormat = (NumberFormat) jFormat.clone();
-        }
+        // JFormat-s aren't thread-safe; must clone it
+        jFormat = (NumberFormat) jFormat.clone();
+        
         return new JavaTemplateNumberFormat(jFormat, params); 
     }
 
-    private static final class NumberFormatKey {
+    private static final class CacheKey {
         private final String pattern;
         private final Locale locale;
 
-        NumberFormatKey(String pattern, Locale locale) {
+        CacheKey(String pattern, Locale locale) {
             this.pattern = pattern;
             this.locale = locale;
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof NumberFormatKey) {
-                NumberFormatKey fk = (NumberFormatKey) o;
+            if (o instanceof CacheKey) {
+                CacheKey fk = (CacheKey) o;
                 return fk.pattern.equals(pattern) && fk.locale.equals(locale);
             }
             return false;

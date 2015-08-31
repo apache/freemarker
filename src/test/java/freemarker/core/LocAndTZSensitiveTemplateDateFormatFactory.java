@@ -25,11 +25,11 @@ import org.apache.commons.lang.NotImplementedException;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
-public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFactory {
+public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
-    public static final EpochMillisTemplateDateFormatFactory INSTANCE = new EpochMillisTemplateDateFormatFactory();
+    public static final LocAndTZSensitiveTemplateDateFormatFactory INSTANCE = new LocAndTZSensitiveTemplateDateFormatFactory();
     
-    private EpochMillisTemplateDateFormatFactory() {
+    private LocAndTZSensitiveTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
     
@@ -38,29 +38,33 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
             Environment env) throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
                     InvalidFormatParametersException {
         TemplateNumberFormatUtil.checkHasNoParameters(params);
-        return EpochMillisTemplateDateFormat.INSTANCE;
+        return new LocAndTZSensitiveTemplateDateFormat(locale, timeZone);
     }
 
-    private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
+    private static class LocAndTZSensitiveTemplateDateFormat extends TemplateDateFormat {
 
-        private static final EpochMillisTemplateDateFormat INSTANCE = new EpochMillisTemplateDateFormat();
+        private final Locale locale;
+        private final TimeZone timeZone;
         
-        private EpochMillisTemplateDateFormat() { }
-        
+        public LocAndTZSensitiveTemplateDateFormat(Locale locale, TimeZone timeZone) {
+            this.locale = locale;
+            this.timeZone = timeZone;
+        }
+
         @Override
         public String format(TemplateDateModel dateModel)
                 throws UnformattableDateException, TemplateModelException {
-            return String.valueOf(getNonNullDate(dateModel).getTime());
+            return String.valueOf(getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
         }
 
         @Override
         public boolean isLocaleBound() {
-            return false;
+            return true;
         }
 
         @Override
         public boolean isTimeZoneBound() {
-            return false;
+            return true;
         }
 
         @Override
@@ -72,7 +76,11 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         @Override
         public Date parse(String s) throws ParseException {
             try {
-                return new Date(Long.parseLong(s));
+                int atIdx = s.indexOf("@");
+                if (atIdx == -1) {
+                    throw new ParseException("Missing @", 0);
+                }
+                return new Date(Long.parseLong(s.substring(0, atIdx)));
             } catch (NumberFormatException e) {
                 throw new ParseException("Malformed long", 0);
             }

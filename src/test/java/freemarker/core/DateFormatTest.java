@@ -15,8 +15,12 @@
  */
 package freemarker.core;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,9 +40,11 @@ public class DateFormatTest extends TemplateTest {
         Configuration cfg = getConfiguration();
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         cfg.setLocale(Locale.US);
+        cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
         
         cfg.setCustomDateFormats(ImmutableMap.of(
-                "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE));
+                "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
+                "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE));
     }
 
     @Test
@@ -54,6 +60,59 @@ public class DateFormatTest extends TemplateTest {
                 + "${d} ${d?string} <#setting locale='de_DE'>${d}",
                 "123456789 123456789 123456789");
     }
+
+    @Test
+    public void testLocaleChange() throws Exception {
+        addToDataModel("d", new Date(123456789));
+        assertOutput(
+                "${d?string.@loc} ${d?string.@loc} "
+                + "<#setting locale='de_DE'>"
+                + "${d?string.@loc} ${d?string.@loc} "
+                + "<#setting locale='en_US'>"
+                + "${d?string.@loc} ${d?string.@loc}",
+                "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00 "
+                + "123456789@de_DE:GMT+01:00 123456789@de_DE:GMT+01:00 "
+                + "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00");
+        
+        getConfiguration().setDateTimeFormat("@loc");
+        assertOutput(
+                "<#assign d = d?datetime>"
+                + "${d} ${d?string} "
+                + "<#setting locale='de_DE'>"
+                + "${d} ${d?string} "
+                + "<#setting locale='en_US'>"
+                + "${d} ${d?string}",
+                "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00 "
+                + "123456789@de_DE:GMT+01:00 123456789@de_DE:GMT+01:00 "
+                + "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00");
+    }
+
+    @Test
+    public void testTimeZoneChange() throws Exception {
+        addToDataModel("d", new Date(123456789));
+        getConfiguration().setDateTimeFormat("iso");
+        assertOutput(
+                "${d?string.@loc} ${d?string.@loc} ${d?datetime?isoLocal} "
+                + "<#setting timeZone='GMT+02:00'>"
+                + "${d?string.@loc} ${d?string.@loc} ${d?datetime?isoLocal} "
+                + "<#setting timeZone='GMT+01:00'>"
+                + "${d?string.@loc} ${d?string.@loc} ${d?datetime?isoLocal}",
+                "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00 1970-01-02T11:17:36+01:00 "
+                + "123456789@en_US:GMT+02:00 123456789@en_US:GMT+02:00 1970-01-02T12:17:36+02:00 "
+                + "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00 1970-01-02T11:17:36+01:00");
+        
+        getConfiguration().setDateTimeFormat("@loc");
+        assertOutput(
+                "<#assign d = d?datetime>"
+                + "${d} ${d?string} "
+                + "<#setting timeZone='GMT+02:00'>"
+                + "${d} ${d?string} "
+                + "<#setting timeZone='GMT+01:00'>"
+                + "${d} ${d?string}",
+                "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00 "
+                + "123456789@en_US:GMT+02:00 123456789@en_US:GMT+02:00 "
+                + "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00");
+    }
     
     @Test
     public void testWrongFormatStrings() throws Exception {
@@ -62,6 +121,37 @@ public class DateFormatTest extends TemplateTest {
         assertErrorContains("${.now?string}", "\"x1\"", "'x'");
         getConfiguration().setDateTimeFormat("short");
         assertErrorContains("${.now?string('x2')}", "\"x2\"", "'x'");
+    }
+    
+    @Test
+    public void testUnknownCustomFormat() throws Exception {
+        {
+            getConfiguration().setDateTimeFormat("@noSuchFormat");
+            Throwable exc = assertErrorContains(
+                    "${.now}",
+                    "\"@noSuchFormat\"", "\"noSuchFormat\"", "\"datetime_format\"");
+            assertThat(exc.getCause(), instanceOf(UndefinedCustomFormatException.class));
+            
+        }
+        {
+            getConfiguration().setDateFormat("@noSuchFormatD");
+            assertErrorContains(
+                    "${.now?date}",
+                    "\"@noSuchFormatD\"", "\"noSuchFormatD\"", "\"date_format\"");
+        }
+        {
+            getConfiguration().setTimeFormat("@noSuchFormatT");
+            assertErrorContains(
+                    "${.now?time}",
+                    "\"@noSuchFormatT\"", "\"noSuchFormatT\"", "\"time_format\"");
+        }
+
+        {
+            getConfiguration().setDateTimeFormat("");
+            Throwable exc = assertErrorContains("${.now?string('@noSuchFormat2')}",
+                    "\"@noSuchFormat2\"", "\"noSuchFormat2\"");
+            assertThat(exc.getCause(), instanceOf(UndefinedCustomFormatException.class));
+        }
     }
     
     @Test

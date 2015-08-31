@@ -242,6 +242,11 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         return false;
     }
     
+    @Override
+    public boolean isTimeZoneBound() {
+        return true;
+    }
+
     /**
      * Always returns {@code null} (there's no markup format).
      */
