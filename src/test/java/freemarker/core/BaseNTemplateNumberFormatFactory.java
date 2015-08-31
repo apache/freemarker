@@ -31,42 +31,22 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
     }
     
     @Override
-    public BaseNLocalizedTemplateNumberFormatFactory createLocalFactory(Environment env, Locale locale) {
-        return BaseNLocalizedTemplateNumberFormatFactory.INSTANCE;
-    }
-    
-    private static class BaseNLocalizedTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
-
-        private static final BaseNLocalizedTemplateNumberFormatFactory INSTANCE
-                = new BaseNLocalizedTemplateNumberFormatFactory();
-        
-        private BaseNLocalizedTemplateNumberFormatFactory() {
-            super(null, null);
-        }
-
-        @Override
-        public TemplateNumberFormat get(String params) throws InvalidFormatParametersException {
-            int base;
-            try {
-                base = Integer.parseInt(params);
-            } catch (NumberFormatException e) {
-                if (params.length() == 0) {
-                    throw new InvalidFormatParametersException(
-                            "A format parameter is required, which specifies the numerical system base.");
-                }
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException {
+        int base;
+        try {
+            base = Integer.parseInt(params);
+        } catch (NumberFormatException e) {
+            if (params.length() == 0) {
                 throw new InvalidFormatParametersException(
-                        "The format paramter must be an integer, but was (shown quoted): " + StringUtil.jQuote(params));
+                        "A format parameter is required, which specifies the numerical system base.");
             }
-            return new BaseNTemplateNumberFormat(base);
+            throw new InvalidFormatParametersException(
+                    "The format paramter must be an integer, but was (shown quoted): " + StringUtil.jQuote(params));
         }
-
-        @Override
-        protected void onLocaleChanged() {
-            // No op
-        }
-        
+        return new BaseNTemplateNumberFormat(base);
     }
-    
+
     private static class BaseNTemplateNumberFormat extends TemplateNumberFormat {
 
         private final int base;

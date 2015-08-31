@@ -26,7 +26,9 @@ import freemarker.log.Logger;
 /**
  * Deals with {@link TemplateNumberFormat}-s that just wrap a Java {@link NumberFormat}.
  */
-class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFactory {
+class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+    
+    static final JavaTemplateNumberFormatFactory INSTANCE = new JavaTemplateNumberFormatFactory();
     
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
@@ -35,14 +37,13 @@ class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFact
     
     private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
     
-    JavaLocalTemplateNumberFormatFactory(Environment env, Locale locale) {
-        super(env, locale);
+    private JavaTemplateNumberFormatFactory() {
+        // Not meant to be instantiated
     }
-
+    
     @Override
-    public TemplateNumberFormat get(String params)
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
-        Locale locale = getLocale();
         NumberFormatKey fk = new NumberFormatKey(params, locale);
         NumberFormat jFormat = GLOBAL_NUMBER_FORMAT_CACHE.get(fk);
         if (jFormat == null) {
@@ -53,7 +54,7 @@ class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFact
             } else if ("percent".equals(params)) {
                 jFormat = NumberFormat.getPercentInstance(locale);
             } else if ("computer".equals(params)) {
-                jFormat = getEnvironment().getCNumberFormat();
+                jFormat = env.getCNumberFormat();
             } else {
                 try {
                     jFormat = new DecimalFormat(params, new DecimalFormatSymbols(locale));
@@ -66,7 +67,7 @@ class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFact
 
             if (GLOBAL_NUMBER_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
                 boolean triggered = false;
-                synchronized (JavaLocalTemplateNumberFormatFactory.class) {
+                synchronized (JavaTemplateNumberFormatFactory.class) {
                     if (GLOBAL_NUMBER_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
                         triggered = true;
                         GLOBAL_NUMBER_FORMAT_CACHE.clear();
@@ -112,11 +113,6 @@ class JavaLocalTemplateNumberFormatFactory extends LocalTemplateNumberFormatFact
         public int hashCode() {
             return pattern.hashCode() ^ locale.hashCode();
         }
-    }
-
-    @Override
-    protected void onLocaleChanged() {
-        // No op
     }
     
 }

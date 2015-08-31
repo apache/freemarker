@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -110,7 +111,6 @@ public final class Environment extends Configurable {
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
     private Map<String, TemplateNumberFormat> cachedTemplateNumberFormats;
-    private Map<String, LocalTemplateNumberFormatFactory> cachedLocalTemplateNumberFormatFactories;
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
@@ -148,7 +148,6 @@ public final class Environment extends Configurable {
     /** Caches the result of {@link #isSQLDateAndTimeTimeZoneSameAsNormal()}. */
     private Boolean cachedSQLDateAndTimeTimeZoneSameAsNormal;
     
-    private JavaLocalTemplateNumberFormatFactory javaLocTempNumberFormatFactory;
     private NumberFormat cNumberFormat;
     
     /**
@@ -836,15 +835,6 @@ public final class Environment extends Configurable {
             if (cachedTemplateNumberFormat != null && cachedTemplateNumberFormat.isLocaleBound()) {
                 cachedTemplateNumberFormat = null;
             }
-            if (cachedLocalTemplateNumberFormatFactories != null) {
-                for (LocalTemplateNumberFormatFactory factory : cachedLocalTemplateNumberFormatFactories.values()) {
-                    factory.setLocale(locale);
-                }
-            }
-            
-            if (javaLocTempNumberFormatFactory != null) {
-                javaLocTempNumberFormatFactory.setLocale(locale);
-            }
     
             if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i++) {
@@ -1200,27 +1190,15 @@ public final class Environment extends Configurable {
                 params = endIdx < ln ? formatString.substring(endIdx + 1) : "";
             }
             
-            LocalTemplateNumberFormatFactory localFormatFactory =
-                    cachedLocalTemplateNumberFormatFactories != null ? cachedLocalTemplateNumberFormatFactories.get(name) : null;
-            if (localFormatFactory == null) {
-                TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
-                if (formatFactory == null) {
-                    throw new UndefinedCustomFormatException(
-                            "No custom number format was defined with name " + StringUtil.jQuote(name));
-                }
-                localFormatFactory = formatFactory.createLocalFactory(this, getLocale());
-                if (cachedLocalTemplateNumberFormatFactories == null) {
-                    cachedLocalTemplateNumberFormatFactories = new HashMap<String, LocalTemplateNumberFormatFactory>();
-                }
-                cachedLocalTemplateNumberFormatFactories.put(name, localFormatFactory);
+            TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
+            if (formatFactory == null) {
+                throw new UndefinedCustomFormatException(
+                        "No custom number format was defined with name " + StringUtil.jQuote(name));
             }
             
-            format = localFormatFactory.get(params);
+            format = formatFactory.get(params, getLocale(), this);
         } else {
-            if (javaLocTempNumberFormatFactory == null) {
-                javaLocTempNumberFormatFactory = new JavaLocalTemplateNumberFormatFactory(this, getLocale());
-            }
-            format = javaLocTempNumberFormatFactory.get(formatString);
+            format = JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, getLocale(), this);
         }
     
         if (cacheResult) {
@@ -2466,7 +2444,48 @@ public final class Environment extends Configurable {
     public void __setitem__(String key, Object o) throws TemplateException {
         setGlobalVariable(key, getObjectWrapper().wrap(o));
     }
+    
+    
+    private IdentityHashMap<Object, Object> customStateVariables;
+    
+    /**
+     * Returns the value of a custom state variable, or {@code null} if it's missing; see
+     * {@link #setCustomState(Object, Object)} for more.
+     * 
+     * @since 2.3.24
+     */
+    public Object getCustomState(Object identityKey) {
+        if (customStateVariables == null) {
+            return null;
+        }
+        return customStateVariables.get(identityKey);
+    }
 
+    /**
+     * Sets the value of a custom state variable. Custom state variables meant to be used by
+     * {@link TemplateNumberFormatFactory}-es, {@link TemplateDateFormatFactory}-es, and similar user-implementable,
+     * pluggable objects, which want to maintain an {@link Environment}-scoped state (such as a cache).
+     * 
+     * @param identityKey
+     *            The key that identifies the variable, by its object identity (not by {@link Object#equals(Object)}).
+     *            This should be something like a {@code private static final Object CUSTOM_STATE_KEY = new Object();}
+     *            in the class that needs this state variable.
+     * @param value
+     *            The value of the variable. Can be anything, even {@code null}.
+     * 
+     * @return The previous value of the variable, or {@code null} if the variable didn't exist.
+     * 
+     * @since 2.3.24
+     */
+    public Object setCustomState(Object identityKey, Object value) {
+        IdentityHashMap<Object, Object> customStateVariables = this.customStateVariables;
+        if (customStateVariables == null) {
+            customStateVariables = new IdentityHashMap<Object, Object>();
+            this.customStateVariables = customStateVariables;
+        }
+        return customStateVariables.put(identityKey, value);
+    }
+    
     final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
 
         private final TemplateElement element;
