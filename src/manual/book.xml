@@ -25455,6 +25455,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>There can be now user defined number and
+              date/time/datetime formatters, defined by the programmers when
+              configuring FreeMarker, which can be referred with strings
+              starting with <literal>"@"</literal>, like in
+              <literal>&lt;#setting number_format='@foo'&gt;</literal>, or
+              <literal>${n?string.@foo_params}</literal>,
+              <literal>&lt;#setting number_format='@foo params'&gt;</literal>,
+              or <literal>${n?string.@foo}</literal>,
+              <literal>${n?string.@foo_params}</literal>. This means that
+              <replaceable>if</replaceable> custom formats are allowed in the
+              configuration (by <link
+              linkend="pgui_config_incompatible_improvements_how_to_set">setting
+              <literal>incompatible_improvements</literal></link> to 2.3.24),
+              an <replaceable>initial</replaceable> <literal>@</literal> in
+              format strings is now reserved, and need to be escaped as
+              <literal>@@</literal> if it has to be there literally.</para>
+            </listitem>
+
+            <listitem>
               <para>Added new special variable:
               <literal>.incompatible_improvements</literal>, which returns the
               <link
@@ -25535,6 +25554,79 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>auto_escaping_policy</literal>. This decides when
                   auto-escaping should be enabled depending on the current
                   output format.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Changes related to the custom number and
+              date/time/datetime formating feature:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Added new classes for implementing custom formatters:
+                  <literal>freemarker.core.TemplateNumberFormat</literal>,
+                  <literal>TemplateNumberFormatFactory</literal>,
+                  <literal>TemplateDateFormat</literal>,
+                  <literal>TemplateDateFormatFactory</literal>, also the
+                  exceptions these can throw. These allow implementing any
+                  kind of formatting rules that are doable in Java (they
+                  aren't restricted to any <literal>java.text</literal>
+                  formatters). Furthermore these formatters get the
+                  <literal>TemplateModel</literal> instead of a the bare
+                  <literal>java.lang.Number</literal> or
+                  <literal>java.util.Date</literal>, which let you use the
+                  extra application-specific meta information that you may
+                  pack into the <literal>TemplateModel</literal>-s, such as
+                  physical unit, preferred precision, and so on.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added
+                  <literal>Configurable.setCustomNumberFormats(Map&lt;String,
+                  TemplateNumberFormatFactory&gt;)</literal> and
+                  <literal>Configurable.setCustomDateFormats(Map&lt;String,
+                  TemplateDateFormatFactory&gt;)</literal> with which you can
+                  register your own formats. <emphasis>If you <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set">set
+                  <literal>incompatible_improvements</literal></link> to
+                  2.3.24, and only then</emphasis>, these formats can be
+                  referred from everywhere where you can use a string to
+                  define a format (often as a pattern), with a format string
+                  like <literal>"@foo"</literal> or <literal>"@foo
+                  params"</literal>, where <literal>"foo"</literal> is the key
+                  in the <literal>Map&lt;String, ...&gt;</literal> parameter
+                  of the earlier shown methods, and the parameters (if any)
+                  are interpreted by the
+                  <literal>Template<replaceable>Xxx</replaceable>FormatFactory</literal>.
+                  Like, you can do <literal>cfg.setNumberFormat("@foo
+                  params")</literal>, or <literal>&lt;#setting
+                  number_format='@foo params'&gt;</literal>, or
+                  <literal>${n?string.@foo_params}</literal>. Note that an
+                  <replaceable>initial</replaceable> <literal>@</literal> in
+                  format strings is reserved for this purpose with
+                  <literal>incompatible_improvements</literal> to 2.3.24, and
+                  need to be escaped as <literal>@@</literal> if it has to be
+                  there literally.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new <literal>Environment</literal> methods
+                  returning <literal>TemplateNumberFormat</literal> and
+                  <literal>TemplateDateFormat</literal> objects:
+                  <literal>getTemplateNumberFormat()</literal>,
+                  <literal>getTemplateNumberFormat(String
+                  formatString)</literal>,
+                  <literal>getTemplateNumberFormat(String formatString, Locale
+                  locale)</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The internal format object caching architecture has
+                  been reworked, so that it can handle custom formats too. But
+                  this reworking also fixes some bottlenecks under highly
+                  concurrent load, and some (otherwise unlikely) memory
+                  leaking possibilities.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -25639,6 +25731,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Internal code cleanup: Mostly source code formatting, also
               many parser construction/setup cleanup</para>
+            </listitem>
+
+            <listitem>
+              <para>JSP TLD loading now quotes the location of
+              <literal>jar</literal>-s (and other <literal>zip</literal>-s)
+              which can't be loaded due to zip format errors in the error
+              message.</para>
             </listitem>
           </itemizedlist>
         </section>
