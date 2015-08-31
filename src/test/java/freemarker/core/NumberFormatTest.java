@@ -110,7 +110,7 @@ public class NumberFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testParameterized() throws Exception {
+    public void testCustomParameterized() throws Exception {
         Configuration cfg = getConfiguration();
         cfg.setNumberFormat("@base 2");
         assertOutput("${11}", "1011");
@@ -155,7 +155,7 @@ public class NumberFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testNullInNumberModel() throws Exception {
+    public void testNullInModel() throws Exception {
         addToDataModel("n", new MutableTemplateNumberModel());
         assertErrorContains("${n}", "nothing inside it");
         assertErrorContains("${n?string}", "nothing inside it");
