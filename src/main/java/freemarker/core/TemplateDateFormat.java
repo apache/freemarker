@@ -101,9 +101,7 @@ public abstract class TemplateDateFormat {
     /**
      * Tells if this formatter should be re-created if the time zone changes. Currently always {@code true}.
      */
-    public final boolean isTimeZoneBound() {
-        return true;
-    }
+    public abstract boolean isTimeZoneBound();
 
     /**
      * Utility method to extract the {@link Date} from an {@link TemplateDateModel}, and throw

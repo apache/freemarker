@@ -52,7 +52,7 @@ public class NumberFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testUnknownNumberFormat() throws Exception {
+    public void testUnknownCustomFormat() throws Exception {
         {
             getConfiguration().setNumberFormat("@noSuchFormat");
             Throwable exc = assertErrorContains("${1}", "\"@noSuchFormat\"", "\"noSuchFormat\"");

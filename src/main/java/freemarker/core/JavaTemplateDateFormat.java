@@ -57,6 +57,11 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
         return true;
     }
 
+    @Override
+    public boolean isTimeZoneBound() {
+        return true;
+    }
+    
     /**
      * Always returns {@code null} (there's no markup format).
      */

@@ -845,7 +845,10 @@ public final class Environment extends Configurable {
         if (!timeZone.equals(prevTimeZone)) {
             if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_SQL_D_T_TZ_OFFS; i++) {
-                    cachedTempDateFormatArray[i] = null;
+                    TemplateDateFormat f = cachedTempDateFormatArray[i];
+                    if (f != null && f.isTimeZoneBound()) {
+                        cachedTempDateFormatArray[i] = null;
+                    }
                 }
             }
             if (cachedTempDateFormatsByFmtStrArray != null) {
@@ -1444,7 +1447,7 @@ public final class Environment extends Configurable {
             }
             return format;
         } catch (InvalidFormatStringException e) {
-            throw new _TemplateModelException(e.getCause(),
+            throw new _TemplateModelException(e,
                     (formatStringCfgSettingName == null
                             ? (Object) "Malformed date/time format string: "
                             : new Object[] {
