@@ -514,7 +514,7 @@ public final class Environment extends Configurable {
             currentTemplate = invokingMacroContext.nestedContentTemplate;
             
             final Configurable prevParent;
-            final boolean parentReplacementOn = isIcI2322OrLater();
+            final boolean parentReplacementOn = isBeforeIcI2322();
             prevParent = getParent();
             if (parentReplacementOn) {
                 setParent(currentNamespace.getTemplate());
@@ -1077,54 +1077,80 @@ public final class Environment extends Configurable {
     public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatStringException {
         TemplateNumberFormat format = cachedTemplateNumberFormat;
         if (format == null) {
-            format = getTemplateNumberFormat(getNumberFormat(), false);
+            format = getTemplateNumberFormat(getNumberFormat(), false, null);
             cachedTemplateNumberFormat = format;
         }
         return format;
     }
 
     /**
-     * Returns the number format for the given format string as {@link TemplateNumberFormat}. The returned value
-     * shouldn't be stored for later reuse, as the returned instance can be different when this method is called later
-     * again, for example if the locale has been changed since then.
+     * Returns the number format for the given format string as {@link TemplateNumberFormat}.
      * 
      * @param formatString
      *            A string that you could also use as the value of the {@code numberFormat} configuration setting.
+     * @param locale
+     *            Can be {@code null}, in which case the current locale will be used. Note that the current locale
+     *            can change over time, and the format returned for a {@code null} parameter won't follow that change.
+     *            Note that if the specified locale differs from the current locale, as of this writing, the
+     *            {@link Environment}-level format cache won't be used.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateNumberFormat getTemplateNumberFormat(String formatString, Locale locale)
+            throws InvalidFormatStringException {
+        return getTemplateNumberFormat(formatString, true, locale);
+    }
+
+    /**
+     * Same as {@link #getTemplateNumberFormat(String, Locale)} with {@code null} {@code locale} parameter. 
      * 
      * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
-        return getTemplateNumberFormat(formatString, true);
+        return getTemplateNumberFormat(formatString, (Locale) null);
     }
     
-    private TemplateNumberFormat getTemplateNumberFormat(String formatString, boolean cacheResult)
+    /**
+     * @param locale
+     *            Can be {@code null}, in which case the current locale will be used.
+     */
+    private TemplateNumberFormat getTemplateNumberFormat(String formatString, boolean cacheResult, Locale locale)
             throws InvalidFormatStringException {
-        if (cachedTemplateNumberFormats == null) {
-            if (cacheResult) {
-                cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
-            }
-        } else {
-            TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
-            if (format != null) {
-                return format;
+        boolean usesEnvLocale = locale == null || locale.equals(getLocale());
+        
+        if (usesEnvLocale) {
+            if (cachedTemplateNumberFormats == null) {
+                if (cacheResult) {
+                    cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
+                }
+            } else {
+                TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
+                if (format != null) {
+                    return format;
+                }
             }
         }
-    
+
+        Locale actualLocale = locale == null ? getLocale() : locale;
+        
         TemplateNumberFormat format;
-        int ln = formatString.length();
-        if (ln > 0 && formatString.charAt(0) == '@') {
+        int formatStringLen = formatString.length();
+        if (formatStringLen > 1
+                && formatString.charAt(0) == '@'
+                && formatString.charAt(1) != '@'
+                && isIcI2324OrLater()) {
             final String name;
             final String params;
             {
                 int endIdx;
-                findParamsStart: for (endIdx = 1; endIdx < ln; endIdx++) {
+                findParamsStart: for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
                     char c = formatString.charAt(endIdx);
                     if (c == ' ' || c == '_') {
                         break findParamsStart;
                     }
                 }
                 name = formatString.substring(1, endIdx);
-                params = endIdx < ln ? formatString.substring(endIdx + 1) : "";
+                params = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
             
             TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
@@ -1133,12 +1159,19 @@ public final class Environment extends Configurable {
                         "No custom number format was defined with name " + StringUtil.jQuote(name));
             }
             
-            format = formatFactory.get(params, getLocale(), this);
+            format = formatFactory.get(params, actualLocale, this);
         } else {
-            format = JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, getLocale(), this);
+            if (formatStringLen > 1
+                    && formatString.charAt(0) == '@'
+                    && formatString.charAt(1) == '@'
+                    && isIcI2324OrLater()) {
+                // Unescape @ escaped as @@
+                formatString = formatString.substring(1);
+            }
+            format = JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, actualLocale, this);
         }
     
-        if (cacheResult) {
+        if (cacheResult && usesEnvLocale) {
             cachedTemplateNumberFormats.put(formatString, format);
         }
         return format;
@@ -1425,7 +1458,10 @@ public final class Environment extends Configurable {
                     && formatString.charAt(2) == 'o') {
                 formatFactory = ISOTemplateDateFormatFactory.INSTANCE;
                 formatParams = formatString; // for speed, we don't remove the prefix
-            } else if (firstChar == '@') {
+            } else if (firstChar == '@'
+                    && formatStringLen > 1
+                    && formatString.charAt(1) != '@'
+                    && isIcI2324OrLater()) {
                 final String name;
                 {
                     int endIdx;
@@ -1445,6 +1481,14 @@ public final class Environment extends Configurable {
                             "No custom date format was defined with name " + StringUtil.jQuote(name));
                 }
             } else {
+                if (firstChar == '@'
+                        && formatStringLen > 1
+                        && formatString.charAt(1) == '@'
+                        && isIcI2324OrLater()) {
+                    // Unescape @ escaped as @@
+                    formatString = formatString.substring(1);
+                }
+                
                 formatFactory = JavaTemplateDateFormatFactory.INSTANCE;
                 formatParams = formatString;
             }
@@ -2155,7 +2199,7 @@ public final class Environment extends Configurable {
     public void include(Template includedTemplate)
     throws TemplateException, IOException {
         final Template prevTemplate;
-        final boolean parentReplacementOn = isIcI2322OrLater();
+        final boolean parentReplacementOn = isBeforeIcI2322();
         prevTemplate = getTemplate();
         if (parentReplacementOn) {
             setParent(includedTemplate);
@@ -2454,10 +2498,14 @@ public final class Environment extends Configurable {
         }
     };
     
-    private boolean isIcI2322OrLater() {
+    private boolean isBeforeIcI2322() {
         return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
     }
 
+    private boolean isIcI2324OrLater() {
+        return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
+    }
+    
     /**
      * See {@link #setFastInvalidReferenceExceptions(boolean)}. 
      */

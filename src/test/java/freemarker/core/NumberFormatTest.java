@@ -28,6 +28,8 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
+import freemarker.template.SimpleNumber;
+import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -110,7 +112,7 @@ public class NumberFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testParameterized() throws Exception {
+    public void testCustomParameterized() throws Exception {
         Configuration cfg = getConfiguration();
         cfg.setNumberFormat("@base 2");
         assertOutput("${11}", "1011");
@@ -120,6 +122,43 @@ public class NumberFormatTest extends TemplateTest {
         assertErrorContains("${11?string.@base_xyz}", "\"@base_xyz\"", "\"xyz\"");
         cfg.setNumberFormat("@base");
         assertErrorContains("${11}", "\"@base\"", "format parameter is required");
+    }
+
+    @Test
+    public void testCustomWithFallback() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setNumberFormat("@base 2|0.0#");
+        assertOutput("${11}", "1011");
+        assertOutput("${11.34}", "11.34");
+        assertOutput("${11?string('@base 3|0.00')}", "102");
+        assertOutput("${11.2?string('@base 3|0.00')}", "11.20");
+    }
+
+    @Test
+    public void testExplicitLocale() throws Exception {
+        Template t = new Template(null, "", getConfiguration());
+        Environment env = t.createProcessingEnvironment(null, null);
+        
+        TemplateNumberFormat defF = env.getTemplateNumberFormat();
+        //
+        TemplateNumberFormat explF = env.getTemplateNumberFormat("0.00");
+        assertEquals("1.25", explF.format(new SimpleNumber(1.25)));
+        //
+        TemplateNumberFormat expl2F = env.getTemplateNumberFormat("@loc");
+        assertEquals("1.25_en_US", expl2F.format(new SimpleNumber(1.25)));
+        
+        TemplateNumberFormat explFFr = env.getTemplateNumberFormat("0.00", Locale.FRANCE);
+        assertNotSame(explF, explFFr);
+        assertEquals("1,25", explFFr.format(new SimpleNumber(1.25)));
+        //
+        TemplateNumberFormat expl2FFr = env.getTemplateNumberFormat("@loc", Locale.FRANCE);
+        assertEquals("1.25_fr_FR", expl2FFr.format(new SimpleNumber(1.25)));
+        
+        assertSame(env.getTemplateNumberFormat(), defF);
+        //
+        assertSame(env.getTemplateNumberFormat("0.00"), explF);
+        //
+        assertSame(env.getTemplateNumberFormat("@loc"), expl2F);
     }
     
     /**
@@ -155,10 +194,25 @@ public class NumberFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testNullInNumberModel() throws Exception {
+    public void testNullInModel() throws Exception {
         addToDataModel("n", new MutableTemplateNumberModel());
         assertErrorContains("${n}", "nothing inside it");
         assertErrorContains("${n?string}", "nothing inside it");
+    }
+    
+    @Test
+    public void testIcIAndEscaping() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@hex");
+        assertOutput("${10}", "a");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
+        cfg.setNumberFormat("@hex");
+        assertOutput("${10}", "@hex10");
     }
     
     private static class MutableTemplateNumberModel implements TemplateNumberModel {

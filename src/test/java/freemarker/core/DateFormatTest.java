@@ -28,6 +28,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
+import freemarker.template.SimpleDate;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
@@ -44,7 +45,8 @@ public class DateFormatTest extends TemplateTest {
         
         cfg.setCustomDateFormats(ImmutableMap.of(
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
-                "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE));
+                "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
+                "div", EpochMillisDivTemplateDateFormatFactory.INSTANCE));
     }
 
     @Test
@@ -122,6 +124,20 @@ public class DateFormatTest extends TemplateTest {
         getConfiguration().setDateTimeFormat("short");
         assertErrorContains("${.now?string('x2')}", "\"x2\"", "'x'");
     }
+
+    @Test
+    public void testCustomParameterized() throws Exception {
+        Configuration cfg = getConfiguration();
+        addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
+        cfg.setDateTimeFormat("@div 1000");
+        assertOutput("${d}", "12345");
+        assertOutput("${d?string}", "12345");
+        assertOutput("${d?string.@div_100}", "123456");
+        
+        assertErrorContains("${d?string.@div_xyz}", "\"@div_xyz\"", "\"xyz\"");
+        cfg.setDateTimeFormat("@div");
+        assertErrorContains("${d}", "\"datetime_format\"", "\"@div\"", "format parameter is required");
+    }
     
     @Test
     public void testUnknownCustomFormat() throws Exception {
@@ -155,10 +171,26 @@ public class DateFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testNullInNumberModel() throws Exception {
-        addToDataModel("n", new MutableTemplateDateModel());
-        assertErrorContains("${n}", "nothing inside it");
-        assertErrorContains("${n?string}", "nothing inside it");
+    public void testNullInModel() throws Exception {
+        addToDataModel("d", new MutableTemplateDateModel());
+        assertErrorContains("${d}", "nothing inside it");
+        assertErrorContains("${d?string}", "nothing inside it");
+    }
+    
+    @Test
+    public void testIcIAndEscaping() throws Exception {
+        Configuration cfg = getConfiguration();
+        addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@epoch");
+        assertOutput("${d}", "12345678");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
+        cfg.setDateTimeFormat("@epoch");
+        assertErrorContains("${d}", "\"@epoch\"");
     }
     
     private static class MutableTemplateDateModel implements TemplateDateModel {
