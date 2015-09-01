@@ -32,7 +32,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
-        TemplateNumberFormatUtil.checkHasNoParameters(params);
+        TemplateFormatUtil.checkHasNoParameters(params);
         return HexTemplateNumberFormat.INSTANCE;
     }
 
@@ -45,7 +45,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         @Override
         public String format(TemplateNumberModel numberModel)
                 throws UnformattableNumberException, TemplateModelException {
-            Number n = TemplateNumberFormatUtil.getNonNullNumber(numberModel);
+            Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
                 return Integer.toHexString(NumberUtil.toIntExact(n));
             } catch (ArithmeticException e) {

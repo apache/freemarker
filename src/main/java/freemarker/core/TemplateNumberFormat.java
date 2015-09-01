@@ -56,6 +56,7 @@ public abstract class TemplateNumberFormat {
             throws UnformattableNumberException, TemplateModelException;
 
     /**
+     * <b>[Not yet used, might changes in 2.3.24 final]</b>
      * Formats the number to markup instead of to plain text, or returns {@code null} that will make FreeMarker call
      * {@link #format(TemplateNumberModel)} and escape its result. If the markup format would be just the result of
      * {@link #format(TemplateNumberModel)} escaped, it should return {@code null}.
@@ -65,6 +66,7 @@ public abstract class TemplateNumberFormat {
                     throws UnformattableNumberException, TemplateModelException;
     
     /**
+     * <b>[Not yet used, might changes in 2.3.24 final]</b>
      * Same as {@link #format(TemplateNumberModel, MarkupOutputFormat)}, but prints the result to a {@link Writer}
      * instead of returning it. This can be utilized for some optimizatoin. In the case where
      * {@link #format(TemplateNumberModel, MarkupOutputFormat)} would return {@code null}, it returns {@code false}. It

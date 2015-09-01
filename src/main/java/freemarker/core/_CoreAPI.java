@@ -17,12 +17,14 @@
 package freemarker.core;
 
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.utility.ClassUtil;
 
 
 /**
@@ -133,6 +135,22 @@ public class _CoreAPI {
     
     static final public void replaceText(TextBlock textBlock, String text) {
         textBlock.replaceText(text);
+    }
+
+    /**
+     * @throws IllegalArgumentException
+     *             if the type of the some of the values isn't as expected
+     */
+    public static void checkSettingValueItemsType(String somethingsSentenceStart, Class<?> expectedClass,
+            Collection<? extends Object> values) {
+        if (values == null) return;
+        for (Object value : values) {
+            if (!expectedClass.isInstance(value)) {
+                throw new IllegalArgumentException(somethingsSentenceStart + " must be instances of "
+                        + ClassUtil.getShortClassName(expectedClass) + ", but one of them was a(n) "
+                        + ClassUtil.getShortClassNameOfObject(value) + ".");
+            }
+        }
     }
     
 }

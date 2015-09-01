@@ -54,6 +54,7 @@ public abstract class TemplateDateFormat {
             throws UnformattableDateException, TemplateModelException;
 
     /**
+     * <b>[Not yet used, might changes in 2.3.24 final]</b>
      * Formats the date/time/dateTime to markup instead of to plain text, or returns {@code null} that will make
      * FreeMarker call {@link #format(TemplateDateModel)} and escape its result. If the markup format would be just the
      * result of {@link #format(TemplateDateModel)} escaped, it should return {@code null}.
@@ -63,6 +64,7 @@ public abstract class TemplateDateFormat {
                     throws UnformattableNumberException, TemplateModelException;
     
     /**
+     * <b>[Not yet used, might changes in 2.3.24 final]</b>
      * Same as {@link #format(TemplateDateModel, MarkupOutputFormat)}, but prints the result to a {@link Writer}
      * instead of returning it. This can be utilized for some optimizatoin. In the case where
      * {@link #format(TemplateDateModel, MarkupOutputFormat)} would return {@code null}, it returns {@code false}. It
@@ -84,6 +86,11 @@ public abstract class TemplateDateFormat {
     }
 
     /**
+     * <b>[Unfinished - will change in 2.3.24 final]</b>.
+     * 
+     * TODO Thrown exceptions.
+     * TODO How can one return a TemplateDateModel instead?
+     * 
      * @return The interpretation of the text as {@link Date}. Can't be {@code null}.
      */
     public abstract Date parse(String s) throws java.text.ParseException;
@@ -102,17 +109,5 @@ public abstract class TemplateDateFormat {
      * Tells if this formatter should be re-created if the time zone changes. Currently always {@code true}.
      */
     public abstract boolean isTimeZoneBound();
-
-    /**
-     * Utility method to extract the {@link Date} from an {@link TemplateDateModel}, and throw
-     * {@link UnformattableDateException} with a standard error message if that's {@code null}.
-     */
-    protected Date getNonNullDate(TemplateDateModel dateModel) throws TemplateModelException {
-        Date date = dateModel.getAsDate();
-        if (date == null) {
-            throw EvalUtil.newModelHasStoredNullException(Date.class, dateModel, null);
-        }
-        return date;
-    }
         
 }

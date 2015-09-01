@@ -9145,6 +9145,38 @@ cfg.setTemplateConfigurers(
         linkend="pgui_config_templateconfigurers">here...</link>)</para>
       </section>
 
+      <section xml:id="pgui_config_custom_formats">
+        <title>Custom number and date/time formats</title>
+
+        <para>FreeMarker allows you to define your own number and
+        date/time/datetime formatter algorithms by implementing
+        <literal>freemarker.core.TemplateNumberFormatFactory</literal> and
+        <literal>freemarker.core.TemplateDateFormatFactory</literal>. These
+        formats can be registered with the
+        <literal>custom_number_formats</literal> and
+        <literal>custom_date_formats</literal> configuration settings. After
+        that, if you <link
+        linkend="pgui_config_incompatible_improvements_how_to_set">set the
+        <literal>incompatible_improvements</literal> setting</link> to 2.3.24
+        or higher, anywhere where you can specify formats with a
+        <literal>String</literal>, now you can refer to your custom format as
+        <literal>"@<replaceable>name</replaceable>"</literal>. So for example,
+        if you have registered a your number format implementation with name
+        <literal>"smart"</literal>, then you could set the
+        <literal>number_format</literal> setting
+        (<literal>Configurable.setNumberFormat(String)</literal>) to
+        <literal>"@smart"</literal>, or issue
+        <literal>${n?string.@smart}</literal> or <literal>&lt;#setting
+        number_format="@smart"&gt;</literal> in a template.</para>
+
+        <para>[TODO] What other applications exist (aliasing, model-aware
+        formatters)</para>
+
+        <para>[TODO] Simple complete example</para>
+
+        <para>[TODO] Complex formatter example (base N with fallback)</para>
+      </section>
+
       <section xml:id="pgui_config_incompatible_improvements">
         <title>The "incompatible improvements" setting</title>
 
@@ -14383,8 +14415,10 @@ rif: foo XYr baar</programlisting>
           by the Java platform installation, rather than by FreeMarker, except
           for <literal>computer</literal>, which uses the same formatting as
           <link linkend="ref_builtin_c">the <literal>c</literal>
-          built-in</link>. You can use these predefined formats like
-          this:</para>
+          built-in</link>. There can also be programmer-defined formats, whose
+          name starts with <literal>@</literal> (programmers <link
+          linkend="pgui_config_custom_formats">see more here...</link>). You
+          can use these predefined formats like this:</para>
 
           <programlisting role="template">&lt;#assign x=42&gt;
 ${x}
@@ -14968,7 +15002,10 @@ ${lastUpdated?string.yyyy} &lt;#-- Same as ${lastUpdated?string["yyyy"]} --&gt;
 
 &lt;#-- Advanced ISO 8601-related formats: --&gt;
 ${lastUpdated?string.iso_m_u}
-${lastUpdated?string.xs_ms_nz}</programlisting>
+${lastUpdated?string.xs_ms_nz}
+
+&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined formats</link> (start with @): --&gt;
+${lastUpdated?string.@file} (or however it was configured)</programlisting>
 
           <para>will print something like this:</para>
 
@@ -15000,7 +15037,9 @@ Tue, Apr 8, '03
 2003
 
 2007-02-20T21:45Z
-2007-02-20T13:45:09.000</programlisting>
+2007-02-20T13:45:09.000
+
+2007-02-20 13 (or however it was configured)</programlisting>
 
           <warning>
             <para>Unfortunately, because of the limitations of the Java
@@ -25583,11 +25622,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added
-                  <literal>Configurable.setCustomNumberFormats(Map&lt;String,
+                  <para>Added <literal>custom_number_formats</literal> and
+                  <literal>custom_date_formats</literal> settings
+                  (<literal>Configurable.setCustomNumberFormats(Map&lt;String,
                   TemplateNumberFormatFactory&gt;)</literal> and
                   <literal>Configurable.setCustomDateFormats(Map&lt;String,
-                  TemplateDateFormatFactory&gt;)</literal> with which you can
+                  TemplateDateFormatFactory&gt;)</literal>) with which you can
                   register your own formats. <emphasis>If you <link
                   linkend="pgui_config_incompatible_improvements_how_to_set">set
                   <literal>incompatible_improvements</literal></link> to
@@ -25608,7 +25648,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   format strings is reserved for this purpose with
                   <literal>incompatible_improvements</literal> to 2.3.24, and
                   need to be escaped as <literal>@@</literal> if it has to be
-                  there literally.</para>
+                  there literally. Note that the
+                  <literal>custom_number_formats</literal> and
+                  <literal>custom_date_formats</literal> settings can be set
+                  per-template (via the new
+                  <literal>template_configurers</literal> settings) or
+                  per-<literal>Environment</literal> too, thus
+                  <literal>@foo</literal> can mean something different in
+                  different templates.</para>
                 </listitem>
 
                 <listitem>

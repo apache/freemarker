@@ -96,6 +96,13 @@ public class Configurable {
     public static final String NUMBER_FORMAT_KEY = NUMBER_FORMAT_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE = "custom_number_formats";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE = "customNumberFormats";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String CUSTOM_NUMBER_FORMATS_KEY = CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TIME_FORMAT_KEY_SNAKE_CASE = "time_format";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
     public static final String TIME_FORMAT_KEY_CAMEL_CASE = "timeFormat";
@@ -108,6 +115,13 @@ public class Configurable {
     public static final String DATE_FORMAT_KEY_CAMEL_CASE = "dateFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String DATE_FORMAT_KEY = DATE_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE = "custom_date_formats";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE = "customDateFormats";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String CUSTOM_DATE_FORMATS_KEY = CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String DATETIME_FORMAT_KEY_SNAKE_CASE = "datetime_format";
@@ -232,6 +246,8 @@ public class Configurable {
         AUTO_FLUSH_KEY_SNAKE_CASE,
         BOOLEAN_FORMAT_KEY_SNAKE_CASE,
         CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
+        CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
+        CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
         DATE_FORMAT_KEY_SNAKE_CASE,
         DATETIME_FORMAT_KEY_SNAKE_CASE,
         LOCALE_KEY_SNAKE_CASE,
@@ -256,6 +272,8 @@ public class Configurable {
         AUTO_FLUSH_KEY_CAMEL_CASE,
         BOOLEAN_FORMAT_KEY_CAMEL_CASE,
         CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
+        CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+        CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
         DATE_FORMAT_KEY_CAMEL_CASE,
         DATETIME_FORMAT_KEY_CAMEL_CASE,
         LOCALE_KEY_CAMEL_CASE,
@@ -701,6 +719,12 @@ public class Configurable {
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
      *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      * </ul>
+     * Or, if {@link Configuration#setIncompatibleImprovements(Version)} is at least 2.3.24, and the string starts
+     * with {@code @} character, it's interpreted as a custom number format. The format of such string is
+     * <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where <code><i>name</i></code>
+     * is the key in the {@link Map} set by {@link #setCustomNumberFormats(Map)}, and <code><i>parameters</i></code>
+     * is parsed by the custom number format.
+     *   
      * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
@@ -736,7 +760,7 @@ public class Configurable {
     
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
-     * number_format} settings with values starting with <code>@<i>name</i></code>.
+     * number_format} setting with values starting with <code>@<i>name</i></code>.
      * 
      * @param customNumberFormats
      *            Can't be {@code null}.
@@ -948,7 +972,7 @@ public class Configurable {
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
      */
     public void setDateFormat(String dateFormat) {
         NullArgumentException.check("dateFormat", dateFormat);
@@ -1046,9 +1070,17 @@ public class Configurable {
      *       For date-time values, you can specify the length of the date and time part independently, be separating
      *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
      *       {@code "medium_medium"} for date-time values.)
+     *       
+     *   <li><p>Anything that starts with {@code "@"}, but only if
+     *       {@link Configuration#setIncompatibleImprovements(Version)} is at least 2.3.24, is interpreted as a custom
+     *       date/time/dateTime format. The format of such string is <code>"@<i>name</i>"</code> or
+     *       <code>"@<i>name</i> <i>parameters</i>"</code>, where <code><i>name</i></code> is the key in the
+     *       {@link Map} set by {@link #setCustomDateFormats(Map)}, and <code><i>parameters</i></code> is parsed by the
+     *       custom number format.
+     *       
      * </ul> 
-     *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
+     * 
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium_medium"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
@@ -1486,6 +1518,16 @@ public class Configurable {
      *       <br>String value: {@code "true"}, {@code "false"}, also since 2.3.20 {@code 0} or {@code 1} or {@code 2}.
      *       (Also accepts {@code "yes"}, {@code "no"}, {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}.)
      *       Case insensitive.
+     *
+     *   <li><p>{@code "custom_number_formats"}: See {@link #setCustomNumberFormats(Map)}.
+     *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *   <br>Example: <code>{ "hex": com.example.HexTemplateNumberFormatFactory,
+     *   "gps": com.example.GPSTemplateNumberFormatFactory }</code>
+     *
+     *   <li><p>{@code "custom_date_formats"}: See {@link #setCustomDateFormats(Map)}.
+     *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *   <br>Example: <code>{ "trade": com.example.TradeTemplateDateFormatFactory,
+     *   "log": com.example.LogTemplateDateFormatFactory }</code>
      *       
      *   <li><p>{@code "template_exception_handler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
@@ -1848,12 +1890,26 @@ public class Configurable {
                 setLocale(StringUtil.deduceLocale(value));
             } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setNumberFormat(value);
+            } else if (CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE.equals(name)
+                    || CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+                Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
+                                value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
+                _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
+                _CoreAPI.checkSettingValueItemsType("Map values", TemplateNumberFormatFactory.class, map.values());
+                setCustomNumberFormats(map);
             } else if (TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setTimeFormat(value);
             } else if (DATE_FORMAT_KEY_SNAKE_CASE.equals(name) || DATE_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateFormat(value);
             } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
+            } else if (CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE.equals(name)
+                    || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+                Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
+                                value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
+                _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
+                _CoreAPI.checkSettingValueItemsType("Map values", TemplateDateFormatFactory.class, map.values());
+                setCustomDateFormats(map);
             } else if (TIME_ZONE_KEY_SNAKE_CASE.equals(name) || TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setTimeZone(parseTimeZoneSettingValue(value));
             } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE.equals(name)
