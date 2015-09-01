@@ -31,7 +31,7 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
-        TemplateNumberFormatUtil.checkHasNoParameters(params);
+        TemplateFormatUtil.checkHasNoParameters(params);
         return new LocaleSensitiveTemplateNumberFormat(locale);
     }
 

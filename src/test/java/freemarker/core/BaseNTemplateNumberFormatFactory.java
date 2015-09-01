@@ -79,7 +79,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         @Override
         public String format(TemplateNumberModel numberModel)
                 throws UnformattableNumberException, TemplateModelException {
-            Number n = TemplateNumberFormatUtil.getNonNullNumber(numberModel);
+            Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
                 return Integer.toString(NumberUtil.toIntExact(n), base);
             } catch (ArithmeticException e) {

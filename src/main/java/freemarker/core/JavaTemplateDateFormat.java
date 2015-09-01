@@ -37,7 +37,7 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
     
     @Override
     public String format(TemplateDateModel dateModel) throws TemplateModelException {
-        return javaDateFormat.format(getNonNullDate(dateModel));
+        return javaDateFormat.format(TemplateFormatUtil.getNonNullDate(dateModel));
     }
 
     @Override
