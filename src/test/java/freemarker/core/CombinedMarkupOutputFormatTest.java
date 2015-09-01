@@ -130,13 +130,13 @@ public class CombinedMarkupOutputFormatTest {
         {
             String markup = "a \\par <b>";
             TemplateCombinedMarkupOutputModel mo = HTML_RTF.fromMarkup(markup);
-            assertSame(markup, HTML_RTF.getMarkup(mo));
+            assertSame(markup, HTML_RTF.getMarkupString(mo));
         }
         
         {
             String safe = "abc";
             TemplateCombinedMarkupOutputModel mo = HTML_RTF.fromPlainTextByEscaping(safe);
-            assertSame(safe, HTML_RTF.getMarkup(mo));
+            assertSame(safe, HTML_RTF.getMarkupString(mo));
         }
     }
     

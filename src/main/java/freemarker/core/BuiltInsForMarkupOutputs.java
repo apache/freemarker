@@ -25,11 +25,11 @@ import freemarker.template.TemplateModelException;
  */
 class BuiltInsForMarkupOutputs {
     
-    static class markupBI extends BuiltInForMarkupOutput {
+    static class markup_stringBI extends BuiltInForMarkupOutput {
 
         @Override
         protected TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateModelException {
-            return new SimpleScalar(model.getOutputFormat().getMarkup(model));
+            return new SimpleScalar(model.getOutputFormat().getMarkupString(model));
         }
         
     }

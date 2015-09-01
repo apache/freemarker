@@ -66,7 +66,7 @@ public class ErrorMessagesTest {
                 } catch (TemplateModelException e) {
                     assertThat(e.getMessage(), allOf(
                             containsString("String"), containsString("convert"), containsString("markup_output"),
-                            containsString("Tip:"), containsString("?markup")));
+                            containsString("Tip:"), containsString("?markup_string")));
                 }
             }
             
@@ -78,7 +78,7 @@ public class ErrorMessagesTest {
                 } catch (TemplateModelException e) {
                     assertThat(e.getMessage(), allOf(
                             containsString("Date"), containsString("convert"), containsString("markup_output"),
-                            not(containsString("?markup"))));
+                            not(containsString("?markup_string"))));
                 }
             }
             
@@ -91,7 +91,7 @@ public class ErrorMessagesTest {
                     assertThat(e.getMessage(), allOf(
                             containsString("No compatible overloaded"),
                             containsString("String"), containsString("markup_output"),
-                            containsString("Tip:"), containsString("?markup")));
+                            containsString("Tip:"), containsString("?markup_string")));
                 }
             }
             
@@ -104,7 +104,7 @@ public class ErrorMessagesTest {
                     assertThat(e.getMessage(), allOf(
                             containsString("No compatible overloaded"),
                             containsString("Integer"), containsString("markup_output"),
-                            not(containsString("?markup"))));
+                            not(containsString("?markup_string"))));
                 }
             }
             
@@ -162,7 +162,7 @@ public class ErrorMessagesTest {
         }
 
         public String mOverloaded4(TemplateHTMLOutputModel s) throws TemplateModelException {
-            return s.getOutputFormat().getMarkup(s);
+            return s.getOutputFormat().getMarkupString(s);
         }
         
     }

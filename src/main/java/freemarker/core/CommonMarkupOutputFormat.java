@@ -62,7 +62,7 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
     }
 
     @Override
-    public final String getMarkup(MO mo) throws TemplateModelException {
+    public final String getMarkupString(MO mo) throws TemplateModelException {
         String mc = mo.getMarkupContent();
         if (mc != null) {
             return mc;
@@ -87,9 +87,9 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
         }
         
         if (pc1 != null) {
-            return newTemplateMarkupOutputModel(null, getMarkup(mo1) + mc2);
+            return newTemplateMarkupOutputModel(null, getMarkupString(mo1) + mc2);
         } else {
-            return newTemplateMarkupOutputModel(null, mc1 + getMarkup(mo2));
+            return newTemplateMarkupOutputModel(null, mc1 + getMarkupString(mo2));
         }
     }
     

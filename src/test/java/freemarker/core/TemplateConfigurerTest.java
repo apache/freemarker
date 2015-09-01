@@ -300,6 +300,48 @@ public class TemplateConfigurerTest {
     }
     
     @Test
+    public void testMergeMapSettings() throws Exception {
+        TemplateConfigurer tc1 = new TemplateConfigurer();
+        tc1.setCustomDateFormats(ImmutableMap.of(
+                "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
+                "x", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE));
+        tc1.setCustomNumberFormats(ImmutableMap.of(
+                "hex", HexTemplateNumberFormatFactory.INSTANCE,
+                "x", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
+        
+        TemplateConfigurer tc2 = new TemplateConfigurer();
+        tc2.setCustomDateFormats(ImmutableMap.of(
+                "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
+                "x", EpochMillisDivTemplateDateFormatFactory.INSTANCE));
+        tc2.setCustomNumberFormats(ImmutableMap.of(
+                "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE,
+                "x", BaseNTemplateNumberFormatFactory.INSTANCE));
+        
+        tc1.merge(tc2);
+        
+        Map<String, ? extends TemplateDateFormatFactory> mergedCustomDateFormats = tc1.getCustomDateFormats();
+        assertEquals(EpochMillisTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("epoch"));
+        assertEquals(LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("loc"));
+        assertEquals(EpochMillisDivTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("x"));
+        
+        Map<String, ? extends TemplateNumberFormatFactory> mergedCustomNumberFormats = tc1.getCustomNumberFormats();
+        assertEquals(HexTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("hex"));
+        assertEquals(LocaleSensitiveTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("loc"));
+        assertEquals(BaseNTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("x"));
+        
+        // Empty map merging optimization:
+        tc1.merge(new TemplateConfigurer());
+        assertSame(mergedCustomDateFormats, tc1.getCustomDateFormats());
+        assertSame(mergedCustomNumberFormats, tc1.getCustomNumberFormats());
+        
+        // Empty map merging optimization:
+        TemplateConfigurer tc3 = new TemplateConfigurer();
+        tc3.merge(tc1);
+        assertSame(mergedCustomDateFormats, tc3.getCustomDateFormats());
+        assertSame(mergedCustomNumberFormats, tc3.getCustomNumberFormats());
+    }
+    
+    @Test
     public void testMergePriority() throws Exception {
         TemplateConfigurer tc1 = new TemplateConfigurer();
         tc1.setDateFormat("1");
