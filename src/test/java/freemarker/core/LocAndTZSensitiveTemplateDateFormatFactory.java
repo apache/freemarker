@@ -37,7 +37,7 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
     public TemplateDateFormat get(int dateType, boolean zonelessInput, String params, Locale locale, TimeZone timeZone,
             Environment env) throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
                     InvalidFormatParametersException {
-        TemplateNumberFormatUtil.checkHasNoParameters(params);
+        TemplateFormatUtil.checkHasNoParameters(params);
         return new LocAndTZSensitiveTemplateDateFormat(locale, timeZone);
     }
 
@@ -54,7 +54,7 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         @Override
         public String format(TemplateDateModel dateModel)
                 throws UnformattableDateException, TemplateModelException {
-            return String.valueOf(getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
+            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
         }
 
         @Override

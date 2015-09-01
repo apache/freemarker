@@ -15,15 +15,18 @@
  */
 package freemarker.core;
 
+import java.util.Date;
+
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 
 /**
  * @since 2.3.24 
  */
-public final class TemplateNumberFormatUtil {
+public final class TemplateFormatUtil {
     
-    private TemplateNumberFormatUtil() {
+    private TemplateFormatUtil() {
         // Not meant to be instantiated
     }
 
@@ -46,6 +49,18 @@ public final class TemplateNumberFormatUtil {
             throw EvalUtil.newModelHasStoredNullException(Number.class, numberModel, null);
         }
         return number;
+    }
+
+    /**
+     * Utility method to extract the {@link Date} from an {@link TemplateDateModel}, and throw
+     * {@link UnformattableDateException} with a standard error message if that's {@code null}.
+     */
+    public static Date getNonNullDate(TemplateDateModel dateModel) throws TemplateModelException {
+        Date date = dateModel.getAsDate();
+        if (date == null) {
+            throw EvalUtil.newModelHasStoredNullException(Date.class, dateModel, null);
+        }
+        return date;
     }
 
 }
