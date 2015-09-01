@@ -25655,7 +25655,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Fixes and improvements in the <quote>object
               builder</quote> syntax used for configuring FreeMarker from
               <literal>java.util.Properties</literal> (or other string-only
-              sources):</para>
+              sources). This is not to be confused with the template language
+              syntax, which has nothing to do with the <quote>object
+              builder</quote> syntax we are writing about here. The
+              improvements are:</para>
 
               <itemizedlist>
                 <listitem>
@@ -25685,6 +25688,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <replaceable>item2</replaceable>,
                   <replaceable>...</replaceable>
                   <replaceable>itemN</replaceable> ]</literal> syntax.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added support for creating maps with <literal>{
+                  <replaceable>key1</replaceable>:
+                  <replaceable>value1</replaceable>,
+                  <replaceable>key2</replaceable>:
+                  <replaceable>value2</replaceable>,
+                  <replaceable>...</replaceable>
+                  <replaceable>keyN</replaceable>:
+                  <replaceable>valueN</replaceable> }</literal> syntax.</para>
                 </listitem>
 
                 <listitem>

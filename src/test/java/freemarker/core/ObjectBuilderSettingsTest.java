@@ -28,13 +28,17 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import freemarker.cache.CacheStorage;
 import freemarker.cache.MruCacheStorage;
@@ -51,6 +55,7 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
 import freemarker.template.utility.WriteProtectable;
 
+@SuppressWarnings("boxing")
 public class ObjectBuilderSettingsTest {
 
     @Test
@@ -667,7 +672,6 @@ public class ObjectBuilderSettingsTest {
                 Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
     }
     
-    @SuppressWarnings("boxing")
     @Test
     public void testListLiterals() throws Exception {
         {
@@ -738,6 +742,117 @@ public class ObjectBuilderSettingsTest {
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
             assertThat(e.getMessage(), containsString("end of"));
+        }
+    }
+
+    @Test
+    public void testMapLiterals() throws Exception {
+        {
+            HashMap<String, Object> expected = new HashMap();
+            expected.put("k1", "s");
+            expected.put("k2", null);
+            expected.put("k3", true);
+            expected.put("k4", new TestBean9(1));
+            expected.put("k5", ImmutableList.of(11, 22, 33));
+            assertEquals(expected, _ObjectBuilderSettingEvaluator.eval(
+                    "{'k1': 's', 'k2': null, 'k3': true, "
+                    + "'k4': freemarker.core.ObjectBuilderSettingsTest$TestBean9(1), 'k5': [11, 22, 33]}",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+            assertEquals(expected, _ObjectBuilderSettingEvaluator.eval(
+                    " {  'k1'  :  's'  ,  'k2' :  null  , 'k3' : true , "
+                    + "'k4' : freemarker.core.ObjectBuilderSettingsTest$TestBean9 ( 1 ) , 'k5' : [ 11 , 22 , 33 ] } ",
+                    Map.class, false, _SettingEvaluationEnvironment.getCurrent()));
+            assertEquals(expected, _ObjectBuilderSettingEvaluator.eval(
+                    " {'k1':'s','k2':null,'k3':true,"
+                    + "'k4':freemarker.core.ObjectBuilderSettingsTest$TestBean9(1),'k5':[11,22,33]}",
+                    LinkedHashMap.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        }
+        
+        {
+            HashMap<Object, String> expected = new HashMap();
+            expected.put(true, "T");
+            expected.put(1, "O");
+            expected.put(new TestBean9(1), "B");
+            expected.put(ImmutableList.of(11, 22, 33), "L");
+            assertEquals(expected, _ObjectBuilderSettingEvaluator.eval(
+                    "{ true: 'T', 1: 'O', freemarker.core.ObjectBuilderSettingsTest$TestBean9(1): 'B', "
+                    + "[11, 22, 33]: 'L' }",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        }
+        
+        assertEquals(Collections.emptyMap(), _ObjectBuilderSettingEvaluator.eval(
+                "{}",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(Collections.emptyMap(), _ObjectBuilderSettingEvaluator.eval(
+                "{  }",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+
+        assertEquals(Collections.singletonMap("k1", 123), _ObjectBuilderSettingEvaluator.eval(
+                "{'k1':123}",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        assertEquals(Collections.singletonMap("k1", 123), _ObjectBuilderSettingEvaluator.eval(
+                "{ 'k1' : 123 }",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        
+        assertEquals(new TestBean9(1, ImmutableMap.of(11, "a", 22, "b")), _ObjectBuilderSettingEvaluator.eval(
+                "freemarker.core.ObjectBuilderSettingsTest$TestBean9(1, { 11: 'a', 22: 'b' })",
+                Object.class, false, _SettingEvaluationEnvironment.getCurrent()));
+        
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "{1:2,}",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("found character \"}\""));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "{,1:2}",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("found character \",\""));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "1:2}",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("found character \":\""));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "1}",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("found character \"}\""));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "{1",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("end of"));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "{1:",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("end of"));
+        }
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "{null:1}",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(), containsString("null as key"));
         }
     }
     
@@ -1124,14 +1239,24 @@ public class ObjectBuilderSettingsTest {
         
         private final int n;
         private final List<?> list;
+        private final Map<?, ?> map;
 
         public TestBean9(int n) {
-            this(n, null);
+            this(n, null, null);
         }
 
         public TestBean9(int n, List<?> list) {
+            this(n, list, null);
+        }
+
+        public TestBean9(int n, Map<?, ?> map) {
+            this(n, null, map);
+        }
+        
+        public TestBean9(int n, List<?> list, Map<?, ?> map) {
             this.n = n;
             this.list = list;
+            this.map = map;
         }
 
         @Override
@@ -1139,6 +1264,7 @@ public class ObjectBuilderSettingsTest {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((list == null) ? 0 : list.hashCode());
+            result = prime * result + ((map == null) ? 0 : map.hashCode());
             result = prime * result + n;
             return result;
         }
@@ -1152,6 +1278,9 @@ public class ObjectBuilderSettingsTest {
             if (list == null) {
                 if (other.list != null) return false;
             } else if (!list.equals(other.list)) return false;
+            if (map == null) {
+                if (other.map != null) return false;
+            } else if (!map.equals(other.map)) return false;
             if (n != other.n) return false;
             return true;
         }

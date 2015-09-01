@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -1796,9 +1797,13 @@ public class Configurable {
      *        <li>The null literal: {@code null}
      *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
      *            <tt>#{...}</tt>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
-     *        <li>A list literal (since 2.3.24) with FTL-like syntax, for example {@code ['foo', 2, true]}.
+     *        <li>A list literal (since 2.3.24) with FTL-like syntax, for example {@code [ 'foo', 2, true ]}.
      *            If the parameter is expected to be array, the list will be automatically converted to array.
      *            The list items can be any kind of expression, like even object builder expressions.
+     *        <li>A map literal (since 2.3.24) with FTL-like syntax, for example <code>{ 'foo': 2, 'bar': true }</code>.
+     *            The keys and values can be any kind of expression, like even object builder expressions.
+     *            The resulting Java object will be a {@link Map} that keeps the item order ({@link LinkedHashMap} as
+     *            of this writing).
      *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
      *      </ul>
      *   </li>
