@@ -48,6 +48,7 @@ import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
+import freemarker.core.BaseNTemplateNumberFormatFactory;
 import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Configurable.SettingValueAssignmentException;
@@ -56,6 +57,7 @@ import freemarker.core.ConfigurableTest;
 import freemarker.core.CustomHTMLOutputFormat;
 import freemarker.core.DummyOutputFormat;
 import freemarker.core.Environment;
+import freemarker.core.EpochMillisDivTemplateDateFormatFactory;
 import freemarker.core.EpochMillisTemplateDateFormatFactory;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.HexTemplateNumberFormatFactory;
@@ -63,6 +65,8 @@ import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.RTFOutputFormat;
+import freemarker.core.TemplateDateFormatFactory;
+import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
 import freemarker.core.XMLOutputFormat;
@@ -1298,7 +1302,7 @@ public class ConfigurationTest extends TestCase {
     }
     
     @Test
-    public void testSetCustomNumberFormat() {
+    public void testSetCustomNumberFormat() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         
         try {
@@ -1337,10 +1341,40 @@ public class ConfigurationTest extends TestCase {
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("@wrong"));
         }
+        
+        cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
+                "{ 'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "() }");
+        assertEquals(
+                Collections.singletonMap("base", BaseNTemplateNumberFormatFactory.INSTANCE),
+                cfg.getCustomNumberFormats());
+        
+        cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
+                "{ "
+                + "'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "(), "
+                + "'hex': " + HexTemplateNumberFormatFactory.class.getName() + "()"
+                + " }");
+        assertEquals(
+                ImmutableMap.of(
+                        "base", BaseNTemplateNumberFormatFactory.INSTANCE,
+                        "hex", HexTemplateNumberFormatFactory.INSTANCE),
+                cfg.getCustomNumberFormats());
+        
+        cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY, "{}");
+        assertEquals(Collections.emptyMap(), cfg.getCustomNumberFormats());
+        
+        try {
+            cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
+                    "{ 'x': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getCause().getMessage(), allOf(
+                    containsString(EpochMillisTemplateDateFormatFactory.class.getName()),
+                    containsString(TemplateNumberFormatFactory.class.getName())));
+        }
     }
     
     @Test
-    public void testSetCustomDateFormat() {
+    public void testSetCustomDateFormat() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         
         try {
@@ -1378,6 +1412,36 @@ public class ConfigurationTest extends TestCase {
             fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("@wrong"));
+        }
+        
+        cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+                "{ 'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
+        assertEquals(
+                Collections.singletonMap("epoch", EpochMillisTemplateDateFormatFactory.INSTANCE),
+                cfg.getCustomDateFormats());
+        
+        cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
+                "{ "
+                + "'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "(), "
+                + "'epochDiv': " + EpochMillisDivTemplateDateFormatFactory.class.getName() + "()"
+                + " }");
+        assertEquals(
+                ImmutableMap.of(
+                        "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
+                        "epochDiv", EpochMillisDivTemplateDateFormatFactory.INSTANCE),
+                cfg.getCustomDateFormats());
+        
+        cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY, "{}");
+        assertEquals(Collections.emptyMap(), cfg.getCustomDateFormats());
+        
+        try {
+            cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+                    "{ 'x': " + HexTemplateNumberFormatFactory.class.getName() + "() }");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getCause().getMessage(), allOf(
+                    containsString(HexTemplateNumberFormatFactory.class.getName()),
+                    containsString(TemplateDateFormatFactory.class.getName())));
         }
     }
     
