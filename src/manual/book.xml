@@ -11,7 +11,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.24</productname>
+    <productname>Freemarker 2.3.24 Preview 1</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -25378,9 +25378,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_24">
-        <title>2.3.24</title>
+        <title>2.3.24 Preview 1</title>
 
-        <para>Date of release: FIXME</para>
+        <para>Date of release: 2015-09-01 for preview release 1</para>
+
+        <para>Date of release for final is not yet known (end of
+        October?).</para>
+
+        <para>Please test for backward compatibility, and help polishing the
+        new features!</para>
 
         <section>
           <title>Changes on the FTL side</title>
