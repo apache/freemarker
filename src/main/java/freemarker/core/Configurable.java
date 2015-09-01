@@ -719,6 +719,12 @@ public class Configurable {
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
      *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      * </ul>
+     * Or, if {@link Configuration#setIncompatibleImprovements(Version)} is at least 2.3.24, and the string starts
+     * with {@code @} character, it's interpreted as a custom number format. The format of such string is
+     * <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where <code><i>name</i></code>
+     * is the key in the {@link Map} set by {@link #setCustomNumberFormats(Map)}, and <code><i>parameters</i></code>
+     * is parsed by the custom number format.
+     *   
      * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
@@ -754,7 +760,7 @@ public class Configurable {
     
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
-     * number_format} settings with values starting with <code>@<i>name</i></code>.
+     * number_format} setting with values starting with <code>@<i>name</i></code>.
      * 
      * @param customNumberFormats
      *            Can't be {@code null}.
@@ -966,7 +972,7 @@ public class Configurable {
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
      */
     public void setDateFormat(String dateFormat) {
         NullArgumentException.check("dateFormat", dateFormat);
@@ -1064,9 +1070,17 @@ public class Configurable {
      *       For date-time values, you can specify the length of the date and time part independently, be separating
      *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
      *       {@code "medium_medium"} for date-time values.)
+     *       
+     *   <li><p>Anything that starts with {@code "@"}, but only if
+     *       {@link Configuration#setIncompatibleImprovements(Version)} is at least 2.3.24, is interpreted as a custom
+     *       date/time/dateTime format. The format of such string is <code>"@<i>name</i>"</code> or
+     *       <code>"@<i>name</i> <i>parameters</i>"</code>, where <code><i>name</i></code> is the key in the
+     *       {@link Map} set by {@link #setCustomDateFormats(Map)}, and <code><i>parameters</i></code> is parsed by the
+     *       custom number format.
+     *       
      * </ul> 
-     *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
+     * 
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium_medium"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
