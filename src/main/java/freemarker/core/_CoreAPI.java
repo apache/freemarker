@@ -31,6 +31,7 @@ import java.util.TreeSet;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.utility.ClassUtil;
 
 
 /**
@@ -427,6 +428,22 @@ public class _CoreAPI {
             return adapted.hashCode();
         }
         
+    }
+
+    /**
+     * @throws IllegalArgumentException
+     *             if the type of the some of the values isn't as expected
+     */
+    public static void checkSettingValueItemsType(String somethingsSentenceStart, Class<?> expectedClass,
+            Collection<? extends Object> values) {
+        if (values == null) return;
+        for (Object value : values) {
+            if (!expectedClass.isInstance(value)) {
+                throw new IllegalArgumentException(somethingsSentenceStart + " must be instances of "
+                        + ClassUtil.getShortClassName(expectedClass) + ", but one of them was a(n) "
+                        + ClassUtil.getShortClassNameOfObject(value) + ".");
+            }
+        }
     }
     
 }

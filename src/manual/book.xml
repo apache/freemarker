@@ -25583,11 +25583,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added
-                  <literal>Configurable.setCustomNumberFormats(Map&lt;String,
+                  <para>Added <literal>custom_number_formats</literal> and
+                  <literal>custom_date_formats</literal> settings
+                  (<literal>Configurable.setCustomNumberFormats(Map&lt;String,
                   TemplateNumberFormatFactory&gt;)</literal> and
                   <literal>Configurable.setCustomDateFormats(Map&lt;String,
-                  TemplateDateFormatFactory&gt;)</literal> with which you can
+                  TemplateDateFormatFactory&gt;)</literal>) with which you can
                   register your own formats. <emphasis>If you <link
                   linkend="pgui_config_incompatible_improvements_how_to_set">set
                   <literal>incompatible_improvements</literal></link> to
@@ -25608,7 +25609,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   format strings is reserved for this purpose with
                   <literal>incompatible_improvements</literal> to 2.3.24, and
                   need to be escaped as <literal>@@</literal> if it has to be
-                  there literally.</para>
+                  there literally. Note that the
+                  <literal>custom_number_formats</literal> and
+                  <literal>custom_date_formats</literal> settings can be set
+                  per-template (via the new
+                  <literal>template_configurers</literal> settings) or
+                  per-<literal>Environment</literal> too, thus
+                  <literal>@foo</literal> can mean something different in
+                  different templates.</para>
                 </listitem>
 
                 <listitem>

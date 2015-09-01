@@ -96,6 +96,13 @@ public class Configurable {
     public static final String NUMBER_FORMAT_KEY = NUMBER_FORMAT_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE = "custom_number_formats";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE = "customNumberFormats";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String CUSTOM_NUMBER_FORMATS_KEY = CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TIME_FORMAT_KEY_SNAKE_CASE = "time_format";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
     public static final String TIME_FORMAT_KEY_CAMEL_CASE = "timeFormat";
@@ -108,6 +115,13 @@ public class Configurable {
     public static final String DATE_FORMAT_KEY_CAMEL_CASE = "dateFormat";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String DATE_FORMAT_KEY = DATE_FORMAT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE = "custom_date_formats";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE = "customDateFormats";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String CUSTOM_DATE_FORMATS_KEY = CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String DATETIME_FORMAT_KEY_SNAKE_CASE = "datetime_format";
@@ -232,6 +246,8 @@ public class Configurable {
         AUTO_FLUSH_KEY_SNAKE_CASE,
         BOOLEAN_FORMAT_KEY_SNAKE_CASE,
         CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
+        CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
+        CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
         DATE_FORMAT_KEY_SNAKE_CASE,
         DATETIME_FORMAT_KEY_SNAKE_CASE,
         LOCALE_KEY_SNAKE_CASE,
@@ -256,6 +272,8 @@ public class Configurable {
         AUTO_FLUSH_KEY_CAMEL_CASE,
         BOOLEAN_FORMAT_KEY_CAMEL_CASE,
         CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
+        CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+        CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
         DATE_FORMAT_KEY_CAMEL_CASE,
         DATETIME_FORMAT_KEY_CAMEL_CASE,
         LOCALE_KEY_CAMEL_CASE,
@@ -1488,6 +1506,16 @@ public class Configurable {
      *       <br>String value: {@code "true"}, {@code "false"}, also since 2.3.20 {@code 0} or {@code 1} or {@code 2}.
      *       (Also accepts {@code "yes"}, {@code "no"}, {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}.)
      *       Case insensitive.
+     *
+     *   <li><p>{@code "custom_number_formats"}: See {@link #setCustomNumberFormats(Map)}.
+     *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *   <br>Example: <code>{ "hex": com.example.HexTemplateNumberFormatFactory,
+     *   "gps": com.example.GPSTemplateNumberFormatFactory }</code>
+     *
+     *   <li><p>{@code "custom_date_formats"}: See {@link #setCustomDateFormats(Map)}.
+     *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *   <br>Example: <code>{ "trade": com.example.TradeTemplateDateFormatFactory,
+     *   "log": com.example.LogTemplateDateFormatFactory }</code>
      *       
      *   <li><p>{@code "template_exception_handler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
@@ -1850,12 +1878,26 @@ public class Configurable {
                 setLocale(StringUtil.deduceLocale(value));
             } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setNumberFormat(value);
+            } else if (CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE.equals(name)
+                    || CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+                Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
+                                value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
+                _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
+                _CoreAPI.checkSettingValueItemsType("Map values", TemplateNumberFormatFactory.class, map.values());
+                setCustomNumberFormats(map);
             } else if (TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setTimeFormat(value);
             } else if (DATE_FORMAT_KEY_SNAKE_CASE.equals(name) || DATE_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateFormat(value);
             } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setDateTimeFormat(value);
+            } else if (CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE.equals(name)
+                    || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+                Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
+                                value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
+                _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
+                _CoreAPI.checkSettingValueItemsType("Map values", TemplateDateFormatFactory.class, map.values());
+                setCustomDateFormats(map);
             } else if (TIME_ZONE_KEY_SNAKE_CASE.equals(name) || TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setTimeZone(parseTimeZoneSettingValue(value));
             } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE.equals(name)
