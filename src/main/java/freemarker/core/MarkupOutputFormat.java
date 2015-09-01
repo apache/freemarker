@@ -49,7 +49,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * the parameter markup text is malformed, but it's unlikely that an implementation chooses to parse the parameter
      * until, and if ever, that becomes necessary.)
      * 
-     * @see #getMarkup(TemplateMarkupOutputModel)
+     * @see #getMarkupString(TemplateMarkupOutputModel)
      */
     public abstract MO fromMarkup(String markupText) throws TemplateModelException;
 
@@ -65,8 +65,8 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
     
     /**
-     * If this {@link TemplateMarkupOutputModel} was created with {@link #fromPlainTextByEscaping(String)}, it returns the
-     * original plain text, otherwise it might returns {@code null}. Used when converting between different type of 
+     * If this {@link TemplateMarkupOutputModel} was created with {@link #fromPlainTextByEscaping(String)}, it returns
+     * the original plain text, otherwise it might returns {@code null}. Used when converting between different type of
      * markups and the source was made from plain text.
      */
     public abstract String getSourcePlainText(MO mo) throws TemplateModelException;
@@ -77,7 +77,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * as far as the returned markup means the same. If this {@link TemplateMarkupOutputModel} wasn't created
      * with {@link #fromMarkup(String)} and it doesn't yet have to markup, it has to generate the markup now.
      */
-    public abstract String getMarkup(MO mo) throws TemplateModelException;
+    public abstract String getMarkupString(MO mo) throws TemplateModelException;
     
     /**
      * Returns a {@link TemplateMarkupOutputModel} that contains the content of both {@link TemplateMarkupOutputModel}
@@ -87,7 +87,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     
     /**
      * Should give the same result as {@link #fromPlainTextByEscaping(String)} and then
-     * {@link #getMarkup(TemplateMarkupOutputModel)}, but the implementation may uses a more efficient approach.
+     * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may uses a more efficient approach.
      */
     public abstract String escapePlainText(String plainTextContent) throws TemplateModelException;
 

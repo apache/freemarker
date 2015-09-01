@@ -593,15 +593,15 @@ public class OutputFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testMarkupBI() throws Exception {
+    public void testMarkupStringBI() throws Exception {
         assertOutput(
-                "${htmlPlain?markup} ${htmlMarkup?markup}",
+                "${htmlPlain?markupString} ${htmlMarkup?markupString}",
                 "a &lt; {h&#39;} <p>c");
         assertErrorContains(
-                "${noSuchVar?markup}",
+                "${noSuchVar?markupString}",
                 "noSuchVar", "null or missing");
         assertErrorContains(
-                "${'x'?markup}",
+                "${'x'?markupString}",
                 "xpected", "markup output", "string");
     }
 
