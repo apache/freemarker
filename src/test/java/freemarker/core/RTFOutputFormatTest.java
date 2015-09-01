@@ -78,13 +78,13 @@ public class RTFOutputFormatTest {
         {
             String markup = "a \\par b";
             TemplateRTFOutputModel mo = INSTANCE.fromMarkup(markup);
-            assertSame(markup, INSTANCE.getMarkup(mo));
+            assertSame(markup, INSTANCE.getMarkupString(mo));
         }
         
         {
             String safe = "abc";
             TemplateRTFOutputModel mo = INSTANCE.fromPlainTextByEscaping(safe);
-            assertSame(safe, INSTANCE.getMarkup(mo));
+            assertSame(safe, INSTANCE.getMarkupString(mo));
         }
     }
     

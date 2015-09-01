@@ -29,7 +29,8 @@ import freemarker.template.TemplateScalarModel;
  * <p>Note that {@link TemplateMarkupOutputModel}-s are by design not handled like {@link TemplateScalarModel}-s,
  * and so the implementations of this interface usually shouldn't implement {@link TemplateScalarModel}. (Because,
  * operations applicable on plain strings, like converting to upper case, substringing, etc., can corrupt markup.)
- * The template author should make conscious decision of passing in the markup as String by using {@code ?markup}.
+ * The template author should make conscious decision of passing in the markup as String by using
+ * {@code ?markup_string}.
  * 
  * @param <MO>
  *            Refers to the interface's own type, which is useful in interfaces that extend

@@ -16,6 +16,8 @@
 package freemarker.core;
 
 import java.io.Reader;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import freemarker.cache.TemplateCache;
 import freemarker.template.Configuration;
@@ -167,10 +169,10 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
             setClassicCompatibleAsInt(tc.getClassicCompatibleAsInt());
         }
         if (tc.isCustomDateFormatsSet()) {
-            setCustomDateFormats(tc.getCustomDateFormats());
+            setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats()));
         }
         if (tc.isCustomNumberFormatsSet()) {
-            setCustomNumberFormats(tc.getCustomNumberFormats());
+            setCustomNumberFormats(mergeMaps(getCustomNumberFormats(), tc.getCustomNumberFormats()));
         }
         if (tc.isDateFormatSet()) {
             setDateFormat(tc.getDateFormat());
@@ -559,6 +561,17 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
                 || isTimeFormatSet()
                 || isTimeZoneSet()
                 || isURLEscapingCharsetSet();
-        }
+    }
+    
+    private Map mergeMaps(Map m1, Map m2) {
+        if (m1 == null) return m2;
+        if (m2 == null) return m1;
+        if (m1.isEmpty()) return m2;
+        if (m2.isEmpty()) return m1;
+        
+        LinkedHashMap mergedM = new LinkedHashMap(m1);
+        mergedM.putAll(m2);
+        return mergedM;
+    }
     
 }

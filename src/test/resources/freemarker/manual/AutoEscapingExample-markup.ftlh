@@ -7,5 +7,5 @@ ${markupOutput1}
 ${markupOutput2}
 
 Double escaping:
-${markupOutput1?markup}
-${markupOutput2?markup}
+${markupOutput1?markup_string}
+${markupOutput2?markup_string}

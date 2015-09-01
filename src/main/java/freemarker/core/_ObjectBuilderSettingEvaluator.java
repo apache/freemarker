@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -249,6 +250,11 @@ public class _ObjectBuilderSettingEvaluator {
             }
 
             val = fetchListLiteral(true);
+            if (val != VOID) {
+                return val;
+            }
+
+            val = fetchMapLiteral(true);
             if (val != VOID) {
                 return val;
             }
@@ -512,6 +518,39 @@ public class _ObjectBuilderSettingEvaluator {
             skipWS();
         }
     }
+
+    private Object fetchMapLiteral(boolean optional) throws _ObjectBuilderSettingEvaluationException {
+        if (pos == src.length() || src.charAt(pos) != '{') {
+            if (!optional) {
+                throw new _ObjectBuilderSettingEvaluationException("{", src, pos);
+            }
+            return VOID;
+        }
+        pos++;
+        
+        MapExpression mapExp = new MapExpression();
+        
+        while (true) {
+            skipWS();
+            
+            if (fetchOptionalChar("}") != 0) {
+                return mapExp;
+            }
+            if (mapExp.itemCount() != 0) {
+                fetchRequiredChar(",");
+                skipWS();
+            }
+            
+            Object key = fetchValue(false, false, true);
+            skipWS();
+            fetchRequiredChar(":");
+            skipWS();
+            Object value = fetchValue(false, false, true);
+            mapExp.addItem(new KeyValuePair(key, value));
+            
+            skipWS();
+        }
+    }
     
     private void skipWS() {
         while (true) {
@@ -715,6 +754,43 @@ public class _ObjectBuilderSettingEvaluator {
             return res;
         }
         
+    }
+    
+    private class MapExpression extends SettingExpression {
+        
+        private List<KeyValuePair> items = new ArrayList();
+        
+        void addItem(KeyValuePair item) {
+            items.add(item);
+        }
+
+        public int itemCount() {
+            return items.size();
+        }
+
+        @Override
+        Object eval() throws _ObjectBuilderSettingEvaluationException {
+            LinkedHashMap res = new LinkedHashMap(items.size() * 4 / 3, 1f);
+            for (KeyValuePair item : items) {
+                Object key = ensureEvaled(item.key);
+                if (key == null) {
+                    throw new _ObjectBuilderSettingEvaluationException("Map can't use null as key.");
+                }
+                res.put(key, ensureEvaled(item.value));
+            }
+            return res;
+        }
+        
+    }
+    
+    private static class KeyValuePair {
+        private final Object key;
+        private final Object value;
+        
+        public KeyValuePair(Object key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
     }
     
     private class BuilderCallExpression extends ExpressionWithParameters {
