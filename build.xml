@@ -730,9 +730,10 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:git:git@github.com:freemarker/freemarker.git</connection>
-    <developerConnection>scm:git:git@github.com:freemarker/freemarker.git</developerConnection>
-    <url>git@github.com:freemarker/freemarker.git</url>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/maven.git</developerConnection>
+    <!-- <url>https://github.com/apache/freemarker/tree/${project.scm.tag}</url> -->
+    <tag>master</tag>
   </scm>
   <developers>
     <developer>
@@ -740,7 +741,7 @@
     </developer>
     <developer>
       <name>Daniel Dekany</name>
-      <email>ddekany@freemail.hu</email>
+      <email>ddekany@apache.org</email>
     </developer>
     <developer>
       <name>Jonathan Revusky</name>
