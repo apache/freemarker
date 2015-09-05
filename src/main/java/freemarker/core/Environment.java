@@ -1063,70 +1063,104 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * Returns the current number format as {@link TemplateNumberFormat}.
+     * Returns the current number format ({@link #getNumberFormat()}) as {@link TemplateNumberFormat}.
+     * 
+     * <p>
+     * Performance notes: The result is stored for reuse, so calling this method frequently is usually not a problem.
+     * However, at least as of this writing (2.3.24), changing the current locale {@link #setLocale(Locale)} or changing
+     * the current number format ({@link #setNumberFormat(String)}) will drop the stored value, so it will have to be
+     * recalculated.
      * 
      * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatStringException {
         TemplateNumberFormat format = cachedTemplateNumberFormat;
         if (format == null) {
-            format = getTemplateNumberFormat(getNumberFormat(), false, null);
+            format = getTemplateNumberFormat(getNumberFormat(), false);
             cachedTemplateNumberFormat = format;
         }
         return format;
     }
 
     /**
-     * Returns the number format for the given format string as {@link TemplateNumberFormat}.
+     * Returns the number format as {@link TemplateNumberFormat}, for the given format string and locale.
      * 
      * @param formatString
      *            A string that you could also use as the value of the {@code numberFormat} configuration setting.
      * @param locale
-     *            Can be {@code null}, in which case the current locale will be used. Note that the current locale
-     *            can change over time, and the format returned for a {@code null} parameter won't follow that change.
-     *            Note that if the specified locale differs from the current locale, as of this writing, the
-     *            {@link Environment}-level format cache won't be used.
+     *            The locale of the number format. If {@code null} then the current locale ({@link #getLocale()}) will
+     *            be used. Note on performance (which was true at least for 2.3.24): If the locale is {@code null} or
+     *            equals to the current locale, then the {@link Environment}-level format cache will be used, otherwise
+     *            the format string has to be parsed and the matching factory has to be get an invoked, which is much
+     *            more expensive than getting the format from the cache. Thus in the last case the number format should
+     *            be stored by the caller for later reuse (but only within the current thread and in relation to the
+     *            current {@link Environment}), if it will be needed frequently.
      * 
      * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat(String formatString, Locale locale)
             throws InvalidFormatStringException {
-        return getTemplateNumberFormat(formatString, true, locale);
+        if (locale == null || locale.equals(getLocale())) {
+            getTemplateNumberFormat(formatString);
+        }
+        
+        return getTemplateNumberFormatWithoutCache(formatString, locale);
     }
 
     /**
-     * Same as {@link #getTemplateNumberFormat(String, Locale)} with {@code null} {@code locale} parameter. 
+     * Returns the number format as {@link TemplateNumberFormat} for the given format string and the current locale.
+     * (The current locale is the locale returned by {@link #getLocale()}.)
+     * 
+     * @param formatString
+     *            A string that you could also use as the value of the {@code numberFormat} configuration setting.
      * 
      * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
-        return getTemplateNumberFormat(formatString, (Locale) null);
+        return getTemplateNumberFormat(formatString, true);
     }
     
     /**
-     * @param locale
-     *            Can be {@code null}, in which case the current locale will be used.
+     * Gets the {@link TemplateNumberFormat} <em>for the current locale</em>.
+     * 
+     * @param formatString
+     *            Not {@code null}
+     * @param cacheResult
+     *            If the results should stored in the {@link Environment}-level cache. It will still try to get the
+     *            result from the cache regardless of this parameter.
      */
-    private TemplateNumberFormat getTemplateNumberFormat(String formatString, boolean cacheResult, Locale locale)
+    private TemplateNumberFormat getTemplateNumberFormat(String formatString, boolean cacheResult)
             throws InvalidFormatStringException {
-        boolean usesEnvLocale = locale == null || locale.equals(getLocale());
-        
-        if (usesEnvLocale) {
-            if (cachedTemplateNumberFormats == null) {
-                if (cacheResult) {
-                    cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
-                }
-            } else {
-                TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
-                if (format != null) {
-                    return format;
-                }
+        if (cachedTemplateNumberFormats == null) {
+            if (cacheResult) {
+                cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
+            }
+        } else {
+            TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
+            if (format != null) {
+                return format;
             }
         }
 
-        Locale actualLocale = locale == null ? getLocale() : locale;
-        
-        TemplateNumberFormat format;
+        TemplateNumberFormat format = getTemplateNumberFormatWithoutCache(formatString, getLocale());
+    
+        if (cacheResult) {
+            cachedTemplateNumberFormats.put(formatString, format);
+        }
+        return format;
+    }
+
+    /**
+     * Returns the {@link TemplateNumberFormat} for the given parameters without using the {@link Environment}-level
+     * cache. Of course, the {@link TemplateNumberFormatFactory} involved might still uses its own cache.
+     * 
+     * @param formatString
+     *            Not {@code null}
+     * @param locale
+     *            Not {@code null}
+     */
+    private TemplateNumberFormat getTemplateNumberFormatWithoutCache(String formatString, Locale locale)
+            throws UndefinedCustomFormatException, InvalidFormatParametersException {
         int formatStringLen = formatString.length();
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
@@ -1152,7 +1186,7 @@ public final class Environment extends Configurable {
                         "No custom number format was defined with name " + StringUtil.jQuote(name));
             }
             
-            format = formatFactory.get(params, actualLocale, this);
+            return formatFactory.get(params, locale, this);
         } else {
             if (formatStringLen > 1
                     && formatString.charAt(0) == '@'
@@ -1161,13 +1195,8 @@ public final class Environment extends Configurable {
                 // Unescape @ escaped as @@
                 formatString = formatString.substring(1);
             }
-            format = JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, actualLocale, this);
+            return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
-    
-        if (cacheResult && usesEnvLocale) {
-            cachedTemplateNumberFormats.put(formatString, format);
-        }
-        return format;
     }
 
     /**
@@ -1184,8 +1213,10 @@ public final class Environment extends Configurable {
         return cNumberFormat;
     }
 
-    TemplateNumberFormat getTemplateNumberFormat(Expression exp)
-            throws _MiscTemplateException {
+    /**
+     * Convenience wrapper around {@link #getTemplateNumberFormat()} to be called during expression evaluation.
+     */
+    TemplateNumberFormat getTemplateNumberFormat(Expression exp) throws _MiscTemplateException {
         TemplateNumberFormat format;
         try {
             format = getTemplateNumberFormat();
@@ -1197,6 +1228,9 @@ public final class Environment extends Configurable {
         return format;
     }
 
+    /**
+     * Convenience wrapper around {@link #getTemplateNumberFormat(String)} to be called during expression evaluation.
+     */
     TemplateNumberFormat getTemplateNumberFormat(String formatString, Expression exp)
             throws _MiscTemplateException {
         TemplateNumberFormat format;
