@@ -25,7 +25,6 @@ import java.util.TimeZone;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
-import freemarker.template.TemplateModelException;
 
 /**
  * Factory for a certain type of date/time/dateTime formatting ({@link TemplateDateFormat}). Usually a singleton
@@ -45,10 +44,21 @@ public abstract class TemplateDateFormatFactory {
      * template execution. So caching on the factory level is still useful, unless creating the formatters is
      * sufficiently cheap.
      * 
+     * @param params
+     *            The string that further describes how the format should look. For example, when the
+     *            {@link Configurable#getDateFormat() dateFormat} is {@code "@fooBar 1, 2"}, then it will be
+     *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
+     *            {@link TemplateDateFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param dateType
      *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, {@link TemplateDateModel#DATETIME} or
      *            {@link TemplateDateModel#UNKNOWN}. Supporting {@link TemplateDateModel#UNKNOWN} is not necessary, in
      *            which case the method should throw an {@link UnknownDateTypeFormattingUnsupportedException} exception.
+     * @param locale
+     *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
+     *            forever (i.e. locale changes in the {@link Environment} shouldn't be followed).
+     * @param timeZone
+     *            The time zone to format for. Not {@code null}. The resulting format should be bound to this time zone
+     *            forever (i.e. time zone changes in the {@link Environment} shouldn't be followed).
      * @param zonelessInput
      *            Indicates that the input Java {@link Date} is not from a time zone aware source. When this is
      *            {@code true}, the formatters shouldn't override the time zone provided to its constructor (most
@@ -62,32 +72,20 @@ public abstract class TemplateDateFormatFactory {
      *            {@link java.sql.Time java.sql.Time}, although this rule can change in future, depending on
      *            configuration settings and such, so you should rely on this rule, just accept what this parameter
      *            says.
-     * @param params
-     *            The string that further describes how the format should look. For example, when the
-     *            {@link Configurable#getDateFormat() dateFormat} is {@code "@fooBar 1, 2"}, then it will be
-     *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
-     *            {@link TemplateDateFormatFactory} implementation. Not {@code null}, often an empty string.
-     * @param locale
-     *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
-     *            forever (i.e. locale changes in the {@link Environment} shouldn't be followed).
-     * @param timeZone
-     *            The time zone to format for. Not {@code null}. The resulting format should be bound to this time zone
-     *            forever (i.e. time zone changes in the {@link Environment} shouldn't be followed).
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
      *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
      * 
      * @throws InvalidFormatParametersException
      *             if the {@code params} is malformed
-     * @throws TemplateModelException
-     *             if the {@code dateType} is unsupported by the formatter
      * @throws UnknownDateTypeFormattingUnsupportedException
      *             if {@code dateType} is {@link TemplateDateModel#UNKNOWN}, and that's unsupported by the formatter
      *             implementation.
      */
-    public abstract TemplateDateFormat get(int dateType, boolean zonelessInput, String params,
-            Locale locale, TimeZone timeZone, Environment env)
-                    throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
-                    InvalidFormatParametersException;
+    public abstract TemplateDateFormat get(
+            String params,
+            int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
+            Environment env)
+                    throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException;
 
 }

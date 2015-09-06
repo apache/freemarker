@@ -148,8 +148,12 @@ class BuiltInsForMultipleTypes {
             throws TemplateModelException {
                 this.text = text;
                 this.env = env;
-                // Deliberately creating a snapshot here:
-                this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target);
+                try {
+                    this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target);
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw _CoreAPI.convertToTemplateModelException(e); 
+                }
             }
             
             public Object exec(List args) throws TemplateModelException {
@@ -158,9 +162,14 @@ class BuiltInsForMultipleTypes {
             }
             
             public TemplateModel get(String pattern) throws TemplateModelException {
-                return new SimpleDate(
-                    parse(env.getTemplateDateFormat(dateType, Date.class, pattern, target)),
-                    dateType);
+                TemplateDateFormat format;
+                try {
+                    format = env.getTemplateDateFormat(pattern, dateType, Date.class, target, dateBI.this);
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw _CoreAPI.convertToTemplateModelException(e); 
+                }
+                return new SimpleDate(parse(format), dateType);
             }
     
             public Date getAsDate() throws TemplateModelException {
@@ -521,10 +530,15 @@ class BuiltInsForMultipleTypes {
                 this.env = env;
                 
                 final int dateType = dateModel.getDateType();
-                this.defaultFormat = dateType == TemplateDateModel.UNKNOWN
-                        ? null  // Lazy unknown type error in getAsString()
-                        : env.getTemplateDateFormat(
-                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target);
+                try {
+                    this.defaultFormat = dateType == TemplateDateModel.UNKNOWN
+                            ? null  // Lazy unknown type error in getAsString()
+                            : env.getTemplateDateFormat(
+                                    dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target);
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw _CoreAPI.convertToTemplateModelException(e); 
+                }
             }
     
             public Object exec(List args) throws TemplateModelException {
@@ -534,7 +548,12 @@ class BuiltInsForMultipleTypes {
 
             public TemplateModel get(String key)
             throws TemplateModelException {
-                return new SimpleScalar(env.formatDate(dateModel, key, target));
+                try {
+                    return new SimpleScalar(env.formatDate(dateModel, key, target, stringBI.this));
+                } catch (TemplateException e) {
+                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
+                    throw _CoreAPI.convertToTemplateModelException(e); 
+                }
             }
             
             public String getAsString()
@@ -582,8 +601,7 @@ class BuiltInsForMultipleTypes {
                     defaultFormat = env.getTemplateNumberFormat(stringBI.this);
                 } catch (TemplateException e) {
                     // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                    throw new _TemplateModelException(
-                            stringBI.this, e.getCause(), env, e.getMessage()); 
+                    throw _CoreAPI.convertToTemplateModelException(e); 
                 }
             }
     
@@ -598,8 +616,7 @@ class BuiltInsForMultipleTypes {
                     format = env.getTemplateNumberFormat(key, stringBI.this);
                 } catch (TemplateException e) {
                     // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                    throw new _TemplateModelException(
-                            stringBI.this, e.getCause(), env, e.getMessage()); 
+                    throw _CoreAPI.convertToTemplateModelException(e); 
                 }
                 
                 String result;
@@ -611,8 +628,7 @@ class BuiltInsForMultipleTypes {
                     }
                 } catch (TemplateException e) {
                     // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                    throw new _TemplateModelException(
-                            target, e.getCause(), env, e.getMessage()); 
+                    throw _CoreAPI.convertToTemplateModelException(e); 
                 }
                 
                 return new SimpleScalar(result);
@@ -629,8 +645,7 @@ class BuiltInsForMultipleTypes {
                         }
                     } catch (TemplateException e) {
                         // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                        throw new _TemplateModelException(
-                                target, e.getCause(), env, e.getMessage()); 
+                        throw _CoreAPI.convertToTemplateModelException(e); 
                     }
                 }
                 return cachedValue;

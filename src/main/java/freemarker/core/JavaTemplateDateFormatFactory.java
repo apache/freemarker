@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import freemarker.log.Logger;
 import freemarker.template.TemplateDateModel;
-import freemarker.template.TemplateModelException;
 
 class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
@@ -49,9 +48,8 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
      *            Has no effect in this implementation.
      */
     @Override
-    public TemplateDateFormat get(int dateType, boolean zonelessInput, String params, Locale locale, TimeZone timeZone,
-            Environment env) throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException,
-                    InvalidFormatParametersException {
+    public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
+            Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
         return new JavaTemplateDateFormat(getJavaDateFormat(dateType, params, locale, timeZone));
     }
 
