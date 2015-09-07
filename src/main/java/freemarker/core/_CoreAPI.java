@@ -27,6 +27,10 @@ import java.util.TreeSet;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
 
 
@@ -153,6 +157,19 @@ public class _CoreAPI {
                         + ClassUtil.getShortClassName(expectedClass) + ", but one of them was a(n) "
                         + ClassUtil.getShortClassNameOfObject(value) + ".");
             }
+        }
+    }
+    
+    /**
+     * The work around the problematic cases where we should throw a {@link TemplateException}, but we are inside
+     * a {@link TemplateModel} method and so we can only throw {@link TemplateModelException}-s.  
+     */
+    public static TemplateModelException ensureIsTemplateModelException(String modelOpMsg, TemplateException e) {
+        if (e instanceof TemplateModelException) {
+            return (TemplateModelException) e;
+        } else {
+            return new _TemplateModelException(
+                    _TemplateAPI.getBlamedExpression(e), e.getCause(), e.getEnvironment(), modelOpMsg);
         }
     }
     

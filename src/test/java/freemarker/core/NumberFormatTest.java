@@ -138,7 +138,7 @@ public class NumberFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testExplicitLocale() throws Exception {
+    public void testEnvironmentGetters() throws Exception {
         Template t = new Template(null, "", getConfiguration());
         Environment env = t.createProcessingEnvironment(null, null);
         

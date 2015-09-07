@@ -25378,9 +25378,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_24">
-        <title>2.3.24 Preview 1</title>
+        <title>2.3.24 Release Candidate 1</title>
 
-        <para>Date of release: 2015-09-01 for preview release 1</para>
+        <para>Date of release for Release Candidate 1: [FIXME]</para>
+
+        <para>Date of release for Preview 1: 2015-09-01</para>
 
         <para>Date of release for final is not yet known (end of
         October?).</para>
@@ -25667,12 +25669,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Added new <literal>Environment</literal> methods
                   returning <literal>TemplateNumberFormat</literal> and
-                  <literal>TemplateDateFormat</literal> objects:
-                  <literal>getTemplateNumberFormat()</literal>,
-                  <literal>getTemplateNumberFormat(String
-                  formatString)</literal>,
-                  <literal>getTemplateNumberFormat(String formatString, Locale
-                  locale)</literal>.</para>
+                  <literal>TemplateDateFormat</literal> objects. See
+                  <literal>getTemplateNumberFormat(<replaceable>...</replaceable>)</literal>
+                  and
+                  <literal>getTemplateDateFormat(<replaceable>...</replaceable>)</literal>
+                  variations. (Only since RC1: public
+                  <literal>TemplateDateFormat</literal> returning
+                  methods)</para>
                 </listitem>
 
                 <listitem>

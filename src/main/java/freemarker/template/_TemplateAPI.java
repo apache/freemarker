@@ -25,6 +25,7 @@ import freemarker.cache.CacheStorage;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
+import freemarker.core.Expression;
 import freemarker.core.OutputFormat;
 import freemarker.core.TemplateObject;
 import freemarker.template.utility.NullArgumentException;
@@ -141,6 +142,10 @@ public class _TemplateAPI {
                     + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
                     + "or Configuration.SQAUARE_BRACKET_SYNTAX");
         }
+    }
+    
+    public static Expression getBlamedExpression(TemplateException e) {
+        return e.getBlamedExpression();
     }
     
 }
