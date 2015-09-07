@@ -164,12 +164,12 @@ public class _CoreAPI {
      * The work around the problematic cases where we should throw a {@link TemplateException}, but we are inside
      * a {@link TemplateModel} method and so we can only throw {@link TemplateModelException}-s.  
      */
-    public static TemplateModelException convertToTemplateModelException(TemplateException e) {
+    public static TemplateModelException ensureIsTemplateModelException(String modelOpMsg, TemplateException e) {
         if (e instanceof TemplateModelException) {
             return (TemplateModelException) e;
         } else {
             return new _TemplateModelException(
-                    _TemplateAPI.getBlamedExpression(e), e.getCause(), e.getEnvironment(), e.getMessage());
+                    _TemplateAPI.getBlamedExpression(e), e.getCause(), e.getEnvironment(), modelOpMsg);
         }
     }
     

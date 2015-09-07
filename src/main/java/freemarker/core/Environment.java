@@ -1033,8 +1033,8 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(TemplateNumberModel number, Expression exp) throws TemplateException {
-        return formatNumber(number, getTemplateNumberFormat(exp), exp);
+    String formatNumber(TemplateNumberModel number, Expression exp, boolean useTempModelExc) throws TemplateException {
+        return formatNumber(number, getTemplateNumberFormat(exp, useTempModelExc), exp, useTempModelExc);
     }
 
     /**
@@ -1043,8 +1043,10 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(TemplateNumberModel number, String formatString, Expression exp) throws TemplateException {
-        return formatNumber(number, getTemplateNumberFormat(formatString, exp), exp);
+    String formatNumber(
+            TemplateNumberModel number, String formatString, Expression exp,
+            boolean useTempModelExc) throws TemplateException {
+        return formatNumber(number, getTemplateNumberFormat(formatString, exp, useTempModelExc), exp, useTempModelExc);
     }
 
     /**
@@ -1053,14 +1055,19 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(TemplateNumberModel number, TemplateNumberFormat format, Expression exp)
-            throws TemplateModelException, _MiscTemplateException {
+    String formatNumber(
+            TemplateNumberModel number, TemplateNumberFormat format, Expression exp,
+            boolean useTempModelExc)
+            throws TemplateException {
         try {
             return format.format(number);
         } catch (UnformattableNumberException e) {
-            throw new _MiscTemplateException(exp, e, this,
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
-                    e.getMessage());
+                    e.getMessage())
+                    .blame(exp); 
+            throw useTempModelExc
+                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
         }
     }
 
@@ -1147,14 +1154,17 @@ public final class Environment extends Configurable {
     /**
      * Convenience wrapper around {@link #getTemplateNumberFormat()} to be called during expression evaluation.
      */
-    TemplateNumberFormat getTemplateNumberFormat(Expression exp) throws _MiscTemplateException {
+    TemplateNumberFormat getTemplateNumberFormat(Expression exp, boolean useTempModelExc) throws TemplateException {
         TemplateNumberFormat format;
         try {
             format = getTemplateNumberFormat();
         } catch (InvalidFormatStringException e) {
-            throw new _MiscTemplateException(exp, e, this,
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Failed to get number format object for the current number format string, ",
-                    new _DelayedJQuote(getNumberFormat()), ": " + e.getMessage());
+                    new _DelayedJQuote(getNumberFormat()), ": ", e.getMessage())
+                    .blame(exp); 
+            throw useTempModelExc
+                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
         }
         return format;
     }
@@ -1165,15 +1175,18 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    TemplateNumberFormat getTemplateNumberFormat(String formatString, Expression exp)
-            throws _MiscTemplateException {
+    TemplateNumberFormat getTemplateNumberFormat(String formatString, Expression exp, boolean useTempModelExc)
+            throws TemplateException {
         TemplateNumberFormat format;
         try {
             format = getTemplateNumberFormat(formatString);
         } catch (InvalidFormatStringException e) {
-            throw new _MiscTemplateException(exp, e, this,
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Failed to get number format object for the ", new _DelayedJQuote(formatString),
-                    " number format string: " + e.getMessage());
+                    " number format string: ", e.getMessage())
+                    .blame(exp);
+            throw useTempModelExc
+                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
         }
         return format;
     }
@@ -1329,11 +1342,13 @@ public final class Environment extends Configurable {
      * @param tdmSourceExpr
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr) throws TemplateException {
+    String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr,
+            boolean useTempModelExc) throws TemplateException {
         Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
         
         TemplateDateFormat format = getTemplateDateFormat(
-                tdm.getDateType(), date.getClass(), tdmSourceExpr);
+                tdm.getDateType(), date.getClass(), tdmSourceExpr,
+                useTempModelExc);
         
         try {
             return format.format(tdm);
@@ -1349,12 +1364,14 @@ public final class Environment extends Configurable {
      *            The blamed expression if an error occurs; only used for error messages.
      */
     String formatDate(TemplateDateModel tdm, String formatString,
-            Expression blamedDateSourceExp, Expression blamedFormatterExp) throws TemplateException {
+            Expression blamedDateSourceExp, Expression blamedFormatterExp,
+            boolean useTempModelExc) throws TemplateException {
         Date date = EvalUtil.modelToDate(tdm, blamedDateSourceExp);
         
         TemplateDateFormat format = getTemplateDateFormat(
                 formatString, tdm.getDateType(), date.getClass(),
-                blamedDateSourceExp, blamedFormatterExp);
+                blamedDateSourceExp, blamedFormatterExp,
+                useTempModelExc);
         
         try {
             return format.format(tdm);
@@ -1537,7 +1554,8 @@ public final class Environment extends Configurable {
      * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to {@link TemplateException}-s.
      */
     TemplateDateFormat getTemplateDateFormat(
-            int dateType, Class<? extends Date> dateClass, Expression blamedDateSourceExp) throws TemplateException {
+            int dateType, Class<? extends Date> dateClass, Expression blamedDateSourceExp, boolean useTempModelExc)
+                    throws TemplateException {
         try {
             return getTemplateDateFormat(dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
@@ -1563,11 +1581,12 @@ public final class Environment extends Configurable {
                 settingValue = "???";
             }
             
-            throw new _MiscTemplateException(e,
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "The value of the \"", settingName,
                     "\" FreeMarker configuration setting is a malformed date/time/datetime format string: ",
                     new _DelayedJQuote(settingValue), ". Reason given: ",
-                    e.getMessage());
+                    e.getMessage());                    
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
         }
     }
 
@@ -1577,18 +1596,20 @@ public final class Environment extends Configurable {
      */
     TemplateDateFormat getTemplateDateFormat(
             String formatString, int dateType, Class<? extends Date> dateClass,
-            Expression blamedDateSourceExp, Expression blamedFormatterExp) throws TemplateException {
+            Expression blamedDateSourceExp, Expression blamedFormatterExp,
+            boolean useTempModelExc)
+            throws TemplateException {
         try {
             return getTemplateDateFormat(formatString, dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
         } catch (InvalidFormatStringException e) {
-            throw new _MiscTemplateException(e,
-                    new _ErrorDescriptionBuilder(
-                            "Malformed date/time/datetime format string: ",
-                            new _DelayedJQuote(formatString), ". Reason given: ",
-                            e.getMessage())
-                            .blame(blamedFormatterExp));
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                    "Malformed date/time/datetime format string: ",
+                    new _DelayedJQuote(formatString), ". Reason given: ",
+                    e.getMessage())
+                    .blame(blamedFormatterExp);
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
         }
     }
 

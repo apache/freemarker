@@ -43,7 +43,7 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
 
     @Override
     public String evalAndCoerceToString(Environment env) throws TemplateException {
-        return env.formatNumber(this, this);
+        return env.formatNumber(this, this, false);
     }
 
     public Number getAsNumber() {
