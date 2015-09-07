@@ -145,11 +145,10 @@ class BuiltInsForMultipleTypes {
             private Date cachedValue;
             
             DateParser(String text, Environment env)
-            throws TemplateModelException {
+            throws TemplateException {
                 this.text = text;
                 this.env = env;
-                // Deliberately creating a snapshot here:
-                this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target);
+                this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target, false);
             }
             
             public Object exec(List args) throws TemplateModelException {
@@ -158,9 +157,14 @@ class BuiltInsForMultipleTypes {
             }
             
             public TemplateModel get(String pattern) throws TemplateModelException {
-                return new SimpleDate(
-                    parse(env.getTemplateDateFormat(dateType, Date.class, pattern, target)),
-                    dateType);
+                TemplateDateFormat format;
+                try {
+                    format = env.getTemplateDateFormat(pattern, dateType, Date.class, target, dateBI.this, true);
+                } catch (TemplateException e) {
+                    // `e` should always be a TemplateModelException here, but to be sure: 
+                    throw _CoreAPI.ensureIsTemplateModelException("Failed to get format", e); 
+                }
+                return new SimpleDate(parse(format), dateType);
             }
     
             public Date getAsDate() throws TemplateModelException {
@@ -517,7 +521,7 @@ class BuiltInsForMultipleTypes {
             private String cachedValue;
     
             DateFormatter(TemplateDateModel dateModel, Environment env)
-            throws TemplateModelException {
+            throws TemplateException {
                 this.dateModel = dateModel;
                 this.env = env;
                 
@@ -525,17 +529,27 @@ class BuiltInsForMultipleTypes {
                 this.defaultFormat = dateType == TemplateDateModel.UNKNOWN
                         ? null  // Lazy unknown type error in getAsString()
                         : env.getTemplateDateFormat(
-                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target);
+                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target, true);
             }
     
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
-                return get((String) args.get(0));
+                return formatWith((String) args.get(0));
             }
 
             public TemplateModel get(String key)
             throws TemplateModelException {
-                return new SimpleScalar(env.formatDate(dateModel, key, target));
+                return formatWith(key);
+            }
+
+            private TemplateModel formatWith(String key)
+            throws TemplateModelException {
+                try {
+                    return new SimpleScalar(env.formatDate(dateModel, key, target, stringBI.this, true));
+                } catch (TemplateException e) {
+                    // `e` should always be a TemplateModelException here, but to be sure: 
+                    throw _CoreAPI.ensureIsTemplateModelException("Failed to format value", e); 
+                }
             }
             
             public String getAsString()
@@ -580,11 +594,10 @@ class BuiltInsForMultipleTypes {
                 this.numberModel = numberModel;
                 number = EvalUtil.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
                 try {
-                    defaultFormat = env.getTemplateNumberFormat(stringBI.this);
+                    defaultFormat = env.getTemplateNumberFormat(stringBI.this, true);
                 } catch (TemplateException e) {
-                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                    throw new _TemplateModelException(
-                            stringBI.this, e.getCause(), env, e.getMessage()); 
+                    // `e` should always be a TemplateModelException here, but to be sure: 
+                    throw _CoreAPI.ensureIsTemplateModelException("Failed to get default number format", e); 
                 }
             }
     
@@ -596,11 +609,10 @@ class BuiltInsForMultipleTypes {
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateNumberFormat format;
                 try {
-                    format = env.getTemplateNumberFormat(key, stringBI.this);
+                    format = env.getTemplateNumberFormat(key, stringBI.this, true);
                 } catch (TemplateException e) {
-                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                    throw new _TemplateModelException(
-                            stringBI.this, e.getCause(), env, e.getMessage()); 
+                    // `e` should always be a TemplateModelException here, but to be sure: 
+                    throw _CoreAPI.ensureIsTemplateModelException("Failed to get number format", e); 
                 }
                 
                 String result;
@@ -608,12 +620,11 @@ class BuiltInsForMultipleTypes {
                     if (format instanceof BackwardCompatibleTemplateNumberFormat) {
                         result = env.formatNumber(number, (BackwardCompatibleTemplateNumberFormat) format, target);
                     } else {
-                        result = env.formatNumber(numberModel, format, target);
+                        result = env.formatNumber(numberModel, format, target, true);
                     }
                 } catch (TemplateException e) {
-                    // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                    throw new _TemplateModelException(
-                            target, e.getCause(), env, e.getMessage()); 
+                    // `e` should always be a TemplateModelException here, but to be sure: 
+                    throw _CoreAPI.ensureIsTemplateModelException("Failed to format number", e); 
                 }
                 
                 return new SimpleScalar(result);
@@ -626,12 +637,11 @@ class BuiltInsForMultipleTypes {
                             cachedValue = env.formatNumber(
                                     number, (BackwardCompatibleTemplateNumberFormat) defaultFormat, target);
                         } else {
-                            cachedValue = env.formatNumber(numberModel, defaultFormat, target);
+                            cachedValue = env.formatNumber(numberModel, defaultFormat, target, true);
                         }
                     } catch (TemplateException e) {
-                        // Must convert TemplateException-s to TemplateModelException-s due to API restriction.
-                        throw new _TemplateModelException(
-                                target, e.getCause(), env, e.getMessage()); 
+                        // `e` should always be a TemplateModelException here, but to be sure: 
+                        throw _CoreAPI.ensureIsTemplateModelException("Failed to format number", e); 
                     }
                 }
                 return cachedValue;

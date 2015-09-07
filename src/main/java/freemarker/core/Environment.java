@@ -23,8 +23,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -75,19 +76,19 @@ import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * Object that represents the runtime environment during template processing.
- * For every invocation of a <tt>Template.process()</tt> method, a new instance
- * of this object is created, and then discarded when <tt>process()</tt> returns.
- * This object stores the set of temporary variables created by the template,
- * the value of settings set by the template, the reference to the data model root,
- * etc. Everything that is needed to fulfill the template processing job.
+ * Object that represents the runtime environment during template processing. For every invocation of a
+ * <tt>Template.process()</tt> method, a new instance of this object is created, and then discarded when
+ * <tt>process()</tt> returns. This object stores the set of temporary variables created by the template, the value of
+ * settings set by the template, the reference to the data model root, etc. Everything that is needed to fulfill the
+ * template processing job.
  *
- * <p>Data models that need to access the <tt>Environment</tt>
- * object that represents the template processing on the current thread can use
- * the {@link #getCurrentEnvironment()} method.
+ * <p>
+ * Data models that need to access the <tt>Environment</tt> object that represents the template processing on the
+ * current thread can use the {@link #getCurrentEnvironment()} method.
  *
- * <p>If you need to modify or read this object before or after the <tt>process</tt>
- * call, use {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
+ * <p>
+ * If you need to modify or read this object before or after the <tt>process</tt> call, use
+ * {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
  */
 public final class Environment extends Configurable {
 
@@ -98,10 +99,10 @@ public final class Environment extends Configurable {
 
     // Do not use this object directly; clone it first! DecimalFormat isn't
     // thread-safe.
-    private static final DecimalFormat C_NUMBER_FORMAT
-            = new DecimalFormat(
-                    "0.################",
-                    new DecimalFormatSymbols(Locale.US));
+    private static final DecimalFormat C_NUMBER_FORMAT = new DecimalFormat(
+            "0.################",
+            new DecimalFormatSymbols(Locale.US));
+
     static {
         C_NUMBER_FORMAT.setGroupingUsed(false);
         C_NUMBER_FORMAT.setDecimalSeparatorAlwaysShown(false);
@@ -109,7 +110,7 @@ public final class Environment extends Configurable {
 
     private final Configuration configuration;
     private final TemplateHashModel rootDataModel;
-    private final ArrayList/*<TemplateElement>*/ instructionStack = new ArrayList();
+    private final ArrayList/* <TemplateElement> */ instructionStack = new ArrayList();
     private final ArrayList recoveredErrorStack = new ArrayList();
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
@@ -117,19 +118,21 @@ public final class Environment extends Configurable {
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
-     * formatting. That is, in situations like ${lastModified} or even ${lastModified?date}, but not in situations
-     * like ${lastModified?string.iso}.
+     * formatting. That is, in situations like ${lastModified} or even ${lastModified?date}, but not in situations like
+     * ${lastModified?string.iso}.
      * 
-     * <p>The index of the array is calculated from what kind of formatter we want
-     * (see {@link #getTemplateDateFormatCacheArrayIndex(int, boolean, boolean)}):<br>
-     * Zoned input:                  0: U,  1: T,  2: D,  3: DT<br>
-     * Zoneless input:               4: U,  5: T,  6: D,  7: DT<br>
-     * SQL D T TZ + Zoned input:     8: U,  9: T, 10: D, 11: DT<br>
+     * <p>
+     * The index of the array is calculated from what kind of formatter we want (see
+     * {@link #getTemplateDateFormatCacheArrayIndex(int, boolean, boolean)}):<br>
+     * Zoned input: 0: U, 1: T, 2: D, 3: DT<br>
+     * Zoneless input: 4: U, 5: T, 6: D, 7: DT<br>
+     * SQL D T TZ + Zoned input: 8: U, 9: T, 10: D, 11: DT<br>
      * SQL D T TZ + Zoneless input: 12: U, 13: T, 14: D, 15: DT
      * 
-     * <p>This is a lazily filled cache. It starts out as {@code null}, then
-     * when first needed the array will be created. The array elements also start out as {@code null}-s, and they
-     * are filled as the particular kind of formatter is first needed.
+     * <p>
+     * This is a lazily filled cache. It starts out as {@code null}, then when first needed the array will be created.
+     * The array elements also start out as {@code null}-s, and they are filled as the particular kind of formatter is
+     * first needed.
      */
     private TemplateDateFormat[] cachedTempDateFormatArray;
     /** Similar to {@link #cachedTempDateFormatArray}, but used when a formatting string was specified. */
@@ -137,18 +140,19 @@ public final class Environment extends Configurable {
     private static final int CACHED_TDFS_ZONELESS_INPUT_OFFS = 4;
     private static final int CACHED_TDFS_SQL_D_T_TZ_OFFS = CACHED_TDFS_ZONELESS_INPUT_OFFS * 2;
     private static final int CACHED_TDFS_LENGTH = CACHED_TDFS_SQL_D_T_TZ_OFFS * 2;
-    
+
     /** Caches the result of {@link #isSQLDateAndTimeTimeZoneSameAsNormal()}. */
     private Boolean cachedSQLDateAndTimeTimeZoneSameAsNormal;
-    
+
     private NumberFormat cNumberFormat;
-    
+
     /**
      * Used by the "iso_" built-ins to accelerate formatting.
-     * @see #getISOBuiltInCalendarFactory() 
+     * 
+     * @see #getISOBuiltInCalendarFactory()
      */
     private DateToISO8601CalendarFactory isoBuiltInCalendarFactory;
-    
+
     private Collator cachedCollator;
 
     private Template currentTemplate;
@@ -156,7 +160,7 @@ public final class Environment extends Configurable {
     private CallableInvocationContext currentMacroContext;
     
     private Writer out;
-    private ArrayList localContextStack; 
+    private ArrayList localContextStack;
     private final Namespace mainNamespace;
     private Namespace globalNamespace;
     private HashMap loadedLibs;
@@ -164,20 +168,20 @@ public final class Environment extends Configurable {
 
     private boolean inAttemptBlock;
     private Throwable lastThrowable;
-    
+
     private TemplateModel lastReturnValue;
 
-    private TemplateNodeModel currentVisitorNode;    
+    private TemplateNodeModel currentVisitorNode;
     private TemplateSequenceModel nodeNamespaces;
     // Things we keep track of for the fallback mechanism.
     private int nodeNamespaceIndex;
     private String currentNodeName, currentNodeNS;
-    
+
     private String cachedURLEscapingCharset;
     private boolean cachedURLEscapingCharsetSet;
 
     private boolean fastInvalidReferenceExceptions;
-    
+
     /**
      * Retrieves the environment object associated with the current thread, or {@code null} if there's no template
      * processing going on in this thread. Data model implementations that need access to the environment can call this
@@ -187,7 +191,7 @@ public final class Environment extends Configurable {
     public static Environment getCurrentEnvironment() {
         return (Environment) threadEnv.get();
     }
-    
+
     static void setCurrentEnvironment(Environment env) {
         threadEnv.set(env);
     }
@@ -217,11 +221,11 @@ public final class Environment extends Configurable {
     public Template getTemplate() {
         return (Template) getParent();
     }
-    
+
     /** Returns the same value as pre-IcI 2.3.22 getTemplate() did. */
     Template getTemplate230() {
         Template legacyParent = (Template) this.legacyParent;
-        return legacyParent != null ? legacyParent : getTemplate(); 
+        return legacyParent != null ? legacyParent : getTemplate();
     }
 
     /**
@@ -235,7 +239,7 @@ public final class Environment extends Configurable {
     public Template getMainTemplate() {
         return mainNamespace.getTemplate();
     }
-    
+
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
@@ -269,23 +273,22 @@ public final class Environment extends Configurable {
         }
         return null;
     }
-    
+
     /**
-     * Deletes cached values that meant to be valid only during a single
-     * template execution. 
+     * Deletes cached values that meant to be valid only during a single template execution.
      */
     private void clearCachedValues() {
         cachedTemplateNumberFormats = null;
         cachedTemplateNumberFormat = null;
-        
+
         cachedTempDateFormatArray = null;
         cachedTempDateFormatsByFmtStrArray = null;
-        
+
         cachedCollator = null;
         cachedURLEscapingCharset = null;
         cachedURLEscapingCharsetSet = false;
     }
-    
+
     /**
      * Processes the template to which this environment belongs to.
      */
@@ -310,12 +313,12 @@ public final class Environment extends Configurable {
             threadEnv.set(savedEnv);
         }
     }
-    
+
     /**
      * "Visit" the template element.
      */
     void visit(TemplateElement element)
-    throws TemplateException, IOException {
+            throws TemplateException, IOException {
         pushElement(element);
         try {
             element.accept(this);
@@ -325,16 +328,16 @@ public final class Environment extends Configurable {
             popElement();
         }
     }
-    
+
     /**
      * Instead of pushing into the element stack, we replace the top element for the time the parameter element is
      * visited, and then we restore the top element. The main purpose of this is to get rid of elements in the error
      * stack trace that from user perspective shouldn't have a stack frame. The typical example is
      * {@code [#if foo]...[@failsHere/]...[/#if]}, where the #if call shouldn't be in the stack trace. (Simply marking
-     * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)    
+     * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)
      */
     void visitByHiddingParent(TemplateElement element)
-    throws TemplateException, IOException {
+            throws TemplateException, IOException {
         TemplateElement parent = replaceTopElement(element);
         try {
             element.accept(this);
@@ -350,9 +353,9 @@ public final class Environment extends Configurable {
     }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
-    
+
     public void visit(final TemplateElement element,
-            TemplateDirectiveModel directiveModel, Map args, 
+            TemplateDirectiveModel directiveModel, Map args,
             final List bodyParameterNames) throws TemplateException, IOException {
         TemplateDirectiveBody nested;
         if (element == null) {
@@ -368,6 +371,7 @@ public final class Environment extends Configurable {
         }
         if (outArgs.length > 0) {
             pushLocalContext(new LocalContext() {
+
                 public TemplateModel getLocalVariable(String name) {
                     int index = bodyParameterNames.indexOf(name);
                     return index != -1 ? outArgs[index] : null;
@@ -386,26 +390,27 @@ public final class Environment extends Configurable {
             }
         }
     }
-    
+
     /**
-     * "Visit" the template element, passing the output
-     * through a TemplateTransformModel
-     * @param element the element to visit through a transform
-     * @param transform the transform to pass the element output
-     * through
-     * @param args optional arguments fed to the transform
+     * "Visit" the template element, passing the output through a TemplateTransformModel
+     * 
+     * @param element
+     *            the element to visit through a transform
+     * @param transform
+     *            the transform to pass the element output through
+     * @param args
+     *            optional arguments fed to the transform
      */
     void visitAndTransform(TemplateElement element,
-               TemplateTransformModel transform,
-               Map args)
-    throws TemplateException, IOException {
+            TemplateTransformModel transform,
+            Map args)
+                    throws TemplateException, IOException {
         try {
             Writer tw = transform.getWriter(out, args);
             if (tw == null) tw = EMPTY_BODY_WRITER;
-            TransformControl tc =
-                tw instanceof TransformControl
-                ? (TransformControl) tw
-                : null;
+            TransformControl tc = tw instanceof TransformControl
+                    ? (TransformControl) tw
+                    : null;
 
             Writer prevOut = out;
             out = tw;
@@ -443,62 +448,61 @@ public final class Environment extends Configurable {
             handleTemplateException(te);
         }
     }
-    
+
     /**
      * Visit a block using buffering/recovery
      */
-     void visitAttemptRecover(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) 
-     throws TemplateException, IOException {
-         Writer prevOut = this.out;
-         StringWriter sw = new StringWriter();
-         this.out = sw;
-         TemplateException thrownException = null;
-         boolean lastFIRE = setFastInvalidReferenceExceptions(false);
-         boolean lastInAttemptBlock = inAttemptBlock; 
-         try {
-             inAttemptBlock = true;
-             visitByHiddingParent(attemptBlock);
-         } catch (TemplateException te) {
-             thrownException = te;
-         } finally {
-             inAttemptBlock = lastInAttemptBlock;
-             setFastInvalidReferenceExceptions(lastFIRE);
-             this.out = prevOut;
-         }
-         if (thrownException != null) {
-             if (ATTEMPT_LOGGER.isDebugEnabled()) {
-                 ATTEMPT_LOGGER.debug("Error in attempt block " + 
-                         attemptBlock.getStartLocationQuoted(), thrownException);
-             }
-             try {
-                 recoveredErrorStack.add(thrownException);
-                 visit(recoveryBlock);
-             } finally {
-                 recoveredErrorStack.remove(recoveredErrorStack.size() - 1);
-             }
-         } else {
-             out.write(sw.toString());
-         }
-     }
-     
-     String getCurrentRecoveredErrorMessage() throws TemplateException {
-         if (recoveredErrorStack.isEmpty()) {
-             throw new _MiscTemplateException(this, ".error is not available outside of a #recover block");
-         }
-         return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() - 1)).getMessage();
-     }
-     
-     /**
-      * Tells if we are inside an <tt>#attempt</tt> block (but before <tt>#recover</tt>). This can be useful for
-      * {@link TemplateExceptionHandler}-s, as then they may don't want to print the error to the output, as
-      * <tt>#attempt</tt> will roll it back anyway. 
-      * 
-      * @since 2.3.20
-      */
-     public boolean isInAttemptBlock() {
-         return inAttemptBlock;
-     }
+    void visitAttemptRecover(TemplateElement attemptBlock, RecoveryBlock recoveryBlock)
+            throws TemplateException, IOException {
+        Writer prevOut = this.out;
+        StringWriter sw = new StringWriter();
+        this.out = sw;
+        TemplateException thrownException = null;
+        boolean lastFIRE = setFastInvalidReferenceExceptions(false);
+        boolean lastInAttemptBlock = inAttemptBlock;
+        try {
+            inAttemptBlock = true;
+            visitByHiddingParent(attemptBlock);
+        } catch (TemplateException te) {
+            thrownException = te;
+        } finally {
+            inAttemptBlock = lastInAttemptBlock;
+            setFastInvalidReferenceExceptions(lastFIRE);
+            this.out = prevOut;
+        }
+        if (thrownException != null) {
+            if (ATTEMPT_LOGGER.isDebugEnabled()) {
+                ATTEMPT_LOGGER.debug("Error in attempt block " +
+                        attemptBlock.getStartLocationQuoted(), thrownException);
+            }
+            try {
+                recoveredErrorStack.add(thrownException);
+                visit(recoveryBlock);
+            } finally {
+                recoveredErrorStack.remove(recoveredErrorStack.size() - 1);
+            }
+        } else {
+            out.write(sw.toString());
+        }
+    }
 
+    String getCurrentRecoveredErrorMessage() throws TemplateException {
+        if (recoveredErrorStack.isEmpty()) {
+            throw new _MiscTemplateException(this, ".error is not available outside of a #recover block");
+        }
+        return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() - 1)).getMessage();
+    }
+
+    /**
+     * Tells if we are inside an <tt>#attempt</tt> block (but before <tt>#recover</tt>). This can be useful for
+     * {@link TemplateExceptionHandler}-s, as then they may don't want to print the error to the output, as
+     * <tt>#attempt</tt> will roll it back anyway.
+     * 
+     * @since 2.3.20
+     */
+    public boolean isInAttemptBlock() {
+        return inAttemptBlock;
+    }
 
     /**
      * Used for {@code #nested}.
@@ -512,7 +516,7 @@ public final class Environment extends Configurable {
             
             final Namespace prevCurrentNamespace = currentNamespace;  
             currentNamespace = invokingMacroContext.nestedContentNamespace;
-            
+
             final Template prevCurrentTemplate = currentTemplate;
             currentTemplate = invokingMacroContext.nestedContentTemplate;
             
@@ -524,7 +528,7 @@ public final class Environment extends Configurable {
             } else {
                 legacyParent = currentNamespace.getTemplate();
             }
-            
+
             this.localContextStack = invokingMacroContext.prevLocalContextStack;
             if (invokingMacroContext.nestedContentParameterNames != null) {
                 pushLocalContext(bodyCtx);
@@ -552,7 +556,7 @@ public final class Environment extends Configurable {
      * "visit" an IteratorBlock
      */
     boolean visitIteratorBlock(IteratorBlock.IterationContext ictxt)
-    throws TemplateException, IOException {
+            throws TemplateException, IOException {
         pushLocalContext(ictxt);
         try {
             return ictxt.accept(this);
@@ -563,12 +567,12 @@ public final class Environment extends Configurable {
             popLocalContext();
         }
     }
-    
+
     /**
      * Used for {@code #visit} and {@code #recurse}.
      */
-    void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces) 
-    throws TemplateException, IOException {
+    void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces)
+            throws TemplateException, IOException {
         if (nodeNamespaces == null) {
             SimpleSequence ss = new SimpleSequence(1);
             ss.add(currentNamespace);
@@ -588,21 +592,21 @@ public final class Environment extends Configurable {
             if (macroOrTransform instanceof BoundCallable) {
                 invoke((BoundCallable) macroOrTransform, null, null, null, null);
             } else if (macroOrTransform instanceof TemplateTransformModel) {
-                visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
+                visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
             } else {
                 String nodeType = node.getNodeType();
                 if (nodeType != null) {
                     // If the node's type is 'text', we just output it.
                     if ((nodeType.equals("text") && node instanceof TemplateScalarModel)) {
-                           out.write(((TemplateScalarModel) node).getAsString());
+                        out.write(((TemplateScalarModel) node).getAsString());
                     } else if (nodeType.equals("document")) {
                         recurse(node, namespaces);
                     }
                     // We complain here, unless the node's type is 'pi', or "comment" or "document_type", in which case
                     // we just ignore it.
-                    else if (!nodeType.equals("pi") 
-                         && !nodeType.equals("comment") 
-                         && !nodeType.equals("document_type")) {
+                    else if (!nodeType.equals("pi")
+                            && !nodeType.equals("comment")
+                            && !nodeType.equals("document_type")) {
                         throw new _MiscTemplateException(
                                 this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), nodeType));
                     }
@@ -622,7 +626,7 @@ public final class Environment extends Configurable {
 
     private Object[] noNodeHandlerDefinedDescription(
             TemplateNodeModel node, String ns, String nodeType)
-    throws TemplateModelException {
+                    throws TemplateModelException {
         String nsPrefix;
         if (ns != null) {
             if (ns.length() > 0) {
@@ -634,48 +638,48 @@ public final class Environment extends Configurable {
             nsPrefix = "";
             ns = "";
         }
-        return new Object[] { "No macro or directive is defined for node named ",  
+        return new Object[] { "No macro or directive is defined for node named ",
                 new _DelayedJQuote(node.getNodeName()), nsPrefix, ns,
                 ", and there is no fallback handler called @", nodeType, " either." };
     }
-    
+
     void fallback() throws TemplateException, IOException {
         TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
         if (macroOrTransform instanceof BoundCallable) {
             invoke((BoundCallable) macroOrTransform, null, null, null, null);
         } else if (macroOrTransform instanceof TemplateTransformModel) {
-            visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
+            visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
         }
     }
-    
+
     /**
      * Calls the macro or function with the given arguments and nested block.
      */
     void invoke(BoundCallable boundCallable, 
-               Map namedArgs, List positionalArgs, 
-               List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
+            Map namedArgs, List positionalArgs,
+            List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
         UnboundCallable unboundCallable = boundCallable.getUnboundCallable();
         if (unboundCallable == UnboundCallable.NO_OP_MACRO) {
             return;
         }
-        
+
         pushElement(unboundCallable);
         try {
             final CallableInvocationContext macroCtx = new CallableInvocationContext(unboundCallable, this, nestedBlock, bodyParameterNames);
             setMacroContextLocalsFromArguments(macroCtx, unboundCallable, namedArgs, positionalArgs);
-            
+
             final CallableInvocationContext prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
-            
+
             final ArrayList prevLocalContextStack = localContextStack;
             localContextStack = null;
-            
+
             final Namespace prevCurrentNamespace = currentNamespace;
             currentNamespace = boundCallable.getNamespace();
             
             final Template prevCurrentTemplate = currentTemplate;
             currentTemplate = boundCallable.getTemplate();
-            
+
             try {
                 macroCtx.invoce(this);
             } catch (ReturnInstruction.Return re) {
@@ -709,8 +713,8 @@ public final class Environment extends Configurable {
             } else {
                 catchAllParamValue = null;
             }
-            
-            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
+
+            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
                 final Map.Entry argNameAndValExp = (Map.Entry) it.next();
                 final String argName = (String) argNameAndValExp.getKey();
                 final boolean isArgNameDeclared = unboundCallable.hasArgNamed(argName);
@@ -736,11 +740,11 @@ public final class Environment extends Configurable {
             } else {
                 catchAllParamValue = null;
             }
-            
+
             String[] argNames = unboundCallable.getArgumentNamesInternal();
             final int argsCnt = positionalArgs.size();
             if (argNames.length < argsCnt && catchAllParamName == null) {
-                throw new _MiscTemplateException(this, 
+                throw new _MiscTemplateException(this,
                         (unboundCallable.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(unboundCallable.getName()),
                         " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
                         new _DelayedToString(argsCnt), ".");
@@ -761,7 +765,7 @@ public final class Environment extends Configurable {
             }
         }
     }
-    
+
     /**
      * Defines the given macro in the current namespace (doesn't call it).
      */
@@ -770,9 +774,9 @@ public final class Environment extends Configurable {
                 unboundCallable.getName(),
                 new BoundCallable(unboundCallable, currentTemplate, currentNamespace));
     }
-    
+
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
-    throws TemplateException, IOException {
+            throws TemplateException, IOException {
         if (node == null) {
             node = this.getCurrentVisitorNode();
             if (node == null) {
@@ -793,9 +797,9 @@ public final class Environment extends Configurable {
     CallableInvocationContext getCurrentMacroContext() {
         return currentMacroContext;
     }
-    
+
     private void handleTemplateException(TemplateException templateException)
-        throws TemplateException {
+            throws TemplateException {
         // Logic to prevent double-handling of the exception in
         // nested visit() calls.
         if (lastThrowable == templateException) {
@@ -824,7 +828,7 @@ public final class Environment extends Configurable {
         super.setTemplateExceptionHandler(templateExceptionHandler);
         lastThrowable = null;
     }
-    
+
     @Override
     public void setLocale(Locale locale) {
         Locale prevLocale = getLocale();
@@ -834,7 +838,7 @@ public final class Environment extends Configurable {
             if (cachedTemplateNumberFormat != null && cachedTemplateNumberFormat.isLocaleBound()) {
                 cachedTemplateNumberFormat = null;
             }
-    
+
             if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i++) {
                     final TemplateDateFormat f = cachedTempDateFormatArray[i];
@@ -843,9 +847,9 @@ public final class Environment extends Configurable {
                     }
                 }
             }
-            
+
             cachedTempDateFormatsByFmtStrArray = null;
-            
+
             cachedCollator = null;
         }
     }
@@ -854,7 +858,7 @@ public final class Environment extends Configurable {
     public void setTimeZone(TimeZone timeZone) {
         TimeZone prevTimeZone = getTimeZone();
         super.setTimeZone(timeZone);
-        
+
         if (!timeZone.equals(prevTimeZone)) {
             if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_SQL_D_T_TZ_OFFS; i++) {
@@ -869,16 +873,16 @@ public final class Environment extends Configurable {
                     cachedTempDateFormatsByFmtStrArray[i] = null;
                 }
             }
-            
+
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
     }
-    
+
     @Override
     public void setSQLDateAndTimeTimeZone(TimeZone timeZone) {
         TimeZone prevTimeZone = getSQLDateAndTimeTimeZone();
         super.setSQLDateAndTimeTimeZone(timeZone);
-        
+
         if (!nullSafeEquals(timeZone, prevTimeZone)) {
             if (cachedTempDateFormatArray != null) {
                 for (int i = CACHED_TDFS_SQL_D_T_TZ_OFFS; i < CACHED_TDFS_LENGTH; i++) {
@@ -890,14 +894,14 @@ public final class Environment extends Configurable {
             }
             if (cachedTempDateFormatsByFmtStrArray != null) {
                 for (int i = CACHED_TDFS_SQL_D_T_TZ_OFFS; i < CACHED_TDFS_LENGTH; i++) {
-                    cachedTempDateFormatsByFmtStrArray[i] = null; 
+                    cachedTempDateFormatsByFmtStrArray[i] = null;
                 }
             }
-            
+
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
     }
-    
+
     // Replace with Objects.equals in Java 7
     private static boolean nullSafeEquals(Object o1, Object o2) {
         if (o1 == o2) return true;
@@ -912,35 +916,32 @@ public final class Environment extends Configurable {
     boolean isSQLDateAndTimeTimeZoneSameAsNormal() {
         if (cachedSQLDateAndTimeTimeZoneSameAsNormal == null) {
             cachedSQLDateAndTimeTimeZoneSameAsNormal = Boolean.valueOf(
-                    getSQLDateAndTimeTimeZone() == null 
-                    || getSQLDateAndTimeTimeZone().equals(getTimeZone()));
+                    getSQLDateAndTimeTimeZone() == null
+                            || getSQLDateAndTimeTimeZone().equals(getTimeZone()));
         }
         return cachedSQLDateAndTimeTimeZoneSameAsNormal.booleanValue();
     }
-    
+
     @Override
     public void setURLEscapingCharset(String urlEscapingCharset) {
         cachedURLEscapingCharsetSet = false;
         super.setURLEscapingCharset(urlEscapingCharset);
     }
-    
+
     /*
-     * Note that altough it's not allowed to set this setting with the
-     * <tt>setting</tt> directive, it still must be allowed to set it from Java
-     * code while the template executes, since some frameworks allow templates
-     * to actually change the output encoding on-the-fly.
+     * Note that altough it's not allowed to set this setting with the <tt>setting</tt> directive, it still must be
+     * allowed to set it from Java code while the template executes, since some frameworks allow templates to actually
+     * change the output encoding on-the-fly.
      */
     @Override
     public void setOutputEncoding(String outputEncoding) {
         cachedURLEscapingCharsetSet = false;
         super.setOutputEncoding(outputEncoding);
     }
-    
+
     /**
-     * Returns the name of the charset that should be used for URL encoding.
-     * This will be <code>null</code> if the information is not available.
-     * The function caches the return value, so it's quick to call it
-     * repeately. 
+     * Returns the name of the charset that should be used for URL encoding. This will be <code>null</code> if the
+     * information is not available. The function caches the return value, so it's quick to call it repeately.
      */
     String getEffectiveURLEscapingCharset() {
         if (!cachedURLEscapingCharsetSet) {
@@ -959,7 +960,7 @@ public final class Environment extends Configurable {
         }
         return cachedCollator;
     }
-    
+
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator.
      * 
@@ -972,8 +973,8 @@ public final class Environment extends Configurable {
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator, except that if the two types
-     *     are incompatible, they are treated as non-equal instead of throwing an exception. Comparing dates of
-     *     different types (date-only VS time-only VS date-time) will still throw an exception, however.
+     * are incompatible, they are treated as non-equal instead of throwing an exception. Comparing dates of different
+     * types (date-only VS time-only VS date-time) will still throw an exception, however.
      * 
      * @since 2.3.20
      */
@@ -981,7 +982,7 @@ public final class Environment extends Configurable {
             throws TemplateException {
         return EvalUtil.compareLenient(leftValue, EvalUtil.CMP_OP_EQUALS, rightValue, this);
     }
-    
+
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "&lt;" operator.
      * 
@@ -1001,7 +1002,7 @@ public final class Environment extends Configurable {
             throws TemplateException {
         return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
     }
-    
+
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "&gt;" operator.
      * 
@@ -1038,29 +1039,54 @@ public final class Environment extends Configurable {
 
     /**
      * Format number with the default number format.
+     * 
+     * @param exp
+     *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(TemplateNumberModel number, Expression exp) throws TemplateException {
-        return formatNumber(number, getTemplateNumberFormat(exp), exp);
+    String formatNumber(TemplateNumberModel number, Expression exp, boolean useTempModelExc) throws TemplateException {
+        return formatNumber(number, getTemplateNumberFormat(exp, useTempModelExc), exp, useTempModelExc);
     }
 
     /**
-     * Format number with the number format specified as the parameter.
+     * Format number with the number format specified as the parameter, with the current locale.
+     * 
+     * @param exp
+     *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(TemplateNumberModel number, String formatString, Expression exp) throws TemplateException {
-        return formatNumber(number, getTemplateNumberFormat(formatString, exp), exp);
+    String formatNumber(
+            TemplateNumberModel number, String formatString, Expression exp,
+            boolean useTempModelExc) throws TemplateException {
+        return formatNumber(number, getTemplateNumberFormat(formatString, exp, useTempModelExc), exp, useTempModelExc);
     }
 
-    String formatNumber(TemplateNumberModel number, TemplateNumberFormat format, Expression exp)
-            throws TemplateModelException, _MiscTemplateException {
+    /**
+     * Format number with the number format specified as the parameter, with the current locale.
+     * 
+     * @param exp
+     *            The blamed expression if an error occurs; it's only needed for better error messages
+     */
+    String formatNumber(
+            TemplateNumberModel number, TemplateNumberFormat format, Expression exp,
+            boolean useTempModelExc)
+            throws TemplateException {
         try {
             return format.format(number);
         } catch (UnformattableNumberException e) {
-            throw new _MiscTemplateException(exp, e, this,
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
-                    e.getMessage());
+                    e.getMessage())
+                    .blame(exp); 
+            throw useTempModelExc
+                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
         }
     }
 
+    /**
+     * Format number with the number format specified as the parameter, with the current locale.
+     * 
+     * @param exp
+     *            The blamed expression if an error occurs; it's only needed for better error messages
+     */
     String formatNumber(Number number, BackwardCompatibleTemplateNumberFormat format, Expression exp)
             throws TemplateModelException, _MiscTemplateException {
         try {
@@ -1071,72 +1097,151 @@ public final class Environment extends Configurable {
                     e.getMessage());
         }
     }
-    
+
     /**
-     * Returns the current number format as {@link TemplateNumberFormat}.
+     * Returns the current number format ({@link #getNumberFormat()}) as {@link TemplateNumberFormat}.
+     * 
+     * <p>
+     * Performance notes: The result is stored for reuse, so calling this method frequently is usually not a problem.
+     * However, at least as of this writing (2.3.24), changing the current locale {@link #setLocale(Locale)} or changing
+     * the current number format ({@link #setNumberFormat(String)}) will drop the stored value, so it will have to be
+     * recalculated.
      * 
      * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatStringException {
         TemplateNumberFormat format = cachedTemplateNumberFormat;
         if (format == null) {
-            format = getTemplateNumberFormat(getNumberFormat(), false, null);
+            format = getTemplateNumberFormat(getNumberFormat(), false);
             cachedTemplateNumberFormat = format;
         }
         return format;
     }
 
     /**
-     * Returns the number format for the given format string as {@link TemplateNumberFormat}.
+     * Returns the number format as {@link TemplateNumberFormat} for the given format string and the current locale.
+     * (The current locale is the locale returned by {@link #getLocale()}.) Note that the result will be cached in the
+     * {@link Environment} instance (though at least in 2.3.24 the cache will be flushed if the current locale of the
+     * {@link Environment} is changed).
+     * 
+     * @param formatString
+     *            A string that you could also use as the value of the {@code numberFormat} configuration setting. Can't
+     *            be {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
+        return getTemplateNumberFormat(formatString, true);
+    }
+
+    /**
+     * Returns the number format as {@link TemplateNumberFormat}, for the given format string and locale. To get a
+     * number format for the current locale, use {@link #getTemplateNumberFormat(String)} instead.
+     * 
+     * <p>
+     * Note on performance (which was true at least for 2.3.24): Unless the locale happens to be equal to the current
+     * locale, the {@link Environment}-level format cache can't be used, so the format string has to be parsed and the
+     * matching factory has to be get an invoked, which is much more expensive than getting the format from the cache.
+     * Thus the returned format should be stored by the caller for later reuse (but only within the current thread and
+     * in relation to the current {@link Environment}), if it will be needed frequently.
      * 
      * @param formatString
      *            A string that you could also use as the value of the {@code numberFormat} configuration setting.
      * @param locale
-     *            Can be {@code null}, in which case the current locale will be used. Note that the current locale
-     *            can change over time, and the format returned for a {@code null} parameter won't follow that change.
-     *            Note that if the specified locale differs from the current locale, as of this writing, the
-     *            {@link Environment}-level format cache won't be used.
+     *            The locale of the number format; not {@code null}.
      * 
      * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat(String formatString, Locale locale)
             throws InvalidFormatStringException {
-        return getTemplateNumberFormat(formatString, true, locale);
+        if (locale.equals(getLocale())) {
+            getTemplateNumberFormat(formatString);
+        }
+
+        return getTemplateNumberFormatWithoutCache(formatString, locale);
     }
 
     /**
-     * Same as {@link #getTemplateNumberFormat(String, Locale)} with {@code null} {@code locale} parameter. 
-     * 
-     * @since 2.3.24
+     * Convenience wrapper around {@link #getTemplateNumberFormat()} to be called during expression evaluation.
      */
-    public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
-        return getTemplateNumberFormat(formatString, (Locale) null);
+    TemplateNumberFormat getTemplateNumberFormat(Expression exp, boolean useTempModelExc) throws TemplateException {
+        TemplateNumberFormat format;
+        try {
+            format = getTemplateNumberFormat();
+        } catch (InvalidFormatStringException e) {
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                    "Failed to get number format object for the current number format string, ",
+                    new _DelayedJQuote(getNumberFormat()), ": ", e.getMessage())
+                    .blame(exp); 
+            throw useTempModelExc
+                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
+        }
+        return format;
     }
-    
+
     /**
-     * @param locale
-     *            Can be {@code null}, in which case the current locale will be used.
+     * Convenience wrapper around {@link #getTemplateNumberFormat(String)} to be called during expression evaluation.
+     * 
+     * @param exp
+     *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    private TemplateNumberFormat getTemplateNumberFormat(String formatString, boolean cacheResult, Locale locale)
+    TemplateNumberFormat getTemplateNumberFormat(String formatString, Expression exp, boolean useTempModelExc)
+            throws TemplateException {
+        TemplateNumberFormat format;
+        try {
+            format = getTemplateNumberFormat(formatString);
+        } catch (InvalidFormatStringException e) {
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                    "Failed to get number format object for the ", new _DelayedJQuote(formatString),
+                    " number format string: ", e.getMessage())
+                    .blame(exp);
+            throw useTempModelExc
+                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
+        }
+        return format;
+    }
+
+    /**
+     * Gets the {@link TemplateNumberFormat} <em>for the current locale</em>.
+     * 
+     * @param formatString
+     *            Not {@code null}
+     * @param cacheResult
+     *            If the results should stored in the {@link Environment}-level cache. It will still try to get the
+     *            result from the cache regardless of this parameter.
+     */
+    private TemplateNumberFormat getTemplateNumberFormat(String formatString, boolean cacheResult)
             throws InvalidFormatStringException {
-        boolean usesEnvLocale = locale == null || locale.equals(getLocale());
-        
-        if (usesEnvLocale) {
-            if (cachedTemplateNumberFormats == null) {
-                if (cacheResult) {
-                    cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
-                }
-            } else {
-                TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
-                if (format != null) {
-                    return format;
-                }
+        if (cachedTemplateNumberFormats == null) {
+            if (cacheResult) {
+                cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
+            }
+        } else {
+            TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
+            if (format != null) {
+                return format;
             }
         }
 
-        Locale actualLocale = locale == null ? getLocale() : locale;
-        
-        TemplateNumberFormat format;
+        TemplateNumberFormat format = getTemplateNumberFormatWithoutCache(formatString, getLocale());
+
+        if (cacheResult) {
+            cachedTemplateNumberFormats.put(formatString, format);
+        }
+        return format;
+    }
+
+    /**
+     * Returns the {@link TemplateNumberFormat} for the given parameters without using the {@link Environment}-level
+     * cache. Of course, the {@link TemplateNumberFormatFactory} involved might still uses its own cache.
+     * 
+     * @param formatString
+     *            Not {@code null}
+     * @param locale
+     *            Not {@code null}
+     */
+    private TemplateNumberFormat getTemplateNumberFormatWithoutCache(String formatString, Locale locale)
+            throws UndefinedCustomFormatException, InvalidFormatParametersException {
         int formatStringLen = formatString.length();
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
@@ -1155,14 +1260,14 @@ public final class Environment extends Configurable {
                 name = formatString.substring(1, endIdx);
                 params = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
-            
+
             TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
             if (formatFactory == null) {
                 throw new UndefinedCustomFormatException(
                         "No custom number format was defined with name " + StringUtil.jQuote(name));
             }
-            
-            format = formatFactory.get(params, actualLocale, this);
+
+            return formatFactory.get(params, locale, this);
         } else {
             if (formatStringLen > 1
                     && formatString.charAt(0) == '@'
@@ -1171,19 +1276,13 @@ public final class Environment extends Configurable {
                 // Unescape @ escaped as @@
                 formatString = formatString.substring(1);
             }
-            format = JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, actualLocale, this);
+            return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
-    
-        if (cacheResult && usesEnvLocale) {
-            cachedTemplateNumberFormats.put(formatString, format);
-        }
-        return format;
     }
 
     /**
-     * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in.
-     * This is always US English <code>"0.################"</code>, without
-     * grouping and without superfluous decimal separator.
+     * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in. This is always US English
+     * <code>"0.################"</code>, without grouping and without superfluous decimal separator.
      */
     public NumberFormat getCNumberFormat() {
         // It can't be cached in a static field, because DecimalFormat-s aren't
@@ -1192,32 +1291,6 @@ public final class Environment extends Configurable {
             cNumberFormat = (DecimalFormat) C_NUMBER_FORMAT.clone();
         }
         return cNumberFormat;
-    }
-
-    TemplateNumberFormat getTemplateNumberFormat(Expression exp)
-            throws _MiscTemplateException {
-        TemplateNumberFormat format;
-        try {
-            format = getTemplateNumberFormat();
-        } catch (InvalidFormatStringException e) {
-            throw new _MiscTemplateException(exp, e, this,
-                    "Failed to get number format object for the current number format string, ",
-                    new _DelayedJQuote(getNumberFormat()), ": " + e.getMessage());
-        }
-        return format;
-    }
-
-    TemplateNumberFormat getTemplateNumberFormat(String formatString, Expression exp)
-            throws _MiscTemplateException {
-        TemplateNumberFormat format;
-        try {
-            format = getTemplateNumberFormat(formatString);
-        } catch (InvalidFormatStringException e) {
-            throw new _MiscTemplateException(exp, e, this,
-                    "Failed to get number format object for the ", new _DelayedJQuote(formatString),
-                    " number format string: " + e.getMessage());
-        }
-        return format;
     }
 
     @Override
@@ -1262,85 +1335,244 @@ public final class Environment extends Configurable {
     public Configuration getConfiguration() {
         return configuration;
     }
-    
+
     TemplateModel getLastReturnValue() {
         return lastReturnValue;
     }
-    
+
     void setLastReturnValue(TemplateModel lastReturnValue) {
         this.lastReturnValue = lastReturnValue;
     }
-    
+
     void clearLastReturnValue() {
         this.lastReturnValue = null;
     }
 
-    String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr) throws TemplateModelException {
+    /**
+     * @param tdmSourceExpr
+     *            The blamed expression if an error occurs; only used for error messages.
+     */
+    String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr,
+            boolean useTempModelExc) throws TemplateException {
         Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
+        
+        TemplateDateFormat format = getTemplateDateFormat(
+                tdm.getDateType(), date.getClass(), tdmSourceExpr,
+                useTempModelExc);
+        
         try {
-            boolean isSQLDateOrTime = isSQLDateOrTimeClass(date.getClass());
-            return getTemplateDateFormat(
-                    tdm.getDateType(), isSQLDateOrTime, shouldUseSQLDTTimeZone(isSQLDateOrTime), tdmSourceExpr)
-                    .format(tdm);
-        } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
+            return format.format(tdm);
         } catch (UnformattableDateException e) {
             throw MessageUtil.newCantFormatDateException(tdmSourceExpr, e);
         }
     }
 
-    String formatDate(TemplateDateModel tdm, String formatString, Expression tdmSourceExpr)
-            throws TemplateModelException {
-        Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
-        boolean isSQLDateOrTime = isSQLDateOrTimeClass(date.getClass());
+    /**
+     * @param blamedDateSourceExp
+     *            The blamed expression if an error occurs; only used for error messages.
+     * @param blamedFormatterExp
+     *            The blamed expression if an error occurs; only used for error messages.
+     */
+    String formatDate(TemplateDateModel tdm, String formatString,
+            Expression blamedDateSourceExp, Expression blamedFormatterExp,
+            boolean useTempModelExc) throws TemplateException {
+        Date date = EvalUtil.modelToDate(tdm, blamedDateSourceExp);
+        
+        TemplateDateFormat format = getTemplateDateFormat(
+                formatString, tdm.getDateType(), date.getClass(),
+                blamedDateSourceExp, blamedFormatterExp,
+                useTempModelExc);
+        
         try {
-            return getTemplateDateFormat(
-                    tdm.getDateType(), isSQLDateOrTime, shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, true,
-                    null)
-                    .format(tdm);
-        } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
+            return format.format(tdm);
         } catch (UnformattableDateException e) {
-            throw MessageUtil.newCantFormatDateException(tdmSourceExpr, e);
+            throw MessageUtil.newCantFormatDateException(blamedDateSourceExp, e);
         }
+    }
+
+    /**
+     * Gets a {@link TemplateDateFormat} using the date/time/datetime format settings and the current locale and time
+     * zone. (The current locale is the locale returned by {@link #getLocale()}. The current time zone is
+     * {@link #getTimeZone()} or {@link #getSQLDateAndTimeTimeZone()}).
+     * 
+     * @param dateType
+     *            The FTL date type; see the similar parameter of
+     *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
+     * @param dateClass
+     *            The exact {@link Date} class, like {@link java.sql.Date} or {@link java.sql.Time}; this can influences
+     *            time zone selection. See also: {@link #setSQLDateAndTimeTimeZone(TimeZone)}
+     */
+    public TemplateDateFormat getTemplateDateFormat(
+            int dateType, Class<? extends Date> dateClass)
+                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
+                    InvalidFormatParametersException {
+        boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
+        return getTemplateDateFormat(dateType, shouldUseSQLDTTimeZone(isSQLDateOrTime), isSQLDateOrTime);
     }
     
     /**
-     * @param dateType The FTL date type, one of {@link TemplateDateModel#DATETIME}, {@link TemplateDateModel#TIME}
-     *          and {@link TemplateDateModel#DATE}. 
-     * @param dateClass The exact Java class of the formatted or created (via parsing) object. This matters because
-     *          the time zone is part of the returned {@link DateFormat}, and if
-     *          {@link #getSQLDateAndTimeTimeZone()} differs from {@link #getTimeZone()} then the exact class influences
-     *          the time zone.
-     * @param dateSourceExpr Used for better error messages only; may be {@code null}
+     * Gets a {@link TemplateDateFormat} for the specified format string and the current locale and time zone. (The
+     * current locale is the locale returned by {@link #getLocale()}. The current time zone is {@link #getTimeZone()} or
+     * {@link #getSQLDateAndTimeTimeZone()}).
+     * 
+     * <p>
+     * Note on performance: The result will be cached in the {@link Environment} instance. However, at least in 2.3.24
+     * the cached entries that depend on the current locale or the current time zone or the current date/time/datetime
+     * format of the {@link Environment} will be lost when those settings are changed.
+     * 
+     * @param formatString
+     *            Like {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"} or {@code "@somethingCustom"} or
+     *            {@code "@somethingCustom params"}
+     * 
+     * @since 2.3.24
      */
-    TemplateDateFormat getTemplateDateFormat(int dateType, Class/*<? extends Date>*/ dateClass, Expression dateSourceExpr)
-            throws TemplateModelException {
-        try {
-            boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
-            return getTemplateDateFormat(dateType, isSQLDateOrTime, shouldUseSQLDTTimeZone(isSQLDateOrTime), dateSourceExpr);
-        } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
-        }
+    public TemplateDateFormat getTemplateDateFormat(
+            String formatString, int dateType, Class<? extends Date> dateClass)
+                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
+                    InvalidFormatParametersException {
+        boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
+        return getTemplateDateFormat(
+                formatString, dateType,
+                shouldUseSQLDTTimeZone(isSQLDateOrTime), isSQLDateOrTime, true);
+    }
+
+    /**
+     * Like {@link #getTemplateDateFormat(String, int, Class)}, but allows you to use a different locale than the
+     * current one. If you want to use the current locale, use {@link #getTemplateDateFormat(String, int, Class)}
+     * instead.
+     * 
+     * <p>
+     * Performance notes regarding the locale and time zone parameters of
+     * {@link #getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} apply.
+     * 
+     * @param locale
+     *            Can't be {@code null}; See the similar parameter of
+     *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
+     * 
+     * @see #getTemplateDateFormat(String, int, Class)
+     * 
+     * @since 2.4
+     */
+    public TemplateDateFormat getTemplateDateFormat(
+            String formatString,
+            int dateType, Class<? extends Date> dateClass,
+            Locale locale)
+                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
+                    UnknownDateTypeFormattingUnsupportedException {
+        boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
+        boolean useSQLDTTZ = shouldUseSQLDTTimeZone(isSQLDateOrTime);
+        return getTemplateDateFormat(
+                formatString,
+                dateType, locale, useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone(), isSQLDateOrTime);        
+    }
+
+    /**
+     * Like {@link #getTemplateDateFormat(String, int, Class)}, but allows you to use a different locale and time zone
+     * than the current one. If you want to use the current locale and time zone, use
+     * {@link #getTemplateDateFormat(String, int, Class)} instead.
+     * 
+     * <p>
+     * Performance notes regarding the locale and time zone parameters of
+     * {@link #getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} apply.
+     * 
+     * @param timeZone
+     *            The {@link TimeZone} used if {@code dateClass} is not an SQL date-only or time-only type. Can't be
+     *            {@code null}.
+     * @param sqlDateAndTimeTimeZone
+     *            The {@link TimeZone} used if {@code dateClass} is an SQL date-only or time-only type. Can't be
+     *            {@code null}.
+     * 
+     * @see #getTemplateDateFormat(String, int, Class)
+     * 
+     * @since 2.4
+     */
+    public TemplateDateFormat getTemplateDateFormat(
+            String formatString,
+            int dateType, Class<? extends Date> dateClass,
+            Locale locale, TimeZone timeZone, TimeZone sqlDateAndTimeTimeZone)
+                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
+                    UnknownDateTypeFormattingUnsupportedException {
+        boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
+        boolean useSQLDTTZ = shouldUseSQLDTTimeZone(isSQLDateOrTime);
+        return getTemplateDateFormat(
+                formatString,
+                dateType, locale, useSQLDTTZ ? sqlDateAndTimeTimeZone : timeZone, isSQLDateOrTime);        
     }
     
-    private TemplateDateFormat getTemplateDateFormat(
-            int dateType, boolean isSQLDateOrTime,
-            boolean useSQLDTTZ, Expression dateSourceExpr)
-            throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
-        if (dateType == TemplateDateModel.UNKNOWN) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, null);
+    /**
+     * Gets a {@link TemplateDateFormat} for the specified parameters. This is mostly meant to be used by
+     * {@link TemplateDateFormatFactory} implementations to delegate to a format based on a specific format string. It's
+     * works well for that, as its parameters are the same low level values as the parameters of
+     * {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}. For other tasks
+     * consider the other overloads of this method.
+     * 
+     * <p>
+     * Note on performance (which was true at least for 2.3.24): Unless the locale happens to be equal to the current
+     * locale and the time zone with one of the current time zones ({@link #getTimeZone()} or
+     * {@link #getSQLDateAndTimeTimeZone()}), the {@link Environment}-level format cache can't be used, so the format
+     * string has to be parsed and the matching factory has to be get an invoked, which is much more expensive than
+     * getting the format from the cache. Thus the returned format should be stored by the caller for later reuse (but
+     * only within the current thread and in relation to the current {@link Environment}), if it will be needed
+     * frequently.
+     * 
+     * @param formatString
+     *            Like {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"} or {@code "@somethingCustom"} or
+     *            {@code "@somethingCustom params"}
+     * @param dateType
+     *            The FTL date type; see the similar parameter of
+     *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
+     * @param timeZone
+     *            Not {@code null}; See the similar parameter of
+     *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
+     * @param locale
+     *            Not {@code null}; See the similar parameter of
+     *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
+     * @param zonelessInput
+     *            See the similar parameter of
+     *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
+     * 
+     * @since 2.3.24
+     */
+    public TemplateDateFormat getTemplateDateFormat(
+            String formatString,
+            int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput)
+                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
+                    UnknownDateTypeFormattingUnsupportedException {
+        Locale currentLocale = getLocale();
+        if (locale.equals(currentLocale)) {
+            int equalCurrentTZ;
+            TimeZone currentTimeZone = getTimeZone();
+            if (timeZone.equals(currentTimeZone)) {
+                equalCurrentTZ = 1;
+            } else {
+                TimeZone currentSQLDTTimeZone = getSQLDateAndTimeTimeZone();
+                if (timeZone.equals(currentSQLDTTimeZone)) {
+                    equalCurrentTZ = 2;
+                } else {
+                    equalCurrentTZ = 0;
+                }
+            }
+            if (equalCurrentTZ != 0) {
+                return getTemplateDateFormat(formatString, dateType, equalCurrentTZ == 2, zonelessInput, true);
+            }
+            // Falls through
         }
-        int cacheIdx = getTemplateDateFormatCacheArrayIndex(dateType, isSQLDateOrTime, useSQLDTTZ);
-        TemplateDateFormat[] cachedTemplateDateFormats = this.cachedTempDateFormatArray;
-        if (cachedTemplateDateFormats == null) {
-            cachedTemplateDateFormats = new TemplateDateFormat[CACHED_TDFS_LENGTH];
-            this.cachedTempDateFormatArray = cachedTemplateDateFormats; 
-        }
-        TemplateDateFormat format = cachedTemplateDateFormats[cacheIdx];
-        if (format == null) {
-            final String settingName;
-            final String settingValue;
+        return getTemplateDateFormatWithoutCache(formatString, dateType, locale, timeZone, zonelessInput);
+    }
+    
+    /**
+     * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to {@link TemplateException}-s.
+     */
+    TemplateDateFormat getTemplateDateFormat(
+            int dateType, Class<? extends Date> dateClass, Expression blamedDateSourceExp, boolean useTempModelExc)
+                    throws TemplateException {
+        try {
+            return getTemplateDateFormat(dateType, dateClass);
+        } catch (UnknownDateTypeFormattingUnsupportedException e) {
+            throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
+        } catch (InvalidFormatStringException e) {
+            String settingName;
+            String settingValue;
             switch (dateType) {
             case TemplateDateModel.TIME:
                 settingName = Configurable.TIME_FORMAT_KEY;
@@ -1355,59 +1587,100 @@ public final class Environment extends Configurable {
                 settingValue = getDateTimeFormat();
                 break;
             default:
-                throw new _TemplateModelException("Invalid date type enum: ", Integer.valueOf(dateType));
-            } // switch
+                settingName = "???";
+                settingValue = "???";
+            }
+            
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                    "The value of the \"", settingName,
+                    "\" FreeMarker configuration setting is a malformed date/time/datetime format string: ",
+                    new _DelayedJQuote(settingValue), ". Reason given: ",
+                    e.getMessage());                    
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
+        }
+    }
 
-            format = getTemplateDateFormat(
-                    dateType, isSQLDateOrTime,
-                    useSQLDTTZ, settingValue, false,
-                    settingName);
+    /**
+     * Same as {@link #getTemplateDateFormat(String, int, Class)}, but translates the exceptions to
+     * {@link TemplateException}-s.
+     */
+    TemplateDateFormat getTemplateDateFormat(
+            String formatString, int dateType, Class<? extends Date> dateClass,
+            Expression blamedDateSourceExp, Expression blamedFormatterExp,
+            boolean useTempModelExc)
+            throws TemplateException {
+        try {
+            return getTemplateDateFormat(formatString, dateType, dateClass);
+        } catch (UnknownDateTypeFormattingUnsupportedException e) {
+            throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
+        } catch (InvalidFormatStringException e) {
+            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                    "Malformed date/time/datetime format string: ",
+                    new _DelayedJQuote(formatString), ". Reason given: ",
+                    e.getMessage())
+                    .blame(blamedFormatterExp);
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
+        }
+    }
+
+    /**
+     * Used to get the {@link TemplateDateFormat} according the date/time/datetime format settings, for the current
+     * locale and time zone. See {@link #getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} for the meaning
+     * of some if the parameters.
+     */
+    private TemplateDateFormat getTemplateDateFormat(int dateType, boolean useSQLDTTZ, boolean zonelessInput)
+                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
+                    InvalidFormatParametersException {
+        if (dateType == TemplateDateModel.UNKNOWN) {
+            throw new UnknownDateTypeFormattingUnsupportedException();
+        }
+        int cacheIdx = getTemplateDateFormatCacheArrayIndex(dateType, zonelessInput, useSQLDTTZ);
+        TemplateDateFormat[] cachedTemplateDateFormats = this.cachedTempDateFormatArray;
+        if (cachedTemplateDateFormats == null) {
+            cachedTemplateDateFormats = new TemplateDateFormat[CACHED_TDFS_LENGTH];
+            this.cachedTempDateFormatArray = cachedTemplateDateFormats;
+        }
+        TemplateDateFormat format = cachedTemplateDateFormats[cacheIdx];
+        if (format == null) {
+            final String formatString;
+            switch (dateType) {
+            case TemplateDateModel.TIME:
+                formatString = getTimeFormat();
+                break;
+            case TemplateDateModel.DATE:
+                formatString = getDateFormat();
+                break;
+            case TemplateDateModel.DATETIME:
+                formatString = getDateTimeFormat();
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid date type enum: " + Integer.valueOf(dateType));
+            }
+
+            format = getTemplateDateFormat(formatString, dateType, useSQLDTTZ, zonelessInput, false);
             
             cachedTemplateDateFormats[cacheIdx] = format;
         }
         return format;
     }
-    
+
     /**
-     * @param dateType {@link TemplateDateModel#UNKNOWN} is accepted or not depending on the {@code formatString}
-     *     value. When it isn't, a {@link TemplateModelException} will be thrown.
-     * @param dateClass The exact class of the date object, such as {@link java.sql.Timestamp}. 
-     * @param formatString Like "iso m" or "dd.MM.yyyy HH:mm" 
-     */
-    TemplateDateFormat getTemplateDateFormat(
-            int dateType, Class/*<? extends Date>*/ dateClass, String formatString, Expression dateSourceExpr)
-            throws TemplateModelException {
-        try {
-            boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
-            return getTemplateDateFormat(
-                    dateType, isSQLDateOrTime,
-                    shouldUseSQLDTTimeZone(isSQLDateOrTime), formatString, true,
-                    null);
-        } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
-        }
-    }
-    
-    /**
-     * @param dateType
-     *            See the similar parameter of {@link TemplateDateFormatFactory#get}
-     * @param zonelessInput
-     *            See the similar parameter of {@link TemplateDateFormatFactory#get}
-     * @param formatString
-     *            The string that describes the date format. See the similar parameter of
-     *            {@link TemplateDateFormatFactory#get}
-     * @param formatStringCfgSettingName
-     *            The name of the configuration setting where the {@code formatZtring} comes from, or {@code null}
-     *            if the format string was specified directly for this formatting call.
+     * Used to get the {@link TemplateDateFormat} for the specified parameters, using the {@link Environment}-level
+     * cache. As the {@link Environment}-level cache currently only stores formats for the current locale and time zone,
+     * there's no parameter to specify those.
+     * 
+     * @param cacheResult
+     *            If the results should stored in the {@link Environment}-level cache. It will still try to get the
+     *            result from the cache regardless of this parameter.
      */
     private TemplateDateFormat getTemplateDateFormat(
-            int dateType, boolean zonelessInput, boolean useSQLDTTZ, String formatString, boolean cacheResult,
-            String formatStringCfgSettingName)
-                    throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
+            String formatString, int dateType, boolean useSQLDTTimeZone, boolean zonelessInput,
+            boolean cacheResult)
+                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
+                    InvalidFormatParametersException {
         HashMap<String, TemplateDateFormat> cachedFormatsByFormatString;
         readFromCache: do {
-            HashMap<String, TemplateDateFormat>[] cachedTempDateFormatsByFmtStrArray
-                    = this.cachedTempDateFormatsByFmtStrArray;
+            HashMap<String, TemplateDateFormat>[] cachedTempDateFormatsByFmtStrArray = this.cachedTempDateFormatsByFmtStrArray;
             if (cachedTempDateFormatsByFmtStrArray == null) {
                 if (cacheResult) {
                     cachedTempDateFormatsByFmtStrArray = new HashMap[CACHED_TDFS_LENGTH];
@@ -1417,10 +1690,10 @@ public final class Environment extends Configurable {
                     break readFromCache;
                 }
             }
-            
+
             TemplateDateFormat format;
             {
-                int cacheArrIdx = getTemplateDateFormatCacheArrayIndex(dateType, zonelessInput, useSQLDTTZ);
+                int cacheArrIdx = getTemplateDateFormatCacheArrayIndex(dateType, zonelessInput, useSQLDTTimeZone);
                 cachedFormatsByFormatString = cachedTempDateFormatsByFmtStrArray[cacheArrIdx];
                 if (cachedFormatsByFormatString == null) {
                     if (cacheResult) {
@@ -1434,126 +1707,136 @@ public final class Environment extends Configurable {
                     format = cachedFormatsByFormatString.get(formatString);
                 }
             }
-            
+
             if (format != null) {
                 return format;
             }
             // Cache miss; falls through
         } while (false);
-        
+
+        TemplateDateFormat format = getTemplateDateFormatWithoutCache(
+                formatString,
+                dateType, getLocale(), useSQLDTTimeZone ? getSQLDateAndTimeTimeZone() : getTimeZone(),
+                zonelessInput);
+        if (cacheResult) {
+            // We know here that cachedFormatsByFormatString != null
+            cachedFormatsByFormatString.put(formatString, format);
+        }
+        return format;
+    }
+
+    /**
+     * Returns the {@link TemplateDateFormat} for the given parameters without using the {@link Environment}-level
+     * cache. Of course, the {@link TemplateDateFormatFactory} involved might still uses its own cache, which can be
+     * global (class-loader-level) or {@link Environment}-level.
+     * 
+     * @param formatString
+     *            See the similar parameter of {@link TemplateDateFormatFactory#get}
+     * @param dateType
+     *            See the similar parameter of {@link TemplateDateFormatFactory#get}
+     * @param zonelessInput
+     *            See the similar parameter of {@link TemplateDateFormatFactory#get}
+     */
+    private TemplateDateFormat getTemplateDateFormatWithoutCache(
+            String formatString, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput)
+                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
+                    UnknownDateTypeFormattingUnsupportedException {
         final int formatStringLen = formatString.length();
         final String formatParams;
-        
-        // As of Java 8, 'x' and 'i' (in lower case) are illegal date format letters, so this is backward-compatible.
+
         TemplateDateFormatFactory formatFactory;
-        char firstChar = formatStringLen != 0 ? formatString.charAt(0) : 0; 
-        try {
-            if (
-                    firstChar == 'x'
-                    && formatStringLen > 1
-                    && formatString.charAt(1) == 's') {
-                formatFactory = XSTemplateDateFormatFactory.INSTANCE;
-                formatParams = formatString; // for speed, we don't remove the prefix
-            } else if (
-                    firstChar == 'i'
-                    && formatStringLen > 2
-                    && formatString.charAt(1) == 's'
-                    && formatString.charAt(2) == 'o') {
-                formatFactory = ISOTemplateDateFormatFactory.INSTANCE;
-                formatParams = formatString; // for speed, we don't remove the prefix
-            } else if (firstChar == '@'
-                    && formatStringLen > 1
-                    && formatString.charAt(1) != '@'
-                    && isIcI2324OrLater()) {
-                final String name;
-                {
-                    int endIdx;
-                    findParamsStart: for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
-                        char c = formatString.charAt(endIdx);
-                        if (c == ' ' || c == '_') {
-                            break findParamsStart;
-                        }
+        char firstChar = formatStringLen != 0 ? formatString.charAt(0) : 0;
+
+        // As of Java 8, 'x' and 'i' (lower case) are illegal date format letters, so this is backward-compatible.
+        if (firstChar == 'x'
+                && formatStringLen > 1
+                && formatString.charAt(1) == 's') {
+            formatFactory = XSTemplateDateFormatFactory.INSTANCE;
+            formatParams = formatString; // for speed, we don't remove the prefix
+        } else if (firstChar == 'i'
+                && formatStringLen > 2
+                && formatString.charAt(1) == 's'
+                && formatString.charAt(2) == 'o') {
+            formatFactory = ISOTemplateDateFormatFactory.INSTANCE;
+            formatParams = formatString; // for speed, we don't remove the prefix
+        } else if (firstChar == '@'
+                && formatStringLen > 1
+                && formatString.charAt(1) != '@'
+                && isIcI2324OrLater()) {
+            final String name;
+            {
+                int endIdx;
+                findParamsStart: for (endIdx = 1; endIdx < formatStringLen; endIdx++) {
+                    char c = formatString.charAt(endIdx);
+                    if (c == ' ' || c == '_') {
+                        break findParamsStart;
                     }
-                    name = formatString.substring(1, endIdx);
-                    formatParams = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
                 }
-                
-                formatFactory = getCustomDateFormat(name);
-                if (formatFactory == null) {
-                    throw new UndefinedCustomFormatException(
-                            "No custom date format was defined with name " + StringUtil.jQuote(name));
-                }
-            } else {
-                if (firstChar == '@'
-                        && formatStringLen > 1
-                        && formatString.charAt(1) == '@'
-                        && isIcI2324OrLater()) {
-                    // Unescape @ escaped as @@
-                    formatString = formatString.substring(1);
-                }
-                
-                formatFactory = JavaTemplateDateFormatFactory.INSTANCE;
-                formatParams = formatString;
+                name = formatString.substring(1, endIdx);
+                formatParams = endIdx < formatStringLen ? formatString.substring(endIdx + 1) : "";
             }
 
-            TemplateDateFormat format = formatFactory.get(dateType, zonelessInput, formatParams, getLocale(),
-                    useSQLDTTZ ? getSQLDateAndTimeTimeZone() : getTimeZone(), this);
-            if (cacheResult) {
-                // We know here that cachedFormatsByFormatString != null            
-                cachedFormatsByFormatString.put(formatString, format);
+            formatFactory = getCustomDateFormat(name);
+            if (formatFactory == null) {
+                throw new UndefinedCustomFormatException(
+                        "No custom date format was defined with name " + StringUtil.jQuote(name));
             }
-            return format;
-        } catch (InvalidFormatStringException e) {
-            throw new _TemplateModelException(e,
-                    (formatStringCfgSettingName == null
-                            ? (Object) "Malformed date/time format string: "
-                            : new Object[] {
-                                    "The value of the \"", formatStringCfgSettingName,
-                                    "\" FreeMarker configuration setting is a malformed date/time format string: "
-                            }),
-                    new _DelayedJQuote(formatString), ". Reason given: ",
-                    e.getMessage());
+        } else {
+            String unescapedFormatString;
+            if (firstChar == '@'
+                    && formatStringLen > 1
+                    && formatString.charAt(1) == '@'
+                    && isIcI2324OrLater()) {
+                // Unescape @ escaped as @@
+                unescapedFormatString = formatString.substring(1);
+            } else {
+                unescapedFormatString = formatString;
+            }
+
+            formatFactory = JavaTemplateDateFormatFactory.INSTANCE;
+            formatParams = unescapedFormatString;
         }
+
+        return formatFactory.get(formatParams, dateType, locale, timeZone,
+                zonelessInput, this);
     }
-    
+
     boolean shouldUseSQLDTTZ(Class dateClass) {
         // Attention! If you update this method, update all overloads of it!
-        return dateClass != Date.class  // This pre-condition is only for speed
+        return dateClass != Date.class // This pre-condition is only for speed
                 && !isSQLDateAndTimeTimeZoneSameAsNormal()
                 && isSQLDateOrTimeClass(dateClass);
     }
 
     private boolean shouldUseSQLDTTimeZone(boolean sqlDateOrTime) {
         // Attention! If you update this method, update all overloads of it!
-        return sqlDateOrTime
-                && !isSQLDateAndTimeTimeZoneSameAsNormal();
+        return sqlDateOrTime && !isSQLDateAndTimeTimeZoneSameAsNormal();
     }
-    
+
     /**
      * Tells if the given class is or is subclass of {@link java.sql.Date} or {@link java.sql.Time}.
      */
     private static boolean isSQLDateOrTimeClass(Class dateClass) {
         // We do shortcuts for the most common cases.
         return dateClass != java.util.Date.class
-                && (dateClass == java.sql.Date.class || dateClass == java.sql.Time.class
-                        || (dateClass != java.sql.Timestamp.class
-                                    && ( 
-                                            java.sql.Date.class.isAssignableFrom(dateClass)
-                                            || java.sql.Time.class.isAssignableFrom(dateClass))));
+                && (dateClass == java.sql.Date.class || dateClass == Time.class
+                        || (dateClass != Timestamp.class
+                                && (java.sql.Date.class.isAssignableFrom(dateClass)
+                                        || Time.class.isAssignableFrom(dateClass))));
     }
-    
+
     private int getTemplateDateFormatCacheArrayIndex(int dateType, boolean zonelessInput, boolean sqlDTTZ) {
         return dateType
                 + (zonelessInput ? CACHED_TDFS_ZONELESS_INPUT_OFFS : 0)
                 + (sqlDTTZ ? CACHED_TDFS_SQL_D_T_TZ_OFFS : 0);
     }
-    
+
     /**
-     * Returns the {@link DateToISO8601CalendarFactory} used by the
-     * the "iso_" built-ins. Be careful when using this; it should only by used
-     * with {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone,
-     * DateToISO8601CalendarFactory)} and
-     * {@link DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}.
+     * Returns the {@link DateToISO8601CalendarFactory} used by the the "iso_" built-ins. Be careful when using this; it
+     * should only by used with
+     * {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
+     * and {@link DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
+     * .
      */
     DateToISO8601CalendarFactory getISOBuiltInCalendarFactory() {
         if (isoBuiltInCalendarFactory == null) {
@@ -1561,7 +1844,7 @@ public final class Environment extends Configurable {
         }
         return isoBuiltInCalendarFactory;
     }
-    
+
     TemplateTransformModel getTransform(Expression exp) throws TemplateException {
         TemplateTransformModel ttm = null;
         TemplateModel tm = exp.eval(this);
@@ -1577,10 +1860,9 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the loop or macro local variable corresponding to this
-     * variable name. Possibly null.
-     * (Note that the misnomer is kept for backward compatibility: loop variables
-     * are not local variables according to our terminology.)
+     * Returns the loop or macro local variable corresponding to this variable name. Possibly null. (Note that the
+     * misnomer is kept for backward compatibility: loop variables are not local variables according to our
+     * terminology.)
      */
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         if (localContextStack != null) {
@@ -1596,21 +1878,20 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the variable that is visible in this context, or {@code null} if the variable is not found.
-     * This is the correspondent to an FTL top-level variable reading expression.
-     * That is, it tries to find the the variable in this order:
+     * Returns the variable that is visible in this context, or {@code null} if the variable is not found. This is the
+     * correspondent to an FTL top-level variable reading expression. That is, it tries to find the the variable in this
+     * order:
      * <ol>
-     *   <li>An loop variable (if we're in a loop or user defined directive body) such as foo_has_next
-     *   <li>A local variable (if we're in a macro)
-     *   <li>A variable defined in the current namespace (say, via &lt;#assign ...&gt;)
-     *   <li>A variable defined globally (say, via &lt;#global ....&gt;)
-     *   <li>Variable in the data model:
-     *     <ol>
-     *       <li>A variable in the root hash that was exposed to this
-                 rendering environment in the Template.process(...) call
-     *       <li>A shared variable set in the configuration via a call to Configuration.setSharedVariable(...)
-     *     </ol>
-     *   </li>
+     * <li>An loop variable (if we're in a loop or user defined directive body) such as foo_has_next
+     * <li>A local variable (if we're in a macro)
+     * <li>A variable defined in the current namespace (say, via &lt;#assign ...&gt;)
+     * <li>A variable defined globally (say, via &lt;#global ....&gt;)
+     * <li>Variable in the data model:
+     * <ol>
+     * <li>A variable in the root hash that was exposed to this rendering environment in the Template.process(...) call
+     * <li>A shared variable set in the configuration via a call to Configuration.setSharedVariable(...)
+     * </ol>
+     * </li>
      * </ol>
      */
     public TemplateModel getVariable(String name) throws TemplateModelException {
@@ -1625,10 +1906,9 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the globally visible variable of the given name (or null).
-     * This is correspondent to FTL <code>.globals.<i>name</i></code>.
-     * This will first look at variables that were assigned globally via:
-     * &lt;#global ...&gt; and then at the data model exposed to the template.
+     * Returns the globally visible variable of the given name (or null). This is correspondent to FTL
+     * <code>.globals.<i>name</i></code>. This will first look at variables that were assigned globally via: &lt;#global
+     * ...&gt; and then at the data model exposed to the template.
      */
     public TemplateModel getGlobalVariable(String name) throws TemplateModelException {
         TemplateModel result = globalNamespace.get(name);
@@ -1642,9 +1922,8 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Sets a variable that is visible globally.
-     * This is correspondent to FTL <code>&lt;#global <i>name</i>=<i>model</i>&gt;</code>.
-     * This can be considered a convenient shorthand for:
+     * Sets a variable that is visible globally. This is correspondent to FTL
+     * <code>&lt;#global <i>name</i>=<i>model</i>&gt;</code>. This can be considered a convenient shorthand for:
      * getGlobalNamespace().put(name, model)
      */
     public void setGlobalVariable(String name, TemplateModel model) {
@@ -1652,9 +1931,8 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Sets a variable in the current namespace.
-     * This is correspondent to FTL <code>&lt;#assign <i>name</i>=<i>model</i>&gt;</code>.
-     * This can be considered a convenient shorthand for:
+     * Sets a variable in the current namespace. This is correspondent to FTL
+     * <code>&lt;#assign <i>name</i>=<i>model</i>&gt;</code>. This can be considered a convenient shorthand for:
      * getCurrentNamespace().put(name, model)
      */
     public void setVariable(String name, TemplateModel model) {
@@ -1662,12 +1940,15 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Sets a local variable (one effective only during a macro invocation).
-     * This is correspondent to FTL <code>&lt;#local <i>name</i>=<i>model</i>&gt;</code>.
-     * @param name the identifier of the variable
-     * @param model the value of the variable.
-     * @throws IllegalStateException if the environment is not executing a
-     * macro body.
+     * Sets a local variable (one effective only during a macro invocation). This is correspondent to FTL
+     * <code>&lt;#local <i>name</i>=<i>model</i>&gt;</code>.
+     * 
+     * @param name
+     *            the identifier of the variable
+     * @param model
+     *            the value of the variable.
+     * @throws IllegalStateException
+     *             if the environment is not executing a macro body.
      */
     public void setLocalVariable(String name, TemplateModel model) {
         if (currentMacroContext == null) {
@@ -1677,40 +1958,36 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns a set of variable names that are known at the time of call. This
-     * includes names of all shared variables in the {@link Configuration},
-     * names of all global variables that were assigned during the template processing,
-     * names of all variables in the current name-space, names of all local variables
-     * and loop variables. If the passed root data model implements the
-     * {@link TemplateHashModelEx} interface, then all names it retrieves through a call to
-     * {@link TemplateHashModelEx#keys()} method are returned as well.
-     * The method returns a new Set object on each call that is completely
-     * disconnected from the Environment. That is, modifying the set will have
-     * no effect on the Environment object.
+     * Returns a set of variable names that are known at the time of call. This includes names of all shared variables
+     * in the {@link Configuration}, names of all global variables that were assigned during the template processing,
+     * names of all variables in the current name-space, names of all local variables and loop variables. If the passed
+     * root data model implements the {@link TemplateHashModelEx} interface, then all names it retrieves through a call
+     * to {@link TemplateHashModelEx#keys()} method are returned as well. The method returns a new Set object on each
+     * call that is completely disconnected from the Environment. That is, modifying the set will have no effect on the
+     * Environment object.
      */
     public Set getKnownVariableNames() throws TemplateModelException {
         // shared vars.
         Set set = configuration.getSharedVariableNames();
-        
+
         // root hash
         if (rootDataModel instanceof TemplateHashModelEx) {
-            TemplateModelIterator rootNames =
-                ((TemplateHashModelEx) rootDataModel).keys().iterator();
+            TemplateModelIterator rootNames = ((TemplateHashModelEx) rootDataModel).keys().iterator();
             while (rootNames.hasNext()) {
                 set.add(((TemplateScalarModel) rootNames.next()).getAsString());
             }
         }
-        
+
         // globals
-        for (TemplateModelIterator tmi = globalNamespace.keys().iterator(); tmi.hasNext(); ) {
+        for (TemplateModelIterator tmi = globalNamespace.keys().iterator(); tmi.hasNext();) {
             set.add(((TemplateScalarModel) tmi.next()).getAsString());
         }
-        
+
         // current name-space
-        for (TemplateModelIterator tmi = currentNamespace.keys().iterator(); tmi.hasNext(); ) {
+        for (TemplateModelIterator tmi = currentNamespace.keys().iterator(); tmi.hasNext();) {
             set.add(((TemplateScalarModel) tmi.next()).getAsString());
         }
-        
+
         // locals and loop vars
         if (currentMacroContext != null) {
             set.addAll(currentMacroContext.getLocalVariableNames());
@@ -1725,19 +2002,21 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Prints the current FTL stack trace. Useful for debugging.
-     * {@link TemplateException}s incorporate this information in their stack traces.
+     * Prints the current FTL stack trace. Useful for debugging. {@link TemplateException}s incorporate this information
+     * in their stack traces.
      */
     public void outputInstructionStack(PrintWriter pw) {
-        outputInstructionStack(getInstructionStackSnapshot(), false,  pw);
+        outputInstructionStack(getInstructionStackSnapshot(), false, pw);
         pw.flush();
     }
 
     private static final int TERSE_MODE_INSTRUCTION_STACK_TRACE_LIMIT = 10;
-    
+
     /**
      * Prints an FTL stack trace based on a stack trace snapshot.
-     * @param w If it's a {@link PrintWriter}, {@link PrintWriter#println()} will be used for line-breaks.
+     * 
+     * @param w
+     *            If it's a {@link PrintWriter}, {@link PrintWriter#println()} will be used for line-breaks.
      * @see #getInstructionStackSnapshot()
      * @since 2.3.21
      */
@@ -1752,7 +2031,7 @@ public final class Environment extends Configurable {
                                 ? totalFrames
                                 : TERSE_MODE_INSTRUCTION_STACK_TRACE_LIMIT - 1)
                         : totalFrames;
-                boolean hideNestringRelatedFrames = terseMode && framesToPrint < totalFrames; 
+                boolean hideNestringRelatedFrames = terseMode && framesToPrint < totalFrames;
                 int nestingRelatedFramesHidden = 0;
                 int trailingFramesHidden = 0;
                 int framesPrinted = 0;
@@ -1768,7 +2047,9 @@ public final class Environment extends Configurable {
                                             ? "\t~ Reached through: "
                                             : "\t- Reached through: "));
                             w.write(instructionStackItemToString(stackEl));
-                            if (pw != null) pw.println(); else w.write('\n');
+                            if (pw != null) pw.println();
+                            else
+                                w.write('\n');
                             framesPrinted++;
                         } else {
                             nestingRelatedFramesHidden++;
@@ -1777,7 +2058,7 @@ public final class Environment extends Configurable {
                         trailingFramesHidden++;
                     }
                 }
-                
+
                 boolean hadClosingNotes = false;
                 if (trailingFramesHidden > 0) {
                     w.write("\t... (Had ");
@@ -1792,38 +2073,45 @@ public final class Environment extends Configurable {
                         w.write('\t');
                     }
                     w.write("(Hidden " + nestingRelatedFramesHidden + " \"~\" lines for terseness)");
-                    if (pw != null) pw.println(); else w.write('\n');
+                    if (pw != null) pw.println();
+                    else
+                        w.write('\n');
                     hadClosingNotes = true;
                 }
                 if (hadClosingNotes) {
-                    if (pw != null) pw.println(); else w.write('\n');
+                    if (pw != null) pw.println();
+                    else
+                        w.write('\n');
                 }
             } else {
                 w.write("(The stack was empty)");
-                if (pw != null) pw.println(); else w.write('\n');
+                if (pw != null) pw.println();
+                else
+                    w.write('\n');
             }
         } catch (IOException e) {
             LOG.error("Failed to print FTL stack trace", e);
         }
     }
-    
+
     /**
      * Returns the snapshot of what would be printed as FTL stack trace.
+     * 
      * @since 2.3.20
      */
     TemplateElement[] getInstructionStackSnapshot() {
         int requiredLength = 0;
         int ln = instructionStack.size();
-        
+
         for (int i = 0; i < ln; i++) {
             TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
             if (i == ln || stackEl.isShownInStackTrace()) {
                 requiredLength++;
             }
         }
-        
+
         if (requiredLength == 0) return null;
-        
+
         TemplateElement[] result = new TemplateElement[requiredLength];
         int dstIdx = requiredLength - 1;
         for (int i = 0; i < ln; i++) {
@@ -1832,7 +2120,7 @@ public final class Environment extends Configurable {
                 result[dstIdx--] = stackEl;
             }
         }
-        
+
         return result;
     }
 
@@ -1841,10 +2129,10 @@ public final class Environment extends Configurable {
         appendInstructionStackItem(stackEl, sb);
         return sb.toString();
     }
-    
+
     static void appendInstructionStackItem(TemplateElement stackEl, StringBuilder sb) {
         sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
-        
+
         sb.append("  [");
         Macro enclosingMacro = getEnclosingMacro(stackEl);
         if (enclosingMacro != null) {
@@ -1875,16 +2163,18 @@ public final class Environment extends Configurable {
     private void popLocalContext() {
         localContextStack.remove(localContextStack.size() - 1);
     }
-    
+
     ArrayList getLocalContextStack() {
         return localContextStack;
     }
 
     /**
      * Returns the name-space for the name if exists, or null.
-     * @param name the template path that you have used with the <code>import</code> directive
-     *     or {@link #importLib(String, String)} call, in normalized form. That is, the path must be an absolute
-     *     path, and it must not contain "/../" or "/./". The leading "/" is optional.
+     * 
+     * @param name
+     *            the template path that you have used with the <code>import</code> directive or
+     *            {@link #importLib(String, String)} call, in normalized form. That is, the path must be an absolute
+     *            path, and it must not contain "/../" or "/./". The leading "/" is optional.
      */
     public Namespace getNamespace(String name) {
         if (name.startsWith("/")) name = name.substring(1);
@@ -1896,38 +2186,37 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the main namespace.
-     * This corresponds to the FTL {@code .main} hash.
+     * Returns the main namespace. This corresponds to the FTL {@code .main} hash.
      */
     public Namespace getMainNamespace() {
         return mainNamespace;
     }
 
     /**
-     * Returns the current namespace.
-     * This corresponds to the FTL {@code .namespace} hash.
-     * Initially, the current name space is the main namespace, but when inside an {@code #import}-ed template, it will
-     * change to the namespace of that import. Note that {@code #include} doesn't affect the namespace, so if you are
-     * in an {@code #import}-ed template and then from there do an {@code #include}, the current namespace will remain
-     * the namespace of the {@code #import}.  
+     * Returns the current namespace. This corresponds to the FTL {@code .namespace} hash. Initially, the current name
+     * space is the main namespace, but when inside an {@code #import}-ed template, it will change to the namespace of
+     * that import. Note that {@code #include} doesn't affect the namespace, so if you are in an {@code #import}-ed
+     * template and then from there do an {@code #include}, the current namespace will remain the namespace of the
+     * {@code #import}.
      */
     public Namespace getCurrentNamespace() {
         return currentNamespace;
     }
-    
+
     /**
-     * Returns the name-space that contains the globally visible non-data-model variables
-     * (usually created with {@code &lt;#global ...&gt;}).
+     * Returns the name-space that contains the globally visible non-data-model variables (usually created with
+     * {@code &lt;#global ...&gt;}).
      */
     public Namespace getGlobalNamespace() {
         return globalNamespace;
     }
-    
+
     /**
      * Returns the data-model (also known as the template context in some other template engines).
      */
     public TemplateHashModel getDataModel() {
-    	final TemplateHashModel result = new TemplateHashModel() {
+        final TemplateHashModel result = new TemplateHashModel() {
+
             public boolean isEmpty() {
                 return false;
             }
@@ -1940,46 +2229,49 @@ public final class Environment extends Configurable {
                 return value;
             }
         };
-        
+
         if (rootDataModel instanceof TemplateHashModelEx) {
-        	return new TemplateHashModelEx() {
-        		public boolean isEmpty() throws TemplateModelException {
-        			return result.isEmpty();
-        		}
-        		public TemplateModel get(String key) throws TemplateModelException {
-        			return result.get(key);
-        		}
-        		
-        		//NB: The methods below do not take into account
-        		// configuration shared variables even though
-        		// the hash will return them, if only for BWC reasons
-        		public TemplateCollectionModel values() throws TemplateModelException {
-        			return ((TemplateHashModelEx) rootDataModel).values();
-        		}
-        		public TemplateCollectionModel keys() throws TemplateModelException {
-        			return ((TemplateHashModelEx) rootDataModel).keys();
-        		}
-        		public int size() throws TemplateModelException {
-        			return ((TemplateHashModelEx) rootDataModel).size();
-        		}
-        	};
+            return new TemplateHashModelEx() {
+
+                public boolean isEmpty() throws TemplateModelException {
+                    return result.isEmpty();
+                }
+
+                public TemplateModel get(String key) throws TemplateModelException {
+                    return result.get(key);
+                }
+
+                // NB: The methods below do not take into account
+                // configuration shared variables even though
+                // the hash will return them, if only for BWC reasons
+                public TemplateCollectionModel values() throws TemplateModelException {
+                    return ((TemplateHashModelEx) rootDataModel).values();
+                }
+
+                public TemplateCollectionModel keys() throws TemplateModelException {
+                    return ((TemplateHashModelEx) rootDataModel).keys();
+                }
+
+                public int size() throws TemplateModelException {
+                    return ((TemplateHashModelEx) rootDataModel).size();
+                }
+            };
         }
         return result;
     }
 
- 
     /**
-     * Returns the read-only hash of globally visible variables.
-     * This is the correspondent of FTL <code>.globals</code> hash.
-     * That is, you see the variables created with
-     * <code>&lt;#global ...&gt;</code>, and the variables of the data-model.
-     * To create new global variables, use {@link #setGlobalVariable setGlobalVariable}.
+     * Returns the read-only hash of globally visible variables. This is the correspondent of FTL <code>.globals</code>
+     * hash. That is, you see the variables created with <code>&lt;#global ...&gt;</code>, and the variables of the
+     * data-model. To create new global variables, use {@link #setGlobalVariable setGlobalVariable}.
      */
     public TemplateHashModel getGlobalVariables() {
         return new TemplateHashModel() {
+
             public boolean isEmpty() {
                 return false;
             }
+
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel result = globalNamespace.get(key);
                 if (result == null) {
@@ -2000,7 +2292,7 @@ public final class Environment extends Configurable {
     private void popElement() {
         instructionStack.remove(instructionStack.size() - 1);
     }
-    
+
     void replaceElementStackTop(TemplateElement instr) {
         instructionStack.set(instructionStack.size() - 1, instr);
     }
@@ -2008,57 +2300,54 @@ public final class Environment extends Configurable {
     public TemplateNodeModel getCurrentVisitorNode() {
         return currentVisitorNode;
     }
-    
+
     /**
      * sets TemplateNodeModel as the current visitor node. <tt>.current_node</tt>
      */
     public void setCurrentVisitorNode(TemplateNodeModel node) {
         currentVisitorNode = node;
     }
-    
+
     TemplateModel getNodeProcessor(TemplateNodeModel node) throws TemplateException {
         String nodeName = node.getNodeName();
         if (nodeName == null) {
             throw new _MiscTemplateException(this, "Node name is null.");
         }
         TemplateModel result = getNodeProcessor(nodeName, node.getNodeNamespace(), 0);
-    
+
         if (result == null) {
             String type = node.getNodeType();
-        
+
             /* DD: Original version: */
             if (type == null) {
                 type = "default";
             }
             result = getNodeProcessor("@" + type, null, 0);
-        
-            /* DD: Jonathan's non-BC version and IMHO otherwise wrong version:
-            if (type != null) {
-                result = getNodeProcessor("@" + type, null, 0);
-            }
-            if (result == null) {
-                result = getNodeProcessor("@default", null, 0);
-            }
-            */
+
+            /*
+             * DD: Jonathan's non-BC version and IMHO otherwise wrong version: if (type != null) { result =
+             * getNodeProcessor("@" + type, null, 0); } if (result == null) { result = getNodeProcessor("@default",
+             * null, 0); }
+             */
         }
-        return result;    
+        return result;
     }
-    
-    private TemplateModel getNodeProcessor(final String nodeName, final String nsURI, int startIndex) 
-    throws TemplateException {
+
+    private TemplateModel getNodeProcessor(final String nodeName, final String nsURI, int startIndex)
+            throws TemplateException {
         TemplateModel result = null;
         int i;
         for (i = startIndex; i < nodeNamespaces.size(); i++) {
             Namespace ns = null;
-            try {                                   
+            try {
                 ns = (Namespace) nodeNamespaces.get(i);
             } catch (ClassCastException cce) {
                 throw new _MiscTemplateException(this,
                         "A \"using\" clause should contain a sequence of namespaces or strings that indicate the "
-                        + "location of importable macro libraries.");
+                                + "location of importable macro libraries.");
             }
             result = getNodeProcessor(ns, nodeName, nsURI);
-            if (result != null) 
+            if (result != null)
                 break;
         }
         if (result != null) {
@@ -2068,7 +2357,7 @@ public final class Environment extends Configurable {
         }
         return result;
     }
-    
+
     private TemplateModel getNodeProcessor(Namespace ns, String localName, String nsURI) throws TemplateException {
         TemplateModel result = null;
         if (nsURI == null) {
@@ -2112,32 +2401,32 @@ public final class Environment extends Configurable {
         }
         return result;
     }
-    
+
     /**
-     * Emulates <code>include</code> directive, except that <code>name</code> must be tempate
-     * root relative.
+     * Emulates <code>include</code> directive, except that <code>name</code> must be tempate root relative.
      *
-     * <p>It's the same as <code>include(getTemplateForInclusion(name, encoding, parse))</code>.
-     * But, you may want to separately call these two methods, so you can determine the source of
-     * exceptions more precisely, and thus achieve more intelligent error handling.
+     * <p>
+     * It's the same as <code>include(getTemplateForInclusion(name, encoding, parse))</code>. But, you may want to
+     * separately call these two methods, so you can determine the source of exceptions more precisely, and thus achieve
+     * more intelligent error handling.
      *
      * @see #getTemplateForInclusion(String name, String encoding, boolean parse)
      * @see #include(Template includedTemplate)
      */
     public void include(String name, String encoding, boolean parse)
-    throws IOException, TemplateException {
+            throws IOException, TemplateException {
         include(getTemplateForInclusion(name, encoding, parse));
     }
 
     /**
      * Same as {@link #getTemplateForInclusion(String, String, boolean, boolean)} with {@code false}
-     * {@code ignoreMissign} argument. 
+     * {@code ignoreMissign} argument.
      */
     public Template getTemplateForInclusion(String name, String encoding, boolean parse)
-    throws IOException {
+            throws IOException {
         return getTemplateForInclusion(name, encoding, parse, false);
     }
-    
+
     /**
      * Gets a template for inclusion; used for implementing {@link #include(Template includedTemplate)}. The advantage
      * over simply using <code>config.getTemplate(...)</code> is that it chooses the default encoding exactly as the
@@ -2172,9 +2461,9 @@ public final class Environment extends Configurable {
      * @since 2.3.21
      */
     public Template getTemplateForInclusion(String name, String encoding, boolean parseAsFTL, boolean ignoreMissing)
-    throws IOException {
+            throws IOException {
         final Template inheritedTemplate = getTemplate();
-        
+
         if (encoding == null) {
             // This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
             encoding = inheritedTemplate.getEncoding();
@@ -2183,8 +2472,8 @@ public final class Environment extends Configurable {
             }
         }
 
-        Object customLookupCondition = inheritedTemplate.getCustomLookupCondition(); 
-        
+        Object customLookupCondition = inheritedTemplate.getCustomLookupCondition();
+
         return configuration.getTemplate(
                 name, getLocale(), customLookupCondition,
                 encoding, parseAsFTL,
@@ -2192,15 +2481,15 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Processes a Template in the context of this <code>Environment</code>, including its
-     * output in the <code>Environment</code>'s Writer.
+     * Processes a Template in the context of this <code>Environment</code>, including its output in the
+     * <code>Environment</code>'s Writer.
      *
-     * @param includedTemplate the template to process. Note that it does <em>not</em> need
-     * to be a template returned by
-     * {@link #getTemplateForInclusion(String name, String encoding, boolean parse)}.
+     * @param includedTemplate
+     *            the template to process. Note that it does <em>not</em> need to be a template returned by
+     *            {@link #getTemplateForInclusion(String name, String encoding, boolean parse)}.
      */
     public void include(Template includedTemplate)
-    throws TemplateException, IOException {
+            throws TemplateException, IOException {
         final Template prevTemplate;
         final boolean parentReplacementOn = isBeforeIcI2322();
         prevTemplate = getTemplate();
@@ -2209,7 +2498,7 @@ public final class Environment extends Configurable {
         } else {
             legacyParent = includedTemplate;
         }
-        
+
         final Template prevCurrentTemplate = currentTemplate;
         try {
             currentTemplate = includedTemplate;
@@ -2229,44 +2518,45 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Emulates <code>import</code> directive, except that <code>name</code> must be tempate
-     * root relative.
+     * Emulates <code>import</code> directive, except that <code>name</code> must be tempate root relative.
      *
-     * <p>It's the same as <code>importLib(getTemplateForImporting(name), namespace)</code>.
-     * But, you may want to separately call these two methods, so you can determine the source of
-     * exceptions more precisely, and thus achieve more intelligent error handling.
+     * <p>
+     * It's the same as <code>importLib(getTemplateForImporting(name), namespace)</code>. But, you may want to
+     * separately call these two methods, so you can determine the source of exceptions more precisely, and thus achieve
+     * more intelligent error handling.
      *
      * @see #getTemplateForImporting(String name)
      * @see #importLib(Template includedTemplate, String namespace)
      */
     public Namespace importLib(String name, String namespace)
-    throws IOException, TemplateException {
+            throws IOException, TemplateException {
         return importLib(getTemplateForImporting(name), namespace);
     }
 
     /**
-     * Gets a template for importing; used with
-     * {@link #importLib(Template importedTemplate, String namespace)}. The advantage
-     * over simply using <code>config.getTemplate(...)</code> is that it chooses the encoding
-     * as the <code>import</code> directive does.
+     * Gets a template for importing; used with {@link #importLib(Template importedTemplate, String namespace)}. The
+     * advantage over simply using <code>config.getTemplate(...)</code> is that it chooses the encoding as the
+     * <code>import</code> directive does.
      *
-     * @param name the name of the template, relatively to the template root directory
-     * (not the to the directory of the currently executing template file!).
-     * (Note that you can use {@link freemarker.cache.TemplateCache#getFullTemplatePath}
-     * to convert paths to template root relative paths.)
+     * @param name
+     *            the name of the template, relatively to the template root directory (not the to the directory of the
+     *            currently executing template file!). (Note that you can use
+     *            {@link freemarker.cache.TemplateCache#getFullTemplatePath} to convert paths to template root relative
+     *            paths.)
      */
     public Template getTemplateForImporting(String name) throws IOException {
         return getTemplateForInclusion(name, null, true);
     }
-    
+
     /**
      * Emulates <code>import</code> directive.
      *
-     * @param loadedTemplate the template to import. Note that it does <em>not</em> need
-     * to be a template returned by {@link #getTemplateForImporting(String name)}.
+     * @param loadedTemplate
+     *            the template to import. Note that it does <em>not</em> need to be a template returned by
+     *            {@link #getTemplateForImporting(String name)}.
      */
     public Namespace importLib(Template loadedTemplate, String namespace)
-    throws IOException, TemplateException {
+            throws IOException, TemplateException {
         if (loadedLibs == null) {
             loadedLibs = new HashMap();
         }
@@ -2298,7 +2588,7 @@ public final class Environment extends Configurable {
         }
         return (Namespace) loadedLibs.get(templateName);
     }
-    
+
     /**
      * Resolves a reference to a template (like the one used in {@code #include} or {@code #import}), assuming a base
      * name. This gives a full (that is, absolute), even if non-normalized template name, that could be used for
@@ -2329,10 +2619,10 @@ public final class Environment extends Configurable {
             // Early FM only had absolute names.
             return targetName;
         }
-        
+
         return _CacheAPI.toAbsoluteName(configuration.getTemplateNameFormat(), baseName, targetName);
     }
-    
+
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {
         Writer prevOut = out;
         try {
@@ -2359,24 +2649,24 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * @return the namespace URI registered for this prefix, or null.
-     * This is based on the mappings registered in the current namespace.
+     * @return the namespace URI registered for this prefix, or null. This is based on the mappings registered in the
+     *         current namespace.
      */
     public String getNamespaceForPrefix(String prefix) {
         return currentNamespace.getTemplate().getNamespaceForPrefix(prefix);
     }
-    
+
     public String getPrefixForNamespace(String nsURI) {
         return currentNamespace.getTemplate().getPrefixForNamespace(nsURI);
     }
-    
+
     /**
      * @return the default node namespace for the current FTL namespace
      */
     public String getDefaultNS() {
         return currentNamespace.getTemplate().getDefaultNS();
     }
-    
+
     /**
      * A hook that Jython uses.
      */
@@ -2390,10 +2680,9 @@ public final class Environment extends Configurable {
     public void __setitem__(String key, Object o) throws TemplateException {
         setGlobalVariable(key, getObjectWrapper().wrap(o));
     }
-    
-    
+
     private IdentityHashMap<Object, Object> customStateVariables;
-    
+
     /**
      * Returns the value of a custom state variable, or {@code null} if it's missing; see
      * {@link #setCustomState(Object, Object)} for more.
@@ -2431,7 +2720,7 @@ public final class Environment extends Configurable {
         }
         return customStateVariables.put(identityKey, value);
     }
-    
+
     final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
 
         private final TemplateElement element;
@@ -2453,21 +2742,21 @@ public final class Environment extends Configurable {
         public TemplateElement getElement() {
             return element;
         }
-        
+
     }
-    
+
     public class Namespace extends SimpleHash {
-        
+
         private final Template template;
-        
+
         Namespace() {
             this.template = Environment.this.getTemplate();
         }
-        
+
         Namespace(Template template) {
             this.template = template;
         }
-        
+
         /**
          * @return the Template object with which this Namespace is associated.
          */
@@ -2482,8 +2771,8 @@ public final class Environment extends Configurable {
         
     }
 
-     private static final Writer EMPTY_BODY_WRITER = new Writer() {
-    
+    private static final Writer EMPTY_BODY_WRITER = new Writer() {
+
         @Override
         public void write(char[] cbuf, int off, int len) throws IOException {
             if (len > 0) {
@@ -2491,16 +2780,16 @@ public final class Environment extends Configurable {
                         "This transform does not allow nested content.");
             }
         }
-    
+
         @Override
         public void flush() {
         }
-    
+
         @Override
         public void close() {
         }
     };
-    
+
     private boolean isBeforeIcI2322() {
         return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
     }
@@ -2508,23 +2797,23 @@ public final class Environment extends Configurable {
     private boolean isIcI2324OrLater() {
         return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
     }
-    
+
     /**
-     * See {@link #setFastInvalidReferenceExceptions(boolean)}. 
+     * See {@link #setFastInvalidReferenceExceptions(boolean)}.
      */
     boolean getFastInvalidReferenceExceptions() {
         return fastInvalidReferenceExceptions;
     }
-    
+
     /**
      * Sets if for invalid references {@link InvalidReferenceException#FAST_INSTANCE} should be thrown, or a new
-     * {@link InvalidReferenceException}. The "fast" instance is used if we know that the error will be handled
-     * so that its message will not be logged or shown anywhere.
+     * {@link InvalidReferenceException}. The "fast" instance is used if we know that the error will be handled so that
+     * its message will not be logged or shown anywhere.
      */
     boolean setFastInvalidReferenceExceptions(boolean b) {
         boolean res = fastInvalidReferenceExceptions;
         fastInvalidReferenceExceptions = b;
         return res;
     }
-    
+
 }

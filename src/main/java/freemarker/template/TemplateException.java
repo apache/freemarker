@@ -583,6 +583,10 @@ public class TemplateException extends Exception {
             return blamedExpressionString;
         }
     }
+    
+    Expression getBlamedExpression() {
+        return blamedExpression;
+    }
 
     private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {
         // These are calculated from transient fields, so this is the last chance to calculate them: 
