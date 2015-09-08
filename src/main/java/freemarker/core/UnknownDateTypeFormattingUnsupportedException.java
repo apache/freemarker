@@ -22,7 +22,7 @@ package freemarker.core;
 import freemarker.template.TemplateDateModel;
 
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because it's type is {@link TemplateDateModel#UNKNOWN}.
+ * Thrown when a {@link TemplateDateModel} can't be formatted because its type is {@link TemplateDateModel#UNKNOWN}.
  * 
  * @since 2.3.24
  */

@@ -44,7 +44,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
                 params = params.substring(0, barIdx);
                 try {
                     fallbackFormat = env.getTemplateNumberFormat(fallbackFormatStr, locale);
-                } catch (InvalidFormatStringException e) {
+                } catch (TemplateValueFormatException e) {
                     throw new InvalidFormatParametersException(
                             "Couldn't get the fallback number format (specified after the \"|\"), "
                             + StringUtil.jQuote(fallbackFormatStr) + ". Reason: " + e.getMessage(),
@@ -81,7 +81,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         
         @Override
         public String format(TemplateNumberModel numberModel)
-                throws UnformattableNumberException, TemplateModelException {
+                throws TemplateModelException, TemplateValueFormatException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
                 return Integer.toString(NumberUtil.toIntExact(n), base);

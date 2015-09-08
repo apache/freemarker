@@ -1061,7 +1061,7 @@ public final class Environment extends Configurable {
             throws TemplateException {
         try {
             return format.format(number);
-        } catch (UnformattableNumberException e) {
+        } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
                     e.getMessage())
@@ -1099,7 +1099,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.24
      */
-    public TemplateNumberFormat getTemplateNumberFormat() throws InvalidFormatStringException {
+    public TemplateNumberFormat getTemplateNumberFormat() throws TemplateValueFormatException {
         TemplateNumberFormat format = cachedTemplateNumberFormat;
         if (format == null) {
             format = getTemplateNumberFormat(getNumberFormat(), false);
@@ -1120,7 +1120,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.24
      */
-    public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws InvalidFormatStringException {
+    public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws TemplateValueFormatException {
         return getTemplateNumberFormat(formatString, true);
     }
 
@@ -1143,7 +1143,7 @@ public final class Environment extends Configurable {
      * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat(String formatString, Locale locale)
-            throws InvalidFormatStringException {
+            throws TemplateValueFormatException {
         if (locale.equals(getLocale())) {
             getTemplateNumberFormat(formatString);
         }
@@ -1158,7 +1158,7 @@ public final class Environment extends Configurable {
         TemplateNumberFormat format;
         try {
             format = getTemplateNumberFormat();
-        } catch (InvalidFormatStringException e) {
+        } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Failed to get number format object for the current number format string, ",
                     new _DelayedJQuote(getNumberFormat()), ": ", e.getMessage())
@@ -1180,7 +1180,7 @@ public final class Environment extends Configurable {
         TemplateNumberFormat format;
         try {
             format = getTemplateNumberFormat(formatString);
-        } catch (InvalidFormatStringException e) {
+        } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Failed to get number format object for the ", new _DelayedJQuote(formatString),
                     " number format string: ", e.getMessage())
@@ -1201,7 +1201,7 @@ public final class Environment extends Configurable {
      *            result from the cache regardless of this parameter.
      */
     private TemplateNumberFormat getTemplateNumberFormat(String formatString, boolean cacheResult)
-            throws InvalidFormatStringException {
+            throws TemplateValueFormatException {
         if (cachedTemplateNumberFormats == null) {
             if (cacheResult) {
                 cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
@@ -1231,7 +1231,7 @@ public final class Environment extends Configurable {
      *            Not {@code null}
      */
     private TemplateNumberFormat getTemplateNumberFormatWithoutCache(String formatString, Locale locale)
-            throws UndefinedCustomFormatException, InvalidFormatParametersException {
+            throws TemplateValueFormatException {
         int formatStringLen = formatString.length();
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
@@ -1352,7 +1352,7 @@ public final class Environment extends Configurable {
         
         try {
             return format.format(tdm);
-        } catch (UnformattableDateException e) {
+        } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(tdmSourceExpr, e);
         }
     }
@@ -1375,7 +1375,7 @@ public final class Environment extends Configurable {
         
         try {
             return format.format(tdm);
-        } catch (UnformattableDateException e) {
+        } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(blamedDateSourceExp, e);
         }
     }
@@ -1392,10 +1392,8 @@ public final class Environment extends Configurable {
      *            The exact {@link Date} class, like {@link java.sql.Date} or {@link java.sql.Time}; this can influences
      *            time zone selection. See also: {@link #setSQLDateAndTimeTimeZone(TimeZone)}
      */
-    public TemplateDateFormat getTemplateDateFormat(
-            int dateType, Class<? extends Date> dateClass)
-                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
-                    InvalidFormatParametersException {
+    public TemplateDateFormat getTemplateDateFormat(int dateType, Class<? extends Date> dateClass)
+            throws TemplateValueFormatException {
         boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
         return getTemplateDateFormat(dateType, shouldUseSQLDTTimeZone(isSQLDateOrTime), isSQLDateOrTime);
     }
@@ -1418,8 +1416,7 @@ public final class Environment extends Configurable {
      */
     public TemplateDateFormat getTemplateDateFormat(
             String formatString, int dateType, Class<? extends Date> dateClass)
-                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
-                    InvalidFormatParametersException {
+                    throws TemplateValueFormatException {
         boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
         return getTemplateDateFormat(
                 formatString, dateType,
@@ -1447,8 +1444,7 @@ public final class Environment extends Configurable {
             String formatString,
             int dateType, Class<? extends Date> dateClass,
             Locale locale)
-                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
-                    UnknownDateTypeFormattingUnsupportedException {
+                    throws TemplateValueFormatException {
         boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
         boolean useSQLDTTZ = shouldUseSQLDTTimeZone(isSQLDateOrTime);
         return getTemplateDateFormat(
@@ -1480,8 +1476,7 @@ public final class Environment extends Configurable {
             String formatString,
             int dateType, Class<? extends Date> dateClass,
             Locale locale, TimeZone timeZone, TimeZone sqlDateAndTimeTimeZone)
-                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
-                    UnknownDateTypeFormattingUnsupportedException {
+                    throws TemplateValueFormatException {
         boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
         boolean useSQLDTTZ = shouldUseSQLDTTimeZone(isSQLDateOrTime);
         return getTemplateDateFormat(
@@ -1526,8 +1521,7 @@ public final class Environment extends Configurable {
     public TemplateDateFormat getTemplateDateFormat(
             String formatString,
             int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput)
-                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
-                    UnknownDateTypeFormattingUnsupportedException {
+                    throws TemplateValueFormatException {
         Locale currentLocale = getLocale();
         if (locale.equals(currentLocale)) {
             int equalCurrentTZ;
@@ -1560,7 +1554,7 @@ public final class Environment extends Configurable {
             return getTemplateDateFormat(dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
-        } catch (InvalidFormatStringException e) {
+        } catch (TemplateValueFormatException e) {
             String settingName;
             String settingValue;
             switch (dateType) {
@@ -1598,14 +1592,14 @@ public final class Environment extends Configurable {
             String formatString, int dateType, Class<? extends Date> dateClass,
             Expression blamedDateSourceExp, Expression blamedFormatterExp,
             boolean useTempModelExc)
-            throws TemplateException {
+                    throws TemplateException {
         try {
             return getTemplateDateFormat(formatString, dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
-        } catch (InvalidFormatStringException e) {
+        } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                    "Malformed date/time/datetime format string: ",
+                    "Can't create date/time/datetime format based on format string ",
                     new _DelayedJQuote(formatString), ". Reason given: ",
                     e.getMessage())
                     .blame(blamedFormatterExp);
@@ -1619,8 +1613,7 @@ public final class Environment extends Configurable {
      * of some if the parameters.
      */
     private TemplateDateFormat getTemplateDateFormat(int dateType, boolean useSQLDTTZ, boolean zonelessInput)
-                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
-                    InvalidFormatParametersException {
+            throws TemplateValueFormatException {
         if (dateType == TemplateDateModel.UNKNOWN) {
             throw new UnknownDateTypeFormattingUnsupportedException();
         }
@@ -1666,8 +1659,7 @@ public final class Environment extends Configurable {
     private TemplateDateFormat getTemplateDateFormat(
             String formatString, int dateType, boolean useSQLDTTimeZone, boolean zonelessInput,
             boolean cacheResult)
-                    throws UnknownDateTypeFormattingUnsupportedException, UndefinedCustomFormatException,
-                    InvalidFormatParametersException {
+                    throws TemplateValueFormatException {
         HashMap<String, TemplateDateFormat> cachedFormatsByFormatString;
         readFromCache: do {
             HashMap<String, TemplateDateFormat>[] cachedTempDateFormatsByFmtStrArray = this.cachedTempDateFormatsByFmtStrArray;
@@ -1729,8 +1721,7 @@ public final class Environment extends Configurable {
      */
     private TemplateDateFormat getTemplateDateFormatWithoutCache(
             String formatString, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput)
-                    throws UndefinedCustomFormatException, InvalidFormatParametersException,
-                    UnknownDateTypeFormattingUnsupportedException {
+                    throws TemplateValueFormatException {
         final int formatStringLen = formatString.length();
         final String formatParams;
 

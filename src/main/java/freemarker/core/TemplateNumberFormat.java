@@ -38,7 +38,7 @@ import freemarker.template.TemplateNumberModel;
  * 
  * @since 2.3.24
  */
-public abstract class TemplateNumberFormat {
+public abstract class TemplateNumberFormat extends TemplateValueFormat {
 
     /**
      * @param numberModel
@@ -48,15 +48,14 @@ public abstract class TemplateNumberFormat {
      * 
      * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). Can't be {@code null}.
      * 
-     * @throws UnformattableNumberException
-     *             When a {@link TemplateDateModel} can't be formatted because of the value/properties of the
-     *             {@link TemplateDateModel}. The most often used subclass is
-     *             {@link UnknownDateTypeFormattingUnsupportedException}.
+     * @throws TemplateValueFormatException
+     *             If any problem occurs while parsing/getting the format. Notable subclass:
+     *             {@link UnformattableNumberException}.
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
     public abstract String format(TemplateNumberModel numberModel)
-            throws UnformattableNumberException, TemplateModelException;
+            throws TemplateValueFormatException, TemplateModelException;
 
     /**
      * <b>[Not yet used, might changes in 2.3.24 final]</b>
@@ -66,7 +65,7 @@ public abstract class TemplateNumberFormat {
      */
     public abstract <MO extends TemplateMarkupOutputModel> MO format(
             TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat)
-                    throws UnformattableNumberException, TemplateModelException;
+                    throws TemplateValueFormatException, TemplateModelException;
     
     /**
      * <b>[Not yet used, might changes in 2.3.24 final]</b>
@@ -81,7 +80,7 @@ public abstract class TemplateNumberFormat {
      */
     public <MO extends TemplateMarkupOutputModel> boolean format(
             TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat, Writer out)
-                    throws UnformattableNumberException, TemplateModelException, IOException {
+                    throws TemplateValueFormatException, TemplateModelException, IOException {
         MO mo = format(dateModel, outputFormat);
         if (mo == null) {
             return false;
@@ -90,11 +89,6 @@ public abstract class TemplateNumberFormat {
         return true;
     }
 
-    /**
-     * Meant to be used in error messages to tell what format the parsed string didn't fit.
-     */
-    public abstract String getDescription();
-    
     /**
      * Tells if this formatter should be re-created if the locale changes.
      */

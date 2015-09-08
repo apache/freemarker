@@ -27,12 +27,12 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 
 /**
- * Factory for a certain type of date/time/dateTime formatting ({@link TemplateDateFormat}). Usually a singleton
+ * Factory for a certain kind of date/time/dateTime formatting ({@link TemplateDateFormat}). Usually a singleton
  * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe.
  * 
  * @since 2.3.24
  */
-public abstract class TemplateDateFormatFactory {
+public abstract class TemplateDateFormatFactory extends TemplateValueFormatFactory {
     
     /**
      * Returns a formatter for the given parameters.
@@ -55,37 +55,36 @@ public abstract class TemplateDateFormatFactory {
      *            which case the method should throw an {@link UnknownDateTypeFormattingUnsupportedException} exception.
      * @param locale
      *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
-     *            forever (i.e. locale changes in the {@link Environment} shouldn't be followed).
+     *            forever (i.e. locale changes in the {@link Environment} must not be followed).
      * @param timeZone
      *            The time zone to format for. Not {@code null}. The resulting format should be bound to this time zone
-     *            forever (i.e. time zone changes in the {@link Environment} shouldn't be followed).
+     *            forever (i.e. time zone changes in the {@link Environment} must not be followed).
      * @param zonelessInput
      *            Indicates that the input Java {@link Date} is not from a time zone aware source. When this is
      *            {@code true}, the formatters shouldn't override the time zone provided to its constructor (most
      *            formatters don't do that anyway), and it shouldn't show the time zone, if it can hide it (like a
      *            {@link SimpleDateFormat} pattern-based formatter may can't do that, as the pattern prescribes what to
      *            show).
-     * 
      *            <p>
      *            As of FreeMarker 2.3.21, this is {@code true} exactly when the date is an SQL "date without time of
      *            the day" (i.e., a {@link java.sql.Date java.sql.Date}) or an SQL "time of the day" value (i.e., a
      *            {@link java.sql.Time java.sql.Time}, although this rule can change in future, depending on
-     *            configuration settings and such, so you should rely on this rule, just accept what this parameter
+     *            configuration settings and such, so you shouldn't rely on this rule, just accept what this parameter
      *            says.
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
      *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
      * 
-     * @throws InvalidFormatParametersException
-     *             if the {@code params} is malformed
-     * @throws UnknownDateTypeFormattingUnsupportedException
-     *             if {@code dateType} is {@link TemplateDateModel#UNKNOWN}, and that's unsupported by the formatter
-     *             implementation.
+     * @throws TemplateValueFormatException
+     *             If any problem occurs while parsing/getting the format. Notable subclasses:
+     *             {@link InvalidFormatParametersException} if {@code params} is malformed;
+     *             {@link UnknownDateTypeFormattingUnsupportedException} if {@code dateType} is
+     *             {@link TemplateDateModel#UNKNOWN} and that's unsupported by this factory.
      */
     public abstract TemplateDateFormat get(
             String params,
             int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
             Environment env)
-                    throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException;
+                    throws TemplateValueFormatException;
 
 }

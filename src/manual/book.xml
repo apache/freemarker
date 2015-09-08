@@ -25673,9 +25673,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>getTemplateNumberFormat(<replaceable>...</replaceable>)</literal>
                   and
                   <literal>getTemplateDateFormat(<replaceable>...</replaceable>)</literal>
-                  variations. (Only since RC1: public
-                  <literal>TemplateDateFormat</literal> returning
-                  methods)</para>
+                  variations.</para>
                 </listitem>
 
                 <listitem>
@@ -25809,6 +25807,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>jar</literal>-s (and other <literal>zip</literal>-s)
               which can't be loaded due to zip format errors in the error
               message.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes compared to 2.3.24 Preview 1</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>Environment</literal> now has public
+              <literal>TemplateDateFormat</literal> returning methods.</para>
+            </listitem>
+
+            <listitem>
+              <para>The various
+              <literal>Template<replaceable>Xxx</replaceable>Format</literal>
+              and
+              <literal>Template<replaceable>Xxx</replaceable>FormatFacotry</literal>
+              exceptions were united under a common abstract superclass,
+              <literal>TemplateValueFormatException</literal>, which is now
+              what the methods of said classes throw (mostly).</para>
             </listitem>
           </itemizedlist>
         </section>
