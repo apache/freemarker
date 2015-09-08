@@ -294,7 +294,7 @@ class MessageUtil {
     }
 
     static TemplateModelException newCantFormatDateException(
-            Expression dateSourceExpr, UnformattableDateException cause) {
+            Expression dateSourceExpr, TemplateValueFormatException cause) {
         return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
                 cause.getMessage())
                 .blame(dateSourceExpr));

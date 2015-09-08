@@ -564,7 +564,7 @@ class BuiltInsForMultipleTypes {
                             }
                         }
                         cachedValue = defaultFormat.format(dateModel);
-                    } catch (UnformattableDateException e) {
+                    } catch (TemplateValueFormatException e) {
                         throw MessageUtil.newCantFormatDateException(target, e);
                     }
                 }

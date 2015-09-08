@@ -23,12 +23,12 @@ import java.util.Locale;
 import freemarker.template.Configuration;
 
 /**
- * Factory for a certain type of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or
+ * Factory for a certain kind of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or
  * one-per-{@link Configuration}), and so must be thread-safe.
  * 
  * @since 2.3.24
  */
-public abstract class TemplateNumberFormatFactory {
+public abstract class TemplateNumberFormatFactory extends TemplateValueFormatFactory {
 
     /**
      * Returns a formatter for the given parameters.
@@ -47,12 +47,16 @@ public abstract class TemplateNumberFormatFactory {
      *            {@link TemplateNumberFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param locale
      *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
-     *            forever (i.e. locale changes in the {@link Environment} shouldn't be followed).
+     *            forever (i.e. locale changes in the {@link Environment} must not be followed).
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
      *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
+     *            
+     * @throws TemplateValueFormatException
+     *             if any problem occurs while parsing/getting the format. Notable subclasses:
+     *             {@link InvalidFormatParametersException} if the {@code params} is malformed.
      */
     public abstract TemplateNumberFormat get(String params, Locale locale, Environment env)
-            throws InvalidFormatParametersException;
+            throws TemplateValueFormatException;
 
 }
