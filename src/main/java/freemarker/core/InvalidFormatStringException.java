@@ -24,7 +24,7 @@ package freemarker.core;
  * 
  * @since 2.3.24
  */
-public abstract class InvalidFormatStringException extends Exception {
+public abstract class InvalidFormatStringException extends TemplateValueFormatException {
     
     public InvalidFormatStringException(String message, Throwable cause) {
         super(message, cause);

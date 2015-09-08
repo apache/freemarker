@@ -39,22 +39,24 @@ import freemarker.template.TemplateModelException;
  * 
  * @since 2.3.24
  */
-public abstract class TemplateDateFormat {
+public abstract class TemplateDateFormat extends TemplateValueFormat {
     
     /**
-     * @param dateModel The date/time/dateTime to format. Most implementations will just work with the return value of
-     *          {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
-     *          a custom {@link TemplateDateModel} implementation.
-     *          
+     * @param dateModel
+     *            The date/time/dateTime to format. Most implementations will just work with the return value of
+     *            {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
+     *            a custom {@link TemplateDateModel} implementation.
+     * 
      * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). Can't be {@code null}.
      * 
-     * @throws UnformattableDateException When a {@link TemplateDateModel} can't be formatted because of the
-     *           value/properties of the {@link TemplateDateModel}. The most often used subclass is
-     *           {@link UnknownDateTypeFormattingUnsupportedException}. 
-     * @throws TemplateModelException Exception thrown by the {@code dateModel} object when calling its methods.  
+     * @throws TemplateValueFormatException
+     *             When a problem occurs during the formatting of the value. Notable subclass:
+     *             {@link UnknownDateTypeFormattingUnsupportedException}
+     * @throws TemplateModelException
+     *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
     public abstract String format(TemplateDateModel dateModel)
-            throws UnformattableDateException, TemplateModelException;
+            throws TemplateValueFormatException, TemplateModelException;
 
     /**
      * <b>[Not yet used, might changes in 2.3.24 final]</b>
@@ -62,10 +64,10 @@ public abstract class TemplateDateFormat {
      * FreeMarker call {@link #format(TemplateDateModel)} and escape its result. If the markup format would be just the
      * result of {@link #format(TemplateDateModel)} escaped, it should return {@code null}.
      */
-    public abstract <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-            MarkupOutputFormat<MO> outputFormat)
-                    throws UnformattableNumberException, TemplateModelException;
-    
+    public abstract <MO extends TemplateMarkupOutputModel> MO format(
+            TemplateDateModel dateModel, MarkupOutputFormat<MO> outputFormat)
+                    throws TemplateValueFormatException, TemplateModelException;
+
     /**
      * <b>[Not yet used, might changes in 2.3.24 final]</b>
      * Same as {@link #format(TemplateDateModel, MarkupOutputFormat)}, but prints the result to a {@link Writer}
@@ -79,7 +81,7 @@ public abstract class TemplateDateFormat {
      */
     public <MO extends TemplateMarkupOutputModel> boolean format(TemplateDateModel dateModel,
             MarkupOutputFormat<MO> outputFormat, Writer out)
-                    throws UnformattableNumberException, TemplateModelException, IOException {
+                    throws TemplateValueFormatException, TemplateModelException, IOException {
         MO mo = format(dateModel, outputFormat);
         if (mo == null) {
             return false;
@@ -97,11 +99,6 @@ public abstract class TemplateDateFormat {
      * @return The interpretation of the text as {@link Date}. Can't be {@code null}.
      */
     public abstract Date parse(String s) throws java.text.ParseException;
-
-    /**
-     * Meant to be used in error messages to tell what format the parsed string didn't fit.
-     */
-    public abstract String getDescription();
     
     /**
      * Tells if this formatter should be re-created if the locale changes.

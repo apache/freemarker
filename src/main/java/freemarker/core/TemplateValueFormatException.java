@@ -16,25 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateNumberModel;
-
 /**
- * Thrown when a {@link TemplateNumberModel} can't be formatted because of the value/properties of the
- * {@link TemplateNumberModel}. For example, some formatters might can't format NaN, or can't display numbers above
- * certain magnitude.
+ * Error while getting, creating or applying {@link TemplateValueFormat}-s (including its subclasses, like
+ * {@link TemplateNumberFormat}).
  * 
  * @since 2.3.24
  */
-public class UnformattableNumberException extends TemplateValueFormatException {
+public abstract class TemplateValueFormatException extends Exception {
 
-    public UnformattableNumberException(String message, Throwable cause) {
+    public TemplateValueFormatException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnformattableNumberException(String message) {
+    public TemplateValueFormatException(String message) {
         super(message);
     }
 
