@@ -39,11 +39,9 @@ final class Case extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) 
+    TemplateElementsToVisit accept(Environment env)
         throws TemplateException, IOException {
-        if (getNestedBlock() != null) {
-            env.visitByHiddingParent(getNestedBlock());
-        }
+        return new TemplateElementsToVisit(getNestedBlock(), true);
     }
 
     @Override

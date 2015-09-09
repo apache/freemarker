@@ -110,7 +110,7 @@ final class PropertySetting extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException {
         TemplateModel mval = value.eval(env);
         String strval;
         if (mval instanceof TemplateScalarModel) {
@@ -123,6 +123,7 @@ final class PropertySetting extends TemplateElement {
             strval = value.evalAndCoerceToStringOrUnsupportedMarkup(env);
         }
         env.setSetting(key, strval);
+        return null;
     }
     
     @Override

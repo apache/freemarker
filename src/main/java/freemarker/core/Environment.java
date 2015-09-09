@@ -319,11 +319,27 @@ public final class Environment extends Configurable {
             throws TemplateException, IOException {
         pushElement(element);
         try {
-            element.accept(this);
+            accept(element);
         } catch (TemplateException te) {
             handleTemplateException(te);
         } finally {
             popElement();
+        }
+    }
+
+    private void accept(TemplateElement element) throws TemplateException, IOException {
+        TemplateElementsToVisit templateElementsToVisit = element.accept(this);
+        if(null != templateElementsToVisit) {
+            boolean hideInParent = templateElementsToVisit.isHideInParent();
+            for (TemplateElement templateElement : templateElementsToVisit.getTemplateElements()) {
+                if(null != templateElement) {
+                    if(hideInParent) {
+                        visitByHiddingParent(templateElement);
+                    } else {
+                        visit(templateElement);
+                    }
+                }
+            }
         }
     }
 
@@ -338,7 +354,7 @@ public final class Environment extends Configurable {
             throws TemplateException, IOException {
         TemplateElement parent = replaceTopElement(element);
         try {
-            element.accept(this);
+            accept(element);
         } catch (TemplateException te) {
             handleTemplateException(te);
         } finally {

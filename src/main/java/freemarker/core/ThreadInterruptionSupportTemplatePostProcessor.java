@@ -110,12 +110,13 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
         }
 
         @Override
-        void accept(Environment env) throws TemplateException, IOException {
+        TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
             // As the API doesn't allow throwing InterruptedException here (nor anywhere else, most importantly,
             // Template.process can't throw it), we must not clear the "interrupted" flag of the thread.
             if (Thread.currentThread().isInterrupted()) {
                 throw new TemplateProcessingThreadInterruptedException();
             }
+            return null;
         }
 
         @Override

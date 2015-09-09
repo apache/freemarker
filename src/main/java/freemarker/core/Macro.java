@@ -90,8 +90,9 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
 
     @Override
-    void accept(Environment env) {
+    TemplateElementsToVisit accept(Environment env) {
         env.visitMacroDef(this);
+        return null;
     }
 
     @Override

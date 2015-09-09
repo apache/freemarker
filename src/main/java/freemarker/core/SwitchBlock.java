@@ -50,7 +50,7 @@ final class SwitchBlock extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) 
+    TemplateElementsToVisit accept(Environment env)
         throws TemplateException, IOException {
         boolean processedCase = false;
         int ln = getRegulatedChildCount();
@@ -80,6 +80,7 @@ final class SwitchBlock extends TemplateElement {
                 env.visitByHiddingParent(defaultCase);
             }
         } catch (BreakInstruction.Break br) {}
+        return null;
     }
 
     @Override

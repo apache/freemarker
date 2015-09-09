@@ -33,7 +33,7 @@ class Sep extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         final IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, null);
         if (iterCtx == null) {
             // The parser should prevent this situation
@@ -42,8 +42,9 @@ class Sep extends TemplateElement {
         }
         
         if (iterCtx.hasNext()) {
-            env.visitByHiddingParent(getNestedBlock());
+            return new TemplateElementsToVisit(getNestedBlock(), true);
         }
+        return null;
     }
 
     @Override

@@ -72,9 +72,9 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         TemplateModel tm = nameExp.eval(env);
-        if (tm == Macro.DO_NOTHING_MACRO) return; // shortcut here.
+        if (tm == Macro.DO_NOTHING_MACRO) return null; // shortcut here.
         if (tm instanceof Macro) {
             Macro macro = (Macro) tm;
             if (macro.isFunction() && !legacySyntax) {
@@ -112,6 +112,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 throw new NonUserDefinedDirectiveLikeException(nameExp, tm, env);
             }
         }
+        return null;
     }
 
     @Override

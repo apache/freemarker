@@ -51,12 +51,8 @@ final class AssignmentInstruction extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
-        int ln = getRegulatedChildCount();
-        for (int i = 0; i < ln; i++) {
-            Assignment assignment = (Assignment) getRegulatedChild(i);
-            env.visit(assignment);
-        }
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+        return new TemplateElementsToVisit(getRegulatedChildren());
     }
 
     @Override

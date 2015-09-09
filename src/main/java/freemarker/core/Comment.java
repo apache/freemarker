@@ -37,8 +37,9 @@ public final class Comment extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) {
+    TemplateElementsToVisit accept(Environment env) {
         // do nothing, skip the body
+        return null;
     }
 
     @Override

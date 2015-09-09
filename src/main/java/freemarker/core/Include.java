@@ -118,7 +118,7 @@ final class Include extends TemplateElement {
     }
     
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullIncludedTemplateName;
         try {
@@ -170,6 +170,7 @@ final class Include extends TemplateElement {
         if (includedTemplate != null) {
             env.include(includedTemplate);
         }
+        return null;
     }
     
     @Override

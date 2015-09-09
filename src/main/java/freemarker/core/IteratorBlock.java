@@ -63,8 +63,9 @@ final class IteratorBlock extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         acceptWithResult(env);
+        return null;
     }
     
     boolean acceptWithResult(Environment env) throws TemplateException, IOException {

@@ -36,10 +36,8 @@ final class OutputFormatBlock extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
-        if (getNestedBlock() != null) {
-            env.visitByHiddingParent(getNestedBlock());
-        }
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+        return new TemplateElementsToVisit(getNestedBlock(), true);
     }
 
     @Override
