@@ -25677,6 +25677,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Added
+                  <literal>freemarker.core.AliasTemplateNumberFormat</literal>
+                  and <literal>AliasTemplateDateFormat</literal>, which can be
+                  used to create custom formats that are aliases to other
+                  formats. For example, instead of writing
+                  <literal>${n?string["0.00"]}</literal> again and again, you
+                  can define the custom format <literal>"price"</literal> as
+                  the alias to the format string <literal>"0.00"</literal> in
+                  the configuration, and then use
+                  <literal>${n?string.@price}</literal>. Thus, you can control
+                  at a central place how prices look. Furthermore, the alias
+                  can chose a different target format string depending on the
+                  current locale; this is especially useful for dates, where
+                  conventions can significantly differ in different
+                  countries.</para>
+                </listitem>
+
+                <listitem>
                   <para>The internal format object caching architecture has
                   been reworked, so that it can handle custom formats too. But
                   this reworking also fixes some bottlenecks under highly
@@ -25828,6 +25846,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               exceptions were united under a common abstract superclass,
               <literal>TemplateValueFormatException</literal>, which is now
               what the methods of said classes throw (mostly).</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>freemarker.core.AliasTemplateNumberFormat</literal> and
+              <literal>AliasTemplateDateFormat</literal>, which can be used to
+              create custom formats that are aliases to other formats. For
+              example, instead of writing
+              <literal>${n?string["0.00"]}</literal> again and again, you can
+              define the custom format <literal>"price"</literal> as the alias
+              to the format string <literal>"0.00"</literal> in the
+              configuration, and then use
+              <literal>${n?string.@price}</literal>. Thus, you can control at
+              a central place how prices look. Furthermore, the alias can
+              chose a different target format string depending on the current
+              locale; this is especially useful for dates, where conventions
+              can significantly differ in different countries.</para>
             </listitem>
           </itemizedlist>
         </section>
