@@ -32,6 +32,8 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
+import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileNameGlobMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
 import freemarker.template.Template;
@@ -39,7 +41,6 @@ import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
-@SuppressWarnings("boxing")
 public class DateFormatTest extends TemplateTest {
     
     /** 2015-09-06T12:00:00Z */
@@ -302,6 +303,52 @@ public class DateFormatTest extends TemplateTest {
         assertErrorContains("${d?date}", "\"date_format\"", "[wrong d]");
         assertErrorContains("${d?datetime}", "\"datetime_format\"", "[wrong dt]");
         assertErrorContains("${d?time}", "\"time_format\"", "[wrong t]");
+    }
+    
+    @Test
+    public void testAlieses() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setCustomDateFormats(ImmutableMap.of(
+                "d", new AliasTemplateDateFormatFactory("yyyy-MMM-dd"),
+                "m", new AliasTemplateDateFormatFactory("yyyy-MMM"),
+                "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        
+        TemplateConfigurer tc = new TemplateConfigurer();
+        tc.setCustomDateFormats(ImmutableMap.of(
+                "m", new AliasTemplateDateFormatFactory("yyyy-MMMM"),
+                "i", new AliasTemplateDateFormatFactory("@epoch")));
+        cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*2*"), tc));
+        
+        addToDataModel("d", TM);
+        String commonFtl = "${d?string.@d} ${d?string.@m} "
+                + "<#setting locale='fr_FR'>${d?string.@m} "
+                + "<#attempt>${d?string.@i}<#recover>E</#attempt>";
+        addTemplate("t1.ftl", commonFtl);
+        addTemplate("t2.ftl", commonFtl);
+        
+        // 2015-09-06T12:00:00Z
+        assertOutputForNamed("t1.ftl", "2015-Sep-06 2015-Sep 2015-sept. E");
+        assertOutputForNamed("t2.ftl", "2015-Sep-06 2015-September 2015-septembre " + T);
+    }
+    
+    @Test
+    public void testAlieses2() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setCustomDateFormats(ImmutableMap.of(
+                "d", new AliasTemplateDateFormatFactory("yyyy-MMM",
+                        ImmutableMap.of(
+                                new Locale("en"), "yyyy-MMM'_en'",
+                                Locale.UK, "yyyy-MMM'_en_GB'",
+                                Locale.FRANCE, "yyyy-MMM'_fr_FR'"))));
+        cfg.setDateTimeFormat("@d");
+        addToDataModel("d", TM);
+        assertOutput(
+                "<#setting locale='en_US'>${d} "
+                + "<#setting locale='en_GB'>${d} "
+                + "<#setting locale='en_GB_Win'>${d} "
+                + "<#setting locale='fr_FR'>${d} "
+                + "<#setting locale='hu_HU'>${d}",
+                "2015-Sep_en 2015-Sep_en_GB 2015-Sep_en_GB 2015-sept._fr_FR 2015-szept.");
     }
     
     private static class MutableTemplateDateModel implements TemplateDateModel {
