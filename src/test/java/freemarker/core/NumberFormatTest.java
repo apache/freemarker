@@ -30,6 +30,8 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
+import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileNameGlobMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
@@ -216,6 +218,49 @@ public class NumberFormatTest extends TemplateTest {
         assertOutput("${10}", "@@10");
         cfg.setNumberFormat("@hex");
         assertOutput("${10}", "@hex10");
+    }
+
+    @Test
+    public void testAlieses() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setCustomNumberFormats(ImmutableMap.of(
+                "f", new AliasTemplateNumberFormatFactory("0.#'f'"),
+                "d", new AliasTemplateNumberFormatFactory("0.0#"),
+                "hex", HexTemplateNumberFormatFactory.INSTANCE));
+        
+        TemplateConfigurer tc = new TemplateConfigurer();
+        tc.setCustomNumberFormats(ImmutableMap.of(
+                "d", new AliasTemplateNumberFormatFactory("0.#'d'"),
+                "i", new AliasTemplateNumberFormatFactory("@hex")));
+        cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*2*"), tc));
+        
+        String commonFtl = "${1?string.@f} ${1?string.@d} "
+                + "<#setting locale='fr_FR'>${1.5?string.@d} "
+                + "<#attempt>${10?string.@i}<#recover>E</#attempt>";
+        addTemplate("t1.ftl", commonFtl);
+        addTemplate("t2.ftl", commonFtl);
+        
+        assertOutputForNamed("t1.ftl", "1f 1.0 1,5 E");
+        assertOutputForNamed("t2.ftl", "1f 1d 1,5d a");
+    }
+
+    @Test
+    public void testAlieses2() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.setCustomNumberFormats(ImmutableMap.of(
+                "n", new AliasTemplateNumberFormatFactory("0.0",
+                        ImmutableMap.of(
+                                new Locale("en"), "0.0'_en'",
+                                Locale.UK, "0.0'_en_GB'",
+                                Locale.FRANCE, "0.0'_fr_FR'"))));
+        cfg.setNumberFormat("@n");
+        assertOutput(
+                "<#setting locale='en_US'>${1} "
+                + "<#setting locale='en_GB'>${1} "
+                + "<#setting locale='en_GB_Win'>${1} "
+                + "<#setting locale='fr_FR'>${1} "
+                + "<#setting locale='hu_HU'>${1}",
+                "1.0_en 1.0_en_GB 1.0_en_GB 1,0_fr_FR 1,0");
     }
     
     private static class MutableTemplateNumberModel implements TemplateNumberModel {

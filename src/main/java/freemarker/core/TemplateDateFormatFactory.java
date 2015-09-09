@@ -30,6 +30,8 @@ import freemarker.template.TemplateDateModel;
  * Factory for a certain kind of date/time/dateTime formatting ({@link TemplateDateFormat}). Usually a singleton
  * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe.
  * 
+ * @see Configurable#setCustomDateFormats(java.util.Map)
+ * 
  * @since 2.3.24
  */
 public abstract class TemplateDateFormatFactory extends TemplateValueFormatFactory {

@@ -26,6 +26,8 @@ import freemarker.template.Configuration;
  * Factory for a certain kind of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or
  * one-per-{@link Configuration}), and so must be thread-safe.
  * 
+ * @see Configurable#setCustomNumberFormats(java.util.Map)
+ * 
  * @since 2.3.24
  */
 public abstract class TemplateNumberFormatFactory extends TemplateValueFormatFactory {
