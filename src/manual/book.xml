@@ -25678,10 +25678,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para>Added
-                  <literal>freemarker.core.AliasTemplateNumberFormat</literal>
-                  and <literal>AliasTemplateDateFormat</literal>, which can be
-                  used to create custom formats that are aliases to other
-                  formats. For example, instead of writing
+                  <literal>freemarker.core.AliasTemplateNumberFormatFactory</literal>
+                  and <literal>AliasTemplateDateFormatFactory</literal>, which
+                  can be used to create custom formats that are aliases to
+                  other formats. For example, instead of writing
                   <literal>${n?string["0.00"]}</literal> again and again, you
                   can define the custom format <literal>"price"</literal> as
                   the alias to the format string <literal>"0.00"</literal> in
@@ -25850,10 +25850,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added
-              <literal>freemarker.core.AliasTemplateNumberFormat</literal> and
-              <literal>AliasTemplateDateFormat</literal>, which can be used to
-              create custom formats that are aliases to other formats. For
-              example, instead of writing
+              <literal>freemarker.core.AliasTemplateNumberFormatFactory</literal>
+              and <literal>AliasTemplateDateFormatFactory</literal>, which can
+              be used to create custom formats that are aliases to other
+              formats. For example, instead of writing
               <literal>${n?string["0.00"]}</literal> again and again, you can
               define the custom format <literal>"price"</literal> as the alias
               to the format string <literal>"0.00"</literal> in the
