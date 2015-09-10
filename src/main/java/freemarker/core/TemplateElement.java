@@ -106,7 +106,7 @@ abstract public class TemplateElement extends TemplateObject {
     
     /**
      * Tells if the element should show up in error stack traces. If you think you need to set this to {@code false} for
-     * an element, always consider if you should use {@link Environment#visitByHiddingParent(TemplateElement)} instead.
+     * an element, always consider if you should pass true instead to {@link Environment#visit(TemplateElement, boolean)}.
      * 
      * Note that this will be ignored for the top (current) element of a stack trace, as that's always shown.
      */
