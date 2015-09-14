@@ -1376,6 +1376,7 @@ public class ConfigurationTest extends TestCase {
         }
     }
     
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
     @Test
     public void testSetCustomDateFormat() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
