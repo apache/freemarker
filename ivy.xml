@@ -86,7 +86,7 @@
       <exclude org="xml-apis" module="xml-apis" />
     </dependency>
     <dependency org="dom4j" name="dom4j" rev="1.3" conf="build.base->default" /> <!-- legacy -->
-    <dependency org="org.jdom" name="jdom" rev="1.0-beta8-dev" conf="build.base->default" /> <!-- legacy -->
+    <dependency org="jdom" name="jdom" rev="1.0b8" conf="build.base->default" /> <!-- legacy -->
 
     <dependency org="ant" name="ant" rev="1.6.5" conf="build.base->default">
       <!-- The lowerst supported xml-apis version depends on JDK version; prevent any collosion: -->
