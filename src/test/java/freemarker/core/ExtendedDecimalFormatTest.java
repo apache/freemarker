@@ -161,19 +161,19 @@ public class ExtendedDecimalFormatTest {
     public void testExtendedParamsEffect() throws ParseException {
         assertFormatted("0",
                 1.5, "2", 2.5, "2", 3.5, "4", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-2", -2.5, "-2", -1.6, "-2");
-        assertFormatted("0;; ro=he",
+        assertFormatted("0;; rnd=he",
                 1.5, "2", 2.5, "2", 3.5, "4", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-2", -2.5, "-2", -1.6, "-2");
-        assertFormatted("0;; ro=hu",
+        assertFormatted("0;; rnd=hu",
                 1.5, "2", 2.5, "3", 3.5, "4", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-2", -2.5, "-3", -1.6, "-2");
-        assertFormatted("0;; ro=hd",
+        assertFormatted("0;; rnd=hd",
                 1.5, "1", 2.5, "2", 3.5, "3", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-1", -2.5, "-2", -1.6, "-2");
-        assertFormatted("0;; ro=f",
+        assertFormatted("0;; rnd=f",
                 1.5, "1", 2.5, "2", 3.5, "3", 1.4, "1", 1.6, "1", -1.4, "-2", -1.5, "-2", -2.5, "-3", -1.6, "-2");
-        assertFormatted("0;; ro=c",
+        assertFormatted("0;; rnd=c",
                 1.5, "2", 2.5, "3", 3.5, "4", 1.4, "2", 1.6, "2", -1.4, "-1", -1.5, "-1", -2.5, "-2", -1.6, "-1");
-        assertFormatted("0;; ro=un", 2, "2");
+        assertFormatted("0;; rnd=un", 2, "2");
         try {
-            assertFormatted("0;; ro=un", 2.5, "2");
+            assertFormatted("0;; rnd=un", 2.5, "2");
             fail();
         } catch (ArithmeticException e) {
             // Expected

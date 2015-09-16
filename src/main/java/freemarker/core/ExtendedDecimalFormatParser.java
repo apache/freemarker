@@ -35,7 +35,7 @@ class ExtendedDecimalFormatParser {
 
     static {
         HashMap<String, ParameterHandler> m = new HashMap<String, ParameterHandler>();
-        m.put("ro", new ParameterHandler() {
+        m.put("rnd", new ParameterHandler() {
 
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
