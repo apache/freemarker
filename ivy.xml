@@ -86,7 +86,7 @@
       <exclude org="xml-apis" module="xml-apis" />
     </dependency>
     <dependency org="dom4j" name="dom4j" rev="1.3" conf="build.base->default" /> <!-- legacy -->
-    <dependency org="org.jdom" name="jdom" rev="1.0-beta8-dev" conf="build.base->default" /> <!-- legacy -->
+    <dependency org="jdom" name="jdom" rev="1.0b8" conf="build.base->default" /> <!-- legacy -->
 
     <dependency org="ant" name="ant" rev="1.6.5" conf="build.base->default">
       <!-- The lowerst supported xml-apis version depends on JDK version; prevent any collosion: -->
@@ -102,7 +102,8 @@
     
     <dependency org="rhino" name="js" rev="1.6R1" conf="build.base->default" />
 
-    <dependency org="org.python" name="jython" rev="2.0.0" conf="build.jython2.0->default" />
+    <!-- We use Jython 2.1 because there was no 2.0 in central; the relevant methods are the same. -->
+    <dependency org="jython" name="jython" rev="2.1" conf="build.jython2.0->default" />
     <dependency org="org.python" name="jython" rev="2.2.1" conf="build.jython2.2->default" />
     <dependency org="org.python" name="jython" rev="2.5.0" conf="build.jython2.5->default" />
     
