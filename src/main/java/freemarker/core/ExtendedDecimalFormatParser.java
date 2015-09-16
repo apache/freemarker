@@ -23,6 +23,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
@@ -36,7 +37,6 @@ class ExtendedDecimalFormatParser {
     static {
         HashMap<String, ParameterHandler> m = new HashMap<String, ParameterHandler>();
         m.put("rnd", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 RoundingMode parsedValue;
@@ -68,7 +68,6 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put("mul", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 try {
@@ -79,7 +78,6 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put("dec", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -88,8 +86,16 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setDecimalSeparator(value.charAt(0));
             }
         });
+        m.put("mdec", new ParameterHandler() {
+            public void handle(ExtendedDecimalFormatParser parser, String value)
+                    throws InvalidParameterValueException {
+                if (value.length() != 1) {
+                    throw new InvalidParameterValueException("Must contain exactly 1 character.");
+                }
+                parser.symbols.setMonetaryDecimalSeparator(value.charAt(0));
+            }
+        });
         m.put("grp", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -99,7 +105,6 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put("exp", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (_JavaVersions.JAVA_6 == null) {
@@ -110,7 +115,6 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put("min", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -120,21 +124,18 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put("inf", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setInfinity(value);
             }
         });
         m.put("nan", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setNaN(value);
             }
         });
         m.put("prc", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -144,7 +145,6 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put("prm", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -154,13 +154,24 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put("zero", new ParameterHandler() {
-
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
                     throw new InvalidParameterValueException("Must contain exactly 1 character.");
                 }
                 parser.symbols.setZeroDigit(value.charAt(0));
+            }
+        });
+        m.put("curc", new ParameterHandler() {
+            public void handle(ExtendedDecimalFormatParser parser, String value)
+                    throws InvalidParameterValueException {
+                Currency currency;
+                try {
+                    currency = Currency.getInstance(value);
+                } catch (IllegalArgumentException e) {
+                    throw new InvalidParameterValueException("Not a known ISO 4217 code.");
+                }
+                parser.symbols.setCurrency(currency);
             }
         });
         PARAM_HANDLERS = m;
@@ -208,7 +219,8 @@ class ExtendedDecimalFormatParser {
             return;
         }
 
-        do {
+        String currencySymbol = null;  // Exceptional, as must be applied after "currency code"
+        fetchParamters: do {
             int namePos = pos;
             String name = fetchName();
             if (name == null) {
@@ -230,7 +242,20 @@ class ExtendedDecimalFormatParser {
             }
             int paramEndPos = pos;
 
-            applyFormatStringExtensionParameter(name, namePos, value, valuePos);
+            ParameterHandler handler = PARAM_HANDLERS.get(name);
+            if (handler == null) {
+                if (name.equals("curs")) {
+                    currencySymbol = value;
+                } else {
+                    throw newUnknownParameterException(name, namePos);
+                }
+            } else {
+                try {
+                    handler.handle(this, value);
+                } catch (InvalidParameterValueException e) {
+                    throw newInvalidParameterValueException(name, value, valuePos, e);
+                }
+            }
 
             skipWS();
 
@@ -239,41 +264,42 @@ class ExtendedDecimalFormatParser {
                 skipWS();
             } else {
                 if (pos == ln) {
-                    return;
+                    break fetchParamters;
                 }
                 if (pos == paramEndPos) {
                     throw newExpectedSgParseException("parameter separator whitespace or comma");
                 }
             }
         } while (true);
+        
+        // This is brought out to here to ensure that it's applied after "currency code":
+        if (currencySymbol != null) {
+            symbols.setCurrencySymbol(currencySymbol);
+        }
     }
 
-    private void applyFormatStringExtensionParameter(
-            String name, int namePos, String value, int valuePos) throws ParseException {
-        ParameterHandler handler = PARAM_HANDLERS.get(name);
-        if (handler == null) {
-            StringBuilder sb = new StringBuilder(128);
-            sb.append("Unsupported parameter name, ").append(StringUtil.jQuote(name));
-            sb.append(". The supported names are: ");
-            Set<String> legalNames = PARAM_HANDLERS.keySet();
-            String[] legalNameArr = legalNames.toArray(new String[legalNames.size()]);
-            Arrays.sort(legalNameArr);
-            for (int i = 0; i < legalNameArr.length; i++) {
-                if (i != 0) {
-                    sb.append(", ");
-                }
-                sb.append(legalNameArr[i]);
-            }
-            throw new java.text.ParseException(sb.toString(), namePos);
-        }
+    private ParseException newInvalidParameterValueException(String name, String value, int valuePos,
+            InvalidParameterValueException e) {
+        return new java.text.ParseException(
+                StringUtil.jQuote(value) + " is an invalid value for the \"" + name + "\" parameter: "
+                + e.message,
+                valuePos);
+    }
 
-        try {
-            handler.handle(this, value);
-        } catch (InvalidParameterValueException e) {
-            throw new java.text.ParseException(
-                    StringUtil.jQuote(value) + " is an invalid value for the \"" + name + "\" parameter: " + e.message,
-                    valuePos);
+    private ParseException newUnknownParameterException(String name, int namePos) throws ParseException {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("Unsupported parameter name, ").append(StringUtil.jQuote(name));
+        sb.append(". The supported names are: ");
+        Set<String> legalNames = PARAM_HANDLERS.keySet();
+        String[] legalNameArr = legalNames.toArray(new String[legalNames.size()]);
+        Arrays.sort(legalNameArr);
+        for (int i = 0; i < legalNameArr.length; i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            sb.append(legalNameArr[i]);
         }
+        return new java.text.ParseException(sb.toString(), namePos);
     }
 
     private void skipWS() {

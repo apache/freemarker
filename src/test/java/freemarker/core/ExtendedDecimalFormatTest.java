@@ -224,6 +224,27 @@ public class ExtendedDecimalFormatTest {
         assertFormatted("0\u2030;; prm='m'", 0.75, "750m");
         
         assertFormatted("0.00;; zero='@'", 10.5, "A@.E@");
+        
+        assertFormatted("0;; curc=USD", 10, "10");
+        assertFormatted("0 \u00A4;; curc=USD", 10, "10 $");
+        assertFormatted("0 \u00A4\u00A4;; curc=USD", 10, "10 USD");
+        assertFormatted(Locale.GERMANY, "0 \u00A4;; curc=EUR", 10, "10 \u20AC");
+        assertFormatted(Locale.GERMANY, "0 \u00A4\u00A4;; curc=EUR", 10, "10 EUR");
+        try {
+            assertFormatted("0;; curc=USDX", 10, "10");
+        } catch (ParseException e) {
+            assertThat(e.getMessage(), containsString("ISO 4217"));
+        }
+        assertFormatted("0 \u00A4;; curc=USD curs=bucks", 10, "10 bucks");
+        assertFormatted("0 \u00A4;; curs=bucks curc=USD", 10, "10 bucks"); // Order doesn't mater
+        assertFormatted("0 \u00A4\u00A4;; curc=USD curs=bucks", 10, "10 USD"); // International symbol isn't affected
+        
+        assertFormatted("0.0 \u00A4;; mdec=m", 10.5, "10m5 $");
+        assertFormatted("0.0 kg;; mdec=m", 10.5, "10.5 kg");
+        assertFormatted("0.0 \u00A4;; dec=d", 10.5, "10.5 $");
+        assertFormatted("0.0 kg;; dec=d", 10.5, "10d5 kg");
+        assertFormatted("0.0 \u00A4;; mdec=m dec=d", 10.5, "10m5 $");
+        assertFormatted("0.0 kg;; mdec=m dec=d", 10.5, "10d5 kg");
     }
     
     @Test
@@ -236,11 +257,15 @@ public class ExtendedDecimalFormatTest {
     
 
     private void assertFormatted(String formatString, Object... numberAndExpectedOutput) throws ParseException {
+        assertFormatted(LOC, formatString, numberAndExpectedOutput);
+    }
+    
+    private void assertFormatted(Locale loc, String formatString, Object... numberAndExpectedOutput) throws ParseException {
         if (numberAndExpectedOutput.length % 2 != 0) {
             throw new IllegalArgumentException();
         }
         
-        DecimalFormat df = ExtendedDecimalFormatParser.parse(formatString, LOC);
+        DecimalFormat df = ExtendedDecimalFormatParser.parse(formatString, loc);
         Number num = null;
         for (int i = 0; i < numberAndExpectedOutput.length; i++) {
             if (i % 2 == 0) {
