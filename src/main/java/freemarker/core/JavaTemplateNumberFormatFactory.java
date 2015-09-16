@@ -18,9 +18,8 @@
  */
 package freemarker.core;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,8 +58,8 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
                 jFormat = env.getCNumberFormat();
             } else {
                 try {
-                    jFormat = new DecimalFormat(params, new DecimalFormatSymbols(locale));
-                } catch (IllegalArgumentException e) {
+                    jFormat = ExtendedDecimalFormatParser.parse(params, locale);
+                } catch (ParseException e) {
                     String msg = e.getMessage();
                     throw new InvalidFormatParametersException(
                             msg != null ? msg : "Invalid DecimalFormat pattern", e);

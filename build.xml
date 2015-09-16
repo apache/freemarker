@@ -24,9 +24,13 @@
   <condition property="has.explicit.boot.classpath.j2se1.5">
     <isset property="boot.classpath.j2se1.5"/>
   </condition>
+  <condition property="has.explicit.boot.classpath.j2se1.6">
+    <isset property="boot.classpath.j2se1.6"/>
+  </condition>
   <condition property="has.all.explicit.boot.classpaths">
     <and>
       <isset property="has.explicit.boot.classpath.j2se1.5"/>
+      <isset property="has.explicit.boot.classpath.j2se1.6"/>
     </and>
   </condition>
   <available property="atLeastJDK8" classname="java.util.function.Predicate"/>
@@ -34,11 +38,16 @@
   <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
   <!-- Note: Target "dist" doesn't allow using these. -->
   <property name="boot.classpath.j2se1.5" value="${sun.boot.class.path}" />
+  <property name="boot.classpath.j2se1.6" value="${sun.boot.class.path}" />
   
   <!-- For checking the correctness of the boot.classpath.j2se* -->
   <available classpath="${boot.classpath.j2se1.5}"
-    classname="java.lang.Object" ignoresystemclasses="true" 
+    classname="java.util.concurrent.ConcurrentHashMap" ignoresystemclasses="true" 
     property="boot.classpath.j2se1.5.correct"
+  />
+  <available classpath="${boot.classpath.j2se1.6}"
+    classname="java.util.ServiceLoader" ignoresystemclasses="true" 
+    property="boot.classpath.j2se1.6.correct"
   />
   
   <condition property="example.freemarker.jar.location"
@@ -179,7 +188,17 @@
       -->the &lt;projectDir>/build.properties file, or wherever you <!--
       -->set it.<!--
     --></fail>
-    <echo level="info">Using boot classpaths: 1.5: ${boot.classpath.j2se1.5}</echo>
+    <fail unless="boot.classpath.j2se1.6.correct"><!--
+      -->The "boot.classpath.j2se1.6" property value (${boot.classpath.j2se1.6}) <!--
+      -->seems to be an incorrect boot classpath. Please fix it in <!--
+      -->the &lt;projectDir>/build.properties file, or wherever you <!--
+      -->set it.<!--
+    --></fail>
+    <echo level="info"><!--
+      -->Using boot classpaths:<!--
+      -->Java 5: ${boot.classpath.j2se1.5}; <!--
+      -->Java 6: ${boot.classpath.j2se1.6}<!--
+    --></echo>
 
     <mkdir dir="build/classes" />
     
@@ -191,6 +210,7 @@
       classpathref="ivy.dep"
       bootclasspath="${boot.classpath.j2se1.5}"
       excludes="
+        freemarker/core/_Java6Impl.java,
         freemarker/ext/jsp/**,
         freemarker/ext/servlet/**,
         freemarker/cache/WebappTemplateLoader.java,
@@ -205,6 +225,15 @@
       </src>
     </javac>
 
+    <ivy:cachepath conf="build.base" pathid="ivy.dep" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
+      includeantruntime="false"
+      classpathref="ivy.dep"
+      bootclasspath="${boot.classpath.j2se1.6}"
+      includes="freemarker/core/_Java6Impl.java"
+    />
+    
     <rmic
       base="build/classes" includes="freemarker/debug/impl/Rmi*Impl.class"
       classpathref="ivy.dep"
@@ -331,7 +360,7 @@
       includeantruntime="false"
       classpath="build/classes"
       classpathref="ivy.dep.build.test"
-      bootclasspath="${boot.classpath.j2se1.5}"
+      bootclasspath="${boot.classpath.j2se1.6}"
     />
     <copy toDir="build/test-classes">
       <fileset dir="src/test/resources"

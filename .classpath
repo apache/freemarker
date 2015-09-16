@@ -9,7 +9,7 @@
 			<attribute name="ignore_optional_problems" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/annotations-3.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/ant-1.6.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/avalon-logkit-2.0.jar"/>
@@ -22,7 +22,7 @@
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/javax.servlet.jsp-2.1.0.v201105211820.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jaxen-1.0-FCS.jar"/>
-	<classpathentry exported="true" kind="lib" path="ide-dependencies/jdom-1.0-beta8-dev.jar"/>
+	<classpathentry kind="lib" path="D:/Temp/git_fm/freemarker-2.3-gae/ide-dependencies/jdom-1.0b8.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-continuation-7.6.16.v20140903.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-http-7.6.16.v20140903.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-io-7.6.16.v20140903.jar"/>
