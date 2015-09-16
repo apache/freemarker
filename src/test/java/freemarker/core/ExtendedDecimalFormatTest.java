@@ -278,9 +278,14 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
                 + "<#setting locale='de_DE'>${1000.15}; "
                 + "<#setting numberFormat='0.0;;rnd=d'>${1000.15}",
                 "1_000.2; 10 00.2; 1_000,2; 1000,1");
-        assertErrorContains("${1?string('#E')}", "\"#E\"", "format string", "exponential");
-        assertErrorContains("<#setting numberFormat='#E'>${1}", "\"#E\"", "format string", "exponential");
-        assertErrorContains("<#setting numberFormat=';;foo=bar'>${1}", "\"foo\"", "supported");
+        assertErrorContains("${1?string('#E')}",
+                TemplateException.class, "\"#E\"", "format string", "exponential");
+        assertErrorContains("<#setting numberFormat='#E'>${1}",
+                TemplateException.class, "\"#E\"", "format string", "exponential");
+        assertErrorContains("<#setting numberFormat=';;foo=bar'>${1}",
+                TemplateException.class, "\"foo\"", "supported");
+        assertErrorContains("<#setting numberFormat='0;;rnd=un'>${1.5}",
+                TemplateException.class, "can't format", "1.5", "UNNECESSARY");
     }
 
     private void assertFormatted(String formatString, Object... numberAndExpectedOutput) throws ParseException {

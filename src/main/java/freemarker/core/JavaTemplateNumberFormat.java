@@ -52,7 +52,12 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
 
     @Override
     String format(Number number) throws UnformattableNumberException {
-        return javaNumberFormat.format(number);
+        try {
+            return javaNumberFormat.format(number);
+        } catch (ArithmeticException e) {
+            throw new UnformattableNumberException(
+                    "This format can't format the " + number + " number. Reason: " + e.getMessage(), e);
+        }
     }
 
     public NumberFormat getJavaNumberFormat() {
