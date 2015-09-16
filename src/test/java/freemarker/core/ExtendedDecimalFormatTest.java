@@ -22,13 +22,18 @@ import static freemarker.test.hamcerst.Matchers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
 import org.junit.Test;
 
-public class ExtendedDecimalFormatTest {
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
+import freemarker.test.TemplateTest;
+
+public class ExtendedDecimalFormatTest extends TemplateTest {
     
     private static final Locale LOC = Locale.US;
     
@@ -47,7 +52,7 @@ public class ExtendedDecimalFormatTest {
         }
         try {
             ExtendedDecimalFormatParser.parse(";", LOC);
-        } catch (IllegalArgumentException e) {
+        } catch (ParseException e) {
             // Expected
         }
     }
@@ -81,19 +86,19 @@ public class ExtendedDecimalFormatTest {
         try {
             ExtendedDecimalFormatParser.parse("; ;", LOC);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (ParseException e) {
             // Expected
         }
         try {
             ExtendedDecimalFormatParser.parse(";m", LOC);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (ParseException e) {
             // Expected
         }
         try {
             ExtendedDecimalFormatParser.parse(";m;", LOC);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (ParseException e) {
             // Expected
         }
     }
@@ -255,6 +260,28 @@ public class ExtendedDecimalFormatTest {
         assertEquals("1_000,0", ExtendedDecimalFormatParser.parse(",000.0;;grp=_", Locale.FRANCE).format(1000));
     }
     
+    @Test
+    public void testTemplates() throws IOException, TemplateException {
+        Configuration cfg = getConfiguration();
+        cfg.setLocale(Locale.US);
+        
+        cfg.setNumberFormat(",000.#");
+        assertOutput("${1000.15} ${1000.25}", "1,000.2 1,000.2");
+        cfg.setNumberFormat(",000.#;; rnd=hu grp=_");
+        assertOutput("${1000.15} ${1000.25}", "1_000.2 1_000.3");
+        cfg.setLocale(Locale.GERMANY);
+        assertOutput("${1000.15} ${1000.25}", "1_000,2 1_000,3");
+        cfg.setLocale(Locale.US);
+        assertOutput(
+                "${1000.15}; "
+                + "${1000.15?string(',##.#;;grp=\" \"')}; "
+                + "<#setting locale='de_DE'>${1000.15}; "
+                + "<#setting numberFormat='0.0;;rnd=d'>${1000.15}",
+                "1_000.2; 10 00.2; 1_000,2; 1000,1");
+        assertErrorContains("${1?string('#E')}", "\"#E\"", "format string", "exponential");
+        assertErrorContains("<#setting numberFormat='#E'>${1}", "\"#E\"", "format string", "exponential");
+        assertErrorContains("<#setting numberFormat=';;foo=bar'>${1}", "\"foo\"", "supported");
+    }
 
     private void assertFormatted(String formatString, Object... numberAndExpectedOutput) throws ParseException {
         assertFormatted(LOC, formatString, numberAndExpectedOutput);

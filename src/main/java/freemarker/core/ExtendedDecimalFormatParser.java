@@ -31,30 +31,53 @@ import java.util.Set;
 import freemarker.template.utility.StringUtil;
 
 class ExtendedDecimalFormatParser {
+    
+    private static final String PARAM_ROUNDING_MODE = "rnd";
+    private static final String PARAM_MULTIPIER = "mul";
+    private static final String PARAM_DECIMAL_SEPARATOR = "dec";
+    private static final String PARAM_MONETARY_DECIMAL_SEPARATOR = "mdec";
+    private static final String PARAM_GROUP_SEPARATOR = "grp";
+    private static final String PARAM_EXPONENT_SEPARATOR = "exp";
+    private static final String PARAM_MINUS_SIGN = "min";
+    private static final String PARAM_INFINITY = "inf";
+    private static final String PARAM_NAN = "nan";
+    private static final String PARAM_PERCENT = "prc";
+    private static final String PARAM_PER_MILL = "prm";
+    private static final String PARAM_ZERO_DIGIT = "zero";
+    private static final String PARAM_CURRENCY_CODE = "curc";
+    private static final String PARAM_CURRENCY_SYMBOL = "curs";
 
+    private static final String PARAM_VALUE_RND_UP = "u";
+    private static final String PARAM_VALUE_RND_DOWN = "d";
+    private static final String PARAM_VALUE_RND_CEILING = "c";
+    private static final String PARAM_VALUE_RND_FLOOR = "f";
+    private static final String PARAM_VALUE_RND_HALF_DOWN = "hd";
+    private static final String PARAM_VALUE_RND_HALF_EVEN = "he";
+    private static final String PARAM_VALUE_RND_HALF_UP = "hu";
+    private static final String PARAM_VALUE_RND_UNNECESSARY = "un";
+    
     private static final HashMap<String, ? extends ParameterHandler> PARAM_HANDLERS;
-
     static {
         HashMap<String, ParameterHandler> m = new HashMap<String, ParameterHandler>();
-        m.put("rnd", new ParameterHandler() {
+        m.put(PARAM_ROUNDING_MODE, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 RoundingMode parsedValue;
-                if (value.equals("u")) {
+                if (value.equals(PARAM_VALUE_RND_UP)) {
                     parsedValue = RoundingMode.UP;
-                } else if (value.equals("d")) {
+                } else if (value.equals(PARAM_VALUE_RND_DOWN)) {
                     parsedValue = RoundingMode.DOWN;
-                } else if (value.equals("c")) {
+                } else if (value.equals(PARAM_VALUE_RND_CEILING)) {
                     parsedValue = RoundingMode.CEILING;
-                } else if (value.equals("f")) {
+                } else if (value.equals(PARAM_VALUE_RND_FLOOR)) {
                     parsedValue = RoundingMode.FLOOR;
-                } else if (value.equals("hd")) {
+                } else if (value.equals(PARAM_VALUE_RND_HALF_DOWN)) {
                     parsedValue = RoundingMode.HALF_DOWN;
-                } else if (value.equals("he")) {
+                } else if (value.equals(PARAM_VALUE_RND_HALF_EVEN)) {
                     parsedValue = RoundingMode.HALF_EVEN;
-                } else if (value.equals("hu")) {
+                } else if (value.equals(PARAM_VALUE_RND_HALF_UP)) {
                     parsedValue = RoundingMode.HALF_UP;
-                } else if (value.equals("un")) {
+                } else if (value.equals(PARAM_VALUE_RND_UNNECESSARY)) {
                     parsedValue = RoundingMode.UNNECESSARY;
                 } else {
                     throw new InvalidParameterValueException("Should be one of: u, d, c, f, hd, he, hu, un");
@@ -67,7 +90,7 @@ class ExtendedDecimalFormatParser {
                 parser.roundingMode = parsedValue;
             }
         });
-        m.put("mul", new ParameterHandler() {
+        m.put(PARAM_MULTIPIER, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 try {
@@ -77,7 +100,7 @@ class ExtendedDecimalFormatParser {
                 }
             }
         });
-        m.put("dec", new ParameterHandler() {
+        m.put(PARAM_DECIMAL_SEPARATOR, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -86,7 +109,7 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setDecimalSeparator(value.charAt(0));
             }
         });
-        m.put("mdec", new ParameterHandler() {
+        m.put(PARAM_MONETARY_DECIMAL_SEPARATOR, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -95,7 +118,7 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setMonetaryDecimalSeparator(value.charAt(0));
             }
         });
-        m.put("grp", new ParameterHandler() {
+        m.put(PARAM_GROUP_SEPARATOR, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -104,7 +127,7 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setGroupingSeparator(value.charAt(0));
             }
         });
-        m.put("exp", new ParameterHandler() {
+        m.put(PARAM_EXPONENT_SEPARATOR, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (_JavaVersions.JAVA_6 == null) {
@@ -114,7 +137,7 @@ class ExtendedDecimalFormatParser {
                 _JavaVersions.JAVA_6.setExponentSeparator(parser.symbols, value);
             }
         });
-        m.put("min", new ParameterHandler() {
+        m.put(PARAM_MINUS_SIGN, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -123,19 +146,19 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setMinusSign(value.charAt(0));
             }
         });
-        m.put("inf", new ParameterHandler() {
+        m.put(PARAM_INFINITY, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setInfinity(value);
             }
         });
-        m.put("nan", new ParameterHandler() {
+        m.put(PARAM_NAN, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setNaN(value);
             }
         });
-        m.put("prc", new ParameterHandler() {
+        m.put(PARAM_PERCENT, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -144,7 +167,7 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setPercent(value.charAt(0));
             }
         });
-        m.put("prm", new ParameterHandler() {
+        m.put(PARAM_PER_MILL, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -153,7 +176,7 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setPerMill(value.charAt(0));
             }
         });
-        m.put("zero", new ParameterHandler() {
+        m.put(PARAM_ZERO_DIGIT, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -162,7 +185,7 @@ class ExtendedDecimalFormatParser {
                 parser.symbols.setZeroDigit(value.charAt(0));
             }
         });
-        m.put("curc", new ParameterHandler() {
+        m.put(PARAM_CURRENCY_CODE, new ParameterHandler() {
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 Currency currency;
@@ -196,7 +219,20 @@ class ExtendedDecimalFormatParser {
         skipWS();
         parseFormatStringExtension();
 
-        DecimalFormat decimalFormat = new DecimalFormat(stdPattern, symbols);
+        DecimalFormat decimalFormat;
+        try {
+            decimalFormat = new DecimalFormat(stdPattern, symbols);
+        } catch (IllegalArgumentException e) {
+            ParseException pe = new ParseException(e.getMessage(), 0);
+            if (e.getCause() != null) {
+                try {
+                    e.initCause(e.getCause());
+                } catch (Exception e2) {
+                    // Supress
+                }
+            }
+            throw pe;
+        }
 
         if (roundingMode != null) {
             if (_JavaVersions.JAVA_6 == null) {
@@ -244,7 +280,7 @@ class ExtendedDecimalFormatParser {
 
             ParameterHandler handler = PARAM_HANDLERS.get(name);
             if (handler == null) {
-                if (name.equals("curs")) {
+                if (name.equals(PARAM_CURRENCY_SYMBOL)) {
                     currencySymbol = value;
                 } else {
                     throw newUnknownParameterException(name, namePos);
