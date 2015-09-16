@@ -318,46 +318,47 @@ class ExtendedDecimalFormatParser {
     private String fetchValue() throws ParseException {
         int ln = src.length();
         int startPos = pos;
-        boolean quotedMode = false;
+        char openedQuot = 0;
         boolean needsUnescaping = false;
         scanUntilEnd: while (pos < ln) {
             char c = src.charAt(pos);
-            if (c == '\'') {
-                if (!quotedMode) {
+            if (c == '\'' || c == '"') {
+                if (openedQuot == 0) {
                     if (startPos != pos) {
                         throw new java.text.ParseException(
-                                "The \"'\" character can only be used for quoting values, "
+                                "The " + c + " character can only be used for quoting values, "
                                         + "but it was in the middle of an non-quoted value.",
                                 pos);
                     }
-                    quotedMode = true;
-                } else {
-                    if (pos + 1 < ln && src.charAt(pos + 1) == '\'') {
-                        pos++; // skip "''" (escaped "'")
+                    openedQuot = c;
+                } else if (c == openedQuot) {
+                    if (pos + 1 < ln && src.charAt(pos + 1) == openedQuot) {
+                        pos++; // skip doubled quote (escaping)
                         needsUnescaping = true;
                     } else {
                         String str = src.substring(startPos + 1, pos);
                         pos++;
-                        return needsUnescaping ? unescape(str) : str;
+                        return needsUnescaping ? unescape(str, openedQuot) : str;
                     }
                 }
             } else {
-                if (!quotedMode && !Character.isJavaIdentifierPart(c)) {
+                if (openedQuot == 0 && !Character.isJavaIdentifierPart(c)) {
                     break scanUntilEnd;
                 }
             }
             pos++;
         } // while
-        if (quotedMode) {
+        if (openedQuot != 0) {
             throw new java.text.ParseException(
-                    "The \"'\" quotation wasn't closed when the end of the source was reached.",
+                    "The " + openedQuot 
+                    + " quotation wasn't closed when the end of the source was reached.",
                     pos);
         }
         return startPos == pos ? null : src.substring(startPos, pos);
     }
 
-    private String unescape(String s) {
-        return StringUtil.replace(s, "\'\'", "\'");
+    private String unescape(String s, char openedQuot) {
+        return openedQuot == '\'' ? StringUtil.replace(s, "\'\'", "\'") : StringUtil.replace(s, "\"\"", "\"");
     }
 
     private String fetchStandardPattern() {

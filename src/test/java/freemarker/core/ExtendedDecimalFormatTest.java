@@ -101,9 +101,17 @@ public class ExtendedDecimalFormatTest {
         
         assertFormatted("0.0;;inf=infinity", Double.POSITIVE_INFINITY, "infinity");
         assertFormatted("0.0;;inf='infinity'", Double.POSITIVE_INFINITY, "infinity");
+        assertFormatted("0.0;;inf=\"infinity\"", Double.POSITIVE_INFINITY, "infinity");
         assertFormatted("0.0;;inf=''", Double.POSITIVE_INFINITY, "");
+        assertFormatted("0.0;;inf=\"\"", Double.POSITIVE_INFINITY, "");
         assertFormatted("0.0;;inf='x''y'", Double.POSITIVE_INFINITY, "x'y");
+        assertFormatted("0.0;;inf=\"x'y\"", Double.POSITIVE_INFINITY, "x'y");
+        assertFormatted("0.0;;inf='x\"\"y'", Double.POSITIVE_INFINITY, "x\"\"y");
+        assertFormatted("0.0;;inf=\"x''y\"", Double.POSITIVE_INFINITY, "x''y");
         assertFormatted("0.0;;dec=''''", 1, "1'0");
+        assertFormatted("0.0;;dec=\"'\"", 1, "1'0");
+        assertFormatted("0.0;;dec='\"'", 1, "1\"0");
+        assertFormatted("0.0;;dec=\"\"\"\"", 1, "1\"0");
         
         try {
             ExtendedDecimalFormatParser.parse(";;dec=D,", LOC);
@@ -121,6 +129,13 @@ public class ExtendedDecimalFormatTest {
         }
         try {
             ExtendedDecimalFormatParser.parse(";;dec='D", LOC);
+            fail();
+        } catch (java.text.ParseException e) {
+            assertThat(e.getMessage(),
+                    allOf(containsString("quotation"), containsString("closed")));
+        }
+        try {
+            ExtendedDecimalFormatParser.parse(";;dec=\"D", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(),
