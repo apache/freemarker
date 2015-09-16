@@ -1305,6 +1305,7 @@ public class ConfigurationTest extends TestCase {
     }
     
     @Test
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS ", justification = "Testing wrong args")
     public void testSetCustomNumberFormat() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         
