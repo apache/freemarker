@@ -73,6 +73,18 @@ public class ExtendedDecimalFormatTest {
             // Expected
         }
         try {
+            new DecimalFormat("; ;");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+        try {
+            ExtendedDecimalFormatParser.parse("; ;", LOC);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+        try {
             ExtendedDecimalFormatParser.parse(";m", LOC);
             fail();
         } catch (IllegalArgumentException e) {
