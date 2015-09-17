@@ -50,7 +50,7 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * 
      * @throws TemplateValueFormatException
      *             If any problem occurs while parsing/getting the format. Notable subclass:
-     *             {@link UnformattableNumberException}.
+     *             {@link UnformattableValueException}.
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */

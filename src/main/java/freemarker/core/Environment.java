@@ -1081,7 +1081,7 @@ public final class Environment extends Configurable {
             throws TemplateModelException, _MiscTemplateException {
         try {
             return format.format(number);
-        } catch (UnformattableNumberException e) {
+        } catch (UnformattableValueException e) {
             throw new _MiscTemplateException(exp, e, this,
                     "Failed to format number with ", new _DelayedJQuote(format.getDescription()), ": ",
                     e.getMessage());

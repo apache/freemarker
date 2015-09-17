@@ -48,18 +48,18 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
         
         @Override
         public String format(TemplateNumberModel numberModel)
-                throws UnformattableNumberException, TemplateModelException {
+                throws UnformattableValueException, TemplateModelException {
             Number n = numberModel.getAsNumber();
             try {
                 return n + "_" + locale;
             } catch (ArithmeticException e) {
-                throw new UnformattableNumberException(n + " doesn't fit into an int");
+                throw new UnformattableValueException(n + " doesn't fit into an int");
             }
         }
     
         @Override
         public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
+                MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
             return null;
         }
     

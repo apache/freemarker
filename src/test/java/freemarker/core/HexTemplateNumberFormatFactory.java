@@ -47,18 +47,18 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         
         @Override
         public String format(TemplateNumberModel numberModel)
-                throws UnformattableNumberException, TemplateModelException {
+                throws UnformattableValueException, TemplateModelException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
                 return Integer.toHexString(NumberUtil.toIntExact(n));
             } catch (ArithmeticException e) {
-                throw new UnformattableNumberException(n + " doesn't fit into an int");
+                throw new UnformattableValueException(n + " doesn't fit into an int");
             }
         }
 
         @Override
         public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
+                MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
             return null;
         }
 

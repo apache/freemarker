@@ -25,6 +25,6 @@ package freemarker.core;
  */
 abstract class BackwardCompatibleTemplateNumberFormat extends TemplateNumberFormat {
 
-    abstract String format(Number number) throws UnformattableNumberException;
+    abstract String format(Number number) throws UnformattableValueException;
 
 }

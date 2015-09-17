@@ -186,7 +186,7 @@ class BuiltInsForMultipleTypes {
             throws TemplateModelException {
                 try {
                     return df.parse(text);
-                } catch (java.text.ParseException e) {
+                } catch (TemplateValueFormatException e) {
                     throw new _TemplateModelException(e,
                             "The string doesn't match the expected date/time/date-time format. "
                             + "The string to parse was: ", new _DelayedJQuote(text), ". ",

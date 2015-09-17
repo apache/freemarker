@@ -26,7 +26,7 @@ import freemarker.template.TemplateDateModel;
  * 
  * @since 2.3.24
  */
-public final class UnknownDateTypeFormattingUnsupportedException extends UnformattableDateException {
+public final class UnknownDateTypeFormattingUnsupportedException extends UnformattableValueException {
 
     public UnknownDateTypeFormattingUnsupportedException() {
         super(MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE);

@@ -43,10 +43,10 @@ public final class TemplateFormatUtil {
 
     /**
      * Utility method to extract the {@link Number} from an {@link TemplateNumberModel}, and throw
-     * {@link UnformattableNumberException} with a standard error message if that's {@code null}.
+     * {@link UnformattableValueException} with a standard error message if that's {@code null}.
      */
     public static Number getNonNullNumber(TemplateNumberModel numberModel)
-            throws TemplateModelException, UnformattableNumberException {
+            throws TemplateModelException, UnformattableValueException {
         Number number = numberModel.getAsNumber();
         if (number == null) {
             throw EvalUtil.newModelHasStoredNullException(Number.class, numberModel, null);
@@ -56,7 +56,7 @@ public final class TemplateFormatUtil {
 
     /**
      * Utility method to extract the {@link Date} from an {@link TemplateDateModel}, and throw
-     * {@link UnformattableDateException} with a standard error message if that's {@code null}.
+     * {@link UnformattableValueException} with a standard error message if that's {@code null}.
      */
     public static Date getNonNullDate(TemplateDateModel dateModel) throws TemplateModelException {
         Date date = dateModel.getAsDate();

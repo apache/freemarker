@@ -44,8 +44,12 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
     }
 
     @Override
-    public Date parse(String s) throws ParseException {
-        return javaDateFormat.parse(s);
+    public Date parse(String s) throws UnparsableValueException {
+        try {
+            return javaDateFormat.parse(s);
+        } catch (ParseException e) {
+            throw new UnparsableValueException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -70,7 +74,7 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
      */
     @Override
     public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-            MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
+            MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
         return null;
     }
 

@@ -98,7 +98,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * 
      * @return The interpretation of the text as {@link Date}. Can't be {@code null}.
      */
-    public abstract Date parse(String s) throws java.text.ParseException;
+    public abstract Date parse(String s) throws TemplateValueFormatException;
     
     /**
      * Tells if this formatter should be re-created if the locale changes.

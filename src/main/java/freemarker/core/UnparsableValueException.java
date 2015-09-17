@@ -19,23 +19,20 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
-
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because of the value/properties of the
- * {@link TemplateDateModel}. For example, a formatter may not support dates before year 1. The most often used subclass
- * is {@link UnknownDateTypeFormattingUnsupportedException}.
+ * Thrown when the content of the string that should be parsed by the {@link TemplateValueFormat} doesn't match what the
+ * format expects.
  * 
  * @since 2.3.24
  */
-public abstract class UnformattableDateException extends TemplateValueFormatException {
+public class UnparsableValueException extends TemplateValueFormatException {
 
-    public UnformattableDateException(String message, Throwable cause) {
+    public UnparsableValueException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnformattableDateException(String message) {
-        super(message);
+    public UnparsableValueException(String message) {
+        this(message, null);
     }
 
 }
