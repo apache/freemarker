@@ -91,14 +91,29 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
     }
 
     /**
-     * <b>[Unfinished - will change in 2.3.24 final]</b>.
+     * Parsers a string to date/time/datetime, according to this format. Some format implementations may throw
+     * {@link ParsingNotSupportedException} here. 
      * 
-     * TODO Thrown exceptions.
-     * TODO How can one return a TemplateDateModel instead?
+     * @param s
+     *            The string to parse
+     * @param dateType
+     *            The expected date type of the result. Not all {@link TemplateDateFormat}-s will care about this;
+     *            though those who return a {@link TemplateDateModel} instead of {@link Date} often will. When strings
+     *            are parsed via {@code ?date}, {@code ?time}, or {@code ?datetime}, then this parameter is
+     *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, or {@link TemplateDateModel#DATETIME},
+     *            respectively. This parameter rarely if ever {@link TemplateDateModel#UNKNOWN}, but the implementation
+     *            that cares about this parameter should be prepared for that. If nothing else, it should throw
+     *            {@link UnknownDateTypeParsingUnsupportedException} then.
      * 
-     * @return The interpretation of the text as {@link Date}. Can't be {@code null}.
+     * @return The interpretation of the text either as a {@link Date} or {@link TemplateDateModel}. Typically, a
+     *         {@link Date}. {@link TemplateDateModel} is used if you have to attach some application-specific
+     *         meta-information thats also extracted during {@link #format(TemplateDateModel)} (so if you format
+     *         something and then parse it, you get back an equivalent result). It can't be {@code null}. Known issue
+     *         (at least in FTL 2): {@code ?date}/{@code ?time}/{@code ?datetime}, when not invoked as a method, can't
+     *         return the {@link TemplateDateModel}, only the {@link Date} from inside it, hence the additional
+     *         application-specific meta-info will be lost.
      */
-    public abstract Date parse(String s) throws TemplateValueFormatException;
+    public abstract Object parse(String s, int dateType) throws TemplateValueFormatException;
     
     /**
      * Tells if this formatter should be re-created if the locale changes.

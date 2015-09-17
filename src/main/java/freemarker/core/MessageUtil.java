@@ -36,6 +36,10 @@ class MessageUtil {
             = "Can't convert the date-like value to string because it isn't "
               + "known if it's a date (no time part), time or date-time value.";
     
+    static final String UNKNOWN_DATE_PARSING_ERROR_MESSAGE
+            = "Can't parse the string to date-like value because it isn't "
+              + "known if it's desired result should be a date (no time part), a time, or a date-time value.";
+
     static final String UNKNOWN_DATE_TYPE_ERROR_TIP = 
             "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
     

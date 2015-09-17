@@ -94,6 +94,15 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      */
     public abstract boolean isLocaleBound();
 
-    // We don't have parse(...) method, because currently FTL only parses to number with the ArithmeticEngine.
+    /**
+     * This method is reserved for future purposes; currently it always throws {@link ParsingNotSupportedException}. We
+     * don't yet support number parsing with {@link TemplateNumberFormat}-s, because currently FTL parses strings to
+     * number with the {@link ArithmeticEngine} ({@link TemplateNumberFormat} were only introduced in 2.3.24). If it
+     * will be support, it will be similar to {@link TemplateDateFormat#parse(String, int)}.
+     */
+    public final Object parse(String s) throws TemplateValueFormatException {
+        throw new ParsingNotSupportedException("Number formats currenly don't support parsing");
+    }
+    
     
 }

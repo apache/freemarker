@@ -12292,13 +12292,15 @@ Green Mouse</programlisting>
 </programlisting>
 
           <para>You can also specify the format explicitly like
-          <literal>?datetime.<replaceable>format</replaceable></literal> or
-          <literal>?datetime["<replaceable>format</replaceable>"]</literal>
-          (or
-          <literal>?datetime("<replaceable>format</replaceable>")</literal>
-          for historical reasons), and the same with <literal>?date</literal>
-          and <literal>?time</literal>. For the syntax and meaning of format
-          values see the possible values of the <link
+          <literal>?datetime.<replaceable>format</replaceable></literal> (and
+          hence also as
+          <literal>?datetime["<replaceable>format</replaceable>"]</literal>)
+          or
+          <literal>?datetime("<replaceable>format</replaceable>")</literal>;
+          these three forms do the same. The format can be specified similarly
+          with <literal>?date</literal> and <literal>?time</literal> too. For
+          the syntax and meaning of format values see the possible values of
+          the <link
           linkend="topic.dateTimeFormatSettings"><literal>date_format</literal>,
           <literal>time_format</literal> and
           <literal>datetime_format</literal> settings</link>. Example:</para>
@@ -12324,7 +12326,17 @@ Green Mouse</programlisting>
           value to a real date.</para>
 
           <para>Of course, the format also can be a variable, like in
-          <literal>"<replaceable>...</replaceable>"?datetime[myFormat]</literal>.</para>
+          <literal>"<replaceable>...</replaceable>"?datetime(myFormat)</literal>.</para>
+
+          <para>Note that since 2.3.24, these built-ins can also be called
+          with 0 arguments, like <literal>?date()</literal>. It's almost the
+          same as just writing <literal>?date</literal>. The difference is
+          highly technical and rarely matters: <literal>?date()</literal> and
+          such returns exactly the same Java object that the date parser
+          (<literal>freemarker.core.TemplateDateFormat</literal>
+          implementation) returns, while <literal>?date</literal> without the
+          <literal>()</literal> returns tricky wrapper that's a date and a
+          method and hash on the same time.</para>
         </section>
 
         <section xml:id="ref_builtin_ends_with">
@@ -25529,6 +25541,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting</link> of the current FreeMarker configuration, as a
               string.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>?date</literal>, <literal>?time</literal> and
+              <literal>?datetime</literal> now can be called as 0 argument
+              method, like <literal>?date()</literal>, etc., which returns the
+              exact object that <literal>TemplateDateFormat.parse</literal>
+              returns, instead of the tricky multi-type object that just using
+              <literal>?date</literal> returns. Because custom
+              <literal>TemplateDateFormat</literal> implementations may return
+              custom <literal>TemplateDateModel</literal> implementations,
+              keeping the exact class can be important in some
+              applications.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -25863,6 +25888,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               chose a different target format string depending on the current
               locale; this is especially useful for dates, where conventions
               can significantly differ in different countries.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>?date</literal>, <literal>?time</literal> and
+              <literal>?datetime</literal> now can be called as 0 argument
+              method, like <literal>?date()</literal>, etc., which returns the
+              exact object that <literal>TemplateDateFormat.parse</literal>
+              returns, instead of the tricky multi-type object that just using
+              <literal>?date</literal> returns. Because custom
+              <literal>TemplateDateFormat</literal> implementations may return
+              custom <literal>TemplateDateModel</literal> implementations,
+              keeping the exact class can be important in some
+              applications.</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>TemplateDateFormat.parse</literal> has been
+              worked out (earlier it was a but different and was marked as
+              draft). <literal>TemplateNumberFormat</literal> has also have a
+              parse method now, though it's just a <literal>final</literal>
+              placeholder now.</para>
             </listitem>
           </itemizedlist>
         </section>

@@ -71,7 +71,7 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         }
 
         @Override
-        public Date parse(String s) throws UnparsableValueException {
+        public Date parse(String s, int dateType) throws UnparsableValueException {
             try {
                 return new Date(Long.parseLong(s));
             } catch (NumberFormatException e) {

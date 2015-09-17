@@ -21,6 +21,7 @@ package freemarker.core;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -38,6 +39,7 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
 import freemarker.template.Template;
 import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
@@ -58,7 +60,8 @@ public class DateFormatTest extends TemplateTest {
         cfg.setCustomDateFormats(ImmutableMap.of(
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
                 "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
-                "div", EpochMillisDivTemplateDateFormatFactory.INSTANCE));
+                "div", EpochMillisDivTemplateDateFormatFactory.INSTANCE,
+                "appMeta", AppMetaTemplateDateFormatFactory.INSTANCE));
     }
 
     @Test
@@ -349,6 +352,49 @@ public class DateFormatTest extends TemplateTest {
                 + "<#setting locale='fr_FR'>${d} "
                 + "<#setting locale='hu_HU'>${d}",
                 "2015-Sep_en 2015-Sep_en_GB 2015-Sep_en_GB 2015-sept._fr_FR 2015-szept.");
+    }
+    
+    /**
+     * ?date() and such are new in 2.3.24.
+     */
+    @Test
+    public void testZeroArgDateBI() throws IOException, TemplateException {
+        Configuration cfg = getConfiguration();
+        cfg.setDateFormat("@epoch");
+        cfg.setDateTimeFormat("@epoch");
+        cfg.setTimeFormat("@epoch");
+        
+        addToDataModel("t", String.valueOf(T));
+        
+        assertOutput(
+                "${t?date?string.xs_u} ${t?date()?string.xs_u}",
+                "2015-09-06Z 2015-09-06Z");
+        assertOutput(
+                "${t?time?string.xs_u} ${t?time()?string.xs_u}",
+                "12:00:00Z 12:00:00Z");
+        assertOutput(
+                "${t?datetime?string.xs_u} ${t?datetime()?string.xs_u}",
+                "2015-09-06T12:00:00Z 2015-09-06T12:00:00Z");
+    }
+
+    @Test
+    public void testAppMetaRoundtrip() throws IOException, TemplateException {
+        Configuration cfg = getConfiguration();
+        cfg.setDateFormat("@appMeta");
+        cfg.setDateTimeFormat("@appMeta");
+        cfg.setTimeFormat("@appMeta");
+        
+        addToDataModel("t", String.valueOf(T) + "/foo");
+        
+        assertOutput(
+                "${t?date} ${t?date()}",
+                T + " " + T + "/foo");
+        assertOutput(
+                "${t?time} ${t?time()}",
+                T + " " + T + "/foo");
+        assertOutput(
+                "${t?datetime} ${t?datetime()}",
+                T + " " + T + "/foo");
     }
     
     private static class MutableTemplateDateModel implements TemplateDateModel {

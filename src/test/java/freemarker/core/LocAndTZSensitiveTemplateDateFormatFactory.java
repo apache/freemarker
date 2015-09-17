@@ -75,7 +75,7 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         }
 
         @Override
-        public Date parse(String s) throws UnparsableValueException {
+        public Date parse(String s, int dateType) throws UnparsableValueException {
             try {
                 int atIdx = s.indexOf("@");
                 if (atIdx == -1) {

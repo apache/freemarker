@@ -44,7 +44,7 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
     }
 
     @Override
-    public Date parse(String s) throws UnparsableValueException {
+    public Date parse(String s, int dateType) throws UnparsableValueException {
         try {
             return javaDateFormat.parse(s);
         } catch (ParseException e) {

@@ -26,45 +26,36 @@ import org.apache.commons.lang.NotImplementedException;
 
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.StringUtil;
 
-public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatFactory {
+public class AppMetaTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
-    public static final EpochMillisDivTemplateDateFormatFactory INSTANCE = new EpochMillisDivTemplateDateFormatFactory();
+    public static final AppMetaTemplateDateFormatFactory INSTANCE = new AppMetaTemplateDateFormatFactory();
     
-    private EpochMillisDivTemplateDateFormatFactory() {
+    private AppMetaTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
     
     @Override
     public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
             Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
-        int divisor;
-        try {
-            divisor = Integer.parseInt(params);
-        } catch (NumberFormatException e) {
-            if (params.length() == 0) {
-                throw new InvalidFormatParametersException(
-                        "A format parameter is required, which specifies the divisor.");
-            }
-            throw new InvalidFormatParametersException(
-                    "The format paramter must be an integer, but was (shown quoted): " + StringUtil.jQuote(params));
-        }
-        return new EpochMillisDivTemplateDateFormat(divisor);
+        TemplateFormatUtil.checkHasNoParameters(params);
+        return AppMetaTemplateDateFormat.INSTANCE;
     }
 
-    private static class EpochMillisDivTemplateDateFormat extends TemplateDateFormat {
+    private static class AppMetaTemplateDateFormat extends TemplateDateFormat {
 
-        private final int divisor;
+        private static final AppMetaTemplateDateFormat INSTANCE = new AppMetaTemplateDateFormat();
         
-        private EpochMillisDivTemplateDateFormat(int divisor) {
-            this.divisor = divisor;
-        }
+        private AppMetaTemplateDateFormat() { }
         
         @Override
         public String format(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
-            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() / divisor);
+            String result = String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
+            if (dateModel instanceof AppMetaTemplateDateModel) {
+                result += "/" + ((AppMetaTemplateDateModel) dateModel).getAppMeta(); 
+            }
+            return result;
         }
 
         @Override
@@ -84,9 +75,17 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
         }
 
         @Override
-        public Date parse(String s, int dateType) throws UnparsableValueException {
+        public Object parse(String s, int dateType) throws UnparsableValueException {
+            int slashIdx = s.indexOf('/');
             try {
-                return new Date(Long.parseLong(s));
+                if (slashIdx != -1) {
+                    return new AppMetaTemplateDateModel(
+                            new Date(Long.parseLong(s.substring(0,  slashIdx))),
+                            dateType,
+                            s.substring(slashIdx +1));
+                } else {
+                    return new Date(Long.parseLong(s));
+                }
             } catch (NumberFormatException e) {
                 throw new UnparsableValueException("Malformed long");
             }
@@ -95,6 +94,34 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
         @Override
         public String getDescription() {
             return "millis since the epoch";
+        }
+        
+    }
+    
+    public static class AppMetaTemplateDateModel implements TemplateDateModel {
+        
+        private final Date date;
+        private final int dateType;
+        private final String appMeta;
+
+        public AppMetaTemplateDateModel(Date date, int dateType, String appMeta) {
+            this.date = date;
+            this.dateType = dateType;
+            this.appMeta = appMeta;
+        }
+
+        @Override
+        public Date getAsDate() throws TemplateModelException {
+            return date;
+        }
+
+        @Override
+        public int getDateType() {
+            return dateType;
+        }
+
+        public String getAppMeta() {
+            return appMeta;
         }
         
     }

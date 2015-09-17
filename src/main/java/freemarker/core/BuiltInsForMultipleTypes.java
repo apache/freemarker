@@ -142,7 +142,7 @@ class BuiltInsForMultipleTypes {
             private final String text;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
-            private Date cachedValue;
+            private TemplateDateModel cachedValue;
             
             DateParser(String text, Environment env)
             throws TemplateException {
@@ -152,8 +152,8 @@ class BuiltInsForMultipleTypes {
             }
             
             public Object exec(List args) throws TemplateModelException {
-                checkMethodArgCount(args, 1);
-                return get((String) args.get(0));
+                checkMethodArgCount(args, 0, 1);
+                return args.size() == 0 ? getAsDateModel() : get((String) args.get(0));
             }
             
             public TemplateModel get(String pattern) throws TemplateModelException {
@@ -164,14 +164,30 @@ class BuiltInsForMultipleTypes {
                     // `e` should always be a TemplateModelException here, but to be sure: 
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to get format", e); 
                 }
-                return new SimpleDate(parse(format), dateType);
+                return toTemplateDateModel(parse(format));
             }
-    
-            public Date getAsDate() throws TemplateModelException {
+
+            private TemplateDateModel toTemplateDateModel(Object date) throws _TemplateModelException {
+                if (date instanceof Date) {
+                    return new SimpleDate((Date) date, dateType);
+                } else {
+                    TemplateDateModel tm = (TemplateDateModel) date;
+                    if (tm.getDateType() != dateType) {
+                        throw new _TemplateModelException("The result of the parsing was of the wrong date type.");
+                    }
+                    return tm;
+                }
+            }
+
+            private TemplateDateModel getAsDateModel() throws TemplateModelException {
                 if (cachedValue == null) {
-                    cachedValue = parse(defaultFormat);
+                    cachedValue = toTemplateDateModel(parse(defaultFormat));
                 }
                 return cachedValue;
+            }
+            
+            public Date getAsDate() throws TemplateModelException {
+                return getAsDateModel().getAsDate();
             }
     
             public int getDateType() {
@@ -182,10 +198,10 @@ class BuiltInsForMultipleTypes {
                 return false;
             }
     
-            private Date parse(TemplateDateFormat df)
+            private Object parse(TemplateDateFormat df)
             throws TemplateModelException {
                 try {
-                    return df.parse(text);
+                    return df.parse(text, dateType);
                 } catch (TemplateValueFormatException e) {
                     throw new _TemplateModelException(e,
                             "The string doesn't match the expected date/time/date-time format. "
