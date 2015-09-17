@@ -714,19 +714,27 @@ public class Configurable {
     }
 
     /**
-     * Sets the default number format used to convert numbers to strings. Currently, this is either a
-     * {@link java.text.DecimalFormat} pattern (like {@code "0.##"}), or one of the following special values:
+     * Sets the default number format used to convert numbers to strings. Currently, this is one of these:
      * <ul>
      *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
      *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
+     *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax has a FreeMarker-specific
+     *       extension, so that you can specify options like the rounding mode and the symbols used in this string. For
+     *       example, {@code ",000;; rnd=hu grp=_"} will format numbers like {@code ",000"} would, but with half-up
+     *       rounding mode, and {@code _} as the group separator. See more about "extended Java decimal format" in the
+     *       FreeMarker Manual.
+     *       </li>
+     *   <li>If the string starts with {@code @} character, and
+     *       {@link Configuration#setIncompatibleImprovements(Version)} is at least 2.3.24, then it's interpreted as a
+     *       custom number format. The format of such string is <code>"@<i>name</i>"</code> or
+     *       <code>"@<i>name</i> <i>parameters</i>"</code>, where <code><i>name</i></code> is the key in the
+     *       {@link Map} set by {@link #setCustomNumberFormats(Map)}, and <code><i>parameters</i></code> is parsed by
+     *       the custom {@link TemplateNumberFormat}.
+     *   </li>
      * </ul>
-     * Or, if {@link Configuration#setIncompatibleImprovements(Version)} is at least 2.3.24, and the string starts
-     * with {@code @} character, it's interpreted as a custom number format. The format of such string is
-     * <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where <code><i>name</i></code>
-     * is the key in the {@link Map} set by {@link #setCustomNumberFormats(Map)}, and <code><i>parameters</i></code>
-     * is parsed by the custom number format.
+     * 
      *   
      * <p>Defaults to <tt>"number"</tt>.
      */

@@ -12335,7 +12335,7 @@ Green Mouse</programlisting>
           such returns exactly the same Java object that the date parser
           (<literal>freemarker.core.TemplateDateFormat</literal>
           implementation) returns, while <literal>?date</literal> without the
-          <literal>()</literal> returns tricky wrapper that's a date and a
+          <literal>()</literal> returns a tricky wrapper that's a date and a
           method and hash on the same time.</para>
         </section>
 
@@ -14473,8 +14473,9 @@ $42.00
 
           <para>Beside the three predefined formats, you can use arbitrary
           number format patterns written in <link
-          xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/DecimalFormat.html">Java
-          decimal number format syntax</link>:</para>
+          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html">Java
+          decimal number format syntax</link> (with some FreeMarker-specific
+          extensions; see later):</para>
 
           <programlisting role="template">&lt;#assign x = 1.234&gt;
 ${x?string["0"]}
@@ -14493,8 +14494,6 @@ ${1.5?string["0"]} &lt;-- 1.5, rounded towards even neighbor
 ${2.5?string["0"]} &lt;-- 2.5, rounded towards even neighbor
 
 ${12345?string["0.##E0"]}</programlisting>
-
-          <para>outputs this:</para>
 
           <programlisting role="output">1
 1.2
@@ -14526,13 +14525,18 @@ ${12345?string["0.##E0"]}</programlisting>
           <literal>x?string("0.#")</literal>, which does exactly the same as
           <literal>x?string["0.#"]</literal>.</para>
 
-          <para>Following the financial and statistics practice, the rounding
-          goes according the so called half-even rule, which means rounding
-          towards the nearest ``neighbor'', unless both neighbors are
-          equidistant, in which case, it rounds towards the even neighbor.
-          This was visible in the above example if you look at the rounding of
-          1.5 and of 2.5, as both were rounded to 2, since 2 is even, but 1
-          and 3 are odds.</para>
+          <para>Following the financial and statistics practice, by default
+          the rounding goes according the so called half-even rule, which
+          means rounding towards the nearest <quote>neighbor</quote>, unless
+          both neighbors are equidistant, in which case, it rounds towards the
+          even neighbor. This was visible in the above example if you look at
+          the rounding of 1.5 and of 2.5, as both were rounded to 2, since 2
+          is even, but 1 and 3 are odds. The other popular rounding rule,
+          where we always round up when the neighbors are equidistant (and so
+          2.5 is rounded to 3) is called the half-up rule, and it can be
+          activated as <link
+          linkend="topic.extendedJavaDecimalFormat">described
+          later</link>.</para>
 
           <para>As it was shown for the predefined formats earlier, the
           default formatting of the numbers can be set in the template:</para>
@@ -14540,9 +14544,11 @@ ${12345?string["0.##E0"]}</programlisting>
           <programlisting role="template">&lt;#setting number_format="0.##"&gt;
 ${1.234}</programlisting>
 
-          <para>outputs this:</para>
-
           <programlisting role="output">1.23</programlisting>
+
+          <para>The default number format also can be specified outside the
+          templates with the FreeMarker API (like with
+          <literal>Configuration.setNumberFormat(String)</literal>).</para>
 
           <para>Note that as number formatting is locale sensitive, the locale
           setting also plays role in the formatting:</para>
@@ -14553,10 +14559,189 @@ US people write:     ${12345678}
 &lt;#setting locale="hu"&gt;
 German people write: ${12345678}</programlisting>
 
-          <para>outputs this:</para>
-
           <programlisting role="output">US people write:     12,345,678.00
 German people write: 12.345.678,00</programlisting>
+
+          <simplesect xml:id="topic.extendedJavaDecimalFormat">
+            <title>Extended Java decimal format </title>
+
+            <indexterm>
+              <primary>extended Java decimal format</primary>
+            </indexterm>
+
+            <para>FreeMarker extends the Java decimal format patterns with
+            extra options. These options are name-value pairs, specified after
+            two semicolons (<literal>;;</literal>) at the end of the format
+            string, or if you had a negative pattern (which is separated from
+            the normal patter with a semicolon, like in <literal>"0.0;minus
+            0.0"</literal>), the after only one semicolon. For example:</para>
+
+            <programlisting role="template">Standard decimal format: ${10002.5?string[",000"]}
+Extended decimal format: ${10002.5?string[",000<emphasis>;; rnd=hu grp=_</emphasis>"]}</programlisting>
+
+            <programlisting role="output">Standard decimal format: 10,002
+Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></programlisting>
+
+            <para>Above, in the extended decimal format, we have specified
+            half-up rounding mode (<literal>rnd=hu</literal>), and group
+            separator <literal>"_"</literal> (<literal>grp=_</literal>). The
+            table of all options:</para>
+
+            <informaltable border="1">
+              <thead>
+                <tr>
+                  <th>Name</th>
+
+                  <th>Meaning / value</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td><literal>rnd</literal></td>
+
+                  <td>Rounding mode. The value is one of <literal>u</literal>
+                  for up, <literal>d</literal> for down, <literal>c</literal>
+                  for ceiling, <literal>f</literal> for floor,
+                  <literal>hu</literal> for half-up, <literal>hd</literal> for
+                  half-down, <literal>he</literal> for half-even, and
+                  <literal>un</literal> for unused. (See <link
+                  xlink:href="http://docs.oracle.com/javase/7/docs/api/java/math/RoundingMode.html">the
+                  <literal>java.math.RoundingMode</literal> API</link> for
+                  explanations.)</td>
+                </tr>
+
+                <tr>
+                  <td><literal>mul</literal></td>
+
+                  <td>Multiplier. The number will be shown after multiplied
+                  with this integer number.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>dec</literal></td>
+
+                  <td>Decimal separator character (like <literal>"."</literal>
+                  in <literal>3.14</literal>).</td>
+                </tr>
+
+                <tr>
+                  <td><literal>mdec</literal></td>
+
+                  <td>Monetary decimal separator character. This is used
+                  instead of <literal>dec</literal> when the pattern contains
+                  parts that make it a monetary format. (See the <link
+                  xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html">Java
+                  decimal number format documentation</link> for more.)</td>
+                </tr>
+
+                <tr>
+                  <td><literal>grp</literal></td>
+
+                  <td>Grouping separator character. Note that grouping is
+                  turned on by using <literal>","</literal> in the patter, as
+                  shown in the earlier example. If it's not turned on, this
+                  option won't have visible effect.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>exp</literal></td>
+
+                  <td>Exponent separator string. Only has visible effect if
+                  the pattern specifies exponential form, like
+                  <literal>"0.##E0"</literal>.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>min</literal></td>
+
+                  <td>Minus sign character.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>inf</literal></td>
+
+                  <td>The string used to show infinity.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>nan</literal></td>
+
+                  <td>The string used to show not-a-number (NaN).</td>
+                </tr>
+
+                <tr>
+                  <td><literal>prc</literal></td>
+
+                  <td>Percent character.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>prm</literal></td>
+
+                  <td>Per-mill character.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>zero</literal></td>
+
+                  <td>Zero character. This modifies the other digits too, for
+                  example, if zero is <literal>A</literal>, then 1 will
+                  <literal>B</literal>, 2 will be <literal>C</literal>, and so
+                  on.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>curc</literal></td>
+
+                  <td>Currency ISO 4217 code. Only has effect when the pattern
+                  contains parts that make it a monetary format. It's an error
+                  to specify a code that's not a known ISO 4217 code in the
+                  Java installation.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>curs</literal></td>
+
+                  <td>Currency symbol; shown where the localized currency name
+                  is present in the pattern. Overrides the symbol determined
+                  from <literal>curc</literal>.</td>
+                </tr>
+              </tbody>
+            </informaltable>
+
+            <para>Regarding the syntax of the options:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>The option name and value are separated by equals
+                character (<literal>=</literal>).</para>
+              </listitem>
+
+              <listitem>
+                <para>Options are separated by whitespace and/or optional
+                comma (<literal>,</literal>)</para>
+              </listitem>
+
+              <listitem>
+                <para>The option value can be quoted with apostrophe
+                (<literal>'</literal>) or normal quotation mark
+                (<literal>"</literal>) , like <literal>exp='*10^'</literal> or
+                <literal>exp="*10^"</literal>. If the value itself has to
+                contain the character used for quotation, then it has to be
+                entered twice (like <literal>inf='It''s infinite'</literal>,
+                but you could also write <literal>inf="It's
+                infinite"</literal>). Backslash has no special meaning.</para>
+              </listitem>
+
+              <listitem>
+                <para>Non-string values must not be quoted. Strings only has
+                to be quoted if they contain punctuation or whitespace, or any
+                other non-letter non-digit non-<literal>"_"</literal>
+                non-<literal>"$"</literal> characters.</para>
+              </listitem>
+            </itemizedlist>
+          </simplesect>
         </section>
 
         <section xml:id="ref_builtin_upper_abc">
@@ -20362,16 +20547,46 @@ ${"'{}"}
                   <secondary>number</secondary>
                 </indexterm><literal>number_format</literal>: The number
               format that is used to convert numbers to strings when no
-              explicit format is specified. Can be one of predefined values
-              <literal>number</literal> (the default),
-              <literal>computer</literal>, <literal>currency</literal>, or
-              <literal>percent</literal>. Additionally, arbitrary format
-              pattern written in <link
-              xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/DecimalFormat.html">Java
-              decimal number format syntax</link> can also be specified. More
-              information about format patterns:<link
-              linkend="ref_builtin_string_for_number"><literal>string</literal>
-              built-in</link>.</para>
+              explicit format is specified. Can be one of the
+              following:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Predefined values defined by the Java platform:
+                  <literal>number</literal> (the default),
+                  <literal>currency</literal>, or
+                  <literal>percent</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>computer</literal>, which formats like <link
+                  linkend="ref_builtin_c">the <literal>c</literal>
+                  built-in</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Format pattern written in <link
+                  xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/DecimalFormat.html">Java
+                  decimal number format syntax</link>, for example
+                  <literal>0.###</literal>. FreeMarker <link
+                  linkend="topic.extendedJavaDecimalFormat">extends this
+                  format</link> to allow specifying rounding mode, symbols
+                  used, etc.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Values starting with <literal>@</literal>, if <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is at least 2.3.24, refers to a <link
+                  linkend="pgui_config_custom_formats">custom format</link>.
+                  For example, <literal>"@price"</literal> refers to the
+                  custom format registered with the <literal>"price"</literal>
+                  name. The custom format name is possibly followed by space
+                  or <literal>_</literal> and then format parameters, whose
+                  interpretation depends on the custom format.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -20615,6 +20830,19 @@ ${"'{}"}
                   (<literal>"medium"</literal> means
                   <literal>"medium_medium"</literal> for date-time
                   values.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Values starting with <literal>@</literal>, if <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is at least 2.3.24, refer to a <link
+                  linkend="pgui_config_custom_formats">custom format</link>,
+                  like <literal>"@departure"</literal> refers to the custom
+                  format registered with the <literal>"departure"</literal>
+                  name. The format name is possibly followed by space or
+                  <literal>_</literal> and then format parameters, whose
+                  interpretation depends on the custom format.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -25534,6 +25762,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Everywhere where Java <literal>DecimalFormat</literal>
+              patterns are used (like in <literal>?string('0.##')</literal> or
+              <literal>&lt;#setting number_format="0.##"&gt;</literal>), now
+              it's possible to specify options like rounding mode or the
+              symbols used, with a FreeMarker-specific <link
+              linkend="topic.extendedJavaDecimalFormat">extension to the
+              pattern syntax</link>.</para>
+            </listitem>
+
+            <listitem>
               <para>Added new special variable:
               <literal>.incompatible_improvements</literal>, which returns the
               <link
@@ -25730,6 +25968,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>In the <literal>number_format</literal> configuration
+              setting, when it holds a Java <literal>DecimalFormat</literal>
+              pattern (like <literal>"0.##"</literal>), it's now possible to
+              specify options like rounding mode or the symbols used, with a
+              FreeMarker-specific <link
+              linkend="topic.extendedJavaDecimalFormat">extension to the
+              pattern syntax</link>.</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>freemarker.cache.ByteArrayTemplateLoader</literal>,
               which is similar to <literal>StringTemplateLoader</literal>, but
@@ -25888,6 +26136,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               chose a different target format string depending on the current
               locale; this is especially useful for dates, where conventions
               can significantly differ in different countries.</para>
+            </listitem>
+
+            <listitem>
+              <para>Everywhere where Java <literal>DecimalFormat</literal>
+              patterns are used (like in the <literal>number_format</literal>
+              configuration setting, or in
+              <literal>?string('0.##')</literal>), now it's possible to
+              specify options like rounding mode or the symbols used, with a
+              FreeMarker-specific <link
+              linkend="topic.extendedJavaDecimalFormat">extension to the
+              pattern syntax</link>.</para>
             </listitem>
 
             <listitem>
