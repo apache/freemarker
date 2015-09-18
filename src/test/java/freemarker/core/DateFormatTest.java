@@ -205,23 +205,29 @@ public class DateFormatTest extends TemplateTest {
         
         cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
         
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@@1970");
         cfg.setDateTimeFormat("@epoch");
         assertErrorContains("${d}", "\"@epoch\"");
+        cfg.setDateTimeFormat("'@'yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
         
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@1970");
         cfg.setDateTimeFormat("@epoch");
         assertErrorContains("${d}", "custom", "\"epoch\"");
+        cfg.setDateTimeFormat("'@'yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
     }
 
     protected void testIcIAndEscapingWhenCustFormsAreAccepted(Configuration cfg) throws IOException, TemplateException {
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@1970");
         cfg.setDateTimeFormat("@epoch");
         assertOutput("${d}", "12345678");
+        cfg.setDateTimeFormat("'@'yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
     }
     
     @Test

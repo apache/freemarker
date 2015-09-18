@@ -215,23 +215,29 @@ public class NumberFormatTest extends TemplateTest {
         testIcIAndEscapingWhenCustFormsAccepted(cfg);
         
         cfg.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@@10");
         cfg.setNumberFormat("@hex");
         assertOutput("${10}", "@hex10");
+        cfg.setNumberFormat("'@'0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
         
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@10");
         cfg.setNumberFormat("@hex");
         assertErrorContains("${10}", "custom", "\"hex\"");
+        cfg.setNumberFormat("'@'0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
     }
 
     protected void testIcIAndEscapingWhenCustFormsAccepted(Configuration cfg) throws IOException, TemplateException {
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@10");
         cfg.setNumberFormat("@hex");
         assertOutput("${10}", "a");
+        cfg.setNumberFormat("'@'0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
     }
 
     @Test

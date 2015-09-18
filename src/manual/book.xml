@@ -25756,10 +25756,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               or <literal>${n?string.@foo}</literal>,
               <literal>${n?string.@foo_params}</literal>. For backward
               compatibility, the initial <literal>@</literal> only has this
-              special meaning if you have any custom formats or <link
+              special meaning if either you have any custom formats or <link
               linkend="pgui_config_incompatible_improvements">the
               <literal>incompatible_improvements</literal> setting</link> is
-              2.3.24 or higher.</para>
+              at lest 2.3.24.</para>
             </listitem>
 
             <listitem>
@@ -25915,12 +25915,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   Like, you can do <literal>cfg.setNumberFormat("@foo
                   params")</literal>, or <literal>&lt;#setting
                   number_format='@foo params'&gt;</literal>, or
-                  <literal>${n?string.@foo_params}</literal>. Note that an
-                  <replaceable>initial</replaceable> <literal>@</literal> in
-                  format strings is reserved for this purpose with
-                  <literal>incompatible_improvements</literal> to 2.3.24, and
-                  need to be escaped as <literal>@@</literal> if it has to be
-                  there literally. Note that the
+                  <literal>${n?string.@foo_params}</literal>. For backward
+                  compatibility, the initial <literal>@</literal> only has
+                  this special meaning if either you have any custom formats
+                  or <link linkend="pgui_config_incompatible_improvements">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is at least 2.3.24. Note that the
                   <literal>custom_number_formats</literal> and
                   <literal>custom_date_formats</literal> settings can be set
                   per-template (via the new
@@ -26157,6 +26157,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               2.3.24, as far as there's any custom format defined. As custom
               formats is also a 2.3.24 feature, it's backward compatible this
               way.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>@@</literal> can't be used to escape
+              <literal>@</literal> at the beginning of format strings anymore,
+              because it was confusing on Android, where
+              <literal>DecimalFormat</literal> supports patterns like
+              <literal>"@@@@@@"</literal>. If a pattern has to output a
+              literal <literal>@</literal> as the first character, you can
+              simply use quoting as defined by
+              <literal>DecimalFormat</literal> and
+              <literal>SimpleDateFormat</literal> (for example,
+              <literal>"'@'0.##"</literal>).</para>
             </listitem>
 
             <listitem>

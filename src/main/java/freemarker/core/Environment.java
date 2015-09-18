@@ -1235,8 +1235,8 @@ public final class Environment extends Configurable {
         int formatStringLen = formatString.length();
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
-                && formatString.charAt(1) != '@'
-                && (isIcI2324OrLater() || hasCustomFormats())) {
+                && (isIcI2324OrLater() || hasCustomFormats())
+                && Character.isLetter(formatString.charAt(1))) {
             final String name;
             final String params;
             {
@@ -1259,13 +1259,6 @@ public final class Environment extends Configurable {
 
             return formatFactory.get(params, locale, this);
         } else {
-            if (formatStringLen > 1
-                    && formatString.charAt(0) == '@'
-                    && formatString.charAt(1) == '@'
-                    && (isIcI2324OrLater() || hasCustomFormats())) {
-                // Unescape @ escaped as @@
-                formatString = formatString.substring(1);
-            }
             return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
     }
@@ -1742,8 +1735,8 @@ public final class Environment extends Configurable {
             formatParams = formatString; // for speed, we don't remove the prefix
         } else if (firstChar == '@'
                 && formatStringLen > 1
-                && formatString.charAt(1) != '@'
-                && (isIcI2324OrLater() || hasCustomFormats())) {
+                && (isIcI2324OrLater() || hasCustomFormats())
+                && Character.isLetter(formatString.charAt(1))) {
             final String name;
             {
                 int endIdx;
@@ -1763,19 +1756,8 @@ public final class Environment extends Configurable {
                         "No custom date format was defined with name " + StringUtil.jQuote(name));
             }
         } else {
-            String unescapedFormatString;
-            if (firstChar == '@'
-                    && formatStringLen > 1
-                    && formatString.charAt(1) == '@'
-                    && (isIcI2324OrLater() || hasCustomFormats())) {
-                // Unescape @ escaped as @@
-                unescapedFormatString = formatString.substring(1);
-            } else {
-                unescapedFormatString = formatString;
-            }
-
+            formatParams = formatString;
             formatFactory = JavaTemplateDateFormatFactory.INSTANCE;
-            formatParams = unescapedFormatString;
         }
 
         return formatFactory.get(formatParams, dateType, locale, timeZone,

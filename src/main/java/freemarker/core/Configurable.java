@@ -778,7 +778,8 @@ public class Configurable {
      * meaning).
      * 
      * @param customNumberFormats
-     *            Can't be {@code null}.
+     *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
+     *            letters and digits.
      * 
      * @since 2.3.24
      */
@@ -793,12 +794,16 @@ public class Configurable {
             if (name.length() == 0) {
                 throw new IllegalArgumentException("Format names can't be 0 length");
             }
-            if (name.charAt(0) == '@') {
+            char firstChar = name.charAt(0);
+            if (firstChar == '@') {
                 throw new IllegalArgumentException(
                         "Format names can't start with '@'. '@' is only used when referring to them from format "
                         + "strings. In: " + name);
             }
-            for (int i = 0; i < name.length(); i++) {
+            if (!Character.isLetter(firstChar)) {
+                throw new IllegalArgumentException("Format name must start with letter: " + name);
+            }
+            for (int i = 1; i < name.length(); i++) {
                 // Note that we deliberately don't allow "_" here.
                 if (!Character.isLetterOrDigit(name.charAt(i))) {
                     throw new IllegalArgumentException("Format name can only contain letters and digits: " + name);
@@ -1149,7 +1154,8 @@ public class Configurable {
      * meaning).
      *
      * @param customDateFormats
-     *            Can't be {@code null}.
+     *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
+     *            letters and digits.
      * 
      * @since 2.3.24
      */
