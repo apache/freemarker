@@ -9155,13 +9155,10 @@ cfg.setTemplateConfigurers(
         formats can be registered with the
         <literal>custom_number_formats</literal> and
         <literal>custom_date_formats</literal> configuration settings. After
-        that, if you <link
-        linkend="pgui_config_incompatible_improvements_how_to_set">set the
-        <literal>incompatible_improvements</literal> setting</link> to 2.3.24
-        or higher, anywhere where you can specify formats with a
+        that, anywhere where you can specify formats with a
         <literal>String</literal>, now you can refer to your custom format as
         <literal>"@<replaceable>name</replaceable>"</literal>. So for example,
-        if you have registered a your number format implementation with name
+        if you have registered your number format implementation with name
         <literal>"smart"</literal>, then you could set the
         <literal>number_format</literal> setting
         (<literal>Configurable.setNumberFormat(String)</literal>) to
@@ -12335,8 +12332,8 @@ Green Mouse</programlisting>
           such returns exactly the same Java object that the date parser
           (<literal>freemarker.core.TemplateDateFormat</literal>
           implementation) returns, while <literal>?date</literal> without the
-          <literal>()</literal> returns a tricky wrapper that's a date and a
-          method and hash on the same time.</para>
+          <literal>()</literal> returns a tricky wrapper value that's a date
+          and a method and hash on the same time.</para>
         </section>
 
         <section xml:id="ref_builtin_ends_with">
@@ -20575,16 +20572,18 @@ ${"'{}"}
                 </listitem>
 
                 <listitem>
-                  <para>Values starting with <literal>@</literal>, if <link
+                  <para>Values starting with <literal>@</literal> refer to a
+                  <link linkend="pgui_config_custom_formats">custom
+                  format</link>, but only if either <link
                   linkend="pgui_config_incompatible_improvements_how_to_set">the
                   <literal>incompatible_improvements</literal> setting</link>
-                  is at least 2.3.24, refers to a <link
-                  linkend="pgui_config_custom_formats">custom format</link>.
-                  For example, <literal>"@price"</literal> refers to the
-                  custom format registered with the <literal>"price"</literal>
-                  name. The custom format name is possibly followed by space
-                  or <literal>_</literal> and then format parameters, whose
-                  interpretation depends on the custom format.</para>
+                  is at least 2.3.24, or there are some custom formats
+                  defined. For example, <literal>"@price"</literal> refers to
+                  the custom format registered with the
+                  <literal>"price"</literal> name. The custom format name is
+                  possibly followed by space or <literal>_</literal> and then
+                  format parameters, whose interpretation depends on the
+                  custom format.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20833,16 +20832,20 @@ ${"'{}"}
                 </listitem>
 
                 <listitem>
-                  <para>Values starting with <literal>@</literal>, if <link
+                  <para>Values starting with <literal>@</literal> refer to a
+                  <link linkend="pgui_config_custom_formats">custom
+                  format</link>, like <literal>"@departure"</literal> refers
+                  to the custom format registered with the
+                  <literal>"departure"</literal> name. The format name is
+                  possibly followed by space or <literal>_</literal> and then
+                  format parameters, whose interpretation depends on the
+                  custom format. For backward compatibility, the initial
+                  <literal>@</literal> only has this new meaning if either
+                  <link
                   linkend="pgui_config_incompatible_improvements_how_to_set">the
                   <literal>incompatible_improvements</literal> setting</link>
-                  is at least 2.3.24, refer to a <link
-                  linkend="pgui_config_custom_formats">custom format</link>,
-                  like <literal>"@departure"</literal> refers to the custom
-                  format registered with the <literal>"departure"</literal>
-                  name. The format name is possibly followed by space or
-                  <literal>_</literal> and then format parameters, whose
-                  interpretation depends on the custom format.</para>
+                  is at least 2.3.24, or there's any custom formats
+                  defined.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -25751,14 +25754,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>${n?string.@foo_params}</literal>,
               <literal>&lt;#setting number_format='@foo params'&gt;</literal>,
               or <literal>${n?string.@foo}</literal>,
-              <literal>${n?string.@foo_params}</literal>. This means that
-              <replaceable>if</replaceable> custom formats are allowed in the
-              configuration (by <link
-              linkend="pgui_config_incompatible_improvements_how_to_set">setting
-              <literal>incompatible_improvements</literal></link> to 2.3.24),
-              an <replaceable>initial</replaceable> <literal>@</literal> in
-              format strings is now reserved, and need to be escaped as
-              <literal>@@</literal> if it has to be there literally.</para>
+              <literal>${n?string.@foo_params}</literal>. For backward
+              compatibility, the initial <literal>@</literal> only has this
+              special meaning if you have any custom formats or <link
+              linkend="pgui_config_incompatible_improvements">the
+              <literal>incompatible_improvements</literal> setting</link> is
+              2.3.24 or higher.</para>
             </listitem>
 
             <listitem>
@@ -26147,6 +26148,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               FreeMarker-specific <link
               linkend="topic.extendedJavaDecimalFormat">extension to the
               pattern syntax</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>In number/date/time/datetime format strings, initial
+              <literal>@</literal> can be used to refer to custom formats even
+              if <literal>incompatible_improvements</literal> is less than
+              2.3.24, as far as there's any custom format defined. As custom
+              formats is also a 2.3.24 feature, it's backward compatible this
+              way.</para>
             </listitem>
 
             <listitem>

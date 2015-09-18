@@ -1236,7 +1236,7 @@ public final class Environment extends Configurable {
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
                 && formatString.charAt(1) != '@'
-                && isIcI2324OrLater()) {
+                && (isIcI2324OrLater() || hasCustomFormats())) {
             final String name;
             final String params;
             {
@@ -1262,7 +1262,7 @@ public final class Environment extends Configurable {
             if (formatStringLen > 1
                     && formatString.charAt(0) == '@'
                     && formatString.charAt(1) == '@'
-                    && isIcI2324OrLater()) {
+                    && (isIcI2324OrLater() || hasCustomFormats())) {
                 // Unescape @ escaped as @@
                 formatString = formatString.substring(1);
             }
@@ -1743,7 +1743,7 @@ public final class Environment extends Configurable {
         } else if (firstChar == '@'
                 && formatStringLen > 1
                 && formatString.charAt(1) != '@'
-                && isIcI2324OrLater()) {
+                && (isIcI2324OrLater() || hasCustomFormats())) {
             final String name;
             {
                 int endIdx;
@@ -1767,7 +1767,7 @@ public final class Environment extends Configurable {
             if (firstChar == '@'
                     && formatStringLen > 1
                     && formatString.charAt(1) == '@'
-                    && isIcI2324OrLater()) {
+                    && (isIcI2324OrLater() || hasCustomFormats())) {
                 // Unescape @ escaped as @@
                 unescapedFormatString = formatString.substring(1);
             } else {

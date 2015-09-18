@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -196,16 +197,31 @@ public class DateFormatTest extends TemplateTest {
     public void testIcIAndEscaping() throws Exception {
         Configuration cfg = getConfiguration();
         addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@1970");
-        cfg.setDateTimeFormat("@epoch");
-        assertOutput("${d}", "12345678");
+        
+        testIcIAndEscapingWhenCustFormsAreAccepted(cfg);
         
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        testIcIAndEscapingWhenCustFormsAreAccepted(cfg);
+        
+        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        
         cfg.setDateTimeFormat("@@yyyy");
         assertOutput("${d}", "@@1970");
         cfg.setDateTimeFormat("@epoch");
         assertErrorContains("${d}", "\"@epoch\"");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@epoch");
+        assertErrorContains("${d}", "custom", "\"epoch\"");
+    }
+
+    protected void testIcIAndEscapingWhenCustFormsAreAccepted(Configuration cfg) throws IOException, TemplateException {
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@epoch");
+        assertOutput("${d}", "12345678");
     }
     
     @Test

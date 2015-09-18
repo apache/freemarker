@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
@@ -208,16 +209,29 @@ public class NumberFormatTest extends TemplateTest {
     @Test
     public void testIcIAndEscaping() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@10");
-        cfg.setNumberFormat("@hex");
-        assertOutput("${10}", "a");
+        testIcIAndEscapingWhenCustFormsAccepted(cfg);
         
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        testIcIAndEscapingWhenCustFormsAccepted(cfg);
+        
+        cfg.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
         cfg.setNumberFormat("@@0");
         assertOutput("${10}", "@@10");
         cfg.setNumberFormat("@hex");
         assertOutput("${10}", "@hex10");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@hex");
+        assertErrorContains("${10}", "custom", "\"hex\"");
+    }
+
+    protected void testIcIAndEscapingWhenCustFormsAccepted(Configuration cfg) throws IOException, TemplateException {
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@hex");
+        assertOutput("${10}", "a");
     }
 
     @Test
