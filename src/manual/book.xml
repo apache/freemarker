@@ -12314,7 +12314,10 @@ Green Mouse</programlisting>
 &lt;#-- Parsing with SimpleDateFormat patterns: --&gt;
 &lt;#assign someDate = "10/25/1995"?date("MM/dd/yyyy")&gt;
 &lt;#assign someTime = "15:05:30"?time("HH:mm:ss")&gt;
-&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;</programlisting>
+&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;
+
+&lt;#-- Parsing with custom date formats: --&gt;
+&lt;#assign someDatetime = "October/25/1995 03:05 PM"?datetime.@worklog&gt;</programlisting>
 
           <para>To prevent misunderstandings, the left-hand value need not be
           a string literal. For example, when you read data from XML DOM (from
@@ -14468,11 +14471,25 @@ $42.00
 
           <para>since the default number format was set to "currency".</para>
 
-          <para>Beside the three predefined formats, you can use arbitrary
-          number format patterns written in <link
+          <para>You can also refer to named custom formats that were defined
+          when configuring FreeMarker (programmers <link
+          linkend="pgui_config_custom_formats">see more here</link>),
+          like:</para>
+
+          <programlisting>${x?strong.@price}
+${x?strong.@weight}</programlisting>
+
+          <para>where the custom format names were <quote>price</quote> and
+          <quote>weight</quote>. Note that hence the templates can just refer
+          to the application-domain meaning, and the exact format can be
+          specified outside the templates, on a single central place.</para>
+
+          <para>Beside named formats, you can specify number format patterns
+          directly, using the <link
           xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html">Java
           decimal number format syntax</link> (with some FreeMarker-specific
-          extensions; see later):</para>
+          extensions; <link linkend="topic.extendedJavaDecimalFormat">see
+          later</link>):</para>
 
           <programlisting role="template">&lt;#assign x = 1.234&gt;
 ${x?string["0"]}
@@ -15166,7 +15183,9 @@ The usual variations are supported:
           <literal>java.sql.Timestamp</literal> or
           <literal>java.util.Date</literal> then this:</para>
 
-          <programlisting role="template">${openingTime?string.short}
+          <programlisting role="template">&lt;#-- Predefined format names: --&gt;
+
+${openingTime?string.short}
 ${openingTime?string.medium}
 ${openingTime?string.long}
 ${openingTime?string.full}
@@ -15188,18 +15207,19 @@ ${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;
 ${lastUpdated?string.xs}
 ${lastUpdated?string.iso}
 
+&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined formats</link> (starts with @ + letter): --&gt;
+${lastUpdated?string.@lastMod}
+
+&lt;#-- More advanced ISO 8601-related formats: --&gt;
+${lastUpdated?string.iso_m_u}
+${lastUpdated?string.xs_ms_nz}
+
 &lt;#-- SimpleDateFormat patterns: --&gt;
 ${lastUpdated?string["dd.MM.yyyy, HH:mm"]}
 ${lastUpdated?string["EEEE, MMMM dd, yyyy, hh:mm a '('zzz')'"]}
 ${lastUpdated?string["EEE, MMM d, ''yy"]}
 ${lastUpdated?string.yyyy} &lt;#-- Same as ${lastUpdated?string["yyyy"]} --&gt;
-
-&lt;#-- Advanced ISO 8601-related formats: --&gt;
-${lastUpdated?string.iso_m_u}
-${lastUpdated?string.xs_ms_nz}
-
-&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined formats</link> (start with @): --&gt;
-${lastUpdated?string.@file} (or however it was configured)</programlisting>
+</programlisting>
 
           <para>will print something like this:</para>
 
@@ -15225,15 +15245,20 @@ Feb 8, 2003 9:24 PM
 2007-02-20T13:45:09-08:00
 2007-02-20T13:45:09-08:00
 
-08.04.2003 21:24
-Tuesday, April 08, 2003, 09:24 PM (PDT)
-Tue, Apr 8, '03
-2003
+Apr/20/2007 13:45
 
 2007-02-20T21:45Z
 2007-02-20T13:45:09.000
 
-2007-02-20 13 (or however it was configured)</programlisting>
+08.04.2003 21:24
+Tuesday, April 08, 2003, 09:24 PM (PDT)
+Tue, Apr 8, '03
+2003</programlisting>
+
+          <para>Note that with custom formats like in
+          <literal>lastUpdated?string.@lastMod</literal> above, templates can
+          just refer to the application-domain meaning, and the exact format
+          can be specified outside the templates, on a central place.</para>
 
           <warning>
             <para>Unfortunately, because of the limitations of the Java
@@ -20572,18 +20597,22 @@ ${"'{}"}
                 </listitem>
 
                 <listitem>
-                  <para>Values starting with <literal>@</literal> refer to a
-                  <link linkend="pgui_config_custom_formats">custom
-                  format</link>, but only if either <link
+                  <para>Values starting with <literal>@</literal> that's also
+                  followed by a letter, refer to a <link
+                  linkend="pgui_config_custom_formats">custom format</link>.
+                  For example, <literal>"@price"</literal> refers to the
+                  custom format registered with the <literal>"price"</literal>
+                  name. The custom format name is possibly followed by space
+                  or <literal>_</literal> and then format parameters, whose
+                  interpretation depends on the custom format. For backward
+                  compatibility, the initial <literal>@</literal> only has
+                  this new meaning if either <link
                   linkend="pgui_config_incompatible_improvements_how_to_set">the
                   <literal>incompatible_improvements</literal> setting</link>
-                  is at least 2.3.24, or there are some custom formats
-                  defined. For example, <literal>"@price"</literal> refers to
-                  the custom format registered with the
-                  <literal>"price"</literal> name. The custom format name is
-                  possibly followed by space or <literal>_</literal> and then
-                  format parameters, whose interpretation depends on the
-                  custom format.</para>
+                  is at least 2.3.24, or there's any custom formats defined.
+                  When the initial <literal>@</literal> isn't followed by a
+                  letter (any UNICODE letter), it's never treated as a
+                  reference to a custom format.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20832,20 +20861,22 @@ ${"'{}"}
                 </listitem>
 
                 <listitem>
-                  <para>Values starting with <literal>@</literal> refer to a
-                  <link linkend="pgui_config_custom_formats">custom
-                  format</link>, like <literal>"@departure"</literal> refers
-                  to the custom format registered with the
-                  <literal>"departure"</literal> name. The format name is
-                  possibly followed by space or <literal>_</literal> and then
-                  format parameters, whose interpretation depends on the
-                  custom format. For backward compatibility, the initial
-                  <literal>@</literal> only has this new meaning if either
-                  <link
+                  <para>Values starting with <literal>@</literal> that's also
+                  followed by a letter, refer to a <link
+                  linkend="pgui_config_custom_formats">custom format</link>,
+                  like <literal>"@worklog"</literal> refers to the custom
+                  format registered with the <literal>"worklog"</literal>
+                  name. The format name is possibly followed by space or
+                  <literal>_</literal> and then format parameters, whose
+                  interpretation depends on the custom format. For backward
+                  compatibility, the initial <literal>@</literal> only has
+                  this new meaning if either <link
                   linkend="pgui_config_incompatible_improvements_how_to_set">the
                   <literal>incompatible_improvements</literal> setting</link>
-                  is at least 2.3.24, or there's any custom formats
-                  defined.</para>
+                  is at least 2.3.24, or there's any custom formats defined.
+                  When the initial <literal>@</literal> isn't followed by a
+                  letter (any UNICODE letter), it's never treated as a
+                  reference to a custom format.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20930,8 +20961,8 @@ ${"'{}"}
             </listitem>
           </itemizedlist>
 
-          <para>Example: Assume that the initial locale of template is de_DE
-          (German). Then this:</para>
+          <para>Example: Assume that the initial locale of template is
+          <literal>de_DE</literal> (German). Then this:</para>
 
           <programlisting role="template">${1.2}
 &lt;#setting locale="en_US"&gt;

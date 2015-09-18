@@ -726,10 +726,10 @@ public class Configurable {
      *       rounding mode, and {@code _} as the group separator. See more about "extended Java decimal format" in the
      *       FreeMarker Manual.
      *       </li>
-     *   <li>If the string starts with {@code @} character then it's interpreted as a custom number format, but only if
-     *       either {@link Configuration#getIncompatibleImprovements()} is at least 2.3.24, or there's any custom
-     *       formats defined (even if custom date/time/dateTime format). The format of a such string is
-     *       <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where
+     *   <li>If the string starts with {@code @} character followed by a letter then it's interpreted as a custom number
+     *       format, but only if either {@link Configuration#getIncompatibleImprovements()} is at least 2.3.24, or
+     *       there's any custom formats defined (even if custom date/time/dateTime format). The format of a such string
+     *       is <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where
      *       <code><i>name</i></code> is the key in the {@link Map} set by {@link #setCustomNumberFormats(Map)}, and
      *       <code><i>parameters</i></code> is parsed by the custom {@link TemplateNumberFormat}.
      *   </li>
@@ -772,10 +772,10 @@ public class Configurable {
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
      * number_format} setting with values starting with <code>@<i>name</i></code>. Beware, if you specify any custom
-     * formats here, an initial {@code @} will have special meaning in number/date/time/datetime format strings, even if
-     * {@link Configuration#getIncompatibleImprovements() incompatible_improvements} is less than 2.3.24 (starting with
-     * {@link Configuration#getIncompatibleImprovements() incompatible_improvements} 2.3.24 {@code @} always has special
-     * meaning).
+     * formats here, an initial {@code @} followed by a letter will have special meaning in number/date/time/datetime
+     * format strings, even if {@link Configuration#getIncompatibleImprovements() incompatible_improvements} is less
+     * than 2.3.24 (starting with {@link Configuration#getIncompatibleImprovements() incompatible_improvements} 2.3.24
+     * {@code @} always has special meaning).
      * 
      * @param customNumberFormats
      *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
@@ -1102,7 +1102,7 @@ public class Configurable {
      *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
      *       {@code "medium_medium"} for date-time values.)
      *       
-     *   <li><p>Anything that starts with {@code "@"} is interpreted as a custom
+     *   <li><p>Anything that starts with {@code "@"} followed by a letter is interpreted as a custom
      *       date/time/dateTime format, but only if either {@link Configuration#getIncompatibleImprovements()}
      *       is at least 2.3.24, or there's any custom formats defined (even if custom number format). The format of
      *       such string is <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where
@@ -1148,10 +1148,10 @@ public class Configurable {
      * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
      * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
      * datetime_format} settings with values starting with <code>@<i>name</i></code>. Beware, if you specify any custom
-     * formats here, an initial {@code @} will have special meaning in number/date/time/datetime format strings, even if
-     * {@link Configuration#getIncompatibleImprovements() incompatible_improvements} is less than 2.3.24 (starting with
-     * {@link Configuration#getIncompatibleImprovements() incompatible_improvements} 2.3.24 {@code @} always has special
-     * meaning).
+     * formats here, an initial {@code @} followed by a letter will have special meaning in number/date/time/datetime
+     * format strings, even if {@link Configuration#getIncompatibleImprovements() incompatible_improvements} is less
+     * than 2.3.24 (starting with {@link Configuration#getIncompatibleImprovements() incompatible_improvements} 2.3.24
+     * {@code @} always has special meaning).
      *
      * @param customDateFormats
      *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
