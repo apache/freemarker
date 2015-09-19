@@ -10928,22 +10928,8 @@ ${bar?trim}</programlisting>
 
           <para>Note that you can use JSP taglibs with FreeMarker even if the
           servlet container has no native JSP support, just make sure that the
-          <literal>javax.servlet.jsp.*</literal> packages for JSP 1.2 (or
-          later) are available to your Web application. If your servlet
-          container comes with JSP 1.1, then you have to obtain the following
-          six classes (for example you can extract them from the jar-s of
-          Tomcat 5.x or Tomcat 4.x), and copy them into your webapp's
-          <literal>WEB-INF/classes/<replaceable>...</replaceable></literal>
-          directory: <literal>javax.servlet.jsp.tagext.IterationTag</literal>,
-          <literal>javax.servlet.jsp.tagext.TryCatchFinally</literal>,
-          <literal>javax.servlet.ServletContextListener</literal>,
-          <literal>javax.servlet.ServletContextAttributeListener</literal>,
-          <literal>javax.servlet.http.HttpSessionAttributeListener</literal>,
-          <literal>javax.servlet.http.HttpSessionListener</literal>. But
-          beware, since containers that come with JSP 1.1 usually use earlier
-          Serlvet versions than 2.3, event listeners will not be supported,
-          and thus JSP 1.2 taglibs that register event listeners will not work
-          properly.</para>
+          <literal>javax.servlet.jsp.*</literal> packages for JSP 2.0 (or
+          later) are available to your Web application.</para>
 
           <para>As of this writing, JSP features up to JSP 2.1 are
           implemented, except the "tag files" feature of JSP 2 (i.e., custom
@@ -25832,9 +25818,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><emphasis role="strong">Attention!</emphasis> Raised
-              minimum required Java version from 1.4 to 1.5 (aka. Java
-              5)</para>
+              <para><emphasis role="strong">Attention!</emphasis> FreeMarker
+              now requires at least 1.5 (aka. Java 5). 2.3.24 has only
+              required Java 1.4. (Reason: Without this, new public API-s
+              couldn't use generics, which affect negatively the majority of
+              users, while old installations that are still using 1.4 are
+              unlikely to update FreeMarker anyway.)</para>
+            </listitem>
+
+            <listitem>
+              <para><emphasis>Attention!</emphasis> FreeMarker's JSP support
+              (if it's used) now requires at least JSP 2.0. Earlier it only
+              required JSP 1.1. (Reason: The <literal>jsp-api</literal>
+              dependency for JSP 1.x, which was needed for building, can't be
+              legally present in the Maven Central Repository, nor be provided
+              by freemarker.org.)</para>
             </listitem>
 
             <listitem>
@@ -36213,7 +36211,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         </listitem>
 
         <listitem>
-          <para>For the custom JSP taglib support, you will need JSP 1.2 API
+          <para>For the custom JSP taglib support, you will need JSP 2.0 API
           or later avilable. No JSP implementation is needed, just the API.
           This is already present in pretty much every servlet container. For
           more information please see <link linkend="pgui_misc_servlet">the
@@ -36221,7 +36219,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         </listitem>
 
         <listitem>
-          <para>Jython classes are needed for the Jython wrapper.</para>
+          <para>Jython 2.0 or later classes are needed for the Jython
+          wrapper.</para>
         </listitem>
 
         <listitem>
