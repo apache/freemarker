@@ -43,11 +43,11 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
     
     /**
      * @param dateModel
-     *            The date/time/dateTime to format. Most implementations will just work with the return value of
+     *            The date/time/dateTime to format; not {@code null}. Most implementations will just work with the return value of
      *            {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
      *            a custom {@link TemplateDateModel} implementation.
      * 
-     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). Can't be {@code null}.
+     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping); can't be {@code null}.
      * 
      * @throws TemplateValueFormatException
      *             When a problem occurs during the formatting of the value. Notable subclass:

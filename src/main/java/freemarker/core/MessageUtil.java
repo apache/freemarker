@@ -296,13 +296,28 @@ class MessageUtil {
                 .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
     }
 
-    static TemplateModelException newCantFormatDateException(
-            Expression dateSourceExpr, TemplateValueFormatException cause) {
-        return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
-                cause.getMessage())
-                .blame(dateSourceExpr));
+    static TemplateException newCantFormatDateException(TemplateDateFormat format, Expression dataSrcExp,
+            TemplateValueFormatException e, boolean useTempModelExc) {
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                e.getMessage())
+                .blame(dataSrcExp); 
+        return useTempModelExc
+                ? new _TemplateModelException(e, (Environment) null, desc)
+                : new _MiscTemplateException(e, (Environment) null, desc);
     }
-
+    
+    static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
+            TemplateValueFormatException e, boolean useTempModelExc) {
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                e.getMessage())
+                .blame(dataSrcExp); 
+        return useTempModelExc
+                ? new _TemplateModelException(e, (Environment) null, desc)
+                : new _MiscTemplateException(e, (Environment) null, desc);
+    }
+    
     /**
      * @return "a" or "an" or "a(n)" (or "" for empty string) for an FTL type name
      */

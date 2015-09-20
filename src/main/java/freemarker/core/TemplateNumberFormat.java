@@ -42,11 +42,11 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
 
     /**
      * @param numberModel
-     *            The date/time/dateTime to format. Most implementations will just work with the return value of
+     *            The number to format; not {@code null}. Most implementations will just work with the return value of
      *            {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
      *            a custom {@link TemplateDateModel} implementation.
-     * 
-     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). Can't be {@code null}.
+     *            
+     * @return The number as text, with no escaping (like no HTML escaping); can't be {@code null}.
      * 
      * @throws TemplateValueFormatException
      *             If any problem occurs while parsing/getting the format. Notable subclass:
@@ -64,7 +64,7 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * {@link #format(TemplateNumberModel)} escaped, it should return {@code null}.
      */
     public abstract <MO extends TemplateMarkupOutputModel> MO format(
-            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat)
+            TemplateNumberModel numberModel, MarkupOutputFormat<MO> outputFormat)
                     throws TemplateValueFormatException, TemplateModelException;
     
     /**
@@ -79,9 +79,9 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * {@link #format(TemplateNumberModel, MarkupOutputFormat)} and writes its result to the {@link Writer}.
      */
     public <MO extends TemplateMarkupOutputModel> boolean format(
-            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat, Writer out)
+            TemplateNumberModel numberModel, MarkupOutputFormat<MO> outputFormat, Writer out)
                     throws TemplateValueFormatException, TemplateModelException, IOException {
-        MO mo = format(dateModel, outputFormat);
+        MO mo = format(numberModel, outputFormat);
         if (mo == null) {
             return false;
         }

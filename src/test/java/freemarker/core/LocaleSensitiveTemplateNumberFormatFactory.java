@@ -58,7 +58,7 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
         }
     
         @Override
-        public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
+        public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel numberModel,
                 MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
             return null;
         }

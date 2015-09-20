@@ -38,15 +38,18 @@ final class DollarVariable extends Interpolation {
     
     /** For OutputFormat-based auto-escaping */
     private final OutputFormat outputFormat;
-    private final MarkupOutputFormat autoEscapeOutputFormat;
+    private final MarkupOutputFormat markupOutputFormat;
+    private final boolean autoEscape;
 
     DollarVariable(
             Expression expression, Expression escapedExpression,
-            OutputFormat outputFormat, MarkupOutputFormat autoEscapeOutputFormat) {
+            OutputFormat outputFormat, boolean autoEscape) {
         this.expression = expression;
         this.escapedExpression = escapedExpression;
         this.outputFormat = outputFormat;
-        this.autoEscapeOutputFormat = autoEscapeOutputFormat;
+        this.markupOutputFormat
+                = (MarkupOutputFormat) (outputFormat instanceof MarkupOutputFormat ? outputFormat : null);
+        this.autoEscape = autoEscape;
     }
 
     /**
@@ -54,26 +57,28 @@ final class DollarVariable extends Interpolation {
      */
     @Override
     void accept(Environment env) throws TemplateException, IOException {
-        TemplateModel tm = escapedExpression.eval(env);
-        Writer out = env.getOut();
-        String s = EvalUtil.coerceModelToString(tm, escapedExpression, null, true, env);
-        if (s != null) {
-            if (autoEscapeOutputFormat != null) {
-                autoEscapeOutputFormat.output(s, out);
+        final TemplateModel tm = escapedExpression.eval(env);
+        final Writer out = env.getOut();
+        final Object moOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
+                tm, escapedExpression, null, markupOutputFormat, out, env);
+        if (moOrStr instanceof String) {
+            final String s = (String) moOrStr;
+            if (autoEscape) {
+                markupOutputFormat.output(s, out);
             } else {
                 out.write(s);
             }
-        } else {
-            TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) tm;
-            MarkupOutputFormat moOF = mo.getOutputFormat();
+        } else if (moOrStr != null) { // moOrStr wasn't output yet
+            final TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) moOrStr;
+            final MarkupOutputFormat moOF = mo.getOutputFormat();
             // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
             if (moOF != outputFormat && !outputFormat.isOutputFormatMixingAllowed()) {
-                String srcPlainText;
+                final String srcPlainText;
                 // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
                 srcPlainText = moOF.getSourcePlainText(mo);
                 if (srcPlainText == null) {
                     throw new _TemplateModelException(escapedExpression,
-                            "Tha value to print is in ", new _DelayedToString(moOF),
+                            "The value to print is in ", new _DelayedToString(moOF),
                             " format, which differs from the current output format, ",
                             new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");
                 }

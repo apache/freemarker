@@ -45,15 +45,17 @@ final class AddConcatExpression extends Expression {
 
     private final Expression left;
     private final Expression right;
+    private final MarkupOutputFormat markupOutputFormat;
 
-    AddConcatExpression(Expression left, Expression right) {
+    AddConcatExpression(Expression left, Expression right, MarkupOutputFormat markupOutputFormat) {
         this.left = left;
         this.right = right;
+        this.markupOutputFormat = markupOutputFormat;
     }
 
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        return _eval(env, this, left, left.eval(env), right, right.eval(env));
+        return _eval(env, this, left, left.eval(env), right, right.eval(env), markupOutputFormat);
     }
 
     /**
@@ -65,7 +67,8 @@ final class AddConcatExpression extends Expression {
     static TemplateModel _eval(Environment env,
             TemplateObject parent,
             Expression leftExp, TemplateModel leftModel,
-            Expression rightExp, TemplateModel rightModel)
+            Expression rightExp, TemplateModel rightModel,
+            MarkupOutputFormat markupOutputFormat)
             throws TemplateModelException, TemplateException, NonStringException {
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel) {
             Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
@@ -75,27 +78,33 @@ final class AddConcatExpression extends Expression {
             return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
         } else {
             try {
-                String leftStr = EvalUtil.coerceModelToString(leftModel, leftExp, (String) null, true, env);
-                String rightStr = EvalUtil.coerceModelToString(rightModel, rightExp, (String) null, true, env);
-                
-                if (leftStr == null) {  // Signals that the model is markup output 
-                    if (leftModel instanceof TemplateMarkupOutputModel) {
-                        TemplateMarkupOutputModel<?> leftMO = (TemplateMarkupOutputModel<?>) leftModel; 
-                        if (rightStr == null) {  // Signals that the model is markup output
-                            return concatMarkupOutputs(parent, leftMO, (TemplateMarkupOutputModel) rightModel);
-                        }
-                        return concatMarkupOutputs(parent, leftMO, leftMO.getOutputFormat().fromPlainTextByEscaping(rightStr));
-                    } else {
-                        leftStr = "null";  // For B.C. only; should be an error 
-                        // Falls through
+                Object leftOMOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
+                        leftModel, leftExp, (String) null, markupOutputFormat, env);
+                Object rightOMOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
+                        rightModel, rightExp, (String) null, markupOutputFormat, env);
+                // TODO prove that neither can be null
+
+                if (leftOMOrStr instanceof String) {
+                    if (rightOMOrStr instanceof String) {
+                        return new SimpleScalar(((String) leftOMOrStr).concat((String) rightOMOrStr));
+                    } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
+                        TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightOMOrStr; 
+                        return concatMarkupOutputs(parent,
+                                rightMO.getOutputFormat().fromPlainTextByEscaping((String) leftOMOrStr),
+                                rightMO);
+                    }                    
+                } else { // leftOMOrStr instanceof TemplateMarkupOutputModel 
+                    TemplateMarkupOutputModel<?> leftMO = (TemplateMarkupOutputModel<?>) leftOMOrStr; 
+                    if (rightOMOrStr instanceof String) {  // markup output
+                        return concatMarkupOutputs(parent,
+                                leftMO,
+                                leftMO.getOutputFormat().fromPlainTextByEscaping((String) rightOMOrStr));
+                    } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
+                        return concatMarkupOutputs(parent,
+                                leftMO,
+                                (TemplateMarkupOutputModel) rightOMOrStr);
                     }
                 }
-                if (rightStr == null) {  // Signals that the model is markup output
-                    TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightModel; 
-                    return concatMarkupOutputs(parent, rightMO.getOutputFormat().fromPlainTextByEscaping(leftStr), rightMO);
-                }
-                
-                return new SimpleScalar(leftStr.concat(rightStr));
             } catch (NonStringOrTemplateOutputException e) {
                 if (leftModel instanceof TemplateHashModel && rightModel instanceof TemplateHashModel) {
                     if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
@@ -161,7 +170,8 @@ final class AddConcatExpression extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new AddConcatExpression(
     	left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-    	right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    	right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	markupOutputFormat);
     }
 
     @Override

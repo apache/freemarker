@@ -48,24 +48,24 @@ class BuiltInsForOutputFormatRelated {
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {
             TemplateModel lhoTM = target.eval(env);
-            String lhoStr = EvalUtil.coerceModelToString(lhoTM, target, null, true, env);
             MarkupOutputFormat contextOF = outputFormat;
-            if (lhoStr == null) { // should indicate that lhoTM is a TemplateMarkupOutputModel
-                TemplateMarkupOutputModel lhoMO;
-                try {
-                    lhoMO = (TemplateMarkupOutputModel) lhoTM;
-                } catch (ClassCastException e) {
+            Object lhoMOOrStr = EvalUtil.coerceModelToMarkupOutputOrString(lhoTM, target, null, contextOF, env);
+            if (lhoMOOrStr instanceof String) { // TemplateMarkupOutputModel
+                return calculateResult((String) lhoMOOrStr, contextOF, env);
+            } else {
+                if (lhoMOOrStr == null) {
                     throw EvalUtil.newModelHasStoredNullException(null, lhoTM, target);
                 }
+                TemplateMarkupOutputModel lhoMO = (TemplateMarkupOutputModel) lhoMOOrStr;
                 MarkupOutputFormat lhoOF = lhoMO.getOutputFormat();
                 // ATTENTION: Keep this logic in sync. with ${...}'s logic!
                 if (lhoOF == contextOF || contextOF.isOutputFormatMixingAllowed()) {
                     // bypass
-                    return lhoTM;
+                    return lhoMO;
                 } else {
                     // ATTENTION: Keep this logic in sync. with ${...}'s logic!
-                    lhoStr = lhoOF.getSourcePlainText(lhoMO);
-                    if (lhoStr == null) {
+                    String lhoPlainTtext = lhoOF.getSourcePlainText(lhoMO);
+                    if (lhoPlainTtext == null) {
                         throw new _TemplateModelException(target,
                                 "The left side operand of ?", key, " is in ", new _DelayedToString(lhoOF),
                                 " format, which differs from the current output format, ",
@@ -73,10 +73,9 @@ class BuiltInsForOutputFormatRelated {
                     }
                     // Here we know that lho is escaped plain text. So we re-escape it to the current format and
                     // bypass it, just as if the two output formats were the same earlier.
-                    return contextOF.fromPlainTextByEscaping(lhoStr);
+                    return contextOF.fromPlainTextByEscaping(lhoPlainTtext);
                 }
             }
-            return calculateResult(lhoStr, contextOF, env);
         }
         
         protected abstract TemplateModel calculateResult(String lho, MarkupOutputFormat outputFormat, Environment env)
