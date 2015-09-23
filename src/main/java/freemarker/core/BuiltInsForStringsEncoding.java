@@ -152,7 +152,7 @@ class BuiltInsForStringsEncoding {
 
         @Override
         MarkupOutputFormat getMarkupOutputFormat() {
-            return XMLOutputFormat.INSTANCE; // TODO XHTMLOutputFormat
+            return XHTMLOutputFormat.INSTANCE;
         }
     }
 

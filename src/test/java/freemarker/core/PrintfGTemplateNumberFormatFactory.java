@@ -92,8 +92,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
         @Override
         public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel numberModel,
                 MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
-            // TODO XHTMLOutputFormat
-            if (!(outputFormat instanceof HTMLOutputFormat)) {
+            if (!(outputFormat instanceof HTMLOutputFormat || outputFormat instanceof XHTMLOutputFormat)) {
                 return null;
             }
             

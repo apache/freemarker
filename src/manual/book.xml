@@ -26221,6 +26221,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               parse method now, though it's just a <literal>final</literal>
               placeholder now.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>TemplateNumberFormat.format</literal> and
+              <literal>TemplateDateFormat.format</literal> overload that
+              returns markup output is now actually called, so for example now
+              it's possible to use HTML in formatting results. (See
+              <literal>freemarker.core.PrintfGTemplateNumberFormatFactory</literal>
+              under <literal>src/test/java</literal> as an example.) Note that
+              formatting to markup only happens if FTL thinks that the
+              expected result is not just a string, such as for
+              <literal>${<replaceable>myNumber</replaceable>}</literal> if
+              that file has markup <link
+              linkend="dgui_misc_autoescaping_outputformat">output
+              format</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>XHTMLOutputFormat</literal> and
+              <literal>TemplateXHTMLOutputModel</literal>.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

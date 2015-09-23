@@ -297,6 +297,12 @@ public class NumberFormatTest extends TemplateTest {
                 "1.23*10<sup>6</sup> cat:1.23*10<sup>6</sup> 1.23*10<sup>-5</sup>");
         assertOutput("<#ftl outputFormat='HTML'>${\"" + commonFTL + "\"}",
                 "1.23E+06 cat:1.23E+06 1.23E-05");
+        assertOutput("<#escape x as x?html>" + commonFTL + "</#escape>",
+                "1.23*10<sup>6</sup> cat:1.23E+06 1.23*10<sup>-5</sup>");
+        assertOutput("<#escape x as x?xhtml>" + commonFTL + "</#escape>",
+                "1.23*10<sup>6</sup> cat:1.23E+06 1.23*10<sup>-5</sup>");
+        assertOutput("<#escape x as x?xml>" + commonFTL + "</#escape>",
+                "1.23E+06 cat:1.23E+06 1.23E-05");
     }
 
     @Test
