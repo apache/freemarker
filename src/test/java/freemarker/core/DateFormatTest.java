@@ -266,57 +266,57 @@ public class DateFormatTest extends TemplateTest {
         String dateTimeFormatStr2 = dateTimeFormatStr + "'!'";
         
         assertEquals("2015.09.06. 13:00",
-                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Date.class).formatToString(TM));
         assertEquals("2015.09.06. 13:00!",
-                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Date.class).format(TM));
+                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Date.class).formatToString(TM));
         
         assertEquals("2015.09.06. (+0100)",
-                env.getTemplateDateFormat(TemplateDateModel.DATE, Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATE, Date.class).formatToString(TM));
         assertEquals("2015.09.06. (+0100)!",
-                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, Date.class).format(TM));
+                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, Date.class).formatToString(TM));
         
         assertEquals("13:00",
-                env.getTemplateDateFormat(TemplateDateModel.TIME, Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.TIME, Date.class).formatToString(TM));
         assertEquals("13:00!",
-                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Date.class).format(TM));
+                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Date.class).formatToString(TM));
         
         assertEquals("2015.09.06. 13:00",
-                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Timestamp.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Timestamp.class).formatToString(TM));
         assertEquals("2015.09.06. 13:00!",
-                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Timestamp.class).format(TM));
+                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Timestamp.class).formatToString(TM));
 
         assertEquals("2015.09.06. (+0000)",
-                env.getTemplateDateFormat(TemplateDateModel.DATE, java.sql.Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATE, java.sql.Date.class).formatToString(TM));
         assertEquals("2015.09.06. (+0000)!",
-                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, java.sql.Date.class).format(TM));
+                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, java.sql.Date.class).formatToString(TM));
 
         assertEquals("12:00",
-                env.getTemplateDateFormat(TemplateDateModel.TIME, Time.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.TIME, Time.class).formatToString(TM));
         assertEquals("12:00!",
-                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Time.class).format(TM));
+                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Time.class).formatToString(TM));
 
         {
             String dateTimeFormatStrLoc = dateTimeFormatStr + " EEEE";
             // Gets into cache:
             TemplateDateFormat format1
                     = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class);
-            assertEquals("2015.09.06. 13:00 Sunday", format1.format(TM));
+            assertEquals("2015.09.06. 13:00 Sunday", format1.formatToString(TM));
             // Different locale (not cached):
             assertEquals("2015.09.06. 13:00 Sonntag",
                     env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class,
-                            Locale.GERMANY).format(TM));
+                            Locale.GERMANY).formatToString(TM));
             // Different locale and zone (not cached):
             assertEquals("2015.09.06. 14:00 Sonntag",
                     env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class,
-                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).format(TM));
+                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).formatToString(TM));
             // Different locale and zone (not cached):
             assertEquals("2015.09.06. 15:00 Sonntag",
                     env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, java.sql.Date.class,
-                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).format(TM));
+                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).formatToString(TM));
             // Check for corrupted cache:
             TemplateDateFormat format2
                     = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class);
-            assertEquals("2015.09.06. 13:00 Sunday", format2.format(TM));
+            assertEquals("2015.09.06. 13:00 Sunday", format2.formatToString(TM));
             assertSame(format1, format2);
         }
         

@@ -60,7 +60,7 @@ final class DollarVariable extends Interpolation {
         final TemplateModel tm = escapedExpression.eval(env);
         final Writer out = env.getOut();
         final Object moOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
-                tm, escapedExpression, null, markupOutputFormat, out, env);
+                tm, escapedExpression, null, markupOutputFormat, env);
         if (moOrStr instanceof String) {
             final String s = (String) moOrStr;
             if (autoEscape) {
@@ -68,7 +68,7 @@ final class DollarVariable extends Interpolation {
             } else {
                 out.write(s);
             }
-        } else if (moOrStr != null) { // moOrStr wasn't output yet
+        } else { // moOrStr wasn't output yet
             final TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) moOrStr;
             final MarkupOutputFormat moOF = mo.getOutputFormat();
             // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!

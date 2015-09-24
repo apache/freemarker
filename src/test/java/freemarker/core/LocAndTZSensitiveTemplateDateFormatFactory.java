@@ -22,8 +22,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
@@ -53,7 +51,7 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         }
 
         @Override
-        public String format(TemplateDateModel dateModel)
+        public String formatToString(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
             return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
         }
@@ -66,12 +64,6 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         @Override
         public boolean isTimeZoneBound() {
             return true;
-        }
-
-        @Override
-        public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
-            throw new NotImplementedException();
         }
 
         @Override

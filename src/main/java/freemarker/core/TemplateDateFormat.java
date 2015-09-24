@@ -19,8 +19,6 @@
 
 package freemarker.core;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -55,39 +53,26 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
-    public abstract String format(TemplateDateModel dateModel)
+    public abstract String formatToString(TemplateDateModel dateModel)
             throws TemplateValueFormatException, TemplateModelException;
 
     /**
-     * <b>[Not yet used, might changes in 2.3.24 final]</b>
-     * Formats the date/time/dateTime to markup instead of to plain text, or returns {@code null} that will make
-     * FreeMarker call {@link #format(TemplateDateModel)} and escape its result. If the markup format would be just the
-     * result of {@link #format(TemplateDateModel)} escaped, it should return {@code null}.
-     */
-    public abstract <MO extends TemplateMarkupOutputModel> MO format(
-            TemplateDateModel dateModel, MarkupOutputFormat<MO> outputFormat)
-                    throws TemplateValueFormatException, TemplateModelException;
-
-    /**
-     * <b>[Not yet used, might changes in 2.3.24 final]</b>
-     * Same as {@link #format(TemplateDateModel, MarkupOutputFormat)}, but prints the result to a {@link Writer}
-     * instead of returning it. This can be utilized for some optimizatoin. In the case where
-     * {@link #format(TemplateDateModel, MarkupOutputFormat)} would return {@code null}, it returns {@code false}. It
-     * writes to the {@link Writer} exactly if the return value is {@code true}.
+     * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
+     * escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
+     * {@link #formatToString(TemplateDateModel)} escaped, it must return the {@link String} that
+     * {@link #formatToString(TemplateDateModel)} does.
      * 
-     * <p>
-     * The default implementation in {@link TemplateNumberFormat} builds on calls
-     * {@link #format(TemplateDateModel, MarkupOutputFormat)} and writes its result to the {@link Writer}.
+     * @param outputFormat
+     *            When the result is a {@link TemplateMarkupOutputModel} result, it must be exactly of this output
+     *            format.
+     * 
+     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}. If it's a
+     *         {@link TemplateMarkupOutputModel}, then it must have the output format specified in the
+     *         {@code outputFormat} parameter.
      */
-    public <MO extends TemplateMarkupOutputModel> boolean format(TemplateDateModel dateModel,
-            MarkupOutputFormat<MO> outputFormat, Writer out)
-                    throws TemplateValueFormatException, TemplateModelException, IOException {
-        MO mo = format(dateModel, outputFormat);
-        if (mo == null) {
-            return false;
-        }
-        mo.getOutputFormat().output(mo, out);
-        return true;
+    public Object formatToMarkupOrString(TemplateDateModel dateModel, MarkupOutputFormat<?> outputFormat)
+            throws TemplateValueFormatException, TemplateModelException {
+        return formatToString(dateModel);
     }
 
     /**
@@ -107,7 +92,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * 
      * @return The interpretation of the text either as a {@link Date} or {@link TemplateDateModel}. Typically, a
      *         {@link Date}. {@link TemplateDateModel} is used if you have to attach some application-specific
-     *         meta-information thats also extracted during {@link #format(TemplateDateModel)} (so if you format
+     *         meta-information thats also extracted during {@link #formatToString(TemplateDateModel)} (so if you format
      *         something and then parse it, you get back an equivalent result). It can't be {@code null}. Known issue
      *         (at least in FTL 2): {@code ?date}/{@code ?time}/{@code ?datetime}, when not invoked as a method, can't
      *         return the {@link TemplateDateModel}, only the {@link Date} from inside it, hence the additional

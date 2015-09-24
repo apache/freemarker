@@ -68,7 +68,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
         }
         
         @Override
-        public String format(TemplateNumberModel numberModel)
+        public String formatToString(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
             final Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             
@@ -90,32 +90,32 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
         }
 
         @Override
-        public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel numberModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
+        public Object formatToMarkupOrString(TemplateNumberModel numberModel, MarkupOutputFormat<?> outputFormat)
+                throws UnformattableValueException, TemplateModelException {
+            String strResult = formatToString(numberModel);
             if (!(outputFormat instanceof HTMLOutputFormat || outputFormat instanceof XHTMLOutputFormat)) {
-                return null;
+                return strResult;
             }
             
-            String s = StringUtil.XHTMLEnc(format(numberModel));
-            int eIdx = s.indexOf('E');
-            if (eIdx == -1) {
-                return outputFormat.fromMarkup(s);
+            int expIdx = strResult.indexOf('E');
+            if (expIdx == -1) {
+                return strResult;
             }
                 
-            String expStr = s.substring(eIdx + 1);
-            int expNumStart = 0;
-            while (expNumStart < expStr.length() && isExpSignificantDigitPrefix(expStr.charAt(expNumStart))) {
-                expNumStart++;
+            String expStr = strResult.substring(expIdx + 1);
+            int expSignifNumBegin = 0;
+            while (expSignifNumBegin < expStr.length() && isExpSignifNumPrefix(expStr.charAt(expSignifNumBegin))) {
+                expSignifNumBegin++;
             }
             
             return outputFormat.fromMarkup(
-                    s.substring(0, eIdx)
+                    strResult.substring(0, expIdx)
                     + "*10<sup>"
-                    + (expStr.charAt(0) == '-' ? "-" : "") + expStr.substring(expNumStart)
+                    + (expStr.charAt(0) == '-' ? "-" : "") + expStr.substring(expSignifNumBegin)
                     + "</sup>");
         }
 
-        private boolean isExpSignificantDigitPrefix(char c) {
+        private boolean isExpSignifNumPrefix(char c) {
             return c == '+' || c == '-' || c == '0';
         }
 

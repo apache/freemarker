@@ -39,7 +39,7 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
     }
     
     @Override
-    public String format(TemplateDateModel dateModel) throws TemplateModelException {
+    public String formatToString(TemplateDateModel dateModel) throws TemplateModelException {
         return javaDateFormat.format(TemplateFormatUtil.getNonNullDate(dateModel));
     }
 
@@ -69,13 +69,4 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
         return true;
     }
     
-    /**
-     * Always returns {@code null} (there's no markup format).
-     */
-    @Override
-    public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-            MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
-        return null;
-    }
-
 }

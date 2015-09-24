@@ -46,7 +46,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         private HexTemplateNumberFormat() { }
         
         @Override
-        public String format(TemplateNumberModel numberModel)
+        public String formatToString(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
@@ -54,12 +54,6 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
             } catch (ArithmeticException e) {
                 throw new UnformattableValueException(n + " doesn't fit into an int");
             }
-        }
-
-        @Override
-        public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel numberModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableValueException, TemplateModelException {
-            return null;
         }
 
         @Override

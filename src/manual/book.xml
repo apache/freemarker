@@ -25988,6 +25988,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>It's now possible to have HTML or other markup in
+                  number and date/time/datetime formatting results, like
+                  <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which
+                  won't be accidentally auto-escaped, as FreeMarker knows that
+                  it's already HTML. (See [TODO] as an example.) Note that
+                  formatting to markup only happens in a context that has a
+                  markup <link
+                  linkend="dgui_misc_autoescaping_outputformat">output
+                  format</link>, otherwise FreeMarker will format to plain
+                  text, just as before. Also note that no out-of-the-box
+                  (non-custom) formatter formats to markup at the
+                  moment.</para>
+                </listitem>
+
+                <listitem>
                   <para>The internal format object caching architecture has
                   been reworked, so that it can handle custom formats too. But
                   this reworking also fixes some bottlenecks under highly
@@ -26223,18 +26238,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>TemplateNumberFormat.format</literal> and
-              <literal>TemplateDateFormat.format</literal> overload that
-              returns markup output is now actually called, so for example now
-              it's possible to use HTML in formatting results. (See
-              <literal>freemarker.core.PrintfGTemplateNumberFormatFactory</literal>
-              under <literal>src/test/java</literal> as an example.) Note that
-              formatting to markup only happens if FTL thinks that the
-              expected result is not just a string, such as for
-              <literal>${<replaceable>myNumber</replaceable>}</literal> if
-              that file has markup <link
+              <para><literal>TemplateNumberFormat.format</literal>/<literal>TemplateDateFormat.format</literal>
+              overloads were renamed to <literal>formatToString</literal> and
+              <literal>formatToMarkupOrString</literal>. The last has
+              different semantics then its predecessor (which was marked as
+              draft), and it's actually used by FreeMarker. Thus, it's now
+              possible to have HTML or other markup in number and
+              date/time/datetime formatting results, like
+              <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which won't
+              be accidentally auto-escaped, as FreeMarker knows that it's
+              already HTML. (See [TODO] as an example.) Note that formatting
+              to markup only happens in a context that has a markup <link
               linkend="dgui_misc_autoescaping_outputformat">output
-              format</link>.</para>
+              format</link>, otherwise FreeMarker will format to plain text,
+              just like before. Also note that no out-of-the-box (non-custom)
+              formatter formats to markup at the moment.</para>
             </listitem>
 
             <listitem>

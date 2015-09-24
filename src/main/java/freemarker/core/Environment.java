@@ -1049,7 +1049,7 @@ public final class Environment extends Configurable {
             boolean useTempModelExc)
             throws TemplateException {
         try {
-            return format.format(number);
+            return format.formatToString(number);
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
         }
@@ -1324,7 +1324,7 @@ public final class Environment extends Configurable {
         TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr, useTempModelExc);
         
         try {
-            return format.format(tdm);
+            return format.formatToString(tdm);
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
         }
@@ -1347,7 +1347,7 @@ public final class Environment extends Configurable {
                 useTempModelExc);
         
         try {
-            return format.format(tdm);
+            return format.formatToString(tdm);
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
         }

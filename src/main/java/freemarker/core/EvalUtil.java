@@ -19,8 +19,6 @@
 
 package freemarker.core;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Date;
 
 import freemarker.ext.beans.BeanModel;
@@ -356,37 +354,13 @@ class EvalUtil {
 
     static Object coerceModelToMarkupOutputOrString(TemplateModel tm, Expression exp, String seqHint,
             MarkupOutputFormat markupOutputFormat, Environment env) throws TemplateException {
-        try {
-            return coerceModelToMarkupOutputOrString(tm, exp, seqHint, markupOutputFormat, null, env);
-        } catch (IOException e) {
-            throw new BugException("Unexpected exception", e);
-        }
-    }
-
-    static Object coerceModelToMarkupOutputOrString(TemplateModel tm, Expression exp, String seqHint,
-            MarkupOutputFormat markupOutputFormat, Writer out, Environment env) throws TemplateException, IOException {
         if (tm instanceof TemplateNumberModel) {
             TemplateNumberModel tnm = (TemplateNumberModel) tm; 
             TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
             try {
-                if (markupOutputFormat != null) {
-                    // Try to return markup output:
-                    if (out == null) {
-                        TemplateMarkupOutputModel r = format.format(tnm, markupOutputFormat);
-                        if (r != null) {
-                            return r;
-                        }
-                        // Falls through
-                    } else {
-                        if (format.format(tnm, markupOutputFormat, out)) {
-                            return null;
-                        }
-                        // Falls through
-                    }
-                }
-                
-                // Return a String:
-                return format.format(tnm);
+                return markupOutputFormat != null 
+                        ? format.formatToMarkupOrString(tnm, markupOutputFormat)
+                        : format.formatToString(tnm);
             } catch (TemplateValueFormatException e) {
                 throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
             }
@@ -394,24 +368,9 @@ class EvalUtil {
             TemplateDateModel tdm = (TemplateDateModel) tm;
             TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
             try {
-                if (markupOutputFormat != null) {
-                    // Try to return markup output:
-                    if (out == null) {
-                        TemplateMarkupOutputModel r = format.format(tdm, markupOutputFormat);
-                        if (r != null) {
-                            return r;
-                        }
-                        // Falls through
-                    } else {
-                        if (format.format(tdm, markupOutputFormat, out)) {
-                            return null;
-                        }
-                        // Falls through
-                    }
-                }
-                
-                // Return a String:
-                return format.format(tdm);
+                return markupOutputFormat != null
+                        ? format.formatToMarkupOrString(tdm, markupOutputFormat)
+                        : format.formatToString(tdm);
             } catch (TemplateValueFormatException e) {
                 throw MessageUtil.newCantFormatDateException(format, exp, e, false);
             }

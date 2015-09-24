@@ -151,17 +151,17 @@ public class NumberFormatTest extends TemplateTest {
         TemplateNumberFormat defF = env.getTemplateNumberFormat();
         //
         TemplateNumberFormat explF = env.getTemplateNumberFormat("0.00");
-        assertEquals("1.25", explF.format(new SimpleNumber(1.25)));
+        assertEquals("1.25", explF.formatToString(new SimpleNumber(1.25)));
         //
         TemplateNumberFormat expl2F = env.getTemplateNumberFormat("@loc");
-        assertEquals("1.25_en_US", expl2F.format(new SimpleNumber(1.25)));
+        assertEquals("1.25_en_US", expl2F.formatToString(new SimpleNumber(1.25)));
         
         TemplateNumberFormat explFFr = env.getTemplateNumberFormat("0.00", Locale.FRANCE);
         assertNotSame(explF, explFFr);
-        assertEquals("1,25", explFFr.format(new SimpleNumber(1.25)));
+        assertEquals("1,25", explFFr.formatToString(new SimpleNumber(1.25)));
         //
         TemplateNumberFormat expl2FFr = env.getTemplateNumberFormat("@loc", Locale.FRANCE);
-        assertEquals("1.25_fr_FR", expl2FFr.format(new SimpleNumber(1.25)));
+        assertEquals("1.25_fr_FR", expl2FFr.formatToString(new SimpleNumber(1.25)));
         
         assertSame(env.getTemplateNumberFormat(), defF);
         //

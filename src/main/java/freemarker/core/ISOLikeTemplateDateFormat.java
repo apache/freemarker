@@ -177,7 +177,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     }
     
     @Override
-    public final String format(TemplateDateModel dateModel) throws TemplateModelException {
+    public final String formatToString(TemplateDateModel dateModel) throws TemplateModelException {
         final Date date = TemplateFormatUtil.getNonNullDate(dateModel);
         return format(
                 date,
@@ -255,15 +255,6 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     @Override
     public boolean isTimeZoneBound() {
         return true;
-    }
-
-    /**
-     * Always returns {@code null} (there's no markup format).
-     */
-    @Override
-    public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-            MarkupOutputFormat<MO> outputFormat) throws TemplateValueFormatException, TemplateModelException {
-        return null;
     }
 
     protected abstract boolean isXSMode();
