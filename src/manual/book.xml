@@ -14639,7 +14639,7 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
                   <td><literal>grp</literal></td>
 
                   <td>Grouping separator character. Note that grouping is
-                  turned on by using <literal>","</literal> in the patter, as
+                  turned on by using <literal>","</literal> in the pattern, as
                   shown in the earlier example. If it's not turned on, this
                   option won't have visible effect.</td>
                 </tr>
