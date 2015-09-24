@@ -142,7 +142,7 @@ class BuiltInsForMultipleTypes {
             private final String text;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
-            private Date cachedValue;
+            private TemplateDateModel cachedValue;
             
             DateParser(String text, Environment env)
             throws TemplateException {
@@ -152,8 +152,8 @@ class BuiltInsForMultipleTypes {
             }
             
             public Object exec(List args) throws TemplateModelException {
-                checkMethodArgCount(args, 1);
-                return get((String) args.get(0));
+                checkMethodArgCount(args, 0, 1);
+                return args.size() == 0 ? getAsDateModel() : get((String) args.get(0));
             }
             
             public TemplateModel get(String pattern) throws TemplateModelException {
@@ -164,14 +164,30 @@ class BuiltInsForMultipleTypes {
                     // `e` should always be a TemplateModelException here, but to be sure: 
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to get format", e); 
                 }
-                return new SimpleDate(parse(format), dateType);
+                return toTemplateDateModel(parse(format));
             }
-    
-            public Date getAsDate() throws TemplateModelException {
+
+            private TemplateDateModel toTemplateDateModel(Object date) throws _TemplateModelException {
+                if (date instanceof Date) {
+                    return new SimpleDate((Date) date, dateType);
+                } else {
+                    TemplateDateModel tm = (TemplateDateModel) date;
+                    if (tm.getDateType() != dateType) {
+                        throw new _TemplateModelException("The result of the parsing was of the wrong date type.");
+                    }
+                    return tm;
+                }
+            }
+
+            private TemplateDateModel getAsDateModel() throws TemplateModelException {
                 if (cachedValue == null) {
-                    cachedValue = parse(defaultFormat);
+                    cachedValue = toTemplateDateModel(parse(defaultFormat));
                 }
                 return cachedValue;
+            }
+            
+            public Date getAsDate() throws TemplateModelException {
+                return getAsDateModel().getAsDate();
             }
     
             public int getDateType() {
@@ -182,11 +198,11 @@ class BuiltInsForMultipleTypes {
                 return false;
             }
     
-            private Date parse(TemplateDateFormat df)
+            private Object parse(TemplateDateFormat df)
             throws TemplateModelException {
                 try {
-                    return df.parse(text);
-                } catch (java.text.ParseException e) {
+                    return df.parse(text, dateType);
+                } catch (TemplateValueFormatException e) {
                     throw new _TemplateModelException(e,
                             "The string doesn't match the expected date/time/date-time format. "
                             + "The string to parse was: ", new _DelayedJQuote(text), ". ",
@@ -544,7 +560,7 @@ class BuiltInsForMultipleTypes {
             private TemplateModel formatWith(String key)
             throws TemplateModelException {
                 try {
-                    return new SimpleScalar(env.formatDate(dateModel, key, target, stringBI.this, true));
+                    return new SimpleScalar(env.formatDateToString(dateModel, key, target, stringBI.this, true));
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure: 
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to format value", e); 
@@ -562,9 +578,14 @@ class BuiltInsForMultipleTypes {
                                 throw new BugException();
                             }
                         }
-                        cachedValue = defaultFormat.format(dateModel);
+                        cachedValue = defaultFormat.formatToString(dateModel);
                     } catch (TemplateValueFormatException e) {
-                        throw MessageUtil.newCantFormatDateException(target, e);
+                        try {
+                            throw MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
+                        } catch (TemplateException e2) {
+                            // `e` should always be a TemplateModelException here, but to be sure: 
+                            throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2); 
+                        }
                     }
                 }
                 return cachedValue;
@@ -617,9 +638,9 @@ class BuiltInsForMultipleTypes {
                 String result;
                 try {
                     if (format instanceof BackwardCompatibleTemplateNumberFormat) {
-                        result = env.formatNumber(number, (BackwardCompatibleTemplateNumberFormat) format, target);
+                        result = env.formatNumberToString(number, (BackwardCompatibleTemplateNumberFormat) format, target);
                     } else {
-                        result = env.formatNumber(numberModel, format, target, true);
+                        result = env.formatNumberToString(numberModel, format, target, true);
                     }
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure: 
@@ -633,10 +654,10 @@ class BuiltInsForMultipleTypes {
                 if (cachedValue == null) {
                     try {
                         if (defaultFormat instanceof BackwardCompatibleTemplateNumberFormat) {
-                            cachedValue = env.formatNumber(
+                            cachedValue = env.formatNumberToString(
                                     number, (BackwardCompatibleTemplateNumberFormat) defaultFormat, target);
                         } else {
-                            cachedValue = env.formatNumber(numberModel, defaultFormat, target, true);
+                            cachedValue = env.formatNumberToString(numberModel, defaultFormat, target, true);
                         }
                     } catch (TemplateException e) {
                         // `e` should always be a TemplateModelException here, but to be sure: 

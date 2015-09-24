@@ -25,11 +25,11 @@ import java.util.TimeZone;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 
-public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFactory {
+public class AppMetaTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
-    public static final EpochMillisTemplateDateFormatFactory INSTANCE = new EpochMillisTemplateDateFormatFactory();
+    public static final AppMetaTemplateDateFormatFactory INSTANCE = new AppMetaTemplateDateFormatFactory();
     
-    private EpochMillisTemplateDateFormatFactory() {
+    private AppMetaTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
     
@@ -37,19 +37,23 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
     public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
             Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
         TemplateFormatUtil.checkHasNoParameters(params);
-        return EpochMillisTemplateDateFormat.INSTANCE;
+        return AppMetaTemplateDateFormat.INSTANCE;
     }
 
-    private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
+    private static class AppMetaTemplateDateFormat extends TemplateDateFormat {
 
-        private static final EpochMillisTemplateDateFormat INSTANCE = new EpochMillisTemplateDateFormat();
+        private static final AppMetaTemplateDateFormat INSTANCE = new AppMetaTemplateDateFormat();
         
-        private EpochMillisTemplateDateFormat() { }
+        private AppMetaTemplateDateFormat() { }
         
         @Override
         public String formatToString(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
-            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
+            String result = String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
+            if (dateModel instanceof AppMetaTemplateDateModel) {
+                result += "/" + ((AppMetaTemplateDateModel) dateModel).getAppMeta(); 
+            }
+            return result;
         }
 
         @Override
@@ -63,9 +67,17 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         }
 
         @Override
-        public Date parse(String s, int dateType) throws UnparsableValueException {
+        public Object parse(String s, int dateType) throws UnparsableValueException {
+            int slashIdx = s.indexOf('/');
             try {
-                return new Date(Long.parseLong(s));
+                if (slashIdx != -1) {
+                    return new AppMetaTemplateDateModel(
+                            new Date(Long.parseLong(s.substring(0,  slashIdx))),
+                            dateType,
+                            s.substring(slashIdx +1));
+                } else {
+                    return new Date(Long.parseLong(s));
+                }
             } catch (NumberFormatException e) {
                 throw new UnparsableValueException("Malformed long");
             }
@@ -74,6 +86,34 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         @Override
         public String getDescription() {
             return "millis since the epoch";
+        }
+        
+    }
+    
+    public static class AppMetaTemplateDateModel implements TemplateDateModel {
+        
+        private final Date date;
+        private final int dateType;
+        private final String appMeta;
+
+        public AppMetaTemplateDateModel(Date date, int dateType, String appMeta) {
+            this.date = date;
+            this.dateType = dateType;
+            this.appMeta = appMeta;
+        }
+
+        @Override
+        public Date getAsDate() throws TemplateModelException {
+            return date;
+        }
+
+        @Override
+        public int getDateType() {
+            return dateType;
+        }
+
+        public String getAppMeta() {
+            return appMeta;
         }
         
     }

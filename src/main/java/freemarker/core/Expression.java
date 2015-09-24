@@ -93,10 +93,6 @@ abstract public class Expression extends TemplateObject {
         return EvalUtil.coerceModelToString(eval(env), this, seqTip, env);
     }
     
-    static String coerceModelToString(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
-        return EvalUtil.coerceModelToString(tm, exp, null, env);
-    }
-    
     Number evalToNumber(Environment env) throws TemplateException {
         TemplateModel model = eval(env);
         return modelToNumber(model, env);

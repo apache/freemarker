@@ -41,6 +41,7 @@ final class Assignment extends TemplateElement {
     private final String variableName;
     private final int operatorType;
     private final Expression valueExp;
+    private final MarkupOutputFormat markupOutputFormat;
     private Expression namespaceExp;
 
     static final int NAMESPACE = 1;
@@ -57,7 +58,8 @@ final class Assignment extends TemplateElement {
     Assignment(String variableName,
             int operator,
             Expression valueExp,
-            int scope) {
+            int scope,
+            MarkupOutputFormat markupOutputFormat) {
         this.scope = scope;
         
         this.variableName = variableName;
@@ -93,6 +95,8 @@ final class Assignment extends TemplateElement {
         }
         
         this.valueExp = valueExp;
+        
+        this.markupOutputFormat = markupOutputFormat;
     }
     
     void setNamespaceExp(Expression namespaceExp) {
@@ -165,7 +169,8 @@ final class Assignment extends TemplateElement {
                         throw InvalidReferenceException.getInstance(valueExp, env);
                     }
                 }
-                value = AddConcatExpression._eval(env, namespaceExp, null, lhoValue, valueExp, value);
+                value = AddConcatExpression._eval(env,
+                        namespaceExp, null, lhoValue, valueExp, value, markupOutputFormat);
             } else {  // Numerical operation
                 Number lhoNumber;
                 if (lhoValue instanceof TemplateNumberModel) {

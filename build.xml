@@ -240,33 +240,20 @@
       verify="yes" stubversion="1.2"
     />
 
-    <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp1.2" />
+    <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
     <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
-      classpathref="ivy.dep.jsp1.2"
+      classpathref="ivy.dep.jsp2.0"
       bootclasspath="${boot.classpath.j2se1.5}"
       includes="
         freemarker/ext/jsp/**,
         freemarker/ext/servlet/**,
         freemarker/cache/WebappTemplateLoader.java"
       excludes="
-        freemarker/ext/jsp/TaglibFactory.java,
-        freemarker/ext/jsp/_FreeMarkerPageContext1.java,
         freemarker/ext/jsp/_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
-    />
-    
-    <ivy:cachepath conf="build.jsp1.2" pathid="ivy.dep.jsp1.2" />
-    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
-      includeantruntime="false"
-      classpathref="ivy.dep.jsp1.2"
-      bootclasspath="${boot.classpath.j2se1.5}"
-      includes="
-        freemarker/ext/jsp/TaglibFactory.java,
-        freemarker/ext/jsp/_FreeMarkerPageContext1.java"
     />
     
     <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->

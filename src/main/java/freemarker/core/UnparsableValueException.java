@@ -19,17 +19,20 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
-
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because its type is {@link TemplateDateModel#UNKNOWN}.
+ * Thrown when the content of the string that should be parsed by the {@link TemplateValueFormat} doesn't match what the
+ * format expects.
  * 
  * @since 2.3.24
  */
-public final class UnknownDateTypeFormattingUnsupportedException extends UnformattableValueException {
+public class UnparsableValueException extends TemplateValueFormatException {
 
-    public UnknownDateTypeFormattingUnsupportedException() {
-        super(MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE);
+    public UnparsableValueException(String message, Throwable cause) {
+        super(message, cause);
     }
-    
+
+    public UnparsableValueException(String message) {
+        this(message, null);
+    }
+
 }

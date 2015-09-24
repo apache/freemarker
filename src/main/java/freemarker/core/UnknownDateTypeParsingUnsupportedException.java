@@ -17,21 +17,20 @@
  * under the License.
  */
 
-package freemarker.ext.jsp;
+package freemarker.core;
 
-import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateDateModel;
 
 /**
- * Don't use this class; it's only public to work around Google App Engine Java
- * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * Thrown when a string can't be parsed to {@link TemplateDateModel}, because the provided target type is
+ * {@link TemplateDateModel#UNKNOWN}.
  * 
- * Implementation of PageContext that contains JSP 1.1 specific methods.
+ * @since 2.3.24
  */
-public class _FreeMarkerPageContext1 extends FreeMarkerPageContext {
+public final class UnknownDateTypeParsingUnsupportedException extends UnformattableValueException {
 
-    public _FreeMarkerPageContext1() throws TemplateModelException {
-        super();
+    public UnknownDateTypeParsingUnsupportedException() {
+        super(MessageUtil.UNKNOWN_DATE_PARSING_ERROR_MESSAGE);
     }
-
-    public void include (String s, boolean b) {}
+    
 }

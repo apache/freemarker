@@ -22,6 +22,7 @@ package freemarker.core;
 import java.util.Date;
 import java.util.TimeZone;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.DateUtil;
@@ -176,7 +177,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     }
     
     @Override
-    public final String format(TemplateDateModel dateModel) throws TemplateModelException {
+    public final String formatToString(TemplateDateModel dateModel) throws TemplateModelException {
         final Date date = TemplateFormatUtil.getNonNullDate(dateModel);
         return format(
                 date,
@@ -197,17 +198,23 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
             DateToISO8601CalendarFactory calendarFactory);
 
     @Override
-    public final Date parse(String s) throws java.text.ParseException {
+    @SuppressFBWarnings(value = "RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN",
+            justification = "Known to use the singleton Boolean-s only")
+    public final Date parse(String s, int dateType) throws UnparsableValueException {
         CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator(env);
         TimeZone tz = forceUTC != Boolean.FALSE ? DateUtil.UTC : timeZone;
-        if (dateType == TemplateDateModel.DATE) {
-            return parseDate(s, tz, calToDateConverter);
-        } else if (dateType == TemplateDateModel.TIME) {
-            return parseTime(s, tz, calToDateConverter);
-        } else if (dateType == TemplateDateModel.DATETIME) {
-            return parseDateTime(s, tz, calToDateConverter);
-        } else {
-            throw new BugException("Unexpected date type: " + dateType);
+        try {
+            if (dateType == TemplateDateModel.DATE) {
+                return parseDate(s, tz, calToDateConverter);
+            } else if (dateType == TemplateDateModel.TIME) {
+                return parseTime(s, tz, calToDateConverter);
+            } else if (dateType == TemplateDateModel.DATETIME) {
+                return parseDateTime(s, tz, calToDateConverter);
+            } else {
+                throw new BugException("Unexpected date type: " + dateType);
+            }
+        } catch (DateParseException e) {
+            throw new UnparsableValueException(e.getMessage(), e);
         }
     }
     
@@ -248,15 +255,6 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     @Override
     public boolean isTimeZoneBound() {
         return true;
-    }
-
-    /**
-     * Always returns {@code null} (there's no markup format).
-     */
-    @Override
-    public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-            MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
-        return null;
     }
 
     protected abstract boolean isXSMode();

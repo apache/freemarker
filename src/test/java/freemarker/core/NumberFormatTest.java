@@ -22,6 +22,9 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
@@ -55,7 +58,8 @@ public class NumberFormatTest extends TemplateTest {
         cfg.setCustomNumberFormats(ImmutableMap.of(
                 "hex", HexTemplateNumberFormatFactory.INSTANCE,
                 "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE,
-                "base", BaseNTemplateNumberFormatFactory.INSTANCE));
+                "base", BaseNTemplateNumberFormatFactory.INSTANCE,
+                "printfG", PrintfGTemplateNumberFormatFactory.INSTANCE));
     }
 
     @Test
@@ -147,17 +151,17 @@ public class NumberFormatTest extends TemplateTest {
         TemplateNumberFormat defF = env.getTemplateNumberFormat();
         //
         TemplateNumberFormat explF = env.getTemplateNumberFormat("0.00");
-        assertEquals("1.25", explF.format(new SimpleNumber(1.25)));
+        assertEquals("1.25", explF.formatToString(new SimpleNumber(1.25)));
         //
         TemplateNumberFormat expl2F = env.getTemplateNumberFormat("@loc");
-        assertEquals("1.25_en_US", expl2F.format(new SimpleNumber(1.25)));
+        assertEquals("1.25_en_US", expl2F.formatToString(new SimpleNumber(1.25)));
         
         TemplateNumberFormat explFFr = env.getTemplateNumberFormat("0.00", Locale.FRANCE);
         assertNotSame(explF, explFFr);
-        assertEquals("1,25", explFFr.format(new SimpleNumber(1.25)));
+        assertEquals("1,25", explFFr.formatToString(new SimpleNumber(1.25)));
         //
         TemplateNumberFormat expl2FFr = env.getTemplateNumberFormat("@loc", Locale.FRANCE);
-        assertEquals("1.25_fr_FR", expl2FFr.format(new SimpleNumber(1.25)));
+        assertEquals("1.25_fr_FR", expl2FFr.formatToString(new SimpleNumber(1.25)));
         
         assertSame(env.getTemplateNumberFormat(), defF);
         //
@@ -208,16 +212,35 @@ public class NumberFormatTest extends TemplateTest {
     @Test
     public void testIcIAndEscaping() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@10");
-        cfg.setNumberFormat("@hex");
-        assertOutput("${10}", "a");
+        testIcIAndEscapingWhenCustFormsAccepted(cfg);
         
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@@10");
+        testIcIAndEscapingWhenCustFormsAccepted(cfg);
+        
+        cfg.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
         cfg.setNumberFormat("@hex");
         assertOutput("${10}", "@hex10");
+        cfg.setNumberFormat("'@'0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        cfg.setNumberFormat("@hex");
+        assertErrorContains("${10}", "custom", "\"hex\"");
+        cfg.setNumberFormat("'@'0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
+    }
+
+    protected void testIcIAndEscapingWhenCustFormsAccepted(Configuration cfg) throws IOException, TemplateException {
+        cfg.setNumberFormat("@hex");
+        assertOutput("${10}", "a");
+        cfg.setNumberFormat("'@'0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
     }
 
     @Test
@@ -261,6 +284,38 @@ public class NumberFormatTest extends TemplateTest {
                 + "<#setting locale='fr_FR'>${1} "
                 + "<#setting locale='hu_HU'>${1}",
                 "1.0_en 1.0_en_GB 1.0_en_GB 1,0_fr_FR 1,0");
+    }
+    
+    @Test
+    public void testMarkupFormat() throws IOException, TemplateException {
+        getConfiguration().setNumberFormat("@printfG_3");
+
+        String commonFTL = "${1234567} ${'cat:' + 1234567} ${0.0000123}";
+        assertOutput(commonFTL,
+                "1.23E+06 cat:1.23E+06 1.23E-05");
+        assertOutput("<#ftl outputFormat='HTML'>" + commonFTL,
+                "1.23*10<sup>6</sup> cat:1.23*10<sup>6</sup> 1.23*10<sup>-5</sup>");
+        assertOutput("<#ftl outputFormat='HTML'>${\"" + commonFTL + "\"}",
+                "1.23E+06 cat:1.23E+06 1.23E-05");
+        assertOutput("<#escape x as x?html>" + commonFTL + "</#escape>",
+                "1.23*10<sup>6</sup> cat:1.23E+06 1.23*10<sup>-5</sup>");
+        assertOutput("<#escape x as x?xhtml>" + commonFTL + "</#escape>",
+                "1.23*10<sup>6</sup> cat:1.23E+06 1.23*10<sup>-5</sup>");
+        assertOutput("<#escape x as x?xml>" + commonFTL + "</#escape>",
+                "1.23E+06 cat:1.23E+06 1.23E-05");
+    }
+
+    @Test
+    public void testPrintG() throws IOException, TemplateException {
+        for (Number n : new Number[] {
+                1234567, 1234567L, 1234567d, 1234567f, BigInteger.valueOf(1234567), BigDecimal.valueOf(1234567) }) {
+            addToDataModel("n", n);
+            
+            assertOutput("${n?string.@printfG}", "1.23457E+06");
+            assertOutput("${n?string.@printfG_3}", "1.23E+06");
+            assertOutput("${n?string.@printfG_7}", "1234567");
+            assertOutput("${0.0000123?string.@printfG}", "1.23000E-05");
+        }
     }
     
     private static class MutableTemplateNumberModel implements TemplateNumberModel {
