@@ -35,6 +35,10 @@ class MessageUtil {
             = "Can't convert the date-like value to string because it isn't "
               + "known if it's a date (no time part), time or date-time value.";
     
+    static final String UNKNOWN_DATE_PARSING_ERROR_MESSAGE
+            = "Can't parse the string to date-like value because it isn't "
+              + "known if it's desired result should be a date (no time part), a time, or a date-time value.";
+
     static final String UNKNOWN_DATE_TYPE_ERROR_TIP = 
             "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
     
@@ -293,13 +297,28 @@ class MessageUtil {
                 .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
     }
 
-    static TemplateModelException newCantFormatDateException(
-            Expression dateSourceExpr, TemplateValueFormatException cause) {
-        return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
-                cause.getMessage())
-                .blame(dateSourceExpr));
+    static TemplateException newCantFormatDateException(TemplateDateFormat format, Expression dataSrcExp,
+            TemplateValueFormatException e, boolean useTempModelExc) {
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                e.getMessage())
+                .blame(dataSrcExp); 
+        return useTempModelExc
+                ? new _TemplateModelException(e, (Environment) null, desc)
+                : new _MiscTemplateException(e, (Environment) null, desc);
     }
-
+    
+    static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
+            TemplateValueFormatException e, boolean useTempModelExc) {
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                e.getMessage())
+                .blame(dataSrcExp); 
+        return useTempModelExc
+                ? new _TemplateModelException(e, (Environment) null, desc)
+                : new _MiscTemplateException(e, (Environment) null, desc);
+    }
+    
     /**
      * @return "a" or "an" or "a(n)" (or "" for empty string) for an FTL type name
      */

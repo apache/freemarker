@@ -18,12 +18,9 @@
  */
 package freemarker.core;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.apache.commons.lang.NotImplementedException;
 
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
@@ -54,8 +51,8 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         }
 
         @Override
-        public String format(TemplateDateModel dateModel)
-                throws UnformattableDateException, TemplateModelException {
+        public String formatToString(TemplateDateModel dateModel)
+                throws UnformattableValueException, TemplateModelException {
             return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
         }
 
@@ -70,21 +67,15 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         }
 
         @Override
-        public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
-            throw new NotImplementedException();
-        }
-
-        @Override
-        public Date parse(String s) throws ParseException {
+        public Date parse(String s, int dateType) throws UnparsableValueException {
             try {
                 int atIdx = s.indexOf("@");
                 if (atIdx == -1) {
-                    throw new ParseException("Missing @", 0);
+                    throw new UnparsableValueException("Missing @");
                 }
                 return new Date(Long.parseLong(s.substring(0, atIdx)));
             } catch (NumberFormatException e) {
-                throw new ParseException("Malformed long", 0);
+                throw new UnparsableValueException("Malformed long");
             }
         }
 

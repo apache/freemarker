@@ -18,12 +18,9 @@
  */
 package freemarker.core;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.apache.commons.lang.NotImplementedException;
 
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
@@ -63,8 +60,8 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
         }
         
         @Override
-        public String format(TemplateDateModel dateModel)
-                throws UnformattableDateException, TemplateModelException {
+        public String formatToString(TemplateDateModel dateModel)
+                throws UnformattableValueException, TemplateModelException {
             return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() / divisor);
         }
 
@@ -79,17 +76,11 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
         }
 
         @Override
-        public <MO extends TemplateMarkupOutputModel> MO format(TemplateDateModel dateModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
-            throw new NotImplementedException();
-        }
-
-        @Override
-        public Date parse(String s) throws ParseException {
+        public Date parse(String s, int dateType) throws UnparsableValueException {
             try {
                 return new Date(Long.parseLong(s));
             } catch (NumberFormatException e) {
-                throw new ParseException("Malformed long", 0);
+                throw new UnparsableValueException("Malformed long");
             }
         }
 

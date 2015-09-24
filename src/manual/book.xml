@@ -9155,13 +9155,10 @@ cfg.setTemplateConfigurers(
         formats can be registered with the
         <literal>custom_number_formats</literal> and
         <literal>custom_date_formats</literal> configuration settings. After
-        that, if you <link
-        linkend="pgui_config_incompatible_improvements_how_to_set">set the
-        <literal>incompatible_improvements</literal> setting</link> to 2.3.24
-        or higher, anywhere where you can specify formats with a
+        that, anywhere where you can specify formats with a
         <literal>String</literal>, now you can refer to your custom format as
         <literal>"@<replaceable>name</replaceable>"</literal>. So for example,
-        if you have registered a your number format implementation with name
+        if you have registered your number format implementation with name
         <literal>"smart"</literal>, then you could set the
         <literal>number_format</literal> setting
         (<literal>Configurable.setNumberFormat(String)</literal>) to
@@ -10931,22 +10928,8 @@ ${bar?trim}</programlisting>
 
           <para>Note that you can use JSP taglibs with FreeMarker even if the
           servlet container has no native JSP support, just make sure that the
-          <literal>javax.servlet.jsp.*</literal> packages for JSP 1.2 (or
-          later) are available to your Web application. If your servlet
-          container comes with JSP 1.1, then you have to obtain the following
-          six classes (for example you can extract them from the jar-s of
-          Tomcat 5.x or Tomcat 4.x), and copy them into your webapp's
-          <literal>WEB-INF/classes/<replaceable>...</replaceable></literal>
-          directory: <literal>javax.servlet.jsp.tagext.IterationTag</literal>,
-          <literal>javax.servlet.jsp.tagext.TryCatchFinally</literal>,
-          <literal>javax.servlet.ServletContextListener</literal>,
-          <literal>javax.servlet.ServletContextAttributeListener</literal>,
-          <literal>javax.servlet.http.HttpSessionAttributeListener</literal>,
-          <literal>javax.servlet.http.HttpSessionListener</literal>. But
-          beware, since containers that come with JSP 1.1 usually use earlier
-          Serlvet versions than 2.3, event listeners will not be supported,
-          and thus JSP 1.2 taglibs that register event listeners will not work
-          properly.</para>
+          <literal>javax.servlet.jsp.*</literal> packages for JSP 2.0 (or
+          later) are available to your Web application.</para>
 
           <para>As of this writing, JSP features up to JSP 2.1 are
           implemented, except the "tag files" feature of JSP 2 (i.e., custom
@@ -12292,13 +12275,15 @@ Green Mouse</programlisting>
 </programlisting>
 
           <para>You can also specify the format explicitly like
-          <literal>?datetime.<replaceable>format</replaceable></literal> or
-          <literal>?datetime["<replaceable>format</replaceable>"]</literal>
-          (or
-          <literal>?datetime("<replaceable>format</replaceable>")</literal>
-          for historical reasons), and the same with <literal>?date</literal>
-          and <literal>?time</literal>. For the syntax and meaning of format
-          values see the possible values of the <link
+          <literal>?datetime.<replaceable>format</replaceable></literal> (and
+          hence also as
+          <literal>?datetime["<replaceable>format</replaceable>"]</literal>)
+          or
+          <literal>?datetime("<replaceable>format</replaceable>")</literal>;
+          these three forms do the same. The format can be specified similarly
+          with <literal>?date</literal> and <literal>?time</literal> too. For
+          the syntax and meaning of format values see the possible values of
+          the <link
           linkend="topic.dateTimeFormatSettings"><literal>date_format</literal>,
           <literal>time_format</literal> and
           <literal>datetime_format</literal> settings</link>. Example:</para>
@@ -12315,7 +12300,10 @@ Green Mouse</programlisting>
 &lt;#-- Parsing with SimpleDateFormat patterns: --&gt;
 &lt;#assign someDate = "10/25/1995"?date("MM/dd/yyyy")&gt;
 &lt;#assign someTime = "15:05:30"?time("HH:mm:ss")&gt;
-&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;</programlisting>
+&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;
+
+&lt;#-- Parsing with custom date formats: --&gt;
+&lt;#assign someDatetime = "October/25/1995 03:05 PM"?datetime.@worklog&gt;</programlisting>
 
           <para>To prevent misunderstandings, the left-hand value need not be
           a string literal. For example, when you read data from XML DOM (from
@@ -12324,7 +12312,17 @@ Green Mouse</programlisting>
           value to a real date.</para>
 
           <para>Of course, the format also can be a variable, like in
-          <literal>"<replaceable>...</replaceable>"?datetime[myFormat]</literal>.</para>
+          <literal>"<replaceable>...</replaceable>"?datetime(myFormat)</literal>.</para>
+
+          <para>Note that since 2.3.24, these built-ins can also be called
+          with 0 arguments, like <literal>?date()</literal>. It's almost the
+          same as just writing <literal>?date</literal>. The difference is
+          highly technical and rarely matters: <literal>?date()</literal> and
+          such returns exactly the same Java object that the date parser
+          (<literal>freemarker.core.TemplateDateFormat</literal>
+          implementation) returns, while <literal>?date</literal> without the
+          <literal>()</literal> returns a tricky wrapper value that's a date
+          and a method and hash on the same time.</para>
         </section>
 
         <section xml:id="ref_builtin_ends_with">
@@ -14459,10 +14457,25 @@ $42.00
 
           <para>since the default number format was set to "currency".</para>
 
-          <para>Beside the three predefined formats, you can use arbitrary
-          number format patterns written in <link
-          xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/DecimalFormat.html">Java
-          decimal number format syntax</link>:</para>
+          <para>You can also refer to named custom formats that were defined
+          when configuring FreeMarker (programmers <link
+          linkend="pgui_config_custom_formats">see more here</link>),
+          like:</para>
+
+          <programlisting>${x?strong.@price}
+${x?strong.@weight}</programlisting>
+
+          <para>where the custom format names were <quote>price</quote> and
+          <quote>weight</quote>. Note that hence the templates can just refer
+          to the application-domain meaning, and the exact format can be
+          specified outside the templates, on a single central place.</para>
+
+          <para>Beside named formats, you can specify number format patterns
+          directly, using the <link
+          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html">Java
+          decimal number format syntax</link> (with some FreeMarker-specific
+          extensions; <link linkend="topic.extendedJavaDecimalFormat">see
+          later</link>):</para>
 
           <programlisting role="template">&lt;#assign x = 1.234&gt;
 ${x?string["0"]}
@@ -14481,8 +14494,6 @@ ${1.5?string["0"]} &lt;-- 1.5, rounded towards even neighbor
 ${2.5?string["0"]} &lt;-- 2.5, rounded towards even neighbor
 
 ${12345?string["0.##E0"]}</programlisting>
-
-          <para>outputs this:</para>
 
           <programlisting role="output">1
 1.2
@@ -14514,13 +14525,18 @@ ${12345?string["0.##E0"]}</programlisting>
           <literal>x?string("0.#")</literal>, which does exactly the same as
           <literal>x?string["0.#"]</literal>.</para>
 
-          <para>Following the financial and statistics practice, the rounding
-          goes according the so called half-even rule, which means rounding
-          towards the nearest ``neighbor'', unless both neighbors are
-          equidistant, in which case, it rounds towards the even neighbor.
-          This was visible in the above example if you look at the rounding of
-          1.5 and of 2.5, as both were rounded to 2, since 2 is even, but 1
-          and 3 are odds.</para>
+          <para>Following the financial and statistics practice, by default
+          the rounding goes according the so called half-even rule, which
+          means rounding towards the nearest <quote>neighbor</quote>, unless
+          both neighbors are equidistant, in which case, it rounds towards the
+          even neighbor. This was visible in the above example if you look at
+          the rounding of 1.5 and of 2.5, as both were rounded to 2, since 2
+          is even, but 1 and 3 are odds. The other popular rounding rule,
+          where we always round up when the neighbors are equidistant (and so
+          2.5 is rounded to 3) is called the half-up rule, and it can be
+          activated as <link
+          linkend="topic.extendedJavaDecimalFormat">described
+          later</link>.</para>
 
           <para>As it was shown for the predefined formats earlier, the
           default formatting of the numbers can be set in the template:</para>
@@ -14528,9 +14544,11 @@ ${12345?string["0.##E0"]}</programlisting>
           <programlisting role="template">&lt;#setting number_format="0.##"&gt;
 ${1.234}</programlisting>
 
-          <para>outputs this:</para>
-
           <programlisting role="output">1.23</programlisting>
+
+          <para>The default number format also can be specified outside the
+          templates with the FreeMarker API (like with
+          <literal>Configuration.setNumberFormat(String)</literal>).</para>
 
           <para>Note that as number formatting is locale sensitive, the locale
           setting also plays role in the formatting:</para>
@@ -14541,10 +14559,189 @@ US people write:     ${12345678}
 &lt;#setting locale="hu"&gt;
 German people write: ${12345678}</programlisting>
 
-          <para>outputs this:</para>
-
           <programlisting role="output">US people write:     12,345,678.00
 German people write: 12.345.678,00</programlisting>
+
+          <simplesect xml:id="topic.extendedJavaDecimalFormat">
+            <title>Extended Java decimal format </title>
+
+            <indexterm>
+              <primary>extended Java decimal format</primary>
+            </indexterm>
+
+            <para>FreeMarker extends the Java decimal format patterns with
+            extra options. These options are name-value pairs, specified after
+            two semicolons (<literal>;;</literal>) at the end of the format
+            string, or if you had a negative pattern (which is separated from
+            the normal patter with a semicolon, like in <literal>"0.0;minus
+            0.0"</literal>), the after only one semicolon. For example:</para>
+
+            <programlisting role="template">Standard decimal format: ${10002.5?string[",000"]}
+Extended decimal format: ${10002.5?string[",000<emphasis>;; rnd=hu grp=_</emphasis>"]}</programlisting>
+
+            <programlisting role="output">Standard decimal format: 10,002
+Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></programlisting>
+
+            <para>Above, in the extended decimal format, we have specified
+            half-up rounding mode (<literal>rnd=hu</literal>), and group
+            separator <literal>"_"</literal> (<literal>grp=_</literal>). The
+            table of all options:</para>
+
+            <informaltable border="1">
+              <thead>
+                <tr>
+                  <th>Name</th>
+
+                  <th>Meaning / value</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td><literal>rnd</literal></td>
+
+                  <td>Rounding mode. The value is one of <literal>u</literal>
+                  for up, <literal>d</literal> for down, <literal>c</literal>
+                  for ceiling, <literal>f</literal> for floor,
+                  <literal>hu</literal> for half-up, <literal>hd</literal> for
+                  half-down, <literal>he</literal> for half-even, and
+                  <literal>un</literal> for unused. (See <link
+                  xlink:href="http://docs.oracle.com/javase/7/docs/api/java/math/RoundingMode.html">the
+                  <literal>java.math.RoundingMode</literal> API</link> for
+                  explanations.)</td>
+                </tr>
+
+                <tr>
+                  <td><literal>mul</literal></td>
+
+                  <td>Multiplier. The number will be shown after multiplied
+                  with this integer number.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>dec</literal></td>
+
+                  <td>Decimal separator character (like <literal>"."</literal>
+                  in <literal>3.14</literal>).</td>
+                </tr>
+
+                <tr>
+                  <td><literal>mdec</literal></td>
+
+                  <td>Monetary decimal separator character. This is used
+                  instead of <literal>dec</literal> when the pattern contains
+                  parts that make it a monetary format. (See the <link
+                  xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html">Java
+                  decimal number format documentation</link> for more.)</td>
+                </tr>
+
+                <tr>
+                  <td><literal>grp</literal></td>
+
+                  <td>Grouping separator character. Note that grouping is
+                  turned on by using <literal>","</literal> in the pattern, as
+                  shown in the earlier example. If it's not turned on, this
+                  option won't have visible effect.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>exp</literal></td>
+
+                  <td>Exponent separator string. Only has visible effect if
+                  the pattern specifies exponential form, like
+                  <literal>"0.##E0"</literal>.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>min</literal></td>
+
+                  <td>Minus sign character.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>inf</literal></td>
+
+                  <td>The string used to show infinity.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>nan</literal></td>
+
+                  <td>The string used to show not-a-number (NaN).</td>
+                </tr>
+
+                <tr>
+                  <td><literal>prc</literal></td>
+
+                  <td>Percent character.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>prm</literal></td>
+
+                  <td>Per-mill character.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>zero</literal></td>
+
+                  <td>Zero character. This modifies the other digits too, for
+                  example, if zero is <literal>A</literal>, then 1 will
+                  <literal>B</literal>, 2 will be <literal>C</literal>, and so
+                  on.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>curc</literal></td>
+
+                  <td>Currency ISO 4217 code. Only has effect when the pattern
+                  contains parts that make it a monetary format. It's an error
+                  to specify a code that's not a known ISO 4217 code in the
+                  Java installation.</td>
+                </tr>
+
+                <tr>
+                  <td><literal>curs</literal></td>
+
+                  <td>Currency symbol; shown where the localized currency name
+                  is present in the pattern. Overrides the symbol determined
+                  from <literal>curc</literal>.</td>
+                </tr>
+              </tbody>
+            </informaltable>
+
+            <para>Regarding the syntax of the options:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>The option name and value are separated by equals
+                character (<literal>=</literal>).</para>
+              </listitem>
+
+              <listitem>
+                <para>Options are separated by whitespace and/or optional
+                comma (<literal>,</literal>)</para>
+              </listitem>
+
+              <listitem>
+                <para>The option value can be quoted with apostrophe
+                (<literal>'</literal>) or normal quotation mark
+                (<literal>"</literal>) , like <literal>exp='*10^'</literal> or
+                <literal>exp="*10^"</literal>. If the value itself has to
+                contain the character used for quotation, then it has to be
+                entered twice (like <literal>inf='It''s infinite'</literal>,
+                but you could also write <literal>inf="It's
+                infinite"</literal>). Backslash has no special meaning.</para>
+              </listitem>
+
+              <listitem>
+                <para>Non-string values must not be quoted. Strings only has
+                to be quoted if they contain punctuation or whitespace, or any
+                other non-letter non-digit non-<literal>"_"</literal>
+                non-<literal>"$"</literal> characters.</para>
+              </listitem>
+            </itemizedlist>
+          </simplesect>
         </section>
 
         <section xml:id="ref_builtin_upper_abc">
@@ -14972,7 +15169,9 @@ The usual variations are supported:
           <literal>java.sql.Timestamp</literal> or
           <literal>java.util.Date</literal> then this:</para>
 
-          <programlisting role="template">${openingTime?string.short}
+          <programlisting role="template">&lt;#-- Predefined format names: --&gt;
+
+${openingTime?string.short}
 ${openingTime?string.medium}
 ${openingTime?string.long}
 ${openingTime?string.full}
@@ -14994,18 +15193,19 @@ ${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;
 ${lastUpdated?string.xs}
 ${lastUpdated?string.iso}
 
+&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined formats</link> (starts with @ + letter): --&gt;
+${lastUpdated?string.@lastMod}
+
+&lt;#-- More advanced ISO 8601-related formats: --&gt;
+${lastUpdated?string.iso_m_u}
+${lastUpdated?string.xs_ms_nz}
+
 &lt;#-- SimpleDateFormat patterns: --&gt;
 ${lastUpdated?string["dd.MM.yyyy, HH:mm"]}
 ${lastUpdated?string["EEEE, MMMM dd, yyyy, hh:mm a '('zzz')'"]}
 ${lastUpdated?string["EEE, MMM d, ''yy"]}
 ${lastUpdated?string.yyyy} &lt;#-- Same as ${lastUpdated?string["yyyy"]} --&gt;
-
-&lt;#-- Advanced ISO 8601-related formats: --&gt;
-${lastUpdated?string.iso_m_u}
-${lastUpdated?string.xs_ms_nz}
-
-&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined formats</link> (start with @): --&gt;
-${lastUpdated?string.@file} (or however it was configured)</programlisting>
+</programlisting>
 
           <para>will print something like this:</para>
 
@@ -15031,15 +15231,20 @@ Feb 8, 2003 9:24 PM
 2007-02-20T13:45:09-08:00
 2007-02-20T13:45:09-08:00
 
-08.04.2003 21:24
-Tuesday, April 08, 2003, 09:24 PM (PDT)
-Tue, Apr 8, '03
-2003
+Apr/20/2007 13:45
 
 2007-02-20T21:45Z
 2007-02-20T13:45:09.000
 
-2007-02-20 13 (or however it was configured)</programlisting>
+08.04.2003 21:24
+Tuesday, April 08, 2003, 09:24 PM (PDT)
+Tue, Apr 8, '03
+2003</programlisting>
+
+          <para>Note that with custom formats like in
+          <literal>lastUpdated?string.@lastMod</literal> above, templates can
+          just refer to the application-domain meaning, and the exact format
+          can be specified outside the templates, on a central place.</para>
 
           <warning>
             <para>Unfortunately, because of the limitations of the Java
@@ -20350,16 +20555,52 @@ ${"'{}"}
                   <secondary>number</secondary>
                 </indexterm><literal>number_format</literal>: The number
               format that is used to convert numbers to strings when no
-              explicit format is specified. Can be one of predefined values
-              <literal>number</literal> (the default),
-              <literal>computer</literal>, <literal>currency</literal>, or
-              <literal>percent</literal>. Additionally, arbitrary format
-              pattern written in <link
-              xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/DecimalFormat.html">Java
-              decimal number format syntax</link> can also be specified. More
-              information about format patterns:<link
-              linkend="ref_builtin_string_for_number"><literal>string</literal>
-              built-in</link>.</para>
+              explicit format is specified. Can be one of the
+              following:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Predefined values defined by the Java platform:
+                  <literal>number</literal> (the default),
+                  <literal>currency</literal>, or
+                  <literal>percent</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>computer</literal>, which formats like <link
+                  linkend="ref_builtin_c">the <literal>c</literal>
+                  built-in</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Format pattern written in <link
+                  xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/DecimalFormat.html">Java
+                  decimal number format syntax</link>, for example
+                  <literal>0.###</literal>. FreeMarker <link
+                  linkend="topic.extendedJavaDecimalFormat">extends this
+                  format</link> to allow specifying rounding mode, symbols
+                  used, etc.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Values starting with <literal>@</literal> that's also
+                  followed by a letter, refer to a <link
+                  linkend="pgui_config_custom_formats">custom format</link>.
+                  For example, <literal>"@price"</literal> refers to the
+                  custom format registered with the <literal>"price"</literal>
+                  name. The custom format name is possibly followed by space
+                  or <literal>_</literal> and then format parameters, whose
+                  interpretation depends on the custom format. For backward
+                  compatibility, the initial <literal>@</literal> only has
+                  this new meaning if either <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is at least 2.3.24, or there's any custom formats defined.
+                  When the initial <literal>@</literal> isn't followed by a
+                  letter (any UNICODE letter), it's never treated as a
+                  reference to a custom format.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -20604,6 +20845,25 @@ ${"'{}"}
                   <literal>"medium_medium"</literal> for date-time
                   values.)</para>
                 </listitem>
+
+                <listitem>
+                  <para>Values starting with <literal>@</literal> that's also
+                  followed by a letter, refer to a <link
+                  linkend="pgui_config_custom_formats">custom format</link>,
+                  like <literal>"@worklog"</literal> refers to the custom
+                  format registered with the <literal>"worklog"</literal>
+                  name. The format name is possibly followed by space or
+                  <literal>_</literal> and then format parameters, whose
+                  interpretation depends on the custom format. For backward
+                  compatibility, the initial <literal>@</literal> only has
+                  this new meaning if either <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is at least 2.3.24, or there's any custom formats defined.
+                  When the initial <literal>@</literal> isn't followed by a
+                  letter (any UNICODE letter), it's never treated as a
+                  reference to a custom format.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -20687,8 +20947,8 @@ ${"'{}"}
             </listitem>
           </itemizedlist>
 
-          <para>Example: Assume that the initial locale of template is de_DE
-          (German). Then this:</para>
+          <para>Example: Assume that the initial locale of template is
+          <literal>de_DE</literal> (German). Then this:</para>
 
           <programlisting role="template">${1.2}
 &lt;#setting locale="en_US"&gt;
@@ -25511,14 +25771,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>${n?string.@foo_params}</literal>,
               <literal>&lt;#setting number_format='@foo params'&gt;</literal>,
               or <literal>${n?string.@foo}</literal>,
-              <literal>${n?string.@foo_params}</literal>. This means that
-              <replaceable>if</replaceable> custom formats are allowed in the
-              configuration (by <link
-              linkend="pgui_config_incompatible_improvements_how_to_set">setting
-              <literal>incompatible_improvements</literal></link> to 2.3.24),
-              an <replaceable>initial</replaceable> <literal>@</literal> in
-              format strings is now reserved, and need to be escaped as
-              <literal>@@</literal> if it has to be there literally.</para>
+              <literal>${n?string.@foo_params}</literal>. For backward
+              compatibility, the initial <literal>@</literal> only has this
+              special meaning if either you have any custom formats or <link
+              linkend="pgui_config_incompatible_improvements">the
+              <literal>incompatible_improvements</literal> setting</link> is
+              at lest 2.3.24.</para>
+            </listitem>
+
+            <listitem>
+              <para>Everywhere where Java <literal>DecimalFormat</literal>
+              patterns are used (like in <literal>?string('0.##')</literal> or
+              <literal>&lt;#setting number_format="0.##"&gt;</literal>), now
+              it's possible to specify options like rounding mode or the
+              symbols used, with a FreeMarker-specific <link
+              linkend="topic.extendedJavaDecimalFormat">extension to the
+              pattern syntax</link>.</para>
             </listitem>
 
             <listitem>
@@ -25529,6 +25797,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting</link> of the current FreeMarker configuration, as a
               string.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>?date</literal>, <literal>?time</literal> and
+              <literal>?datetime</literal> now can be called as 0 argument
+              method, like <literal>?date()</literal>, etc., which returns the
+              exact object that <literal>TemplateDateFormat.parse</literal>
+              returns, instead of the tricky multi-type object that just using
+              <literal>?date</literal> returns. Because custom
+              <literal>TemplateDateFormat</literal> implementations may return
+              custom <literal>TemplateDateModel</literal> implementations,
+              keeping the exact class can be important in some
+              applications.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -25537,9 +25818,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><emphasis role="strong">Attention!</emphasis> Raised
-              minimum required Java version from 1.4 to 1.5 (aka. Java
-              5)</para>
+              <para><emphasis role="strong">Attention!</emphasis> FreeMarker
+              now requires at least 1.5 (aka. Java 5). 2.3.24 has only
+              required Java 1.4. (Reason: Without this, new public API-s
+              couldn't use generics, which affect negatively the majority of
+              users, while old installations that are still using 1.4 are
+              unlikely to update FreeMarker anyway.)</para>
+            </listitem>
+
+            <listitem>
+              <para><emphasis>Attention!</emphasis> FreeMarker's JSP support
+              (if it's used) now requires at least JSP 2.0. Earlier it only
+              required JSP 1.1. (Reason: The <literal>jsp-api</literal>
+              dependency for JSP 1.x, which was needed for building, can't be
+              legally present in the Maven Central Repository, nor be provided
+              by freemarker.org.)</para>
             </listitem>
 
             <listitem>
@@ -25651,12 +25944,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   Like, you can do <literal>cfg.setNumberFormat("@foo
                   params")</literal>, or <literal>&lt;#setting
                   number_format='@foo params'&gt;</literal>, or
-                  <literal>${n?string.@foo_params}</literal>. Note that an
-                  <replaceable>initial</replaceable> <literal>@</literal> in
-                  format strings is reserved for this purpose with
-                  <literal>incompatible_improvements</literal> to 2.3.24, and
-                  need to be escaped as <literal>@@</literal> if it has to be
-                  there literally. Note that the
+                  <literal>${n?string.@foo_params}</literal>. For backward
+                  compatibility, the initial <literal>@</literal> only has
+                  this special meaning if either you have any custom formats
+                  or <link linkend="pgui_config_incompatible_improvements">the
+                  <literal>incompatible_improvements</literal> setting</link>
+                  is at least 2.3.24. Note that the
                   <literal>custom_number_formats</literal> and
                   <literal>custom_date_formats</literal> settings can be set
                   per-template (via the new
@@ -25695,6 +25988,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>It's now possible to have HTML or other markup in
+                  number and date/time/datetime formatting results, like
+                  <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which
+                  won't be accidentally auto-escaped, as FreeMarker knows that
+                  it's already HTML. (See [TODO] as an example.) Note that
+                  formatting to markup only happens in a context that has a
+                  markup <link
+                  linkend="dgui_misc_autoescaping_outputformat">output
+                  format</link>, otherwise FreeMarker will format to plain
+                  text, just as before. Also note that no out-of-the-box
+                  (non-custom) formatter formats to markup at the
+                  moment.</para>
+                </listitem>
+
+                <listitem>
                   <para>The internal format object caching architecture has
                   been reworked, so that it can handle custom formats too. But
                   this reworking also fixes some bottlenecks under highly
@@ -25702,6 +26010,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   leaking possibilities.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>In the <literal>number_format</literal> configuration
+              setting, when it holds a Java <literal>DecimalFormat</literal>
+              pattern (like <literal>"0.##"</literal>), it's now possible to
+              specify options like rounding mode or the symbols used, with a
+              FreeMarker-specific <link
+              linkend="topic.extendedJavaDecimalFormat">extension to the
+              pattern syntax</link>.</para>
             </listitem>
 
             <listitem>
@@ -25863,6 +26181,83 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               chose a different target format string depending on the current
               locale; this is especially useful for dates, where conventions
               can significantly differ in different countries.</para>
+            </listitem>
+
+            <listitem>
+              <para>Everywhere where Java <literal>DecimalFormat</literal>
+              patterns are used (like in the <literal>number_format</literal>
+              configuration setting, or in
+              <literal>?string('0.##')</literal>), now it's possible to
+              specify options like rounding mode or the symbols used, with a
+              FreeMarker-specific <link
+              linkend="topic.extendedJavaDecimalFormat">extension to the
+              pattern syntax</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>In number/date/time/datetime format strings, initial
+              <literal>@</literal> can be used to refer to custom formats even
+              if <literal>incompatible_improvements</literal> is less than
+              2.3.24, as far as there's any custom format defined. As custom
+              formats is also a 2.3.24 feature, it's backward compatible this
+              way.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>@@</literal> can't be used to escape
+              <literal>@</literal> at the beginning of format strings anymore,
+              because it was confusing on Android, where
+              <literal>DecimalFormat</literal> supports patterns like
+              <literal>"@@@@@@"</literal>. If a pattern has to output a
+              literal <literal>@</literal> as the first character, you can
+              simply use quoting as defined by
+              <literal>DecimalFormat</literal> and
+              <literal>SimpleDateFormat</literal> (for example,
+              <literal>"'@'0.##"</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>?date</literal>, <literal>?time</literal> and
+              <literal>?datetime</literal> now can be called as 0 argument
+              method, like <literal>?date()</literal>, etc., which returns the
+              exact object that <literal>TemplateDateFormat.parse</literal>
+              returns, instead of the tricky multi-type object that just using
+              <literal>?date</literal> returns. Because custom
+              <literal>TemplateDateFormat</literal> implementations may return
+              custom <literal>TemplateDateModel</literal> implementations,
+              keeping the exact class can be important in some
+              applications.</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>TemplateDateFormat.parse</literal> has been
+              worked out (earlier it was a but different and was marked as
+              draft). <literal>TemplateNumberFormat</literal> has also have a
+              parse method now, though it's just a <literal>final</literal>
+              placeholder now.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateNumberFormat.format</literal>/<literal>TemplateDateFormat.format</literal>
+              overloads were renamed to <literal>formatToString</literal> and
+              <literal>formatToMarkupOrString</literal>. The last has
+              different semantics then its predecessor (which was marked as
+              draft), and it's actually used by FreeMarker. Thus, it's now
+              possible to have HTML or other markup in number and
+              date/time/datetime formatting results, like
+              <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which won't
+              be accidentally auto-escaped, as FreeMarker knows that it's
+              already HTML. (See [TODO] as an example.) Note that formatting
+              to markup only happens in a context that has a markup <link
+              linkend="dgui_misc_autoescaping_outputformat">output
+              format</link>, otherwise FreeMarker will format to plain text,
+              just like before. Also note that no out-of-the-box (non-custom)
+              formatter formats to markup at the moment.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>XHTMLOutputFormat</literal> and
+              <literal>TemplateXHTMLOutputModel</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -35854,7 +36249,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         </listitem>
 
         <listitem>
-          <para>For the custom JSP taglib support, you will need JSP 1.2 API
+          <para>For the custom JSP taglib support, you will need JSP 2.0 API
           or later avilable. No JSP implementation is needed, just the API.
           This is already present in pretty much every servlet container. For
           more information please see <link linkend="pgui_misc_servlet">the
@@ -35862,7 +36257,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         </listitem>
 
         <listitem>
-          <para>Jython classes are needed for the Jython wrapper.</para>
+          <para>Jython 2.0 or later classes are needed for the Jython
+          wrapper.</para>
         </listitem>
 
         <listitem>

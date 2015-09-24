@@ -743,9 +743,21 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          These "file" extensions aren't case sensitive.
      *       </li>
      *       <li><p>
+     *          In number format and date format strings (like in the {@code number_format} setting, or in templates in
+     *          {@code n?string("0.##")}), an initial {@code '@'} has special meaning; they refer to a custom format
+     *          with the name given after the {@code @} (see: {@link #setCustomNumberFormats(Map)},
+     *          {@link #setCustomDateFormats(Map)}, {@link #setNumberFormat(String)}, and {@link #setDateTimeFormat}).
+     *          If the custom format doesn't exist, that will be an error. To have a literal {@code @} as the first
+     *          character in the output, it has to be written as {@code @@}. Again, all this only applies to the very
+     *          first character of the format string, so {@code @} characters elsewhere must not be doubled. Also, if
+     *          there are any custom formats defined, initial {@code '@'} will have the new meaning regardless of
+     *          the value of the {@code incompatible_improvements} setting. So you don't need to set the
+     *          {@code incompatible_improvements} only to use custom formats. 
+     *       </li>
+     *       <li><p>
      *          Expressions inside interpolations that were inside <em>string literal expressions</em>
      *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;</code>, has
-     *          always used {@code incompatbileImprovement}-s 0 (2.3.0 in effect).
+     *          always used {@code incompatbileImprovement}-s 0 (2.3.0 in effect). Now it's fixed.
      *       </li>
      *     </ul>
      *   </li>

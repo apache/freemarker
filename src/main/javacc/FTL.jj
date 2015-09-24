@@ -230,6 +230,10 @@ public class FMParser {
             autoEscaping = false;
         }
     }
+    
+    MarkupOutputFormat getMarkupOutputFormat() {
+        return outputFormat instanceof MarkupOutputFormat ? (MarkupOutputFormat) outputFormat : null;
+    }
 
     /**
      * Don't use it, unless you are developing FreeMarker itself.
@@ -1572,7 +1576,7 @@ Expression AdditiveExpression() :
             if (plus) {
 	            // plus is treated separately, since it is also
 	            // used for concatenation.
-                result = new AddConcatExpression(lhs, rhs);
+                result = new AddConcatExpression(lhs, rhs, getMarkupOutputFormat());
             } else {
                 numberLiteralOnly(lhs);
                 numberLiteralOnly(rhs);
@@ -2235,8 +2239,7 @@ DollarVariable StringOutput() :
         DollarVariable result = new DollarVariable(
                 exp, escapedExpression(exp),
                 outputFormat,
-                autoEscaping && outputFormat instanceof MarkupOutputFormat
-                        ? (MarkupOutputFormat)  outputFormat : null);
+                autoEscaping);
         result.setLocation(template, begin, end);
         return result;
     }
@@ -2843,7 +2846,7 @@ TemplateElement Assign() :
 		        )
 	        )
 	        {
-	            ass = new Assignment(varName, equalsOp.kind, exp, scope);
+	            ass = new Assignment(varName, equalsOp.kind, exp, scope, getMarkupOutputFormat());
                 if (exp != null) {
                    ass.setLocation(template, nameExp, exp);
                 } else {
@@ -2883,7 +2886,7 @@ TemplateElement Assign() :
 	                )
 	            )
 	            {
-	                ass = new Assignment(varName, equalsOp.kind, exp, scope);
+	                ass = new Assignment(varName, equalsOp.kind, exp, scope, getMarkupOutputFormat());
 	                if (exp != null) {
 	                   ass.setLocation(template, nameExp, exp);
 	                } else {
@@ -2956,7 +2959,7 @@ TemplateElement Assign() :
 	        {
 	            BlockAssignment ba = new BlockAssignment(
 	                   block, varName, scope, nsExp,
-	                   outputFormat instanceof MarkupOutputFormat ? (MarkupOutputFormat) outputFormat : null);
+	                   getMarkupOutputFormat());
 	            ba.setLocation(template, start, end);
 	            return ba;
 	        }

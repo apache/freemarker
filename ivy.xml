@@ -25,9 +25,6 @@
         description="for building FreeMarker without dependencies that optinal dependencies"
     />
 
-    <conf name="build.jsp1.2" extends="build.base"
-        description="for building FreeMarker with JSP 1.2 support"
-    />
     <conf name="build.jsp2.0" extends="build.base"
         description="for building FreeMarker with JSP 2.0 support"
     />
@@ -93,8 +90,6 @@
       <exclude org="xml-apis" module="xml-apis" />
     </dependency>
     
-    <dependency org="javax.servlet.jsp" name="jsp-api" rev="1.2" conf="build.jsp1.2->default" />
-    <dependency org="javax.servlet" name="servlet-api" rev="2.3" conf="build.jsp1.2->default" />
     <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.0" conf="build.jsp2.0->default; example.struts-webapp->default" />
     <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default; example.servlet->default" />
     <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.1" conf="build.jsp2.1->default" />

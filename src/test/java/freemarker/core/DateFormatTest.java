@@ -21,8 +21,10 @@ package freemarker.core;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -38,6 +40,7 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
 import freemarker.template.Template;
 import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
@@ -58,7 +61,8 @@ public class DateFormatTest extends TemplateTest {
         cfg.setCustomDateFormats(ImmutableMap.of(
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
                 "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
-                "div", EpochMillisDivTemplateDateFormatFactory.INSTANCE));
+                "div", EpochMillisDivTemplateDateFormatFactory.INSTANCE,
+                "appMeta", AppMetaTemplateDateFormatFactory.INSTANCE));
     }
 
     @Test
@@ -193,16 +197,37 @@ public class DateFormatTest extends TemplateTest {
     public void testIcIAndEscaping() throws Exception {
         Configuration cfg = getConfiguration();
         addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@1970");
-        cfg.setDateTimeFormat("@epoch");
-        assertOutput("${d}", "12345678");
+        
+        testIcIAndEscapingWhenCustFormsAreAccepted(cfg);
         
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@@1970");
+        testIcIAndEscapingWhenCustFormsAreAccepted(cfg);
+        
+        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        
         cfg.setDateTimeFormat("@epoch");
         assertErrorContains("${d}", "\"@epoch\"");
+        cfg.setDateTimeFormat("'@'yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
+        
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        cfg.setDateTimeFormat("@epoch");
+        assertErrorContains("${d}", "custom", "\"epoch\"");
+        cfg.setDateTimeFormat("'@'yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
+    }
+
+    protected void testIcIAndEscapingWhenCustFormsAreAccepted(Configuration cfg) throws IOException, TemplateException {
+        cfg.setDateTimeFormat("@epoch");
+        assertOutput("${d}", "12345678");
+        cfg.setDateTimeFormat("'@'yyyy");
+        assertOutput("${d}", "@1970");
+        cfg.setDateTimeFormat("@@yyyy");
+        assertOutput("${d}", "@@1970");
     }
     
     @Test
@@ -241,57 +266,57 @@ public class DateFormatTest extends TemplateTest {
         String dateTimeFormatStr2 = dateTimeFormatStr + "'!'";
         
         assertEquals("2015.09.06. 13:00",
-                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Date.class).formatToString(TM));
         assertEquals("2015.09.06. 13:00!",
-                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Date.class).format(TM));
+                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Date.class).formatToString(TM));
         
         assertEquals("2015.09.06. (+0100)",
-                env.getTemplateDateFormat(TemplateDateModel.DATE, Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATE, Date.class).formatToString(TM));
         assertEquals("2015.09.06. (+0100)!",
-                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, Date.class).format(TM));
+                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, Date.class).formatToString(TM));
         
         assertEquals("13:00",
-                env.getTemplateDateFormat(TemplateDateModel.TIME, Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.TIME, Date.class).formatToString(TM));
         assertEquals("13:00!",
-                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Date.class).format(TM));
+                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Date.class).formatToString(TM));
         
         assertEquals("2015.09.06. 13:00",
-                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Timestamp.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Timestamp.class).formatToString(TM));
         assertEquals("2015.09.06. 13:00!",
-                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Timestamp.class).format(TM));
+                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Timestamp.class).formatToString(TM));
 
         assertEquals("2015.09.06. (+0000)",
-                env.getTemplateDateFormat(TemplateDateModel.DATE, java.sql.Date.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATE, java.sql.Date.class).formatToString(TM));
         assertEquals("2015.09.06. (+0000)!",
-                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, java.sql.Date.class).format(TM));
+                env.getTemplateDateFormat(dateFormatStr2, TemplateDateModel.DATE, java.sql.Date.class).formatToString(TM));
 
         assertEquals("12:00",
-                env.getTemplateDateFormat(TemplateDateModel.TIME, Time.class).format(TM));
+                env.getTemplateDateFormat(TemplateDateModel.TIME, Time.class).formatToString(TM));
         assertEquals("12:00!",
-                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Time.class).format(TM));
+                env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Time.class).formatToString(TM));
 
         {
             String dateTimeFormatStrLoc = dateTimeFormatStr + " EEEE";
             // Gets into cache:
             TemplateDateFormat format1
                     = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class);
-            assertEquals("2015.09.06. 13:00 Sunday", format1.format(TM));
+            assertEquals("2015.09.06. 13:00 Sunday", format1.formatToString(TM));
             // Different locale (not cached):
             assertEquals("2015.09.06. 13:00 Sonntag",
                     env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class,
-                            Locale.GERMANY).format(TM));
+                            Locale.GERMANY).formatToString(TM));
             // Different locale and zone (not cached):
             assertEquals("2015.09.06. 14:00 Sonntag",
                     env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class,
-                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).format(TM));
+                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).formatToString(TM));
             // Different locale and zone (not cached):
             assertEquals("2015.09.06. 15:00 Sonntag",
                     env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, java.sql.Date.class,
-                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).format(TM));
+                            Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).formatToString(TM));
             // Check for corrupted cache:
             TemplateDateFormat format2
                     = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class);
-            assertEquals("2015.09.06. 13:00 Sunday", format2.format(TM));
+            assertEquals("2015.09.06. 13:00 Sunday", format2.formatToString(TM));
             assertSame(format1, format2);
         }
         
@@ -349,6 +374,49 @@ public class DateFormatTest extends TemplateTest {
                 + "<#setting locale='fr_FR'>${d} "
                 + "<#setting locale='hu_HU'>${d}",
                 "2015-Sep_en 2015-Sep_en_GB 2015-Sep_en_GB 2015-sept._fr_FR 2015-szept.");
+    }
+    
+    /**
+     * ?date() and such are new in 2.3.24.
+     */
+    @Test
+    public void testZeroArgDateBI() throws IOException, TemplateException {
+        Configuration cfg = getConfiguration();
+        cfg.setDateFormat("@epoch");
+        cfg.setDateTimeFormat("@epoch");
+        cfg.setTimeFormat("@epoch");
+        
+        addToDataModel("t", String.valueOf(T));
+        
+        assertOutput(
+                "${t?date?string.xs_u} ${t?date()?string.xs_u}",
+                "2015-09-06Z 2015-09-06Z");
+        assertOutput(
+                "${t?time?string.xs_u} ${t?time()?string.xs_u}",
+                "12:00:00Z 12:00:00Z");
+        assertOutput(
+                "${t?datetime?string.xs_u} ${t?datetime()?string.xs_u}",
+                "2015-09-06T12:00:00Z 2015-09-06T12:00:00Z");
+    }
+
+    @Test
+    public void testAppMetaRoundtrip() throws IOException, TemplateException {
+        Configuration cfg = getConfiguration();
+        cfg.setDateFormat("@appMeta");
+        cfg.setDateTimeFormat("@appMeta");
+        cfg.setTimeFormat("@appMeta");
+        
+        addToDataModel("t", String.valueOf(T) + "/foo");
+        
+        assertOutput(
+                "${t?date} ${t?date()}",
+                T + " " + T + "/foo");
+        assertOutput(
+                "${t?time} ${t?time()}",
+                T + " " + T + "/foo");
+        assertOutput(
+                "${t?datetime} ${t?datetime()}",
+                T + " " + T + "/foo");
     }
     
     private static class MutableTemplateDateModel implements TemplateDateModel {

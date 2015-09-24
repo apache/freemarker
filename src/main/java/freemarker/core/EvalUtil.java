@@ -44,7 +44,7 @@ class EvalUtil {
     static final int CMP_OP_LESS_THAN_EQUALS = 5;
     static final int CMP_OP_GREATER_THAN_EQUALS = 6;
     // If you add a new operator here, update the "compare" and "cmpOpToString" methods!
-
+    
     // Prevents instantination.
     private EvalUtil() { }
     
@@ -341,24 +341,54 @@ class EvalUtil {
         }
     }
 
-    static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
-        return coerceModelToString(tm, exp, seqHint, false, env);
-    }
-    
-    /**
-     * @param allowTOM
-     *            Instead of throwing exception, return {@code null} for a {@link TemplateMarkupOutputModel}.
-     */
     static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint,
-            boolean allowTOM,
             Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return env.formatNumber((TemplateNumberModel) tm, exp, false);
+            return env.formatNumberToString((TemplateNumberModel) tm, exp, false);
         } else if (tm instanceof TemplateDateModel) {
-            return env.formatDate((TemplateDateModel) tm, exp, false);
-        } else if (allowTOM && tm instanceof TemplateMarkupOutputModel) {
-            return null;
-        } else if (tm instanceof TemplateScalarModel) {
+            return env.formatDateToString((TemplateDateModel) tm, exp, false);
+        } else {
+            return coerceModelToStringCommon(tm, exp, seqHint, false, env);
+        }
+    }
+
+    static Object coerceModelToMarkupOutputOrString(TemplateModel tm, Expression exp, String seqHint,
+            MarkupOutputFormat markupOutputFormat, Environment env) throws TemplateException {
+        if (tm instanceof TemplateNumberModel) {
+            TemplateNumberModel tnm = (TemplateNumberModel) tm; 
+            TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
+            try {
+                return markupOutputFormat != null 
+                        ? format.formatToMarkupOrString(tnm, markupOutputFormat)
+                        : format.formatToString(tnm);
+            } catch (TemplateValueFormatException e) {
+                throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
+            }
+        } else if (tm instanceof TemplateDateModel) {
+            TemplateDateModel tdm = (TemplateDateModel) tm;
+            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
+            try {
+                return markupOutputFormat != null
+                        ? format.formatToMarkupOrString(tdm, markupOutputFormat)
+                        : format.formatToString(tdm);
+            } catch (TemplateValueFormatException e) {
+                throw MessageUtil.newCantFormatDateException(format, exp, e, false);
+            }
+        } else if (tm instanceof TemplateMarkupOutputModel) {
+            return tm;
+        } else { 
+            return coerceModelToStringCommon(tm, exp, seqHint, true, env);
+        }
+    }
+
+    /**
+     * @param supportsTOM
+     *            Whether the caller {@code coerceModelTo...} method could handle a {@link TemplateMarkupOutputModel}.
+     */
+    private static String coerceModelToStringCommon(TemplateModel tm, Expression exp, String seqHint, boolean supportsTOM,
+            Environment env) throws TemplateModelException, InvalidReferenceException, TemplateException,
+                    NonStringOrTemplateOutputException, NonStringException {
+        if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
         } else if (tm == null) {
             if (env.isClassicCompatible()) {
@@ -399,13 +429,13 @@ class EvalUtil {
                 return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
             }
             if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
-                if (allowTOM) {
+                if (supportsTOM) {
                     throw new NonStringOrTemplateOutputException(exp, tm, seqHint, env);
                 } else {
                     throw new NonStringException(exp, tm, seqHint, env);
                 }
             } else {
-                if (allowTOM) {
+                if (supportsTOM) {
                     throw new NonStringOrTemplateOutputException(exp, tm, env);
                 } else {
                     throw new NonStringException(exp, tm, env);
@@ -413,7 +443,7 @@ class EvalUtil {
             }
         }
     }
-    
+
     /**
      * Returns an {@link ArithmeticEngine} even if {@code env} is {@code null}, because we are in parsing phase.
      */

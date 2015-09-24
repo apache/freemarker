@@ -80,25 +80,19 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         }
         
         @Override
-        public String format(TemplateNumberModel numberModel)
+        public String formatToString(TemplateNumberModel numberModel)
                 throws TemplateModelException, TemplateValueFormatException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
                 return Integer.toString(NumberUtil.toIntExact(n), base);
             } catch (ArithmeticException e) {
                 if (fallbackFormat == null) {
-                    throw new UnformattableNumberException(
+                    throw new UnformattableValueException(
                             n + " doesn't fit into an int, and there was no fallback format specified.");
                 } else {
-                    return fallbackFormat.format(numberModel);
+                    return fallbackFormat.formatToString(numberModel);
                 }
             }
-        }
-
-        @Override
-        public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
-                MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
-            return null;
         }
 
         @Override

@@ -19,23 +19,19 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateNumberModel;
-
 /**
- * Thrown when a {@link TemplateNumberModel} can't be formatted because of the value/properties of the
- * {@link TemplateNumberModel}. For example, some formatters might can't format NaN, or can't display numbers above
- * certain magnitude.
+ * Thrown when the {@link TemplateValueFormat} doesn't support parsing, and parsing was invoked.
  * 
  * @since 2.3.24
  */
-public class UnformattableNumberException extends TemplateValueFormatException {
+public class ParsingNotSupportedException extends TemplateValueFormatException {
 
-    public UnformattableNumberException(String message, Throwable cause) {
+    public ParsingNotSupportedException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnformattableNumberException(String message) {
-        super(message);
+    public ParsingNotSupportedException(String message) {
+        this(message, null);
     }
 
 }

@@ -1450,6 +1450,71 @@ public class ConfigurationTest extends TestCase {
         }
     }
     
+    @Test
+    public void testHasCustomFormats() throws IOException, TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Template t = new Template(null, "", cfg);
+        Environment env = t.createProcessingEnvironment(null, null);
+        assertFalse(cfg.hasCustomFormats());
+        assertFalse(t.hasCustomFormats());
+        assertFalse(env.hasCustomFormats());
+        
+        env.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        assertFalse(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+        t.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        assertFalse(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        cfg.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        assertTrue(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+        
+        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        t.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        env.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        assertFalse(cfg.hasCustomFormats());
+        assertFalse(t.hasCustomFormats());
+        assertFalse(env.hasCustomFormats());
+        
+        cfg.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        assertTrue(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+        
+        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        t.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        env.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        assertFalse(cfg.hasCustomFormats());
+        assertFalse(t.hasCustomFormats());
+        assertFalse(env.hasCustomFormats());
+        
+        // Same with number formats:
+        
+        env.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
+        assertFalse(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+        t.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
+        assertFalse(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        cfg.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
+        assertTrue(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+        
+        cfg.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
+        t.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
+        env.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
+        assertFalse(cfg.hasCustomFormats());
+        assertFalse(t.hasCustomFormats());
+        assertFalse(env.hasCustomFormats());
+        
+        cfg.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
+        assertTrue(cfg.hasCustomFormats());
+        assertTrue(t.hasCustomFormats());
+        assertTrue(env.hasCustomFormats());
+    }
+    
     public void testNamingConventionSetSetting() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 

@@ -31,17 +31,20 @@ abstract class BuiltInForLegacyEscaping extends BuiltInBannedWhenAutoEscaping {
     TemplateModel _eval(Environment env)
     throws TemplateException {
         TemplateModel tm = target.eval(env);
-        String targetString = EvalUtil.coerceModelToString(tm, target, null, true, env);
-        if (targetString == null) {
-            TemplateMarkupOutputModel<?> mo = (TemplateMarkupOutputModel<?>) tm;
+        Object moOrStr = EvalUtil.coerceModelToMarkupOutputOrString(tm, target, null, getMarkupOutputFormat(), env);
+        if (moOrStr instanceof String) {
+            return calculateResult((String) moOrStr, env);
+        } else {
+            TemplateMarkupOutputModel<?> mo = (TemplateMarkupOutputModel<?>) moOrStr;
             if (mo.getOutputFormat().isLegacyBuiltInBypassed(key)) {
                 return mo;
             }
             throw new NonStringException(target, tm, env);
         }
-        return calculateResult(targetString, env);
     }
     
     abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
+    
+    abstract MarkupOutputFormat getMarkupOutputFormat();
     
 }

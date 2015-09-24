@@ -18,8 +18,6 @@
  */
 package freemarker.core;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.text.NumberFormat;
 
 import freemarker.template.TemplateDateModel;
@@ -42,58 +40,54 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
 
     /**
      * @param numberModel
-     *            The date/time/dateTime to format. Most implementations will just work with the return value of
+     *            The number to format; not {@code null}. Most implementations will just work with the return value of
      *            {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
      *            a custom {@link TemplateDateModel} implementation.
-     * 
-     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). Can't be {@code null}.
+     *            
+     * @return The number as text, with no escaping (like no HTML escaping); can't be {@code null}.
      * 
      * @throws TemplateValueFormatException
      *             If any problem occurs while parsing/getting the format. Notable subclass:
-     *             {@link UnformattableNumberException}.
+     *             {@link UnformattableValueException}.
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
-    public abstract String format(TemplateNumberModel numberModel)
+    public abstract String formatToString(TemplateNumberModel numberModel)
             throws TemplateValueFormatException, TemplateModelException;
 
     /**
-     * <b>[Not yet used, might changes in 2.3.24 final]</b>
-     * Formats the number to markup instead of to plain text, or returns {@code null} that will make FreeMarker call
-     * {@link #format(TemplateNumberModel)} and escape its result. If the markup format would be just the result of
-     * {@link #format(TemplateNumberModel)} escaped, it should return {@code null}.
-     */
-    public abstract <MO extends TemplateMarkupOutputModel> MO format(
-            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat)
-                    throws TemplateValueFormatException, TemplateModelException;
-    
-    /**
-     * <b>[Not yet used, might changes in 2.3.24 final]</b>
-     * Same as {@link #format(TemplateNumberModel, MarkupOutputFormat)}, but prints the result to a {@link Writer}
-     * instead of returning it. This can be utilized for some optimizatoin. In the case where
-     * {@link #format(TemplateNumberModel, MarkupOutputFormat)} would return {@code null}, it returns {@code false}. It
-     * writes to the {@link Writer} exactly if the return value is {@code true}.
+     * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
+     * escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
+     * {@link #formatToString(TemplateNumberModel)} escaped, it must return the {@link String} that
+     * {@link #formatToString(TemplateNumberModel)} does.
      * 
-     * <p>
-     * The default implementation in {@link TemplateNumberFormat} builds on calls
-     * {@link #format(TemplateNumberModel, MarkupOutputFormat)} and writes its result to the {@link Writer}.
+     * @param outputFormat
+     *            When the result is a {@link TemplateMarkupOutputModel} result, it must be exactly of this output
+     *            format. Not {@code null}.
+     * 
+     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}. If it's a
+     *         {@link TemplateMarkupOutputModel}, then it must have the output format specified in the
+     *         {@code outputFormat} parameter.
      */
-    public <MO extends TemplateMarkupOutputModel> boolean format(
-            TemplateNumberModel dateModel, MarkupOutputFormat<MO> outputFormat, Writer out)
-                    throws TemplateValueFormatException, TemplateModelException, IOException {
-        MO mo = format(dateModel, outputFormat);
-        if (mo == null) {
-            return false;
-        }
-        mo.getOutputFormat().output(mo, out);
-        return true;
+    public Object formatToMarkupOrString(TemplateNumberModel numberModel, MarkupOutputFormat<?> outputFormat)
+            throws TemplateValueFormatException, TemplateModelException {
+        return formatToString(numberModel);
     }
-
+    
     /**
      * Tells if this formatter should be re-created if the locale changes.
      */
     public abstract boolean isLocaleBound();
 
-    // We don't have parse(...) method, because currently FTL only parses to number with the ArithmeticEngine.
+    /**
+     * This method is reserved for future purposes; currently it always throws {@link ParsingNotSupportedException}. We
+     * don't yet support number parsing with {@link TemplateNumberFormat}-s, because currently FTL parses strings to
+     * number with the {@link ArithmeticEngine} ({@link TemplateNumberFormat} were only introduced in 2.3.24). If it
+     * will be support, it will be similar to {@link TemplateDateFormat#parse(String, int)}.
+     */
+    public final Object parse(String s) throws TemplateValueFormatException {
+        throw new ParsingNotSupportedException("Number formats currenly don't support parsing");
+    }
+    
     
 }

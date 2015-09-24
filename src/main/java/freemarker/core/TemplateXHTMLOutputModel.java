@@ -16,26 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
-
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because of the value/properties of the
- * {@link TemplateDateModel}. For example, a formatter may not support dates before year 1. The most often used subclass
- * is {@link UnknownDateTypeFormattingUnsupportedException}.
+ * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
  * 
  * @since 2.3.24
  */
-public abstract class UnformattableDateException extends TemplateValueFormatException {
-
-    public UnformattableDateException(String message, Throwable cause) {
-        super(message, cause);
+public final class TemplateXHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXHTMLOutputModel> {
+    
+    /**
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     */
+    TemplateXHTMLOutputModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
     }
 
-    public UnformattableDateException(String message) {
-        super(message);
+    @Override
+    public XHTMLOutputFormat getOutputFormat() {
+        return XHTMLOutputFormat.INSTANCE;
     }
 
 }

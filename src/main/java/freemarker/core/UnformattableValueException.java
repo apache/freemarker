@@ -19,17 +19,23 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateModel;
 
 /**
- * Thrown when a {@link TemplateDateModel} can't be formatted because its type is {@link TemplateDateModel#UNKNOWN}.
+ * Thrown when a {@link TemplateModel} can't be formatted because of the value/properties of it are outside of that the
+ * {@link TemplateValueFormat} supports. For example, a formatter may not support dates before year 1, or can't format
+ * NaN. The most often used subclass is {@link UnknownDateTypeFormattingUnsupportedException}.
  * 
  * @since 2.3.24
  */
-public final class UnknownDateTypeFormattingUnsupportedException extends UnformattableValueException {
+public class UnformattableValueException extends TemplateValueFormatException {
 
-    public UnknownDateTypeFormattingUnsupportedException() {
-        super(MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE);
+    public UnformattableValueException(String message, Throwable cause) {
+        super(message, cause);
     }
-    
+
+    public UnformattableValueException(String message) {
+        super(message);
+    }
+
 }

@@ -39,6 +39,11 @@ class BuiltInsForStringsEncoding {
             TemplateModel calculateResult(String s, Environment env) {
                 return new SimpleScalar(StringUtil.HTMLEnc(s));
             }
+
+            @Override
+            MarkupOutputFormat getMarkupOutputFormat() {
+                return HTMLOutputFormat.INSTANCE;
+            }
         }
         
         private final BIBeforeICI2d3d20 prevICIObj = new BIBeforeICI2d3d20();
@@ -54,6 +59,11 @@ class BuiltInsForStringsEncoding {
     
         public Object getPreviousICIChainMember() {
             return prevICIObj;
+        }
+
+        @Override
+        MarkupOutputFormat getMarkupOutputFormat() {
+            return HTMLOutputFormat.INSTANCE;
         }
     }
 
@@ -82,6 +92,11 @@ class BuiltInsForStringsEncoding {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.RTFEnc(s));
+        }
+
+        @Override
+        MarkupOutputFormat getMarkupOutputFormat() {
+            return RTFOutputFormat.INSTANCE;
         }
     }
 
@@ -134,12 +149,22 @@ class BuiltInsForStringsEncoding {
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XHTMLEnc(s));
         }
+
+        @Override
+        MarkupOutputFormat getMarkupOutputFormat() {
+            return XHTMLOutputFormat.INSTANCE;
+        }
     }
 
     static class xmlBI extends BuiltInForLegacyEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XMLEnc(s));
+        }
+
+        @Override
+        MarkupOutputFormat getMarkupOutputFormat() {
+            return XMLOutputFormat.INSTANCE;
         }
     }
 

@@ -34,15 +34,9 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
     }
 
     @Override
-    public String format(TemplateNumberModel numberModel) throws UnformattableNumberException, TemplateModelException {
+    public String formatToString(TemplateNumberModel numberModel) throws UnformattableValueException, TemplateModelException {
         Number number = TemplateFormatUtil.getNonNullNumber(numberModel);
         return format(number);
-    }
-
-    @Override
-    public <MO extends TemplateMarkupOutputModel> MO format(TemplateNumberModel dateModel,
-            MarkupOutputFormat<MO> outputFormat) throws UnformattableNumberException, TemplateModelException {
-        return null;
     }
 
     @Override
@@ -51,11 +45,11 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
     }
 
     @Override
-    String format(Number number) throws UnformattableNumberException {
+    String format(Number number) throws UnformattableValueException {
         try {
             return javaNumberFormat.format(number);
         } catch (ArithmeticException e) {
-            throw new UnformattableNumberException(
+            throw new UnformattableValueException(
                     "This format can't format the " + number + " number. Reason: " + e.getMessage(), e);
         }
     }

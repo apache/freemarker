@@ -1043,8 +1043,9 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(TemplateNumberModel number, Expression exp, boolean useTempModelExc) throws TemplateException {
-        return formatNumber(number, getTemplateNumberFormat(exp, useTempModelExc), exp, useTempModelExc);
+    String formatNumberToString(TemplateNumberModel number, Expression exp, boolean useTempModelExc)
+            throws TemplateException {
+        return formatNumberToString(number, getTemplateNumberFormat(exp, useTempModelExc), exp, useTempModelExc);
     }
 
     /**
@@ -1053,31 +1054,14 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(
-            TemplateNumberModel number, String formatString, Expression exp,
-            boolean useTempModelExc) throws TemplateException {
-        return formatNumber(number, getTemplateNumberFormat(formatString, exp, useTempModelExc), exp, useTempModelExc);
-    }
-
-    /**
-     * Format number with the number format specified as the parameter, with the current locale.
-     * 
-     * @param exp
-     *            The blamed expression if an error occurs; it's only needed for better error messages
-     */
-    String formatNumber(
+    String formatNumberToString(
             TemplateNumberModel number, TemplateNumberFormat format, Expression exp,
             boolean useTempModelExc)
             throws TemplateException {
         try {
-            return format.format(number);
+            return format.formatToString(number);
         } catch (TemplateValueFormatException e) {
-            _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                    "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
-                    e.getMessage())
-                    .blame(exp); 
-            throw useTempModelExc
-                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
+            throw MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
         }
     }
 
@@ -1087,11 +1071,11 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumber(Number number, BackwardCompatibleTemplateNumberFormat format, Expression exp)
+    String formatNumberToString(Number number, BackwardCompatibleTemplateNumberFormat format, Expression exp)
             throws TemplateModelException, _MiscTemplateException {
         try {
             return format.format(number);
-        } catch (UnformattableNumberException e) {
+        } catch (UnformattableValueException e) {
             throw new _MiscTemplateException(exp, e, this,
                     "Failed to format number with ", new _DelayedJQuote(format.getDescription()), ": ",
                     e.getMessage());
@@ -1245,8 +1229,8 @@ public final class Environment extends Configurable {
         int formatStringLen = formatString.length();
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
-                && formatString.charAt(1) != '@'
-                && isIcI2324OrLater()) {
+                && (isIcI2324OrLater() || hasCustomFormats())
+                && Character.isLetter(formatString.charAt(1))) {
             final String name;
             final String params;
             {
@@ -1269,13 +1253,6 @@ public final class Environment extends Configurable {
 
             return formatFactory.get(params, locale, this);
         } else {
-            if (formatStringLen > 1
-                    && formatString.charAt(0) == '@'
-                    && formatString.charAt(1) == '@'
-                    && isIcI2324OrLater()) {
-                // Unescape @ escaped as @@
-                formatString = formatString.substring(1);
-            }
             return JavaTemplateNumberFormatFactory.INSTANCE.get(formatString, locale, this);
         }
     }
@@ -1352,18 +1329,14 @@ public final class Environment extends Configurable {
      * @param tdmSourceExpr
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr,
+    String formatDateToString(TemplateDateModel tdm, Expression tdmSourceExpr,
             boolean useTempModelExc) throws TemplateException {
-        Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
-        
-        TemplateDateFormat format = getTemplateDateFormat(
-                tdm.getDateType(), date.getClass(), tdmSourceExpr,
-                useTempModelExc);
+        TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr, useTempModelExc);
         
         try {
-            return format.format(tdm);
+            return format.formatToString(tdm);
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatDateException(tdmSourceExpr, e);
+            throw MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
         }
     }
 
@@ -1373,7 +1346,7 @@ public final class Environment extends Configurable {
      * @param blamedFormatterExp
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDate(TemplateDateModel tdm, String formatString,
+    String formatDateToString(TemplateDateModel tdm, String formatString,
             Expression blamedDateSourceExp, Expression blamedFormatterExp,
             boolean useTempModelExc) throws TemplateException {
         Date date = EvalUtil.modelToDate(tdm, blamedDateSourceExp);
@@ -1384,9 +1357,9 @@ public final class Environment extends Configurable {
                 useTempModelExc);
         
         try {
-            return format.format(tdm);
+            return format.formatToString(tdm);
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatDateException(blamedDateSourceExp, e);
+            throw MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
         }
     }
 
@@ -1554,6 +1527,16 @@ public final class Environment extends Configurable {
         return getTemplateDateFormatWithoutCache(formatString, dateType, locale, timeZone, zonelessInput);
     }
     
+    TemplateDateFormat getTemplateDateFormat(TemplateDateModel tdm, Expression tdmSourceExpr, boolean useTempModelExc)
+            throws TemplateModelException, TemplateException {
+        Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
+        
+        TemplateDateFormat format = getTemplateDateFormat(
+                tdm.getDateType(), date.getClass(), tdmSourceExpr,
+                useTempModelExc);
+        return format;
+    }
+
     /**
      * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to {@link TemplateException}-s.
      */
@@ -1752,8 +1735,8 @@ public final class Environment extends Configurable {
             formatParams = formatString; // for speed, we don't remove the prefix
         } else if (firstChar == '@'
                 && formatStringLen > 1
-                && formatString.charAt(1) != '@'
-                && isIcI2324OrLater()) {
+                && (isIcI2324OrLater() || hasCustomFormats())
+                && Character.isLetter(formatString.charAt(1))) {
             final String name;
             {
                 int endIdx;
@@ -1773,19 +1756,8 @@ public final class Environment extends Configurable {
                         "No custom date format was defined with name " + StringUtil.jQuote(name));
             }
         } else {
-            String unescapedFormatString;
-            if (firstChar == '@'
-                    && formatStringLen > 1
-                    && formatString.charAt(1) == '@'
-                    && isIcI2324OrLater()) {
-                // Unescape @ escaped as @@
-                unescapedFormatString = formatString.substring(1);
-            } else {
-                unescapedFormatString = formatString;
-            }
-
+            formatParams = formatString;
             formatFactory = JavaTemplateDateFormatFactory.INSTANCE;
-            formatParams = unescapedFormatString;
         }
 
         return formatFactory.get(formatParams, dateType, locale, timeZone,
