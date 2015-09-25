@@ -225,8 +225,10 @@ public class FileTemplateLoader implements TemplateLoader {
      */
     private boolean isNameCaseCorrect(File source) throws IOException {
         final String sourcePath = source.getPath();
-        if (correctCasePaths.get(sourcePath) != null) {
-            return true;
+        synchronized (correctCasePaths) {
+            if (correctCasePaths.get(sourcePath) != null) {
+                return true;
+            }
         }
         
         final File parentDir = source.getParentFile();
