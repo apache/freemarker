@@ -26121,6 +26121,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/439/">439</link>]:
+              <literal>FileTemplateLoader</literal> with
+              <literal>emulateCaseSensitiveFileSystem</literal> set to
+              <literal>true</literal> (used for development) wasn't properly
+              synchronized, leading to random
+              <literal>NullPointerException</literal>-s or other
+              misbehavior.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: The (rarely used) cause exception of
               <literal>ParseException</literal>-s wasn't set</para>
             </listitem>
