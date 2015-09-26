@@ -14462,7 +14462,7 @@ $42.00
           linkend="pgui_config_custom_formats">see more here</link>),
           like:</para>
 
-          <programlisting>${x?strong.@price}
+          <programlisting role="template">${x?strong.@price}
 ${x?strong.@weight}</programlisting>
 
           <para>where the custom format names were <quote>price</quote> and
