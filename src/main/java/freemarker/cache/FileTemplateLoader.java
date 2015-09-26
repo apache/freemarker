@@ -263,8 +263,10 @@ public class FileTemplateLoader implements TemplateLoader {
                 }
             }
         }
-    
-        correctCasePaths.put(sourcePath, Boolean.TRUE);        
+
+        synchronized (correctCasePaths) {
+            correctCasePaths.put(sourcePath, Boolean.TRUE);        
+        }
         return true;
     }
 
