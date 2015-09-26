@@ -82,7 +82,6 @@ final class AddConcatExpression extends Expression {
                         leftModel, leftExp, (String) null, markupOutputFormat, env);
                 Object rightOMOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
                         rightModel, rightExp, (String) null, markupOutputFormat, env);
-                // TODO prove that neither can be null
 
                 if (leftOMOrStr instanceof String) {
                     if (rightOMOrStr instanceof String) {

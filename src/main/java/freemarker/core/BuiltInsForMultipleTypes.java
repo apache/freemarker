@@ -578,7 +578,7 @@ class BuiltInsForMultipleTypes {
                                 throw new BugException();
                             }
                         }
-                        cachedValue = defaultFormat.formatToString(dateModel);
+                        cachedValue = EvalUtil.formatResultNotNull(defaultFormat.formatToString(dateModel));
                     } catch (TemplateValueFormatException e) {
                         try {
                             throw MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);

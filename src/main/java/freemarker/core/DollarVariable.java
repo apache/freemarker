@@ -68,7 +68,7 @@ final class DollarVariable extends Interpolation {
             } else {
                 out.write(s);
             }
-        } else { // moOrStr wasn't output yet
+        } else {
             final TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) moOrStr;
             final MarkupOutputFormat moOF = mo.getOutputFormat();
             // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!

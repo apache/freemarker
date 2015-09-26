@@ -62,6 +62,8 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * {@link #formatToString(TemplateDateModel)} escaped, it must return the {@link String} that
      * {@link #formatToString(TemplateDateModel)} does.
      * 
+     * <p>The implementation in {@link TemplateDateFormat} simply calls {@link #formatToString(TemplateDateModel)}.
+     * 
      * @param outputFormat
      *            When the result is a {@link TemplateMarkupOutputModel} result, it must be exactly of this output
      *            format.

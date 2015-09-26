@@ -61,6 +61,8 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * {@link #formatToString(TemplateNumberModel)} escaped, it must return the {@link String} that
      * {@link #formatToString(TemplateNumberModel)} does.
      * 
+     * <p>The implementation in {@link TemplateNumberFormat} simply calls {@link #formatToString(TemplateNumberModel)}.
+     * 
      * @param outputFormat
      *            When the result is a {@link TemplateMarkupOutputModel} result, it must be exactly of this output
      *            format. Not {@code null}.

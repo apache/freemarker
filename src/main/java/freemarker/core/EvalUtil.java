@@ -341,26 +341,32 @@ class EvalUtil {
         }
     }
 
+    /**
+     * @return Never {@code null}
+     */
     static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint,
             Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return env.formatNumberToString((TemplateNumberModel) tm, exp, false);
+            return formatResultNotNull(env.formatNumberToString((TemplateNumberModel) tm, exp, false));
         } else if (tm instanceof TemplateDateModel) {
-            return env.formatDateToString((TemplateDateModel) tm, exp, false);
+            return formatResultNotNull(env.formatDateToString((TemplateDateModel) tm, exp, false));
         } else {
             return coerceModelToStringCommon(tm, exp, seqHint, false, env);
         }
     }
 
+    /**
+     * @return Never {@code null}
+     */
     static Object coerceModelToMarkupOutputOrString(TemplateModel tm, Expression exp, String seqHint,
             MarkupOutputFormat markupOutputFormat, Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
             TemplateNumberModel tnm = (TemplateNumberModel) tm; 
             TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
             try {
-                return markupOutputFormat != null 
+                return formatResultNotNull(markupOutputFormat != null 
                         ? format.formatToMarkupOrString(tnm, markupOutputFormat)
-                        : format.formatToString(tnm);
+                        : format.formatToString(tnm));
             } catch (TemplateValueFormatException e) {
                 throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
             }
@@ -368,9 +374,9 @@ class EvalUtil {
             TemplateDateModel tdm = (TemplateDateModel) tm;
             TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
             try {
-                return markupOutputFormat != null
+                return formatResultNotNull(markupOutputFormat != null
                         ? format.formatToMarkupOrString(tdm, markupOutputFormat)
-                        : format.formatToString(tdm);
+                        : format.formatToString(tdm));
             } catch (TemplateValueFormatException e) {
                 throw MessageUtil.newCantFormatDateException(format, exp, e, false);
             }
@@ -382,11 +388,17 @@ class EvalUtil {
     }
 
     /**
+     * @param tm
+     *            If {@code null} that's an exception, unless we are in classic compatible mode.
+     * 
      * @param supportsTOM
      *            Whether the caller {@code coerceModelTo...} method could handle a {@link TemplateMarkupOutputModel}.
+     *            
+     * @return Never {@code null}
      */
-    private static String coerceModelToStringCommon(TemplateModel tm, Expression exp, String seqHint, boolean supportsTOM,
-            Environment env) throws TemplateModelException, InvalidReferenceException, TemplateException,
+    private static String coerceModelToStringCommon(
+            TemplateModel tm, Expression exp, String seqHint, boolean supportsTOM, Environment env)
+            throws TemplateModelException, InvalidReferenceException, TemplateException,
                     NonStringOrTemplateOutputException, NonStringException {
         if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
@@ -442,6 +454,20 @@ class EvalUtil {
                 }
             }
         }
+    }
+
+    static String formatResultNotNull(String r) {
+        if (r != null) {
+            return r;
+        }
+        throw new NullPointerException("TemplateValueFormatter result can't be null");
+    }
+
+    static Object formatResultNotNull(Object r) {
+        if (r != null) {
+            return r;
+        }
+        throw new NullPointerException("TemplateValueFormatter result can't be null");
     }
 
     /**
