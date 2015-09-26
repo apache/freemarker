@@ -53,28 +53,21 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
-    public abstract String formatToString(TemplateDateModel dateModel)
+    public abstract String formatToPlainText(TemplateDateModel dateModel)
             throws TemplateValueFormatException, TemplateModelException;
 
     /**
      * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
      * escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
-     * {@link #formatToString(TemplateDateModel)} escaped, it must return the {@link String} that
-     * {@link #formatToString(TemplateDateModel)} does.
+     * {@link #formatToPlainText(TemplateDateModel)} escaped, it must return the {@link String} that
+     * {@link #formatToPlainText(TemplateDateModel)} does.
      * 
-     * <p>The implementation in {@link TemplateDateFormat} simply calls {@link #formatToString(TemplateDateModel)}.
+     * <p>The implementation in {@link TemplateDateFormat} simply calls {@link #formatToPlainText(TemplateDateModel)}.
      * 
-     * @param outputFormat
-     *            When the result is a {@link TemplateMarkupOutputModel} result, it must be exactly of this output
-     *            format.
-     * 
-     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}. If it's a
-     *         {@link TemplateMarkupOutputModel}, then it must have the output format specified in the
-     *         {@code outputFormat} parameter.
+     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}.
      */
-    public Object formatToMarkupOrString(TemplateDateModel dateModel, MarkupOutputFormat<?> outputFormat)
-            throws TemplateValueFormatException, TemplateModelException {
-        return formatToString(dateModel);
+    public Object format(TemplateDateModel dateModel) throws TemplateValueFormatException, TemplateModelException {
+        return formatToPlainText(dateModel);
     }
 
     /**
@@ -94,7 +87,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * 
      * @return The interpretation of the text either as a {@link Date} or {@link TemplateDateModel}. Typically, a
      *         {@link Date}. {@link TemplateDateModel} is used if you have to attach some application-specific
-     *         meta-information thats also extracted during {@link #formatToString(TemplateDateModel)} (so if you format
+     *         meta-information thats also extracted during {@link #formatToPlainText(TemplateDateModel)} (so if you format
      *         something and then parse it, you get back an equivalent result). It can't be {@code null}. Known issue
      *         (at least in FTL 2): {@code ?date}/{@code ?time}/{@code ?datetime}, when not invoked as a method, can't
      *         return the {@link TemplateDateModel}, only the {@link Date} from inside it, hence the additional

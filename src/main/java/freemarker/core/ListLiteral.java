@@ -67,13 +67,13 @@ final class ListLiteral extends Expression {
                 return Collections.EMPTY_LIST;
             }
             case 1: {
-                return Collections.singletonList(((Expression) items.get(0)).evalAndCoerceToString(env));
+                return Collections.singletonList(((Expression) items.get(0)).evalAndCoerceToPlainText(env));
             }
             default: {
                 List result = new ArrayList(items.size());
                 for (ListIterator iterator = items.listIterator(); iterator.hasNext(); ) {
                     Expression exp = (Expression) iterator.next();
-                    result.add(exp.evalAndCoerceToString(env));
+                    result.add(exp.evalAndCoerceToPlainText(env));
                 }
                 return result;
             }

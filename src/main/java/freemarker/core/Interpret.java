@@ -43,7 +43,7 @@ import freemarker.template.TemplateTransformModel;
  * specify another parameter to the method call in which case the
  * template name suffix is the specified id instead of "anonymous_interpreted".
  */
-class Interpret extends BuiltInForOutputFormatRelated {
+class Interpret extends OutputFormatBoundBuiltIn {
     
     /**
      * Constructs a template on-the-fly and returns it embedded in a
@@ -68,7 +68,7 @@ class Interpret extends BuiltInForOutputFormatRelated {
         if (model instanceof TemplateSequenceModel) {
             sourceExpr = ((Expression) new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(0))).copyLocationFrom(target));
             if (((TemplateSequenceModel) model).size() > 1) {
-                id = ((Expression) new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(1))).copyLocationFrom(target)).evalAndCoerceToString(env);
+                id = ((Expression) new DynamicKeyName(target, new NumberLiteral(Integer.valueOf(1))).copyLocationFrom(target)).evalAndCoerceToPlainText(env);
             }
         } else if (model instanceof TemplateScalarModel) {
             sourceExpr = target;
@@ -78,7 +78,7 @@ class Interpret extends BuiltInForOutputFormatRelated {
                     "sequence or string", new Class[] { TemplateSequenceModel.class, TemplateScalarModel.class },
                     env);
         }
-        String templateSource = sourceExpr.evalAndCoerceToString(env);
+        String templateSource = sourceExpr.evalAndCoerceToPlainText(env);
         Template parentTemplate = env.getTemplate();
         
         final Template interpretedTemplate;

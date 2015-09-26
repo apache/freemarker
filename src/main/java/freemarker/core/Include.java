@@ -80,7 +80,7 @@ final class Include extends TemplateElement {
                 try {
                     if (parseExp instanceof StringLiteral) {
                         // Legacy
-                        parse = Boolean.valueOf(StringUtil.getYesNo(parseExp.evalAndCoerceToString(null)));
+                        parse = Boolean.valueOf(StringUtil.getYesNo(parseExp.evalAndCoerceToPlainText(null)));
                     } else {
                         try {
                             parse = Boolean.valueOf(parseExp.evalToBoolean(template.getConfiguration()));
@@ -119,7 +119,7 @@ final class Include extends TemplateElement {
     
     @Override
     void accept(Environment env) throws TemplateException, IOException {
-        final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToString(env);
+        final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullIncludedTemplateName;
         try {
             fullIncludedTemplateName = env.toFullTemplateName(getTemplate().getName(), includedTemplateName);
@@ -132,7 +132,7 @@ final class Include extends TemplateElement {
         final String encoding = this.encoding != null
                 ? this.encoding
                 : (encodingExp != null
-                        ? encodingExp.evalAndCoerceToString(env)
+                        ? encodingExp.evalAndCoerceToPlainText(env)
                         : null);
         
         final boolean parse;

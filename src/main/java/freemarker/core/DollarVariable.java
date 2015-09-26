@@ -59,8 +59,8 @@ final class DollarVariable extends Interpolation {
     void accept(Environment env) throws TemplateException, IOException {
         final TemplateModel tm = escapedExpression.eval(env);
         final Writer out = env.getOut();
-        final Object moOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
-                tm, escapedExpression, null, markupOutputFormat, env);
+        final Object moOrStr = EvalUtil.coerceModelToStringOrMarkup(
+                tm, escapedExpression, null, env);
         if (moOrStr instanceof String) {
             final String s = (String) moOrStr;
             if (autoEscape) {

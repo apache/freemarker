@@ -49,7 +49,7 @@ class BuiltInsForStringsMisc {
         }
     }
 
-    static class evalBI extends BuiltInForOutputFormatRelated {
+    static class evalBI extends OutputFormatBoundBuiltIn {
         
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {

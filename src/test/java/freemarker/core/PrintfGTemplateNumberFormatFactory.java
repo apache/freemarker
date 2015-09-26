@@ -68,7 +68,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
         }
         
         @Override
-        public String formatToString(TemplateNumberModel numberModel)
+        public String formatToPlainText(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
             final Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             
@@ -90,12 +90,9 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
         }
 
         @Override
-        public Object formatToMarkupOrString(TemplateNumberModel numberModel, MarkupOutputFormat<?> outputFormat)
+        public Object format(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
-            String strResult = formatToString(numberModel);
-            if (!(outputFormat instanceof HTMLOutputFormat || outputFormat instanceof XHTMLOutputFormat)) {
-                return strResult;
-            }
+            String strResult = formatToPlainText(numberModel);
             
             int expIdx = strResult.indexOf('E');
             if (expIdx == -1) {
@@ -108,7 +105,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
                 expSignifNumBegin++;
             }
             
-            return outputFormat.fromMarkup(
+            return HTMLOutputFormat.INSTANCE.fromMarkup(
                     strResult.substring(0, expIdx)
                     + "*10<sup>"
                     + (expStr.charAt(0) == '-' ? "-" : "") + expStr.substring(expSignifNumBegin)

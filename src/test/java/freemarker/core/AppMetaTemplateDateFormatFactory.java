@@ -47,7 +47,7 @@ public class AppMetaTemplateDateFormatFactory extends TemplateDateFormatFactory 
         private AppMetaTemplateDateFormat() { }
         
         @Override
-        public String formatToString(TemplateDateModel dateModel)
+        public String formatToPlainText(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
             String result = String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
             if (dateModel instanceof AppMetaTemplateDateModel) {

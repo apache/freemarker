@@ -22,7 +22,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.utility.NullArgumentException;
 
-abstract class BuiltInForOutputFormatRelated extends SpecialBuiltIn {
+abstract class OutputFormatBoundBuiltIn extends SpecialBuiltIn {
     
     protected OutputFormat outputFormat;
     

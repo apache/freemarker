@@ -89,7 +89,7 @@ class BuiltInsForStringsBasic {
     
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
-            return new BIMethod(target.evalAndCoerceToString(env,
+            return new BIMethod(target.evalAndCoerceToStringOrUnsupportedMarkup(env,
                     "For sequences/collections (lists and such) use \"?seq_contains\" instead."));
         }
     }
@@ -217,9 +217,9 @@ class BuiltInsForStringsBasic {
         
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
-            return new BIMethod(target.evalAndCoerceToString(env,
+            return new BIMethod(target.evalAndCoerceToStringOrUnsupportedMarkup(env,
                     "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
-        } 
+        }
     }
     
     static class keep_afterBI extends BuiltInForString {

@@ -45,17 +45,15 @@ final class AddConcatExpression extends Expression {
 
     private final Expression left;
     private final Expression right;
-    private final MarkupOutputFormat markupOutputFormat;
 
-    AddConcatExpression(Expression left, Expression right, MarkupOutputFormat markupOutputFormat) {
+    AddConcatExpression(Expression left, Expression right) {
         this.left = left;
         this.right = right;
-        this.markupOutputFormat = markupOutputFormat;
     }
 
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        return _eval(env, this, left, left.eval(env), right, right.eval(env), markupOutputFormat);
+        return _eval(env, this, left, left.eval(env), right, right.eval(env));
     }
 
     /**
@@ -67,8 +65,7 @@ final class AddConcatExpression extends Expression {
     static TemplateModel _eval(Environment env,
             TemplateObject parent,
             Expression leftExp, TemplateModel leftModel,
-            Expression rightExp, TemplateModel rightModel,
-            MarkupOutputFormat markupOutputFormat)
+            Expression rightExp, TemplateModel rightModel)
             throws TemplateModelException, TemplateException, NonStringException {
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel) {
             Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
@@ -78,10 +75,10 @@ final class AddConcatExpression extends Expression {
             return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
         } else {
             try {
-                Object leftOMOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
-                        leftModel, leftExp, (String) null, markupOutputFormat, env);
-                Object rightOMOrStr = EvalUtil.coerceModelToMarkupOutputOrString(
-                        rightModel, rightExp, (String) null, markupOutputFormat, env);
+                Object leftOMOrStr = EvalUtil.coerceModelToStringOrMarkup(
+                        leftModel, leftExp, (String) null, env);
+                Object rightOMOrStr = EvalUtil.coerceModelToStringOrMarkup(
+                        rightModel, rightExp, (String) null, env);
 
                 if (leftOMOrStr instanceof String) {
                     if (rightOMOrStr instanceof String) {
@@ -169,8 +166,7 @@ final class AddConcatExpression extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new AddConcatExpression(
     	left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-    	right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-    	markupOutputFormat);
+    	right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
     @Override
