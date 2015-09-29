@@ -52,26 +52,23 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * @throws TemplateModelException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
-    public abstract String formatToString(TemplateNumberModel numberModel)
+    public abstract String formatToPlainText(TemplateNumberModel numberModel)
             throws TemplateValueFormatException, TemplateModelException;
 
     /**
      * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
      * escaped, otherwise falls back to formatting to plain text. If the markup result would be just the result of
-     * {@link #formatToString(TemplateNumberModel)} escaped, it must return the {@link String} that
-     * {@link #formatToString(TemplateNumberModel)} does.
+     * {@link #formatToPlainText(TemplateNumberModel)} escaped, it must return the {@link String} that
+     * {@link #formatToPlainText(TemplateNumberModel)} does.
      * 
-     * @param outputFormat
-     *            When the result is a {@link TemplateMarkupOutputModel} result, it must be exactly of this output
-     *            format. Not {@code null}.
+     * <p>
+     * The implementation in {@link TemplateNumberFormat} simply calls {@link #formatToPlainText(TemplateNumberModel)}.
      * 
-     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}. If it's a
-     *         {@link TemplateMarkupOutputModel}, then it must have the output format specified in the
-     *         {@code outputFormat} parameter.
+     * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}.
      */
-    public Object formatToMarkupOrString(TemplateNumberModel numberModel, MarkupOutputFormat<?> outputFormat)
+    public Object format(TemplateNumberModel numberModel)
             throws TemplateValueFormatException, TemplateModelException {
-        return formatToString(numberModel);
+        return formatToPlainText(numberModel);
     }
     
     /**

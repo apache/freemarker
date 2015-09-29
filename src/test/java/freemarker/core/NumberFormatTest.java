@@ -151,17 +151,17 @@ public class NumberFormatTest extends TemplateTest {
         TemplateNumberFormat defF = env.getTemplateNumberFormat();
         //
         TemplateNumberFormat explF = env.getTemplateNumberFormat("0.00");
-        assertEquals("1.25", explF.formatToString(new SimpleNumber(1.25)));
+        assertEquals("1.25", explF.formatToPlainText(new SimpleNumber(1.25)));
         //
         TemplateNumberFormat expl2F = env.getTemplateNumberFormat("@loc");
-        assertEquals("1.25_en_US", expl2F.formatToString(new SimpleNumber(1.25)));
+        assertEquals("1.25_en_US", expl2F.formatToPlainText(new SimpleNumber(1.25)));
         
         TemplateNumberFormat explFFr = env.getTemplateNumberFormat("0.00", Locale.FRANCE);
         assertNotSame(explF, explFFr);
-        assertEquals("1,25", explFFr.formatToString(new SimpleNumber(1.25)));
+        assertEquals("1,25", explFFr.formatToPlainText(new SimpleNumber(1.25)));
         //
         TemplateNumberFormat expl2FFr = env.getTemplateNumberFormat("@loc", Locale.FRANCE);
-        assertEquals("1.25_fr_FR", expl2FFr.formatToString(new SimpleNumber(1.25)));
+        assertEquals("1.25_fr_FR", expl2FFr.formatToPlainText(new SimpleNumber(1.25)));
         
         assertSame(env.getTemplateNumberFormat(), defF);
         //
@@ -291,18 +291,16 @@ public class NumberFormatTest extends TemplateTest {
         getConfiguration().setNumberFormat("@printfG_3");
 
         String commonFTL = "${1234567} ${'cat:' + 1234567} ${0.0000123}";
-        assertOutput(commonFTL,
-                "1.23E+06 cat:1.23E+06 1.23E-05");
-        assertOutput("<#ftl outputFormat='HTML'>" + commonFTL,
-                "1.23*10<sup>6</sup> cat:1.23*10<sup>6</sup> 1.23*10<sup>-5</sup>");
-        assertOutput("<#ftl outputFormat='HTML'>${\"" + commonFTL + "\"}",
-                "1.23E+06 cat:1.23E+06 1.23E-05");
-        assertOutput("<#escape x as x?html>" + commonFTL + "</#escape>",
-                "1.23*10<sup>6</sup> cat:1.23E+06 1.23*10<sup>-5</sup>");
-        assertOutput("<#escape x as x?xhtml>" + commonFTL + "</#escape>",
-                "1.23*10<sup>6</sup> cat:1.23E+06 1.23*10<sup>-5</sup>");
-        assertOutput("<#escape x as x?xml>" + commonFTL + "</#escape>",
-                "1.23E+06 cat:1.23E+06 1.23E-05");
+        String commonOutput = "1.23*10<sup>6</sup> cat:1.23*10<sup>6</sup> 1.23*10<sup>-5</sup>";
+        assertOutput(commonFTL, commonOutput);
+        assertOutput("<#ftl outputFormat='HTML'>" + commonFTL, commonOutput);
+        assertOutput("<#escape x as x?html>" + commonFTL + "</#escape>", commonOutput);
+        assertOutput("<#escape x as x?xhtml>" + commonFTL + "</#escape>", commonOutput);
+        assertOutput("<#escape x as x?xml>" + commonFTL + "</#escape>", commonOutput);
+        // TODO: Should give markup, but currently does interpolation in plain text:
+        // assertOutput("${\"" + commonFTL + "\"}",
+        //        "1.23*10<sup>6</sup> cat:1.23*10<sup>6</sup> 1.23*10<sup>-5</sup>");
+        assertErrorContains("<#ftl outputFormat='plainText'>" + commonFTL, "HTML", "plainText", "conversion");
     }
 
     @Test

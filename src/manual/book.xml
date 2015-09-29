@@ -14462,7 +14462,7 @@ $42.00
           linkend="pgui_config_custom_formats">see more here</link>),
           like:</para>
 
-          <programlisting>${x?strong.@price}
+          <programlisting role="template">${x?strong.@price}
 ${x?strong.@weight}</programlisting>
 
           <para>where the custom format names were <quote>price</quote> and
@@ -14563,7 +14563,7 @@ German people write: ${12345678}</programlisting>
 German people write: 12.345.678,00</programlisting>
 
           <simplesect xml:id="topic.extendedJavaDecimalFormat">
-            <title>Extended Java decimal format </title>
+            <title>Extended Java decimal format</title>
 
             <indexterm>
               <primary>extended Java decimal format</primary>
@@ -25992,14 +25992,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   number and date/time/datetime formatting results, like
                   <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which
                   won't be accidentally auto-escaped, as FreeMarker knows that
-                  it's already HTML. (See [TODO] as an example.) Note that
-                  formatting to markup only happens in a context that has a
-                  markup <link
-                  linkend="dgui_misc_autoescaping_outputformat">output
-                  format</link>, otherwise FreeMarker will format to plain
-                  text, just as before. Also note that no out-of-the-box
-                  (non-custom) formatter formats to markup at the
-                  moment.</para>
+                  it's already HTML. (See [TODO] as an example.) Note that no
+                  out-of-the-box format formats to markup (at the moment), but
+                  you could write such custom format.</para>
                 </listitem>
 
                 <listitem>
@@ -26250,20 +26245,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para><literal>TemplateNumberFormat.format</literal>/<literal>TemplateDateFormat.format</literal>
-              overloads were renamed to <literal>formatToString</literal> and
-              <literal>formatToMarkupOrString</literal>. The last has
-              different semantics then its predecessor (which was marked as
-              draft), and it's actually used by FreeMarker. Thus, it's now
-              possible to have HTML or other markup in number and
+              overloads were changed to <literal>formatToPlainText</literal>
+              and <literal>format</literal>, the last returning either String
+              or a <literal>TemplateMarkupOutputModel</literal>. Also,
+              formatting to markup is now actually used by FreeMarker. Thus,
+              it's now possible to have HTML or other markup in number and
               date/time/datetime formatting results, like
               <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which won't
               be accidentally auto-escaped, as FreeMarker knows that it's
-              already HTML. (See [TODO] as an example.) Note that formatting
-              to markup only happens in a context that has a markup <link
-              linkend="dgui_misc_autoescaping_outputformat">output
-              format</link>, otherwise FreeMarker will format to plain text,
-              just like before. Also note that no out-of-the-box (non-custom)
-              formatter formats to markup at the moment.</para>
+              already HTML. (See [TODO] as an example.) Note that no
+              out-of-the-box format formats to markup (at the moment), but you
+              could write such custom format.</para>
             </listitem>
 
             <listitem>

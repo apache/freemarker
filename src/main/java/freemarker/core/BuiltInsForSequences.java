@@ -183,7 +183,7 @@ class BuiltInsForSequences {
                             hadItem = true;
                         }
                         try {
-                            sb.append(EvalUtil.coerceModelToString(item, null, null, env));
+                            sb.append(EvalUtil.coerceModelToStringOrUnsupportedMarkup(item, null, null, env));
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e,
                                     "\"?", key, "\" failed at index ", Integer.valueOf(idx), " with this error:\n\n",

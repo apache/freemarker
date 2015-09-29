@@ -39,7 +39,7 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
     }
     
     @Override
-    public String formatToString(TemplateDateModel dateModel) throws TemplateModelException {
+    public String formatToPlainText(TemplateDateModel dateModel) throws TemplateModelException {
         return javaDateFormat.format(TemplateFormatUtil.getNonNullDate(dateModel));
     }
 

@@ -51,7 +51,7 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
         }
 
         @Override
-        public String formatToString(TemplateDateModel dateModel)
+        public String formatToPlainText(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
             return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
         }

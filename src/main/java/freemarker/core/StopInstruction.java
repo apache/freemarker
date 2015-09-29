@@ -37,7 +37,7 @@ final class StopInstruction extends TemplateElement {
         if (exp == null) {
             throw new StopException(env);
         }
-        throw new StopException(env, exp.evalAndCoerceToString(env));
+        throw new StopException(env, exp.evalAndCoerceToPlainText(env));
     }
 
     @Override

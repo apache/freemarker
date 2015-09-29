@@ -51,7 +51,7 @@ public final class LibraryLoad extends TemplateElement {
 
     @Override
     void accept(Environment env) throws TemplateException, IOException {
-        final String importedTemplateName = importedTemplateNameExp.evalAndCoerceToString(env);
+        final String importedTemplateName = importedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullImportedTemplateName;
         try {
             fullImportedTemplateName = env.toFullTemplateName(getTemplate().getName(), importedTemplateName);

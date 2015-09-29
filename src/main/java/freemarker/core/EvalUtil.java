@@ -286,8 +286,8 @@ class EvalUtil {
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
             cmpResult = (leftBool ? 1 : 0) - (rightBool ? 1 : 0);
         } else if (env.isClassicCompatible()) {
-            String leftSting = leftExp.evalAndCoerceToString(env);
-            String rightString = rightExp.evalAndCoerceToString(env);
+            String leftSting = leftExp.evalAndCoerceToPlainText(env);
+            String rightString = rightExp.evalAndCoerceToPlainText(env);
             cmpResult = env.getCollator().compare(leftSting, rightString);
         } else {
             if (typeMismatchMeansNotEqual) {
@@ -341,26 +341,22 @@ class EvalUtil {
         }
     }
 
-    static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint,
-            Environment env) throws TemplateException {
-        if (tm instanceof TemplateNumberModel) {
-            return env.formatNumberToString((TemplateNumberModel) tm, exp, false);
-        } else if (tm instanceof TemplateDateModel) {
-            return env.formatDateToString((TemplateDateModel) tm, exp, false);
-        } else {
-            return coerceModelToStringCommon(tm, exp, seqHint, false, env);
-        }
-    }
-
-    static Object coerceModelToMarkupOutputOrString(TemplateModel tm, Expression exp, String seqHint,
-            MarkupOutputFormat markupOutputFormat, Environment env) throws TemplateException {
+    /**
+     * Converts a value to plain text {@link String}, or a {@link TemplateMarkupOutputModel} if that's what the
+     * {@link TemplateValueFormat} involved produces.
+     * 
+     * @param seqTip
+     *            Tip to display if the value type is not coercable, but it's sequence or collection.
+     * 
+     * @return Never {@code null}
+     */
+    static Object coerceModelToStringOrMarkup(TemplateModel tm, Expression exp, String seqTip, Environment env)
+            throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
             TemplateNumberModel tnm = (TemplateNumberModel) tm; 
             TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
             try {
-                return markupOutputFormat != null 
-                        ? format.formatToMarkupOrString(tnm, markupOutputFormat)
-                        : format.formatToString(tnm);
+                return assertFormatResultNotNull(format.format(tnm));
             } catch (TemplateValueFormatException e) {
                 throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
             }
@@ -368,25 +364,82 @@ class EvalUtil {
             TemplateDateModel tdm = (TemplateDateModel) tm;
             TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
             try {
-                return markupOutputFormat != null
-                        ? format.formatToMarkupOrString(tdm, markupOutputFormat)
-                        : format.formatToString(tdm);
+                return assertFormatResultNotNull(format.format(tdm));
             } catch (TemplateValueFormatException e) {
                 throw MessageUtil.newCantFormatDateException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
         } else { 
-            return coerceModelToStringCommon(tm, exp, seqHint, true, env);
+            return coerceModelToTextualCommon(tm, exp, seqTip, true, env);
         }
     }
 
     /**
+     * Like {@link #coerceModelToStringOrMarkup(TemplateModel, Expression, String, Environment)}, but gives error
+     * if the result is markup. This is what you normally use where markup results can't be used.
+     *
+     * @param seqTip
+     *            Tip to display if the value type is not coercable, but it's sequence or collection.
+     * 
+     * @return Never {@code null}
+     */
+    static String coerceModelToStringOrUnsupportedMarkup(
+            TemplateModel tm, Expression exp, String seqTip, Environment env)
+            throws TemplateException {
+        if (tm instanceof TemplateNumberModel) {
+            TemplateNumberModel tnm = (TemplateNumberModel) tm; 
+            TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
+            try {
+                return ensureFormatResultString(format.format(tnm), exp, env);
+            } catch (TemplateValueFormatException e) {
+                throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
+            }
+        } else if (tm instanceof TemplateDateModel) {
+            TemplateDateModel tdm = (TemplateDateModel) tm;
+            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
+            try {
+                return ensureFormatResultString(format.format(tdm), exp, env);
+            } catch (TemplateValueFormatException e) {
+                throw MessageUtil.newCantFormatDateException(format, exp, e, false);
+            }
+        } else { 
+            return coerceModelToTextualCommon(tm, exp, seqTip, false, env);
+        }
+    }
+
+    /**
+     * Converts a value to plain text {@link String}, even if the {@link TemplateValueFormat} involved normally produces
+     * markup. This should be used rarely, where the user clearly intend to use the plain text variant of the format.
+     * 
+     * @param seqTip
+     *            Tip to display if the value type is not coercable, but it's sequence or collection.
+     * 
+     * @return Never {@code null}
+     */
+    static String coerceModelToPlainText(TemplateModel tm, Expression exp, String seqTip,
+            Environment env) throws TemplateException {
+        if (tm instanceof TemplateNumberModel) {
+            return assertFormatResultNotNull(env.formatNumberToPlainText((TemplateNumberModel) tm, exp, false));
+        } else if (tm instanceof TemplateDateModel) {
+            return assertFormatResultNotNull(env.formatDateToPlainText((TemplateDateModel) tm, exp, false));
+        } else {
+            return coerceModelToTextualCommon(tm, exp, seqTip, false, env);
+        }
+    }
+
+    /**
+     * @param tm
+     *            If {@code null} that's an exception, unless we are in classic compatible mode.
+     * 
      * @param supportsTOM
      *            Whether the caller {@code coerceModelTo...} method could handle a {@link TemplateMarkupOutputModel}.
+     *            
+     * @return Never {@code null}
      */
-    private static String coerceModelToStringCommon(TemplateModel tm, Expression exp, String seqHint, boolean supportsTOM,
-            Environment env) throws TemplateModelException, InvalidReferenceException, TemplateException,
+    private static String coerceModelToTextualCommon(
+            TemplateModel tm, Expression exp, String seqHint, boolean supportsTOM, Environment env)
+            throws TemplateModelException, InvalidReferenceException, TemplateException,
                     NonStringOrTemplateOutputException, NonStringException {
         if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
@@ -442,6 +495,37 @@ class EvalUtil {
                 }
             }
         }
+    }
+
+    private static String ensureFormatResultString(Object formatResult, Expression exp, Environment env)
+            throws NonStringException {
+        if (formatResult instanceof String) { 
+            return (String) formatResult;
+        }
+        
+        assertFormatResultNotNull(formatResult);
+        
+        TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) formatResult;
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                "Value was formatted to convert it to string, but the result was markup of ouput format ",
+                new _DelayedJQuote(mo.getOutputFormat()), ".")
+                .tip("Use value?string to force formatting to plain text.")
+                .blame(exp);
+        throw new NonStringException(null, desc);
+    }
+
+    static String assertFormatResultNotNull(String r) {
+        if (r != null) {
+            return r;
+        }
+        throw new NullPointerException("TemplateValueFormatter result can't be null");
+    }
+
+    static Object assertFormatResultNotNull(Object r) {
+        if (r != null) {
+            return r;
+        }
+        throw new NullPointerException("TemplateValueFormatter result can't be null");
     }
 
     /**

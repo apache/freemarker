@@ -34,7 +34,7 @@ final class JavaTemplateNumberFormat extends BackwardCompatibleTemplateNumberFor
     }
 
     @Override
-    public String formatToString(TemplateNumberModel numberModel) throws UnformattableValueException, TemplateModelException {
+    public String formatToPlainText(TemplateNumberModel numberModel) throws UnformattableValueException, TemplateModelException {
         Number number = TemplateFormatUtil.getNonNullNumber(numberModel);
         return format(number);
     }

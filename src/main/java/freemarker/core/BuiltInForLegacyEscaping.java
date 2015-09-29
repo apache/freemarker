@@ -31,7 +31,7 @@ abstract class BuiltInForLegacyEscaping extends BuiltInBannedWhenAutoEscaping {
     TemplateModel _eval(Environment env)
     throws TemplateException {
         TemplateModel tm = target.eval(env);
-        Object moOrStr = EvalUtil.coerceModelToMarkupOutputOrString(tm, target, null, getMarkupOutputFormat(), env);
+        Object moOrStr = EvalUtil.coerceModelToStringOrMarkup(tm, target, null, env);
         if (moOrStr instanceof String) {
             return calculateResult((String) moOrStr, env);
         } else {
@@ -44,7 +44,5 @@ abstract class BuiltInForLegacyEscaping extends BuiltInBannedWhenAutoEscaping {
     }
     
     abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
-    
-    abstract MarkupOutputFormat getMarkupOutputFormat();
     
 }
