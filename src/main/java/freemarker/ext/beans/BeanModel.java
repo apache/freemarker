@@ -337,9 +337,15 @@ implements
      * In FreeMarker 1.7 (and also at least in 2.1) {@link BeanModel} was a {@link TemplateScalarModel}. Some internal
      * FreeMarker code tries to emulate FreeMarker classic by calling this method when a {@link TemplateScalarModel} is
      * expected.
+     * 
+     * @return Never {@code null}
      */
     String getAsClassicCompatibleString() {
-        return object == null ? "null" : object.toString();        
+        if (object == null) {
+            return "null";
+        }
+        String s = object.toString();
+        return s != null ? s : "null";        
     }
     
     @Override

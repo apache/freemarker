@@ -31,7 +31,7 @@ abstract class BuiltInForString extends BuiltIn {
     abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
     
     static String getTargetString(Expression target, Environment env) throws TemplateException {
-        return target.evalAndCoerceToString(env);
+        return target.evalAndCoerceToStringOrUnsupportedMarkup(env);
     }
     
 }

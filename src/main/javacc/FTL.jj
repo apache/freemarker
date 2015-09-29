@@ -1576,7 +1576,7 @@ Expression AdditiveExpression() :
             if (plus) {
 	            // plus is treated separately, since it is also
 	            // used for concatenation.
-                result = new AddConcatExpression(lhs, rhs, getMarkupOutputFormat());
+                result = new AddConcatExpression(lhs, rhs);
             } else {
                 numberLiteralOnly(lhs);
                 numberLiteralOnly(rhs);
@@ -2002,19 +2002,19 @@ Expression BuiltIn(Expression lhoExp) :
             return result;
         }
 
-        if (result instanceof BuiltInForMarkupOutputFormatRelated) {
+        if (result instanceof MarkupOutputFormatBoundBuiltIn) {
             if (!(outputFormat instanceof MarkupOutputFormat)) {
                 throw new ParseException(
                         "?" + t.image + " can't be used here, as the current output format isn't a markup (escaping) "
                         + "format: " + outputFormat, template, t);
             }
-            ((BuiltInForMarkupOutputFormatRelated) result).bindToMarkupOutputFormat((MarkupOutputFormat) outputFormat);
+            ((MarkupOutputFormatBoundBuiltIn) result).bindToMarkupOutputFormat((MarkupOutputFormat) outputFormat);
             
             return result;
         }
 
-        if (result instanceof BuiltInForOutputFormatRelated) {
-            ((BuiltInForOutputFormatRelated) result).bindToOutputFormat(outputFormat);
+        if (result instanceof OutputFormatBoundBuiltIn) {
+            ((OutputFormatBoundBuiltIn) result).bindToOutputFormat(outputFormat);
             
             return result;
         }
@@ -2846,7 +2846,7 @@ TemplateElement Assign() :
 		        )
 	        )
 	        {
-	            ass = new Assignment(varName, equalsOp.kind, exp, scope, getMarkupOutputFormat());
+	            ass = new Assignment(varName, equalsOp.kind, exp, scope);
                 if (exp != null) {
                    ass.setLocation(template, nameExp, exp);
                 } else {
@@ -2886,7 +2886,7 @@ TemplateElement Assign() :
 	                )
 	            )
 	            {
-	                ass = new Assignment(varName, equalsOp.kind, exp, scope, getMarkupOutputFormat());
+	                ass = new Assignment(varName, equalsOp.kind, exp, scope);
 	                if (exp != null) {
 	                   ass.setLocation(template, nameExp, exp);
 	                } else {

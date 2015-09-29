@@ -46,7 +46,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         private HexTemplateNumberFormat() { }
         
         @Override
-        public String formatToString(TemplateNumberModel numberModel)
+        public String formatToPlainText(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {

@@ -81,15 +81,37 @@ abstract public class Expression extends TemplateObject {
         return constantValue != null ? constantValue : _eval(env);
     }
     
-    String evalAndCoerceToString(Environment env) throws TemplateException {
-        return EvalUtil.coerceModelToString(eval(env), this, null, env);
+    String evalAndCoerceToPlainText(Environment env) throws TemplateException {
+        return EvalUtil.coerceModelToPlainText(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
-    String evalAndCoerceToString(Environment env, String seqTip) throws TemplateException {
-        return EvalUtil.coerceModelToString(eval(env), this, seqTip, env);
+    String evalAndCoerceToPlainText(Environment env, String seqTip) throws TemplateException {
+        return EvalUtil.coerceModelToPlainText(eval(env), this, seqTip, env);
+    }
+
+    Object evalAndCoerceToStringOrMarkup(Environment env) throws TemplateException {
+        return EvalUtil.coerceModelToStringOrMarkup(eval(env), this, null, env);
+    }
+
+    /**
+     * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
+     */
+    Object evalAndCoerceToStringOrMarkup(Environment env, String seqTip) throws TemplateException {
+        return EvalUtil.coerceModelToStringOrMarkup(eval(env), this, seqTip, env);
+    }
+    
+    String evalAndCoerceToStringOrUnsupportedMarkup(Environment env) throws TemplateException {
+        return EvalUtil.coerceModelToStringOrUnsupportedMarkup(eval(env), this, null, env);
+    }
+
+    /**
+     * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
+     */
+    String evalAndCoerceToStringOrUnsupportedMarkup(Environment env, String seqTip) throws TemplateException {
+        return EvalUtil.coerceModelToStringOrUnsupportedMarkup(eval(env), this, seqTip, env);
     }
     
     Number evalToNumber(Environment env) throws TemplateException {

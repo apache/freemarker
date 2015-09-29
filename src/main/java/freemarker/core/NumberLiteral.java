@@ -42,8 +42,8 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
     }
 
     @Override
-    public String evalAndCoerceToString(Environment env) throws TemplateException {
-        return env.formatNumberToString(this, this, false);
+    public String evalAndCoerceToPlainText(Environment env) throws TemplateException {
+        return env.formatNumberToPlainText(this, this, false);
     }
 
     public Number getAsNumber() {

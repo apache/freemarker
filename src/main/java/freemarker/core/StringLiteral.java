@@ -76,7 +76,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        return new SimpleScalar(evalAndCoerceToString(env));
+        return new SimpleScalar(evalAndCoerceToPlainText(env));
     }
 
     public String getAsString() {
@@ -92,7 +92,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
     
     @Override
-    String evalAndCoerceToString(Environment env) throws TemplateException {
+    String evalAndCoerceToPlainText(Environment env) throws TemplateException {
         if (dynamicValue == null) {
             return value;
         } else {

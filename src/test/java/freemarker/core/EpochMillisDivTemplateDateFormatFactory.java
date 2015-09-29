@@ -60,7 +60,7 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
         }
         
         @Override
-        public String formatToString(TemplateDateModel dateModel)
+        public String formatToPlainText(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
             return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() / divisor);
         }

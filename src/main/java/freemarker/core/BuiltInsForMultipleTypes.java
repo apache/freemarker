@@ -241,7 +241,7 @@ class BuiltInsForMultipleTypes {
             }
             // Otherwise, interpret as a string and attempt 
             // to parse it into a date.
-            String s = target.evalAndCoerceToString(env);
+            String s = target.evalAndCoerceToPlainText(env);
             return new DateParser(s, env);
         }
 
@@ -561,7 +561,7 @@ class BuiltInsForMultipleTypes {
             private TemplateModel formatWith(String key)
             throws TemplateModelException {
                 try {
-                    return new SimpleScalar(env.formatDateToString(dateModel, key, target, stringBI.this, true));
+                    return new SimpleScalar(env.formatDateToPlainText(dateModel, key, target, stringBI.this, true));
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure: 
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to format value", e); 
@@ -579,7 +579,7 @@ class BuiltInsForMultipleTypes {
                                 throw new BugException();
                             }
                         }
-                        cachedValue = defaultFormat.formatToString(dateModel);
+                        cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
                     } catch (TemplateValueFormatException e) {
                         try {
                             throw MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
@@ -639,9 +639,9 @@ class BuiltInsForMultipleTypes {
                 String result;
                 try {
                     if (format instanceof BackwardCompatibleTemplateNumberFormat) {
-                        result = env.formatNumberToString(number, (BackwardCompatibleTemplateNumberFormat) format, target);
+                        result = env.formatNumberToPlainText(number, (BackwardCompatibleTemplateNumberFormat) format, target);
                     } else {
-                        result = env.formatNumberToString(numberModel, format, target, true);
+                        result = env.formatNumberToPlainText(numberModel, format, target, true);
                     }
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure: 
@@ -655,10 +655,10 @@ class BuiltInsForMultipleTypes {
                 if (cachedValue == null) {
                     try {
                         if (defaultFormat instanceof BackwardCompatibleTemplateNumberFormat) {
-                            cachedValue = env.formatNumberToString(
+                            cachedValue = env.formatNumberToPlainText(
                                     number, (BackwardCompatibleTemplateNumberFormat) defaultFormat, target);
                         } else {
-                            cachedValue = env.formatNumberToString(numberModel, defaultFormat, target, true);
+                            cachedValue = env.formatNumberToPlainText(numberModel, defaultFormat, target, true);
                         }
                     } catch (TemplateException e) {
                         // `e` should always be a TemplateModelException here, but to be sure: 

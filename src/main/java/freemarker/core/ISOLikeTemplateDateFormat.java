@@ -177,7 +177,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     }
     
     @Override
-    public final String formatToString(TemplateDateModel dateModel) throws TemplateModelException {
+    public final String formatToPlainText(TemplateDateModel dateModel) throws TemplateModelException {
         final Date date = TemplateFormatUtil.getNonNullDate(dateModel);
         return format(
                 date,

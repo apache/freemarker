@@ -1043,9 +1043,9 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumberToString(TemplateNumberModel number, Expression exp, boolean useTempModelExc)
+    String formatNumberToPlainText(TemplateNumberModel number, Expression exp, boolean useTempModelExc)
             throws TemplateException {
-        return formatNumberToString(number, getTemplateNumberFormat(exp, useTempModelExc), exp, useTempModelExc);
+        return formatNumberToPlainText(number, getTemplateNumberFormat(exp, useTempModelExc), exp, useTempModelExc);
     }
 
     /**
@@ -1054,12 +1054,12 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumberToString(
+    String formatNumberToPlainText(
             TemplateNumberModel number, TemplateNumberFormat format, Expression exp,
             boolean useTempModelExc)
             throws TemplateException {
         try {
-            return format.formatToString(number);
+            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(number));
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
         }
@@ -1071,7 +1071,7 @@ public final class Environment extends Configurable {
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumberToString(Number number, BackwardCompatibleTemplateNumberFormat format, Expression exp)
+    String formatNumberToPlainText(Number number, BackwardCompatibleTemplateNumberFormat format, Expression exp)
             throws TemplateModelException, _MiscTemplateException {
         try {
             return format.format(number);
@@ -1329,12 +1329,12 @@ public final class Environment extends Configurable {
      * @param tdmSourceExpr
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDateToString(TemplateDateModel tdm, Expression tdmSourceExpr,
+    String formatDateToPlainText(TemplateDateModel tdm, Expression tdmSourceExpr,
             boolean useTempModelExc) throws TemplateException {
         TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr, useTempModelExc);
         
         try {
-            return format.formatToString(tdm);
+            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
         }
@@ -1346,7 +1346,7 @@ public final class Environment extends Configurable {
      * @param blamedFormatterExp
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDateToString(TemplateDateModel tdm, String formatString,
+    String formatDateToPlainText(TemplateDateModel tdm, String formatString,
             Expression blamedDateSourceExp, Expression blamedFormatterExp,
             boolean useTempModelExc) throws TemplateException {
         Date date = EvalUtil.modelToDate(tdm, blamedDateSourceExp);
@@ -1357,7 +1357,7 @@ public final class Environment extends Configurable {
                 useTempModelExc);
         
         try {
-            return format.formatToString(tdm);
+            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
         }

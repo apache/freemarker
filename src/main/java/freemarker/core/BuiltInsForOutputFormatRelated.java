@@ -43,19 +43,16 @@ class BuiltInsForOutputFormatRelated {
         
     }
     
-    static abstract class AbstractConverterBI extends BuiltInForMarkupOutputFormatRelated {
+    static abstract class AbstractConverterBI extends MarkupOutputFormatBoundBuiltIn {
 
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {
             TemplateModel lhoTM = target.eval(env);
+            Object lhoMOOrStr = EvalUtil.coerceModelToStringOrMarkup(lhoTM, target, null, env);
             MarkupOutputFormat contextOF = outputFormat;
-            Object lhoMOOrStr = EvalUtil.coerceModelToMarkupOutputOrString(lhoTM, target, null, contextOF, env);
             if (lhoMOOrStr instanceof String) { // TemplateMarkupOutputModel
                 return calculateResult((String) lhoMOOrStr, contextOF, env);
             } else {
-                if (lhoMOOrStr == null) {
-                    throw EvalUtil.newModelHasStoredNullException(null, lhoTM, target);
-                }
                 TemplateMarkupOutputModel lhoMO = (TemplateMarkupOutputModel) lhoMOOrStr;
                 MarkupOutputFormat lhoOF = lhoMO.getOutputFormat();
                 // ATTENTION: Keep this logic in sync. with ${...}'s logic!

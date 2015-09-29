@@ -47,7 +47,7 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
         }
         
         @Override
-        public String formatToString(TemplateNumberModel numberModel)
+        public String formatToPlainText(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
             Number n = numberModel.getAsNumber();
             try {

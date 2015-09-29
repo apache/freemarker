@@ -106,7 +106,7 @@ final class DynamicKeyName extends Expression {
         } 
         
         try {
-            String s = target.evalAndCoerceToString(env);
+            String s = target.evalAndCoerceToPlainText(env);
             try {
                 return new SimpleScalar(s.substring(index, index + 1));
             } catch (IndexOutOfBoundsException e) {
@@ -152,7 +152,7 @@ final class DynamicKeyName extends Expression {
         } else {
             targetSeq = null;
             try {
-                targetStr = target.evalAndCoerceToString(env);
+                targetStr = target.evalAndCoerceToPlainText(env);
             } catch (NonStringException e) {
                 throw new UnexpectedTypeException(
                         target, target.eval(env),

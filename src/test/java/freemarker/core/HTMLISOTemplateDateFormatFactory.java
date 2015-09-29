@@ -24,12 +24,15 @@ import java.util.TimeZone;
 
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.DateUtil;
+import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
+import freemarker.template.utility.DateUtil.DateParseException;
 
-public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFactory {
+public class HTMLISOTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
-    public static final EpochMillisTemplateDateFormatFactory INSTANCE = new EpochMillisTemplateDateFormatFactory();
+    public static final HTMLISOTemplateDateFormatFactory INSTANCE = new HTMLISOTemplateDateFormatFactory();
     
-    private EpochMillisTemplateDateFormatFactory() {
+    private HTMLISOTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
     
@@ -37,19 +40,29 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
     public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
             Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
         TemplateFormatUtil.checkHasNoParameters(params);
-        return EpochMillisTemplateDateFormat.INSTANCE;
+        return HTMLISOTemplateDateFormat.INSTANCE;
     }
 
-    private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
+    private static class HTMLISOTemplateDateFormat extends TemplateDateFormat {
 
-        private static final EpochMillisTemplateDateFormat INSTANCE = new EpochMillisTemplateDateFormat();
+        private static final HTMLISOTemplateDateFormat INSTANCE = new HTMLISOTemplateDateFormat();
+
+        private DateUtil.TrivialDateToISO8601CalendarFactory calendarFactory;
+
+        private CalendarFieldsToDateConverter calToDateConverter;
         
-        private EpochMillisTemplateDateFormat() { }
+        private HTMLISOTemplateDateFormat() { }
         
         @Override
         public String formatToPlainText(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
-            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
+            if (calendarFactory == null) {
+                calendarFactory = new DateUtil.TrivialDateToISO8601CalendarFactory();
+            }
+            return DateUtil.dateToISO8601String(
+                    TemplateFormatUtil.getNonNullDate(dateModel),
+                    true, true, true, DateUtil.ACCURACY_SECONDS, DateUtil.UTC,
+                    calendarFactory);
         }
 
         @Override
@@ -65,17 +78,27 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         @Override
         public Date parse(String s, int dateType) throws UnparsableValueException {
             try {
-                return new Date(Long.parseLong(s));
-            } catch (NumberFormatException e) {
-                throw new UnparsableValueException("Malformed long");
+                if (calToDateConverter == null) {
+                    calToDateConverter = new DateUtil.TrivialCalendarFieldsToDateConverter(); 
+                }
+                return DateUtil.parseISO8601DateTime(s, DateUtil.UTC, calToDateConverter);
+            } catch (DateParseException e) {
+                throw new UnparsableValueException("Malformed ISO date-time", e);
             }
         }
 
         @Override
+        public Object format(TemplateDateModel dateModel) throws TemplateValueFormatException, TemplateModelException {
+            return HTMLOutputFormat.INSTANCE.fromMarkup(
+                    formatToPlainText(dateModel).replace("T", "<span class='T'>T</span>"));
+        }
+
+        @Override
         public String getDescription() {
-            return "millis since the epoch";
+            return "ISO UTC HTML";
         }
         
     }
 
 }
+ 
