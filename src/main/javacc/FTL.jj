@@ -255,10 +255,11 @@ public class FMParser {
     }
     
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
-        token_source.onlyTextOutput = true;
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
+        token_source.SwitchTo(NODIRECTIVE);
+        
         outputFormat = PlainTextOutputFormat.INSTANCE;
         recalculateAutoEscapingField();                                
         if (incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_24) {
@@ -578,12 +579,12 @@ TOKEN_MGR_DECLS:
      * distinguish the } used to close a hash literal and the one used to close a ${
      */
     private FMParser parser;
+    private int postInterpolationLexState = -1;
     private int hashLiteralNesting;
     private int parenthesisNesting;
     private int bracketNesting;
     private boolean inFTLHeader;
     boolean strictEscapeSyntax,
-            onlyTextOutput,
             squBracTagSyntax,
             autodetectTagSyntax,
             directiveSyntaxEstablished,
@@ -602,11 +603,6 @@ TOKEN_MGR_DECLS:
     // tag syntax detection. If you update this logic, take a look
     // at the UNKNOWN_DIRECTIVE token too.
     private void strictSyntaxCheck(Token tok, int tokenNamingConvention, int newLexState) {
-        if (onlyTextOutput) {
-            tok.kind = STATIC_TEXT_NON_WS;
-            return;
-        }
-
         final String image = tok.image;
         
         // Non-strict syntax (deprecated) only supports legacy naming convention.
@@ -731,11 +727,6 @@ TOKEN_MGR_DECLS:
     }
 
     private void unifiedCall(Token tok) {
-        if (onlyTextOutput) {
-            tok.kind = STATIC_TEXT_NON_WS;
-            return;
-        }
-    
         char firstChar = tok.image.charAt(0);
         if (autodetectTagSyntax && !directiveSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
@@ -753,11 +744,6 @@ TOKEN_MGR_DECLS:
     }
 
     private void unifiedCallEnd(Token tok) {
-        if (onlyTextOutput) {
-            tok.kind = STATIC_TEXT_NON_WS;
-            return;
-        }
-    
         char firstChar = tok.image.charAt(0);
         if (squBracTagSyntax && firstChar == '<') {
             tok.kind = STATIC_TEXT_NON_WS;
@@ -780,6 +766,37 @@ TOKEN_MGR_DECLS:
             }
             SwitchTo(DEFAULT);
         }
+    }
+    
+    private void startInterpolation(Token tok) {
+        if (postInterpolationLexState != -1) {
+            char c = tok.image.charAt(0);
+            throw new TokenMgrError(
+                    "You can't start an interpolation (" + c + "{...}) here "
+                    + "as you are inside another interpolation.)",
+                    TokenMgrError.LEXICAL_ERROR,
+                    tok.beginLine, tok.beginColumn,
+                    tok.endLine, tok.endColumn);
+        }
+        postInterpolationLexState = curLexState;
+        SwitchTo(FM_EXPRESSION);
+    }
+
+    /**
+     * @param tok
+     *         Assumed to be an '}', or something that is the closing pair of another "mirror image" character.
+     */
+    private void endInterpolation(Token tok) {
+        if (postInterpolationLexState == -1) {
+            char c = tok.image.charAt(0);
+            throw new TokenMgrError(
+                    "You can't have an \"" + c + "\" here, as there's nothing open that it could close.",
+                    TokenMgrError.LEXICAL_ERROR,
+                    tok.beginLine, tok.beginColumn,
+                    tok.endLine, tok.endColumn);
+        }
+        SwitchTo(postInterpolationLexState);
+        postInterpolationLexState = -1;
     }
 
     private void eatNewline() {
@@ -1096,9 +1113,9 @@ TOKEN:
     |
     <STATIC_TEXT_FALSE_ALARM : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
     |
-    <DOLLAR_INTERPOLATION_OPENING : "${"> : FM_EXPRESSION
+    <DOLLAR_INTERPOLATION_OPENING : "${"> { startInterpolation(matchedToken); }
     |
-    <HASH_INTERPOLATION_OPENING : "#{"> : FM_EXPRESSION
+    <HASH_INTERPOLATION_OPENING : "#{"> { startInterpolation(matchedToken); }
 }
 
 <FM_EXPRESSION, IN_PAREN, NAMED_PARAMETER_EXPRESSION> SKIP :
@@ -1259,7 +1276,7 @@ TOKEN:
     |
     <CLOSING_CURLY_BRACKET : "}">
     {
-        if (hashLiteralNesting == 0) SwitchTo(DEFAULT);
+        if (hashLiteralNesting == 0) endInterpolation(matchedToken);
         else --hashLiteralNesting;
     }
     |

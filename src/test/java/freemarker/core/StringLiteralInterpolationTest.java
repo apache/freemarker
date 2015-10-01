@@ -26,28 +26,33 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
+@SuppressWarnings("boxing")
 public class StringLiteralInterpolationTest extends TemplateTest {
 
     @Test
     public void basics() throws IOException, TemplateException {
-        assertOutput("<#assign x = 1>${'${x}'}", "1");
-        assertOutput("<#assign x = 1>${'${x} ${x}'}", "1 1");
-        assertOutput("<#assign x = 1>${'$\\{x}'}", "${x}");
-        assertOutput("<#assign x = 1>${'$\\{x} $\\{x}'}", "${x} ${x}");
-        assertOutput("<#assign x = 1>${'<#-- not a comment -->${x}'}", "<#-- not a comment -->1");
-        assertOutput("<#assign x = 1>${'<#-- not a comment -->$\\{x}'}", "<#-- not a comment -->${x}");
-        assertOutput("<#assign x = 1>${'<@x/>${x}'}", "<@x/>1");
-        assertOutput("<#assign x = 1>${'<@x/>$\\{x}'}", "<@x/>${x}");
-        assertOutput("<#assign x = 1>${'<@ ${x}<@'}", "<@ 1<@");
-        assertOutput("<#assign x = 1>${'<@ $\\{x}<@'}", "<@ ${x}<@");
-        assertOutput("<#assign x = 1>${'</@x>${x}'}", "</@x>1");
-        assertOutput("<#assign x = 1>${'</@x>$\\{x}'}", "</@x>${x}");
-        assertOutput("<#assign x = 1>${'</@ ${x}</@'}", "</@ 1</@");
-        assertOutput("<#assign x = 1>${'</@ $\\{x}</@'}", "</@ ${x}</@");
-        assertOutput("<#assign x = 1>${'[@ ${x}'}", "[@ 1");
-        assertOutput("<#assign x = 1>${'[@ $\\{x}'}", "[@ ${x}");
-        assertOutput("<#assign x = 1>${'<#assign x = 2> ${x}'}", "<#assign x = 2> 1");
-        assertOutput("<#assign x = 1>${'<#assign x = 2> $\\{x}'}", "<#assign x = 2> ${x}");
+        addToDataModel("x", 1);
+        assertOutput("${'${x}'}", "1");
+        assertOutput("${'#{x}'}", "1");
+        assertOutput("${'a${x}b${x*2}c'}", "a1b2c");
+        assertOutput("${'a#{x}b#{x*2}c'}", "a1b2c");
+        assertOutput("${'${x} ${x}'}", "1 1");
+        assertOutput("${'$\\{x}'}", "${x}");
+        assertOutput("${'$\\{x} $\\{x}'}", "${x} ${x}");
+        assertOutput("${'<#-- not a comment -->${x}'}", "<#-- not a comment -->1");
+        assertOutput("${'<#-- not a comment -->$\\{x}'}", "<#-- not a comment -->${x}");
+        assertOutput("${'<#assign x = 2> ${x} <#assign x = 2>'}", "<#assign x = 2> 1 <#assign x = 2>");
+        assertOutput("${'<#assign x = 2> $\\{x} <#assign x = 2>'}", "<#assign x = 2> ${x} <#assign x = 2>");
+        assertOutput("${'<@x/>${x}<@x/>'}", "<@x/>1<@x/>");
+        assertOutput("${'<@x/>$\\{x}<@x/>'}", "<@x/>${x}<@x/>");
+        assertOutput("${'<@ ${x}<@'}", "<@ 1<@");
+        assertOutput("${'<@ $\\{x}<@'}", "<@ ${x}<@");
+        assertOutput("${'</@x>${x}'}", "</@x>1");
+        assertOutput("${'</@x>$\\{x}'}", "</@x>${x}");
+        assertOutput("${'</@ ${x}</@'}", "</@ 1</@");
+        assertOutput("${'</@ $\\{x}</@'}", "</@ ${x}</@");
+        assertOutput("${'[@ ${x}'}", "[@ 1");
+        assertOutput("${'[@ $\\{x}'}", "[@ ${x}");
     }
 
     /**
@@ -55,8 +60,18 @@ public class StringLiteralInterpolationTest extends TemplateTest {
      */
     @Test
     public void legacyEscapingBugStillPresent() throws IOException, TemplateException {
-        assertOutput("<#assign x = 1>${'$\\{x} ${x}'}", "1 1");
-        assertOutput("<#assign x = 1>${'${x} $\\{x}'}", "1 1");
+        addToDataModel("x", 1);
+        assertOutput("${'$\\{x} ${x}'}", "1 1");
+        assertOutput("${'${x} $\\{x}'}", "1 1");
+    }
+    
+    @Test
+    public void legacyLengthGlitch() throws IOException, TemplateException {
+        assertOutput("${'${'}", "${");
+        assertOutput("${'${1'}", "${1");
+        assertOutput("${'${}'}", "${}");
+        assertOutput("${'${1}'}", "1");
+        assertErrorContains("${'${  '}", "");
     }
 
     @Test
