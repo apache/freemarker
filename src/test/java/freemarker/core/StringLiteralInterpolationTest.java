@@ -34,6 +34,20 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         assertOutput("<#assign x = 1>${'${x} ${x}'}", "1 1");
         assertOutput("<#assign x = 1>${'$\\{x}'}", "${x}");
         assertOutput("<#assign x = 1>${'$\\{x} $\\{x}'}", "${x} ${x}");
+        assertOutput("<#assign x = 1>${'<#-- not a comment -->${x}'}", "<#-- not a comment -->1");
+        assertOutput("<#assign x = 1>${'<#-- not a comment -->$\\{x}'}", "<#-- not a comment -->${x}");
+        assertOutput("<#assign x = 1>${'<@x/>${x}'}", "<@x/>1");
+        assertOutput("<#assign x = 1>${'<@x/>$\\{x}'}", "<@x/>${x}");
+        assertOutput("<#assign x = 1>${'<@ ${x}<@'}", "<@ 1<@");
+        assertOutput("<#assign x = 1>${'<@ $\\{x}<@'}", "<@ ${x}<@");
+        assertOutput("<#assign x = 1>${'</@x>${x}'}", "</@x>1");
+        assertOutput("<#assign x = 1>${'</@x>$\\{x}'}", "</@x>${x}");
+        assertOutput("<#assign x = 1>${'</@ ${x}</@'}", "</@ 1</@");
+        assertOutput("<#assign x = 1>${'</@ $\\{x}</@'}", "</@ ${x}</@");
+        assertOutput("<#assign x = 1>${'[@ ${x}'}", "[@ 1");
+        assertOutput("<#assign x = 1>${'[@ $\\{x}'}", "[@ ${x}");
+        assertOutput("<#assign x = 1>${'<#assign x = 2> ${x}'}", "<#assign x = 2> 1");
+        assertOutput("<#assign x = 1>${'<#assign x = 2> $\\{x}'}", "<#assign x = 2> ${x}");
     }
 
     /**

@@ -25810,6 +25810,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               keeping the exact class can be important in some
               applications.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>&lt;@</literal> and <literal>&lt;/@</literal> is
+              now allowed in String literals that contain
+              <literal>${<replaceable>exp</replaceable>}</literal>, and will
+              be part of the literal as is. Earlier it was a syntactical
+              error.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
