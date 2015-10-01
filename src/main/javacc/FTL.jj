@@ -3893,9 +3893,7 @@ TextBlock PCData() :
 }
 {
     (
-        LOOKAHEAD(<STATIC_TEXT_WS>|<STATIC_TEXT_NON_WS>|<STATIC_TEXT_FALSE_ALARM>)
         (
-            { prevToken = t; }
             t = <STATIC_TEXT_WS>
             |
             t = <STATIC_TEXT_NON_WS>
@@ -3906,6 +3904,7 @@ TextBlock PCData() :
             buf.append(t.image);
             if (start == null) start = t;
             if (prevToken != null) prevToken.next = null;
+            prevToken = t;
         }
     )+
     {
