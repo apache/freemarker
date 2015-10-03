@@ -60,6 +60,17 @@ final class NumericalOutput extends Interpolation {
 
     @Override
     void accept(Environment env) throws TemplateException, IOException {
+        String s = calculateInterpolatedStringOrMarkup(env);
+        Writer out = env.getOut();
+        if (autoEscapeOutputFormat != null) {
+            autoEscapeOutputFormat.output(s, out);
+        } else {
+            out.write(s);
+        }
+    }
+
+    @Override
+    protected String calculateInterpolatedStringOrMarkup(Environment env) throws TemplateException {
         Number num = expression.evalToNumber(env);
         
         FormatHolder fmth = formatCache;  // atomic sampling
@@ -85,12 +96,7 @@ final class NumericalOutput extends Interpolation {
         // Some locales may use non-Arabic digits, thus replacing the
         // decimal separator in the result of toString() is not enough.
         String s = fmth.format.format(num);
-        Writer out = env.getOut();
-        if (autoEscapeOutputFormat != null) {
-            autoEscapeOutputFormat.output(s, out);
-        } else {
-            out.write(s);
-        }
+        return s;
     }
 
     @Override

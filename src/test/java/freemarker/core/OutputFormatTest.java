@@ -436,12 +436,21 @@ public class OutputFormatTest extends TemplateTest {
     }
 
     @Test
-    public void testStringLiteralTemplateModificationBug() throws IOException, TemplateException {
+    public void testStringLiteralInterpolation() throws IOException, TemplateException {
         Template t = new Template(null, "<#ftl outputFormat='XML'>${'&'} ${\"(${'&'})\"?noEsc}", getConfiguration());
         assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
-        assertOutput("${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}", "undefined plainText undefined");
-        assertOutput("${'foo ${xmlPlain}'}", "foo a < {x'}");
-        assertErrorContains("${'${xmlMarkup}'}", "plainText", "XML", "conversion");
+        
+        assertOutput("${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}",
+                "undefined undefined undefined");
+        assertOutput("<#ftl outputFormat='HTML'>${.outputFormat} ${'${.outputFormat}'} ${.outputFormat}",
+                "HTML HTML HTML");
+        assertOutput("${.outputFormat} <#outputFormat 'XML'>${'${.outputFormat}'}</#outputFormat> ${.outputFormat}",
+                "undefined XML undefined");
+        assertOutput("${'foo ${xmlPlain}'}", "foo a &lt; {x&apos;}");
+        assertOutput("${'${xmlMarkup}'}", "<p>c</p>");
+        assertErrorContains("${'${\"x\"?esc}'}", "?esc", "undefined");
+        assertOutput("<#ftl outputFormat='XML'>${'${xmlMarkup?esc} ${\"<\"?esc} ${\">\"} ${\"&amp;\"?noEsc}'}",
+                "<p>c</p> &lt; &gt; &amp;");
     }
     
     @Test
@@ -875,11 +884,13 @@ public class OutputFormatTest extends TemplateTest {
                 assertOutput(commonFTL, "x");
                 assertErrorContains("<#ftl outputFormat='HTML'>" + commonFTL,
                         "?" + biName, "HTML", "double-escaping");
+                assertErrorContains("<#ftl outputFormat='HTML'>${'${\"x\"?" + biName + "}'}",
+                        "?" + biName, "HTML", "double-escaping");
                 assertOutput("<#ftl outputFormat='plainText'>" + commonFTL, "x");
                 assertOutput("<#ftl outputFormat='HTML' autoEsc=false>" + commonFTL, "x");
                 assertOutput("<#ftl outputFormat='HTML'><#noAutoEsc>" + commonFTL + "</#noAutoEsc>", "x");
-                assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>", "x");
-                assertOutput("<#ftl outputFormat='HTML'>${'${\"x\"?" + biName + "}'}", "x");
+                assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>",
+                        "x");
             }
         }
     }

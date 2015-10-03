@@ -62,6 +62,7 @@ final class ParameterRole {
     static final ParameterRole ARGUMENT_VALUE = new ParameterRole("argument value");
     static final ParameterRole CONTENT = new ParameterRole("content");
     static final ParameterRole EMBEDDED_TEMPLATE = new ParameterRole("embedded template");
+    static final ParameterRole VALUE_PART = new ParameterRole("value part");
     static final ParameterRole MINIMUM_DECIMALS = new ParameterRole("minimum decimals");
     static final ParameterRole MAXIMUM_DECIMALS = new ParameterRole("maximum decimals");
     static final ParameterRole NODE = new ParameterRole("node");

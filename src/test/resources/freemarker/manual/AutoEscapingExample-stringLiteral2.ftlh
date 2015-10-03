@@ -6,4 +6,4 @@
 <#assign mo2 = "<p>Foo"?no_esc>
 
 ${"${mo1} baz"}
-<#attempt>${"${mo2} baz"}<#recover>Failed</#attempt>
+${"${mo2} baz"}

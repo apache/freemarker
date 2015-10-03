@@ -254,13 +254,13 @@ public class FMParser {
         }
     }
     
-    void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
+    void setupStringLiteralMode(FMParserTokenManager parentTokenSource, OutputFormat outputFormat) {
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
         token_source.SwitchTo(NODIRECTIVE);
         
-        outputFormat = PlainTextOutputFormat.INSTANCE;
+        this.outputFormat = outputFormat;
         recalculateAutoEscapingField();                                
         if (incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_24) {
             // Emulate bug, where the string literal parser haven't inherited the IcI:
@@ -2271,7 +2271,7 @@ StringLiteral StringLiteral(boolean interpolate) :
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source);
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source, outputFormat);
         }
         return result;
     }
@@ -4201,6 +4201,66 @@ Map ParamList() :
     )+
     {
         return result;
+    }
+}
+
+/**
+ * Parses the already un-escaped content of a string literal (input must not include the quotation marks).
+ *
+ * @return A {@link List} of {@link String}-s and {@link Interpolation}-s. 
+ */
+List<Object> StaticTextAndInterpolations() :
+{
+    Token t;
+    Interpolation interpolation;
+    StringBuilder staticTextCollector = null;
+    ArrayList<Object> parts = new ArrayList<Object>();
+}
+{
+    (
+	    (
+		    t = <STATIC_TEXT_WS>
+		    |
+		    t = <STATIC_TEXT_NON_WS>
+		    |
+		    t = <STATIC_TEXT_FALSE_ALARM>
+	    )
+	    {
+	       String s = t.image;
+	       if (!s.isEmpty()) {
+	           if (staticTextCollector == null) {
+	               staticTextCollector = new StringBuilder(t.image);
+	           } else {
+	               staticTextCollector.append(t.image);
+	           }
+	       }
+	    }
+	    |
+	    (
+	        LOOKAHEAD(<DOLLAR_INTERPOLATION_OPENING>)
+		    (
+		        interpolation = StringOutput()
+	        )
+		    |
+            LOOKAHEAD(<HASH_INTERPOLATION_OPENING>)
+		    (
+                interpolation = NumericalOutput()
+		    )
+	    )
+	    {
+            if (staticTextCollector != null) {
+                parts.add(staticTextCollector.toString());
+                staticTextCollector.setLength(0);
+            }
+            parts.add(interpolation);
+	    }
+    )*
+    {
+        if (staticTextCollector != null && staticTextCollector.length() != 0) {
+            parts.add(staticTextCollector.toString());
+        }
+        parts.trimToSize();
+        return parts;
     }
 }
 

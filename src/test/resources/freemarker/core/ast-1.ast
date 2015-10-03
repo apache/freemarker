@@ -64,19 +64,15 @@
             - AST-node subtype: "1"  // Integer
             ${...}  // f.c.DollarVariable
                 - content: "static"  // f.c.StringLiteral
-                    - embedded template: null  // Null
             ${...}  // f.c.DollarVariable
                 - content: dynamic "..."  // f.c.StringLiteral
-                    - embedded template: #mixed_content  // f.c.MixedContent
-                        #text  // f.c.TextBlock
-                            - content: "x"  // String
-                        ${...}  // f.c.DollarVariable
-                            - content: *  // f.c.ArithmeticExpression
-                                - left-hand operand: baaz  // f.c.Identifier
-                                - right-hand operand: 10  // f.c.NumberLiteral
-                                - AST-node subtype: "1"  // Integer
-                        #text  // f.c.TextBlock
-                            - content: "y"  // String
+                    - value part: "x"  // String
+                    - value part: ${...}  // f.c.DollarVariable
+                        - content: *  // f.c.ArithmeticExpression
+                            - left-hand operand: baaz  // f.c.Identifier
+                            - right-hand operand: 10  // f.c.NumberLiteral
+                            - AST-node subtype: "1"  // Integer
+                    - value part: "y"  // String
     #text  // f.c.TextBlock
         - content: "\n5 "  // String
     #switch  // f.c.SwitchBlock
@@ -163,7 +159,6 @@
         - content: "\n11 "  // String
     #outputformat  // f.c.OutputFormatBlock
         - value: "XML"  // f.c.StringLiteral
-            - embedded template: null  // Null
         #noautoesc  // f.c.NoAutoEscBlock
             ${...}  // f.c.DollarVariable
                 - content: a  // f.c.Identifier

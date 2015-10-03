@@ -19,6 +19,7 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -36,6 +37,7 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         assertOutput("${'#{x}'}", "1");
         assertOutput("${'a${x}b${x*2}c'}", "a1b2c");
         assertOutput("${'a#{x}b#{x*2}c'}", "a1b2c");
+        assertOutput("${'a#{x; m2}'}", "a1.00");
         assertOutput("${'${x} ${x}'}", "1 1");
         assertOutput("${'$\\{x}'}", "${x}");
         assertOutput("${'$\\{x} $\\{x}'}", "${x} ${x}");
@@ -73,6 +75,13 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         assertOutput("${'${1}'}", "1");
         assertErrorContains("${'${  '}", "");
     }
+    
+    @Test
+    public void testErrors() {
+        addToDataModel("x", 1);
+        assertErrorContains("${'${noSuchVar}'}", InvalidReferenceException.class, "missing", "noSuchVar");
+        assertErrorContains("${'${x/0}'}", ArithmeticException.class, "zero");
+    }
 
     @Test
     public void escaping() throws IOException, TemplateException {
@@ -88,6 +97,20 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         // Fix enabled:
         getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         assertOutput("${'&\\''?html} ${\"${'&\\\\\\''?html}\"}", "&amp;&#39; &amp;&#39;");
+    }
+    
+    @Test
+    public void markup() throws IOException, TemplateException {
+        Configuration cfg = getConfiguration();
+        cfg.setCustomNumberFormats(Collections.singletonMap("G", PrintfGTemplateNumberFormatFactory.INSTANCE));
+        cfg.setNumberFormat("@G 3");
+        
+        assertOutput("${\"${1000}\"}", "1.00*10<sup>3</sup>");
+        assertOutput("${\"&_${1000}\"}", "&amp;_1.00*10<sup>3</sup>");
+        assertOutput("${\"${1000}_&\"}", "1.00*10<sup>3</sup>_&amp;");
+        assertOutput("${\"${1000}, ${2000}\"}", "1.00*10<sup>3</sup>, 2.00*10<sup>3</sup>");
+        assertOutput("${\"& ${'x'}, ${2000}\"}", "&amp; x, 2.00*10<sup>3</sup>");
+        assertOutput("${\"& ${'x'}, #{2000}\"}", "& x, 2000");
     }
     
 }

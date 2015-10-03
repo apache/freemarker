@@ -2798,14 +2798,7 @@ baz
             literals <link linkend="dgui_template_valueinsertion">behaves
             similarly as in <phrase role="markedText">text</phrase>
             sections</link> (so it goes through the same <emphasis>locale
-            sensitive</emphasis> number and date/time formatting), except that
-            no automatic escaping will happen (the deprecated <link
-            linkend="ref.directive.escape">escaping by
-            <literal>escape</literal> directive</link> has no effect there,
-            nor <link linkend="dgui_misc_autoescaping">auto-escaping</link>
-            happens as <link
-            linkend="dgui_misc_autoescaping_stringliteral">explained
-            here</link>).</para>
+            sensitive</emphasis> number and date/time formatting).</para>
 
             <para>Example (assume that user is <quote>Big Joe</quote>):</para>
 
@@ -2865,17 +2858,6 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
               something like <literal>"someUrl?id=1234"</literal>, regardless
               of locale and format settings.</para>
             </warning>
-
-            <para>Note for advanced users that <literal>+</literal> is more
-            flexible than <literal>${<replaceable>...</replaceable>}</literal>
-            when it comes to handling <link
-            linkend="dgui_misc_autoescaping_movalues">markup output
-            values</link>, because <link
-            linkend="dgui_misc_autoescaping_concatenation"><literal>+</literal>
-            can have markup output result</link>, while <link
-            linkend="dgui_misc_autoescaping_stringliteral">string literal
-            interpolation can't</link>, as the literal must yield a
-            string.</para>
           </section>
 
           <section xml:id="dgui_template_exp_get_character">
@@ -5690,51 +5672,6 @@ XML:  &lt;p&gt;Test&lt;/p&gt;
 RTF:  \par Test</programlisting>
           </section>
 
-          <section xml:id="dgui_misc_autoescaping_stringliteral">
-            <title>Auto-escaping and ${...} inside string literals</title>
-
-            <para>Inside string literals (quoted text expressions), the <link
-            linkend="dgui_misc_autoescaping_outputformat">output format</link>
-            is <literal>plainText</literal>. Thus no auto-escaping will occur
-            there:</para>
-
-            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
-&lt;#assign s = "Foo &amp; bar"&gt;
-${s}
-${"${s} &amp; baz"}</programlisting>
-
-            <programlisting role="output">Foo &amp;amp; bar
-Foo &amp;amp; bar &amp;amp; baz</programlisting>
-
-            <para>Above, because inside the string literal
-            <literal>${s}</literal> did no auto-escaping, when we print the
-            whole string we don't end up with double-escaping.</para>
-
-            <para>The <literal>plainText</literal> output format only allows
-            the inserting of markup output values that were created by
-            escaping plain text
-            (<literal><replaceable>plainText</replaceable>?esc</literal>), as
-            those are trivially convertible back to plain text. Thus only such
-            markup output values can be insert into string literals with
-            <literal>${<replaceable>...</replaceable>}</literal> (the
-            <literal>+</literal> operator is more flexible, but see that
-            later):</para>
-
-            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
-
-&lt;#-- Markup output value created by escaping plain text: --&gt;
-&lt;#assign mo1 = "Foo &amp; bar"?esc&gt;
-
-&lt;#-- Markup output value created outherwise: --&gt;
-&lt;#assign mo2 = "&lt;p&gt;Foo"?no_esc&gt;
-
-${"${mo1} baz"}
-&lt;#attempt&gt;${"${mo2} baz"}&lt;#recover&gt;Failed&lt;/#attempt&gt;</programlisting>
-
-            <programlisting role="output">Foo &amp;amp; bar baz
-Failed</programlisting>
-          </section>
-
           <section xml:id="dgui_misc_autoescaping_concatenation">
             <title>Markup output values and the <quote>+</quote>
             operator</title>
@@ -5762,6 +5699,32 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             an error. (See the <link
             linkend="dgui_misc_autoescaping_mixingoutputformats">limitations
             of conversions here</link>.)</para>
+          </section>
+
+          <section xml:id="dgui_misc_autoescaping_stringliteral">
+            <title>Auto-escaping and ${...} inside string literals</title>
+
+            <para>A string <emphasis>expression</emphasis> like
+            <literal>"Hello ${name}!"</literal> is just a shorthand for
+            <literal>"Hello" + name + "!"</literal>, so that
+            <literal>${<replaceable>...</replaceable>}</literal> doesn't
+            auto-escape.</para>
+
+            <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
+&lt;#assign name = "Foo &amp; Bar"&gt;
+
+&lt;#assign s = "&lt;p&gt;Hello ${name}!"&gt;
+${s}
+&lt;p&gt;Hello ${name}!
+
+To prove that s didn't contain the value escaped:
+${s?replace('&amp;'), 'and'}</programlisting>
+
+            <programlisting role="output">&amp;lt;p&amp;gt;Hello Foo &amp;amp; Bar!
+&lt;p&gt;Hello Foo &amp;amp; Bar!
+
+To prove that s didn't contain the value escaped:
+&amp;lt;p&amp;gt;Hello Foo and Bar!</programlisting>
           </section>
 
           <section>
@@ -26158,6 +26121,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               which can't be loaded due to zip format errors in the error
               message.</para>
             </listitem>
+
+            <listitem>
+              <para>The non-public AST API of
+              <literal>freemarker.core.StringLiteral</literal>-s has been
+              changed. In principle it doesn't mater as it isn't a public API,
+              but some might used these regardless to introspect templates.
+              Earlier it had an <quote>embedded template</quote> parameter
+              inside, now it has 0 (for purely static string literals), one or
+              multiple <quote>value part</quote>-ts, which are
+              <literal>String</literal>-s and
+              <literal>Interpolation</literal>-s.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -26264,6 +26239,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               already HTML. (See [TODO] as an example.) Note that no
               out-of-the-box format formats to markup (at the moment), but you
               could write such custom format.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>${<replaceable>...</replaceable>}</literal>
+              inside string literals is equivalent to using the
+              <literal>+</literal> operator again. This rule was broken by
+              <literal>+</literal> supporting markup operands, while
+              <literal>${<replaceable>...</replaceable>}</literal> inside
+              string literals didn't. Now similarly as <literal>"foo " +
+              someMarkup</literal> works and gives a markup result,
+              <literal>"foo ${someMarkup}"</literal> does too.</para>
             </listitem>
 
             <listitem>
