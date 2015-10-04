@@ -62,7 +62,8 @@ public class DateFormatTest extends TemplateTest {
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
                 "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
                 "div", EpochMillisDivTemplateDateFormatFactory.INSTANCE,
-                "appMeta", AppMetaTemplateDateFormatFactory.INSTANCE));
+                "appMeta", AppMetaTemplateDateFormatFactory.INSTANCE,
+                "htmlIso", HTMLISOTemplateDateFormatFactory.INSTANCE));
     }
 
     @Test
@@ -77,6 +78,14 @@ public class DateFormatTest extends TemplateTest {
                 "<#assign d = d?datetime>"
                 + "${d} ${d?string} <#setting locale='de_DE'>${d}",
                 "123456789 123456789 123456789");
+        
+        getConfiguration().setDateTimeFormat("@htmlIso");
+        assertOutput(
+                "<#assign d = d?datetime>"
+                + "${d} ${d?string} <#setting locale='de_DE'>${d}",
+                "1970-01-02<span class='T'>T</span>10:17:36Z "
+                + "1970-01-02T10:17:36Z "
+                + "1970-01-02<span class='T'>T</span>10:17:36Z");
     }
 
     @Test
