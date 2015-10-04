@@ -4227,7 +4227,7 @@ List<Object> StaticTextAndInterpolations() :
 	    )
 	    {
 	       String s = t.image;
-	       if (!s.isEmpty()) {
+	       if (s.length() != 0) {
 	           if (staticTextCollector == null) {
 	               staticTextCollector = new StringBuilder(t.image);
 	           } else {
