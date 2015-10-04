@@ -528,10 +528,36 @@ class EvalUtil {
         throw new NullPointerException("TemplateValueFormatter result can't be null");
     }
 
+    static TemplateMarkupOutputModel concatMarkupOutputs(TemplateObject parent, TemplateMarkupOutputModel leftMO,
+            TemplateMarkupOutputModel rightMO) throws TemplateException {
+        MarkupOutputFormat leftOF = leftMO.getOutputFormat();
+        MarkupOutputFormat rightOF = rightMO.getOutputFormat();
+        if (rightOF != leftOF) {
+            String rightPT;
+            String leftPT;
+            if ((rightPT = rightOF.getSourcePlainText(rightMO)) != null) {
+                return leftOF.concat(leftMO, leftOF.fromPlainTextByEscaping(rightPT));
+            } else if ((leftPT = leftOF.getSourcePlainText(leftMO)) != null) {
+                return rightOF.concat(rightOF.fromPlainTextByEscaping(leftPT), rightMO);
+            } else {
+                Object[] message = { "Concatenation left hand operand is in ", new _DelayedToString(leftOF),
+                        " format, while the right hand operand is in ", new _DelayedToString(rightOF),
+                        ". Conversion to common format wasn't possible." };
+                if (parent instanceof Expression) {
+                    throw new _MiscTemplateException((Expression) parent, message);
+                } else {
+                    throw new _MiscTemplateException(message);
+                }
+            }
+        } else {
+            return leftOF.concat(leftMO, rightMO);
+        }
+    }
+
     /**
      * Returns an {@link ArithmeticEngine} even if {@code env} is {@code null}, because we are in parsing phase.
      */
-    public static ArithmeticEngine getArithmeticEngine(Environment env, TemplateObject tObj) {
+    static ArithmeticEngine getArithmeticEngine(Environment env, TemplateObject tObj) {
         return env != null
                 ? env.getArithmeticEngine()
                 : tObj.getUnboundTemplate().getParserConfiguration().getArithmeticEngine();

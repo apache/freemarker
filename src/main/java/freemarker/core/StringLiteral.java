@@ -19,13 +19,11 @@
 
 package freemarker.core;
 
-import java.io.IOException;
 import java.io.StringReader;
-import java.util.Enumeration;
+import java.util.List;
 
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
@@ -33,7 +31,9 @@ import freemarker.template.utility.StringUtil;
 final class StringLiteral extends Expression implements TemplateScalarModel {
     
     private final String value;
-    private TemplateElement dynamicValue;
+    
+    /** {@link List} of {@link String}-s and {@link Interpolation}-s. */
+    private List<Object> dynamicValue;
     
     StringLiteral(String value) {
         this.value = value;
@@ -44,8 +44,9 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
      *            The token source of the template that contains this string literal. As of this writing, we only need
      *            this to share the {@code namingConvetion} with that.
      */
-    // TODO This should be the part of the "parent" parsing; now it contains hacks like those with namingConvention.  
-    void parseValue(FMParserTokenManager parentTkMan) throws ParseException {
+    void parseValue(FMParserTokenManager parentTkMan, OutputFormat outputFormat) throws ParseException {
+        // The way this work is incorrect (the literal should be parsed without un-escaping),
+        // but we can't fix this backward compatibly.
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
             
             UnboundTemplate parentTemplate = getUnboundTemplate();
@@ -59,9 +60,9 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 
                 FMParser parser = new FMParser(parentTemplate, false, tkMan, null, parentTemplate.getParserConfiguration());
                 // We continue from the parent parser's current state:
-                parser.setupStringLiteralMode(parentTkMan);
+                parser.setupStringLiteralMode(parentTkMan, outputFormat);
                 try {
-                    dynamicValue = parser.FreeMarkerText();
+                    dynamicValue = parser.StaticTextAndInterpolations();
                 } finally {
                     // The parent parser continues from this parser's current state:
                     parser.tearDownStringLiteralMode(parentTkMan);
@@ -76,7 +77,51 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        return new SimpleScalar(evalAndCoerceToPlainText(env));
+        if (dynamicValue == null) {
+            return new SimpleScalar(value);
+        } else {
+            // This should behave like concatenating the values with `+`. Thus, an interpolated expression that
+            // returns markup promotes the result of the whole expression to markup.
+            
+            // Exactly one of these is non-null, depending on if the result will be plain text or markup, which can
+            // change during evaluation, depending on the result of the interpolations:
+            StringBuilder plainTextResult = null;
+            TemplateMarkupOutputModel<?> markupResult = null;
+            
+            for (Object part : dynamicValue) {
+                Object calcedPart =
+                        part instanceof String ? part
+                        : ((Interpolation) part).calculateInterpolatedStringOrMarkup(env);
+                if (markupResult != null) {
+                    TemplateMarkupOutputModel<?> partMO = calcedPart instanceof String
+                            ? markupResult.getOutputFormat().fromPlainTextByEscaping((String) calcedPart)
+                            : (TemplateMarkupOutputModel<?>) calcedPart;
+                    markupResult = EvalUtil.concatMarkupOutputs(this, markupResult, partMO);
+                } else { // We are using `plainTextOutput` (or nothing yet)
+                    if (calcedPart instanceof String) {
+                        String partStr = (String) calcedPart;
+                        if (plainTextResult == null) {
+                            plainTextResult = new StringBuilder(partStr);
+                        } else {
+                            plainTextResult.append(partStr);
+                        }
+                    } else { // `calcedPart` is TemplateMarkupOutputModel
+                        TemplateMarkupOutputModel<?> moPart = (TemplateMarkupOutputModel<?>) calcedPart;
+                        if (plainTextResult != null) {
+                            TemplateMarkupOutputModel<?> leftHandMO = moPart.getOutputFormat()
+                                    .fromPlainTextByEscaping(plainTextResult.toString());
+                            markupResult = EvalUtil.concatMarkupOutputs(this, leftHandMO, moPart);
+                            plainTextResult = null;
+                        } else {
+                            markupResult = moPart;
+                        }
+                    }
+                }
+            } // for each part
+            return markupResult != null ? markupResult
+                    : plainTextResult != null ? new SimpleScalar(plainTextResult.toString())
+                    : SimpleScalar.EMPTY_STRING;
+        }
     }
 
     public String getAsString() {
@@ -87,27 +132,10 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
      * Tells if this is something like <tt>"${foo}"</tt>, which is usually a user mistake.
      */
     boolean isSingleInterpolationLiteral() {
-        return dynamicValue != null && dynamicValue.getChildCount() == 1
-                && dynamicValue.getChildAt(0) instanceof DollarVariable;
+        return dynamicValue != null && dynamicValue.size() == 1
+                && dynamicValue.get(0) instanceof Interpolation;
     }
     
-    @Override
-    String evalAndCoerceToPlainText(Environment env) throws TemplateException {
-        if (dynamicValue == null) {
-            return value;
-        } else {
-            TemplateExceptionHandler teh = env.getTemplateExceptionHandler();
-            env.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-            try {
-               return env.renderElementToString(dynamicValue);
-            } catch (IOException ioe) {
-                throw new _MiscTemplateException(ioe, env);
-            } finally {
-                env.setTemplateExceptionHandler(teh);
-            }
-        }
-    }
-
     @Override
     public String getCanonicalForm() {
         if (dynamicValue == null) {
@@ -115,12 +143,11 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         } else {
             StringBuilder sb = new StringBuilder();
             sb.append('"');
-            for (Enumeration childrenEnum = dynamicValue.children(); childrenEnum.hasMoreElements(); ) {
-                TemplateElement child = (TemplateElement) childrenEnum.nextElement();
+            for (Object child : dynamicValue) {
                 if (child instanceof Interpolation) {
                     sb.append(((Interpolation) child).getCanonicalFormInStringLiteral());
                 } else {
-                    sb.append(StringUtil.FTLStringLiteralEnc(child.getCanonicalForm(), '"'));
+                    sb.append(StringUtil.FTLStringLiteralEnc((String) child, '"'));
                 }
             }
             sb.append('"');
@@ -149,19 +176,25 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
 
     @Override
     int getParameterCount() {
-        return 1;
+        return dynamicValue == null ? 0 : dynamicValue.size();
     }
 
     @Override
     Object getParameterValue(int idx) {
-        if (idx != 0) throw new IndexOutOfBoundsException();
-        return dynamicValue;
+        checkIndex(idx);
+        return dynamicValue.get(idx);
+    }
+
+    private void checkIndex(int idx) {
+        if (dynamicValue == null || idx >= dynamicValue.size()) {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
     @Override
     ParameterRole getParameterRole(int idx) {
-        if (idx != 0) throw new IndexOutOfBoundsException();
-        return ParameterRole.EMBEDDED_TEMPLATE;
+        checkIndex(idx);
+        return ParameterRole.VALUE_PART;
     }
     
 }

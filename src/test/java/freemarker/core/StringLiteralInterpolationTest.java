@@ -19,6 +19,7 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -26,14 +27,34 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
+@SuppressWarnings("boxing")
 public class StringLiteralInterpolationTest extends TemplateTest {
 
     @Test
     public void basics() throws IOException, TemplateException {
-        assertOutput("<#assign x = 1>${'${x}'}", "1");
-        assertOutput("<#assign x = 1>${'${x} ${x}'}", "1 1");
-        assertOutput("<#assign x = 1>${'$\\{x}'}", "${x}");
-        assertOutput("<#assign x = 1>${'$\\{x} $\\{x}'}", "${x} ${x}");
+        addToDataModel("x", 1);
+        assertOutput("${'${x}'}", "1");
+        assertOutput("${'#{x}'}", "1");
+        assertOutput("${'a${x}b${x*2}c'}", "a1b2c");
+        assertOutput("${'a#{x}b#{x*2}c'}", "a1b2c");
+        assertOutput("${'a#{x; m2}'}", "a1.00");
+        assertOutput("${'${x} ${x}'}", "1 1");
+        assertOutput("${'$\\{x}'}", "${x}");
+        assertOutput("${'$\\{x} $\\{x}'}", "${x} ${x}");
+        assertOutput("${'<#-- not a comment -->${x}'}", "<#-- not a comment -->1");
+        assertOutput("${'<#-- not a comment -->$\\{x}'}", "<#-- not a comment -->${x}");
+        assertOutput("${'<#assign x = 2> ${x} <#assign x = 2>'}", "<#assign x = 2> 1 <#assign x = 2>");
+        assertOutput("${'<#assign x = 2> $\\{x} <#assign x = 2>'}", "<#assign x = 2> ${x} <#assign x = 2>");
+        assertOutput("${'<@x/>${x}<@x/>'}", "<@x/>1<@x/>");
+        assertOutput("${'<@x/>$\\{x}<@x/>'}", "<@x/>${x}<@x/>");
+        assertOutput("${'<@ ${x}<@'}", "<@ 1<@");
+        assertOutput("${'<@ $\\{x}<@'}", "<@ ${x}<@");
+        assertOutput("${'</@x>${x}'}", "</@x>1");
+        assertOutput("${'</@x>$\\{x}'}", "</@x>${x}");
+        assertOutput("${'</@ ${x}</@'}", "</@ 1</@");
+        assertOutput("${'</@ $\\{x}</@'}", "</@ ${x}</@");
+        assertOutput("${'[@ ${x}'}", "[@ 1");
+        assertOutput("${'[@ $\\{x}'}", "[@ ${x}");
     }
 
     /**
@@ -41,8 +62,25 @@ public class StringLiteralInterpolationTest extends TemplateTest {
      */
     @Test
     public void legacyEscapingBugStillPresent() throws IOException, TemplateException {
-        assertOutput("<#assign x = 1>${'$\\{x} ${x}'}", "1 1");
-        assertOutput("<#assign x = 1>${'${x} $\\{x}'}", "1 1");
+        addToDataModel("x", 1);
+        assertOutput("${'$\\{x} ${x}'}", "1 1");
+        assertOutput("${'${x} $\\{x}'}", "1 1");
+    }
+    
+    @Test
+    public void legacyLengthGlitch() throws IOException, TemplateException {
+        assertOutput("${'${'}", "${");
+        assertOutput("${'${1'}", "${1");
+        assertOutput("${'${}'}", "${}");
+        assertOutput("${'${1}'}", "1");
+        assertErrorContains("${'${  '}", "");
+    }
+    
+    @Test
+    public void testErrors() {
+        addToDataModel("x", 1);
+        assertErrorContains("${'${noSuchVar}'}", InvalidReferenceException.class, "missing", "noSuchVar");
+        assertErrorContains("${'${x/0}'}", ArithmeticException.class, "zero");
     }
 
     @Test
@@ -59,6 +97,33 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         // Fix enabled:
         getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         assertOutput("${'&\\''?html} ${\"${'&\\\\\\''?html}\"}", "&amp;&#39; &amp;&#39;");
+    }
+    
+    @Test
+    public void markup() throws IOException, TemplateException {
+        Configuration cfg = getConfiguration();
+        cfg.setCustomNumberFormats(Collections.singletonMap("G", PrintfGTemplateNumberFormatFactory.INSTANCE));
+        cfg.setNumberFormat("@G 3");
+        
+        assertOutput("${\"${1000}\"}", "1.00*10<sup>3</sup>");
+        assertOutput("${\"&_${1000}\"}", "&amp;_1.00*10<sup>3</sup>");
+        assertOutput("${\"${1000}_&\"}", "1.00*10<sup>3</sup>_&amp;");
+        assertOutput("${\"${1000}, ${2000}\"}", "1.00*10<sup>3</sup>, 2.00*10<sup>3</sup>");
+        assertOutput("${\"& ${'x'}, ${2000}\"}", "&amp; x, 2.00*10<sup>3</sup>");
+        assertOutput("${\"& ${'x'}, #{2000}\"}", "& x, 2000");
+        
+        assertOutput("${\"${2000}\"?isMarkupOutput?c}", "true");
+        assertOutput("${\"x ${2000}\"?isMarkupOutput?c}", "true");
+        assertOutput("${\"${2000} x\"?isMarkupOutput?c}", "true");
+        assertOutput("${\"#{2000}\"?isMarkupOutput?c}", "false");
+        assertOutput("${\"${'x'}\"?isMarkupOutput?c}", "false");
+        assertOutput("${\"x ${'x'}\"?isMarkupOutput?c}", "false");
+        assertOutput("${\"${'x'} x\"?isMarkupOutput?c}", "false");
+        
+        addToDataModel("rtf", RTFOutputFormat.INSTANCE.fromMarkup("\\p"));
+        assertOutput("${\"${rtf}\"?isMarkupOutput?c}", "true");
+        assertErrorContains("${\"${1000}${rtf}\"}", TemplateException.class, "HTML", "RTF", "onversion");
+        assertErrorContains("x${\"${1000}${rtf}\"}", TemplateException.class, "HTML", "RTF", "onversion");
     }
     
 }

@@ -71,8 +71,8 @@ application already uses the related library.
 Building
 --------
 
-You need Apache Ant and Ivy be installed. (As of this writing it was
-tested with Ant 1.8.1 and Ivy 2.3.0.)
+You need JDK 8(!), Apache Ant and Ivy be installed. (As of this writing
+it was tested with Ant 1.8.1 and Ivy 2.3.0.)
 
 If you need to ensure compliance with certain J2SE versions, copy
 build.properties.sample into build.properties, and edit it

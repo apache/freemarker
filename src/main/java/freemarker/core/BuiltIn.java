@@ -77,7 +77,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 257;
+    static final int NUMBER_OF_BIS = 259;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
@@ -140,6 +140,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("is_infinite", "isInfinite", new is_infiniteBI());
         putBI("is_indexable", "isIndexable", new BuiltInsForMultipleTypes.is_indexableBI());
         putBI("is_macro", "isMacro", new BuiltInsForMultipleTypes.is_macroBI());
+        putBI("is_markup_output", "isMarkupOutput", new BuiltInsForMultipleTypes.is_markup_outputBI());
         putBI("is_method", "isMethod", new BuiltInsForMultipleTypes.is_methodBI());
         putBI("is_nan", "isNan", new is_nanBI());
         putBI("is_node", "isNode", new BuiltInsForMultipleTypes.is_nodeBI());

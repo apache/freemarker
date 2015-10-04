@@ -74,6 +74,13 @@ public class ParsingErrorMessagesTest {
         assertErrorContains("${blah", "\"{\"", "unclosed");
     }
     
+    @Test
+    public void testInterpolatingClosingsErrors() {
+        assertErrorContains("${x", "unclosed");
+        assertErrorContains("<#assign x = x}>", "\"}\"", "open");
+        // TODO assertErrorContains("<#assign x = '${x'>", "unclosed");
+    }
+    
     private void assertErrorContains(String ftl, String... expectedSubstrings) {
         assertErrorContains(false, ftl, expectedSubstrings);
         assertErrorContains(true, ftl, expectedSubstrings);

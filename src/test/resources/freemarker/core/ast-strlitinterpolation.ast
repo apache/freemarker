@@ -1,10 +1,64 @@
-@  // f.c.UnifiedCall
-    - callee: m  // f.c.Identifier
-    - argument name: "x"  // String
-    - argument value: dynamic "..."  // f.c.StringLiteral
-        - embedded template: #mixed_content  // f.c.MixedContent
-            ${...}  // f.c.DollarVariable
+#mixed_content  // f.c.MixedContent
+    #text  // f.c.TextBlock
+        - content: "1. "  // String
+    @  // f.c.UnifiedCall
+        - callee: m  // f.c.Identifier
+        - argument name: "x"  // String
+        - argument value: dynamic "..."  // f.c.StringLiteral
+            - value part: ${...}  // f.c.DollarVariable
                 - content: e1  // f.c.Identifier
-    - argument name: "y"  // String
-    - argument value: "$\\{e2}"  // f.c.StringLiteral
-        - embedded template: null  // Null
+        - argument name: "y"  // String
+        - argument value: "$\\{e2}"  // f.c.StringLiteral
+    #text  // f.c.TextBlock
+        - content: "\n2. "  // String
+    ${...}  // f.c.DollarVariable
+        - content: dynamic "..."  // f.c.StringLiteral
+            - value part: "a"  // String
+            - value part: ${...}  // f.c.DollarVariable
+                - content: x  // f.c.Identifier
+            - value part: "b"  // String
+            - value part: ${...}  // f.c.DollarVariable
+                - content: x  // f.c.Identifier
+            - value part: "c"  // String
+    #text  // f.c.TextBlock
+        - content: "\n3. "  // String
+    ${...}  // f.c.DollarVariable
+        - content: dynamic "..."  // f.c.StringLiteral
+            - value part: ${...}  // f.c.DollarVariable
+                - content: x  // f.c.Identifier
+            - value part: "b"  // String
+    #text  // f.c.TextBlock
+        - content: "\n4. "  // String
+    ${...}  // f.c.DollarVariable
+        - content: dynamic "..."  // f.c.StringLiteral
+            - value part: "a"  // String
+            - value part: ${...}  // f.c.DollarVariable
+                - content: x  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n5. "  // String
+    ${...}  // f.c.DollarVariable
+        - content: dynamic "..."  // f.c.StringLiteral
+            - value part: ${...}  // f.c.DollarVariable
+                - content: x  // f.c.Identifier
+            - value part: #{...}  // f.c.NumericalOutput
+                - content: y  // f.c.Identifier
+                - minimum decimals: "0"  // Integer
+                - maximum decimals: "0"  // Integer
+    #text  // f.c.TextBlock
+        - content: "\n6. "  // String
+    ${...}  // f.c.DollarVariable
+        - content: dynamic "..."  // f.c.StringLiteral
+            - value part: "a b "  // String
+            - value part: ${...}  // f.c.DollarVariable
+                - content: x  // f.c.Identifier
+            - value part: " c d"  // String
+    #text  // f.c.TextBlock
+        - content: "\n7. "  // String
+    ${...}  // f.c.DollarVariable
+        - content: dynamic "..."  // f.c.StringLiteral
+            - value part: ${...}  // f.c.DollarVariable
+                - content: x  // f.c.Identifier
+            - value part: " a b "  // String
+            - value part: ${...}  // f.c.DollarVariable
+                - content: y  // f.c.Identifier
+            - value part: " c$d"  // String

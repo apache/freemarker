@@ -297,9 +297,7 @@ public class NumberFormatTest extends TemplateTest {
         assertOutput("<#escape x as x?html>" + commonFTL + "</#escape>", commonOutput);
         assertOutput("<#escape x as x?xhtml>" + commonFTL + "</#escape>", commonOutput);
         assertOutput("<#escape x as x?xml>" + commonFTL + "</#escape>", commonOutput);
-        // TODO: Should give markup, but currently does interpolation in plain text:
-        // assertOutput("${\"" + commonFTL + "\"}",
-        //        "1.23*10<sup>6</sup> cat:1.23*10<sup>6</sup> 1.23*10<sup>-5</sup>");
+        assertOutput("${\"" + commonFTL + "\"}", "1.23*10<sup>6</sup> cat:1.23*10<sup>6</sup> 1.23*10<sup>-5</sup>");
         assertErrorContains("<#ftl outputFormat='plainText'>" + commonFTL, "HTML", "plainText", "conversion");
     }
 

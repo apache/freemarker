@@ -158,12 +158,13 @@ public class FMParser {
         }
     }
     
-    void setupStringLiteralMode(FMParserTokenManager parentTokenSource) {
-        token_source.onlyTextOutput = true;
+    void setupStringLiteralMode(FMParserTokenManager parentTokenSource, OutputFormat outputFormat) {
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
-        outputFormat = PlainTextOutputFormat.INSTANCE;
+        token_source.SwitchTo(NODIRECTIVE);
+        
+        this.outputFormat = outputFormat;
         recalculateAutoEscapingField();                                
         if (incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_24) {
             // Emulate bug, where the string literal parser haven't inherited the IcI:
@@ -489,12 +490,12 @@ TOKEN_MGR_DECLS:
      * distinguish the } used to close a hash literal and the one used to close a ${
      */
     private FMParser parser;
+    private int postInterpolationLexState = -1;
     private int hashLiteralNesting;
     private int parenthesisNesting;
     private int bracketNesting;
     private boolean inFTLHeader;
     boolean strictEscapeSyntax,
-            onlyTextOutput,
             squBracTagSyntax,
             autodetectTagSyntax,
             directiveSyntaxEstablished,
@@ -513,11 +514,6 @@ TOKEN_MGR_DECLS:
     // tag syntax detection. If you update this logic, take a look
     // at the UNKNOWN_DIRECTIVE token too.
     private void strictSyntaxCheck(Token tok, int tokenNamingConvention, int newLexState) {
-        if (onlyTextOutput) {
-            tok.kind = STATIC_TEXT_NON_WS;
-            return;
-        }
-
         final String image = tok.image;
         
         // Non-strict syntax (deprecated) only supports legacy naming convention.
@@ -681,6 +677,37 @@ TOKEN_MGR_DECLS:
             }
             SwitchTo(DEFAULT);
         }
+    }
+    
+    private void startInterpolation(Token tok) {
+        if (postInterpolationLexState != -1) {
+            char c = tok.image.charAt(0);
+            throw new TokenMgrError(
+                    "You can't start an interpolation (" + c + "{...}) here "
+                    + "as you are inside another interpolation.)",
+                    TokenMgrError.LEXICAL_ERROR,
+                    tok.beginLine, tok.beginColumn,
+                    tok.endLine, tok.endColumn);
+        }
+        postInterpolationLexState = curLexState;
+        SwitchTo(FM_EXPRESSION);
+    }
+
+    /**
+     * @param tok
+     *         Assumed to be an '}', or something that is the closing pair of another "mirror image" character.
+     */
+    private void endInterpolation(Token tok) {
+        if (postInterpolationLexState == -1) {
+            char c = tok.image.charAt(0);
+            throw new TokenMgrError(
+                    "You can't have an \"" + c + "\" here, as there's nothing open that it could close.",
+                    TokenMgrError.LEXICAL_ERROR,
+                    tok.beginLine, tok.beginColumn,
+                    tok.endLine, tok.endColumn);
+        }
+        SwitchTo(postInterpolationLexState);
+        postInterpolationLexState = -1;
     }
 
     private void eatNewline() {
@@ -997,9 +1024,9 @@ TOKEN:
     |
     <STATIC_TEXT_FALSE_ALARM : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
     |
-    <DOLLAR_INTERPOLATION_OPENING : "${"> : FM_EXPRESSION
+    <DOLLAR_INTERPOLATION_OPENING : "${"> { startInterpolation(matchedToken); }
     |
-    <HASH_INTERPOLATION_OPENING : "#{"> : FM_EXPRESSION
+    <HASH_INTERPOLATION_OPENING : "#{"> { startInterpolation(matchedToken); }
 }
 
 <FM_EXPRESSION, IN_PAREN, NAMED_PARAMETER_EXPRESSION> SKIP :
@@ -1160,7 +1187,7 @@ TOKEN:
     |
     <CLOSING_CURLY_BRACKET : "}">
     {
-        if (hashLiteralNesting == 0) SwitchTo(DEFAULT);
+        if (hashLiteralNesting == 0) endInterpolation(matchedToken);
         else --hashLiteralNesting;
     }
     |
@@ -2138,25 +2165,26 @@ StringLiteral StringLiteral(boolean interpolate) :
         t = <RAW_STRING> { raw = true; }
     )
     {
-        String s = t.image;
+        String s;
         // Get rid of the quotes.
-        s = s.substring(1, s.length() -1);
         if (raw) {
-            s = s.substring(1);
-        } else try {
-            s = StringUtil.FTLStringLiteralDec(s);
-        } catch (ParseException pe) {
-            pe.lineNumber = t.beginLine;
-            pe.columnNumber = t.beginColumn;
-            pe.endLineNumber = t.endLine;
-            pe.endColumnNumber = t.endColumn;
-            throw pe;
+            s = t.image.substring(2, t.image.length() -1);
+        } else {
+	        try {
+	            s = StringUtil.FTLStringLiteralDec(t.image.substring(1, t.image.length() -1));
+	        } catch (ParseException pe) {
+	            pe.lineNumber = t.beginLine;
+	            pe.columnNumber = t.beginColumn;
+	            pe.endLineNumber = t.endLine;
+	            pe.endColumnNumber = t.endColumn;
+	            throw pe;
+	        }
         }
         StringLiteral result = new StringLiteral(s);
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source);
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source, outputFormat);
         }
         return result;
     }
@@ -3795,9 +3823,7 @@ TextBlock PCData() :
 }
 {
     (
-        LOOKAHEAD(<STATIC_TEXT_WS>|<STATIC_TEXT_NON_WS>|<STATIC_TEXT_FALSE_ALARM>)
         (
-            { prevToken = t; }
             t = <STATIC_TEXT_WS>
             |
             t = <STATIC_TEXT_NON_WS>
@@ -3808,6 +3834,7 @@ TextBlock PCData() :
             buf.append(t.image);
             if (start == null) start = t;
             if (prevToken != null) prevToken.next = null;
+            prevToken = t;
         }
     )+
     {
@@ -4087,6 +4114,66 @@ Map ParamList() :
     )+
     {
         return result;
+    }
+}
+
+/**
+ * Parses the already un-escaped content of a string literal (input must not include the quotation marks).
+ *
+ * @return A {@link List} of {@link String}-s and {@link Interpolation}-s. 
+ */
+List<Object> StaticTextAndInterpolations() :
+{
+    Token t;
+    Interpolation interpolation;
+    StringBuilder staticTextCollector = null;
+    ArrayList<Object> parts = new ArrayList<Object>();
+}
+{
+    (
+	    (
+		    t = <STATIC_TEXT_WS>
+		    |
+		    t = <STATIC_TEXT_NON_WS>
+		    |
+		    t = <STATIC_TEXT_FALSE_ALARM>
+	    )
+	    {
+	       String s = t.image;
+	       if (s.length() != 0) {
+	           if (staticTextCollector == null) {
+	               staticTextCollector = new StringBuilder(t.image);
+	           } else {
+	               staticTextCollector.append(t.image);
+	           }
+	       }
+	    }
+	    |
+	    (
+	        LOOKAHEAD(<DOLLAR_INTERPOLATION_OPENING>)
+		    (
+		        interpolation = StringOutput()
+	        )
+		    |
+            LOOKAHEAD(<HASH_INTERPOLATION_OPENING>)
+		    (
+                interpolation = NumericalOutput()
+		    )
+	    )
+	    {
+            if (staticTextCollector != null) {
+                parts.add(staticTextCollector.toString());
+                staticTextCollector.setLength(0);
+            }
+            parts.add(interpolation);
+	    }
+    )*
+    {
+        if (staticTextCollector != null && staticTextCollector.length() != 0) {
+            parts.add(staticTextCollector.toString());
+        }
+        parts.trimToSize();
+        return parts;
     }
 }
 

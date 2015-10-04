@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateModel;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -57,10 +56,8 @@ final class DollarVariable extends Interpolation {
      */
     @Override
     void accept(Environment env) throws TemplateException, IOException {
-        final TemplateModel tm = escapedExpression.eval(env);
+        final Object moOrStr = calculateInterpolatedStringOrMarkup(env);
         final Writer out = env.getOut();
-        final Object moOrStr = EvalUtil.coerceModelToStringOrMarkup(
-                tm, escapedExpression, null, env);
         if (moOrStr instanceof String) {
             final String s = (String) moOrStr;
             if (autoEscape) {
@@ -91,6 +88,11 @@ final class DollarVariable extends Interpolation {
                 moOF.output(mo, out);
             }
         }
+    }
+
+    @Override
+    protected Object calculateInterpolatedStringOrMarkup(Environment env) throws TemplateException {
+        return EvalUtil.coerceModelToStringOrMarkup(escapedExpression.eval(env), escapedExpression, null, env);
     }
 
     @Override
