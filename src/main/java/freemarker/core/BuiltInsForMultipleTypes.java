@@ -580,14 +580,14 @@ class BuiltInsForMultipleTypes {
             public String getAsString()
             throws TemplateModelException {
                 if (cachedValue == null) {
-                    try {
-                        if (defaultFormat == null) {
-                            if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
-                                throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
-                            } else {
-                                throw new BugException();
-                            }
+                    if (defaultFormat == null) {
+                        if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
+                            throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
+                        } else {
+                            throw new BugException();
                         }
+                    }
+                    try {
                         cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
                     } catch (TemplateValueFormatException e) {
                         try {
