@@ -14550,15 +14550,17 @@ German people write: 12.345.678,00</programlisting>
             0.0"</literal>), the after only one semicolon. For example:</para>
 
             <programlisting role="template">Standard decimal format: ${10002.5?string[",000"]}
-Extended decimal format: ${10002.5?string[",000<emphasis>;; rnd=hu grp=_</emphasis>"]}</programlisting>
+Extended decimal format: ${10002.5?string[",000<emphasis>;; roundingMode=halfUp groupingSeparator=_</emphasis>"]}</programlisting>
 
             <programlisting role="output">Standard decimal format: 10,002
 Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></programlisting>
 
             <para>Above, in the extended decimal format, we have specified
-            half-up rounding mode (<literal>rnd=hu</literal>), and group
-            separator <literal>"_"</literal> (<literal>grp=_</literal>). The
-            table of all options:</para>
+            half-up rounding mode and group separator <literal>"_"</literal>.
+            The table of all options follows (note that these are defined by
+            <literal>java.text.DecimalFormat</literal> and
+            <literal>java.text.DecimalFormatSymbols</literal>, not by
+            FreeMarker):</para>
 
             <informaltable border="1">
               <thead>
@@ -14571,101 +14573,120 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
 
               <tbody>
                 <tr>
-                  <td><literal>rnd</literal></td>
+                  <td><literal>roundingMode</literal></td>
 
-                  <td>Rounding mode. The value is one of <literal>u</literal>
-                  for up, <literal>d</literal> for down, <literal>c</literal>
-                  for ceiling, <literal>f</literal> for floor,
-                  <literal>hu</literal> for half-up, <literal>hd</literal> for
-                  half-down, <literal>he</literal> for half-even, and
-                  <literal>un</literal> for unused. (See <link
+                  <td>The value is one of <literal>up</literal>,
+                  <literal>down</literal>, <literal>ceiling</literal>,
+                  <literal>floor</literal>, <literal>halfUp</literal>,
+                  <literal>halfDown</literal>, <literal>halfEven</literal>,
+                  and <literal>unnecessary</literal>. The behavior that most
+                  people learns in school is <literal>halfUp</literal>, but
+                  the Java default is <literal>halfEven</literal> (also called
+                  bankers' rounding). (See <link
                   xlink:href="http://docs.oracle.com/javase/7/docs/api/java/math/RoundingMode.html">the
                   <literal>java.math.RoundingMode</literal> API</link> for
                   explanations.)</td>
                 </tr>
 
                 <tr>
-                  <td><literal>mul</literal></td>
+                  <td><literal>multipier</literal></td>
 
-                  <td>Multiplier. The number will be shown after multiplied
-                  with this integer number.</td>
+                  <td>The number will be shown after multiplied with this
+                  integer number.</td>
                 </tr>
 
                 <tr>
-                  <td><literal>dec</literal></td>
+                  <td><literal>decimalSeparator</literal></td>
 
-                  <td>Decimal separator character (like <literal>"."</literal>
-                  in <literal>3.14</literal>).</td>
+                  <td>The character separating the integer part from the
+                  fraction part (like <literal>"."</literal> in
+                  <literal>3.14</literal>).</td>
                 </tr>
 
                 <tr>
-                  <td><literal>mdec</literal></td>
+                  <td><literal>monetaryDecimalSeparator</literal></td>
 
-                  <td>Monetary decimal separator character. This is used
-                  instead of <literal>dec</literal> when the pattern contains
-                  parts that make it a monetary format. (See the <link
+                  <td>This is used instead of
+                  <literal>decimalSeparator</literal> when the pattern
+                  contains parts that make it a monetary format. (See the
+                  <link
                   xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html">Java
                   decimal number format documentation</link> for more.)</td>
                 </tr>
 
                 <tr>
-                  <td><literal>grp</literal></td>
+                  <td><literal>groupingSeparator</literal></td>
 
-                  <td>Grouping separator character. Note that grouping is
-                  turned on by using <literal>","</literal> in the pattern, as
-                  shown in the earlier example. If it's not turned on, this
-                  option won't have visible effect.</td>
+                  <td>The single character used for grouping the integer part
+                  (like <literal>","</literal> in
+                  <literal>1,000,000</literal>) Note that grouping is turned
+                  on by using <literal>","</literal> in the pattern, as shown
+                  in the earlier example. If it's not turned on, this option
+                  won't have visible effect.</td>
                 </tr>
 
                 <tr>
-                  <td><literal>exp</literal></td>
+                  <td><literal>exponentSeparator</literal></td>
 
-                  <td>Exponent separator string. Only has visible effect if
-                  the pattern specifies exponential form, like
+                  <td>This string (of arbitrary length) is used to separate
+                  the exponent from the part before it. (like
+                  <literal>"E"</literal> in <literal>1.23E6</literal>). Only
+                  has visible effect if the pattern specifies exponential
+                  (also known as scientific) format, like
                   <literal>"0.##E0"</literal>.</td>
                 </tr>
 
                 <tr>
-                  <td><literal>min</literal></td>
+                  <td><literal>minusSign</literal></td>
 
-                  <td>Minus sign character.</td>
+                  <td>The single character used as minus sign (like
+                  <literal>"-"</literal> in <literal>-1</literal>).</td>
                 </tr>
 
                 <tr>
-                  <td><literal>inf</literal></td>
+                  <td><literal>infinity</literal></td>
 
-                  <td>The string used to show infinity.</td>
+                  <td>The string (of arbitrary length) used to show
+                  infinity.</td>
                 </tr>
 
                 <tr>
                   <td><literal>nan</literal></td>
 
-                  <td>The string used to show not-a-number (NaN).</td>
+                  <td>The string (of arbitrary length) used to show
+                  not-a-number (NaN).</td>
                 </tr>
 
                 <tr>
-                  <td><literal>prc</literal></td>
+                  <td><literal>percent</literal></td>
 
-                  <td>Percent character.</td>
+                  <td>The single character used as the percent symbol (like
+                  <literal>"%"</literal> in <literal>50%</literal>). Only has
+                  visible effect if the pattern contains
+                  <literal>%</literal>.</td>
                 </tr>
 
                 <tr>
-                  <td><literal>prm</literal></td>
+                  <td><literal>perMill</literal></td>
 
-                  <td>Per-mill character.</td>
+                  <td>The single character used as the per-mill symbol (like
+                  <literal>"‰"</literal> in <literal>50021‰</literal>). Only
+                  has visible effect if the pattern contains
+                  <literal>‰</literal>.</td>
                 </tr>
 
                 <tr>
-                  <td><literal>zero</literal></td>
+                  <td><literal>zeroDigit</literal></td>
 
-                  <td>Zero character. This modifies the other digits too, for
-                  example, if zero is <literal>A</literal>, then 1 will
+                  <td>The first character in the 10 character range (of
+                  character codes) that contains the digits to be used. For
+                  example, if this is <literal>A</literal>, then 1 will
                   <literal>B</literal>, 2 will be <literal>C</literal>, and so
                   on.</td>
                 </tr>
 
                 <tr>
-                  <td><literal>curc</literal></td>
+                  <td><literal>currencyCode</literal></td>
 
                   <td>Currency ISO 4217 code. Only has effect when the pattern
                   contains parts that make it a monetary format. It's an error
@@ -14674,11 +14695,11 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
                 </tr>
 
                 <tr>
-                  <td><literal>curs</literal></td>
+                  <td><literal>currencySymbol</literal></td>
 
                   <td>Currency symbol; shown where the localized currency name
                   is present in the pattern. Overrides the symbol determined
-                  from <literal>curc</literal>.</td>
+                  based on the <literal>currencyCode</literal>.</td>
                 </tr>
               </tbody>
             </informaltable>
@@ -14699,19 +14720,23 @@ Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></progr
               <listitem>
                 <para>The option value can be quoted with apostrophe
                 (<literal>'</literal>) or normal quotation mark
-                (<literal>"</literal>) , like <literal>exp='*10^'</literal> or
-                <literal>exp="*10^"</literal>. If the value itself has to
-                contain the character used for quotation, then it has to be
-                entered twice (like <literal>inf='It''s infinite'</literal>,
-                but you could also write <literal>inf="It's
-                infinite"</literal>). Backslash has no special meaning.</para>
+                (<literal>"</literal>) , like
+                <literal>exponentSeparator='*10^'</literal> or
+                <literal>exponentSeparator="*10^"</literal>. If the value
+                itself has to contain the character used for quotation, then
+                it has to be entered twice (like <literal>infinity='It''s
+                infinite'</literal>, but you could also write
+                <literal>infinity="It's infinite"</literal>). Backslash has no
+                special meaning.</para>
               </listitem>
 
               <listitem>
                 <para>Non-string values must not be quoted. Strings only has
                 to be quoted if they contain punctuation or whitespace, or any
                 other non-letter non-digit non-<literal>"_"</literal>
-                non-<literal>"$"</literal> characters.</para>
+                non-<literal>"$"</literal> characters. Thus, for example, both
+                <literal>roundingMode=down</literal> and
+                <literal>roundingMode="down"</literal> are legal.</para>
               </listitem>
             </itemizedlist>
           </simplesect>
@@ -25822,12 +25847,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><emphasis>Attention!</emphasis> FreeMarker's JSP support
-              (if it's used) now requires at least JSP 2.0. Earlier it only
-              required JSP 1.1. (Reason: The <literal>jsp-api</literal>
-              dependency for JSP 1.x, which was needed for building, can't be
-              legally present in the Maven Central Repository, nor be provided
-              by freemarker.org.)</para>
+              <para><emphasis role="strong">Attention!</emphasis> FreeMarker's
+              JSP support (if it's used) now requires at least JSP 2.0.
+              Earlier it only required JSP 1.1. (Reason: The
+              <literal>jsp-api</literal> dependency for JSP 1.x, which was
+              needed for building, can't be legally present in the Maven
+              Central Repository, nor be provided by freemarker.org.)</para>
             </listitem>
 
             <listitem>
@@ -26274,6 +26299,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               string literals didn't. Now similarly as <literal>"foo " +
               someMarkup</literal> works and gives a markup result,
               <literal>"foo ${someMarkup}"</literal> does too.</para>
+            </listitem>
+
+            <listitem>
+              <para>The extended decimal format options don't use
+              abbreviations anymore. Like instead of
+              <literal>rnd=hu</literal>, now there's
+              <literal>roundingMode=halfUp</literal>.</para>
             </listitem>
 
             <listitem>
