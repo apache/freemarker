@@ -32,29 +32,29 @@ import freemarker.template.utility.StringUtil;
 
 class ExtendedDecimalFormatParser {
     
-    private static final String PARAM_ROUNDING_MODE = "rnd";
-    private static final String PARAM_MULTIPIER = "mul";
-    private static final String PARAM_DECIMAL_SEPARATOR = "dec";
-    private static final String PARAM_MONETARY_DECIMAL_SEPARATOR = "mdec";
-    private static final String PARAM_GROUP_SEPARATOR = "grp";
-    private static final String PARAM_EXPONENT_SEPARATOR = "exp";
-    private static final String PARAM_MINUS_SIGN = "min";
-    private static final String PARAM_INFINITY = "inf";
+    private static final String PARAM_ROUNDING_MODE = "roundingMode";
+    private static final String PARAM_MULTIPIER = "multipier";
+    private static final String PARAM_DECIMAL_SEPARATOR = "decimalSeparator";
+    private static final String PARAM_MONETARY_DECIMAL_SEPARATOR = "monetaryDecimalSeparator";
+    private static final String PARAM_GROUP_SEPARATOR = "groupingSeparator";
+    private static final String PARAM_EXPONENT_SEPARATOR = "exponentSeparator";
+    private static final String PARAM_MINUS_SIGN = "minusSign";
+    private static final String PARAM_INFINITY = "infinity";
     private static final String PARAM_NAN = "nan";
-    private static final String PARAM_PERCENT = "prc";
-    private static final String PARAM_PER_MILL = "prm";
-    private static final String PARAM_ZERO_DIGIT = "zero";
-    private static final String PARAM_CURRENCY_CODE = "curc";
-    private static final String PARAM_CURRENCY_SYMBOL = "curs";
+    private static final String PARAM_PERCENT = "percent";
+    private static final String PARAM_PER_MILL = "perMill";
+    private static final String PARAM_ZERO_DIGIT = "zeroDigit";
+    private static final String PARAM_CURRENCY_CODE = "currencyCode";
+    private static final String PARAM_CURRENCY_SYMBOL = "currencySymbol";
 
-    private static final String PARAM_VALUE_RND_UP = "u";
-    private static final String PARAM_VALUE_RND_DOWN = "d";
-    private static final String PARAM_VALUE_RND_CEILING = "c";
-    private static final String PARAM_VALUE_RND_FLOOR = "f";
-    private static final String PARAM_VALUE_RND_HALF_DOWN = "hd";
-    private static final String PARAM_VALUE_RND_HALF_EVEN = "he";
-    private static final String PARAM_VALUE_RND_HALF_UP = "hu";
-    private static final String PARAM_VALUE_RND_UNNECESSARY = "un";
+    private static final String PARAM_VALUE_RND_UP = "up";
+    private static final String PARAM_VALUE_RND_DOWN = "down";
+    private static final String PARAM_VALUE_RND_CEILING = "ceiling";
+    private static final String PARAM_VALUE_RND_FLOOR = "floor";
+    private static final String PARAM_VALUE_RND_HALF_DOWN = "halfDown";
+    private static final String PARAM_VALUE_RND_HALF_EVEN = "halfEven";
+    private static final String PARAM_VALUE_RND_HALF_UP = "halfUp";
+    private static final String PARAM_VALUE_RND_UNNECESSARY = "unnecessary";
     
     private static final HashMap<String, ? extends ParameterHandler> PARAM_HANDLERS;
     static {

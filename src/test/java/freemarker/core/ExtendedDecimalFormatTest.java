@@ -107,84 +107,89 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
     @Test
     public void testExtendedParamsParsing() throws ParseException {
         for (String fs : new String[] {
-                "00.##;; dec='D'", "00.##;;dec=D", "00.##;;  dec  =  D ", "00.##;; dec = 'D' " }) {
+                "00.##;; decimalSeparator='D'",
+                "00.##;;decimalSeparator=D",
+                "00.##;;  decimalSeparator  =  D ", "00.##;; decimalSeparator = 'D' " }) {
             assertFormatted(fs, 1.125, "01D12");
         }
         for (String fs : new String[] {
-                ",#0.0;; dec=D, grp=_", ",#0.0;;dec=D,grp=_", ",#0.0;; dec = D , grp = _ ", ",#0.0;; dec='D', grp='_'"
+                ",#0.0;; decimalSeparator=D, groupingSeparator=_",
+                ",#0.0;;decimalSeparator=D,groupingSeparator=_",
+                ",#0.0;; decimalSeparator = D , groupingSeparator = _ ",
+                ",#0.0;; decimalSeparator='D', groupingSeparator='_'"
                 }) {
             assertFormatted(fs, 12345, "1_23_45D0");
         }
         
-        assertFormatted("0.0;;inf=infinity", Double.POSITIVE_INFINITY, "infinity");
-        assertFormatted("0.0;;inf='infinity'", Double.POSITIVE_INFINITY, "infinity");
-        assertFormatted("0.0;;inf=\"infinity\"", Double.POSITIVE_INFINITY, "infinity");
-        assertFormatted("0.0;;inf=''", Double.POSITIVE_INFINITY, "");
-        assertFormatted("0.0;;inf=\"\"", Double.POSITIVE_INFINITY, "");
-        assertFormatted("0.0;;inf='x''y'", Double.POSITIVE_INFINITY, "x'y");
-        assertFormatted("0.0;;inf=\"x'y\"", Double.POSITIVE_INFINITY, "x'y");
-        assertFormatted("0.0;;inf='x\"\"y'", Double.POSITIVE_INFINITY, "x\"\"y");
-        assertFormatted("0.0;;inf=\"x''y\"", Double.POSITIVE_INFINITY, "x''y");
-        assertFormatted("0.0;;dec=''''", 1, "1'0");
-        assertFormatted("0.0;;dec=\"'\"", 1, "1'0");
-        assertFormatted("0.0;;dec='\"'", 1, "1\"0");
-        assertFormatted("0.0;;dec=\"\"\"\"", 1, "1\"0");
+        assertFormatted("0.0;;infinity=infinity", Double.POSITIVE_INFINITY, "infinity");
+        assertFormatted("0.0;;infinity='infinity'", Double.POSITIVE_INFINITY, "infinity");
+        assertFormatted("0.0;;infinity=\"infinity\"", Double.POSITIVE_INFINITY, "infinity");
+        assertFormatted("0.0;;infinity=''", Double.POSITIVE_INFINITY, "");
+        assertFormatted("0.0;;infinity=\"\"", Double.POSITIVE_INFINITY, "");
+        assertFormatted("0.0;;infinity='x''y'", Double.POSITIVE_INFINITY, "x'y");
+        assertFormatted("0.0;;infinity=\"x'y\"", Double.POSITIVE_INFINITY, "x'y");
+        assertFormatted("0.0;;infinity='x\"\"y'", Double.POSITIVE_INFINITY, "x\"\"y");
+        assertFormatted("0.0;;infinity=\"x''y\"", Double.POSITIVE_INFINITY, "x''y");
+        assertFormatted("0.0;;decimalSeparator=''''", 1, "1'0");
+        assertFormatted("0.0;;decimalSeparator=\"'\"", 1, "1'0");
+        assertFormatted("0.0;;decimalSeparator='\"'", 1, "1\"0");
+        assertFormatted("0.0;;decimalSeparator=\"\"\"\"", 1, "1\"0");
         
         try {
-            ExtendedDecimalFormatParser.parse(";;dec=D,", LOC);
+            ExtendedDecimalFormatParser.parse(";;decimalSeparator=D,", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(),
                     allOf(containsStringIgnoringCase("expected a(n) name"), containsString(" end of ")));
         }
         try {
-            ExtendedDecimalFormatParser.parse(";;xdec=D,", LOC);
+            ExtendedDecimalFormatParser.parse(";;foo=D,", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(),
-                    allOf(containsString("\"xdec\""), containsString("name")));
+                    allOf(containsString("\"foo\""), containsString("name")));
         }
         try {
-            ExtendedDecimalFormatParser.parse(";;dec='D", LOC);
-            fail();
-        } catch (java.text.ParseException e) {
-            assertThat(e.getMessage(),
-                    allOf(containsString("quotation"), containsString("closed")));
-        }
-        try {
-            ExtendedDecimalFormatParser.parse(";;dec=\"D", LOC);
+            ExtendedDecimalFormatParser.parse(";;decimalSeparator='D", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(),
                     allOf(containsString("quotation"), containsString("closed")));
         }
         try {
-            ExtendedDecimalFormatParser.parse(";;dec='D'grp=G", LOC);
+            ExtendedDecimalFormatParser.parse(";;decimalSeparator=\"D", LOC);
+            fail();
+        } catch (java.text.ParseException e) {
+            assertThat(e.getMessage(),
+                    allOf(containsString("quotation"), containsString("closed")));
+        }
+        try {
+            ExtendedDecimalFormatParser.parse(";;decimalSeparator='D'groupingSeparator=G", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(), allOf(
                     containsString("separator"), containsString("whitespace"), containsString("comma")));
         }
         try {
-            ExtendedDecimalFormatParser.parse(";;dec=., grp=G", LOC);
+            ExtendedDecimalFormatParser.parse(";;decimalSeparator=., groupingSeparator=G", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(), allOf(
-                    containsStringIgnoringCase("expected a(n) value"), containsString("., grp")));
+                    containsStringIgnoringCase("expected a(n) value"), containsString("., gr[...]")));
         }
         try {
-            ExtendedDecimalFormatParser.parse("0.0;;dec=''", LOC);
+            ExtendedDecimalFormatParser.parse("0.0;;decimalSeparator=''", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(), allOf(
-                    containsStringIgnoringCase("\"dec\""), containsString("exactly 1 char")));
+                    containsStringIgnoringCase("\"decimalSeparator\""), containsString("exactly 1 char")));
         }
         try {
-            ExtendedDecimalFormatParser.parse("0.0;;mul=ten", LOC);
+            ExtendedDecimalFormatParser.parse("0.0;;multipier=ten", LOC);
             fail();
         } catch (java.text.ParseException e) {
             assertThat(e.getMessage(), allOf(
-                    containsString("\"mul\""), containsString("\"ten\""), containsString("integer")));
+                    containsString("\"multipier\""), containsString("\"ten\""), containsString("integer")));
         }
     }
     
@@ -193,71 +198,77 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
     public void testExtendedParamsEffect() throws ParseException {
         assertFormatted("0",
                 1.5, "2", 2.5, "2", 3.5, "4", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-2", -2.5, "-2", -1.6, "-2");
-        assertFormatted("0;; rnd=he",
+        assertFormatted("0;; roundingMode=halfEven",
                 1.5, "2", 2.5, "2", 3.5, "4", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-2", -2.5, "-2", -1.6, "-2");
-        assertFormatted("0;; rnd=hu",
+        assertFormatted("0;; roundingMode=halfUp",
                 1.5, "2", 2.5, "3", 3.5, "4", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-2", -2.5, "-3", -1.6, "-2");
-        assertFormatted("0;; rnd=hd",
+        assertFormatted("0;; roundingMode=halfDown",
                 1.5, "1", 2.5, "2", 3.5, "3", 1.4, "1", 1.6, "2", -1.4, "-1", -1.5, "-1", -2.5, "-2", -1.6, "-2");
-        assertFormatted("0;; rnd=f",
+        assertFormatted("0;; roundingMode=floor",
                 1.5, "1", 2.5, "2", 3.5, "3", 1.4, "1", 1.6, "1", -1.4, "-2", -1.5, "-2", -2.5, "-3", -1.6, "-2");
-        assertFormatted("0;; rnd=c",
+        assertFormatted("0;; roundingMode=ceiling",
                 1.5, "2", 2.5, "3", 3.5, "4", 1.4, "2", 1.6, "2", -1.4, "-1", -1.5, "-1", -2.5, "-2", -1.6, "-1");
-        assertFormatted("0;; rnd=un", 2, "2");
+        assertFormatted("0;; roundingMode=up",
+                1.5, "2", 2.5, "3", 3.5, "4", 1.4, "2", 1.6, "2", -1.4, "-2", -1.5, "-2", -2.5, "-3", -1.6, "-2");
+        assertFormatted("0;; roundingMode=down",
+                1.5, "1", 2.5, "2", 3.5, "3", 1.4, "1", 1.6, "1", -1.4, "-1", -1.5, "-1", -2.5, "-2", -1.6, "-1");
+        assertFormatted("0;; roundingMode=unnecessary", 2, "2");
         try {
-            assertFormatted("0;; rnd=un", 2.5, "2");
+            assertFormatted("0;; roundingMode=unnecessary", 2.5, "2");
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
 
-        assertFormatted("0.##;; mul=100", 12.345, "1234.5");
-        assertFormatted("0.##;; mul=1000", 12.345, "12345");
+        assertFormatted("0.##;; multipier=100", 12.345, "1234.5");
+        assertFormatted("0.##;; multipier=1000", 12.345, "12345");
         
-        assertFormatted(",##0.##;; grp=_ dec=D", 12345.1, "12_345D1", 1, "1");
+        assertFormatted(",##0.##;; groupingSeparator=_ decimalSeparator=D", 12345.1, "12_345D1", 1, "1");
         
-        assertFormatted("0.##E0;; exp='*10^'", 12345.1, "1.23*10^4");
+        assertFormatted("0.##E0;; exponentSeparator='*10^'", 12345.1, "1.23*10^4");
         
-        assertFormatted("0.##;; min=m", -1, "m1", 1, "1");
+        assertFormatted("0.##;; minusSign=m", -1, "m1", 1, "1");
         
-        assertFormatted("0.##;; inf=foo", Double.POSITIVE_INFINITY, "foo", Double.NEGATIVE_INFINITY, "-foo");
+        assertFormatted("0.##;; infinity=foo", Double.POSITIVE_INFINITY, "foo", Double.NEGATIVE_INFINITY, "-foo");
         
         assertFormatted("0.##;; nan=foo", Double.NaN, "foo");
         
-        assertFormatted("0%;; prc='c'", 0.75, "75c");
+        assertFormatted("0%;; percent='c'", 0.75, "75c");
         
-        assertFormatted("0\u2030;; prm='m'", 0.75, "750m");
+        assertFormatted("0\u2030;; perMill='m'", 0.75, "750m");
         
-        assertFormatted("0.00;; zero='@'", 10.5, "A@.E@");
+        assertFormatted("0.00;; zeroDigit='@'", 10.5, "A@.E@");
         
-        assertFormatted("0;; curc=USD", 10, "10");
-        assertFormatted("0 \u00A4;; curc=USD", 10, "10 $");
-        assertFormatted("0 \u00A4\u00A4;; curc=USD", 10, "10 USD");
-        assertFormatted(Locale.GERMANY, "0 \u00A4;; curc=EUR", 10, "10 \u20AC");
-        assertFormatted(Locale.GERMANY, "0 \u00A4\u00A4;; curc=EUR", 10, "10 EUR");
+        assertFormatted("0;; currencyCode=USD", 10, "10");
+        assertFormatted("0 \u00A4;; currencyCode=USD", 10, "10 $");
+        assertFormatted("0 \u00A4\u00A4;; currencyCode=USD", 10, "10 USD");
+        assertFormatted(Locale.GERMANY, "0 \u00A4;; currencyCode=EUR", 10, "10 \u20AC");
+        assertFormatted(Locale.GERMANY, "0 \u00A4\u00A4;; currencyCode=EUR", 10, "10 EUR");
         try {
-            assertFormatted("0;; curc=USDX", 10, "10");
+            assertFormatted("0;; currencyCode=USDX", 10, "10");
         } catch (ParseException e) {
             assertThat(e.getMessage(), containsString("ISO 4217"));
         }
-        assertFormatted("0 \u00A4;; curc=USD curs=bucks", 10, "10 bucks");
-        assertFormatted("0 \u00A4;; curs=bucks curc=USD", 10, "10 bucks"); // Order doesn't mater
-        assertFormatted("0 \u00A4\u00A4;; curc=USD curs=bucks", 10, "10 USD"); // International symbol isn't affected
+        assertFormatted("0 \u00A4;; currencyCode=USD currencySymbol=bucks", 10, "10 bucks");
+     // Order doesn't mater:
+        assertFormatted("0 \u00A4;; currencySymbol=bucks currencyCode=USD", 10, "10 bucks");
+        // International symbol isn't affected:
+        assertFormatted("0 \u00A4\u00A4;; currencyCode=USD currencySymbol=bucks", 10, "10 USD");
         
-        assertFormatted("0.0 \u00A4;; mdec=m", 10.5, "10m5 $");
-        assertFormatted("0.0 kg;; mdec=m", 10.5, "10.5 kg");
-        assertFormatted("0.0 \u00A4;; dec=d", 10.5, "10.5 $");
-        assertFormatted("0.0 kg;; dec=d", 10.5, "10d5 kg");
-        assertFormatted("0.0 \u00A4;; mdec=m dec=d", 10.5, "10m5 $");
-        assertFormatted("0.0 kg;; mdec=m dec=d", 10.5, "10d5 kg");
+        assertFormatted("0.0 \u00A4;; monetaryDecimalSeparator=m", 10.5, "10m5 $");
+        assertFormatted("0.0 kg;; monetaryDecimalSeparator=m", 10.5, "10.5 kg");
+        assertFormatted("0.0 \u00A4;; decimalSeparator=d", 10.5, "10.5 $");
+        assertFormatted("0.0 kg;; decimalSeparator=d", 10.5, "10d5 kg");
+        assertFormatted("0.0 \u00A4;; monetaryDecimalSeparator=m decimalSeparator=d", 10.5, "10m5 $");
+        assertFormatted("0.0 kg;; monetaryDecimalSeparator=m decimalSeparator=d", 10.5, "10d5 kg");
     }
     
     @Test
     public void testLocale() throws ParseException {
         assertEquals("1000.0", ExtendedDecimalFormatParser.parse("0.0", Locale.US).format(1000));
         assertEquals("1000,0", ExtendedDecimalFormatParser.parse("0.0", Locale.FRANCE).format(1000));
-        assertEquals("1_000.0", ExtendedDecimalFormatParser.parse(",000.0;;grp=_", Locale.US).format(1000));
-        assertEquals("1_000,0", ExtendedDecimalFormatParser.parse(",000.0;;grp=_", Locale.FRANCE).format(1000));
+        assertEquals("1_000.0", ExtendedDecimalFormatParser.parse(",000.0;;groupingSeparator=_", Locale.US).format(1000));
+        assertEquals("1_000,0", ExtendedDecimalFormatParser.parse(",000.0;;groupingSeparator=_", Locale.FRANCE).format(1000));
     }
     
     @Test
@@ -267,16 +278,16 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
         
         cfg.setNumberFormat(",000.#");
         assertOutput("${1000.15} ${1000.25}", "1,000.2 1,000.2");
-        cfg.setNumberFormat(",000.#;; rnd=hu grp=_");
+        cfg.setNumberFormat(",000.#;; roundingMode=halfUp groupingSeparator=_");
         assertOutput("${1000.15} ${1000.25}", "1_000.2 1_000.3");
         cfg.setLocale(Locale.GERMANY);
         assertOutput("${1000.15} ${1000.25}", "1_000,2 1_000,3");
         cfg.setLocale(Locale.US);
         assertOutput(
                 "${1000.15}; "
-                + "${1000.15?string(',##.#;;grp=\" \"')}; "
+                + "${1000.15?string(',##.#;;groupingSeparator=\" \"')}; "
                 + "<#setting locale='de_DE'>${1000.15}; "
-                + "<#setting numberFormat='0.0;;rnd=d'>${1000.15}",
+                + "<#setting numberFormat='0.0;;roundingMode=down'>${1000.15}",
                 "1_000.2; 10 00.2; 1_000,2; 1000,1");
         assertErrorContains("${1?string('#E')}",
                 TemplateException.class, "\"#E\"", "format string", "exponential");
@@ -284,7 +295,7 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
                 TemplateException.class, "\"#E\"", "format string", "exponential");
         assertErrorContains("<#setting numberFormat=';;foo=bar'>${1}",
                 TemplateException.class, "\"foo\"", "supported");
-        assertErrorContains("<#setting numberFormat='0;;rnd=un'>${1.5}",
+        assertErrorContains("<#setting numberFormat='0;;roundingMode=unnecessary'>${1.5}",
                 TemplateException.class, "can't format", "1.5", "UNNECESSARY");
     }
 
