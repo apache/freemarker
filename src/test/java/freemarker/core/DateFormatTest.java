@@ -428,6 +428,14 @@ public class DateFormatTest extends TemplateTest {
                 T + " " + T + "/foo");
     }
     
+    @Test
+    public void testUnknownDateType() throws IOException, TemplateException {
+        addToDataModel("u", new Date(T));
+        assertErrorContains("${u?string}", "isn't known");
+        assertOutput("${u?string('yyyy')}", "2015");
+        assertOutput("<#assign s = u?string>${s('yyyy')}", "2015");
+    }
+    
     private static class MutableTemplateDateModel implements TemplateDateModel {
         
         private Date date;
