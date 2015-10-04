@@ -111,6 +111,19 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         assertOutput("${\"${1000}, ${2000}\"}", "1.00*10<sup>3</sup>, 2.00*10<sup>3</sup>");
         assertOutput("${\"& ${'x'}, ${2000}\"}", "&amp; x, 2.00*10<sup>3</sup>");
         assertOutput("${\"& ${'x'}, #{2000}\"}", "& x, 2000");
+        
+        assertOutput("${\"${2000}\"?isMarkupOutput?c}", "true");
+        assertOutput("${\"x ${2000}\"?isMarkupOutput?c}", "true");
+        assertOutput("${\"${2000} x\"?isMarkupOutput?c}", "true");
+        assertOutput("${\"#{2000}\"?isMarkupOutput?c}", "false");
+        assertOutput("${\"${'x'}\"?isMarkupOutput?c}", "false");
+        assertOutput("${\"x ${'x'}\"?isMarkupOutput?c}", "false");
+        assertOutput("${\"${'x'} x\"?isMarkupOutput?c}", "false");
+        
+        addToDataModel("rtf", RTFOutputFormat.INSTANCE.fromMarkup("\\p"));
+        assertOutput("${\"${rtf}\"?isMarkupOutput?c}", "true");
+        assertErrorContains("${\"${1000}${rtf}\"}", TemplateException.class, "HTML", "RTF", "onversion");
+        assertErrorContains("x${\"${1000}${rtf}\"}", TemplateException.class, "HTML", "RTF", "onversion");
     }
     
 }
