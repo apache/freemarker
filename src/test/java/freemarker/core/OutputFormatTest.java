@@ -991,6 +991,15 @@ public class OutputFormatTest extends TemplateTest {
             assertErrorContains(ftl, InvalidReferenceException.class, "noSuchVar", "null or missing");
         }
     }
+
+    @Test
+    public void testIsMarkupOutputBI() throws Exception {
+        addToDataModel("m1", HTMLOutputFormat.INSTANCE.fromPlainTextByEscaping("x"));
+        addToDataModel("m2", HTMLOutputFormat.INSTANCE.fromMarkup("x"));
+        addToDataModel("s", "x");
+        assertOutput("${m1?isMarkupOutput?c} ${m2?isMarkupOutput?c} ${s?isMarkupOutput?c}", "true true false");
+        assertOutput("${m1?is_markup_output?c}", "true");
+    }
     
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {

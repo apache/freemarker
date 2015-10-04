@@ -17168,6 +17168,13 @@ Sorted by name.last:
 
                 <td>node</td>
               </tr>
+
+              <tr>
+                <td><literal>is_markup_output</literal></td>
+
+                <td>markup output (a value that won't be <link
+                linkend="dgui_misc_autoescaping">auto-escaped</link>)</td>
+              </tr>
             </tbody>
           </informaltable>
         </section>
@@ -25670,6 +25677,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   This returns the markup of a <link
                   linkend="dgui_misc_autoescaping_movalues">markup output
                   value</link> as a string.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new built-in:
+                  <literal>is_markup_output</literal>, returns
+                  <literal>true</literal> if the value is of type
+                  <quote>markup output</quote>.</para>
                 </listitem>
 
                 <listitem>

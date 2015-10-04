@@ -391,6 +391,16 @@ class BuiltInsForMultipleTypes {
         }
     }
 
+    static class is_markup_outputBI extends BuiltIn {
+        @Override
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return (tm instanceof TemplateMarkupOutputModel)  ?
+                TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+    
     static class is_methodBI extends BuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
