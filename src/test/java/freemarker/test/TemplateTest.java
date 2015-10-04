@@ -229,11 +229,13 @@ public abstract class TemplateTest {
             }
             assertContainsAll(e.getEditorMessage(), expectedSubstrings);
             return e;
-        } catch (IOException e) {
+        } catch (Exception e) {
             if (exceptionClass != null) {
                 assertThat(e, instanceOf(exceptionClass));
+                return e;
+            } else {
+                throw new RuntimeException("Unexpected exception class: " + e.getClass().getName(), e);
             }
-            throw new RuntimeException("Unexpected exception class: " + e.getClass().getName(), e);
         }
     }
     

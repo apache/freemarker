@@ -102,13 +102,11 @@
                     - left-hand operand: n  // f.c.Identifier
                     - right-hand operand: "index_of"  // String
                 - argument value: "x"  // f.c.StringLiteral
-                    - embedded template: null  // Null
             - right-hand operand: ...(...)  // f.c.MethodCall
                 - callee: ?index_of  // f.c.BuiltInsForStringsBasic$index_ofBI
                     - left-hand operand: m  // f.c.Identifier
                     - right-hand operand: "index_of"  // String
                 - argument value: "y"  // f.c.StringLiteral
-                    - embedded template: null  // Null
         - variable scope: "1"  // Integer
         - namespace: null  // Null
     #assign  // f.c.Assignment

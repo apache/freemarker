@@ -85,18 +85,18 @@ final class AddConcatExpression extends Expression {
                         return new SimpleScalar(((String) leftOMOrStr).concat((String) rightOMOrStr));
                     } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
                         TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightOMOrStr; 
-                        return concatMarkupOutputs(parent,
+                        return EvalUtil.concatMarkupOutputs(parent,
                                 rightMO.getOutputFormat().fromPlainTextByEscaping((String) leftOMOrStr),
                                 rightMO);
                     }                    
                 } else { // leftOMOrStr instanceof TemplateMarkupOutputModel 
                     TemplateMarkupOutputModel<?> leftMO = (TemplateMarkupOutputModel<?>) leftOMOrStr; 
                     if (rightOMOrStr instanceof String) {  // markup output
-                        return concatMarkupOutputs(parent,
+                        return EvalUtil.concatMarkupOutputs(parent,
                                 leftMO,
                                 leftMO.getOutputFormat().fromPlainTextByEscaping((String) rightOMOrStr));
                     } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
-                        return concatMarkupOutputs(parent,
+                        return EvalUtil.concatMarkupOutputs(parent,
                                 leftMO,
                                 (TemplateMarkupOutputModel) rightOMOrStr);
                     }
@@ -121,32 +121,6 @@ final class AddConcatExpression extends Expression {
                     throw e;
                 }
             }
-        }
-    }
-
-    private static TemplateModel concatMarkupOutputs(TemplateObject parent, TemplateMarkupOutputModel leftMO,
-            TemplateMarkupOutputModel rightMO) throws TemplateModelException {
-        MarkupOutputFormat leftOF = leftMO.getOutputFormat();
-        MarkupOutputFormat rightOF = rightMO.getOutputFormat();
-        if (rightOF != leftOF) {
-            String rightPT;
-            String leftPT;
-            if ((rightPT = rightOF.getSourcePlainText(rightMO)) != null) {
-                return leftOF.concat(leftMO, leftOF.fromPlainTextByEscaping(rightPT));
-            } else if ((leftPT = leftOF.getSourcePlainText(leftMO)) != null) {
-                return rightOF.concat(rightOF.fromPlainTextByEscaping(leftPT), rightMO);
-            } else {
-                Object[] message = { "Concatenation left hand operand is in ", new _DelayedToString(leftOF),
-                        " format, while the right hand operand is in ", new _DelayedToString(rightOF),
-                        ". Conversion to common format wasn't possible." };
-                if (parent instanceof Expression) {
-                    throw new _TemplateModelException((Expression) parent, message);
-                } else {
-                    throw new _TemplateModelException(message);
-                }
-            }
-        } else {
-            return leftOF.concat(leftMO, rightMO);
         }
     }
 

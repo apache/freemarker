@@ -20,7 +20,6 @@
                 - right-hand operand: "left_pad"  // String
             - argument value: 5  // f.c.NumberLiteral
             - argument value: "-"  // f.c.StringLiteral
-                - embedded template: null  // Null
     #text  // f.c.TextBlock
         - content: "\n"  // String
     ${...}  // f.c.DollarVariable
@@ -28,9 +27,7 @@
             - left-hand operand: x  // f.c.Identifier
             - right-hand operand: "then"  // String
             - argument value: "y"  // f.c.StringLiteral
-                - embedded template: null  // Null
             - argument value: "n"  // f.c.StringLiteral
-                - embedded template: null  // Null
     #text  // f.c.TextBlock
         - content: "\n"  // String
     ${...}  // f.c.DollarVariable

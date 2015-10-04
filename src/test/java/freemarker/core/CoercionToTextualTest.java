@@ -15,7 +15,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.test.TemplateTest;
 
 @SuppressWarnings("boxing")
-public class CorectionToTextualTest extends TemplateTest {
+public class CoercionToTextualTest extends TemplateTest {
     
     /** 2015-09-06T12:00:00Z */
     private static long T = 1441540800000L;

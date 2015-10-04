@@ -391,6 +391,16 @@ class BuiltInsForMultipleTypes {
         }
     }
 
+    static class is_markup_outputBI extends BuiltIn {
+        @Override
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return (tm instanceof TemplateMarkupOutputModel)  ?
+                TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+    
     static class is_methodBI extends BuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
@@ -570,14 +580,14 @@ class BuiltInsForMultipleTypes {
             public String getAsString()
             throws TemplateModelException {
                 if (cachedValue == null) {
-                    try {
-                        if (defaultFormat == null) {
-                            if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
-                                throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
-                            } else {
-                                throw new BugException();
-                            }
+                    if (defaultFormat == null) {
+                        if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
+                            throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
+                        } else {
+                            throw new BugException();
                         }
+                    }
+                    try {
                         cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
                     } catch (TemplateValueFormatException e) {
                         try {
