@@ -87,8 +87,8 @@ public abstract class FileTestCase extends TestCase {
     }
 
     private void multilineAssertEquals(String expected, String actual) {
-        String normExpected = normalizeNewLines(expected);
-        final String normActual = normalizeNewLines(actual);
+        String normExpected = normalizeNewLineLiterals(normalizeNewLines(expected));
+        final String normActual = normalizeNewLineLiterals(normalizeNewLines(actual));
         
         // Ignore final line-break difference:
         if (normActual.endsWith("\n") && !normExpected.endsWith("\n")) {
@@ -99,7 +99,11 @@ public abstract class FileTestCase extends TestCase {
         
         assertEquals(normExpected, normActual);
     }
-    
+
+    private String normalizeNewLineLiterals(String s) {
+        return StringUtil.replace(s, "\\r\\n", "\\n");
+    }
+
     private String normalizeNewLines(String s) {
         return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
