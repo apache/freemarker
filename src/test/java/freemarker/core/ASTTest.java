@@ -22,6 +22,7 @@ package freemarker.core;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import freemarker.template.utility.StringUtil;
 import freemarker.test.utility.FileTestCase;
 
 public class ASTTest extends FileTestCase {
@@ -62,7 +63,11 @@ public class ASTTest extends FileTestCase {
         final String templateName = testName + ".ftl";
         assertExpectedFileEqualsString(
                 testName + ".ast",
-                ASTPrinter.getASTAsString(templateName, loadResource(templateName)));
+                ASTPrinter.getASTAsString(templateName, normalizeLineBreaks(templateName)));
+    }
+
+    private String normalizeLineBreaks(final String templateName) throws FileNotFoundException, IOException {
+        return StringUtil.replace(loadResource(templateName), "\r\n", "\n").replace('\r', '\n');
     }
     
 }

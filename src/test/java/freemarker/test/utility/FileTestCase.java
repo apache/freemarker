@@ -99,7 +99,7 @@ public abstract class FileTestCase extends TestCase {
         
         assertEquals(normExpected, normActual);
     }
-    
+
     private String normalizeNewLines(String s) {
         return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
