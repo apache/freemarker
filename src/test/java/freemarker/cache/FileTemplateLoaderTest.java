@@ -92,7 +92,7 @@ public class FileTemplateLoaderTest {
                 ((FileTemplateLoader) cfg.getTemplateLoader()).setEmulateCaseSensitiveFileSystem(emuCaseSensFS);
                 cfg.clearTemplateCache();
                 
-                if (SystemUtils.IS_OS_WINDOWS && !emuCaseSensFS) {
+                if ((SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_MAC_OSX) && !emuCaseSensFS) {
                     assertEquals("foo", cfg.getTemplate(nameWithBadCase).toString());
                 } else {
                     assertEquals("foo", cfg.getTemplate(nameWithBadCase.toLowerCase()).toString());
