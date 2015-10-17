@@ -135,19 +135,19 @@ import freemarker.template.utility.StringUtil;
  * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: The Content-type HTTP header value used in the HTTP responses
- * (unless <strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> is set to {@code false} and the response
- * Content-type is already set by the time {@link FreemarkerServlet} is invoked). Defaults to <tt>"text/html"</tt>. The
- * value may include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If the charset is not specified in
- * this init-param, then the charset (encoding) of the actual template file will be used (both in the response HTTP
- * header and for encoding the output stream). Note that this setting can be overridden on a per-template basis by
- * specifying a custom attribute named <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
+ * (unless {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} is set to {@code false} and the response
+ * {@code contentType} is already set by the time {@link FreemarkerServlet} is invoked). Defaults to
+ * <tt>"text/html"</tt>. The value may include the charset (e.g. <tt>"text/html; charset=utf-8"</tt>). If the charset is
+ * not specified in this init-param, then the charset (encoding) of the actual template file will be used (both in the
+ * response HTTP header and for encoding the output stream). Note that this setting can be overridden on a per-template
+ * basis by specifying a custom attribute named <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
  * <tt>&lt;#ftl&gt;</tt> directive.</li>
  *
- * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): If set to {@code true}
- * (which is the default), the Content-type HTTP header of the response is always set to the value of the
- * <strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong> setting. If set to {@code false}, {@link FreemarkerServlet} will
- * only set the Content-type HTTP response header if it isn't already set when {@link FreemarkerServlet} is invoked.
- * Thus, {@code false} allows you to specify the Content-type before forwarding to {@link FreemarkerServlet}.</li>
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies if we should
+ * always set the {@code contentType} in the {@link HttpServletResponse} to the value of the
+ * {@value #INIT_PARAM_CONTENT_TYPE} init-param (or to its default, {@code text/html}), or only if it wasn't already set
+ * (i.e., {@link HttpServletResponse#getContentType()} returns {@code null}). The default is {@code true}. Setting this
+ * to {@code false} allows you to specify the content type before forwarding to {@link FreemarkerServlet}.</li>
  *
  * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
  * "MB" is written after the number (like {@code <param-value>256 KB</param-value>}) then in kilobytes or megabytes.
