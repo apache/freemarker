@@ -140,7 +140,12 @@ import freemarker.template.utility.StringUtil;
  * actual template file will be used (in the response HTTP header and for encoding the output stream). Note that this
  * setting can be overridden on a per-template basis by specifying a custom attribute named <tt>content_type</tt> in the
  * <tt>attributes</tt> parameter of the <tt>&lt;#ftl&gt;</tt> directive.</li>
- * 
+ *
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.4.0): If set to true, overrides the ContentType
+ * of the response by using either <strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong> parameter setting or other
+ * information (see the description of <strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong> for detail). The default
+ * value is <tt>false</tt>.</li>
+ *
  * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
  * "MB" is written after the number (like {@code <param-value>256 KB</param-value>}) then in kilobytes or megabytes.
  * This corresponds to {@link HttpServletResponse#setBufferSize(int)}. If the {@link HttpServletResponse} state doesn't
@@ -273,6 +278,13 @@ public class FreemarkerServlet extends HttpServlet {
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     *
+     * @since 2.3.24
+     */
+    public static final String INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE = "OverrideResponseContentType";
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      * 
      * @since 2.3.22
      */
@@ -314,7 +326,7 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE = "ignore";
     private static final String DEPR_INITPARAM_DEBUG = "debug";
     
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    static final String DEFAULT_CONTENT_TYPE = "text/html";
 
     /**
      * When set, the items defined in it will be added after those coming from the
@@ -412,6 +424,7 @@ public class FreemarkerServlet extends HttpServlet {
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ObjectWrapper wrapper;
     private String contentType;
+    private boolean overrideResponseContentType = true;
     private boolean noCharsetInContentType;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
@@ -557,6 +570,8 @@ public class FreemarkerServlet extends HttpServlet {
                     debug = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
                     contentType = value;
+                } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE)) {
+                    overrideResponseContentType = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
@@ -708,15 +723,17 @@ public class FreemarkerServlet extends HttpServlet {
             throw newServletExceptionWithFreeMarkerLogging(
                     "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
-        
-        Object attrContentType = template.getCustomAttribute("content_type");
-        if (attrContentType != null) {
-            response.setContentType(attrContentType.toString());
-        } else {
-            if (noCharsetInContentType) {
-                response.setContentType(contentType + "; charset=" + template.getEncoding());
+
+        if (overrideResponseContentType) {
+            Object attrContentType = template.getCustomAttribute("content_type");
+            if (attrContentType != null) {
+                response.setContentType(attrContentType.toString());
             } else {
-                response.setContentType(contentType);
+                if (noCharsetInContentType) {
+                    response.setContentType(contentType + "; charset=" + template.getEncoding());
+                } else {
+                    response.setContentType(contentType);
+                }
             }
         }
 
