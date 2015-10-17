@@ -725,11 +725,11 @@ public class FreemarkerServlet extends HttpServlet {
                     "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
 
-        if (overrideResponseContentType || response.getContentType() == null) {
-            Object attrContentType = template.getCustomAttribute("content_type");
-            if (attrContentType != null) {
-                response.setContentType(attrContentType.toString());
-            } else {
+        Object attrContentType = template.getCustomAttribute("content_type");
+        if (attrContentType != null) {
+            response.setContentType(attrContentType.toString());
+        } else {
+            if (overrideResponseContentType || response.getContentType() == null) {
                 if (noCharsetInContentType) {
                     response.setContentType(contentType + "; charset=" + template.getEncoding());
                 } else {
