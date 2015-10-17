@@ -26,13 +26,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.util.Assert;
 
 import freemarker.log.Logger;
 
@@ -42,35 +42,21 @@ public class FreemarkerServletTest {
 
     private static final String TEST_TEMPLATE_PATH = "classpath:freemarker/ext/servlet";
 
-    private FreemarkerServlet freemarkerServlet;
-
     private MockServletContext servletContext;
-    private MockServletConfig servletConfig;
 
     @Before
     public void setUp() throws ServletException, IOException {
         servletContext = new MockServletContext();
         servletContext.setContextPath("/");
-
-        servletConfig = new MockServletConfig(servletContext);
-        servletConfig.addInitParameter(FreemarkerServlet.INIT_PARAM_TEMPLATE_PATH, TEST_TEMPLATE_PATH);
-
-        freemarkerServlet = new FreemarkerServlet();
-        freemarkerServlet.init(servletConfig);
-    }
-
-    @After
-    public void tearDown() {
-        freemarkerServlet.destroy();
     }
 
     @Test
-    public void testContentTypeInitParams_withNoResponseContentType_ByDefault() throws ServletException, IOException {
+    public void testContentTypeInitParams_withNoResponseContentType_DefaultOverriding() throws ServletException, IOException {
         MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
         MockHttpServletResponse response = new MockHttpServletResponse();
         assertNull(response.getContentType());
 
-        freemarkerServlet.doGet(request, response);
+        createFreemarkerServlet().doGet(request, response);
         LOG.debug("response content: " + response.getContentAsString());
 
         assertEquals(HttpServletResponse.SC_OK, response.getStatus());
@@ -78,56 +64,123 @@ public class FreemarkerServletTest {
     }
 
     @Test
-    public void testContentTypeInitParams_withResponseContentType_ByDefault() throws ServletException, IOException {
+    public void testContentTypeInitParams_withNoResponseContentType_DefaultOverriding2() throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        assertNull(response.getContentType());
+
+        createFreemarkerServlet(
+                FreemarkerServlet.INIT_PARAM_CONTENT_TYPE, "text/css")
+                .doGet(request, response);
+        LOG.debug("response content: " + response.getContentAsString());
+
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertTrue(response.getContentType().contains("text/css"));
+    }
+
+    @Test
+    public void testContentTypeInitParams_withResponseContentType_DefaultOverriding() throws ServletException, IOException {
         MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
         MockHttpServletResponse response = new MockHttpServletResponse();
         response.setContentType("application/json");
         assertEquals("application/json", response.getContentType());
 
-        freemarkerServlet.doGet(request, response);
+        createFreemarkerServlet().doGet(request, response);
         LOG.debug("response content: " + response.getContentAsString());
 
         assertEquals(HttpServletResponse.SC_OK, response.getStatus());
         assertTrue(response.getContentType().contains(FreemarkerServlet.DEFAULT_CONTENT_TYPE));
+    }
+
+    @Test
+    public void testContentTypeInitParams_withResponseContentType_DefaultOverriding2() throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setContentType("application/json");
+        assertEquals("application/json", response.getContentType());
+
+        createFreemarkerServlet(
+                FreemarkerServlet.INIT_PARAM_CONTENT_TYPE, "text/css")
+                .doGet(request, response);
+        LOG.debug("response content: " + response.getContentAsString());
+
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertTrue(response.getContentType().contains("text/css"));
     }
 
     @Test
     public void testContentTypeInitParams_withResponseContentType_NoOverriding() throws ServletException, IOException {
-        servletConfig.addInitParameter(FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false");
-        freemarkerServlet = new FreemarkerServlet();
-        freemarkerServlet.init(servletConfig);
-
         MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
         MockHttpServletResponse response = new MockHttpServletResponse();
         response.setContentType("application/json");
         assertEquals("application/json", response.getContentType());
 
-        freemarkerServlet.doGet(request, response);
+        createFreemarkerServlet(FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false")
+                .doGet(request, response);
         LOG.debug("response content: " + response.getContentAsString());
 
         assertEquals(HttpServletResponse.SC_OK, response.getStatus());
         assertEquals("application/json", response.getContentType());
+    }
 
-        freemarkerServlet.destroy();
+    @Test
+    public void testContentTypeInitParams_withResponseContentType_NoOverriding2() throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setContentType("application/json");
+        assertEquals("application/json", response.getContentType());
+
+        createFreemarkerServlet(
+                FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false",
+                FreemarkerServlet.INIT_PARAM_CONTENT_TYPE, "text/css")
+                .doGet(request, response);
+        LOG.debug("response content: " + response.getContentAsString());
+
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertEquals("application/json", response.getContentType());
     }
 
     @Test
     public void testContentTypeInitParams_withNoResponseContentType_NoOverriding() throws ServletException, IOException {
-        servletConfig.addInitParameter(FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false");
-        freemarkerServlet = new FreemarkerServlet();
-        freemarkerServlet.init(servletConfig);
-
         MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
         MockHttpServletResponse response = new MockHttpServletResponse();
         assertNull(response.getContentType());
 
-        freemarkerServlet.doGet(request, response);
+        createFreemarkerServlet(FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false")
+                .doGet(request, response);
         LOG.debug("response content: " + response.getContentAsString());
 
         assertEquals(HttpServletResponse.SC_OK, response.getStatus());
         assertTrue(response.getContentType().contains(FreemarkerServlet.DEFAULT_CONTENT_TYPE));
+    }
 
-        freemarkerServlet.destroy();
+    @Test
+    public void testContentTypeInitParams_withNoResponseContentType_NoOverriding2() throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        assertNull(response.getContentType());
+
+        createFreemarkerServlet(
+                FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false",
+                FreemarkerServlet.INIT_PARAM_CONTENT_TYPE, "text/css")
+                .doGet(request, response);
+        LOG.debug("response content: " + response.getContentAsString());
+
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertTrue(response.getContentType().contains("text/css"));
+    }
+    
+    private FreemarkerServlet createFreemarkerServlet(String... initParams) throws ServletException {
+        MockServletConfig servletConfig = new MockServletConfig(servletContext);
+        servletConfig.addInitParameter(FreemarkerServlet.INIT_PARAM_TEMPLATE_PATH, TEST_TEMPLATE_PATH);
+        Assert.isTrue(initParams.length % 2 == 0);
+        for (int i = 0; i < initParams.length; i += 2) {
+            servletConfig.addInitParameter(initParams[i], initParams[i + 1]); 
+        }
+        
+        FreemarkerServlet freemarkerServlet = new FreemarkerServlet();
+        freemarkerServlet.init(servletConfig);
+        return freemarkerServlet;
     }
 
     private MockHttpServletRequest createMockHttpServletRequest(final ServletContext servletContext,
@@ -140,4 +193,5 @@ public class FreemarkerServletTest {
         servletRequest.setPathInfo(pathInfo);
         return servletRequest;
     }
+    
 }
