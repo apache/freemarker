@@ -111,6 +111,25 @@ public class FreemarkerServletTest {
         freemarkerServlet.destroy();
     }
 
+    @Test
+    public void testContentTypeInitParams_withNoResponseContentType_NoOverriding() throws ServletException, IOException {
+        servletConfig.addInitParameter(FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false");
+        freemarkerServlet = new FreemarkerServlet();
+        freemarkerServlet.init(servletConfig);
+
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/foo.ftl");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        assertNull(response.getContentType());
+
+        freemarkerServlet.doGet(request, response);
+        LOG.debug("response content: " + response.getContentAsString());
+
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertTrue(response.getContentType().contains(FreemarkerServlet.DEFAULT_CONTENT_TYPE));
+
+        freemarkerServlet.destroy();
+    }
+
     private MockHttpServletRequest createMockHttpServletRequest(final ServletContext servletContext,
             final String pathInfo) {
         MockHttpServletRequest servletRequest = new MockHttpServletRequest(servletContext);

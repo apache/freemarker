@@ -88,9 +88,9 @@ import freemarker.template.utility.StringUtil;
  * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>.
  * 
  * <li>A custom directive named {@code include_page} allows you to include the output of another servlet resource from
- * your servlet container, just as if you used {@code ServletRequest.getRequestDispatcher(path).include()}:
- * {@code <@include_page path="/myWebapp/somePage.jsp"/>}. You can also pass parameters to the newly included page by
- * passing a hash named {@code params}:
+ * your servlet container, just as if you used {@code ServletRequest.getRequestDispatcher(path).include()}: {@code 
+ * <@include_page path="/myWebapp/somePage.jsp"/>}. You can also pass parameters to the newly included page by passing a
+ * hash named {@code params}:
  * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params= lang: "en", q="5"}/&gt;</code>. By default, the request
  * parameters of the original request (the one being processed by FreemarkerServlet) are also inherited by the include.
  * You can explicitly control this inheritance using the {@code inherit_params} parameter:
@@ -116,15 +116,15 @@ import freemarker.template.utility.StringUtil;
  * you want to load templates from the specified package accessible through the Thread Context Class Loader of the
  * thread that initializes this servlet.<br>
  * If {@code incompatible_improvements} is set to 2.3.22 (or higher), you can specify multiple comma separated locations
- * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}.
- * This internally creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't
- * set to at least 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
+ * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}. This internally
+ * creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't set to at least
+ * 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
  * Any of the above can have a {@code ?setting(name=value, ...)} postfix to set the JavaBeans properties of the
  * {@link TemplateLoader} created. For example,
- * {@code /templates?settings(attemptFileAccess=false, URLConnectionUsesCaches=true)}
- * calls {@link WebappTemplateLoader#setAttemptFileAccess(boolean)}
- * and {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. 
- * For backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
+ * {@code /templates?settings(attemptFileAccess=false, URLConnectionUsesCaches=true)} calls
+ * {@link WebappTemplateLoader#setAttemptFileAccess(boolean)} and
+ * {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. For
+ * backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
  * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
  * defining class loader of this servlet's class. This can cause template not found errors, if that class (in
  * {@code freemarer.jar} usually) is not local to the web application, while the templates are.<br>
@@ -134,17 +134,20 @@ import freemarker.template.utility.StringUtil;
  * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to true, generates headers in the response that advise the
  * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
  * 
- * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: If specified, response uses the specified Content-type HTTP
- * header. The value may include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified,
- * <tt>"text/html"</tt> is used. If the charset is not specified in this init-param, then the charset (encoding) of the
- * actual template file will be used (in the response HTTP header and for encoding the output stream). Note that this
- * setting can be overridden on a per-template basis by specifying a custom attribute named <tt>content_type</tt> in the
- * <tt>attributes</tt> parameter of the <tt>&lt;#ftl&gt;</tt> directive.</li>
+ * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: The Content-type HTTP header value used in the HTTP responses
+ * (unless <strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> is set to {@code false} and the response
+ * Content-type is already set by the time {@link FreemarkerServlet} is invoked). Defaults to <tt>"text/html"</tt>. The
+ * value may include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If the charset is not specified in
+ * this init-param, then the charset (encoding) of the actual template file will be used (both in the response HTTP
+ * header and for encoding the output stream). Note that this setting can be overridden on a per-template basis by
+ * specifying a custom attribute named <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
+ * <tt>&lt;#ftl&gt;</tt> directive.</li>
  *
- * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.4.0): If set to true, overrides the ContentType
- * of the response by using either <strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong> parameter setting or other
- * information (see the description of <strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong> for detail). The default
- * value is <tt>false</tt>.</li>
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): If set to {@code true}
+ * (which is the default), the Content-type HTTP header of the response is always set to the value of the
+ * <strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong> setting. If set to {@code false}, {@link FreemarkerServlet} will
+ * only set the Content-type HTTP response header if it isn't already set when {@link FreemarkerServlet} is invoked.
+ * Thus, {@code false} allows you to specify the Content-type before forwarding to {@link FreemarkerServlet}.</li>
  *
  * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
  * "MB" is written after the number (like {@code <param-value>256 KB</param-value>}) then in kilobytes or megabytes.
@@ -162,9 +165,9 @@ import freemarker.template.utility.StringUtil;
  * 
  * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items, each
  * is either {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, or {@value #META_INF_TLD_LOCATION_CLASSPATH}
- * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example
- * {@code <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or
- * {@code <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
+ * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example {@code 
+ * <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or {@code 
+ * <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
  * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to a list that contains
  * {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS} only (can be overridden with
  * {@link #createDefaultMetaInfTldSources()}). Note that this can be also specified with the
@@ -230,12 +233,10 @@ import freemarker.template.utility.StringUtil;
  * the servlet container (with the proper cause exception). After all, if the visited URL had an associated "action" but
  * the template behind it is missing, that's an internal server error, not a wrong URL.</li>
  * 
- * <li>
- * If the template contains parsing errors, it will log it with error level, then the servlet throws
+ * <li>If the template contains parsing errors, it will log it with error level, then the servlet throws
  * {@link ServletException} to the servlet container (with the proper cause exception).</li>
  * 
- * <li>
- * If the template throws exception during its execution, and the value of the {@code template_exception_handler}
+ * <li>If the template throws exception during its execution, and the value of the {@code template_exception_handler}
  * init-param is {@code rethrow} (recommended), it will log it with error level and then the servlet throws
  * {@link ServletException} to the servlet container (with the proper cause exception). But beware, the default value of
  * the {@code template_exception_handler} init-param is {@code html_debug}, which is for development only! Set it to
@@ -596,7 +597,7 @@ public class FreemarkerServlet extends HttpServlet {
         noCharsetInContentType = true;
         int i = contentType.toLowerCase().indexOf("charset=");
         if (i != -1) {
-            char c = ' ';
+            char c = 0;
             i--;
             while (i >= 0) {
                 c = contentType.charAt(i);
@@ -724,7 +725,7 @@ public class FreemarkerServlet extends HttpServlet {
                     "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
 
-        if (overrideResponseContentType) {
+        if (overrideResponseContentType || response.getContentType() == null) {
             Object attrContentType = template.getCustomAttribute("content_type");
             if (attrContentType != null) {
                 response.setContentType(attrContentType.toString());
