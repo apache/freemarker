@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -45,6 +47,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
+import freemarker.core.UndefinedOutputFormat;
 import freemarker.ext.jsp.TaglibFactory;
 import freemarker.ext.jsp.TaglibFactory.ClasspathMetaInfTldSource;
 import freemarker.ext.jsp.TaglibFactory.ClearMetaInfTldSource;
@@ -135,13 +138,24 @@ import freemarker.template.utility.StringUtil;
  * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: The Content-type HTTP header value used in the HTTP responses
- * (unless {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} is set to {@code false} and the response
- * {@code contentType} is already set by the time {@link FreemarkerServlet} is invoked). Defaults to
- * <tt>"text/html"</tt>. The value may include the charset (e.g. <tt>"text/html; charset=utf-8"</tt>). If the charset is
- * not specified in this init-param, then the charset (encoding) of the actual template file will be used (both in the
- * response HTTP header and for encoding the output stream). Note that this setting can be overridden on a per-template
- * basis by specifying a custom attribute named <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
- * <tt>&lt;#ftl&gt;</tt> directive.</li>
+ * when nothing else specifies the MIME type. The things that may specify the MIME type (and hence this init-param is
+ * ignored), starting with the highest precedence, are:
+ * <ol>
+ * <li>The template's custom attribute name <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
+ * <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
+ * <li>The {@linkplain Template#getOutputFormat() output format of the template}, if that has non-{@code null} MIME-type
+ * ({@link OutputFormat#getMediaType()}). When a template has no output format specified, {@link UndefinedOutputFormat}
+ * is used, which has {@code null} MIME-type. (The output format of a template is deduced from {@link Configuration}
+ * settings, or can be specified directly in the template, like {@code <#ftl outputFormat="HTML">}. See the FreeMarker
+ * Manual for more about the output format mechanism. Note that setting an output format may turns on auto-escaping,
+ * so it's not just about MIME types.)
+ * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@code false} (the default is
+ * {@code true}), then the value of {@link HttpServletResponse#getContentType()} is used if that's non-{@code null}.
+ * </ol>
+ * If none of the above gives a MIME type, then this init-param does. Defaults to <tt>"text/html"</tt>. The
+ * value may include the charset (e.g. <tt>"text/html; charset=utf-8"</tt>). If the charset is not specified in this
+ * init-param, then the charset (encoding) of the actual template file will appended after it, which, as per the
+ * Servlet specification, also sets the actual encoding used to write the response body.</li>
  *
  * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies if we should
  * always set the {@code contentType} in the {@link HttpServletResponse} to the value of the
@@ -725,9 +739,9 @@ public class FreemarkerServlet extends HttpServlet {
                     "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
 
-        Object attrContentType = template.getCustomAttribute("content_type");
-        if (attrContentType != null) {
-            response.setContentType(attrContentType.toString());
+        String templateSpecificContentType = getTemplateSpecificContentType(template);
+        if (templateSpecificContentType != null) {
+            response.setContentType(templateSpecificContentType);
         } else {
             if (overrideResponseContentType || response.getContentType() == null) {
                 if (noCharsetInContentType) {
@@ -765,6 +779,21 @@ public class FreemarkerServlet extends HttpServlet {
             }
             throw newServletExceptionWithFreeMarkerLogging("Error executing FreeMarker template", e);
         }
+    }
+
+    private String getTemplateSpecificContentType(final Template template) {
+        Object contentTypeAttr = template.getCustomAttribute("content_type");
+        if (contentTypeAttr != null) {
+            // Convert with toString() for backward compatibility
+            return contentTypeAttr.toString();
+        }
+        
+        String outputFormatMimeType = template.getOutputFormat().getMimeType();
+        if (outputFormatMimeType != null) {
+            return outputFormatMimeType; 
+        }
+            
+        return null;
     }
 
     private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {

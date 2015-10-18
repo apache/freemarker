@@ -198,6 +198,35 @@ public class FreemarkerServletTest {
         assertEquals(HttpServletResponse.SC_OK, response.getStatus());
         assertEquals("text/plain", response.getContentType());
     }
+
+    @Test
+    public void testContentTypeInitParams_outputFormatAlwaysWins_DefaultOverriding() throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/outputFormatHeader.ftl");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setContentType("application/json");
+        assertEquals("application/json", response.getContentType());
+
+        createFreemarkerServlet().doGet(request, response);
+        LOG.debug("response content: " + response.getContentAsString());
+
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertEquals("text/plain", response.getContentType());
+    }
+    
+    @Test
+    public void testContentTypeInitParams_outputFormatAlwaysWins_NoOverriding() throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, "/outputFormatHeader.ftl");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setContentType("application/json");
+        assertEquals("application/json", response.getContentType());
+
+        createFreemarkerServlet(FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, "false")
+                .doGet(request, response);
+        LOG.debug("response content: " + response.getContentAsString());
+
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+        assertEquals("text/plain", response.getContentType());
+    }
     
     private FreemarkerServlet createFreemarkerServlet(String... initParams) throws ServletException {
         MockServletConfig servletConfig = new MockServletConfig(servletContext);
