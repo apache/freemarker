@@ -38,8 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -47,6 +45,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
+import freemarker.core.OutputFormat;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.ext.jsp.TaglibFactory;
 import freemarker.ext.jsp.TaglibFactory.ClasspathMetaInfTldSource;
@@ -141,27 +140,34 @@ import freemarker.template.utility.StringUtil;
  * when nothing else specifies the MIME type. The things that may specify the MIME type (and hence this init-param is
  * ignored), starting with the highest precedence, are:
  * <ol>
+ * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@value #INIT_PARAM_VALUE_NEVER} (it
+ * itn't be default), then the value of {@link HttpServletResponse#getContentType()} is if that's non-{@code null}.
  * <li>The template's custom attribute name <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
  * <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
  * <li>The {@linkplain Template#getOutputFormat() output format of the template}, if that has non-{@code null} MIME-type
- * ({@link OutputFormat#getMediaType()}). When a template has no output format specified, {@link UndefinedOutputFormat}
+ * ({@link OutputFormat#getMimeType()}). When a template has no output format specified, {@link UndefinedOutputFormat}
  * is used, which has {@code null} MIME-type. (The output format of a template is deduced from {@link Configuration}
  * settings, or can be specified directly in the template, like {@code <#ftl outputFormat="HTML">}. See the FreeMarker
- * Manual for more about the output format mechanism. Note that setting an output format may turns on auto-escaping,
- * so it's not just about MIME types.)
- * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@code false} (the default is
- * {@code true}), then the value of {@link HttpServletResponse#getContentType()} is used if that's non-{@code null}.
+ * Manual for more about the output format mechanism. Note that setting an output format may turns on auto-escaping, so
+ * it's not just about MIME types.)
+ * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is not {@value #INIT_PARAM_VALUE_ALWAYS}
+ * (the default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is
+ * used if that's non-{@code null}.
  * </ol>
- * If none of the above gives a MIME type, then this init-param does. Defaults to <tt>"text/html"</tt>. The
- * value may include the charset (e.g. <tt>"text/html; charset=utf-8"</tt>). If the charset is not specified in this
- * init-param, then the charset (encoding) of the actual template file will appended after it, which, as per the
- * Servlet specification, also sets the actual encoding used to write the response body.</li>
+ * If none of the above gives a MIME type, then this init-param does. Defaults to <tt>"text/html"</tt>. The value may
+ * include the charset (e.g. <tt>"text/html; charset=utf-8"</tt>). If the charset is not specified in this init-param,
+ * then the charset (encoding) of the actual template file will appended after it, which, as per the Servlet
+ * specification, also sets the actual encoding used to write the response body.</li>
  *
- * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies if we should
- * always set the {@code contentType} in the {@link HttpServletResponse} to the value of the
- * {@value #INIT_PARAM_CONTENT_TYPE} init-param (or to its default, {@code text/html}), or only if it wasn't already set
- * (i.e., {@link HttpServletResponse#getContentType()} returns {@code null}). The default is {@code true}. Setting this
- * to {@code false} allows you to specify the content type before forwarding to {@link FreemarkerServlet}.</li>
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies when should we
+ * override the {@code contentType} that's already set (i.e., non-{@code null}) in the {@link HttpServletResponse}. The
+ * default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always set the content type. Another possible value
+ * is {@value #INIT_PARAM_VALUE_NEVER}, which means that we don't set the content type in the response, unless
+ * {@link HttpServletResponse#getContentType()} is {@code null}. The third possible value is
+ * {@value #INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE}, which means that we only set the content type if either the
+ * template has an associated {@link OutputFormat} with non-{@code null} {@link OutputFormat#getMimeType()}, or it has a
+ * custom attribute with name <tt>content_type</tt>, or {@link HttpServletResponse#getContentType()} is {@code null}.
+ * Setting this init-param allows you to specify the content type before forwarding to {@link FreemarkerServlet}.</li>
  *
  * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
  * "MB" is written after the number (like {@code <param-value>256 KB</param-value>}) then in kilobytes or megabytes.
@@ -300,6 +306,13 @@ public class FreemarkerServlet extends HttpServlet {
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     *
+     * @since 2.3.24
+     */
+    public static final String INIT_PARAM_RESPONSE_CHARACTER_ENCODING = "ResponseCharacterEncoding";
+    
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      * 
      * @since 2.3.22
      */
@@ -342,6 +355,13 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_DEBUG = "debug";
     
     static final String DEFAULT_CONTENT_TYPE = "text/html";
+    
+    public static final String INIT_PARAM_VALUE_NEVER = "never";
+    public static final String INIT_PARAM_VALUE_ALWAYS = "always";
+    public static final String INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE = "whenTemplateHasMimeType";
+    public static final String INIT_PARAM_VALUE_FROM_TEMPLATE = "fromTemplate";
+    public static final String INIT_PARAM_VALUE_LEGACY = "legacy";
+    public static final String INIT_PARAM_VALUE_DO_NOT_SET = "doNotSet";
 
     /**
      * When set, the items defined in it will be added after those coming from the
@@ -439,8 +459,9 @@ public class FreemarkerServlet extends HttpServlet {
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ObjectWrapper wrapper;
     private String contentType;
-    private boolean overrideResponseContentType = true;
-    private boolean noCharsetInContentType;
+    private OverrideResponseContentType overrideResponseContentType = OverrideResponseContentType.ALWAYS;
+    private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
+    private boolean contentTypeContainsCharset;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
 
@@ -586,7 +607,9 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
                     contentType = value;
                 } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE)) {
-                    overrideResponseContentType = StringUtil.getYesNo(value);
+                    overrideResponseContentType = initParamValueToEnum(value, OverrideResponseContentType.values());
+                } else if (name.equals(INIT_PARAM_RESPONSE_CHARACTER_ENCODING)) {
+                    responseCharacterEncoding = initParamValueToEnum(value, ResponseCharacterEncoding.values());
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
@@ -608,20 +631,24 @@ public class FreemarkerServlet extends HttpServlet {
             }
         } // while initpnames
         
-        noCharsetInContentType = true;
-        int i = contentType.toLowerCase().indexOf("charset=");
-        if (i != -1) {
+        contentTypeContainsCharset = contentTypeContainsCharset(contentType);
+    }
+    
+    private boolean contentTypeContainsCharset(String contentType) {
+        int charsetIdx = contentType.toLowerCase().indexOf("charset=");
+        if (charsetIdx != -1) {
             char c = 0;
-            i--;
-            while (i >= 0) {
-                c = contentType.charAt(i);
+            charsetIdx--;
+            while (charsetIdx >= 0) {
+                c = contentType.charAt(charsetIdx);
                 if (!Character.isWhitespace(c)) break;
-                i--;
+                charsetIdx--;
             }
-            if (i == -1 || c == ';') {
-                noCharsetInContentType = false;
+            if (charsetIdx == -1 || c == ';') {
+                return true;
             }
         }
+        return false;
     }
 
     private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
@@ -739,17 +766,25 @@ public class FreemarkerServlet extends HttpServlet {
                     "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
 
-        String templateSpecificContentType = getTemplateSpecificContentType(template);
-        if (templateSpecificContentType != null) {
-            response.setContentType(templateSpecificContentType);
-        } else {
-            if (overrideResponseContentType || response.getContentType() == null) {
-                if (noCharsetInContentType) {
-                    response.setContentType(contentType + "; charset=" + template.getEncoding());
+        if (response.getContentType() == null || overrideResponseContentType != OverrideResponseContentType.NEVER) {
+            String templateSpecificContentType = getTemplateSpecificContentType(template);
+            if (templateSpecificContentType != null) {
+                response.setContentType(templateSpecificContentType);
+            } else if (response.getContentType() == null
+                    || overrideResponseContentType == OverrideResponseContentType.ALWAYS) {
+                if (!contentTypeContainsCharset && responseCharacterEncoding == ResponseCharacterEncoding.LEGACY) {
+                    response.setContentType(contentType + "; charset=" + getTemplateSpecificOutputEncoding(template));
                 } else {
                     response.setContentType(contentType);
                 }
             }
+        }
+        
+        if (responseCharacterEncoding != ResponseCharacterEncoding.LEGACY
+                && responseCharacterEncoding != ResponseCharacterEncoding.DO_NOT_SET) {
+            // Using the Servlet 2.4 way of setting character encoding.
+            response.setCharacterEncoding(getTemplateSpecificOutputEncoding(template));
+            // TODO handle "always ${charset}"
         }
 
         setBrowserCachingPolicy(response);
@@ -781,15 +816,26 @@ public class FreemarkerServlet extends HttpServlet {
         }
     }
 
+    private String getTemplateSpecificOutputEncoding(Template template) {
+        String outputEncoding = responseCharacterEncoding == ResponseCharacterEncoding.LEGACY ? null
+                : template.getOutputEncoding();
+        return outputEncoding != null ? outputEncoding : template.getEncoding();
+    }
+
     private String getTemplateSpecificContentType(final Template template) {
         Object contentTypeAttr = template.getCustomAttribute("content_type");
         if (contentTypeAttr != null) {
-            // Convert with toString() for backward compatibility
+            // Converted with toString() for backward compatibility.
+            // Don't add charset for backward compatibility.
             return contentTypeAttr.toString();
         }
         
         String outputFormatMimeType = template.getOutputFormat().getMimeType();
         if (outputFormatMimeType != null) {
+            if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY) {
+                // In legacy mode we won't call serlvetResponse.getCharacterEncoding(...), so:
+                outputFormatMimeType += "; charset=" + getTemplateSpecificOutputEncoding(template);
+            }
             return outputFormatMimeType; 
         }
             
@@ -842,7 +888,7 @@ public class FreemarkerServlet extends HttpServlet {
      * to use the locale indicated in the request.
      * 
      * @param templatePath
-     *            The template path (templat name) as it will be passed to {@link Configuration#getTemplate(String)}.
+     *            The template path (template name) as it will be passed to {@link Configuration#getTemplate(String)}.
      *            (Not to be confused with the servlet init-param of identical name; they aren't related.)
      * 
      * @throws ServletException
@@ -1394,6 +1440,73 @@ public class FreemarkerServlet extends HttpServlet {
 
         MalformedWebXmlException(String message) {
             super(message);
+        }
+        
+    }
+    
+    private <T extends InitParamValueEnum> T initParamValueToEnum(String initParamValue, T[] values) {
+        for (T value : values) {
+            if (initParamValue.equals(value.getInitParamValue())) {
+                return value;
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(StringUtil.jQuote(initParamValue));
+        sb.append(" is not a one of the enumeration values: ");
+        boolean first = true;
+        for (T value : values) {
+            if (!first) {
+                sb.append(", ");
+            } else {
+                first = false;
+            }
+            sb.append(StringUtil.jQuote(value.getInitParamValue()));
+        }
+        throw new IllegalArgumentException(sb.toString());
+    }
+
+    /**
+     * Superclass of all (future) init-param value enums.
+     * 
+     * @see #initParamValueToEnum
+     */
+    private interface InitParamValueEnum {
+        String getInitParamValue();
+    }
+    
+    private enum OverrideResponseContentType implements InitParamValueEnum {
+        ALWAYS(INIT_PARAM_VALUE_ALWAYS),
+        NEVER(INIT_PARAM_VALUE_NEVER),
+        WHEN_TEMPLATE_HAS_MIME_TYPE(INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE);
+
+        private final String initParamValue;
+        
+        OverrideResponseContentType(String initParamValue) {
+            this.initParamValue = initParamValue;
+        }
+
+        @Override
+        public String getInitParamValue() {
+            return initParamValue;
+        }
+    }
+    
+    private enum ResponseCharacterEncoding implements InitParamValueEnum {
+        LEGACY(INIT_PARAM_VALUE_LEGACY),
+        FROM_TEMPLATE(INIT_PARAM_VALUE_FROM_TEMPLATE),
+        DO_NOT_SET(INIT_PARAM_VALUE_DO_NOT_SET);
+        // TODO: "always ${charset}"
+
+        private final String initParamValue;
+        
+        ResponseCharacterEncoding(String initParamValue) {
+            this.initParamValue = initParamValue;
+        }
+
+        @Override
+        public String getInitParamValue() {
+            return initParamValue;
         }
         
     }
