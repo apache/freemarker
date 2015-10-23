@@ -89,6 +89,20 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                 nu.outputContent(node.getAttributes(), buf);
                 return new SimpleScalar(buf.toString().trim());
             }
+            if (key.equals("@@previous")) {
+                XPathSupport xps = getXPathSupport();
+                if (xps != null) {
+                    return xps.executeQuery(node, "preceding-sibling::*[position()=1]");
+                }
+            }
+            if (key.equals("@@next")) {
+                XPathSupport xps = getXPathSupport();
+                if (xps != null) {
+                    TemplateModel next = xps.executeQuery(node, "following-sibling::*[position()=1]");
+                    System.out.println(next.toString());
+                    return next;
+                }
+            }
             if (StringUtil.isXMLID(key.substring(1))) {
                 Attr att = getAttribute(key.substring(1));
                 if (att == null) { 

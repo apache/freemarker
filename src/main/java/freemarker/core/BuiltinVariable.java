@@ -72,6 +72,8 @@ final class BuiltinVariable extends Expression {
     static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
+    static final String PREVIOUS_SIBLING = "previous";
+    static final String NEXT_SIBLING = "next";
     
     static final String[] SPEC_VAR_NAMES = new String[] {
         AUTO_ESC_CC,
@@ -107,7 +109,9 @@ final class BuiltinVariable extends Expression {
         URL_ESCAPING_CHARSET_CC,
         URL_ESCAPING_CHARSET,
         VARS,
-        VERSION
+        VERSION,
+        PREVIOUS_SIBLING,
+        NEXT_SIBLING
     };
 
     private final String name;

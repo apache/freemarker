@@ -59,6 +59,7 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNodeModelExt;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateSequenceModel;
 
@@ -75,7 +76,7 @@ import freemarker.template.TemplateSequenceModel;
  * then), but should be used to represent a node set of exactly 1 node.
  */
 abstract public class NodeModel
-implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
+implements TemplateNodeModel, TemplateNodeModelExt, TemplateHashModel, TemplateSequenceModel,
     AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel {
 
     static private final Logger LOG = Logger.getLogger("freemarker.dom");
@@ -109,6 +110,8 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     final Node node;
     private TemplateSequenceModel children;
     private NodeModel parent;
+    private NodeModel previousSibling;
+    private NodeModel nextSibling;
     
     /**
      * Sets the DOM Parser implementation to be used when building NodeModel
@@ -307,7 +310,23 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         }
         return parent;
     }
-    
+
+    public TemplateNodeModel getPreviousSibling() throws TemplateModelException {
+        if (previousSibling == null) {
+            Node previous = node.getPreviousSibling();
+            previousSibling = wrap(previous);
+        }
+        return previousSibling;
+    }
+
+    public TemplateNodeModel getNextSibling() throws TemplateModelException {
+        if (nextSibling == null) {
+            Node next = node.getNextSibling();
+            nextSibling = wrap(next);
+        }
+        return nextSibling;
+    }
+
     public TemplateSequenceModel getChildNodes() {
         if (children == null) {
             children = new NodeListModel(node.getChildNodes(), this);

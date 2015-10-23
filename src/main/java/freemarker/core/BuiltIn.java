@@ -62,6 +62,8 @@ import freemarker.core.BuiltInsForSequences.seq_index_ofBI;
 import freemarker.core.BuiltInsForSequences.sortBI;
 import freemarker.core.BuiltInsForSequences.sort_byBI;
 import freemarker.core.BuiltInsForStringsMisc.evalBI;
+import freemarker.core.BuiltInExtForNodes.previousSiblingBI;
+import freemarker.core.BuiltInExtForNodes.nextSiblingBI;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
@@ -81,9 +83,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-    
-    static final int NUMBER_OF_BIS = 259;
-    static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
+
+    static final int NUMBER_OF_BIS = 261;
+    static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
+
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
         
@@ -246,6 +249,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
         putBI("number_to_datetime", "numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
         putBI("parent", new parentBI());
+        putBI("previousSibling", new previousSiblingBI());
+        putBI("nextSibling", new nextSiblingBI());
         putBI("item_parity", "itemParity", new BuiltInsForLoopVariables.item_parityBI());
         putBI("item_parity_cap", "itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
         putBI("reverse", new reverseBI());
@@ -284,6 +289,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("matches", new BuiltInsForStringsRegexp.matchesBI());
         putBI("groups", new BuiltInsForStringsRegexp.groupsBI());
         putBI("replace", new BuiltInsForStringsRegexp.replace_reBI());
+
         
         if (NUMBER_OF_BIS < BUILT_INS_BY_NAME.size()) {
             throw new AssertionError("Update NUMBER_OF_BIS! Should be: " + BUILT_INS_BY_NAME.size());
