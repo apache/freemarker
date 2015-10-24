@@ -45,7 +45,7 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
     private final Iterator iterator;
-    private boolean iteratorOwned;
+    private boolean iteratorOwnedBySomeone;
 
     /**
      * Factory method for creating new adapter instances.
@@ -83,7 +83,9 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
 
         public TemplateModel next() throws TemplateModelException {
             if (!iteratorOwnedByMe) {
-                takeIteratorOwnership();
+                checkNotOwner();
+                iteratorOwnedBySomeone = true;
+                iteratorOwnedByMe = true;
             }
 
             if (!iterator.hasNext()) {
@@ -97,19 +99,16 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
         public boolean hasNext() throws TemplateModelException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {
-                takeIteratorOwnership();
+                checkNotOwner();
             }
 
             return iterator.hasNext();
         }
 
-        private void takeIteratorOwnership() throws TemplateModelException {
-            if (iteratorOwned) {
+        private void checkNotOwner() throws TemplateModelException {
+            if (iteratorOwnedBySomeone) {
                 throw new TemplateModelException(
                         "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
-            } else {
-                iteratorOwned = true;
-                iteratorOwnedByMe = true;
             }
         }
     }

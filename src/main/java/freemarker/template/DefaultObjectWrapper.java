@@ -89,6 +89,11 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      *              <li>2.3.22 (or higher): The default value of
      *                  {@link #setUseAdaptersForContainers(boolean) useAdaptersForContainers} changes to
      *                  {@code true}.</li>
+     *              <li>2.3.24 (or higher): When wrapping an {@link Iterator}, operations on it that only check if the
+     *                  collection is empty without reading an element from it, such as {@code ?has_content},
+     *                  won't cause the a later iteration (or further emptiness check) to fail anymore. Earlier, in
+     *                  certain situations, the second operation has failed saying that the iterator "can be listed only
+     *                  once".  
      *            </ul>
      * 
      * @since 2.3.21

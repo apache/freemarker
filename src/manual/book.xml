@@ -26160,6 +26160,40 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed: It wasn't well defined when a Java
+              <literal>Iterator</literal> counts as empty. Depending on what
+              <literal>ObjectWrapper</literal> you are using, one of these
+              fixes apply:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>DefaultObjectWrapper</literal> (fix is always
+                  active): Operations on the <literal>Iterator</literal> that
+                  only check if it's empty without reading an element from it,
+                  such as <literal>?has_content</literal>, won't cause the a
+                  later iteration (or further emptiness check) to fail
+                  anymore. Earlier, in certain situations, the second
+                  operation has failed saying that the iterator <quote>can be
+                  listed only once</quote>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>BeansWrapper</literal> (when it's not
+                  extended by <literal>DefaultObjectWrapper</literal>), if
+                  it's <literal>incompatibleImprovements</literal> property is
+                  set to 2.3.24 (or higher): <literal>Iterator</literal>-s
+                  were always said to be non-empty when using
+                  <literal>?has_content</literal> and such (i.e., operators
+                  that check emptiness without reading any elements). Now an
+                  <literal>Iterator</literal> counts as empty exactly if it
+                  has no elements left. (Note that this bug has never affected
+                  basic functionality, like <literal>&lt;#list
+                  ...&gt;</literal>.)</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: The (rarely used) cause exception of
               <literal>ParseException</literal>-s wasn't set</para>
             </listitem>

@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -295,6 +296,9 @@ implements
         }
         if (object instanceof Collection) {
             return ((Collection) object).isEmpty();
+        }
+        if (object instanceof Iterator && wrapper.is2324Bugfixed()) {
+            return !((Iterator) object).hasNext();
         }
         if (object instanceof Map) {
             return ((Map) object).isEmpty();
