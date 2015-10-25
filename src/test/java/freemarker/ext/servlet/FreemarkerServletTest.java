@@ -22,9 +22,11 @@ import static freemarker.ext.servlet.FreemarkerServlet.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
@@ -35,6 +37,8 @@ import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateModel;
 
 public class FreemarkerServletTest {
 
@@ -128,13 +132,45 @@ public class FreemarkerServletTest {
                 null, INIT_PARAM_VALUE_NEVER, // <- init-params
                 "outputFormatHeader.ftl", "application/json"); // <- request
     }
-    
+
+    @Test
+    public void testResponseLocaleInitParams() throws Exception {
+        // By default, the Configurable.locale is set to Locale.getDefault().
+        final Locale defaultLocale = Locale.getDefault();
+
+        assertTemplateLocaleEquals(
+                defaultLocale, // <- expected template locale
+                null, // <- request locale
+                null, // <- init-param
+                "foo.ftl");
+        assertTemplateLocaleEquals(
+                defaultLocale, // <- expected template locale
+                Locale.FRENCH, // <- request locale
+                null, // <- init-param
+                "foo.ftl");
+        assertTemplateLocaleEquals(
+                defaultLocale, // <- expected template locale
+                Locale.FRENCH, // <- request locale
+                INIT_PARAM_VALUE_ALWAYS, // <- init-param
+                "foo.ftl");
+        assertTemplateLocaleEquals(
+                defaultLocale, // <- expected template locale
+                null, // <- request locale
+                INIT_PARAM_VALUE_NEVER, // <- init-param
+                "foo.ftl");
+        assertTemplateLocaleEquals(
+                Locale.FRENCH, // <- expected template locale
+                Locale.FRENCH, // <- request locale
+                INIT_PARAM_VALUE_NEVER, // <- init-param
+                "foo.ftl");
+    }
+
     private void assertResponseContentTypeEquals(
             String exptectContentType,
             String ctInitParam, String overrideCTInitParam,
             String templateName, String responseCT)
                     throws ServletException, IOException {
-        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, templateName);
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, templateName, null);
         
         MockHttpServletResponse response = new MockHttpServletResponse();
         if (responseCT != null) {
@@ -167,15 +203,64 @@ public class FreemarkerServletTest {
         }
     }
 
+    private void assertTemplateLocaleEquals(
+            Locale exptectLocale,
+            Locale requestLocale,
+            String overrideResponseLocaleInitParam,
+            String templateName)
+                    throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, templateName, requestLocale);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        MockServletConfig servletConfig = new MockServletConfig(servletContext);
+        servletConfig.addInitParameter(INIT_PARAM_TEMPLATE_PATH, TEST_TEMPLATE_PATH);
+
+        if (overrideResponseLocaleInitParam != null) {
+            servletConfig.addInitParameter(INIT_PARAM_OVERRIDE_RESPONSE_LOCALE, overrideResponseLocaleInitParam);
+        }
+
+        final Template [] processedTemplateHolder = new Template[1];
+
+        FreemarkerServlet freemarkerServlet = new FreemarkerServlet() {
+
+            @Override
+            protected void postTemplateProcess(
+                    HttpServletRequest request,
+                    HttpServletResponse response,
+                    Template template,
+                    TemplateModel data)
+                            throws ServletException, IOException {
+                processedTemplateHolder[0] = template;
+            }
+        };
+
+        try {
+            freemarkerServlet.init(servletConfig);
+            freemarkerServlet.doGet(request, response);
+
+            assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+            assertEquals(exptectLocale, processedTemplateHolder[0].getLocale());
+        } finally {
+            freemarkerServlet.destroy();
+        }
+    }
+
     private MockHttpServletRequest createMockHttpServletRequest(final ServletContext servletContext,
-            final String pathInfo) {
-        MockHttpServletRequest servletRequest = new MockHttpServletRequest(servletContext);
+            final String pathInfo, final Locale requestLocale) {
+        MockHttpServletRequest servletRequest = new MockHttpServletRequest(servletContext) {
+            @Override
+            public Locale getLocale() {
+                return requestLocale;
+            }
+        };
+
         servletRequest.setServerName("localhost");
         servletRequest.setServerPort(8080);
         servletRequest.setContextPath("");
         servletRequest.setRequestURI(pathInfo);
         servletRequest.setPathInfo(pathInfo);
+
         return servletRequest;
     }
-    
+
 }
