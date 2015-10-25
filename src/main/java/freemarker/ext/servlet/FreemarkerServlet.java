@@ -400,7 +400,6 @@ public class FreemarkerServlet extends HttpServlet {
      * @since 2.3.22
      */
     public static final String META_INF_TLD_LOCATION_CLEAR = "clear";
-    
 
     public static final String KEY_REQUEST = "Request";
     public static final String KEY_INCLUDE = "include_page";
@@ -459,7 +458,8 @@ public class FreemarkerServlet extends HttpServlet {
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ObjectWrapper wrapper;
     private String contentType;
-    private OverrideResponseContentType overrideResponseContentType = OverrideResponseContentType.ALWAYS;
+    private OverrideResponseContentType overrideResponseContentType = initParamValueToEnum(
+            getDefaultOverrideResponseContentType(), OverrideResponseContentType.values());
     private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
     private boolean contentTypeContainsCharset;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
@@ -1361,6 +1361,17 @@ public class FreemarkerServlet extends HttpServlet {
      */
     protected Configuration getConfiguration() {
         return config;
+    }
+
+    /**
+     * Returns the default value of the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} Servlet init-param.
+     * The method inherited from {@link FreemarkerServlet} returns {@value #INIT_PARAM_VALUE_ALWAYS}; subclasses my
+     * override this.
+     * 
+     * @since 2.3.24
+     */
+    protected String getDefaultOverrideResponseContentType() {
+        return INIT_PARAM_VALUE_ALWAYS;
     }
 
     /**
