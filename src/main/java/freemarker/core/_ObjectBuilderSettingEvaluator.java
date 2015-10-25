@@ -125,7 +125,7 @@ public class _ObjectBuilderSettingEvaluator {
         
         skipWS();
         try {
-            value = ensureEvaled(fetchValue(false, true, true));
+            value = ensureEvaled(fetchValue(false, true, false, true));
         } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
             e.rethrowLegacy();
             value = null; // newer reached
@@ -209,7 +209,7 @@ public class _ObjectBuilderSettingEvaluator {
             do {
                 skipWS();
                 
-                Object paramNameOrValue = fetchValue(false, false, false);
+                Object paramNameOrValue = fetchValue(false, false, true, false);
                 if (paramNameOrValue != VOID) {
                     skipWS();
                     if (paramNameOrValue instanceof Name) {
@@ -219,7 +219,7 @@ public class _ObjectBuilderSettingEvaluator {
                         fetchRequiredChar("=");
                         skipWS();
                         
-                        Object paramValue = fetchValue(false, false, true);
+                        Object paramValue = fetchValue(false, false, true, true);
                         exp.namedParamValues.add(ensureEvaled(paramValue));
                     } else {
                         if (!exp.namedParamNames.isEmpty()) {
@@ -239,10 +239,10 @@ public class _ObjectBuilderSettingEvaluator {
         }
     }
 
-    private Object fetchValue(boolean optional, boolean topLevel, boolean resolveVariables)
+    private Object fetchValue(boolean optional, boolean topLevel, boolean resultCoerced, boolean resolveVariables)
             throws _ObjectBuilderSettingEvaluationException {
         if (pos < src.length()) {
-            Object val = fetchNumberLike(true);
+            Object val = fetchNumberLike(true, resultCoerced);
             if (val != VOID) {
                 return val;
             }
@@ -361,7 +361,8 @@ public class _ObjectBuilderSettingEvaluator {
         return className;
     }
 
-    private Object fetchNumberLike(boolean optional) throws _ObjectBuilderSettingEvaluationException {
+    private Object fetchNumberLike(boolean optional, boolean resultCoerced)
+            throws _ObjectBuilderSettingEvaluationException {
         int startPos = pos;
         boolean isVersion = false;
         boolean hasDot = false;
@@ -391,38 +392,81 @@ public class _ObjectBuilderSettingEvaluator {
             }
         }
         
-        String tk = src.substring(startPos, pos);
+        String numStr = src.substring(startPos, pos);
         if (isVersion) {
             try {
-                return new Version(tk);
+                return new Version(numStr);
             } catch (IllegalArgumentException e) {
-                throw new _ObjectBuilderSettingEvaluationException("Malformed version number: " + tk, e);
+                throw new _ObjectBuilderSettingEvaluationException("Malformed version number: " + numStr, e);
             }
         } else {
-            try {
-                if (tk.endsWith(".")) {
-                    throw new NumberFormatException("A number can't end with a dot");
+            // For example, in 1.0f, numStr is "1.0", and typePostfix is "f".
+            String typePostfix = null;
+            seekTypePostfixEnd: while (true) {
+                if (pos == src.length()) {
+                    break seekTypePostfixEnd;
                 }
-                if (tk.startsWith(".") || tk.startsWith("-.")  || tk.startsWith("+.")) {
-                    throw new NumberFormatException("A number can't start with a dot");
-                }
-                
-                if (tk.indexOf('.') == -1) {
-                    BigInteger biNum = new BigInteger(tk);
-                    final int bitLength = biNum.bitLength();  // Doesn't include sign bit
-                    if (bitLength <= 31) {
-                        return Integer.valueOf(biNum.intValue());
-                    } else if (bitLength <= 63) {
-                        return Long.valueOf(biNum.longValue());
+                char c = src.charAt(pos);
+                if (Character.isLetter(c)) {
+                    if (typePostfix == null) {
+                        typePostfix = String.valueOf(c);
                     } else {
-                        return biNum;
+                        typePostfix += c; 
                     }
                 } else {
-                    return new BigDecimal(tk);
+                    break seekTypePostfixEnd;
+                }
+                pos++;
+            }
+            
+            try {
+                if (numStr.endsWith(".")) {
+                    throw new NumberFormatException("A number can't end with a dot");
+                }
+                if (numStr.startsWith(".") || numStr.startsWith("-.")  || numStr.startsWith("+.")) {
+                    throw new NumberFormatException("A number can't start with a dot");
+                }
+
+                if (typePostfix == null) {
+                    // Auto-detect type
+                    if (numStr.indexOf('.') == -1) {
+                        BigInteger biNum = new BigInteger(numStr);
+                        final int bitLength = biNum.bitLength();  // Doesn't include sign bit
+                        if (bitLength <= 31) {
+                            return Integer.valueOf(biNum.intValue());
+                        } else if (bitLength <= 63) {
+                            return Long.valueOf(biNum.longValue());
+                        } else {
+                            return biNum;
+                        }
+                    } else {
+                        if (resultCoerced) {
+                            // The FTL way (BigDecimal is loseless, and it will be coerced to the target type later):
+                            return new BigDecimal(numStr);
+                        } else {
+                            // The Java way (lossy but familiar):
+                            return Double.valueOf(numStr);
+                        }
+                    }
+                } else { // Has explicitly specified type
+                    if (typePostfix.equalsIgnoreCase("l")) {
+                        return Long.valueOf(numStr);
+                    } else if (typePostfix.equalsIgnoreCase("bi")) {
+                        return new BigInteger(numStr);
+                    } else if (typePostfix.equalsIgnoreCase("bd")) {
+                        return new BigDecimal(numStr);
+                    } else if (typePostfix.equalsIgnoreCase("d")) {
+                        return Double.valueOf(numStr);
+                    } else if (typePostfix.equalsIgnoreCase("f")) {
+                        return Float.valueOf(numStr);
+                    } else {
+                        throw new _ObjectBuilderSettingEvaluationException(
+                                "Unrecognized number type postfix: " + typePostfix);
+                    }
                 }
                 
             } catch (NumberFormatException e) {
-                throw new _ObjectBuilderSettingEvaluationException("Malformed number: " + tk, e);
+                throw new _ObjectBuilderSettingEvaluationException("Malformed number: " + numStr, e);
             }
         }
     }
@@ -516,7 +560,7 @@ public class _ObjectBuilderSettingEvaluator {
                 skipWS();
             }
             
-            listExp.addItem(fetchValue(false, false, true));
+            listExp.addItem(fetchValue(false, false, false, true));
             
             skipWS();
         }
@@ -544,11 +588,11 @@ public class _ObjectBuilderSettingEvaluator {
                 skipWS();
             }
             
-            Object key = fetchValue(false, false, true);
+            Object key = fetchValue(false, false, false, true);
             skipWS();
             fetchRequiredChar(":");
             skipWS();
-            Object value = fetchValue(false, false, true);
+            Object value = fetchValue(false, false, false, true);
             mapExp.addItem(new KeyValuePair(key, value));
             
             skipWS();

@@ -26128,6 +26128,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   importance as number types are converted to the constructor
                   parameter type anyway.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Number literals can have Java type specified postfixes
+                  (<literal>f</literal>, <literal>d</literal>,
+                  <literal>l</literal>), plus <literal>bd</literal> for
+                  <literal>BigDecimal</literal> and <literal>bi</literal> for
+                  <literal>BigInteger</literal>.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -26228,6 +26236,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               multiple <quote>value part</quote>-ts, which are
               <literal>String</literal>-s and
               <literal>Interpolation</literal>-s.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixes and improvements in the <quote>object
+              builder</quote> syntax used for configuring FreeMarker from
+              <literal>java.util.Properties</literal> (or other string-only
+              sources). This is not to be confused with the template language
+              syntax, which has nothing to do with the <quote>object
+              builder</quote> syntax we are writing about here. The
+              improvements are:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Number literals can have Java type specified postfixes
+                  (<literal>f</literal>, <literal>d</literal>,
+                  <literal>l</literal>), plus <literal>bd</literal> for
+                  <literal>BigDecimal</literal> and <literal>bi</literal> for
+                  <literal>BigInteger</literal>.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
