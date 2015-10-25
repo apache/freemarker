@@ -43,15 +43,6 @@ public class IteratorIssuesTest extends TemplateTest {
     }
 
     @Test
-    public void testHasContentAndListDOW2324() throws Exception {
-        addToDataModel("it", getDOW2324().wrap(getAbcIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_ABC);
-        
-        addToDataModel("it", getDOW2324().wrap(getEmptyIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_EMPTY);
-    }
-
-    @Test
     public void testHasContentAndListBW230() throws Exception {
         addToDataModel("it", getBW230().wrap(getAbcIt()));
         assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_ABC);
@@ -91,12 +82,6 @@ public class IteratorIssuesTest extends TemplateTest {
     }
 
     @Test
-    public void testListAndHasContentDOW2324() throws Exception {
-        addToDataModel("it", getDOW2324().wrap(getAbcIt()));
-        assertErrorContains(FTL_LIST_AND_HAS_CONTENT, "can be listed only once");
-    }
-
-    @Test
     public void testListAndHasContentBW230() throws Exception {
         addToDataModel("it", getBW230().wrap(getAbcIt()));
         assertOutput(FTL_LIST_AND_HAS_CONTENT, OUT_LIST_AND_HAS_CONTENT_BW_WRONG);
@@ -128,10 +113,6 @@ public class IteratorIssuesTest extends TemplateTest {
     
     private DefaultObjectWrapper getDOW2323() {
         return new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_23).build();
-    }
-    
-    private DefaultObjectWrapper getDOW2324() {
-        return new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build();
     }
 
     private BeansWrapper getBW230() {
