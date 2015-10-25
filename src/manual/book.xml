@@ -26237,26 +26237,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>String</literal>-s and
               <literal>Interpolation</literal>-s.</para>
             </listitem>
-
-            <listitem>
-              <para>Fixes and improvements in the <quote>object
-              builder</quote> syntax used for configuring FreeMarker from
-              <literal>java.util.Properties</literal> (or other string-only
-              sources). This is not to be confused with the template language
-              syntax, which has nothing to do with the <quote>object
-              builder</quote> syntax we are writing about here. The
-              improvements are:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Number literals can have Java type specified postfixes
-                  (<literal>f</literal>, <literal>d</literal>,
-                  <literal>l</literal>), plus <literal>bd</literal> for
-                  <literal>BigDecimal</literal> and <literal>bi</literal> for
-                  <literal>BigInteger</literal>.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
           </itemizedlist>
         </section>
 
@@ -26392,6 +26372,73 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Added new built-in: <literal>is_markup_output</literal>,
               returns <literal>true</literal> if the value is of type
               <quote>markup output</quote>.</para>
+            </listitem>
+
+            <listitem>
+              <para>New <literal>FreemarkerServlet</literal> init-param:
+              <literal>OverrideResponseContentType</literal>. Specifies when
+              should we override the <literal>contentType</literal> that's
+              already set (i.e., non-<literal>null</literal>) in the
+              <literal>HttpServletResponse</literal>. Earlier, we have always
+              set it, and that's still the default behavior. But now that this
+              init-param exists, you can change that behavior, so that the
+              <literal>contentType</literal> you have specified before
+              forwarding to <literal>FreemarkerServlet</literal>
+              matters.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: It wasn't well defined when a Java
+              <literal>Iterator</literal> counts as empty. Depending on what
+              <literal>ObjectWrapper</literal> you are using, one of these
+              fixes apply:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>DefaultObjectWrapper</literal> (fix is always
+                  active): Operations on the <literal>Iterator</literal> that
+                  only check if it's empty without reading an element from it,
+                  such as <literal>?has_content</literal>, won't cause the a
+                  later iteration (or further emptiness check) to fail
+                  anymore. Earlier, in certain situations, the second
+                  operation has failed saying that the iterator <quote>can be
+                  listed only once</quote>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>BeansWrapper</literal> (when it's not
+                  extended by <literal>DefaultObjectWrapper</literal>), if
+                  it's <literal>incompatibleImprovements</literal> property is
+                  set to 2.3.24 (or higher): <literal>Iterator</literal>-s
+                  were always said to be non-empty when using
+                  <literal>?has_content</literal> and such (i.e., operators
+                  that check emptiness without reading any elements). Now an
+                  <literal>Iterator</literal> counts as empty exactly if it
+                  has no elements left. (Note that this bug has never affected
+                  basic functionality, like <literal>&lt;#list
+                  ...&gt;</literal>.)</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Fixes and improvements in the <quote>object
+              builder</quote> syntax used for configuring FreeMarker from
+              <literal>java.util.Properties</literal> (or other string-only
+              sources). This is not to be confused with the template language
+              syntax, which has nothing to do with the <quote>object
+              builder</quote> syntax we are writing about here. The
+              improvements are:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Number literals can have Java type specified postfixes
+                  (<literal>f</literal>, <literal>d</literal>,
+                  <literal>l</literal>), plus <literal>bd</literal> for
+                  <literal>BigDecimal</literal> and <literal>bi</literal> for
+                  <literal>BigInteger</literal>.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
