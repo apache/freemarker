@@ -451,7 +451,10 @@
             that in the <link linkend="example.first">very first
             example</link> you want to greet your boss, Big Joe, differently
             than other users:</para>
-
+              <programlisting role="formDataModel">
+                  user=John
+                  latestProduct = {"url": "https://test.com", "name": "test"}
+              </programlisting>
             <programlisting role="template">&lt;html&gt;
 &lt;head&gt;
   &lt;title&gt;Welcome!&lt;/title&gt;
@@ -464,7 +467,6 @@
   &lt;a href="${latestProduct.url}"&gt;${latestProduct.name}&lt;/a&gt;!
 &lt;/body&gt;
 &lt;/html&gt;</programlisting>
-
             <para>Here you have told FreeMarker that the <quote>, our beloved
             leader</quote> should be there only if the value of the variable
             <literal>user</literal> is equal to the string <literal>"Big
