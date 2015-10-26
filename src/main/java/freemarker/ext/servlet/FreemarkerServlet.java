@@ -140,8 +140,9 @@ import freemarker.template.utility.StringUtil;
  * when nothing else specifies the MIME type. The things that may specify the MIME type (and hence this init-param is
  * ignored), starting with the highest precedence, are:
  * <ol>
- * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@value #INIT_PARAM_VALUE_NEVER} (it
- * itn't be default), then the value of {@link HttpServletResponse#getContentType()} is if that's non-{@code null}.
+ * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@value #INIT_PARAM_VALUE_NEVER} (the
+ * default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is used
+ * if that's non-{@code null}.
  * <li>The template's custom attribute name <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
  * <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
  * <li>The {@linkplain Template#getOutputFormat() output format of the template}, if that has non-{@code null} MIME-type
@@ -159,15 +160,23 @@ import freemarker.template.utility.StringUtil;
  * then the charset (encoding) of the actual template file will appended after it, which, as per the Servlet
  * specification, also sets the actual encoding used to write the response body.</li>
  *
- * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies when should we
- * override the {@code contentType} that's already set (i.e., non-{@code null}) in the {@link HttpServletResponse}. The
- * default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always set the content type. Another possible value
- * is {@value #INIT_PARAM_VALUE_NEVER}, which means that we don't set the content type in the response, unless
- * {@link HttpServletResponse#getContentType()} is {@code null}. The third possible value is
- * {@value #INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE}, which means that we only set the content type if either the
- * template has an associated {@link OutputFormat} with non-{@code null} {@link OutputFormat#getMimeType()}, or it has a
- * custom attribute with name <tt>content_type</tt>, or {@link HttpServletResponse#getContentType()} is {@code null}.
- * Setting this init-param allows you to specify the content type before forwarding to {@link FreemarkerServlet}.</li>
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies when we should
+ * override the {@code contentType} that might be already set (i.e., non-{@code null}) in the
+ * {@link HttpServletResponse}. The default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always set the
+ * content type. Another possible value is {@value #INIT_PARAM_VALUE_NEVER}, which means that we don't set the content
+ * type in the response, unless {@link HttpServletResponse#getContentType()} is {@code null}. The third possible value
+ * is {@value #INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE}, which means that we only set the content type if either
+ * the template has an associated {@link OutputFormat} with non-{@code null} {@link OutputFormat#getMimeType()}, or it
+ * has a custom attribute with name <tt>content_type</tt>, or {@link HttpServletResponse#getContentType()} is
+ * {@code null}. Setting this init-param allows you to specify the content type before forwarding to
+ * {@link FreemarkerServlet}.</li>
+ *
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE}</strong> (since 2.3.24): Specifies when we should
+ * override the template {@code locale} that might be already set (i.e., non-{@code null}) in the {@link HttpServletRequest}.
+ * The default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always deduce the template {@code locale}
+ * by invoking {@link #deduceLocale(String, HttpServletRequest, HttpServletResponse)}. Another possible value is
+ * {@value #INIT_PARAM_VALUE_NEVER}, which means that we don't deduce the template {@code locale}, unless
+ * {@link HttpServletRequest#getLocale()} is {@code null}.
  *
  * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
  * "MB" is written after the number (like {@code <param-value>256 KB</param-value>}) then in kilobytes or megabytes.
@@ -310,7 +319,14 @@ public class FreemarkerServlet extends HttpServlet {
      * @since 2.3.24
      */
     public static final String INIT_PARAM_RESPONSE_CHARACTER_ENCODING = "ResponseCharacterEncoding";
-    
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     *
+     * @since 2.3.24
+     */
+    public static final String INIT_PARAM_OVERRIDE_RESPONSE_LOCALE = "OverrideResponseLocale";
+
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      * 
@@ -462,6 +478,7 @@ public class FreemarkerServlet extends HttpServlet {
             getDefaultOverrideResponseContentType(), OverrideResponseContentType.values());
     private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
     private boolean contentTypeContainsCharset;
+    private OverrideResponseLocale overrideResponseLocale = OverrideResponseLocale.ALWAYS;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
 
@@ -610,6 +627,8 @@ public class FreemarkerServlet extends HttpServlet {
                     overrideResponseContentType = initParamValueToEnum(value, OverrideResponseContentType.values());
                 } else if (name.equals(INIT_PARAM_RESPONSE_CHARACTER_ENCODING)) {
                     responseCharacterEncoding = initParamValueToEnum(value, ResponseCharacterEncoding.values());
+                } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_LOCALE)) {
+                    overrideResponseLocale = initParamValueToEnum(value, OverrideResponseLocale.values());
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
@@ -741,8 +760,12 @@ public class FreemarkerServlet extends HttpServlet {
             LOG.debug("Requested template " + StringUtil.jQuoteNoXSS(templatePath) + ".");
         }
 
-        final Locale locale = deduceLocale(templatePath, request, response);
-        
+        Locale locale = request.getLocale();
+
+        if (locale == null || overrideResponseLocale != OverrideResponseLocale.NEVER) {
+            locale = deduceLocale(templatePath, request, response);
+        }
+
         final Template template;
         try {
             template = config.getTemplate(templatePath, locale);
@@ -1521,5 +1544,21 @@ public class FreemarkerServlet extends HttpServlet {
         }
         
     }
-    
+
+    private enum OverrideResponseLocale implements InitParamValueEnum {
+        ALWAYS(INIT_PARAM_VALUE_ALWAYS),
+        NEVER(INIT_PARAM_VALUE_NEVER);
+
+        private final String initParamValue;
+
+        OverrideResponseLocale(String initParamValue) {
+            this.initParamValue = initParamValue;
+        }
+
+        @Override
+        public String getInitParamValue() {
+            return initParamValue;
+        }
+    }
+
 }
