@@ -62,8 +62,8 @@ import freemarker.core.BuiltInsForSequences.seq_index_ofBI;
 import freemarker.core.BuiltInsForSequences.sortBI;
 import freemarker.core.BuiltInsForSequences.sort_byBI;
 import freemarker.core.BuiltInsForStringsMisc.evalBI;
-import freemarker.core.BuiltInExtForNodes.previousSiblingBI;
-import freemarker.core.BuiltInExtForNodes.nextSiblingBI;
+import freemarker.core.BuiltInsExtForNode.previousSiblingBI;
+import freemarker.core.BuiltInsExtForNode.nextSiblingBI;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
@@ -83,8 +83,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-
-    static final int NUMBER_OF_BIS = 261;
+    static final int NUMBER_OF_BIS = 263;
     static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -249,8 +248,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
         putBI("number_to_datetime", "numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
         putBI("parent", new parentBI());
-        putBI("previousSibling", new previousSiblingBI());
-        putBI("nextSibling", new nextSiblingBI());
+        putBI("previous_sibling", "previousSibling", new previousSiblingBI());
+        putBI("next_sibling", "nextSibling", new nextSiblingBI());
         putBI("item_parity", "itemParity", new BuiltInsForLoopVariables.item_parityBI());
         putBI("item_parity_cap", "itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
         putBI("reverse", new reverseBI());

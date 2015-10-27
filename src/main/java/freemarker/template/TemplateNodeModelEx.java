@@ -16,21 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package freemarker.core;
 
-import freemarker.template.*;
+package freemarker.template;
 
-public abstract class BuiltInExtForNode extends BuiltIn {
-    @Override
-    TemplateModel _eval(Environment env)
-            throws TemplateException {
-        TemplateModel model = target.eval(env);
-        if (model instanceof TemplateNodeModelEx) {
-            return calculateResult((TemplateNodeModelEx) model, env);
-        } else {
-            throw new NonNodeException(target, model, env);
-        }
-    }
-    abstract TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env)
-            throws TemplateModelException;
+public interface TemplateNodeModelEx extends TemplateNodeModel {
+
+    /**
+     * @return the immediate Previous Sibling of this node
+     */
+    TemplateNodeModel getPreviousSibling() throws TemplateModelException;
+
+    /**
+     * @return the immediate next Sibling of this node
+     */
+    TemplateNodeModel getNextSibling() throws TemplateModelException;
 }

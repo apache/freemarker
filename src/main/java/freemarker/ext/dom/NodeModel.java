@@ -59,7 +59,7 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNodeModel;
-import freemarker.template.TemplateNodeModelExt;
+import freemarker.template.TemplateNodeModelEx;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateSequenceModel;
 
@@ -76,7 +76,7 @@ import freemarker.template.TemplateSequenceModel;
  * then), but should be used to represent a node set of exactly 1 node.
  */
 abstract public class NodeModel
-implements TemplateNodeModel, TemplateNodeModelExt, TemplateHashModel, TemplateSequenceModel,
+implements TemplateNodeModel, TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel {
 
     static private final Logger LOG = Logger.getLogger("freemarker.dom");

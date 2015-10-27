@@ -18,19 +18,24 @@
  */
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNodeModelEx;
 
-public abstract class BuiltInExtForNode extends BuiltIn {
-    @Override
-    TemplateModel _eval(Environment env)
-            throws TemplateException {
-        TemplateModel model = target.eval(env);
-        if (model instanceof TemplateNodeModelEx) {
-            return calculateResult((TemplateNodeModelEx) model, env);
-        } else {
-            throw new NonNodeException(target, model, env);
+public class BuiltInsExtForNode {
+
+    static class previousSiblingBI extends BuiltInExtForNode {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env) throws TemplateModelException {
+            return nodeModel.getPreviousSibling();
         }
     }
-    abstract TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env)
-            throws TemplateModelException;
+
+    static class nextSiblingBI extends  BuiltInExtForNode {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env) throws TemplateModelException {
+            return nodeModel.getNextSibling();
+        }
+    }
+
 }
