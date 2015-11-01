@@ -143,8 +143,9 @@ import freemarker.template.utility.StringUtil;
  * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@value #INIT_PARAM_VALUE_NEVER} (the
  * default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is used
  * if that's non-{@code null}.
- * <li>The template's custom attribute name <tt>content_type</tt> in the <tt>attributes</tt> parameter of the
- * <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
+ * <li>The template's custom attribute name <tt>content_type</tt>, usually specified via the <tt>attributes</tt>
+ * parameter of the <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat}
+ * mechanism.
  * <li>The {@linkplain Template#getOutputFormat() output format of the template}, if that has non-{@code null} MIME-type
  * ({@link OutputFormat#getMimeType()}). When a template has no output format specified, {@link UndefinedOutputFormat}
  * is used, which has {@code null} MIME-type. (The output format of a template is deduced from {@link Configuration}
@@ -157,7 +158,7 @@ import freemarker.template.utility.StringUtil;
  * </ol>
  * If none of the above gives a MIME type, then this init-param does. Defaults to <tt>"text/html"</tt>. The value may
  * include the charset (e.g. <tt>"text/html; charset=utf-8"</tt>). If the charset is not specified in this init-param,
- * then the charset (encoding) of the actual template file will appended after it, which, as per the Servlet
+ * then the charset (encoding) of the actual template file will be appended after it, which, as per the Servlet
  * specification, also sets the actual encoding used to write the response body.</li>
  *
  * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies when we should
@@ -171,10 +172,10 @@ import freemarker.template.utility.StringUtil;
  * {@code null}. Setting this init-param allows you to specify the content type before forwarding to
  * {@link FreemarkerServlet}.</li>
  *
- * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE}</strong> (since 2.3.24): Specifies when we should
- * override the template {@code locale} that might be already set (i.e., non-{@code null}) in the {@link HttpServletRequest}.
- * The default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always deduce the template {@code locale}
- * by invoking {@link #deduceLocale(String, HttpServletRequest, HttpServletResponse)}. Another possible value is
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE}</strong> (since 2.3.24): Specifies if we should override
+ * the template {@code locale} that might be already set (i.e., non-{@code null}) in the {@link HttpServletRequest}. The
+ * default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always deduce the template {@code locale} by
+ * invoking {@link #deduceLocale(String, HttpServletRequest, HttpServletResponse)}. Another possible value is
  * {@value #INIT_PARAM_VALUE_NEVER}, which means that we don't deduce the template {@code locale}, unless
  * {@link HttpServletRequest#getLocale()} is {@code null}.
  *
@@ -761,7 +762,6 @@ public class FreemarkerServlet extends HttpServlet {
         }
 
         Locale locale = request.getLocale();
-
         if (locale == null || overrideResponseLocale != OverrideResponseLocale.NEVER) {
             locale = deduceLocale(templatePath, request, response);
         }
@@ -906,9 +906,10 @@ public class FreemarkerServlet extends HttpServlet {
     }
     
     /**
-     * Returns the locale used for the {@link Configuration#getTemplate(String, Locale)} call. The base implementation
-     * simply returns the locale setting of the configuration. Override this method to provide different behaviour, i.e.
-     * to use the locale indicated in the request.
+     * Returns the locale used for the {@link Configuration#getTemplate(String, Locale)} call (as far as the
+     * {@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE} Servlet init-param allows that). The base implementation in
+     * {@link FreemarkerServlet} simply returns the {@code locale} setting of the configuration. Override this method to
+     * provide different behavior, for example, to use the locale indicated in the HTTP request.
      * 
      * @param templatePath
      *            The template path (template name) as it will be passed to {@link Configuration#getTemplate(String)}.

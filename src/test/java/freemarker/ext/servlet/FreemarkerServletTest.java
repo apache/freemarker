@@ -135,34 +135,40 @@ public class FreemarkerServletTest {
 
     @Test
     public void testResponseLocaleInitParams() throws Exception {
-        // By default, the Configurable.locale is set to Locale.getDefault().
-        final Locale defaultLocale = Locale.getDefault();
-
-        assertTemplateLocaleEquals(
-                defaultLocale, // <- expected template locale
-                null, // <- request locale
-                null, // <- init-param
-                "foo.ftl");
-        assertTemplateLocaleEquals(
-                defaultLocale, // <- expected template locale
-                Locale.FRENCH, // <- request locale
-                null, // <- init-param
-                "foo.ftl");
-        assertTemplateLocaleEquals(
-                defaultLocale, // <- expected template locale
-                Locale.FRENCH, // <- request locale
-                INIT_PARAM_VALUE_ALWAYS, // <- init-param
-                "foo.ftl");
-        assertTemplateLocaleEquals(
-                defaultLocale, // <- expected template locale
-                null, // <- request locale
-                INIT_PARAM_VALUE_NEVER, // <- init-param
-                "foo.ftl");
-        assertTemplateLocaleEquals(
-                Locale.FRENCH, // <- expected template locale
-                Locale.FRENCH, // <- request locale
-                INIT_PARAM_VALUE_NEVER, // <- init-param
-                "foo.ftl");
+        Locale prevDefaultLocale = Locale.getDefault();
+        Locale.setDefault(Locale.US);
+        try {
+            // By default, the Configurable.locale is set to Locale.getDefault().
+            final Locale defaultLocale = Locale.getDefault();
+    
+            assertTemplateLocaleEquals(
+                    defaultLocale, // <- expected template locale
+                    null, // <- request locale
+                    null, // <- init-param
+                    "foo.ftl");
+            assertTemplateLocaleEquals(
+                    defaultLocale, // <- expected template locale
+                    Locale.FRENCH, // <- request locale
+                    null, // <- init-param
+                    "foo.ftl");
+            assertTemplateLocaleEquals(
+                    defaultLocale, // <- expected template locale
+                    Locale.FRENCH, // <- request locale
+                    INIT_PARAM_VALUE_ALWAYS, // <- init-param
+                    "foo.ftl");
+            assertTemplateLocaleEquals(
+                    defaultLocale, // <- expected template locale
+                    null, // <- request locale
+                    INIT_PARAM_VALUE_NEVER, // <- init-param
+                    "foo.ftl");
+            assertTemplateLocaleEquals(
+                    Locale.FRENCH, // <- expected template locale
+                    Locale.FRENCH, // <- request locale
+                    INIT_PARAM_VALUE_NEVER, // <- init-param
+                    "foo.ftl");
+        } finally {
+            Locale.setDefault(prevDefaultLocale);
+        }
     }
 
     private void assertResponseContentTypeEquals(
