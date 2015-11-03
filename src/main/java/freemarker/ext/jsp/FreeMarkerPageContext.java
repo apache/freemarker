@@ -29,6 +29,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.el.ELContext;
 import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -422,18 +423,23 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
 
     @Override
     public BodyContent pushBody() {
-      return (BodyContent) pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
-  }
+        return (BodyContent) pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
+    }
 
-  @Override
-public JspWriter pushBody(Writer w) {
-      return pushWriter(new JspWriterAdapter(w));
-  }
+    @Override
+    public JspWriter pushBody(Writer w) {
+        return pushWriter(new JspWriterAdapter(w));
+    }
 
     @Override
     public JspWriter popBody() {
         popWriter();
         return (JspWriter) getAttribute(OUT);
+    }
+
+    @Override
+    public ELContext getELContext() {
+        throw new UnsupportedOperationException();
     }
 
     Object peekTopTag(Class tagClass) {

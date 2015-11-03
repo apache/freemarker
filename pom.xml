@@ -69,95 +69,247 @@
 
   <properties>
 
-    <project.build.javaVersion>1.7</project.build.javaVersion>
+    <project.build.javaVersion>1.5</project.build.javaVersion>
+
+    <javacc.version>6.1.2</javacc.version>
+
+    <jaxen.version>1.0-FCS</jaxen.version>
+    <xalan.version>2.7.0</xalan.version>
+    <dom4j.version>1.3</dom4j.version>
+    <jdom.version>1.0b8</jdom.version>
+    <servlet-api.version>2.5</servlet-api.version>
+    <jsp-api.version>2.2.1</jsp-api.version>
+    <el-api.version>2.2.1-b04</el-api.version>
+    <rhino.version>1.6R1</rhino.version>
+    <jython.version>2.5.0</jython.version>
+    <ant.version>1.6.5</ant.version>
+    <avalon-logkit.version>2.0</avalon-logkit.version>
+    <log4j.version>1.2.17</log4j.version>
+    <slf4j.version>1.6.1</slf4j.version>
+    <commons-logging.version>1.1.1</commons-logging.version>
+    <findbug-annotation.version>3.0.0</findbug-annotation.version>
+    <javarebel-sdk.version>1.2.2</javarebel-sdk.version>
+
+    <jetty.version>7.6.18.v20150929</jetty.version>
+    <junit.version>4.12</junit.version>
+    <hamcrest.version>1.3</hamcrest.version>
+    <commons-io.version>2.2</commons-io.version>
+    <guava.version>17.0</guava.version>
+    <displaytag.version>1.2</displaytag.version>
+    <spring.version>2.5.6.SEC03</spring.version>
 
     <plugin.compiler.version>3.1</plugin.compiler.version>
+    <plugin.build-helper.version>1.9.1</plugin.build-helper.version>
+    <plugin.javacc.version>2.6</plugin.javacc.version>
 
   </properties>
 
   <dependencies>
 
     <dependency>
+      <groupId>jaxen</groupId>
+      <artifactId>jaxen</artifactId>
+      <version>${jaxen.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>xalan</artifactId>
+      <version>${xalan.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>xml-apis</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>${dom4j.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <version>${jdom.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
+      <version>${servlet-api.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>javax.servlet.jsp</groupId>
-      <artifactId>jsp-api</artifactId>
-      <version>2.1</version>
+      <artifactId>javax.servlet.jsp-api</artifactId>
+      <version>${jsp-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>el-api</artifactId>
+      <version>${el-api.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>rhino</groupId>
       <artifactId>js</artifactId>
-      <version>1.6R1</version>
-      <scope>provided</scope>
+      <version>${rhino.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>org.python</groupId>
       <artifactId>jython</artifactId>
-      <version>2.5.0</version>
-      <scope>provided</scope>
+      <version>${jython.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>ant</groupId>
+      <artifactId>ant</artifactId>
+      <version>${ant.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>xml-apis</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>avalon-logkit</groupId>
+      <artifactId>avalon-logkit</artifactId>
+      <version>${avalon-logkit.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.1</version>
-      <scope>provided</scope>
+      <version>${slf4j.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <version>1.6.1</version>
-      <scope>provided</scope>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>${commons-logging.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>annotations</artifactId>
-      <version>3.0.0</version>
-      <scope>provided</scope>
+      <version>${findbug-annotation.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.zeroturnaround</groupId>
+      <artifactId>javarebel-sdk</artifactId>
+      <version>${javarebel-sdk.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-library</artifactId>
-      <version>1.3</version>
+      <version>${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.2</version>
+      <version>${commons-io.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava-jdk5</artifactId>
-      <version>17.0</version>
+      <version>${guava.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${jetty.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+      <version>${jetty.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-jsp</artifactId>
+      <version>${jetty.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>${jetty.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>displaytag</groupId>
       <artifactId>displaytag</artifactId>
-      <version>1.2</version>
+      <version>${displaytag.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -182,7 +334,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>2.5.6.SEC03</version>
+      <version>${spring.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -195,7 +347,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>2.5.6.SEC03</version>
+      <version>${spring.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -210,6 +362,47 @@
   <build>
 
     <plugins>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${plugin.build-helper.version}</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>target/generated-sources/javacc</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javacc-maven-plugin</artifactId>
+        <version>${plugin.javacc.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>javacc</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>net.java.dev.javacc</groupId>
+            <artifactId>javacc</artifactId>
+            <version>${javacc.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -219,6 +412,7 @@
           <target>${project.build.javaVersion}</target>
         </configuration>
       </plugin>
+
     </plugins>
 
   </build>
