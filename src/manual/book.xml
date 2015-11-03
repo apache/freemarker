@@ -26038,16 +26038,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>New <literal>FreemarkerServlet</literal> init-param:
-              <literal>OverrideResponseContentType</literal>. Specifies when
-              should we override the <literal>contentType</literal> that's
-              already set (i.e., non-<literal>null</literal>) in the
-              <literal>HttpServletResponse</literal>. Earlier, we have always
-              set it, and that's still the default behavior. But now that this
-              init-param exists, you can change that behavior, so that the
-              <literal>contentType</literal> you have specified before
-              forwarding to <literal>FreemarkerServlet</literal>
-              matters.</para>
+              <para>New <literal>FreemarkerServlet</literal> init-params (see
+              <link
+              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
+              <literal>FreemarkerSerlvet</literal> API documentation</link>
+              for details):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>OverrideResponseContentType</literal>.
+                  Specifies when should we override the
+                  <literal>contentType</literal> that's already set (i.e.,
+                  non-<literal>null</literal>) in the
+                  <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, and that's still the default behavior. But
+                  now that this init-param exists, you can change that
+                  behavior, so that the <literal>contentType</literal> you
+                  have specified before forwarding to
+                  <literal>FreemarkerServlet</literal> matters.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>OverrideResponseLocale</literal>. Specifies
+                  if should we override the <literal>contentType</literal>
+                  that's already set (i.e., non-<literal>null</literal>) in
+                  the <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, but now this behavior can be changed so that
+                  we only set it if it wasn't already set.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -26375,16 +26394,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>New <literal>FreemarkerServlet</literal> init-param:
-              <literal>OverrideResponseContentType</literal>. Specifies when
-              should we override the <literal>contentType</literal> that's
-              already set (i.e., non-<literal>null</literal>) in the
-              <literal>HttpServletResponse</literal>. Earlier, we have always
-              set it, and that's still the default behavior. But now that this
-              init-param exists, you can change that behavior, so that the
-              <literal>contentType</literal> you have specified before
-              forwarding to <literal>FreemarkerServlet</literal>
-              matters.</para>
+              <para>New <literal>FreemarkerServlet</literal> init-params (see
+              <link
+              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
+              <literal>FreemarkerSerlvet</literal> API documentation</link>
+              for details):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>OverrideResponseContentType</literal>.
+                  Specifies when should we override the
+                  <literal>contentType</literal> that's already set (i.e.,
+                  non-<literal>null</literal>) in the
+                  <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, and that's still the default behavior. But
+                  now that this init-param exists, you can change that
+                  behavior, so that the <literal>contentType</literal> you
+                  have specified before forwarding to
+                  <literal>FreemarkerServlet</literal> matters.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>OverrideResponseLocale</literal>. Specifies
+                  if should we override the <literal>contentType</literal>
+                  that's already set (i.e., non-<literal>null</literal>) in
+                  the <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, but now this behavior can be changed so that
+                  we only set it if it wasn't already set.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
