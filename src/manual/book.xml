@@ -26046,7 +26046,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>OverrideResponseContentType</literal>.
+                  <para><literal>OverrideResponseContentType</literal>:
                   Specifies when should we override the
                   <literal>contentType</literal> that's already set (i.e.,
                   non-<literal>null</literal>) in the
@@ -26059,12 +26059,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para><literal>OverrideResponseLocale</literal>. Specifies
+                  <para><literal>OverrideResponseLocale</literal>: Specifies
                   if should we override the <literal>contentType</literal>
                   that's already set (i.e., non-<literal>null</literal>) in
                   the <literal>HttpServletResponse</literal>. Earlier, we have
                   always set it, but now this behavior can be changed so that
                   we only set it if it wasn't already set.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>ResponseCharacterEncoding</literal>:
+                  Deprecates the old (and quirky) way of specifying the output
+                  charset, which was specifying it in the
+                  <literal>ContentType</literal>, or falling back to using the
+                  template file charset. The possible value are
+                  <literal>legacy</literal> (the default for backward
+                  compatibility), <literal>fromTemplate</literal> (which is
+                  <literal>legacy</literal> without quirks),
+                  <literal>doNotSet</literal> (keeps what the caller has
+                  already set in the <literal>ServletRespone</literal>) and
+                  <literal>force
+                  <replaceable>charsetName</replaceable></literal> (forces a
+                  specific charset).</para>
                 </listitem>
               </itemizedlist>
             </listitem>

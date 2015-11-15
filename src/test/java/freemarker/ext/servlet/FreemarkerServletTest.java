@@ -19,9 +19,11 @@
 package freemarker.ext.servlet;
 
 import static freemarker.ext.servlet.FreemarkerServlet.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 
 import javax.servlet.ServletContext;
@@ -36,13 +38,29 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
+import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.FileNameGlobMatcher;
+import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.TemplateLoader;
+import freemarker.core.Environment;
+import freemarker.core.TemplateConfigurer;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.TemplateModel;
+import freemarker.template.TemplateException;
 
 public class FreemarkerServletTest {
 
-    private static final String TEST_TEMPLATE_PATH = "classpath:freemarker/ext/servlet";
+    private static final String OUTPUT_FORMAT_HEADER_FTL = "outputFormatHeader.ftl";
+    private static final String CONTENT_TYPE_ATTR_FTL = "contentTypeAttr.ftl";
+    private static final String FOO_FTL = "foo.ftl";
+    private static final String FOO_SRC_UTF8_FTL = "foo-src-utf8.ftl";
+    private static final String FOO_OUT_UTF8_FTL = "foo-out-utf8.ftl";
+
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+    private static final String CFG_DEFAULT_ENCODING = "US-ASCII";
+    /** According to the Servlet Specification */
+    private static final String SERVLET_RESPONSE_DEFAULT_CHARSET = "ISO-8859-1";
 
     private MockServletContext servletContext;
 
@@ -59,115 +77,245 @@ public class FreemarkerServletTest {
             assertResponseContentTypeEquals(
                     DEFAULT_CONTENT_TYPE + "; charset=UTF-8", // <- expected
                     null, overrideCT, // <- init-params
-                    "foo.ftl", null); // <- request
+                    FOO_FTL, null); // <- request
             assertResponseContentTypeEquals(
                     "text/css; charset=UTF-8", // <- expected
                     "text/css", overrideCT, // <- init-params
-                    "foo.ftl", null); // <- request
+                    FOO_FTL, null); // <- request
             assertResponseContentTypeEquals(
                     DEFAULT_CONTENT_TYPE + "; charset=UTF-8", // <- expected
                     null, overrideCT, // <- init-params
-                    "foo.ftl", "application/json"); // <- request
+                    FOO_FTL, "application/json"); // <- request
             assertResponseContentTypeEquals(
                     "text/css; charset=UTF-8", // <- expected
                     "text/css", overrideCT, // <- init-params
-                    "foo.ftl", "application/json"); // <- request
+                    FOO_FTL, "application/json"); // <- request
             assertResponseContentTypeEquals(
                     "text/plain", // <- expected
                     null, overrideCT, // <- init-params
-                    "contentTypeAttr.ftl", "application/json"); // <- request
+                    CONTENT_TYPE_ATTR_FTL, "application/json"); // <- request
             assertResponseContentTypeEquals(
                     "text/plain; charset=UTF-8", // <- expected
                     null, overrideCT, // <- init-params
-                    "outputFormatHeader.ftl", "application/json"); // <- request
+                    OUTPUT_FORMAT_HEADER_FTL, "application/json"); // <- request
         }
-        
+
         assertResponseContentTypeEquals(
                 DEFAULT_CONTENT_TYPE + "; charset=UTF-8", // <- expected
                 null, INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE, // <- init-params
-                "foo.ftl", null); // <- request
+                FOO_FTL, null); // <- request
         assertResponseContentTypeEquals(
                 "text/css; charset=UTF-8", // <- expected
                 "text/css", INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE, // <- init-params
-                "foo.ftl", null); // <- request        
+                FOO_FTL, null); // <- request
         assertResponseContentTypeEquals(
                 "application/json", // <- expected
                 null, INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE, // <- init-params
-                "foo.ftl", "application/json"); // <- request
+                FOO_FTL, "application/json"); // <- request
         assertResponseContentTypeEquals(
                 "application/json", // <- expected
                 "text/css", INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE, // <- init-params
-                "foo.ftl", "application/json"); // <- request
+                FOO_FTL, "application/json"); // <- request
         assertResponseContentTypeEquals(
                 "text/plain", // <- expected
                 null, INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE, // <- init-params
-                "contentTypeAttr.ftl", "application/json"); // <- request
+                CONTENT_TYPE_ATTR_FTL, "application/json"); // <- request
         assertResponseContentTypeEquals(
                 "text/plain; charset=UTF-8", // <- expected
                 null, INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE, // <- init-params
-                "outputFormatHeader.ftl", "application/json"); // <- request
-        
+                OUTPUT_FORMAT_HEADER_FTL, "application/json"); // <- request
+
         assertResponseContentTypeEquals(
                 DEFAULT_CONTENT_TYPE + "; charset=UTF-8", // <- expected
                 null, INIT_PARAM_VALUE_NEVER, // <- init-params
-                "foo.ftl", null); // <- request
+                FOO_FTL, null); // <- request
         assertResponseContentTypeEquals(
                 "text/css; charset=UTF-8", // <- expected
                 "text/css", INIT_PARAM_VALUE_NEVER, // <- init-params
-                "foo.ftl", null); // <- request        
+                FOO_FTL, null); // <- request
         assertResponseContentTypeEquals(
                 "application/json", // <- expected
                 null, INIT_PARAM_VALUE_NEVER, // <- init-params
-                "foo.ftl", "application/json"); // <- request
+                FOO_FTL, "application/json"); // <- request
         assertResponseContentTypeEquals(
                 "application/json", // <- expected
                 "text/css", INIT_PARAM_VALUE_NEVER, // <- init-params
-                "foo.ftl", "application/json"); // <- request
+                FOO_FTL, "application/json"); // <- request
         assertResponseContentTypeEquals(
                 "application/json", // <- expected
                 null, INIT_PARAM_VALUE_NEVER, // <- init-params
-                "contentTypeAttr.ftl", "application/json"); // <- request
+                CONTENT_TYPE_ATTR_FTL, "application/json"); // <- request
         assertResponseContentTypeEquals(
                 "application/json", // <- expected
                 null, INIT_PARAM_VALUE_NEVER, // <- init-params
-                "outputFormatHeader.ftl", "application/json"); // <- request
+                OUTPUT_FORMAT_HEADER_FTL, "application/json"); // <- request
     }
 
     @Test
     public void testResponseLocaleInitParams() throws Exception {
-        Locale prevDefaultLocale = Locale.getDefault();
-        Locale.setDefault(Locale.US);
+        assertTemplateLocaleEquals(
+                DEFAULT_LOCALE, // <- expected template locale
+                null, // <- request locale
+                null, // <- init-param
+                FOO_FTL);
+        assertTemplateLocaleEquals(
+                DEFAULT_LOCALE, // <- expected template locale
+                Locale.FRENCH, // <- request locale
+                null, // <- init-param
+                FOO_FTL);
+        assertTemplateLocaleEquals(
+                DEFAULT_LOCALE, // <- expected template locale
+                Locale.FRENCH, // <- request locale
+                INIT_PARAM_VALUE_ALWAYS, // <- init-param
+                FOO_FTL);
+        assertTemplateLocaleEquals(
+                DEFAULT_LOCALE, // <- expected template locale
+                null, // <- request locale
+                INIT_PARAM_VALUE_NEVER, // <- init-param
+                FOO_FTL);
+        assertTemplateLocaleEquals(
+                Locale.FRENCH, // <- expected template locale
+                Locale.FRENCH, // <- request locale
+                INIT_PARAM_VALUE_NEVER, // <- init-param
+                FOO_FTL);
+    }
+
+    @Test
+    public void testResponseOutputCharsetInitParam() throws Exception {
+        // Legacy mode is not aware of the outputEncoding, thus it doesn't set it:
+        assertOutputEncodingEquals(
+                CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
+                null, // <- expected env.outputEncoding
+                null, // <- init-param
+                FOO_FTL);
+        assertOutputEncodingEquals(
+                CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
+                null, // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_LEGACY, // <- init-param
+                FOO_FTL);
+        // Legacy mode follows the source encoding of the template:
+        assertOutputEncodingEquals(
+                "UTF-8", // <- expected response.characterEncoding
+                null, // <- expected env.outputEncoding
+                null, // <- init-param
+                FOO_SRC_UTF8_FTL);
+        // Legacy mode doesn't deal with outputEncoding, but it's inherited by the Environment from the Template:
+        assertOutputEncodingEquals(
+                CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
+                "UTF-8", // <- expected env.outputEncoding
+                null, // <- init-param
+                FOO_OUT_UTF8_FTL);
+        // Charset in content type is the strongest:
+        assertOutputEncodingEquals(
+                "ISO-8859-2", // <- expected response.characterEncoding
+                null, // <- expected env.outputEncoding
+                null, // <- init-param
+                "text/html; charset=ISO-8859-2", // ContentType init-param
+                FOO_FTL);
+        assertOutputEncodingEquals(
+                "ISO-8859-2", // <- expected response.characterEncoding
+                null, // <- expected env.outputEncoding
+                null, // <- init-param
+                "text/html; charset=ISO-8859-2", // ContentType init-param
+                FOO_SRC_UTF8_FTL);
+        
+        // Non-legacy mode always keeps env.outputEncoding in sync. with the Servlet response encoding:
+        assertOutputEncodingEquals(
+                CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
+                CFG_DEFAULT_ENCODING, // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FROM_TEMPLATE, // <- init-param
+                FOO_FTL);
+        // Non-legacy mode considers the template-specific outputEncoding:
+        assertOutputEncodingEquals(
+                "UTF-8", // <- expected response.characterEncoding
+                "UTF-8", // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FROM_TEMPLATE, // <- init-param
+                FOO_OUT_UTF8_FTL);
+        // Non-legacy mode uses the template source encoding as a fallback for outputEncoding:
+        assertOutputEncodingEquals(
+                "UTF-8", // <- expected response.characterEncoding
+                "UTF-8", // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FROM_TEMPLATE, // <- init-param
+                FOO_SRC_UTF8_FTL);
+        // Not allowed to specify the charset in the contentType init-param: 
         try {
-            // By default, the Configurable.locale is set to Locale.getDefault().
-            final Locale defaultLocale = Locale.getDefault();
-    
-            assertTemplateLocaleEquals(
-                    defaultLocale, // <- expected template locale
-                    null, // <- request locale
-                    null, // <- init-param
-                    "foo.ftl");
-            assertTemplateLocaleEquals(
-                    defaultLocale, // <- expected template locale
-                    Locale.FRENCH, // <- request locale
-                    null, // <- init-param
-                    "foo.ftl");
-            assertTemplateLocaleEquals(
-                    defaultLocale, // <- expected template locale
-                    Locale.FRENCH, // <- request locale
-                    INIT_PARAM_VALUE_ALWAYS, // <- init-param
-                    "foo.ftl");
-            assertTemplateLocaleEquals(
-                    defaultLocale, // <- expected template locale
-                    null, // <- request locale
-                    INIT_PARAM_VALUE_NEVER, // <- init-param
-                    "foo.ftl");
-            assertTemplateLocaleEquals(
-                    Locale.FRENCH, // <- expected template locale
-                    Locale.FRENCH, // <- request locale
-                    INIT_PARAM_VALUE_NEVER, // <- init-param
-                    "foo.ftl");
-        } finally {
-            Locale.setDefault(prevDefaultLocale);
+            assertOutputEncodingEquals(
+                    null, // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    FreemarkerServlet.INIT_PARAM_VALUE_FROM_TEMPLATE, // <- init-param
+                    "text/html; charset=ISO-8859-2", // ContentType init-param
+                    FOO_FTL);
+            fail();
+        } catch (ServletException e) {
+            assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
+        }
+        
+        // Do not set mode:
+        assertOutputEncodingEquals(
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected response.characterEncoding
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_DO_NOT_SET, // <- init-param
+                FOO_FTL);
+        assertOutputEncodingEquals(
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected response.characterEncoding
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_DO_NOT_SET, // <- init-param
+                FOO_SRC_UTF8_FTL);
+        assertOutputEncodingEquals(
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected response.characterEncoding
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_DO_NOT_SET, // <- init-param
+                FOO_OUT_UTF8_FTL);
+        // Not allowed to specify the charset in the contentType init-param: 
+        try {
+            assertOutputEncodingEquals(
+                    null, // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    FreemarkerServlet.INIT_PARAM_VALUE_DO_NOT_SET, // <- init-param
+                    "text/html; charset=ISO-8859-2", // ContentType init-param
+                    FOO_FTL);
+            fail();
+        } catch (ServletException e) {
+            assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
+        }
+        
+        // Forced mode:
+        assertOutputEncodingEquals(
+                "UTF-16LE", // <- expected response.characterEncoding
+                "UTF-16LE", // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
+                FOO_FTL);
+        assertOutputEncodingEquals(
+                "UTF-16LE", // <- expected response.characterEncoding
+                "UTF-16LE", // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
+                FOO_SRC_UTF8_FTL);
+        assertOutputEncodingEquals(
+                "UTF-16LE", // <- expected response.characterEncoding
+                "UTF-16LE", // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
+                FOO_OUT_UTF8_FTL);
+        try {
+            assertOutputEncodingEquals(
+                    null, // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "noSuchCharset", // <- init-param
+                    FOO_FTL);
+            fail();
+        } catch (ServletException e) {
+            assertThat(e.getCause().getCause(), instanceOf(UnsupportedCharsetException.class));
+        }
+        // Not allowed to specify the charset in the contentType init-param: 
+        try {
+            assertOutputEncodingEquals(
+                    null, // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
+                    "text/html; charset=ISO-8859-2", // ContentType init-param
+                    FOO_FTL);
+            fail();
+        } catch (ServletException e) {
+            assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
         }
     }
 
@@ -177,7 +325,7 @@ public class FreemarkerServletTest {
             String templateName, String responseCT)
                     throws ServletException, IOException {
         MockHttpServletRequest request = createMockHttpServletRequest(servletContext, templateName, null);
-        
+
         MockHttpServletResponse response = new MockHttpServletResponse();
         if (responseCT != null) {
             response.setContentType(responseCT);
@@ -185,23 +333,22 @@ public class FreemarkerServletTest {
         } else {
             assertNull(response.getContentType());
         }
-    
+
         MockServletConfig servletConfig = new MockServletConfig(servletContext);
-        servletConfig.addInitParameter(INIT_PARAM_TEMPLATE_PATH, TEST_TEMPLATE_PATH);
         servletConfig.addInitParameter(Configuration.DEFAULT_ENCODING_KEY, "UTF-8");
         if (ctInitParam != null) {
-            servletConfig.addInitParameter(INIT_PARAM_CONTENT_TYPE, ctInitParam);            
+            servletConfig.addInitParameter(INIT_PARAM_CONTENT_TYPE, ctInitParam);
         }
         if (overrideCTInitParam != null) {
             servletConfig.addInitParameter(INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE, overrideCTInitParam);
         }
-        
-        FreemarkerServlet freemarkerServlet = new FreemarkerServlet();
+
+        TestFreemarkerServlet freemarkerServlet = new TestFreemarkerServlet();
         try {
             freemarkerServlet.init(servletConfig);
-            
+
             freemarkerServlet.doGet(request, response);
-        
+
             assertEquals(HttpServletResponse.SC_OK, response.getStatus());
             assertEquals(exptectContentType, response.getContentType());
         } finally {
@@ -219,33 +366,65 @@ public class FreemarkerServletTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         MockServletConfig servletConfig = new MockServletConfig(servletContext);
-        servletConfig.addInitParameter(INIT_PARAM_TEMPLATE_PATH, TEST_TEMPLATE_PATH);
 
         if (overrideResponseLocaleInitParam != null) {
             servletConfig.addInitParameter(INIT_PARAM_OVERRIDE_RESPONSE_LOCALE, overrideResponseLocaleInitParam);
         }
 
-        final Template [] processedTemplateHolder = new Template[1];
-
-        FreemarkerServlet freemarkerServlet = new FreemarkerServlet() {
-
-            @Override
-            protected void postTemplateProcess(
-                    HttpServletRequest request,
-                    HttpServletResponse response,
-                    Template template,
-                    TemplateModel data)
-                            throws ServletException, IOException {
-                processedTemplateHolder[0] = template;
-            }
-        };
+        TestFreemarkerServlet freemarkerServlet = new TestFreemarkerServlet();
 
         try {
             freemarkerServlet.init(servletConfig);
             freemarkerServlet.doGet(request, response);
 
             assertEquals(HttpServletResponse.SC_OK, response.getStatus());
-            assertEquals(exptectLocale, processedTemplateHolder[0].getLocale());
+            assertEquals(exptectLocale, freemarkerServlet.lastLocale);
+            assertEquals(freemarkerServlet.lastLocale, freemarkerServlet.lastMainTemplate.getLocale());
+        } finally {
+            freemarkerServlet.destroy();
+        }
+    }
+
+    private void assertOutputEncodingEquals(
+            String exptectRespCharacterEncoding,
+            String exptectEnvOutputEncoding,
+            String responseCharacterEncodingInitParam,
+            String templateName) throws ServletException, IOException {
+        assertOutputEncodingEquals(
+                exptectRespCharacterEncoding, exptectEnvOutputEncoding,
+                responseCharacterEncodingInitParam, null,
+                templateName);
+    }
+    
+    private void assertOutputEncodingEquals(
+            String exptectRespCharacterEncoding,
+            String exptectEnvOutputEncoding,
+            String responseCharacterEncodingInitParam,
+            String contentTypeInitParam,
+            String templateName)
+                    throws ServletException, IOException {
+        MockHttpServletRequest request = createMockHttpServletRequest(servletContext, templateName, null);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        MockServletConfig servletConfig = new MockServletConfig(servletContext);
+
+        if (responseCharacterEncodingInitParam != null) {
+            servletConfig.addInitParameter(INIT_PARAM_RESPONSE_CHARACTER_ENCODING, responseCharacterEncodingInitParam);
+        }
+        
+        if (contentTypeInitParam != null) {
+            servletConfig.addInitParameter(INIT_PARAM_CONTENT_TYPE, contentTypeInitParam);
+        }
+
+        TestFreemarkerServlet freemarkerServlet = new TestFreemarkerServlet();
+
+        try {
+            freemarkerServlet.init(servletConfig);
+            freemarkerServlet.doGet(request, response);
+
+            assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+            assertEquals(exptectEnvOutputEncoding, freemarkerServlet.lastOutputEncoding);
+            assertEquals(exptectRespCharacterEncoding, response.getCharacterEncoding());
         } finally {
             freemarkerServlet.destroy();
         }
@@ -254,6 +433,7 @@ public class FreemarkerServletTest {
     private MockHttpServletRequest createMockHttpServletRequest(final ServletContext servletContext,
             final String pathInfo, final Locale requestLocale) {
         MockHttpServletRequest servletRequest = new MockHttpServletRequest(servletContext) {
+
             @Override
             public Locale getLocale() {
                 return requestLocale;
@@ -267,6 +447,70 @@ public class FreemarkerServletTest {
         servletRequest.setPathInfo(pathInfo);
 
         return servletRequest;
+    }
+
+    static class TestFreemarkerServlet extends FreemarkerServlet {
+
+        private Template lastMainTemplate;
+        private Locale lastLocale;
+        private String lastOutputEncoding;
+
+        @Override
+        protected Configuration createConfiguration() {
+            Configuration cfg = super.createConfiguration();
+            // Needed for the TemplateConfigurer that sets outputEncoding:
+            cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
+
+            // Set a test runner environment independent default locale:
+            cfg.setLocale(DEFAULT_LOCALE);
+            cfg.setDefaultEncoding(CFG_DEFAULT_ENCODING);
+
+            {
+                TemplateConfigurer outUtf8TC = new TemplateConfigurer();
+                outUtf8TC.setOutputEncoding("UTF-8");
+                
+                TemplateConfigurer srcUtf8TC = new TemplateConfigurer();
+                srcUtf8TC.setEncoding("UTF-8");
+                
+                cfg.setTemplateConfigurers(
+                        new FirstMatchTemplateConfigurerFactory(
+                                new ConditionalTemplateConfigurerFactory(
+                                        new FileNameGlobMatcher(FOO_SRC_UTF8_FTL), srcUtf8TC),
+                                new ConditionalTemplateConfigurerFactory(
+                                        new FileNameGlobMatcher(FOO_OUT_UTF8_FTL), outUtf8TC)
+                        )
+                        .allowNoMatch(true)
+                );
+            }
+
+            return cfg;
+        }
+
+        @Override
+        protected TemplateLoader createTemplateLoader(String templatePath) throws IOException {
+            // Override default template loader
+            if (templatePath.equals("class://")) {
+                StringTemplateLoader tl = new StringTemplateLoader();
+                tl.putTemplate(FOO_FTL, "foo");
+                tl.putTemplate(FOO_SRC_UTF8_FTL, "foo");
+                tl.putTemplate(FOO_OUT_UTF8_FTL, "foo");
+                tl.putTemplate(CONTENT_TYPE_ATTR_FTL, "<#ftl attributes={ 'content_type': 'text/plain' }>foo");
+                tl.putTemplate(OUTPUT_FORMAT_HEADER_FTL, "<#ftl outputFormat='plainText'>foo");
+                return tl;
+            } else {
+                return super.createTemplateLoader(templatePath);
+            }
+        }
+
+        @Override
+        protected void processEnvironment(Environment env, HttpServletRequest request, HttpServletResponse response)
+                throws TemplateException, IOException {
+            lastMainTemplate = env.getMainTemplate();
+            lastLocale = env.getLocale();
+            lastOutputEncoding = env.getOutputEncoding();
+            super.processEnvironment(env, request, response);
+        }
+
     }
 
 }
