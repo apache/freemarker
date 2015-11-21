@@ -53,6 +53,7 @@ public class FreemarkerServletTest {
 
     private static final String OUTPUT_FORMAT_HEADER_FTL = "outputFormatHeader.ftl";
     private static final String CONTENT_TYPE_ATTR_FTL = "contentTypeAttr.ftl";
+    private static final String CONTENT_TYPE_ATTR_WITH_CHARSET_FTL = "contentTypeAttrWithCharset.ftl";
     private static final String FOO_FTL = "foo.ftl";
     private static final String FOO_SRC_UTF8_FTL = "foo-src-utf8.ftl";
     private static final String FOO_OUT_UTF8_FTL = "foo-out-utf8.ftl";
@@ -61,6 +62,7 @@ public class FreemarkerServletTest {
     private static final String CFG_DEFAULT_ENCODING = "US-ASCII";
     /** According to the Servlet Specification */
     private static final String SERVLET_RESPONSE_DEFAULT_CHARSET = "ISO-8859-1";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
     private MockServletContext servletContext;
 
@@ -182,42 +184,55 @@ public class FreemarkerServletTest {
 
     @Test
     public void testResponseOutputCharsetInitParam() throws Exception {
-        // Legacy mode is not aware of the outputEncoding, thus it doesn't set it:
-        assertOutputEncodingEquals(
-                CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
-                null, // <- expected env.outputEncoding
-                null, // <- init-param
-                FOO_FTL);
-        assertOutputEncodingEquals(
-                CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
-                null, // <- expected env.outputEncoding
-                FreemarkerServlet.INIT_PARAM_VALUE_LEGACY, // <- init-param
-                FOO_FTL);
-        // Legacy mode follows the source encoding of the template:
-        assertOutputEncodingEquals(
-                "UTF-8", // <- expected response.characterEncoding
-                null, // <- expected env.outputEncoding
-                null, // <- init-param
-                FOO_SRC_UTF8_FTL);
-        // Legacy mode doesn't deal with outputEncoding, but it's inherited by the Environment from the Template:
-        assertOutputEncodingEquals(
-                CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
-                "UTF-8", // <- expected env.outputEncoding
-                null, // <- init-param
-                FOO_OUT_UTF8_FTL);
-        // Charset in content type is the strongest:
-        assertOutputEncodingEquals(
-                "ISO-8859-2", // <- expected response.characterEncoding
-                null, // <- expected env.outputEncoding
-                null, // <- init-param
-                "text/html; charset=ISO-8859-2", // ContentType init-param
-                FOO_FTL);
-        assertOutputEncodingEquals(
-                "ISO-8859-2", // <- expected response.characterEncoding
-                null, // <- expected env.outputEncoding
-                null, // <- init-param
-                "text/html; charset=ISO-8859-2", // ContentType init-param
-                FOO_SRC_UTF8_FTL);
+        for (String initParamValue : new String[] { null, FreemarkerServlet.INIT_PARAM_VALUE_LEGACY }) {
+            // Legacy mode is not aware of the outputEncoding, thus it doesn't set it:
+            assertOutputEncodingEquals(
+                    CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    FOO_FTL);
+            assertOutputEncodingEquals(
+                    CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    FOO_FTL);
+            // Legacy mode follows the source encoding of the template:
+            assertOutputEncodingEquals(
+                    "UTF-8", // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    FOO_SRC_UTF8_FTL);
+            // Legacy mode doesn't deal with outputEncoding, but it's inherited by the Environment from the Template:
+            assertOutputEncodingEquals(
+                    CFG_DEFAULT_ENCODING, // <- expected response.characterEncoding
+                    "UTF-8", // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    FOO_OUT_UTF8_FTL);
+            // Charset in content type is the strongest:
+            assertOutputEncodingEquals(
+                    "ISO-8859-2", // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    "text/html; charset=ISO-8859-2", // ContentType init-param
+                    FOO_FTL);
+            assertOutputEncodingEquals(
+                    "ISO-8859-2", // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    "text/html; charset=ISO-8859-2", // ContentType init-param
+                    FOO_SRC_UTF8_FTL);
+            assertOutputEncodingEquals(
+                    "UTF-8", // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    CONTENT_TYPE_ATTR_WITH_CHARSET_FTL);
+            assertOutputEncodingEquals(
+                    "UTF-8", // <- expected response.characterEncoding
+                    null, // <- expected env.outputEncoding
+                    initParamValue, // <- init-param
+                    "text/html; charset=ISO-8859-2", // ContentType init-param
+                    CONTENT_TYPE_ATTR_WITH_CHARSET_FTL);
+        }
         
         // Non-legacy mode always keeps env.outputEncoding in sync. with the Servlet response encoding:
         assertOutputEncodingEquals(
@@ -249,6 +264,12 @@ public class FreemarkerServletTest {
         } catch (ServletException e) {
             assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
         }
+        // But the legacy content_type template attribute can still set the output charset:
+        assertOutputEncodingEquals(
+                "UTF-8", // <- expected response.characterEncoding
+                "UTF-8", // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FROM_TEMPLATE, // <- init-param
+                CONTENT_TYPE_ATTR_WITH_CHARSET_FTL);
         
         // Do not set mode:
         assertOutputEncodingEquals(
@@ -269,8 +290,8 @@ public class FreemarkerServletTest {
         // Not allowed to specify the charset in the contentType init-param: 
         try {
             assertOutputEncodingEquals(
-                    null, // <- expected response.characterEncoding
-                    null, // <- expected env.outputEncoding
+                    SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected response.characterEncoding
+                    SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected env.outputEncoding
                     FreemarkerServlet.INIT_PARAM_VALUE_DO_NOT_SET, // <- init-param
                     "text/html; charset=ISO-8859-2", // ContentType init-param
                     FOO_FTL);
@@ -278,6 +299,12 @@ public class FreemarkerServletTest {
         } catch (ServletException e) {
             assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
         }
+        // The legacy content_type template attribute can still specify an output charset, though it will be ignored:
+        assertOutputEncodingEquals(
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected response.characterEncoding
+                SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_DO_NOT_SET, // <- init-param
+                CONTENT_TYPE_ATTR_WITH_CHARSET_FTL);
         
         // Forced mode:
         assertOutputEncodingEquals(
@@ -308,8 +335,8 @@ public class FreemarkerServletTest {
         // Not allowed to specify the charset in the contentType init-param: 
         try {
             assertOutputEncodingEquals(
-                    null, // <- expected response.characterEncoding
-                    null, // <- expected env.outputEncoding
+                    "UTF-16LE", // <- expected response.characterEncoding
+                    "UTF-16LE", // <- expected env.outputEncoding
                     FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
                     "text/html; charset=ISO-8859-2", // ContentType init-param
                     FOO_FTL);
@@ -317,6 +344,12 @@ public class FreemarkerServletTest {
         } catch (ServletException e) {
             assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
         }
+        // The legacy content_type template attribute can still specify an output charset, though it will be overridden:
+        assertOutputEncodingEquals(
+                "UTF-16LE", // <- expected response.characterEncoding
+                "UTF-16LE", // <- expected env.outputEncoding
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
+                CONTENT_TYPE_ATTR_WITH_CHARSET_FTL);
     }
 
     private void assertResponseContentTypeEquals(
@@ -495,6 +528,7 @@ public class FreemarkerServletTest {
                 tl.putTemplate(FOO_SRC_UTF8_FTL, "foo");
                 tl.putTemplate(FOO_OUT_UTF8_FTL, "foo");
                 tl.putTemplate(CONTENT_TYPE_ATTR_FTL, "<#ftl attributes={ 'content_type': 'text/plain' }>foo");
+                tl.putTemplate(CONTENT_TYPE_ATTR_WITH_CHARSET_FTL, "<#ftl attributes={ 'content_type': 'text/plain; charset=UTF-8' }>foo");
                 tl.putTemplate(OUTPUT_FORMAT_HEADER_FTL, "<#ftl outputFormat='plainText'>foo");
                 return tl;
             } else {

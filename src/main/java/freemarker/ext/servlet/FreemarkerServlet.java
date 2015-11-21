@@ -407,7 +407,7 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE = "ignore";
     private static final String DEPR_INITPARAM_DEBUG = "debug";
     
-    static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final ContentType DEFAULT_CONTENT_TYPE = new ContentType("text/html");
     
     public static final String INIT_PARAM_VALUE_NEVER = "never";
     public static final String INIT_PARAM_VALUE_ALWAYS = "always";
@@ -511,12 +511,12 @@ public class FreemarkerServlet extends HttpServlet {
     private Configuration config;
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ObjectWrapper wrapper;
-    private String contentType;
+    private ContentType contentType;
     private OverrideResponseContentType overrideResponseContentType = initParamValueToEnum(
             getDefaultOverrideResponseContentType(), OverrideResponseContentType.values());
     private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Charset forcedResponseCharacterEncoding;
-    private boolean contentTypeContainsCharset;
     private OverrideResponseLocale overrideResponseLocale = OverrideResponseLocale.ALWAYS;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
@@ -661,7 +661,7 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_DEBUG)) {
                     debug = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
-                    contentType = value;
+                    contentType = new ContentType(value);
                 } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE)) {
                     overrideResponseContentType = initParamValueToEnum(value, OverrideResponseContentType.values());
                 } else if (name.equals(INIT_PARAM_RESPONSE_CHARACTER_ENCODING)) {
@@ -693,32 +693,14 @@ public class FreemarkerServlet extends HttpServlet {
             }
         } // while initpnames
         
-        contentTypeContainsCharset = contentTypeContainsCharset(contentType);
-        if (contentTypeContainsCharset && responseCharacterEncoding != ResponseCharacterEncoding.LEGACY) {
-            throw new InitParamValueException(INIT_PARAM_CONTENT_TYPE, contentType,
+        if (contentType.containsCharset && responseCharacterEncoding != ResponseCharacterEncoding.LEGACY) {
+            throw new InitParamValueException(INIT_PARAM_CONTENT_TYPE, contentType.httpHeaderValue,
                     new IllegalStateException("You can't specify the charset in the content type, because the \"" +
                             INIT_PARAM_RESPONSE_CHARACTER_ENCODING + "\" init-param isn't set to "
                             + "\"" + INIT_PARAM_VALUE_LEGACY + "\"."));
-        }
+        }        
     }
     
-    private boolean contentTypeContainsCharset(String contentType) {
-        int charsetIdx = contentType.toLowerCase().indexOf("charset=");
-        if (charsetIdx != -1) {
-            char c = 0;
-            charsetIdx--;
-            while (charsetIdx >= 0) {
-                c = contentType.charAt(charsetIdx);
-                if (!Character.isWhitespace(c)) break;
-                charsetIdx--;
-            }
-            if (charsetIdx == -1 || c == ';') {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
         List/*<MetaInfTldSource>*/ metaInfTldSources = null;
         
@@ -837,16 +819,24 @@ public class FreemarkerServlet extends HttpServlet {
                     "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
 
+        boolean tempSpecContentTypeContainsCharset = false;
         if (response.getContentType() == null || overrideResponseContentType != OverrideResponseContentType.NEVER) {
-            String templateSpecificContentType = getTemplateSpecificContentType(template);
+            ContentType templateSpecificContentType = getTemplateSpecificContentType(template);
             if (templateSpecificContentType != null) {
-                response.setContentType(templateSpecificContentType);
+                // With ResponseCharacterEncoding.LEGACY we should append the charset, but we don't do that for b. c.
+                response.setContentType(
+                        responseCharacterEncoding != ResponseCharacterEncoding.DO_NOT_SET
+                                ? templateSpecificContentType.httpHeaderValue
+                                : templateSpecificContentType.getMimeType());
+                tempSpecContentTypeContainsCharset = templateSpecificContentType.containsCharset;
             } else if (response.getContentType() == null
                     || overrideResponseContentType == OverrideResponseContentType.ALWAYS) {
-                if (!contentTypeContainsCharset && responseCharacterEncoding == ResponseCharacterEncoding.LEGACY) {
-                    response.setContentType(contentType + "; charset=" + getTemplateSpecificOutputEncoding(template));
+                if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY && !contentType.containsCharset) {
+                    // In legacy mode we don't call response.setCharacterEncoding, so the charset must be set here:
+                    response.setContentType(
+                            contentType.httpHeaderValue + "; charset=" + getTemplateSpecificOutputEncoding(template));
                 } else {
-                    response.setContentType(contentType);
+                    response.setContentType(contentType.httpHeaderValue);
                 }
             }
         }
@@ -855,7 +845,9 @@ public class FreemarkerServlet extends HttpServlet {
                 && responseCharacterEncoding != ResponseCharacterEncoding.DO_NOT_SET) {
             // Using the Servlet 2.4 way of setting character encoding.
             if (responseCharacterEncoding != ResponseCharacterEncoding.FORCE_CHARSET) {
-                response.setCharacterEncoding(getTemplateSpecificOutputEncoding(template));
+                if (!tempSpecContentTypeContainsCharset) {
+                    response.setCharacterEncoding(getTemplateSpecificOutputEncoding(template));
+                }
             } else {
                 response.setCharacterEncoding(forcedResponseCharacterEncoding.name());
             }
@@ -920,21 +912,21 @@ public class FreemarkerServlet extends HttpServlet {
         return outputEncoding != null ? outputEncoding : template.getEncoding();
     }
 
-    private String getTemplateSpecificContentType(final Template template) {
+    private ContentType getTemplateSpecificContentType(final Template template) {
         Object contentTypeAttr = template.getCustomAttribute("content_type");
         if (contentTypeAttr != null) {
             // Converted with toString() for backward compatibility.
-            // Don't add charset for backward compatibility.
-            return contentTypeAttr.toString();
+            return new ContentType(contentTypeAttr.toString());
         }
         
         String outputFormatMimeType = template.getOutputFormat().getMimeType();
         if (outputFormatMimeType != null) {
             if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY) {
                 // In legacy mode we won't call serlvetResponse.setCharacterEncoding(...), so:
-                outputFormatMimeType += "; charset=" + getTemplateSpecificOutputEncoding(template);
+                return new ContentType(outputFormatMimeType + "; charset=" + getTemplateSpecificOutputEncoding(template), true);
+            } else {
+                return new ContentType(outputFormatMimeType, false);
             }
-            return outputFormatMimeType; 
         }
             
         return null;
@@ -1550,6 +1542,46 @@ public class FreemarkerServlet extends HttpServlet {
 
         MalformedWebXmlException(String message) {
             super(message);
+        }
+        
+    }
+    
+    private static class ContentType {
+        private final String httpHeaderValue;
+        private final boolean containsCharset;
+        
+        public ContentType(String httpHeaderValue) {
+            this(httpHeaderValue, contentTypeContainsCharset(httpHeaderValue));
+        }
+
+        public ContentType(String httpHeaderValue, boolean containsCharset) {
+            this.httpHeaderValue = httpHeaderValue;
+            this.containsCharset = containsCharset;
+        }
+        
+        private static boolean contentTypeContainsCharset(String contentType) {
+            int charsetIdx = contentType.toLowerCase().indexOf("charset=");
+            if (charsetIdx != -1) {
+                char c = 0;
+                charsetIdx--;
+                while (charsetIdx >= 0) {
+                    c = contentType.charAt(charsetIdx);
+                    if (!Character.isWhitespace(c)) break;
+                    charsetIdx--;
+                }
+                if (charsetIdx == -1 || c == ';') {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        /**
+         * Extracts the MIME type without the charset specifier or other such extras.
+         */
+        private String getMimeType() {
+            int scIdx = httpHeaderValue.indexOf(';');
+            return (scIdx == -1 ? httpHeaderValue : httpHeaderValue.substring(0, scIdx)).trim();
         }
         
     }
