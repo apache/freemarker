@@ -26069,13 +26069,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para><literal>ResponseCharacterEncoding</literal>:
-                  Deprecates the old (and quirky) way of specifying the output
-                  charset, which was specifying it in the
-                  <literal>ContentType</literal>, or falling back to using the
-                  template file charset. The possible value are
-                  <literal>legacy</literal> (the default for backward
-                  compatibility), <literal>fromTemplate</literal> (which is
-                  <literal>legacy</literal> without quirks),
+                  Deprecates the old (and quirky) logic of specifying the
+                  output charset, which was putting it into the
+                  <literal>ContentType</literal> init-param after the MIME
+                  type, otherwise falling back to using the template file
+                  charset. The possible values are <literal>legacy</literal>
+                  (the default for backward compatibility),
+                  <literal>fromTemplate</literal> (which is
+                  <literal>legacy</literal> without quirks, and is aware of
+                  the <literal>outputEncoding</literal> setting),
                   <literal>doNotSet</literal> (keeps what the caller has
                   already set in the <literal>ServletRespone</literal>) and
                   <literal>force

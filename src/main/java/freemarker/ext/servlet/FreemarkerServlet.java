@@ -161,8 +161,8 @@ import freemarker.template.utility.StringUtil;
  * the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING} init-param is set to {@value #INIT_PARAM_VALUE_LEGACY} (which is
  * the default of it), the content type may include the charset (as in <tt>"text/html; charset=utf-8"</tt>), in which
  * case that specifies the actual charset of the output. If the the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}
- * init-param is not set to {@value #INIT_PARAM_VALUE_LEGACY}, then specifying the charset in the content type is not
- * allowed, and will cause servlet initialization error.
+ * init-param is not set to {@value #INIT_PARAM_VALUE_LEGACY}, then specifying the charset in the
+ * {@value #INIT_PARAM_CONTENT_TYPE} init-param is not allowed, and will cause servlet initialization error.
  * </li>
  *
  * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies when we should
@@ -195,7 +195,7 @@ import freemarker.template.utility.StringUtil;
  * or writes it (though very few applications utilize that setting anyway). Also, it sets the charset of the servlet
  * response by adding it to the response content type via calling {@link HttpServletResponse#setContentType(String)} (as
  * that was the only way before Servlet 2.4), not via the more modern
- * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template almost always
+ * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template usually
  * comes from {@link Configuration#getDefaultEncoding()} (i.e., from the {@code default_encoding} FreeMarker setting),
  * occasionally from {@link Configuration#getEncoding(Locale)} (when FreeMarker was configured to use different charsets
  * depending on the locale) or even more rarely from {@link Configuration#getTemplateConfigurers()} (when FreeMarker was
@@ -205,7 +205,9 @@ import freemarker.template.utility.StringUtil;
  * template usually just inherits that from the {@link Configuration}), and if that's not set, then reads the source
  * charset of the template, just like {@value #INIT_PARAM_VALUE_LEGACY}. Then it passes the charset acquired this way to
  * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. (It
- * doesn't call the legacy {@link HttpServletResponse#setContentType(String)} API to set the charset.)
+ * doesn't call the legacy {@link HttpServletResponse#setContentType(String)} API to set the charset.) (Note that if
+ * the template has a {@code content_type} template attribute (which is deprecated) that specifies a charset, it will be
+ * considered as the output charset of that template.)
  * <li>{@value #INIT_PARAM_VALUE_DO_NOT_SET}: {@link FreemarkerServlet} will not set the {@link HttpServletResponse}
  * "character encoding". It will still call {@link Environment#setOutputEncoding(String)}, so that the running template
  * will be aware of the charset used for the output.
