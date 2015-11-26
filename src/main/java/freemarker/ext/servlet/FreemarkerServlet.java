@@ -21,6 +21,8 @@ package freemarker.ext.servlet;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
+import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.OutputFormat;
@@ -162,8 +165,7 @@ import freemarker.template.utility.StringUtil;
  * the default of it), the content type may include the charset (as in <tt>"text/html; charset=utf-8"</tt>), in which
  * case that specifies the actual charset of the output. If the the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}
  * init-param is not set to {@value #INIT_PARAM_VALUE_LEGACY}, then specifying the charset in the
- * {@value #INIT_PARAM_CONTENT_TYPE} init-param is not allowed, and will cause servlet initialization error.
- * </li>
+ * {@value #INIT_PARAM_CONTENT_TYPE} init-param is not allowed, and will cause servlet initialization error.</li>
  *
  * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies when we should
  * override the {@code contentType} that might be already set (i.e., non-{@code null}) in the
@@ -185,7 +187,7 @@ import freemarker.template.utility.StringUtil;
  * 
  * <li><strong>{@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}</strong> (since 2.3.24): Specifies how the
  * {@link HttpServletResponse} "character encoding" (as in {@link HttpServletResponse#setCharacterEncoding(String)})
- * will deduced. The possible modes are:
+ * will be deduced. The possible modes are:
  * <ul>
  * <li>{@value #INIT_PARAM_VALUE_LEGACY}: This is the default for backward compatibility; in new applications, use
  * {@value #INIT_PARAM_VALUE_FROM_TEMPLATE} (or some of the other options) instead. {@value #INIT_PARAM_VALUE_LEGACY}
@@ -195,8 +197,8 @@ import freemarker.template.utility.StringUtil;
  * or writes it (though very few applications utilize that setting anyway). Also, it sets the charset of the servlet
  * response by adding it to the response content type via calling {@link HttpServletResponse#setContentType(String)} (as
  * that was the only way before Servlet 2.4), not via the more modern
- * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template usually
- * comes from {@link Configuration#getDefaultEncoding()} (i.e., from the {@code default_encoding} FreeMarker setting),
+ * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template usually comes
+ * from {@link Configuration#getDefaultEncoding()} (i.e., from the {@code default_encoding} FreeMarker setting),
  * occasionally from {@link Configuration#getEncoding(Locale)} (when FreeMarker was configured to use different charsets
  * depending on the locale) or even more rarely from {@link Configuration#getTemplateConfigurers()} (when FreeMarker was
  * configured to use a specific charset for certain templates).
@@ -205,16 +207,16 @@ import freemarker.template.utility.StringUtil;
  * template usually just inherits that from the {@link Configuration}), and if that's not set, then reads the source
  * charset of the template, just like {@value #INIT_PARAM_VALUE_LEGACY}. Then it passes the charset acquired this way to
  * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. (It
- * doesn't call the legacy {@link HttpServletResponse#setContentType(String)} API to set the charset.) (Note that if
- * the template has a {@code content_type} template attribute (which is deprecated) that specifies a charset, it will be
- * considered as the output charset of that template.)
+ * doesn't call the legacy {@link HttpServletResponse#setContentType(String)} API to set the charset.) (Note that if the
+ * template has a {@code content_type} template attribute (which is deprecated) that specifies a charset, it will be
+ * used as the output charset of that template.)
  * <li>{@value #INIT_PARAM_VALUE_DO_NOT_SET}: {@link FreemarkerServlet} will not set the {@link HttpServletResponse}
  * "character encoding". It will still call {@link Environment#setOutputEncoding(String)}, so that the running template
  * will be aware of the charset used for the output.
- * <li>{@value #INIT_PARAM_VALUE_FORCE_PREFIX} + charset name, for example {@code force UTF-8}: The output charset will
- * be the one specified after "force" + space, regardless of everything. The charset specified this way is passed to
- * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. If the
- * charset name is not recognized by Java, the servlet initialization will fail.
+ * <li>A charset name, for example {@code UTF-8}: The output charset will the specified charset, regardless of
+ * everything. The charset specified this way is passed to {@link HttpServletResponse#setCharacterEncoding(String)} and
+ * {@link Environment#setOutputEncoding(String)}. If the charset name is not recognized by Java, the servlet
+ * initialization will fail.
  * </ul>
  *
  * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
@@ -417,7 +419,6 @@ public class FreemarkerServlet extends HttpServlet {
     public static final String INIT_PARAM_VALUE_FROM_TEMPLATE = "fromTemplate";
     public static final String INIT_PARAM_VALUE_LEGACY = "legacy";
     public static final String INIT_PARAM_VALUE_DO_NOT_SET = "doNotSet";
-    public static final String INIT_PARAM_VALUE_FORCE_PREFIX = "force ";
 
     /**
      * When set, the items defined in it will be added after those coming from the
@@ -668,9 +669,20 @@ public class FreemarkerServlet extends HttpServlet {
                     overrideResponseContentType = initParamValueToEnum(value, OverrideResponseContentType.values());
                 } else if (name.equals(INIT_PARAM_RESPONSE_CHARACTER_ENCODING)) {
                     responseCharacterEncoding = initParamValueToEnum(value, ResponseCharacterEncoding.values());
-                    if (responseCharacterEncoding == ResponseCharacterEncoding.FORCE_CHARSET) {
-                        String charsetName = value.substring(INIT_PARAM_VALUE_FORCE_PREFIX.length()).trim();
-                        forcedResponseCharacterEncoding = Charset.forName(charsetName);
+                    if (responseCharacterEncoding == ResponseCharacterEncoding.SPECIFIC_CHARSET) {
+                        try {
+                            forcedResponseCharacterEncoding = Charset.forName(value);
+                        } catch (IllegalArgumentException e) {
+                            if (!(e instanceof UnsupportedCharsetException
+                                    || e instanceof IllegalCharsetNameException)) {
+                                throw e;
+                            }
+                            StringBuilder sb = new StringBuilder();
+                            sb.append(StringUtil.jQuote(value));
+                            sb.append(" isn't a valid charset name, nor it is any of the predefined values: ");
+                            appendEnumInitParamValues(sb, ResponseCharacterEncoding.values());
+                            throw new IllegalArgumentException(sb.toString());
+                        }
                     }
                 } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_LOCALE)) {
                     overrideResponseLocale = initParamValueToEnum(value, OverrideResponseLocale.values());
@@ -846,7 +858,7 @@ public class FreemarkerServlet extends HttpServlet {
         if (responseCharacterEncoding != ResponseCharacterEncoding.LEGACY
                 && responseCharacterEncoding != ResponseCharacterEncoding.DO_NOT_SET) {
             // Using the Servlet 2.4 way of setting character encoding.
-            if (responseCharacterEncoding != ResponseCharacterEncoding.FORCE_CHARSET) {
+            if (responseCharacterEncoding != ResponseCharacterEncoding.SPECIFIC_CHARSET) {
                 if (!tempSpecContentTypeContainsCharset) {
                     response.setCharacterEncoding(getTemplateSpecificOutputEncoding(template));
                 }
@@ -1589,28 +1601,42 @@ public class FreemarkerServlet extends HttpServlet {
     }
     
     private <T extends InitParamValueEnum> T initParamValueToEnum(String initParamValue, T[] enumValues) {
+        T wildcardEnumValue = null;
         for (T enumValue : enumValues) {
             String enumInitParamValue = enumValue.getInitParamValue();
-            if (initParamValue.equals(enumInitParamValue)
-                    || enumInitParamValue.endsWith("}") && initParamValue.startsWith(
-                            enumInitParamValue.substring(0, enumInitParamValue.indexOf("${")))) {
+            if (enumInitParamValue == null) {
+                if (wildcardEnumValue != null) {
+                    throw new BugException();
+                }
+                wildcardEnumValue = enumValue;
+            } else if (initParamValue.equals(enumInitParamValue)) {
                 return enumValue;
             }
+        }
+        if (wildcardEnumValue != null) {
+            return wildcardEnumValue;
         }
         
         StringBuilder sb = new StringBuilder();
         sb.append(StringUtil.jQuote(initParamValue));
         sb.append(" is not a one of the enumeration values: ");
+        appendEnumInitParamValues(sb, enumValues);
+        throw new IllegalArgumentException(sb.toString());
+    }
+
+    protected <T extends InitParamValueEnum> void appendEnumInitParamValues(StringBuilder sb, T[] enumValues) {
         boolean first = true;
         for (T value : enumValues) {
-            if (!first) {
-                sb.append(", ");
-            } else {
-                first = false;
+            String initParamValue = value.getInitParamValue();
+            if (initParamValue != null) {  // Not a wildcard enum
+                if (!first) {
+                    sb.append(", ");
+                } else {
+                    first = false;
+                }
+                sb.append(StringUtil.jQuote(initParamValue));
             }
-            sb.append(StringUtil.jQuote(value.getInitParamValue()));
         }
-        throw new IllegalArgumentException(sb.toString());
     }
 
     /**
@@ -1643,7 +1669,7 @@ public class FreemarkerServlet extends HttpServlet {
         LEGACY(INIT_PARAM_VALUE_LEGACY),
         FROM_TEMPLATE(INIT_PARAM_VALUE_FROM_TEMPLATE),
         DO_NOT_SET(INIT_PARAM_VALUE_DO_NOT_SET),
-        FORCE_CHARSET(INIT_PARAM_VALUE_FORCE_PREFIX + "${charsetName}");
+        SPECIFIC_CHARSET(null);
 
         private final String initParamValue;
         
@@ -1655,7 +1681,6 @@ public class FreemarkerServlet extends HttpServlet {
         public String getInitParamValue() {
             return initParamValue;
         }
-        
     }
 
     private enum OverrideResponseLocale implements InitParamValueEnum {
