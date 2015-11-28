@@ -10431,20 +10431,24 @@ TemplateHashModel roundingModeEnums =
     &lt;param-value&gt;true&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
-    &lt;param-name&gt;ContentType&lt;/param-name&gt;
-    &lt;param-value&gt;text/html&lt;/param-value&gt;
+    &lt;param-name&gt;ResponseCharacterEncoding&lt;/param-name&gt;
+    &lt;!-- Use the output_encoding setting of FreeMarker: --&gt;
+    &lt;param-value&gt;fromTemplate&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
-    &lt;param-name&gt;ResponseCharacterEncoding&lt;/param-name&gt;
-    &lt;param-value&gt;UTF-8&lt;/param-value&gt;
+    &lt;param-name&gt;ExceptionOnMissingTemplate&lt;/param-name&gt;
+    &lt;!-- true =&gt; HTTP 500 on missing template, instead of HTTP 404. --&gt;
+    &lt;param-value&gt;true&lt;/param-value&gt;
   &lt;/init-param&gt;
-    
+
   &lt;!-- FreeMarker engine settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
     &lt;param-value&gt;2.3.24&lt;/param-value&gt;
-    &lt;!-- Recommended to set to a high value. See:
-         http://freemarker.org/docs/pgui_config_incompatible_improvements.html
+    &lt;!--
+      Recommended to set to a high value.
+      See: http://freemarker.org/docs/pgui_config_incompatible_improvements.html
+    --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_exception_handler&lt;/param-name&gt;
@@ -10458,7 +10462,13 @@ TemplateHashModel roundingModeEnums =
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;default_encoding&lt;/param-name&gt;
-    &lt;!-- The encoding of the template files. --&gt;
+    &lt;!-- The encoding of the template files: --&gt;
+    &lt;param-value&gt;UTF-8&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;output_encoding&lt;/param-name&gt;
+    &lt;!-- The encoding of the template output; Note that you must set
+         "ResponseCharacterEncodring" to "fromTemplate" for this to work! --&gt;
     &lt;param-value&gt;UTF-8&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
@@ -10477,6 +10487,9 @@ TemplateHashModel roundingModeEnums =
 &lt;servlet-mapping&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   &lt;url-pattern&gt;<emphasis>*.ftl</emphasis>&lt;/url-pattern&gt;
+  &lt;!-- HTML and XML auto-escaped if incompatible_improvements &gt;= 2.3.24: --&gt;
+  &lt;url-pattern&gt;<emphasis>*.ftlh</emphasis>&lt;/url-pattern&gt;
+  &lt;url-pattern&gt;<emphasis>*.ftl</emphasis>x&lt;/url-pattern&gt;
 &lt;/servlet-mapping&gt;
 
 <replaceable>...</replaceable>
@@ -10490,6 +10503,8 @@ TemplateHashModel roundingModeEnums =
   &lt;web-resource-collection&gt;
     &lt;web-resource-name&gt;FreeMarker MVC Views&lt;/web-resource-name&gt;
     &lt;url-pattern&gt;*.ftl&lt;/url-pattern&gt;
+    &lt;url-pattern&gt;*.ftlh&lt;/url-pattern&gt;
+    &lt;url-pattern&gt;*.ftlx&lt;/url-pattern&gt;
   &lt;/web-resource-collection&gt;
   &lt;auth-constraint&gt;
     &lt;!-- Nobody is allowed to visit these directly. --&gt;
@@ -26089,8 +26104,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   the <literal>outputEncoding</literal> setting),
                   <literal>doNotSet</literal> (keeps what the caller has
                   already set in the <literal>ServletRespone</literal>) and
-                  any valid charset name (forces a specific output
-                  charset).</para>
+                  <literal>force</literal> followed by a charset name (forces
+                  a specific output charset).</para>
                 </listitem>
               </itemizedlist>
             </listitem>

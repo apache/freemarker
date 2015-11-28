@@ -310,23 +310,23 @@ public class FreemarkerServletTest {
         assertOutputEncodingEquals(
                 "UTF-16LE", // <- expected response.characterEncoding
                 "UTF-16LE", // <- expected env.outputEncoding
-                "UTF-16LE", // <- init-param
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
                 FOO_FTL);
         assertOutputEncodingEquals(
                 "UTF-16LE", // <- expected response.characterEncoding
                 "UTF-16LE", // <- expected env.outputEncoding
-                "UTF-16LE", // <- init-param
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
                 FOO_SRC_UTF8_FTL);
         assertOutputEncodingEquals(
                 "UTF-16LE", // <- expected response.characterEncoding
                 "UTF-16LE", // <- expected env.outputEncoding
-                "UTF-16LE", // <- init-param
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
                 FOO_OUT_UTF8_FTL);
         try {
             assertOutputEncodingEquals(
                     null, // <- expected response.characterEncoding
                     null, // <- expected env.outputEncoding
-                    "noSuchCharset", // <- init-param
+                    FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "noSuchCharset", // <- init-param
                     FOO_FTL);
             fail();
         } catch (ServletException e) {
@@ -337,7 +337,7 @@ public class FreemarkerServletTest {
             assertOutputEncodingEquals(
                     "UTF-16LE", // <- expected response.characterEncoding
                     "UTF-16LE", // <- expected env.outputEncoding
-                    "UTF-16LE", // <- init-param
+                    FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
                     "text/html; charset=ISO-8859-2", // ContentType init-param
                     FOO_FTL);
             fail();
@@ -348,7 +348,7 @@ public class FreemarkerServletTest {
         assertOutputEncodingEquals(
                 "UTF-16LE", // <- expected response.characterEncoding
                 "UTF-16LE", // <- expected env.outputEncoding
-                "UTF-16LE", // <- init-param
+                FreemarkerServlet.INIT_PARAM_VALUE_FORCE_PREFIX + "UTF-16LE", // <- init-param
                 CONTENT_TYPE_ATTR_WITH_CHARSET_FTL);
     }
 
