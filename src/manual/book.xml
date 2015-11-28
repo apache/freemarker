@@ -10415,6 +10415,11 @@ TemplateHashModel roundingModeEnums =
           <programlisting role="unspecified">&lt;servlet&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   &lt;servlet-class&gt;<emphasis>freemarker.ext.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
+  
+  &lt;!--
+    Init-param documentation:
+    <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
+  --&gt;
     
   &lt;!-- FreemarkerServlet settings: --&gt;
   &lt;init-param&gt;
@@ -10434,22 +10439,22 @@ TemplateHashModel roundingModeEnums =
     &lt;param-value&gt;UTF-8&lt;/param-value&gt;
   &lt;/init-param&gt;
     
-  &lt;!-- FreeMarker settings: --&gt;
+  &lt;!-- FreeMarker engine settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.22&lt;/param-value&gt;
-    &lt;!-- Recommended to set to a high value. For the details, see the Java API docs of
-         freemarker.template.Configuration#Configuration(Version). --&gt;
+    &lt;param-value&gt;2.3.24&lt;/param-value&gt;
+    &lt;!-- Recommended to set to a high value. See:
+         http://freemarker.org/docs/pgui_config_incompatible_improvements.html
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_exception_handler&lt;/param-name&gt;
-    &lt;!-- Use "html_debug" instead during development! --&gt;
+    &lt;!-- Use "html_debug" during development! --&gt;
     &lt;param-value&gt;rethrow&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_update_delay&lt;/param-name&gt;
-    &lt;!-- ATTENTION, 0 is for development only! Use higher value otherwise. --&gt;
-    &lt;param-value&gt;0&lt;/param-value&gt;
+    &lt;!-- Use 0 during development! Consider what value you need otherwise. --&gt;
+    &lt;param-value&gt;30 s&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;default_encoding&lt;/param-name&gt;

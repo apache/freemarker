@@ -113,10 +113,10 @@ import freemarker.template.utility.StringUtil;
  * 
  * <ul>
  * 
- * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the templates. By default, this is
- * interpreted as a {@link ServletContext} reasource path, which practically means a web application directory relative
- * path, or a {@code WEB-INF/lib/*.jar/META-INF/resources}-relative path (note that this last didn't work properly
- * before FreeMarker 2.3.23).<br>
+ * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the template files. By default,
+ * this is interpreted as a {@link ServletContext} resource path, which practically means a web application directory
+ * relative path, or a {@code WEB-INF/lib/*.jar/META-INF/resources}-relative path (note that this last haven't always
+ * worked before FreeMarker 2.3.23).<br>
  * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
  * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
  * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
@@ -133,13 +133,14 @@ import freemarker.template.utility.StringUtil;
  * {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. For
  * backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
  * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
- * defining class loader of this servlet's class. This can cause template not found errors, if that class (in
+ * defining class loader of this servlet's class. This can cause template-not-found errors, if that class (in
  * {@code freemarer.jar} usually) is not local to the web application, while the templates are.<br>
  * The default value is <tt>class://</tt> (that is, the root of the class hierarchy), which is not recommended anymore,
- * and should be overwritten with the init-param.</li>
+ * and should be overwritten with the {@value #INIT_PARAM_TEMPLATE_PATH} init-param.</li>
  * 
- * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to true, generates headers in the response that advise the
- * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
+ * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to {@code true}, generates headers in the response that
+ * advise the HTTP client not to cache the returned page. If {@code false}, the HTTP response is not modified for this
+ * purpose. The default is {@code false}.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: The Content-type HTTP header value used in the HTTP responses
  * when nothing else specifies the MIME type. The things that may specify the MIME type (and hence this init-param is
@@ -1004,6 +1005,10 @@ public class FreemarkerServlet extends HttpServlet {
         return config.getLocale();
     }
 
+    /**
+     * Creates the data-model that will be passed to {@link Template#process(Object, java.io.Writer)}.
+     * The default implementation in {@link FreemarkerServlet} returns a {@link AllHttpScopesHashModel}.
+     */
     protected TemplateModel createModel(ObjectWrapper objectWrapper,
                                         ServletContext servletContext,
                                         final HttpServletRequest request,
@@ -1410,39 +1415,39 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     /**
-     * Called before the execution is passed to template.process().
-     * This is a generic hook you might use in subclasses to perform a specific
-     * action before the template is processed. By default does nothing.
-     * A typical action to perform here is to inject application-specific
-     * objects into the model root
+     * Called before the execution is passed to {@link Template#template.process(Object, java.io.Writer)}. This is a
+     * generic hook you might use in subclasses to perform a specific action before the template is processed.
      *
-     * <p>Example: Expose the Serlvet context path as "baseDir" for all templates:
-     *
-     *<pre>
-     *    ((SimpleHash) data).put("baseDir", request.getContextPath() + "/");
-     *    return true;
-     *</pre>
-     *
-     * @param request the actual HTTP request
-     * @param response the actual HTTP response
-     * @param template the template that will get executed
-     * @param data the data that will be passed to the template. By default this will be
-     *        an {@link AllHttpScopesHashModel} (which is a {@link freemarker.template.SimpleHash} subclass).
-     *        Thus, you can add new variables to the data-model with the
-     *        {@link freemarker.template.SimpleHash#put(String, Object)} subclass) method.
+     * @param request
+     *            The HTTP request that we will response to.
+     * @param response
+     *            The HTTP response. The HTTP headers are already initialized here, such as the {@code conteType} and
+     *            the {@code responseCharacterEncoding} are already set, but you can do the final adjustments here. The
+     *            response {@linker Writer} isn't created yet, so changing HTTP headers and buffering parameters works.
+     * @param template
+     *            The template that will get executed
+     * @param model
+     *            The data model that will be passed to the template. By default this will be an
+     *            {@link AllHttpScopesHashModel} (which is a {@link freemarker.template.SimpleHash} subclass). Thus, you
+     *            can add new variables to the data-model with the
+     *            {@link freemarker.template.SimpleHash#put(String, Object)} subclass) method. However, to adjust the
+     *            data-model, overriding
+     *            {@link #createModel(ObjectWrapper, ServletContext, HttpServletRequest, HttpServletResponse)} is
+     *            probably a more appropriate place.
+     * 
      * @return true to process the template, false to suppress template processing.
      */
     protected boolean preTemplateProcess(
         HttpServletRequest request,
         HttpServletResponse response,
         Template template,
-        TemplateModel data)
+        TemplateModel model)
         throws ServletException, IOException {
         return true;
     }
 
     /**
-     * Called after the execution returns from template.process().
+     * Called after the execution returns from {@link Template#process(Object, java.io.Writer)}.
      * This is a generic hook you might use in subclasses to perform a specific
      * action after the template is processed. It will be invoked even if the
      * template processing throws an exception. By default does nothing.
