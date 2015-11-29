@@ -52,7 +52,7 @@ final class MixedContent extends TemplateElement {
     @Override
     TemplateElementsToVisit accept(Environment env)
         throws TemplateException, IOException {
-        return new TemplateElementsToVisit(getRegulatedChildren(), false);
+        return new TemplateElementsToVisit(getRegulatedChildren());
     }
 
     @Override

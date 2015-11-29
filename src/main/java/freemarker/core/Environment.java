@@ -325,28 +325,28 @@ public final class Environment extends Configurable {
      * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)
      */
     void visit(TemplateElement element, boolean hideInParent) throws IOException, TemplateException {
-        TemplateElement parent = null;
-        if(hideInParent) {
-            parent = replaceTopElement(element);
+        TemplateElement hiddenParent;
+        if (hideInParent) {
+            hiddenParent = replaceTopElement(element);
         } else {
             pushElement(element);
+            hiddenParent = null;
         }
         try {
             TemplateElementsToVisit templateElementsToVisit = element.accept(this);
-            if(null != templateElementsToVisit) {
+            if (templateElementsToVisit != null) {
                 boolean hideInnerElementInParent = templateElementsToVisit.isHideInParent();
                 for (TemplateElement templateElementToVisit : templateElementsToVisit.getTemplateElements()) {
-                    if(null != templateElementToVisit) {
+                    if (templateElementToVisit != null) {
                         visit(templateElementToVisit, hideInnerElementInParent);
                     }
                 }
             }
         } catch (TemplateException te) {
             handleTemplateException(te);
-        }
-        finally {
-            if(null != parent) {
-                replaceTopElement(parent);
+        } finally {
+            if (hiddenParent != null) {
+                replaceTopElement(hiddenParent);
             } else {
                 popElement();
             }
