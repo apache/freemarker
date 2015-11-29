@@ -759,6 +759,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;</code>, has
      *          always used {@code incompatbileImprovement}-s 0 (2.3.0 in effect). Now it's fixed.
      *       </li>
+     *       <li><p>
+     *          {@link DefaultObjectWrapper} has some minor changes with {@code incompatibleImprovements} 2.3.24;
+     *          check them out at {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. It's important to know
+     *          that if you set the {@code object_wrapper} setting (to an other value than {@code "default"}), rather
+     *          than leaving it on its default value, the {@code object_wrapper} won't inherit the
+     *          {@code incompatibleImprovements} of the {@link Configuration}. In that case, if you want the 2.3.24
+     *          improvements of {@link DefaultObjectWrapper}, you have to set it in the {@link DefaultObjectWrapper}
+     *          object itself too! (Note that it's OK to use a {@link DefaultObjectWrapper} with a different
+     *          {@code incompatibleImprovements} version number than that of the {@link Configuration}, if that's
+     *          really what you want.)
+     *       </li>
      *     </ul>
      *   </li>
      * </ul>

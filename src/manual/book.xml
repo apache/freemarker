@@ -10415,6 +10415,11 @@ TemplateHashModel roundingModeEnums =
           <programlisting role="unspecified">&lt;servlet&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   &lt;servlet-class&gt;<emphasis>freemarker.ext.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
+  
+  &lt;!--
+    Init-param documentation:
+    <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
+  --&gt;
     
   &lt;!-- FreemarkerServlet settings: --&gt;
   &lt;init-param&gt;
@@ -10426,30 +10431,44 @@ TemplateHashModel roundingModeEnums =
     &lt;param-value&gt;true&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
-    &lt;param-name&gt;ContentType&lt;/param-name&gt;
-    &lt;param-value&gt;text/html; charset=UTF-8&lt;/param-value&gt; &lt;!-- Forces UTF-8 output encoding! --&gt;
+    &lt;param-name&gt;ResponseCharacterEncoding&lt;/param-name&gt;
+    &lt;!-- Use the output_encoding setting of FreeMarker: --&gt;
+    &lt;param-value&gt;fromTemplate&lt;/param-value&gt;
   &lt;/init-param&gt;
-    
-  &lt;!-- FreeMarker settings: --&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;ExceptionOnMissingTemplate&lt;/param-name&gt;
+    &lt;!-- true =&gt; HTTP 500 on missing template, instead of HTTP 404. --&gt;
+    &lt;param-value&gt;true&lt;/param-value&gt;
+  &lt;/init-param&gt;
+
+  &lt;!-- FreeMarker engine settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.22&lt;/param-value&gt;
-    &lt;!-- Recommended to set to a high value. For the details, see the Java API docs of
-         freemarker.template.Configuration#Configuration(Version). --&gt;
+    &lt;param-value&gt;2.3.24&lt;/param-value&gt;
+    &lt;!--
+      Recommended to set to a high value.
+      See: http://freemarker.org/docs/pgui_config_incompatible_improvements.html
+    --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_exception_handler&lt;/param-name&gt;
-    &lt;!-- Use "html_debug" instead during development! --&gt;
+    &lt;!-- Use "html_debug" during development! --&gt;
     &lt;param-value&gt;rethrow&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_update_delay&lt;/param-name&gt;
-    &lt;!-- ATTENTION, 0 is for development only! Use higher value otherwise. --&gt;
-    &lt;param-value&gt;0&lt;/param-value&gt;
+    &lt;!-- Use 0 during development! Consider what value you need otherwise. --&gt;
+    &lt;param-value&gt;30 s&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;default_encoding&lt;/param-name&gt;
-    &lt;!-- The encoding of the template files. --&gt;
+    &lt;!-- The encoding of the template files: --&gt;
+    &lt;param-value&gt;UTF-8&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;output_encoding&lt;/param-name&gt;
+    &lt;!-- The encoding of the template output; Note that you must set
+         "ResponseCharacterEncodring" to "fromTemplate" for this to work! --&gt;
     &lt;param-value&gt;UTF-8&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
@@ -10468,6 +10487,9 @@ TemplateHashModel roundingModeEnums =
 &lt;servlet-mapping&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   &lt;url-pattern&gt;<emphasis>*.ftl</emphasis>&lt;/url-pattern&gt;
+  &lt;!-- HTML and XML auto-escaped if incompatible_improvements &gt;= 2.3.24: --&gt;
+  &lt;url-pattern&gt;<emphasis>*.ftlh</emphasis>&lt;/url-pattern&gt;
+  &lt;url-pattern&gt;<emphasis>*.ftl</emphasis>x&lt;/url-pattern&gt;
 &lt;/servlet-mapping&gt;
 
 <replaceable>...</replaceable>
@@ -10481,6 +10503,8 @@ TemplateHashModel roundingModeEnums =
   &lt;web-resource-collection&gt;
     &lt;web-resource-name&gt;FreeMarker MVC Views&lt;/web-resource-name&gt;
     &lt;url-pattern&gt;*.ftl&lt;/url-pattern&gt;
+    &lt;url-pattern&gt;*.ftlh&lt;/url-pattern&gt;
+    &lt;url-pattern&gt;*.ftlx&lt;/url-pattern&gt;
   &lt;/web-resource-collection&gt;
   &lt;auth-constraint&gt;
     &lt;!-- Nobody is allowed to visit these directly. --&gt;
@@ -26038,6 +26062,55 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>New <literal>FreemarkerServlet</literal> init-params (see
+              <link
+              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
+              <literal>FreemarkerSerlvet</literal> API documentation</link>
+              for details):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>OverrideResponseContentType</literal>:
+                  Specifies when should we override the
+                  <literal>contentType</literal> that's already set (i.e.,
+                  non-<literal>null</literal>) in the
+                  <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, and that's still the default behavior. But
+                  now that this init-param exists, you can change that
+                  behavior, so that the <literal>contentType</literal> you
+                  have specified before forwarding to
+                  <literal>FreemarkerServlet</literal> matters.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>OverrideResponseLocale</literal>: Specifies
+                  if should we override the <literal>contentType</literal>
+                  that's already set (i.e., non-<literal>null</literal>) in
+                  the <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, but now this behavior can be changed so that
+                  we only set it if it wasn't already set.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>ResponseCharacterEncoding</literal>:
+                  Deprecates the old (and quirky) logic of specifying the
+                  output charset, which was putting it into the
+                  <literal>ContentType</literal> init-param after the MIME
+                  type, otherwise falling back to using the template file
+                  charset. The possible values are <literal>legacy</literal>
+                  (the default for backward compatibility),
+                  <literal>fromTemplate</literal> (which is
+                  <literal>legacy</literal> without quirks, and is aware of
+                  the <literal>outputEncoding</literal> setting),
+                  <literal>doNotSet</literal> (keeps what the caller has
+                  already set in the <literal>ServletRespone</literal>) and
+                  <literal>force</literal> followed by a charset name (forces
+                  a specific output charset).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>freemarker.cache.ByteArrayTemplateLoader</literal>,
               which is similar to <literal>StringTemplateLoader</literal>, but
@@ -26115,6 +26188,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   importance as number types are converted to the constructor
                   parameter type anyway.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Number literals can have Java type specified postfixes
+                  (<literal>f</literal>, <literal>d</literal>,
+                  <literal>l</literal>), plus <literal>bd</literal> for
+                  <literal>BigDecimal</literal> and <literal>bi</literal> for
+                  <literal>BigInteger</literal>.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -26144,6 +26225,40 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               synchronized, leading to random
               <literal>NullPointerException</literal>-s or other
               misbehavior.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: It wasn't well defined when a Java
+              <literal>Iterator</literal> counts as empty. Depending on what
+              <literal>ObjectWrapper</literal> you are using, one of these
+              fixes apply:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>DefaultObjectWrapper</literal> (fix is always
+                  active): Operations on the <literal>Iterator</literal> that
+                  only check if it's empty without reading an element from it,
+                  such as <literal>?has_content</literal>, won't cause the a
+                  later iteration (or further emptiness check) to fail
+                  anymore. Earlier, in certain situations, the second
+                  operation has failed saying that the iterator <quote>can be
+                  listed only once</quote>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>BeansWrapper</literal> (when it's not
+                  extended by <literal>DefaultObjectWrapper</literal>), if
+                  it's <literal>incompatibleImprovements</literal> property is
+                  set to 2.3.24 (or higher): <literal>Iterator</literal>-s
+                  were always said to be non-empty when using
+                  <literal>?has_content</literal> and such (i.e., operators
+                  that check emptiness without reading any elements). Now an
+                  <literal>Iterator</literal> counts as empty exactly if it
+                  has no elements left. (Note that this bug has never affected
+                  basic functionality, like <literal>&lt;#list
+                  ...&gt;</literal>.)</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -26317,6 +26432,109 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Added new built-in: <literal>is_markup_output</literal>,
               returns <literal>true</literal> if the value is of type
               <quote>markup output</quote>.</para>
+            </listitem>
+
+            <listitem>
+              <para>New <literal>FreemarkerServlet</literal> init-params (see
+              <link
+              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
+              <literal>FreemarkerSerlvet</literal> API documentation</link>
+              for details):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>OverrideResponseContentType</literal>:
+                  Specifies when should we override the
+                  <literal>contentType</literal> that's already set (i.e.,
+                  non-<literal>null</literal>) in the
+                  <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, and that's still the default behavior. But
+                  now that this init-param exists, you can change that
+                  behavior, so that the <literal>contentType</literal> you
+                  have specified before forwarding to
+                  <literal>FreemarkerServlet</literal> matters.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>OverrideResponseLocale</literal>: Specifies
+                  if should we override the <literal>contentType</literal>
+                  that's already set (i.e., non-<literal>null</literal>) in
+                  the <literal>HttpServletResponse</literal>. Earlier, we have
+                  always set it, but now this behavior can be changed so that
+                  we only set it if it wasn't already set.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>ResponseCharacterEncoding</literal>:
+                  Deprecates the old (and quirky) logic of specifying the
+                  output charset, which was putting it into the
+                  <literal>ContentType</literal> init-param after the MIME
+                  type, otherwise falling back to using the template file
+                  charset. The possible values are <literal>legacy</literal>
+                  (the default for backward compatibility),
+                  <literal>fromTemplate</literal> (which is
+                  <literal>legacy</literal> without quirks, and is aware of
+                  the <literal>outputEncoding</literal> setting),
+                  <literal>doNotSet</literal> (keeps what the caller has
+                  already set in the <literal>ServletRespone</literal>) and
+                  any valid charset name (forces a specific output
+                  charset).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: It wasn't well defined when a Java
+              <literal>Iterator</literal> counts as empty. Depending on what
+              <literal>ObjectWrapper</literal> you are using, one of these
+              fixes apply:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>DefaultObjectWrapper</literal> (fix is always
+                  active): Operations on the <literal>Iterator</literal> that
+                  only check if it's empty without reading an element from it,
+                  such as <literal>?has_content</literal>, won't cause the a
+                  later iteration (or further emptiness check) to fail
+                  anymore. Earlier, in certain situations, the second
+                  operation has failed saying that the iterator <quote>can be
+                  listed only once</quote>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>BeansWrapper</literal> (when it's not
+                  extended by <literal>DefaultObjectWrapper</literal>), if
+                  it's <literal>incompatibleImprovements</literal> property is
+                  set to 2.3.24 (or higher): <literal>Iterator</literal>-s
+                  were always said to be non-empty when using
+                  <literal>?has_content</literal> and such (i.e., operators
+                  that check emptiness without reading any elements). Now an
+                  <literal>Iterator</literal> counts as empty exactly if it
+                  has no elements left. (Note that this bug has never affected
+                  basic functionality, like <literal>&lt;#list
+                  ...&gt;</literal>.)</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Fixes and improvements in the <quote>object
+              builder</quote> syntax used for configuring FreeMarker from
+              <literal>java.util.Properties</literal> (or other string-only
+              sources). This is not to be confused with the template language
+              syntax, which has nothing to do with the <quote>object
+              builder</quote> syntax we are writing about here. The
+              improvements are:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Number literals can have Java type specified postfixes
+                  (<literal>f</literal>, <literal>d</literal>,
+                  <literal>l</literal>), plus <literal>bd</literal> for
+                  <literal>BigDecimal</literal> and <literal>bi</literal> for
+                  <literal>BigInteger</literal>.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>

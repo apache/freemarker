@@ -1871,8 +1871,13 @@ public class Configurable {
      *   <li>
      *      <p>Currently, the values of arguments and properties can only be one of these:
      *      <ul>
-     *        <li>A numerical literal, like {@code 123} or {@code -1.5}. Like in FTL, there are no numerical types,
-     *            the value will be automatically converted to the type of the target.</li>
+     *        <li>A numerical literal, like {@code 123} or {@code -1.5}. The value will be automatically converted to
+     *        the type of the target (just like in FTL). However, a target type is only available if the number will
+     *        be a parameter to a method or constructor, not when it's a value (or key) in a {@code List} or
+     *        {@code Map} literal. Thus in the last case the type of number will be like in Java language, like
+     *        {@code 1} is an {@code int}, and {@code 1.0} is a {@code double}, and {@code 1.0f} is a {@code float},
+     *        etc. In all cases, the standard Java type postfixes can be used ("f", "d", "l"), plus "bd" for
+     *        {@code BigDecimal} and "bi" for {@code BigInteger}.</li>
      *        <li>A boolean literal: {@code true} or {@code false}
      *        <li>The null literal: {@code null}
      *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
