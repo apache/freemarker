@@ -49,7 +49,7 @@ final class BlockAssignment extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visitAndTransform(getNestedBlock(), new CaptureOutput(env), null);
         } else {
@@ -65,6 +65,7 @@ final class BlockAssignment extends TemplateElement {
                 env.setLocalVariable(varName, value);
             }
         }
+        return null;
     }
 
     private TemplateModel capturedStringToModel(String s) throws TemplateModelException {

@@ -36,10 +36,11 @@ final class CompressedBlock extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         if (getNestedBlock() != null) {
             env.visitAndTransform(getNestedBlock(), StandardCompress.INSTANCE, null);
         }
+        return null;
     }
 
     @Override

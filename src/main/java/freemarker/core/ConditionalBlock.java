@@ -45,12 +45,11 @@ final class ConditionalBlock extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         if (condition == null || condition.evalToBoolean(env)) {
-            if (getNestedBlock() != null) {
-                env.visitByHiddingParent(getNestedBlock());
-            }
+            return new TemplateElementsToVisit(getNestedBlock(), true);
         }
+        return null;
     }
     
     @Override

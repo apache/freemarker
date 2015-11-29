@@ -22,11 +22,14 @@ package freemarker.core;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateSequenceModel;
+
+import static java.util.Arrays.asList;
 
 /**
  * <b>Internal API - subject to change:</b> Represent directive call, interpolation, text block, or other such
@@ -74,7 +77,7 @@ abstract public class TemplateElement extends TemplateObject {
      *
      * @param env The runtime environment
      */
-    abstract void accept(Environment env) throws TemplateException, IOException;
+    abstract TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException;
 
     /**
      * One-line description of the element, that contain all the information that is used in
@@ -103,7 +106,7 @@ abstract public class TemplateElement extends TemplateObject {
     
     /**
      * Tells if the element should show up in error stack traces. If you think you need to set this to {@code false} for
-     * an element, always consider if you should use {@link Environment#visitByHiddingParent(TemplateElement)} instead.
+     * an element, always consider if you should pass true instead to {@link Environment#visit(TemplateElement, boolean)}.
      * 
      * Note that this will be ignored for the top (current) element of a stack trace, as that's always shown.
      */
@@ -315,6 +318,10 @@ abstract public class TemplateElement extends TemplateObject {
     
     final TemplateElement getRegulatedChild(int index) {
         return regulatedChildBuffer[index];
+    }
+
+    final List<TemplateElement> getRegulatedChildren(){
+        return asList(regulatedChildBuffer);
     }
     
     final int getIndex() {

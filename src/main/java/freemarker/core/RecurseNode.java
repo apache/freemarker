@@ -43,7 +43,7 @@ final class RecurseNode extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws IOException, TemplateException {
+    TemplateElementsToVisit accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.eval(env);
         if (node != null && !(node instanceof TemplateNodeModel)) {
             throw new NonNodeException(targetNode, node, "node", env);
@@ -71,6 +71,7 @@ final class RecurseNode extends TemplateElement {
         }
         
         env.recurse((TemplateNodeModel) node, (TemplateSequenceModel) nss);
+        return null;
     }
 
     @Override

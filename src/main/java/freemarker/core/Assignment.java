@@ -101,7 +101,7 @@ final class Assignment extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException {
         final Environment.Namespace namespace;
         if (namespaceExp == null) {
             switch (scope) {
@@ -193,6 +193,7 @@ final class Assignment extends TemplateElement {
         } else {
             namespace.put(variableName, value);
         }
+        return null;
     }
 
     @Override

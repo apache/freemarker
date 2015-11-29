@@ -90,8 +90,9 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
 
     @Override
-    void accept(Environment env) {
+    TemplateElementsToVisit accept(Environment env) {
         env.visitMacroDef(this);
+        return null;
     }
 
     @Override
@@ -187,7 +188,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             sanityCheck(env);
             // Set default values for unspecified parameters
             if (getNestedBlock() != null) {
-                env.visit(getNestedBlock());
+                env.visit(getNestedBlock(), false);
             }
         }
 

@@ -55,9 +55,10 @@ final class BodyInstruction extends TemplateElement {
      * I (JR) realized this thanks to some incisive comments from Daniel Dekany.
      */
     @Override
-    void accept(Environment env) throws IOException, TemplateException {
+    TemplateElementsToVisit accept(Environment env) throws IOException, TemplateException {
         Context bodyContext = new Context(env);
         env.invokeNestedContent(bodyContext);
+        return null;
     }
 
     @Override

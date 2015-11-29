@@ -40,8 +40,9 @@ final class AttemptBlock extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         env.visitAttemptRecover(attemptBlock, recoveryBlock);
+        return null;
     }
 
     @Override

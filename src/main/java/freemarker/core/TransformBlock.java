@@ -55,7 +55,7 @@ final class TransformBlock extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) 
+    TemplateElementsToVisit accept(Environment env)
     throws TemplateException, IOException {
         TemplateTransformModel ttm = env.getTransform(transformExpression);
         if (ttm != null) {
@@ -79,6 +79,7 @@ final class TransformBlock extends TemplateElement {
                     transformExpression, tm,
                     "transform", new Class[] { TemplateTransformModel.class }, env);
         }
+        return null;
     }
 
     @Override

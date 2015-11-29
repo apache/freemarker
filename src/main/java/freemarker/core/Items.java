@@ -36,7 +36,7 @@ class Items extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
         final IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, null);
         if (iterCtx == null) {
             // The parser should prevent this situation
@@ -45,6 +45,7 @@ class Items extends TemplateElement {
         }
         
         iterCtx.loopForItemsElement(env, getNestedBlock(), loopVarName);
+        return null;
     }
 
     @Override
