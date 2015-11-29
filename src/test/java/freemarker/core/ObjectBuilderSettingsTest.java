@@ -632,7 +632,7 @@ public class ObjectBuilderSettingsTest {
         assertEquals(Boolean.TRUE, _ObjectBuilderSettingEvaluator.eval(
                 "  true  ",
                 Object.class, true, _SettingEvaluationEnvironment.getCurrent()));
-        assertEquals(new BigDecimal("1.23"), _ObjectBuilderSettingEvaluator.eval(
+        assertEquals(Double.valueOf("1.23"), _ObjectBuilderSettingEvaluator.eval(
                 "1.23 ",
                 Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
         assertEquals(new Version(1, 2, 3), _ObjectBuilderSettingEvaluator.eval(
@@ -642,7 +642,7 @@ public class ObjectBuilderSettingsTest {
 
     @Test
     public void testNumberLiteralJavaTypes() throws Exception {
-        assertEquals(new BigDecimal("1.0"), _ObjectBuilderSettingEvaluator.eval(
+        assertEquals(Double.valueOf("1.0"), _ObjectBuilderSettingEvaluator.eval(
                 "1.0",
                 Number.class, true, _SettingEvaluationEnvironment.getCurrent()));
 
@@ -857,6 +857,68 @@ public class ObjectBuilderSettingsTest {
         } catch (_ObjectBuilderSettingEvaluationException e) {
             assertThat(e.getMessage(), containsString("null as key"));
         }
+    }
+
+    @Test
+    public void testMethodParameterNumberTypes() throws Exception {
+        {
+            TestBean8 result = (TestBean8) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean8(anyObject=1)",
+                    TestBean8.class, false, new _SettingEvaluationEnvironment());
+            assertEquals(result.getAnyObject(), 1);
+        }
+        {
+            TestBean8 result = (TestBean8) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean8(anyObject=2147483649)",
+                    TestBean8.class, false, new _SettingEvaluationEnvironment());
+            assertEquals(result.getAnyObject(), 2147483649L);
+        }
+        {
+            TestBean8 result = (TestBean8) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean8(anyObject=1.0)",
+                    TestBean8.class, false, new _SettingEvaluationEnvironment());
+            // Like in FTL, non-integer numbers are BigDecimal-s, that are later coerced to the actual parameter type.
+            // However, here the type is Object, so it remains BigDecimal.
+            assertEquals(new BigDecimal("1.0"), result.getAnyObject());
+        }
+    }
+    
+    @Test
+    public void testNonMethodParameterNumberTypes() throws Exception {
+        assertEqualsEvaled(Integer.valueOf(1), "1");
+        assertEqualsEvaled(Double.valueOf(1), "1.0");
+        assertEqualsEvaled(Long.valueOf(2147483649l), "2147483649");
+
+        assertEqualsEvaled(Double.valueOf(1), "1d");
+        assertEqualsEvaled(Double.valueOf(1), "1D");
+        assertEqualsEvaled(Float.valueOf(1), "1f");
+        assertEqualsEvaled(Float.valueOf(1), "1F");
+        assertEqualsEvaled(Long.valueOf(1), "1l");
+        assertEqualsEvaled(Long.valueOf(1), "1L");
+        assertEqualsEvaled(BigDecimal.valueOf(1), "1bd");
+        assertEqualsEvaled(BigDecimal.valueOf(1), "1Bd");
+        assertEqualsEvaled(BigDecimal.valueOf(1), "1BD");
+        assertEqualsEvaled(BigInteger.valueOf(1), "1bi");
+        assertEqualsEvaled(BigInteger.valueOf(1), "1bI");
+        
+        assertEqualsEvaled(Float.valueOf(1.5f), "1.5f");
+        assertEqualsEvaled(Double.valueOf(1.5), "1.5d");
+        assertEqualsEvaled(BigDecimal.valueOf(1.5), "1.5bd");
+        
+        assertEqualsEvaled(
+                ImmutableList.of(-1, -0.5, new BigDecimal("-0.1")),
+                "[ -1, -0.5, -0.1bd ]");
+        assertEqualsEvaled(
+                ImmutableMap.of(-1, -11, -0.5, -0.55, new BigDecimal("-0.1"), new BigDecimal("-0.11")),
+                "{ -1: -11, -0.5: -0.55, -0.1bd: -0.11bd }");
+    }
+    
+    private void assertEqualsEvaled(Object expectedValue, String s)
+            throws _ObjectBuilderSettingEvaluationException, ClassNotFoundException, InstantiationException,
+            IllegalAccessException {
+        Object actualValue = _ObjectBuilderSettingEvaluator.eval(
+                s, Object.class, true, _SettingEvaluationEnvironment.getCurrent());
+        assertEquals(expectedValue, actualValue);
     }
     
     @Test

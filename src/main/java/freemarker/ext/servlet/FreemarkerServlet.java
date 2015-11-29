@@ -20,6 +20,8 @@
 package freemarker.ext.servlet;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,6 +47,9 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
+import freemarker.core.Environment;
+import freemarker.core.OutputFormat;
+import freemarker.core.UndefinedOutputFormat;
 import freemarker.ext.jsp.TaglibFactory;
 import freemarker.ext.jsp.TaglibFactory.ClasspathMetaInfTldSource;
 import freemarker.ext.jsp.TaglibFactory.ClearMetaInfTldSource;
@@ -88,9 +93,9 @@ import freemarker.template.utility.StringUtil;
  * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>.
  * 
  * <li>A custom directive named {@code include_page} allows you to include the output of another servlet resource from
- * your servlet container, just as if you used {@code ServletRequest.getRequestDispatcher(path).include()}:
- * {@code <@include_page path="/myWebapp/somePage.jsp"/>}. You can also pass parameters to the newly included page by
- * passing a hash named {@code params}:
+ * your servlet container, just as if you used {@code ServletRequest.getRequestDispatcher(path).include()}: {@code 
+ * <@include_page path="/myWebapp/somePage.jsp"/>}. You can also pass parameters to the newly included page by passing a
+ * hash named {@code params}:
  * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params= lang: "en", q="5"}/&gt;</code>. By default, the request
  * parameters of the original request (the one being processed by FreemarkerServlet) are also inherited by the include.
  * You can explicitly control this inheritance using the {@code inherit_params} parameter:
@@ -106,41 +111,113 @@ import freemarker.template.utility.StringUtil;
  * 
  * <ul>
  * 
- * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the templates. By default, this is
- * interpreted as a {@link ServletContext} reasource path, which practically means a web application directory relative
- * path, or a {@code WEB-INF/lib/*.jar/META-INF/resources}-relative path (note that this last didn't work properly
- * before FreeMarker 2.3.23).<br>
+ * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the template files. By default,
+ * this is interpreted as a {@link ServletContext} resource path, which practically means a web application directory
+ * relative path, or a {@code WEB-INF/lib/*.jar/META-INF/resources}-relative path (note that this last haven't always
+ * worked before FreeMarker 2.3.23).<br>
  * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
  * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
  * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
  * you want to load templates from the specified package accessible through the Thread Context Class Loader of the
  * thread that initializes this servlet.<br>
  * If {@code incompatible_improvements} is set to 2.3.22 (or higher), you can specify multiple comma separated locations
- * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}.
- * This internally creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't
- * set to at least 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
+ * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}. This internally
+ * creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't set to at least
+ * 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
  * Any of the above can have a {@code ?setting(name=value, ...)} postfix to set the JavaBeans properties of the
  * {@link TemplateLoader} created. For example,
- * {@code /templates?settings(attemptFileAccess=false, URLConnectionUsesCaches=true)}
- * calls {@link WebappTemplateLoader#setAttemptFileAccess(boolean)}
- * and {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. 
- * For backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
+ * {@code /templates?settings(attemptFileAccess=false, URLConnectionUsesCaches=true)} calls
+ * {@link WebappTemplateLoader#setAttemptFileAccess(boolean)} and
+ * {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. For
+ * backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
  * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
- * defining class loader of this servlet's class. This can cause template not found errors, if that class (in
+ * defining class loader of this servlet's class. This can cause template-not-found errors, if that class (in
  * {@code freemarer.jar} usually) is not local to the web application, while the templates are.<br>
  * The default value is <tt>class://</tt> (that is, the root of the class hierarchy), which is not recommended anymore,
- * and should be overwritten with the init-param.</li>
+ * and should be overwritten with the {@value #INIT_PARAM_TEMPLATE_PATH} init-param.</li>
  * 
- * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to true, generates headers in the response that advise the
- * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
+ * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to {@code true}, generates headers in the response that
+ * advise the HTTP client not to cache the returned page. If {@code false}, the HTTP response is not modified for this
+ * purpose. The default is {@code false}.</li>
  * 
- * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: If specified, response uses the specified Content-type HTTP
- * header. The value may include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified,
- * <tt>"text/html"</tt> is used. If the charset is not specified in this init-param, then the charset (encoding) of the
- * actual template file will be used (in the response HTTP header and for encoding the output stream). Note that this
- * setting can be overridden on a per-template basis by specifying a custom attribute named <tt>content_type</tt> in the
- * <tt>attributes</tt> parameter of the <tt>&lt;#ftl&gt;</tt> directive.</li>
+ * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: The Content-type HTTP header value used in the HTTP responses
+ * when nothing else specifies the MIME type. The things that may specify the MIME type (and hence this init-param is
+ * ignored), starting with the highest precedence, are:
+ * <ol>
+ * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@value #INIT_PARAM_VALUE_NEVER} (the
+ * default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is used
+ * if that's non-{@code null}.
+ * <li>The template's <tt>content_type</tt> custom attribute, usually specified via the <tt>attributes</tt> parameter of
+ * the <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
+ * <li>The {@linkplain Template#getOutputFormat() output format of the template}, if that has non-{@code null} MIME-type
+ * ({@link OutputFormat#getMimeType()}). When a template has no output format specified, {@link UndefinedOutputFormat}
+ * is used, which has {@code null} MIME-type. (The output format of a template is deduced from {@link Configuration}
+ * settings, or can be specified directly in the template, like {@code <#ftl outputFormat="HTML">}. See the FreeMarker
+ * Manual for more about the output format mechanism. Note that setting an output format may turns on auto-escaping, so
+ * it's not just about MIME types.)
+ * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is not {@value #INIT_PARAM_VALUE_ALWAYS}
+ * (the default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is
+ * used if that's non-{@code null}.
+ * </ol>
+ * If none of the above gives a MIME type, then this init-param does. Defaults to <tt>"text/html"</tt>. If and only if
+ * the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING} init-param is set to {@value #INIT_PARAM_VALUE_LEGACY} (which is
+ * the default of it), the content type may include the charset (as in <tt>"text/html; charset=utf-8"</tt>), in which
+ * case that specifies the actual charset of the output. If the the {@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}
+ * init-param is not set to {@value #INIT_PARAM_VALUE_LEGACY}, then specifying the charset in the
+ * {@value #INIT_PARAM_CONTENT_TYPE} init-param is not allowed, and will cause servlet initialization error.</li>
+ *
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE}</strong> (since 2.3.24): Specifies when we should
+ * override the {@code contentType} that might be already set (i.e., non-{@code null}) in the
+ * {@link HttpServletResponse}. The default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always set the
+ * content type. Another possible value is {@value #INIT_PARAM_VALUE_NEVER}, which means that we don't set the content
+ * type in the response, unless {@link HttpServletResponse#getContentType()} is {@code null}. The third possible value
+ * is {@value #INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE}, which means that we only set the content type if either
+ * the template has an associated {@link OutputFormat} with non-{@code null} {@link OutputFormat#getMimeType()}, or it
+ * has a custom attribute with name <tt>content_type</tt>, or {@link HttpServletResponse#getContentType()} is
+ * {@code null}. Setting this init-param allows you to specify the content type before forwarding to
+ * {@link FreemarkerServlet}.</li>
+ *
+ * <li><strong>{@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE}</strong> (since 2.3.24): Specifies if we should override
+ * the template {@code locale} that might be already set (i.e., non-{@code null}) in the {@link HttpServletRequest}. The
+ * default is {@value #INIT_PARAM_VALUE_ALWAYS}, which means that we always deduce the template {@code locale} by
+ * invoking {@link #deduceLocale(String, HttpServletRequest, HttpServletResponse)}. Another possible value is
+ * {@value #INIT_PARAM_VALUE_NEVER}, which means that we don't deduce the template {@code locale}, unless
+ * {@link HttpServletRequest#getLocale()} is {@code null}.
  * 
+ * <li><strong>{@value #INIT_PARAM_RESPONSE_CHARACTER_ENCODING}</strong> (since 2.3.24): Specifies how the
+ * {@link HttpServletResponse} "character encoding" (as in {@link HttpServletResponse#setCharacterEncoding(String)})
+ * will be deduced. The possible modes are:
+ * <ul>
+ * <li>{@value #INIT_PARAM_VALUE_LEGACY}: This is the default for backward compatibility; in new applications, use
+ * {@value #INIT_PARAM_VALUE_FROM_TEMPLATE} (or some of the other options) instead. {@value #INIT_PARAM_VALUE_LEGACY}
+ * will use the charset of the template file to set the charset of the servlet response. Except, if the
+ * {@value #INIT_PARAM_CONTENT_TYPE} init-param contains a charset, it will use that instead. A quirk of this legacy
+ * mode is that it's not aware of the {@link Configurable#getOutputEncoding()} FreeMarker setting, and thus never reads
+ * or writes it (though very few applications utilize that setting anyway). Also, it sets the charset of the servlet
+ * response by adding it to the response content type via calling {@link HttpServletResponse#setContentType(String)} (as
+ * that was the only way before Servlet 2.4), not via the more modern
+ * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template usually comes
+ * from {@link Configuration#getDefaultEncoding()} (i.e., from the {@code default_encoding} FreeMarker setting),
+ * occasionally from {@link Configuration#getEncoding(Locale)} (when FreeMarker was configured to use different charsets
+ * depending on the locale) or even more rarely from {@link Configuration#getTemplateConfigurers()} (when FreeMarker was
+ * configured to use a specific charset for certain templates).
+ * <li>{@value #INIT_PARAM_VALUE_FROM_TEMPLATE}: This should be used in most applications, but it's not the default for
+ * backward compatibility. It reads the {@link Configurable#getOutputEncoding()} setting of the template (note that the
+ * template usually just inherits that from the {@link Configuration}), and if that's not set, then reads the source
+ * charset of the template, just like {@value #INIT_PARAM_VALUE_LEGACY}. Then it passes the charset acquired this way to
+ * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. (It
+ * doesn't call the legacy {@link HttpServletResponse#setContentType(String)} API to set the charset.) (Note that if the
+ * template has a {@code content_type} template attribute (which is deprecated) that specifies a charset, it will be
+ * used as the output charset of that template.)
+ * <li>{@value #INIT_PARAM_VALUE_DO_NOT_SET}: {@link FreemarkerServlet} will not set the {@link HttpServletResponse}
+ * "character encoding". It will still call {@link Environment#setOutputEncoding(String)}, so that the running template
+ * will be aware of the charset used for the output.
+ * <li>{@value #INIT_PARAM_VALUE_FORCE_PREFIX} + charset name, for example {@code force UTF-8}: The output charset will
+ * be the one specified after "force" + space, regardless of everything. The charset specified this way is passed to
+ * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. If the
+ * charset name is not recognized by Java, the servlet initialization will fail.
+ * </ul>
+ *
  * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
  * "MB" is written after the number (like {@code <param-value>256 KB</param-value>}) then in kilobytes or megabytes.
  * This corresponds to {@link HttpServletResponse#setBufferSize(int)}. If the {@link HttpServletResponse} state doesn't
@@ -157,9 +234,9 @@ import freemarker.template.utility.StringUtil;
  * 
  * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items, each
  * is either {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, or {@value #META_INF_TLD_LOCATION_CLASSPATH}
- * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example
- * {@code <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or
- * {@code <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
+ * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example {@code 
+ * <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or {@code 
+ * <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
  * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to a list that contains
  * {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS} only (can be overridden with
  * {@link #createDefaultMetaInfTldSources()}). Note that this can be also specified with the
@@ -187,7 +264,8 @@ import freemarker.template.utility.StringUtil;
  * as {@code object_wrapper}.
  * 
  * <li><strong>Any other init-params</strong> will be interpreted as {@link Configuration}-level FreeMarker setting. See
- * the possible names and values at {@link Configuration#setSetting(String, String)}.</li>
+ * the possible names and values at {@link Configuration#setSetting(String, String)}. Note that these init-param names
+ * are starting with lower-case letter (upper-case init-params are used for FreemarkerSerlvet settings).</li>
  * 
  * </ul>
  * 
@@ -225,12 +303,10 @@ import freemarker.template.utility.StringUtil;
  * the servlet container (with the proper cause exception). After all, if the visited URL had an associated "action" but
  * the template behind it is missing, that's an internal server error, not a wrong URL.</li>
  * 
- * <li>
- * If the template contains parsing errors, it will log it with error level, then the servlet throws
+ * <li>If the template contains parsing errors, it will log it with error level, then the servlet throws
  * {@link ServletException} to the servlet container (with the proper cause exception).</li>
  * 
- * <li>
- * If the template throws exception during its execution, and the value of the {@code template_exception_handler}
+ * <li>If the template throws exception during its execution, and the value of the {@code template_exception_handler}
  * init-param is {@code rethrow} (recommended), it will log it with error level and then the servlet throws
  * {@link ServletException} to the servlet container (with the proper cause exception). But beware, the default value of
  * the {@code template_exception_handler} init-param is {@code html_debug}, which is for development only! Set it to
@@ -270,6 +346,27 @@ public class FreemarkerServlet extends HttpServlet {
      * @since 2.3.22
      */
     public static final String INIT_PARAM_CONTENT_TYPE = "ContentType";
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     *
+     * @since 2.3.24
+     */
+    public static final String INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE = "OverrideResponseContentType";
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     *
+     * @since 2.3.24
+     */
+    public static final String INIT_PARAM_RESPONSE_CHARACTER_ENCODING = "ResponseCharacterEncoding";
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     *
+     * @since 2.3.24
+     */
+    public static final String INIT_PARAM_OVERRIDE_RESPONSE_LOCALE = "OverrideResponseLocale";
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
@@ -314,7 +411,15 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE = "ignore";
     private static final String DEPR_INITPARAM_DEBUG = "debug";
     
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final ContentType DEFAULT_CONTENT_TYPE = new ContentType("text/html");
+    
+    public static final String INIT_PARAM_VALUE_NEVER = "never";
+    public static final String INIT_PARAM_VALUE_ALWAYS = "always";
+    public static final String INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE = "whenTemplateHasMimeType";
+    public static final String INIT_PARAM_VALUE_FROM_TEMPLATE = "fromTemplate";
+    public static final String INIT_PARAM_VALUE_LEGACY = "legacy";
+    public static final String INIT_PARAM_VALUE_DO_NOT_SET = "doNotSet";
+    public static final String INIT_PARAM_VALUE_FORCE_PREFIX = "force ";
 
     /**
      * When set, the items defined in it will be added after those coming from the
@@ -353,7 +458,6 @@ public class FreemarkerServlet extends HttpServlet {
      * @since 2.3.22
      */
     public static final String META_INF_TLD_LOCATION_CLEAR = "clear";
-    
 
     public static final String KEY_REQUEST = "Request";
     public static final String KEY_INCLUDE = "include_page";
@@ -411,8 +515,13 @@ public class FreemarkerServlet extends HttpServlet {
     private Configuration config;
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ObjectWrapper wrapper;
-    private String contentType;
-    private boolean noCharsetInContentType;
+    private ContentType contentType;
+    private OverrideResponseContentType overrideResponseContentType = initParamValueToEnum(
+            getDefaultOverrideResponseContentType(), OverrideResponseContentType.values());
+    private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
+    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
+    private Charset forcedResponseCharacterEncoding;
+    private OverrideResponseLocale overrideResponseLocale = OverrideResponseLocale.ALWAYS;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
 
@@ -556,7 +665,17 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_DEBUG)) {
                     debug = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
-                    contentType = value;
+                    contentType = new ContentType(value);
+                } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE)) {
+                    overrideResponseContentType = initParamValueToEnum(value, OverrideResponseContentType.values());
+                } else if (name.equals(INIT_PARAM_RESPONSE_CHARACTER_ENCODING)) {
+                    responseCharacterEncoding = initParamValueToEnum(value, ResponseCharacterEncoding.values());
+                    if (responseCharacterEncoding == ResponseCharacterEncoding.FORCE_CHARSET) {
+                        String charsetName = value.substring(INIT_PARAM_VALUE_FORCE_PREFIX.length()).trim();
+                        forcedResponseCharacterEncoding = Charset.forName(charsetName);
+                    }
+                } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_LOCALE)) {
+                    overrideResponseLocale = initParamValueToEnum(value, OverrideResponseLocale.values());
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
@@ -578,22 +697,14 @@ public class FreemarkerServlet extends HttpServlet {
             }
         } // while initpnames
         
-        noCharsetInContentType = true;
-        int i = contentType.toLowerCase().indexOf("charset=");
-        if (i != -1) {
-            char c = ' ';
-            i--;
-            while (i >= 0) {
-                c = contentType.charAt(i);
-                if (!Character.isWhitespace(c)) break;
-                i--;
-            }
-            if (i == -1 || c == ';') {
-                noCharsetInContentType = false;
-            }
-        }
+        if (contentType.containsCharset && responseCharacterEncoding != ResponseCharacterEncoding.LEGACY) {
+            throw new InitParamValueException(INIT_PARAM_CONTENT_TYPE, contentType.httpHeaderValue,
+                    new IllegalStateException("You can't specify the charset in the content type, because the \"" +
+                            INIT_PARAM_RESPONSE_CHARACTER_ENCODING + "\" init-param isn't set to "
+                            + "\"" + INIT_PARAM_VALUE_LEGACY + "\"."));
+        }        
     }
-
+    
     private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
         List/*<MetaInfTldSource>*/ metaInfTldSources = null;
         
@@ -684,8 +795,11 @@ public class FreemarkerServlet extends HttpServlet {
             LOG.debug("Requested template " + StringUtil.jQuoteNoXSS(templatePath) + ".");
         }
 
-        final Locale locale = deduceLocale(templatePath, request, response);
-        
+        Locale locale = request.getLocale();
+        if (locale == null || overrideResponseLocale != OverrideResponseLocale.NEVER) {
+            locale = deduceLocale(templatePath, request, response);
+        }
+
         final Template template;
         try {
             template = config.getTemplate(templatePath, locale);
@@ -708,15 +822,38 @@ public class FreemarkerServlet extends HttpServlet {
             throw newServletExceptionWithFreeMarkerLogging(
                     "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
+
+        boolean tempSpecContentTypeContainsCharset = false;
+        if (response.getContentType() == null || overrideResponseContentType != OverrideResponseContentType.NEVER) {
+            ContentType templateSpecificContentType = getTemplateSpecificContentType(template);
+            if (templateSpecificContentType != null) {
+                // With ResponseCharacterEncoding.LEGACY we should append the charset, but we don't do that for b. c.
+                response.setContentType(
+                        responseCharacterEncoding != ResponseCharacterEncoding.DO_NOT_SET
+                                ? templateSpecificContentType.httpHeaderValue
+                                : templateSpecificContentType.getMimeType());
+                tempSpecContentTypeContainsCharset = templateSpecificContentType.containsCharset;
+            } else if (response.getContentType() == null
+                    || overrideResponseContentType == OverrideResponseContentType.ALWAYS) {
+                if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY && !contentType.containsCharset) {
+                    // In legacy mode we don't call response.setCharacterEncoding, so the charset must be set here:
+                    response.setContentType(
+                            contentType.httpHeaderValue + "; charset=" + getTemplateSpecificOutputEncoding(template));
+                } else {
+                    response.setContentType(contentType.httpHeaderValue);
+                }
+            }
+        }
         
-        Object attrContentType = template.getCustomAttribute("content_type");
-        if (attrContentType != null) {
-            response.setContentType(attrContentType.toString());
-        } else {
-            if (noCharsetInContentType) {
-                response.setContentType(contentType + "; charset=" + template.getEncoding());
+        if (responseCharacterEncoding != ResponseCharacterEncoding.LEGACY
+                && responseCharacterEncoding != ResponseCharacterEncoding.DO_NOT_SET) {
+            // Using the Servlet 2.4 way of setting character encoding.
+            if (responseCharacterEncoding != ResponseCharacterEncoding.FORCE_CHARSET) {
+                if (!tempSpecContentTypeContainsCharset) {
+                    response.setCharacterEncoding(getTemplateSpecificOutputEncoding(template));
+                }
             } else {
-                response.setContentType(contentType);
+                response.setCharacterEncoding(forcedResponseCharacterEncoding.name());
             }
         }
 
@@ -732,7 +869,14 @@ public class FreemarkerServlet extends HttpServlet {
             if (preTemplateProcess(request, response, template, model)) {
                 try {
                     // Process the template
-                    template.process(model, response.getWriter());
+                    Environment env = template.createProcessingEnvironment(model, response.getWriter());
+                    if (responseCharacterEncoding != ResponseCharacterEncoding.LEGACY) {
+                        String actualOutputCharset = response.getCharacterEncoding();
+                        if (actualOutputCharset != null) {
+                            env.setOutputEncoding(actualOutputCharset);
+                        }
+                    }
+                    processEnvironment(env, request, response);
                 } finally {
                     // Give subclasses a chance to hook into postprocessing
                     postTemplateProcess(request, response, template, model);
@@ -747,6 +891,49 @@ public class FreemarkerServlet extends HttpServlet {
             }
             throw newServletExceptionWithFreeMarkerLogging("Error executing FreeMarker template", e);
         }
+    }
+
+    /**
+     * This is the method that actually executes the template. The original implementation coming from
+     * {@link FreemarkerServlet} simply calls {@link Environment#process()}. Overriding this method allows you to
+     * prepare the {@link Environment} before the execution, or extract information from the {@link Environment} after
+     * the execution. It also allows you to capture exceptions throw by the template.
+     * 
+     * @param env
+     *            The {@link Environment} object already set up to execute the template. You only have to call
+     *            {@link Environment#process()} and the output will be produced by the template.
+     * 
+     * @since 2.3.24
+     */
+    protected void processEnvironment(Environment env, HttpServletRequest request, HttpServletResponse response)
+            throws TemplateException, IOException {
+        env.process();
+    }
+
+    private String getTemplateSpecificOutputEncoding(Template template) {
+        String outputEncoding = responseCharacterEncoding == ResponseCharacterEncoding.LEGACY ? null
+                : template.getOutputEncoding();
+        return outputEncoding != null ? outputEncoding : template.getEncoding();
+    }
+
+    private ContentType getTemplateSpecificContentType(final Template template) {
+        Object contentTypeAttr = template.getCustomAttribute("content_type");
+        if (contentTypeAttr != null) {
+            // Converted with toString() for backward compatibility.
+            return new ContentType(contentTypeAttr.toString());
+        }
+        
+        String outputFormatMimeType = template.getOutputFormat().getMimeType();
+        if (outputFormatMimeType != null) {
+            if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY) {
+                // In legacy mode we won't call serlvetResponse.setCharacterEncoding(...), so:
+                return new ContentType(outputFormatMimeType + "; charset=" + getTemplateSpecificOutputEncoding(template), true);
+            } else {
+                return new ContentType(outputFormatMimeType, false);
+            }
+        }
+            
+        return null;
     }
 
     private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {
@@ -790,12 +977,13 @@ public class FreemarkerServlet extends HttpServlet {
     }
     
     /**
-     * Returns the locale used for the {@link Configuration#getTemplate(String, Locale)} call. The base implementation
-     * simply returns the locale setting of the configuration. Override this method to provide different behaviour, i.e.
-     * to use the locale indicated in the request.
+     * Returns the locale used for the {@link Configuration#getTemplate(String, Locale)} call (as far as the
+     * {@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE} Servlet init-param allows that). The base implementation in
+     * {@link FreemarkerServlet} simply returns the {@code locale} setting of the configuration. Override this method to
+     * provide different behavior, for example, to use the locale indicated in the HTTP request.
      * 
      * @param templatePath
-     *            The template path (templat name) as it will be passed to {@link Configuration#getTemplate(String)}.
+     *            The template path (template name) as it will be passed to {@link Configuration#getTemplate(String)}.
      *            (Not to be confused with the servlet init-param of identical name; they aren't related.)
      * 
      * @throws ServletException
@@ -1212,39 +1400,39 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     /**
-     * Called before the execution is passed to template.process().
-     * This is a generic hook you might use in subclasses to perform a specific
-     * action before the template is processed. By default does nothing.
-     * A typical action to perform here is to inject application-specific
-     * objects into the model root
+     * Called before the execution is passed to {@link Template#process(Object, java.io.Writer)}. This is a
+     * generic hook you might use in subclasses to perform a specific action before the template is processed.
      *
-     * <p>Example: Expose the Serlvet context path as "baseDir" for all templates:
-     *
-     *<pre>
-     *    ((SimpleHash) data).put("baseDir", request.getContextPath() + "/");
-     *    return true;
-     *</pre>
-     *
-     * @param request the actual HTTP request
-     * @param response the actual HTTP response
-     * @param template the template that will get executed
-     * @param data the data that will be passed to the template. By default this will be
-     *        an {@link AllHttpScopesHashModel} (which is a {@link freemarker.template.SimpleHash} subclass).
-     *        Thus, you can add new variables to the data-model with the
-     *        {@link freemarker.template.SimpleHash#put(String, Object)} subclass) method.
+     * @param request
+     *            The HTTP request that we will response to.
+     * @param response
+     *            The HTTP response. The HTTP headers are already initialized here, such as the {@code conteType} and
+     *            the {@code responseCharacterEncoding} are already set, but you can do the final adjustments here. The
+     *            response {@link Writer} isn't created yet, so changing HTTP headers and buffering parameters works.
+     * @param template
+     *            The template that will get executed
+     * @param model
+     *            The data model that will be passed to the template. By default this will be an
+     *            {@link AllHttpScopesHashModel} (which is a {@link freemarker.template.SimpleHash} subclass). Thus, you
+     *            can add new variables to the data-model with the
+     *            {@link freemarker.template.SimpleHash#put(String, Object)} subclass) method. However, to adjust the
+     *            data-model, overriding
+     *            {@link #createModel(ObjectWrapper, ServletContext, HttpServletRequest, HttpServletResponse)} is
+     *            probably a more appropriate place.
+     * 
      * @return true to process the template, false to suppress template processing.
      */
     protected boolean preTemplateProcess(
         HttpServletRequest request,
         HttpServletResponse response,
         Template template,
-        TemplateModel data)
+        TemplateModel model)
         throws ServletException, IOException {
         return true;
     }
 
     /**
-     * Called after the execution returns from template.process().
+     * Called after the execution returns from {@link Template#process(Object, java.io.Writer)}.
      * This is a generic hook you might use in subclasses to perform a specific
      * action after the template is processed. It will be invoked even if the
      * template processing throws an exception. By default does nothing.
@@ -1268,6 +1456,17 @@ public class FreemarkerServlet extends HttpServlet {
      */
     protected Configuration getConfiguration() {
         return config;
+    }
+
+    /**
+     * Returns the default value of the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} Servlet init-param.
+     * The method inherited from {@link FreemarkerServlet} returns {@value #INIT_PARAM_VALUE_ALWAYS}; subclasses my
+     * override this.
+     * 
+     * @since 2.3.24
+     */
+    protected String getDefaultOverrideResponseContentType() {
+        return INIT_PARAM_VALUE_ALWAYS;
     }
 
     /**
@@ -1351,4 +1550,129 @@ public class FreemarkerServlet extends HttpServlet {
         
     }
     
+    private static class ContentType {
+        private final String httpHeaderValue;
+        private final boolean containsCharset;
+        
+        public ContentType(String httpHeaderValue) {
+            this(httpHeaderValue, contentTypeContainsCharset(httpHeaderValue));
+        }
+
+        public ContentType(String httpHeaderValue, boolean containsCharset) {
+            this.httpHeaderValue = httpHeaderValue;
+            this.containsCharset = containsCharset;
+        }
+        
+        private static boolean contentTypeContainsCharset(String contentType) {
+            int charsetIdx = contentType.toLowerCase().indexOf("charset=");
+            if (charsetIdx != -1) {
+                char c = 0;
+                charsetIdx--;
+                while (charsetIdx >= 0) {
+                    c = contentType.charAt(charsetIdx);
+                    if (!Character.isWhitespace(c)) break;
+                    charsetIdx--;
+                }
+                if (charsetIdx == -1 || c == ';') {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        /**
+         * Extracts the MIME type without the charset specifier or other such extras.
+         */
+        private String getMimeType() {
+            int scIdx = httpHeaderValue.indexOf(';');
+            return (scIdx == -1 ? httpHeaderValue : httpHeaderValue.substring(0, scIdx)).trim();
+        }
+        
+    }
+    
+    private <T extends InitParamValueEnum> T initParamValueToEnum(String initParamValue, T[] enumValues) {
+        for (T enumValue : enumValues) {
+            String enumInitParamValue = enumValue.getInitParamValue();
+            if (initParamValue.equals(enumInitParamValue)
+                    || enumInitParamValue.endsWith("}") && initParamValue.startsWith(
+                            enumInitParamValue.substring(0, enumInitParamValue.indexOf("${")))) {
+                return enumValue;
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(StringUtil.jQuote(initParamValue));
+        sb.append(" is not a one of the enumeration values: ");
+        boolean first = true;
+        for (T value : enumValues) {
+            if (!first) {
+                sb.append(", ");
+            } else {
+                first = false;
+            }
+            sb.append(StringUtil.jQuote(value.getInitParamValue()));
+        }
+        throw new IllegalArgumentException(sb.toString());
+    }
+
+    /**
+     * Superclass of all (future) init-param value enums.
+     * 
+     * @see #initParamValueToEnum
+     */
+    private interface InitParamValueEnum {
+        String getInitParamValue();
+    }
+    
+    private enum OverrideResponseContentType implements InitParamValueEnum {
+        ALWAYS(INIT_PARAM_VALUE_ALWAYS),
+        NEVER(INIT_PARAM_VALUE_NEVER),
+        WHEN_TEMPLATE_HAS_MIME_TYPE(INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE);
+
+        private final String initParamValue;
+        
+        OverrideResponseContentType(String initParamValue) {
+            this.initParamValue = initParamValue;
+        }
+
+        @Override
+        public String getInitParamValue() {
+            return initParamValue;
+        }
+    }
+    
+    private enum ResponseCharacterEncoding implements InitParamValueEnum {
+        LEGACY(INIT_PARAM_VALUE_LEGACY),
+        FROM_TEMPLATE(INIT_PARAM_VALUE_FROM_TEMPLATE),
+        DO_NOT_SET(INIT_PARAM_VALUE_DO_NOT_SET),
+        FORCE_CHARSET(INIT_PARAM_VALUE_FORCE_PREFIX + "${charsetName}");
+
+        private final String initParamValue;
+        
+        ResponseCharacterEncoding(String initParamValue) {
+            this.initParamValue = initParamValue;
+        }
+
+        @Override
+        public String getInitParamValue() {
+            return initParamValue;
+        }
+    }
+
+    private enum OverrideResponseLocale implements InitParamValueEnum {
+        ALWAYS(INIT_PARAM_VALUE_ALWAYS),
+        NEVER(INIT_PARAM_VALUE_NEVER);
+
+        private final String initParamValue;
+
+        OverrideResponseLocale(String initParamValue) {
+            this.initParamValue = initParamValue;
+        }
+
+        @Override
+        public String getInitParamValue() {
+            return initParamValue;
+        }
+    }
+
 }

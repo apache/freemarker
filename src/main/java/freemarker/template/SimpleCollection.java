@@ -112,7 +112,11 @@ implements TemplateCollectionModel, Serializable {
 
         public TemplateModel next() throws TemplateModelException {
             if (!iteratorOwnedByMe) { 
-                takeIteratorOwnership();
+                synchronized (SimpleCollection.this) {
+                    checkIteratorOwned();
+                    iteratorOwned = true;
+                    iteratorOwnedByMe = true;
+                }
             }
             
             if (!iterator.hasNext()) {
@@ -126,23 +130,21 @@ implements TemplateCollectionModel, Serializable {
         public boolean hasNext() throws TemplateModelException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {
-                takeIteratorOwnership();
+                synchronized (SimpleCollection.this) {
+                    checkIteratorOwned();
+                }
             }
             
             return iterator.hasNext();
         }
         
-        private void takeIteratorOwnership() throws TemplateModelException {
-            synchronized (SimpleCollection.this) {
-                if (iteratorOwned) {
-                    throw new TemplateModelException(
-                            "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
-                } else {
-                    iteratorOwned = true;
-                    iteratorOwnedByMe = true;
-                }
+        private void checkIteratorOwned() throws TemplateModelException {
+            if (iteratorOwned) {
+                throw new TemplateModelException(
+                        "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
             }
         }
+        
     }
     
 }

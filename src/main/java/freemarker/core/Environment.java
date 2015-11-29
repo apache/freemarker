@@ -931,7 +931,7 @@ public final class Environment extends Configurable {
 
     /**
      * Returns the name of the charset that should be used for URL encoding. This will be <code>null</code> if the
-     * information is not available. The function caches the return value, so it's quick to call it repeately.
+     * information is not available. The function caches the return value, so it's quick to call it repeatedly.
      */
     String getEffectiveURLEscapingCharset() {
         if (!cachedURLEscapingCharsetSet) {

@@ -249,6 +249,13 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       like in Java), which is hence never the one with the {@code Object} parameter type. For more details
      *       about overloaded method selection changes see the version history in the FreeMarker Manual.
      *     </li>
+     *     <li>
+     *       <p>2.3.24 (or higher):
+     *       {@link Iterator}-s were always said to be non-empty when using {@code ?has_content} and such (i.e.,
+     *       operators that check emptiness without reading any elements). Now an {@link Iterator} counts as
+     *       empty exactly if it has no elements left. (Note that this bug has never affected basic functionality, like
+     *       {@code <#list ...>}.) 
+     *     </li>  
      *   </ul>
      *   
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
@@ -793,6 +800,14 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     static boolean is2321Bugfixed(Version version) {
         return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_21;
     }
+
+    boolean is2324Bugfixed() {
+        return is2324Bugfixed(getIncompatibleImprovements());
+    }
+
+    static boolean is2324Bugfixed(Version version) {
+        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
+    }
     
     /** 
      * Returns the lowest version number that is equivalent with the parameter version.
@@ -803,7 +818,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }
-        return is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21 : Configuration.VERSION_2_3_0;
+        return is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
+                : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
+                : Configuration.VERSION_2_3_0;
     }
     
     /**
