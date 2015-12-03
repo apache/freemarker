@@ -40,7 +40,7 @@ final class AttemptBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         env.visitAttemptRecover(attemptBlock, recoveryBlock);
         return null;
     }
@@ -85,11 +85,6 @@ final class AttemptBlock extends TemplateElement {
         return "#attempt";
     }
     
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
-    }
-
     @Override
     boolean isNestedBlockRepeater() {
         return false;

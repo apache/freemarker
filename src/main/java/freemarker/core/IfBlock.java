@@ -40,7 +40,7 @@ final class IfBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         int ln  = getRegulatedChildCount();
         for (int i = 0; i < ln; i++) {
             ConditionalBlock cblock = (ConditionalBlock) getRegulatedChild(i);
@@ -48,7 +48,7 @@ final class IfBlock extends TemplateElement {
             env.replaceElementStackTop(cblock);
             if (condition == null || condition.evalToBoolean(env)) {
                 if (cblock.getNestedBlock() != null) {
-                    return new TemplateElementsToVisit(cblock.getNestedBlock(), true);
+                    return new TemplateElement[] { cblock.getNestedBlock() };
                 }
             }
         }
@@ -102,11 +102,6 @@ final class IfBlock extends TemplateElement {
     @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
-    }
-    
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
     }
 
     @Override

@@ -26,7 +26,7 @@ import freemarker.template.TemplateException;
 final class FallbackInstruction extends TemplateElement {
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws IOException, TemplateException {
+    TemplateElement[] accept(Environment env) throws IOException, TemplateException {
         env.fallback();
         return null;
     }
@@ -61,4 +61,9 @@ final class FallbackInstruction extends TemplateElement {
         return false;
     }
     
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
+    }
+
 }

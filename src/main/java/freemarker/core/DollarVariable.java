@@ -55,7 +55,7 @@ final class DollarVariable extends Interpolation {
      * Outputs the string value of the enclosed expression.
      */
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         final Object moOrStr = calculateInterpolatedStringOrMarkup(env);
         final Writer out = env.getOut();
         if (moOrStr instanceof String) {

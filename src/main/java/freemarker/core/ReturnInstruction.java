@@ -33,7 +33,7 @@ public final class ReturnInstruction extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException {
+    TemplateElement[] accept(Environment env) throws TemplateException {
         if (exp != null) {
             env.setLastReturnValue(exp.eval(env));
         }

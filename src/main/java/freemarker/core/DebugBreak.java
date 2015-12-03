@@ -38,7 +38,7 @@ public class DebugBreak extends TemplateElement {
     }
     
     @Override
-    protected TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    protected TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         if (!DebuggerService.suspendEnvironment(
                 env, this.getTemplate().getSourceName(), getNestedBlock().getBeginLine())) {
             return getNestedBlock().accept(env);

@@ -50,7 +50,7 @@ final class SwitchBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env)
+    TemplateElement[] accept(Environment env)
         throws TemplateException, IOException {
         boolean processedCase = false;
         int ln = getRegulatedChildCount();
@@ -69,7 +69,7 @@ final class SwitchBlock extends TemplateElement {
                             EvalUtil.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
                 }
                 if (processCase) {
-                    env.visit(cas, true);
+                    env.visit(cas);
                     processedCase = true;
                 }
             }
@@ -77,7 +77,7 @@ final class SwitchBlock extends TemplateElement {
             // If we didn't process any nestedElements, and we have a default,
             // process it.
             if (!processedCase && defaultCase != null) {
-                env.visit(defaultCase, true);
+                env.visit(defaultCase);
             }
         } catch (BreakInstruction.Break br) {}
         return null;

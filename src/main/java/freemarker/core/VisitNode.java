@@ -42,7 +42,7 @@ final class VisitNode extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws IOException, TemplateException {
+    TemplateElement[] accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
             throw new NonNodeException(targetNode, node, env);
@@ -117,6 +117,11 @@ final class VisitNode extends TemplateElement {
 
     @Override
     boolean isNestedBlockRepeater() {
+        return true;
+    }
+
+    @Override
+    boolean isShownInStackTrace() {
         return true;
     }
     

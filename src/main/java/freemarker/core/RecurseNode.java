@@ -43,7 +43,7 @@ final class RecurseNode extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws IOException, TemplateException {
+    TemplateElement[] accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.eval(env);
         if (node != null && !(node instanceof TemplateNodeModel)) {
             throw new NonNodeException(targetNode, node, "node", env);
@@ -122,6 +122,11 @@ final class RecurseNode extends TemplateElement {
     @Override
     boolean isNestedBlockRepeater() {
         return false;
+    }
+    
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
     }
     
 }

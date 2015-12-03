@@ -59,7 +59,7 @@ final class NumericalOutput extends Interpolation {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         String s = calculateInterpolatedStringOrMarkup(env);
         Writer out = env.getOut();
         if (autoEscapeOutputFormat != null) {

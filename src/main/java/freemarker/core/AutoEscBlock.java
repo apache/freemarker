@@ -33,8 +33,8 @@ final class AutoEscBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
-        return new TemplateElementsToVisit(getNestedBlock(), true);
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        return new TemplateElement[] { getNestedBlock() };
     }
 
     @Override

@@ -55,7 +55,7 @@ final class BodyInstruction extends TemplateElement {
      * I (JR) realized this thanks to some incisive comments from Daniel Dekany.
      */
     @Override
-    TemplateElementsToVisit accept(Environment env) throws IOException, TemplateException {
+    TemplateElement[] accept(Environment env) throws IOException, TemplateException {
         Context bodyContext = new Context(env);
         env.invokeNestedContent(bodyContext);
         return null;
@@ -114,6 +114,11 @@ final class BodyInstruction extends TemplateElement {
     }
     */
     
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
+    }
+
     class Context implements LocalContext {
         Macro.Context invokingMacroContext;
         Environment.Namespace bodyVars;

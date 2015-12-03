@@ -38,7 +38,7 @@ final class TrimInstruction extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) {
+    TemplateElement[] accept(Environment env) {
         // This instruction does nothing at render-time, only parse-time.
         return null;
     }

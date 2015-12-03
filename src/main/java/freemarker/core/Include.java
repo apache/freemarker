@@ -118,7 +118,7 @@ final class Include extends TemplateElement {
     }
     
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullIncludedTemplateName;
         try {
@@ -250,4 +250,10 @@ final class Include extends TemplateElement {
         return true;
     }
 */
+    
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
+    }
+    
 }

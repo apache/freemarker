@@ -27,7 +27,7 @@ import java.io.IOException;
 final class FlushInstruction extends TemplateElement {
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws IOException {
+    TemplateElement[] accept(Environment env) throws IOException {
         env.getOut().flush();
         return null;
     }

@@ -19,10 +19,10 @@
 
 package freemarker.core;
 
+import java.io.IOException;
+
 import freemarker.core.Expression.ReplacemenetState;
 import freemarker.template.TemplateException;
-
-import java.io.IOException;
 
 /**
  * Representation of the compile-time #escape directive.
@@ -47,8 +47,8 @@ class EscapeBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
-        return new TemplateElementsToVisit(getNestedBlock(), false);
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        return new TemplateElement[] { getNestedBlock() };
     }
 
     Expression doEscape(Expression expression) {
@@ -75,11 +75,6 @@ class EscapeBlock extends TemplateElement {
     @Override
     String getNodeTypeSymbol() {
         return "#escape";
-    }
-    
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
     }
     
     @Override

@@ -90,7 +90,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) {
+    TemplateElement[] accept(Environment env) {
         env.visitMacroDef(this);
         return null;
     }
@@ -151,11 +151,6 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return function ? "#function" : "#macro";
     }
     
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
-    }
-    
     public boolean isFunction() {
         return function;
     }
@@ -188,7 +183,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             sanityCheck(env);
             // Set default values for unspecified parameters
             if (getNestedBlock() != null) {
-                env.visit(getNestedBlock(), false);
+                env.visit(getNestedBlock());
             }
         }
 

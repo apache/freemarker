@@ -14,27 +14,17 @@ import java.util.Collections;
 class TemplateElementsToVisit {
 
     private final Collection<TemplateElement> templateElements;
-    private final boolean hideInParent;
-
-    TemplateElementsToVisit(Collection<TemplateElement> templateElements, boolean hideInParent) {
-        this.templateElements = null != templateElements ? templateElements : Collections.<TemplateElement> emptyList();
-        this.hideInParent = hideInParent;
-    }
 
     TemplateElementsToVisit(Collection<TemplateElement> templateElements) {
-        this(templateElements, false);
+        this.templateElements = null != templateElements ? templateElements : Collections.<TemplateElement> emptyList();
     }
 
-    TemplateElementsToVisit(TemplateElement nestedBlock, boolean hideInParent) {
-        this(Collections.singleton(nestedBlock), hideInParent);
+    TemplateElementsToVisit(TemplateElement nestedBlock) {
+        this(Collections.singleton(nestedBlock));
     }
 
     Collection<TemplateElement> getTemplateElements() {
         return templateElements;
-    }
-
-    boolean isHideInParent() {
-        return hideInParent;
     }
     
 }

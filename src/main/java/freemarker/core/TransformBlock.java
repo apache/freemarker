@@ -55,7 +55,7 @@ final class TransformBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env)
+    TemplateElement[] accept(Environment env)
     throws TemplateException, IOException {
         TemplateTransformModel ttm = env.getTransform(transformExpression);
         if (ttm != null) {
@@ -160,6 +160,11 @@ final class TransformBlock extends TemplateElement {
     @Override
     boolean isNestedBlockRepeater() {
         return false;
+    }
+
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
     }
     
 }

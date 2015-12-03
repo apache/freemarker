@@ -72,7 +72,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         TemplateModel tm = nameExp.eval(env);
         if (tm == Macro.DO_NOTHING_MACRO) return null; // shortcut here.
         if (tm instanceof Macro) {
@@ -335,6 +335,11 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     
     @Override
     boolean isNestedBlockRepeater() {
+        return true;
+    }
+
+    @Override
+    boolean isShownInStackTrace() {
         return true;
     }
     

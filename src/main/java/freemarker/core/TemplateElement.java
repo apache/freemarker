@@ -22,14 +22,11 @@ package freemarker.core;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateSequenceModel;
-
-import static java.util.Arrays.asList;
 
 /**
  * <b>Internal API - subject to change:</b> Represent directive call, interpolation, text block, or other such
@@ -72,12 +69,18 @@ abstract public class TemplateElement extends TemplateObject {
     private int index;
 
     /**
-     * Processes the contents of this <tt>TemplateElement</tt> and
-     * outputs the resulting text
+     * Executes this {@link TemplateElement}. Usually should not be called directly, but through
+     * {@link Environment#visit(TemplateElement)} or a similar {@link Environment} method.
      *
-     * @param env The runtime environment
+     * @param env
+     *            The runtime environment
+     * 
+     * @return The template elements to execute (meant to be used for nested elements), or {@code null}. Can have
+     *         <em>trailing</em> {@code null}-s (unused buffer capacity). Returning the nested elements instead of
+     *         executing them inside this method is a trick used for decreasing stack usage when there's nothing to
+     *         do after the children was processed anyway.
      */
-    abstract TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException;
+    abstract TemplateElement[] accept(Environment env) throws TemplateException, IOException;
 
     /**
      * One-line description of the element, that contain all the information that is used in
@@ -105,13 +108,11 @@ abstract public class TemplateElement extends TemplateObject {
     }
     
     /**
-     * Tells if the element should show up in error stack traces. If you think you need to set this to {@code false} for
-     * an element, always consider if you should pass true instead to {@link Environment#visit(TemplateElement, boolean)}.
-     * 
-     * Note that this will be ignored for the top (current) element of a stack trace, as that's always shown.
+     * Tells if the element should show up in error stack traces. Note that this will be ignored for the top (current)
+     * element of a stack trace, as that's always shown.
      */
     boolean isShownInStackTrace() {
-        return true;
+        return false;
     }
     
     /**
@@ -320,8 +321,8 @@ abstract public class TemplateElement extends TemplateObject {
         return regulatedChildBuffer[index];
     }
 
-    final List<TemplateElement> getRegulatedChildren(){
-        return asList(regulatedChildBuffer);
+    final TemplateElement[] getRegulatedChildren(){
+        return regulatedChildBuffer;
     }
     
     final int getIndex() {

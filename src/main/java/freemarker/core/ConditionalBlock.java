@@ -45,9 +45,9 @@ final class ConditionalBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         if (condition == null || condition.evalToBoolean(env)) {
-            return new TemplateElementsToVisit(getNestedBlock(), true);
+            return new TemplateElement[] { getNestedBlock() };
         }
         return null;
     }

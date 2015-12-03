@@ -110,7 +110,7 @@ public final class Environment extends Configurable {
 
     private final Configuration configuration;
     private final TemplateHashModel rootDataModel;
-    private final ArrayList/* <TemplateElement> */ instructionStack = new ArrayList();
+    private final ArrayList<TemplateElement> instructionStack = new ArrayList<TemplateElement>();
     private final ArrayList recoveredErrorStack = new ArrayList();
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
@@ -264,7 +264,7 @@ public final class Environment extends Configurable {
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
         int ln = instructionStack.size();
         if (ln == 0) return null;
-        TemplateElement te = (TemplateElement) instructionStack.get(ln - 1);
+        TemplateElement te = instructionStack.get(ln - 1);
         if (te instanceof UnifiedCall) return (UnifiedCall) te;
         if (te instanceof Macro && ln > 1 && instructionStack.get(ln - 2) instanceof UnifiedCall) {
             return (UnifiedCall) instructionStack.get(ln - 2);
@@ -298,7 +298,7 @@ public final class Environment extends Configurable {
             clearCachedValues();
             try {
                 doAutoImportsAndIncludes(this);
-                visit(getTemplate().getRootTreeNode(), false);
+                visit(getTemplate().getRootTreeNode());
                 // It's here as we must not flush if there was an exception.
                 if (getAutoFlush()) {
                     out.flush();
@@ -314,47 +314,28 @@ public final class Environment extends Configurable {
 
     /**
      * "Visit" the template element.
-     *
-     * Param 'hideInParent' controls how the instruction stack is handled. If it is set to false, the current
-     * element is pushed to the instruction stack.
-     *
-     * If it is set to true, we replace the top element for the time the parameter element is
-     * visited, and then we restore the top element. The main purpose of this is to get rid of elements in the error
-     * stack trace that from user perspective shouldn't have a stack frame. The typical example is
-     * {@code [#if foo]...[@failsHere/]...[/#if]}, where the #if call shouldn't be in the stack trace. (Simply marking
-     * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)
      */
-    void visit(TemplateElement element, boolean hideInParent) throws IOException, TemplateException {
-        TemplateElement hiddenParent;
-        if (hideInParent) {
-            hiddenParent = replaceTopElement(element);
-        } else {
-            pushElement(element);
-            hiddenParent = null;
-        }
+    void visit(TemplateElement element) throws IOException, TemplateException {
+        pushElement(element);
         try {
-            TemplateElementsToVisit templateElementsToVisit = element.accept(this);
+            TemplateElement[] templateElementsToVisit = element.accept(this);
             if (templateElementsToVisit != null) {
-                boolean hideInnerElementInParent = templateElementsToVisit.isHideInParent();
-                for (TemplateElement templateElementToVisit : templateElementsToVisit.getTemplateElements()) {
-                    if (templateElementToVisit != null) {
-                        visit(templateElementToVisit, hideInnerElementInParent);
+                for (TemplateElement el : templateElementsToVisit) {
+                    if (el == null) {
+                        break;  // Skip unused trailing buffer capacity 
                     }
+                    visit(el);
                 }
             }
         } catch (TemplateException te) {
             handleTemplateException(te);
         } finally {
-            if (hiddenParent != null) {
-                replaceTopElement(hiddenParent);
-            } else {
-                popElement();
-            }
+            popElement();
         }
     }
 
     private TemplateElement replaceTopElement(TemplateElement element) {
-        return (TemplateElement) instructionStack.set(instructionStack.size() - 1, element);
+        return instructionStack.set(instructionStack.size() - 1, element);
     }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
@@ -423,7 +404,7 @@ public final class Environment extends Configurable {
                 if (tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
                     do {
                         if (element != null) {
-                            visit(element, true);
+                            visit(element);
                         }
                     } while (tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
                 }
@@ -467,7 +448,7 @@ public final class Environment extends Configurable {
         boolean lastInAttemptBlock = inAttemptBlock;
         try {
             inAttemptBlock = true;
-            visit(attemptBlock, true);
+            visit(attemptBlock);
         } catch (TemplateException te) {
             thrownException = te;
         } finally {
@@ -482,7 +463,7 @@ public final class Environment extends Configurable {
             }
             try {
                 recoveredErrorStack.add(thrownException);
-                visit(recoveryBlock, false);
+                visit(recoveryBlock);
             } finally {
                 recoveredErrorStack.remove(recoveredErrorStack.size() - 1);
             }
@@ -534,7 +515,7 @@ public final class Environment extends Configurable {
                 pushLocalContext(bodyCtx);
             }
             try {
-                visit(nestedContent, false);
+                visit(nestedContent);
             } finally {
                 if (invokingMacroContext.nestedContentParameterNames != null) {
                     popLocalContext();
@@ -2064,8 +2045,8 @@ public final class Environment extends Configurable {
         int ln = instructionStack.size();
 
         for (int i = 0; i < ln; i++) {
-            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
-            if (i == ln || stackEl.isShownInStackTrace()) {
+            TemplateElement stackEl = instructionStack.get(i);
+            if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 requiredLength++;
             }
         }
@@ -2075,8 +2056,8 @@ public final class Environment extends Configurable {
         TemplateElement[] result = new TemplateElement[requiredLength];
         int dstIdx = requiredLength - 1;
         for (int i = 0; i < ln; i++) {
-            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
-            if (i == ln || stackEl.isShownInStackTrace()) {
+            TemplateElement stackEl = instructionStack.get(i);
+            if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 result[dstIdx--] = stackEl;
             }
         }
@@ -2461,7 +2442,7 @@ public final class Environment extends Configurable {
 
         importMacros(includedTemplate);
         try {
-            visit(includedTemplate.getRootTreeNode(), false);
+            visit(includedTemplate.getRootTreeNode());
         } finally {
             if (parentReplacementOn) {
                 setParent(prevTemplate);
@@ -2582,7 +2563,7 @@ public final class Environment extends Configurable {
         try {
             StringWriter sw = new StringWriter();
             this.out = sw;
-            visit(te, false);
+            visit(te);
             return sw.toString();
         } finally {
             this.out = prevOut;
@@ -2680,7 +2661,7 @@ public final class Environment extends Configurable {
             Writer prevOut = out;
             out = newOut;
             try {
-                visit(element, false);
+                visit(element);
             } finally {
                 out = prevOut;
             }

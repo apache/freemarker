@@ -51,8 +51,8 @@ final class AssignmentInstruction extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
-        return new TemplateElementsToVisit(getRegulatedChildren());
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        return getRegulatedChildren();
     }
 
     @Override

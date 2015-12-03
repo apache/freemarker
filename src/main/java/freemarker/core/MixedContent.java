@@ -50,9 +50,9 @@ final class MixedContent extends TemplateElement {
      * and outputs the resulting text.
      */
     @Override
-    TemplateElementsToVisit accept(Environment env)
+    TemplateElement[] accept(Environment env)
         throws TemplateException, IOException {
-        return new TemplateElementsToVisit(getRegulatedChildren());
+        return getRegulatedChildren();
     }
 
     @Override
@@ -101,11 +101,6 @@ final class MixedContent extends TemplateElement {
     @Override
     ParameterRole getParameterRole(int idx) {
         throw new IndexOutOfBoundsException();
-    }
-    
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
     }
     
     @Override

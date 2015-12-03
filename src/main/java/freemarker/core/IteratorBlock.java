@@ -63,7 +63,7 @@ final class IteratorBlock extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         acceptWithResult(env);
         return null;
     }
@@ -245,7 +245,7 @@ final class IteratorBlock extends TemplateElement {
                                 loopVar = iterModel.next();
                                 hasNext = iterModel.hasNext();
                                 if (nestedBlock != null) {
-                                    env.visit(nestedBlock, true);
+                                    env.visit(nestedBlock);
                                 }
                                 index++;
                             }
@@ -258,7 +258,7 @@ final class IteratorBlock extends TemplateElement {
                         // allow one iterator() call.
                         openedIteratorModel = iterModel;
                         if (nestedBlock != null) {
-                            env.visit(nestedBlock, true);
+                            env.visit(nestedBlock);
                         }
                     }
                 }
@@ -273,7 +273,7 @@ final class IteratorBlock extends TemplateElement {
                                 loopVar = seqModel.get(index);
                                 hasNext = (size > index + 1);
                                 if (nestedBlock != null) {
-                                    env.visit(nestedBlock, true);
+                                    env.visit(nestedBlock);
                                 }
                             }
                         } catch (BreakInstruction.Break br) {
@@ -281,7 +281,7 @@ final class IteratorBlock extends TemplateElement {
                         }
                     } else {
                         if (nestedBlock != null) {
-                            env.visit(nestedBlock, true);
+                            env.visit(nestedBlock);
                         }
                     }
                 }
@@ -293,7 +293,7 @@ final class IteratorBlock extends TemplateElement {
                 }
                 try {
                     if (nestedBlock != null) {
-                        env.visit(nestedBlock, true);
+                        env.visit(nestedBlock);
                     }
                 } catch (BreakInstruction.Break br) {
                     // Silently exit "loop"

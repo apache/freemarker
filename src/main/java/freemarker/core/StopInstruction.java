@@ -33,7 +33,7 @@ final class StopInstruction extends TemplateElement {
     }
 
     @Override
-    TemplateElementsToVisit accept(Environment env) throws TemplateException {
+    TemplateElement[] accept(Environment env) throws TemplateException {
         if (exp == null) {
             throw new StopException(env);
         }
