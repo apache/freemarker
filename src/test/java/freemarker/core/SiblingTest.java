@@ -3,7 +3,10 @@ package freemarker.core;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,25 +36,50 @@ import java.util.Map;
  */
 public class SiblingTest extends TemplateTest {
 
-    @Override
-    protected Object getDataModel() {
-        Map dataModel = new HashMap();
-        String dataModelFileUrl = this.getClass().getResource(".").toString() + "/siblingDataModel.xml";
+    @Before
+    public void setUp() {
         try {
-            dataModel.put(
-                    "doc", NodeModel.parse(new File("build/test-classes/freemarker/core/siblingDataModel.xml")));
+            InputSource is = new InputSource(getClass().getResourceAsStream("siblingDataModel.xml"));
+            addToDataModel("doc", NodeModel.parse(is) );
         } catch (Exception e) {
             System.out.println("Exception while parsing the dataModel xml");
             e.printStackTrace();
         }
-        return dataModel;
     }
+
     @Test
-    public void testPreviousSibling() throws IOException, TemplateException {
-        String ftl = "<#assign sibling>${doc.person.name?previousSibling}</#assign>" +
-                "${sibling?trim}" ;
-        assertOutput(ftl, "");
+    public void testEmptyPreviousSibling() throws IOException, TemplateException {
+        String ftl = "${doc.person.name?previousSibling}";
+        assertOutput(ftl, "\n    ");
     }
 
+    @Test
+    public void testNonEmptyPreviousSibling() throws IOException, TemplateException {
+        String ftl = "${doc.person.address?previousSibling}";
+        assertOutput(ftl, "12th August");
+    }
 
+    @Test
+    public void testEmptyNextSibling() throws IOException, TemplateException {
+        String ftl = "${doc.person.name?nextSibling}";
+        assertOutput(ftl, "\n    ");
+    }
+
+    @Test
+    public void testNonEmptyNextSibling() throws IOException, TemplateException {
+        String ftl = "${doc.person.dob?nextSibling}";
+        assertOutput(ftl, "Chennai, India");
+    }
+
+    @Test
+    public void testSignificantNextSibling() throws IOException, TemplateException {
+        String ftl = "${doc.person.name.@@next}";
+        assertOutput(ftl, "12th August");
+    }
+
+    @Test
+    public void testSignificantPreviousSibling() throws IOException, TemplateException {
+        String ftl = "${doc.person.name.@@previous}";
+        assertOutput(ftl, "male");
+    }
 }

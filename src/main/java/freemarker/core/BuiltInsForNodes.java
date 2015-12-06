@@ -22,12 +22,7 @@ package freemarker.core;
 import java.util.List;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import freemarker.template.SimpleScalar;
-import freemarker.template.SimpleSequence;
-import freemarker.template.TemplateMethodModel;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateNodeModel;
+import freemarker.template.*;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -97,7 +92,20 @@ class BuiltInsForNodes {
             return result;
        }
     }
-    
+
+    static class previousSiblingBI extends BuiltInForNodeEx {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env) throws TemplateModelException {
+            return nodeModel.getPreviousSibling();
+        }
+    }
+
+    static class nextSiblingBI extends  BuiltInForNodeEx {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env) throws TemplateModelException {
+            return nodeModel.getNextSibling();
+        }
+    }
     
     // Can't be instantiated
     private BuiltInsForNodes() { }

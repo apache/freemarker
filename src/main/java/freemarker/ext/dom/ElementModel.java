@@ -91,14 +91,14 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
             }
             if (key.equals("@@previous")) {
                 Node previousSibling = node.getPreviousSibling();
-                while(previousSibling.getNodeType() != Node.ELEMENT_NODE) {
+                while(!this.isSignificantNode(previousSibling)) {
                     previousSibling = previousSibling.getPreviousSibling();
                 }
                 return wrap(previousSibling);
             }
             if (key.equals("@@next")) {
                 Node nextSibling = node.getNextSibling();
-                while(nextSibling.getNodeType() != Node.ELEMENT_NODE) {
+                while(!this.isSignificantNode(nextSibling)) {
                     nextSibling = nextSibling.getNextSibling();
                 }
                 return wrap(nextSibling);
@@ -121,6 +121,11 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         return super.get(key);
     }
 
+    public boolean isSignificantNode(Node node) throws TemplateModelException {
+        boolean isEmpty =  node.getTextContent().trim().isEmpty();
+        boolean significantNode = !isEmpty;
+        return significantNode;
+    }
     public String getAsString() throws TemplateModelException {
         NodeList nl = node.getChildNodes();
         String result = "";

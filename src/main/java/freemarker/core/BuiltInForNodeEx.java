@@ -20,7 +20,7 @@ package freemarker.core;
 
 import freemarker.template.*;
 
-public abstract class BuiltInExtForNode extends BuiltIn {
+public abstract class BuiltInForNodeEx extends BuiltIn {
     @Override
     TemplateModel _eval(Environment env)
             throws TemplateException {
