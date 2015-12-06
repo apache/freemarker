@@ -42,7 +42,7 @@ class Sep extends TemplateElement {
         }
         
         if (iterCtx.hasNext()) {
-            return new TemplateElement[] { getNestedBlock() };
+            return getRegulatedChildren();
         }
         return null;
     }

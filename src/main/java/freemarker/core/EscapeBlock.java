@@ -48,7 +48,7 @@ class EscapeBlock extends TemplateElement {
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        return new TemplateElement[] { getNestedBlock() };
+        return getRegulatedChildren();
     }
 
     Expression doEscape(Expression expression) {

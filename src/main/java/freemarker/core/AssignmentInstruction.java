@@ -110,12 +110,6 @@ final class AssignmentInstruction extends TemplateElement {
     }
 
     @Override
-    public TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
-        super.postParseCleanup(stripWhitespace);
-        return this;
-    }
-
-    @Override
     boolean isNestedBlockRepeater() {
         return false;
     }

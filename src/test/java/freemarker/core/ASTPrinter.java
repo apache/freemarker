@@ -263,11 +263,18 @@ public class ASTPrinter {
         int ln = te.getRegulatedChildCount();
         for (int i = 0; i < ln; i++) {
             TemplateElement child = te.getRegulatedChild(i);
-            if (child.getParentElement() != te) {
+            TemplateElement parentElement = child.getParentElement();
+            // As MixedContent.accept does nothing but return its regulatedChildren, it's optimized out in the final
+            // AST tree. While it will be present as a child, the parent element also will have regularedChildren
+            // that contains the children of the MixedContent directly. 
+            if (parentElement instanceof MixedContent && parentElement.getParent() != null) {
+                parentElement = parentElement.getParent();
+            }
+            if (parentElement != te) {
                 throw new InvalidASTException("Wrong parent node."
                         + "\nNode: " + child.dump(false)
                         + "\nExpected parent: " + te.dump(false)
-                        + "\nActual parent: " + child.getParentElement().dump(false));
+                        + "\nActual parent: " + parentElement.dump(false));
             }
             if (child.getIndex() != i) {
                 throw new InvalidASTException("Wrong node index."
@@ -280,9 +287,42 @@ public class ASTPrinter {
             throw new InvalidASTException("Mixed content with child count less than 2 should removed by optimizatoin, "
                     + "but found one with " + te.getRegulatedChildCount() + " child(ren).");
         }
-        if (te.getRegulatedChildCount() != 0 && te.getNestedBlock() != null) {
-            throw new InvalidASTException("Can't have both nestedBlock and regulatedChildren."
-                    + "\nNode: " + te.dump(false));
+        TemplateElement nestedBlock = te.getNestedBlock();
+        TemplateElement[] regulatedChildren = te.getRegulatedChildren();
+        if (nestedBlock != null) {
+            if (regulatedChildren == null) {
+                throw new InvalidASTException(
+                        "RegularChildren must be filled after postParseCleanup if there's a nestedBlock."
+                        + "\nNode: " + te.dump(false));
+            }
+            if (nestedBlock instanceof MixedContent
+                    && (te.getRegulatedChildCount() != nestedBlock.getRegulatedChildCount()
+                    || regulatedChildren != nestedBlock.getRegulatedChildren())) {
+                throw new InvalidASTException(
+                        "MixedContent.regularChildren must be the same as its parent's regularChildren."
+                        + "\nNode: " + te.dump(false));
+            } else if (!(nestedBlock instanceof MixedContent) && te.getRegulatedChildCount() != 1) {
+                throw new InvalidASTException(
+                        "non-MixedContent-related regularChildren must be of lenght 1 where there's a nestedBlock, "
+                        + "but was " + te.getRegulatedChildCount()
+                        + "\nNode: " + te.dump(false));
+            }
+        }
+        if (regulatedChildren != null) {
+            for (int i = 0; i < te.getRegulatedChildCount(); i++) {
+                if (regulatedChildren[i] == null) {
+                    throw new InvalidASTException(
+                            "regularChildren can't be null at index " + i
+                            + "\nNode: " + te.dump(false));
+                }
+            }
+            for (int i = te.getRegulatedChildCount(); i < regulatedChildren.length; i++) {
+                if (regulatedChildren[i] != null) {
+                    throw new InvalidASTException(
+                            "regularChildren can't be non-null at index " + i
+                            + "\nNode: " + te.dump(false));
+                }
+            }
         }
     }
 

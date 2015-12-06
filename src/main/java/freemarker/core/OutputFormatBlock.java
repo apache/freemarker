@@ -37,7 +37,7 @@ final class OutputFormatBlock extends TemplateElement {
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        return new TemplateElement[] { getNestedBlock() };
+        return getRegulatedChildren();
     }
 
     @Override

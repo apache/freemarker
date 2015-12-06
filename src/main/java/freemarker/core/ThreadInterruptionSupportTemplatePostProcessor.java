@@ -72,7 +72,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
         // Because nestedElements (means fixed schema for the children) and nestedBlock (means no fixed schema) are
         // mutually exclusive, and we only care about the last kind:
         if (te.isNestedBlockRepeater()) {
-            if (regulatedChildrenCount != 0) {
+            if (nestedBlock == null && regulatedChildrenCount != 0) {
                 // Only elements that use nestedBlock instead of regulatedChildren should be block repeaters.
                 // Note that nestedBlock and nestedElements are (should be) mutually exclusive.
                 throw new BugException(); 

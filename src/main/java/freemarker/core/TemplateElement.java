@@ -46,16 +46,20 @@ abstract public class TemplateElement extends TemplateObject {
 
     /**
      * Used by elements that has no fixed schema for its child elements. For example, a {@code #case} can enclose any
-     * kind of elements. Only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be non-{@code null}.
-     * This element is typically a {@link MixedContent}, at least before {@link #postParseCleanup(boolean)} (which
-     * optimizes out {@link MixedContent} with child count less than 2).
+     * kind of elements. Only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be non-{@code null}
+     * before {@link #postParseCleanup(boolean)}. After {@link #postParseCleanup(boolean)}, the
+     * {@link #regulatedChildBuffer} is always filled and used for execution. This element is typically a
+     * {@link MixedContent}, at least before {@link #postParseCleanup(boolean)} (which optimizes out
+     * {@link MixedContent} with child count less than 2).
      */
     private TemplateElement nestedBlock;
     
     /**
-     * Used by elements that has a fixed schema for its child elements. For example, {@code #switch} can only have
-     * {@code #case} and {@code #default} child elements. Only one of {@link #nestedBlock} and
-     * {@link #regulatedChildBuffer} can be non-{@code null}.
+     * Before {@link #postParseCleanup(boolean)}, it's only used by elements that has a fixed schema for its child
+     * elements. For example, {@code #switch} can only have {@code #case} and {@code #default} child elements. Before
+     * {@link #postParseCleanup(boolean)}, only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be
+     * non-{@code null}. After {@link #postParseCleanup(boolean)}, the {@link #regulatedChildBuffer} is always filled
+     * and used for execution.
      */
     private TemplateElement[] regulatedChildBuffer;
     private int regulatedChildCount;
@@ -148,17 +152,18 @@ abstract public class TemplateElement extends TemplateObject {
     }
     
     public TemplateSequenceModel getChildNodes() {
-        if (regulatedChildBuffer != null) {
-            final SimpleSequence seq = new SimpleSequence(regulatedChildCount);
-            for (int i = 0; i < regulatedChildCount; i++) {
-                seq.add(regulatedChildBuffer[i]);
-            }
-            return seq;
-        }
         SimpleSequence result = new SimpleSequence(1);
         if (nestedBlock != null) {
             result.add(nestedBlock);
-        } 
+        } else { 
+            if (regulatedChildBuffer != null) {
+                final SimpleSequence seq = new SimpleSequence(regulatedChildCount);
+                for (int i = 0; i < regulatedChildCount; i++) {
+                    seq.add(regulatedChildBuffer[i]);
+                }
+                return seq;
+            }
+        }
         return result;
     }
     
@@ -201,13 +206,13 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     public int getChildCount() {
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.getChildCount();
-        }
+        // Note: regulatedChildren is possibly filled for optimization despite that nestedBlock is filled too, but then
+        // it should only be utilized for execution, as those children might skip a MixedContent parent. 
         if (nestedBlock != null) {
-            return 1;
+            return nestedBlock instanceof MixedContent ? nestedBlock.getChildCount() : 1;
+        } else {
+            return regulatedChildCount;
         }
-        return regulatedChildCount;
     }
 
     /**
@@ -215,11 +220,11 @@ abstract public class TemplateElement extends TemplateObject {
      * {@link MixedContent}.
      */
     public Enumeration children() {
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.children();
-        }
+        // Note: regulatedChildren is possibly filled for optimization despite that nestedBlock is filled too, but then
+        // it should only be utilized for execution, as those children might skip a MixedContent parent. 
         if (nestedBlock != null) {
-            return Collections.enumeration(Collections.singletonList(nestedBlock));
+            return nestedBlock instanceof MixedContent
+                    ? nestedBlock.children() : Collections.enumeration(Collections.singletonList(nestedBlock));
         } else if (regulatedChildBuffer != null) {
             return new _ArrayEnumeration(regulatedChildBuffer, regulatedChildCount);
         }
@@ -227,10 +232,11 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     public TemplateElement getChildAt(int index) {
+        // Note: regulatedChildren is possibly filled for optimization despite that nestedBlock is filled too, but then
+        // it should only be utilized for execution, as those children might skip a MixedContent parent. 
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.getChildAt(index);
-        }
-        if (nestedBlock != null) {
+        } else if (nestedBlock != null) {
             if (index == 0) {
                 return nestedBlock;
             }
@@ -249,11 +255,17 @@ abstract public class TemplateElement extends TemplateObject {
     public void setChildAt(int index, TemplateElement element) {
         if (nestedBlock instanceof MixedContent) {
             nestedBlock.setChildAt(index, element);
+            if (regulatedChildBuffer != null) {
+                regulatedChildBuffer[index] = element;
+            }            
         } else if (nestedBlock != null) {
             if (index == 0) {
                 nestedBlock = element;
                 element.index = 0;
                 element.parent = this;
+                if (regulatedChildBuffer != null) {
+                    regulatedChildBuffer[0] = element;
+                }            
             } else {
                 throw new IndexOutOfBoundsException("invalid index");
             }
@@ -358,7 +370,7 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     /**
-     * Walk the AST subtree rooted by this element, and do simplifications where possible, also remove superfluous
+     * Walk the AST subtree rooted by this element, and do simplifications where possible, also removes superfluous
      * whitespace.
      * 
      * @param stripWhitespace
@@ -370,7 +382,25 @@ abstract public class TemplateElement extends TemplateObject {
      */
     TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
         int regulatedChildCount = this.regulatedChildCount;
-        if (regulatedChildCount != 0) {
+        if (nestedBlock != null) {
+            nestedBlock = nestedBlock.postParseCleanup(stripWhitespace);
+            if (nestedBlock.isIgnorable()) {
+                nestedBlock = null;
+            } else {
+                nestedBlock.parent = this;
+                if (nestedBlock instanceof MixedContent) {
+                    // As MixedContent.accept does nothing but return its regulatedChildren, while it will be present as
+                    // a child, the parent element also will have regularedChildren that contains the children of the
+                    // MixedContent directly. 
+                    this.regulatedChildBuffer = nestedBlock.getRegulatedChildren();
+                    this.regulatedChildCount = nestedBlock.getRegulatedChildCount();
+                } else {
+                    // Because execution will use regularChildren only.
+                    this.regulatedChildBuffer = new TemplateElement[] { nestedBlock };
+                    this.regulatedChildCount = 1;
+                }
+            }
+        } else if (regulatedChildCount != 0) {
             for (int i = 0; i < regulatedChildCount; i++) {
                 TemplateElement te = regulatedChildBuffer[i];
                 te = te.postParseCleanup(stripWhitespace);
@@ -402,14 +432,7 @@ abstract public class TemplateElement extends TemplateObject {
                 }
                 regulatedChildBuffer = trimmedregulatedChildBuffer;
             }
-        } else if (nestedBlock != null) {
-            nestedBlock = nestedBlock.postParseCleanup(stripWhitespace);
-            if (nestedBlock.isIgnorable()) {
-                nestedBlock = null;
-            } else {
-                nestedBlock.parent = this;
-            }
-        }
+        } 
         return this;
     }
 

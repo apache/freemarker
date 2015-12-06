@@ -48,7 +48,7 @@ final class IfBlock extends TemplateElement {
             env.replaceElementStackTop(cblock);
             if (condition == null || condition.evalToBoolean(env)) {
                 if (cblock.getNestedBlock() != null) {
-                    return new TemplateElement[] { cblock.getNestedBlock() };
+                    return cblock.getRegulatedChildren();
                 }
             }
         }
@@ -60,7 +60,6 @@ final class IfBlock extends TemplateElement {
         throws ParseException {
         if (getRegulatedChildCount() == 1) {
             ConditionalBlock cblock = (ConditionalBlock) getRegulatedChild(0);
-            cblock.isLonelyIf = true;
             cblock.setLocation(getTemplate(), cblock, this);
             return cblock.postParseCleanup(stripWhitespace);
         } else {
