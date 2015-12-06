@@ -159,7 +159,7 @@ public final class Environment extends Configurable {
 
     private Writer out;
     private Macro.Context currentMacroContext;
-    private ArrayList localContextStack;
+    private LocalContextStack localContextStack;
     private final Namespace mainNamespace;
     private Namespace currentNamespace, globalNamespace;
     private HashMap loadedLibs;
@@ -377,7 +377,7 @@ public final class Environment extends Configurable {
             directiveModel.execute(this, args, outArgs, nested);
         } finally {
             if (outArgs.length > 0) {
-                popLocalContext();
+                localContextStack.pop();
             }
         }
     }
@@ -500,7 +500,7 @@ public final class Environment extends Configurable {
      */
     void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
-        ArrayList prevLocalContextStack = localContextStack;
+        LocalContextStack prevLocalContextStack = localContextStack;
         TemplateElement nestedContent = invokingMacroContext.nestedContent;
         if (nestedContent != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
@@ -523,7 +523,7 @@ public final class Environment extends Configurable {
                 visit(nestedContent);
             } finally {
                 if (invokingMacroContext.nestedContentParameterNames != null) {
-                    popLocalContext();
+                    localContextStack.pop();
                 }
                 this.currentMacroContext = invokingMacroContext;
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
@@ -549,7 +549,7 @@ public final class Environment extends Configurable {
             handleTemplateException(te);
             return true;
         } finally {
-            popLocalContext();
+            localContextStack.pop();
         }
     }
 
@@ -655,7 +655,7 @@ public final class Environment extends Configurable {
             final Macro.Context prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
 
-            final ArrayList prevLocalContextStack = localContextStack;
+            final LocalContextStack prevLocalContextStack = localContextStack;
             localContextStack = null;
 
             final Namespace prevNamespace = currentNamespace;
@@ -1813,7 +1813,7 @@ public final class Environment extends Configurable {
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
-                LocalContext lc = (LocalContext) localContextStack.get(i);
+                LocalContext lc = localContextStack.get(i);
                 TemplateModel tm = lc.getLocalVariable(name);
                 if (tm != null) {
                     return tm;
@@ -1940,7 +1940,7 @@ public final class Environment extends Configurable {
         }
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
-                LocalContext lc = (LocalContext) localContextStack.get(i);
+                LocalContext lc = localContextStack.get(i);
                 set.addAll(lc.getLocalVariableNames());
             }
         }
@@ -2101,16 +2101,12 @@ public final class Environment extends Configurable {
 
     private void pushLocalContext(LocalContext localContext) {
         if (localContextStack == null) {
-            localContextStack = new ArrayList();
+            localContextStack = new LocalContextStack();
         }
-        localContextStack.add(localContext);
+        localContextStack.push(localContext);
     }
 
-    private void popLocalContext() {
-        localContextStack.remove(localContextStack.size() - 1);
-    }
-
-    ArrayList getLocalContextStack() {
+    LocalContextStack getLocalContextStack() {
         return localContextStack;
     }
 

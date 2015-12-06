@@ -89,7 +89,7 @@ final class IteratorBlock extends TemplateElement {
      */
     static IterationContext findEnclosingIterationContext(Environment env, String loopVariableName)
             throws _MiscTemplateException {
-        ArrayList ctxStack = env.getLocalContextStack();
+        LocalContextStack ctxStack = env.getLocalContextStack();
         if (ctxStack != null) {
             for (int i = ctxStack.size() - 1; i >= 0; i--) {
                 Object ctx = ctxStack.get(i);

@@ -20,7 +20,6 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -160,13 +159,13 @@ public final class Macro extends TemplateElement implements TemplateModel {
         final TemplateElement nestedContent;
         final Environment.Namespace nestedContentNamespace;
         final List nestedContentParameterNames;
-        final ArrayList prevLocalContextStack;
+        final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
         
         Context(Environment env, 
                 TemplateElement nestedContent,
                 List nestedContentParameterNames) {
-            this.localVars = env.new Namespace();
+            this.localVars = env.new Namespace(); 
             this.nestedContent = nestedContent;
             this.nestedContentNamespace = env.getCurrentNamespace();
             this.nestedContentParameterNames = nestedContentParameterNames;
