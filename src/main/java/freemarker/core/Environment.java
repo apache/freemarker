@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache._CacheAPI;
 import freemarker.ext.beans.BeansWrapper;
@@ -110,7 +111,8 @@ public final class Environment extends Configurable {
 
     private final Configuration configuration;
     private final TemplateHashModel rootDataModel;
-    private final ArrayList<TemplateElement> instructionStack = new ArrayList<TemplateElement>();
+    private TemplateElement[] instructionStack = new TemplateElement[16];
+    private int instructionStackSize = 0;
     private final ArrayList recoveredErrorStack = new ArrayList();
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
@@ -248,9 +250,10 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.23
      */
+    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public Template getCurrentTemplate() {
-        int ln = instructionStack.size();
-        return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
+        int ln = instructionStackSize;
+        return ln == 0 ? getMainTemplate() : instructionStack[ln - 1].getTemplate();
     }
 
     /**
@@ -261,13 +264,14 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.22
      */
+    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
-        int ln = instructionStack.size();
+        int ln = instructionStackSize;
         if (ln == 0) return null;
-        TemplateElement te = instructionStack.get(ln - 1);
+        TemplateElement te = instructionStack[ln - 1];
         if (te instanceof UnifiedCall) return (UnifiedCall) te;
-        if (te instanceof Macro && ln > 1 && instructionStack.get(ln - 2) instanceof UnifiedCall) {
-            return (UnifiedCall) instructionStack.get(ln - 2);
+        if (te instanceof Macro && ln > 1 && instructionStack[ln - 2] instanceof UnifiedCall) {
+            return (UnifiedCall) instructionStack[ln - 2];
         }
         return null;
     }
@@ -334,8 +338,9 @@ public final class Environment extends Configurable {
         }
     }
 
+    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
     private TemplateElement replaceTopElement(TemplateElement element) {
-        return instructionStack.set(instructionStack.size() - 1, element);
+        return instructionStack[instructionStackSize - 1] = element;
     }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
@@ -2042,10 +2047,10 @@ public final class Environment extends Configurable {
      */
     TemplateElement[] getInstructionStackSnapshot() {
         int requiredLength = 0;
-        int ln = instructionStack.size();
+        int ln = instructionStackSize;
 
         for (int i = 0; i < ln; i++) {
-            TemplateElement stackEl = instructionStack.get(i);
+            TemplateElement stackEl = instructionStack[i];
             if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 requiredLength++;
             }
@@ -2056,7 +2061,7 @@ public final class Environment extends Configurable {
         TemplateElement[] result = new TemplateElement[requiredLength];
         int dstIdx = requiredLength - 1;
         for (int i = 0; i < ln; i++) {
-            TemplateElement stackEl = instructionStack.get(i);
+            TemplateElement stackEl = instructionStack[i];
             if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 result[dstIdx--] = stackEl;
             }
@@ -2227,15 +2232,25 @@ public final class Environment extends Configurable {
     }
 
     private void pushElement(TemplateElement element) {
-        instructionStack.add(element);
+        final int newSize = ++instructionStackSize;
+        TemplateElement[] instructionStack = this.instructionStack;
+        if (newSize > instructionStack.length) {
+            final TemplateElement[] newInstructionStack = new TemplateElement[newSize * 2];
+            for (int i = 0; i < instructionStack.length; i++) {
+                newInstructionStack[i] = instructionStack[i]; 
+            }
+            instructionStack = newInstructionStack;
+            this.instructionStack = instructionStack;
+        }
+        instructionStack[newSize - 1] = element;
     }
 
     private void popElement() {
-        instructionStack.remove(instructionStack.size() - 1);
+        instructionStackSize--;
     }
 
     void replaceElementStackTop(TemplateElement instr) {
-        instructionStack.set(instructionStack.size() - 1, instr);
+        instructionStack[instructionStackSize - 1] = instr;
     }
 
     public TemplateNodeModel getCurrentVisitorNode() {
