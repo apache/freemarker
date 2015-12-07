@@ -28,18 +28,18 @@ import freemarker.template.TemplateException;
 class NoEscapeBlock extends TemplateElement {
 
     NoEscapeBlock(TemplateElement nestedBlock) {
-        setNestedBlock(nestedBlock);
+        setChildrenFromElement(nestedBlock);
     }
     
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        return getRegulatedChildren();
+        return getChildBuffer();
     }
 
     @Override
     protected String dump(boolean canonical) {
         if (canonical) {
-            return "<" + getNodeTypeSymbol() + '>' + getNestedBlock().getCanonicalForm()
+            return "<" + getNodeTypeSymbol() + '>' + getChildrenCanonicalForm()
                     + "</" + getNodeTypeSymbol() + '>';
         } else {
             return getNodeTypeSymbol();

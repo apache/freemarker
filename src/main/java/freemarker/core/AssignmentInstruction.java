@@ -35,24 +35,24 @@ final class AssignmentInstruction extends TemplateElement {
 
     AssignmentInstruction(int scope) {
         this.scope = scope;
-        setRegulatedChildBufferCapacity(1);
+        setChildBufferCapacity(1);
     }
 
     void addAssignment(Assignment assignment) {
-        addRegulatedChild(assignment);
+        addChild(assignment);
     }
     
     void setNamespaceExp(Expression namespaceExp) {
         this.namespaceExp = namespaceExp;
-        int ln = getRegulatedChildCount();
+        int ln = getChildCount();
         for (int i = 0; i < ln; i++) {
-            ((Assignment) getRegulatedChild(i)).setNamespaceExp(namespaceExp);
+            ((Assignment) getChild(i)).setNamespaceExp(namespaceExp);
         }
     }
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        return getRegulatedChildren();
+        return getChildBuffer();
     }
 
     @Override
@@ -62,12 +62,12 @@ final class AssignmentInstruction extends TemplateElement {
         buf.append(Assignment.getDirectiveName(scope));
         if (canonical) {
             buf.append(' ');
-            int ln = getRegulatedChildCount();
+            int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
                 if (i != 0) {
                     buf.append(", ");
                 }
-                Assignment assignment = (Assignment) getRegulatedChild(i);
+                Assignment assignment = (Assignment) getChild(i);
                 buf.append(assignment.getCanonicalForm());
             }
         } else {

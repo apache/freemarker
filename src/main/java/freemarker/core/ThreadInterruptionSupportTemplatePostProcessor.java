@@ -58,41 +58,14 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
             return;
         }
         
-        final TemplateElement nestedBlock = te.getNestedBlock();
-
-        // Deepest-first recursion:
-        if (nestedBlock != null) {
-            addInterruptionChecks(nestedBlock);
-        }
-        final int regulatedChildrenCount = te.getRegulatedChildCount();
+        final int regulatedChildrenCount = te.getChildCount();
         for (int i = 0; i < regulatedChildrenCount; i++) {
-            addInterruptionChecks(te.getRegulatedChild(i));
+            addInterruptionChecks(te.getChild(i));
         }
         
-        // Because nestedElements (means fixed schema for the children) and nestedBlock (means no fixed schema) are
-        // mutually exclusive, and we only care about the last kind:
         if (te.isNestedBlockRepeater()) {
-            if (nestedBlock == null && regulatedChildrenCount != 0) {
-                // Only elements that use nestedBlock instead of regulatedChildren should be block repeaters.
-                // Note that nestedBlock and nestedElements are (should be) mutually exclusive.
-                throw new BugException(); 
-            }
             try {
-                final ThreadInterruptionCheck interruptedChk = new ThreadInterruptionCheck(te);
-                if (nestedBlock == null) {
-                    te.setNestedBlock(interruptedChk);
-                } else {
-                    final MixedContent nestedMixedC;
-                    if (nestedBlock instanceof MixedContent) {
-                        nestedMixedC = (MixedContent) nestedBlock;
-                    } else {
-                        nestedMixedC = new MixedContent();
-                        nestedMixedC.setLocation(te.getTemplate(), 0, 0, 0, 0);
-                        nestedMixedC.addElement(nestedBlock);
-                        te.setNestedBlock(nestedMixedC);
-                    }
-                    nestedMixedC.addElement(0, interruptedChk);
-                }
+                te.addChild(0, new ThreadInterruptionCheck(te));
             } catch (ParseException e) {
                 throw new TemplatePostProcessorException("Unexpected error; see cause", e);
             }

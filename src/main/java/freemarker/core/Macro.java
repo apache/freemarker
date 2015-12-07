@@ -65,7 +65,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.function = function;
         this.catchAllParamName = catchAllParamName; 
         
-        this.setNestedBlock(nestedBlock);
+        this.setChildrenFromElement(nestedBlock);
     }
 
     public String getCatchAll() {
@@ -137,9 +137,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         if (function) sb.append(')');
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) {
-                sb.append(getNestedBlock().getCanonicalForm());
-            }
+            sb.append(getChildrenCanonicalForm());
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }
         return sb.toString();
@@ -156,17 +154,17 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     class Context implements LocalContext {
         final Environment.Namespace localVars; 
-        final TemplateElement nestedContent;
+        final TemplateElement[] nestedContentBuffer;
         final Environment.Namespace nestedContentNamespace;
         final List nestedContentParameterNames;
         final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
         
         Context(Environment env, 
-                TemplateElement nestedContent,
+                TemplateElement[] nestedContentBuffer,
                 List nestedContentParameterNames) {
             this.localVars = env.new Namespace(); 
-            this.nestedContent = nestedContent;
+            this.nestedContentBuffer = nestedContentBuffer;
             this.nestedContentNamespace = env.getCurrentNamespace();
             this.nestedContentParameterNames = nestedContentParameterNames;
             this.prevLocalContextStack = env.getLocalContextStack();
@@ -180,10 +178,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
         void runMacro(Environment env) throws TemplateException, IOException {
             sanityCheck(env);
-            // Set default values for unspecified parameters
-            if (getNestedBlock() != null) {
-                env.visit(getNestedBlock());
-            }
+            env.visit(getChildBuffer());
         }
 
         // Set default parameters, check if all the required parameters are defined.

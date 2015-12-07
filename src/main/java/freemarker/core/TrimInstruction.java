@@ -66,7 +66,7 @@ final class TrimInstruction extends TemplateElement {
     }
     
     @Override
-    boolean isIgnorable() {
+    boolean isIgnorable(boolean stripWhitespace) {
         return true;
     }
 

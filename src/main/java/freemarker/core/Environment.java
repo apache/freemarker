@@ -337,6 +337,24 @@ public final class Environment extends Configurable {
             popElement();
         }
     }
+    
+    /**
+     * @param elementBuffer
+     *            The elements to visit; might contains trailing {@code null}-s. Can be {@code null}.
+     * 
+     * @since 2.3.24
+     */
+    void visit(TemplateElement[] elementBuffer) throws IOException, TemplateException {
+        if (elementBuffer == null) {
+            return;
+        }
+        for (TemplateElement el : elementBuffer) {
+            if (el == null) {
+                break;  // Skip unused trailing buffer capacity 
+            }
+            visit(el);
+        }
+    }
 
     @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
     private TemplateElement replaceTopElement(TemplateElement element) {
@@ -345,14 +363,24 @@ public final class Environment extends Configurable {
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
 
+    /**
+     * @deprecated Should be internal API
+     */
+    @Deprecated
     public void visit(final TemplateElement element,
             TemplateDirectiveModel directiveModel, Map args,
             final List bodyParameterNames) throws TemplateException, IOException {
+        visit(new TemplateElement[] { element }, directiveModel, args, bodyParameterNames);
+    }
+    
+    void visit(final TemplateElement[] childBuffer,
+            TemplateDirectiveModel directiveModel, Map args,
+            final List bodyParameterNames) throws TemplateException, IOException {
         TemplateDirectiveBody nested;
-        if (element == null) {
+        if (childBuffer == null) {
             nested = null;
         } else {
-            nested = new NestedElementTemplateDirectiveBody(element);
+            nested = new NestedElementTemplateDirectiveBody(childBuffer);
         }
         final TemplateModel[] outArgs;
         if (bodyParameterNames == null || bodyParameterNames.isEmpty()) {
@@ -385,14 +413,14 @@ public final class Environment extends Configurable {
     /**
      * "Visit" the template element, passing the output through a TemplateTransformModel
      * 
-     * @param element
-     *            the element to visit through a transform
+     * @param elementBuffer
+     *            the element to visit through a transform; might contains trailing {@code null}-s
      * @param transform
      *            the transform to pass the element output through
      * @param args
      *            optional arguments fed to the transform
      */
-    void visitAndTransform(TemplateElement element,
+    void visitAndTransform(TemplateElement[] elementBuffer,
             TemplateTransformModel transform,
             Map args)
                     throws TemplateException, IOException {
@@ -408,9 +436,7 @@ public final class Environment extends Configurable {
             try {
                 if (tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
                     do {
-                        if (element != null) {
-                            visit(element);
-                        }
+                        visit(elementBuffer);
                     } while (tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
                 }
             } catch (Throwable t) {
@@ -501,8 +527,8 @@ public final class Environment extends Configurable {
     void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
         LocalContextStack prevLocalContextStack = localContextStack;
-        TemplateElement nestedContent = invokingMacroContext.nestedContent;
-        if (nestedContent != null) {
+        TemplateElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
+        if (nestedContentBuffer != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;
 
@@ -520,7 +546,7 @@ public final class Environment extends Configurable {
                 pushLocalContext(bodyCtx);
             }
             try {
-                visit(nestedContent);
+                visit(nestedContentBuffer);
             } finally {
                 if (invokingMacroContext.nestedContentParameterNames != null) {
                     localContextStack.pop();
@@ -642,14 +668,14 @@ public final class Environment extends Configurable {
      */
     void invoke(Macro macro,
             Map namedArgs, List positionalArgs,
-            List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
+            List bodyParameterNames, TemplateElement[] childBuffer) throws TemplateException, IOException {
         if (macro == Macro.DO_NOTHING_MACRO) {
             return;
         }
 
         pushElement(macro);
         try {
-            final Macro.Context macroCtx = macro.new Context(this, nestedBlock, bodyParameterNames);
+            final Macro.Context macroCtx = macro.new Context(this, childBuffer, bodyParameterNames);
             setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
 
             final Macro.Context prevMacroCtx = currentMacroContext;
@@ -2662,24 +2688,24 @@ public final class Environment extends Configurable {
 
     final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
 
-        private final TemplateElement element;
+        private final TemplateElement[] childBuffer;
 
-        private NestedElementTemplateDirectiveBody(TemplateElement element) {
-            this.element = element;
+        private NestedElementTemplateDirectiveBody(TemplateElement[] childBuffer) {
+            this.childBuffer = childBuffer;
         }
 
         public void render(Writer newOut) throws TemplateException, IOException {
             Writer prevOut = out;
             out = newOut;
             try {
-                visit(element);
+                visit(childBuffer);
             } finally {
                 out = prevOut;
             }
         }
-
-        public TemplateElement getElement() {
-            return element;
+        
+        TemplateElement[] getChildrenBuffer() {
+            return childBuffer;
         }
 
     }

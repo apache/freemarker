@@ -108,7 +108,13 @@ public final class TextBlock extends TemplateElement {
         if (!stripWhitespace || text.length == 0 ) {
             return this;
         }
-        if (getParentElement().getParentElement() == null && previousSibling() == null) return this;
+        TemplateElement parentElement = getParentElement();
+        if (
+                (parentElement == null
+                        || parentElement.getParentElement() == null && parentElement instanceof MixedContent)
+                && previousSibling() == null) {
+            return this;
+        }
         if (!deliberateLeftTrim) {
             trailingCharsToStrip = trailingCharsToStrip();
         }
@@ -306,7 +312,7 @@ public final class TextBlock extends TemplateElement {
 
     @Override
     boolean heedsTrailingWhitespace() {
-        if (isIgnorable()) {
+        if (isIgnorable(true)) {
             return false;
         }
         for (int i = 0; i < text.length; i++) {
@@ -323,7 +329,7 @@ public final class TextBlock extends TemplateElement {
 
     @Override
     boolean heedsOpeningWhitespace() {
-        if (isIgnorable()) {
+        if (isIgnorable(true)) {
             return false;
         }
         for (int i = text.length - 1; i >= 0; i--) {
@@ -339,18 +345,24 @@ public final class TextBlock extends TemplateElement {
     }
 
     @Override
-    boolean isIgnorable() {
+    boolean isIgnorable(boolean stripWhitespace) {
         if (text == null || text.length == 0) {
             return true;
         }
-        if (!StringUtil.isTrimmableToEmpty(text)) {
+        if (stripWhitespace) {
+            if (!StringUtil.isTrimmableToEmpty(text)) {
+                return false;
+            }
+            TemplateElement parentElement = getParentElement();
+            boolean atTopLevel = (parentElement == null
+                    || parentElement.getParentElement() == null && parentElement instanceof MixedContent);
+            TemplateElement prevSibling = previousSibling();
+            TemplateElement nextSibling = nextSibling();
+            return ((prevSibling == null && atTopLevel) || nonOutputtingType(prevSibling))
+                    && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
+        } else {
             return false;
         }
-        boolean atTopLevel = (getParentElement().getParentElement() == null);
-        TemplateElement prevSibling = previousSibling();
-        TemplateElement nextSibling = nextSibling();
-        return ((prevSibling == null && atTopLevel) || nonOutputtingType(prevSibling))
-                && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
     }
     
 

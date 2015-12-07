@@ -45,28 +45,19 @@ abstract public class TemplateElement extends TemplateObject {
     private TemplateElement parent;
 
     /**
-     * Used by elements that has no fixed schema for its child elements. For example, a {@code #case} can enclose any
-     * kind of elements. Only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be non-{@code null}
-     * before {@link #postParseCleanup(boolean)}. After {@link #postParseCleanup(boolean)}, the
-     * {@link #regulatedChildBuffer} is always filled and used for execution. This element is typically a
-     * {@link MixedContent}, at least before {@link #postParseCleanup(boolean)} (which optimizes out
-     * {@link MixedContent} with child count less than 2).
+     * Contains 1 or more nested elements with optional trailing {@code null}-s, or is {@code null} exactly if there
+     * are no nested elements.
      */
-    private TemplateElement nestedBlock;
+    private TemplateElement[] childBuffer;
     
     /**
-     * Before {@link #postParseCleanup(boolean)}, it's only used by elements that has a fixed schema for its child
-     * elements. For example, {@code #switch} can only have {@code #case} and {@code #default} child elements. Before
-     * {@link #postParseCleanup(boolean)}, only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be
-     * non-{@code null}. After {@link #postParseCleanup(boolean)}, the {@link #regulatedChildBuffer} is always filled
-     * and used for execution.
+     * Contains the number of elements in the {@link #childBuffer}, not counting the trailing {@code null}-s.
+     * If this is 0, then and only then {@link #childBuffer} must be {@code null}.
      */
-    private TemplateElement[] regulatedChildBuffer;
-    private int regulatedChildCount;
+    private int childCount;
 
     /**
-     * The index of the element in the parent's {@link #regulatedChildBuffer} array, or 0 if this is the
-     * {@link #nestedBlock} of the parent.
+     * The index of the element in the parent's {@link #childBuffer} array.
      * 
      * @since 2.3.23
      */
@@ -111,6 +102,18 @@ abstract public class TemplateElement extends TemplateObject {
         return dump(true);
     }
     
+    final String getChildrenCanonicalForm() {
+        int ln = childCount;
+        if (ln == 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ln; i++) {
+            sb.append(childBuffer[i].getCanonicalForm());
+        }
+        return sb.toString();
+    }
+    
     /**
      * Tells if the element should show up in error stack traces. Note that this will be ignored for the top (current)
      * element of a stack trace, as that's always shown.
@@ -120,10 +123,10 @@ abstract public class TemplateElement extends TemplateObject {
     }
     
     /**
-     * Tells if this element possibly executes its {@link #nestedBlock} for many times. This flag is useful when
-     * a template AST is modified for running time limiting (see {@link ThreadInterruptionSupportTemplatePostProcessor}).
-     * Elements that use {@link #regulatedChildBuffer} should not need this, as the insertion of the timeout checks is
-     * impossible there, given their rigid nested element schema.
+     * Tells if this element possibly executes its nested content for many times. This flag is useful when a template
+     * AST is modified for running time limiting (see {@link ThreadInterruptionSupportTemplatePostProcessor}). Elements
+     * that use {@link #childBuffer} should not need this, as the insertion of the timeout checks is impossible
+     * there, given their rigid nested element schema.
      */
     abstract boolean isNestedBlockRepeater();
 
@@ -153,16 +156,12 @@ abstract public class TemplateElement extends TemplateObject {
     
     public TemplateSequenceModel getChildNodes() {
         SimpleSequence result = new SimpleSequence(1);
-        if (nestedBlock != null) {
-            result.add(nestedBlock);
-        } else { 
-            if (regulatedChildBuffer != null) {
-                final SimpleSequence seq = new SimpleSequence(regulatedChildCount);
-                for (int i = 0; i < regulatedChildCount; i++) {
-                    seq.add(regulatedChildBuffer[i]);
-                }
-                return seq;
+        if (childBuffer != null) {
+            final SimpleSequence seq = new SimpleSequence(childCount);
+            for (int i = 0; i < childCount; i++) {
+                seq.add(childBuffer[i]);
             }
+            return seq;
         }
         return result;
     }
@@ -176,7 +175,7 @@ abstract public class TemplateElement extends TemplateObject {
     // Methods so that we can implement the Swing TreeNode API.    
 
     public boolean isLeaf() {
-        return nestedBlock == null && regulatedChildCount == 0;
+        return childCount == 0;
     }
 
     /**
@@ -188,31 +187,16 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     public int getIndex(TemplateElement node) {
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.getIndex(node);
-        }
-        if (nestedBlock != null) {
-            if (node == nestedBlock) {
-                return 0;
-            }
-        } else {
-            for (int i = 0; i < regulatedChildCount; i++) {
-                if (regulatedChildBuffer[i].equals(node)) { 
-                    return i;
-                }
+        for (int i = 0; i < childCount; i++) {
+            if (childBuffer[i].equals(node)) { 
+                return i;
             }
         }
         return -1;
     }
 
     public int getChildCount() {
-        // Note: regulatedChildren is possibly filled for optimization despite that nestedBlock is filled too, but then
-        // it should only be utilized for execution, as those children might skip a MixedContent parent. 
-        if (nestedBlock != null) {
-            return nestedBlock instanceof MixedContent ? nestedBlock.getChildCount() : 1;
-        } else {
-            return regulatedChildCount;
-        }
+        return childCount;
     }
 
     /**
@@ -220,61 +204,30 @@ abstract public class TemplateElement extends TemplateObject {
      * {@link MixedContent}.
      */
     public Enumeration children() {
-        // Note: regulatedChildren is possibly filled for optimization despite that nestedBlock is filled too, but then
-        // it should only be utilized for execution, as those children might skip a MixedContent parent. 
-        if (nestedBlock != null) {
-            return nestedBlock instanceof MixedContent
-                    ? nestedBlock.children() : Collections.enumeration(Collections.singletonList(nestedBlock));
-        } else if (regulatedChildBuffer != null) {
-            return new _ArrayEnumeration(regulatedChildBuffer, regulatedChildCount);
-        }
-        return Collections.enumeration(Collections.EMPTY_LIST);
+        return childBuffer != null
+                ? new _ArrayEnumeration(childBuffer, childCount)
+                : Collections.enumeration(Collections.EMPTY_LIST);
     }
 
     public TemplateElement getChildAt(int index) {
-        // Note: regulatedChildren is possibly filled for optimization despite that nestedBlock is filled too, but then
-        // it should only be utilized for execution, as those children might skip a MixedContent parent. 
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.getChildAt(index);
-        } else if (nestedBlock != null) {
-            if (index == 0) {
-                return nestedBlock;
-            }
-            throw new ArrayIndexOutOfBoundsException("invalid index");
-        } else if (regulatedChildCount != 0) {
-            try {
-                return regulatedChildBuffer[index];
-            } catch (ArrayIndexOutOfBoundsException e) {
-                // nestedElements was a List earlier, so we emulate the same kind of exception
-                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + regulatedChildCount);
-            }
+        if (childCount == 0) {
+            throw new IndexOutOfBoundsException("Template element has no children");
         }
-        throw new ArrayIndexOutOfBoundsException("Template element has no children");
+        try {
+            return childBuffer[index];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // nestedElements was a List earlier, so we emulate the same kind of exception
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + childCount);
+        }
     }
 
     public void setChildAt(int index, TemplateElement element) {
-        if (nestedBlock instanceof MixedContent) {
-            nestedBlock.setChildAt(index, element);
-            if (regulatedChildBuffer != null) {
-                regulatedChildBuffer[index] = element;
-            }            
-        } else if (nestedBlock != null) {
-            if (index == 0) {
-                nestedBlock = element;
-                element.index = 0;
-                element.parent = this;
-                if (regulatedChildBuffer != null) {
-                    regulatedChildBuffer[0] = element;
-                }            
-            } else {
-                throw new IndexOutOfBoundsException("invalid index");
-            }
-        } else if (regulatedChildBuffer != null) {
-            regulatedChildBuffer[index] = element;
+        if (index < childCount && index >= 0) {
+            childBuffer[index] = element;
             element.index = index;
             element.parent = this;
         } else {
-            throw new IndexOutOfBoundsException("element has no children");
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + childCount);
         }
     }
     
@@ -288,29 +241,35 @@ abstract public class TemplateElement extends TemplateObject {
         return parent;
     }
     
-    final void setRegulatedChildBufferCapacity(int capacity) {
-        int ln = regulatedChildCount;
+    final void setChildBufferCapacity(int capacity) {
+        int ln = childCount;
         TemplateElement[] newRegulatedChildBuffer = new TemplateElement[capacity];
         for (int i = 0; i < ln; i++) {
-            newRegulatedChildBuffer[i] = regulatedChildBuffer[i];
+            newRegulatedChildBuffer[i] = childBuffer[i];
         }
-        regulatedChildBuffer = newRegulatedChildBuffer;
+        childBuffer = newRegulatedChildBuffer;
     }
     
-    final void addRegulatedChild(TemplateElement nestedElement) {
-        addRegulatedChild(regulatedChildCount, nestedElement);
+    /**
+     * Inserts a new nested element after the last nested element. 
+     */
+    final void addChild(TemplateElement nestedElement) {
+        addChild(childCount, nestedElement);
     }
 
-    final void addRegulatedChild(int index, TemplateElement nestedElement) {
-        final int lRegulatedChildCount = regulatedChildCount;
+    /**
+     * Inserts a new nested element at the given index, which can also be one higher than the current highest index.
+     */
+    final void addChild(int index, TemplateElement nestedElement) {
+        final int lRegulatedChildCount = childCount;
         
-        TemplateElement[] lRegulatedChildBuffer = regulatedChildBuffer;
+        TemplateElement[] lRegulatedChildBuffer = childBuffer;
         if (lRegulatedChildBuffer == null) {
             lRegulatedChildBuffer = new TemplateElement[INITIAL_REGULATED_CHILD_BUFFER_CAPACITY];
-            regulatedChildBuffer = lRegulatedChildBuffer;
+            childBuffer = lRegulatedChildBuffer;
         } else if (lRegulatedChildCount == lRegulatedChildBuffer.length) {
-            setRegulatedChildBufferCapacity(lRegulatedChildCount != 0 ? lRegulatedChildCount * 2 : 1);
-            lRegulatedChildBuffer = regulatedChildBuffer; 
+            setChildBufferCapacity(lRegulatedChildCount != 0 ? lRegulatedChildCount * 2 : 1);
+            lRegulatedChildBuffer = childBuffer; 
         }
         // At this point: nestedElements == this.nestedElements, and has sufficient capacity.
 
@@ -322,19 +281,37 @@ abstract public class TemplateElement extends TemplateObject {
         nestedElement.index = index;
         nestedElement.parent = this;
         lRegulatedChildBuffer[index] = nestedElement;
-        regulatedChildCount = lRegulatedChildCount + 1;
+        childCount = lRegulatedChildCount + 1;
     }
     
-    final int getRegulatedChildCount() {
-       return regulatedChildCount; 
+    final TemplateElement getChild(int index) {
+        return childBuffer[index];
     }
     
-    final TemplateElement getRegulatedChild(int index) {
-        return regulatedChildBuffer[index];
+    /**
+     * @return Array containing 1 or more nested elements with optional trailing {@code null}-s, or is {@code null}
+     *         exactly if there are no nested elements.
+     */
+    final TemplateElement[] getChildBuffer(){
+        return childBuffer;
     }
-
-    final TemplateElement[] getRegulatedChildren(){
-        return regulatedChildBuffer;
+    
+    // TODO Workaround until the parser doesn't emit TemplateElement[]-s for "blocks" 
+    final void setChildrenFromElement(TemplateElement nestedBlock) {
+        if (nestedBlock == null) {
+            childBuffer = null;
+            childCount = 0;
+        } else if (nestedBlock instanceof MixedContent) {
+            MixedContent mixedContent = (MixedContent) nestedBlock;
+            childBuffer = mixedContent.getChildBuffer();
+            childCount = mixedContent.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                childBuffer[i].parent = this;
+            }
+        } else {
+            childBuffer = new TemplateElement[] { nestedBlock };
+            childCount = 1;
+        }
     }
     
     final int getIndex() {
@@ -346,18 +323,6 @@ abstract public class TemplateElement extends TemplateObject {
      */
     final TemplateElement getParentElement() {
         return parent;
-    }
-    
-    final TemplateElement getNestedBlock() {
-        return nestedBlock;
-    }
-
-    final void setNestedBlock(TemplateElement nestedBlock) {
-        if (nestedBlock != null) {
-            nestedBlock.parent = this;
-            nestedBlock.index = 0;
-        }
-        this.nestedBlock = nestedBlock;
     }
     
     /**
@@ -381,62 +346,45 @@ abstract public class TemplateElement extends TemplateObject {
      *         is the duty of the caller, not of this method.
      */
     TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
-        int regulatedChildCount = this.regulatedChildCount;
-        if (nestedBlock != null) {
-            nestedBlock = nestedBlock.postParseCleanup(stripWhitespace);
-            if (nestedBlock.isIgnorable()) {
-                nestedBlock = null;
-            } else {
-                nestedBlock.parent = this;
-                if (nestedBlock instanceof MixedContent) {
-                    // As MixedContent.accept does nothing but return its regulatedChildren, while it will be present as
-                    // a child, the parent element also will have regularedChildren that contains the children of the
-                    // MixedContent directly. 
-                    this.regulatedChildBuffer = nestedBlock.getRegulatedChildren();
-                    this.regulatedChildCount = nestedBlock.getRegulatedChildCount();
-                } else {
-                    // Because execution will use regularChildren only.
-                    this.regulatedChildBuffer = new TemplateElement[] { nestedBlock };
-                    this.regulatedChildCount = 1;
-                }
-            }
-        } else if (regulatedChildCount != 0) {
+        int regulatedChildCount = this.childCount;
+        if (regulatedChildCount != 0) {
             for (int i = 0; i < regulatedChildCount; i++) {
-                TemplateElement te = regulatedChildBuffer[i];
+                TemplateElement te = childBuffer[i];
                 te = te.postParseCleanup(stripWhitespace);
-                regulatedChildBuffer[i] = te;
+                childBuffer[i] = te;
                 te.parent = this;
                 te.index = i;
             }
-            if (stripWhitespace) {
-                for (int i = 0; i < regulatedChildCount; i++) {
-                    TemplateElement te = regulatedChildBuffer[i];
-                    if (te.isIgnorable()) {
-                        regulatedChildCount--;
-                        for (int j = i; j < regulatedChildCount; j++) {
-                            final TemplateElement te2 = regulatedChildBuffer[j  + 1];
-                            regulatedChildBuffer[j] = te2;
-                            te2.index = j;
-                        }
-                        regulatedChildBuffer[regulatedChildCount] = null;
-                        this.regulatedChildCount = regulatedChildCount;
-                        i--;
+            for (int i = 0; i < regulatedChildCount; i++) {
+                TemplateElement te = childBuffer[i];
+                if (te.isIgnorable(stripWhitespace)) {
+                    // TODO Optimize this...
+                    regulatedChildCount--;
+                    for (int j = i; j < regulatedChildCount; j++) {
+                        final TemplateElement te2 = childBuffer[j  + 1];
+                        childBuffer[j] = te2;
+                        te2.index = j;
                     }
+                    childBuffer[regulatedChildCount] = null;
+                    this.childCount = regulatedChildCount;
+                    i--;
                 }
             }
-            if (regulatedChildCount < regulatedChildBuffer.length
-                    && regulatedChildCount <= regulatedChildBuffer.length * 3 / 4) {
+            if (regulatedChildCount == 0) {
+                childBuffer = null;
+            } else if (regulatedChildCount < childBuffer.length
+                && regulatedChildCount <= childBuffer.length * 3 / 4) {
                 TemplateElement[] trimmedregulatedChildBuffer = new TemplateElement[regulatedChildCount];
                 for (int i = 0; i < regulatedChildCount; i++) {
-                    trimmedregulatedChildBuffer[i] = regulatedChildBuffer[i];
+                    trimmedregulatedChildBuffer[i] = childBuffer[i];
                 }
-                regulatedChildBuffer = trimmedregulatedChildBuffer;
+                childBuffer = trimmedregulatedChildBuffer;
             }
         } 
         return this;
     }
 
-    boolean isIgnorable() {
+    boolean isIgnorable(boolean stripWhitespace) {
         return false;
     }
 
@@ -467,35 +415,23 @@ abstract public class TemplateElement extends TemplateObject {
         if (parent == null) {
             return null;
         }
-        return index > 0 ? parent.regulatedChildBuffer[index - 1] : null;
+        return index > 0 ? parent.childBuffer[index - 1] : null;
     }
 
     TemplateElement nextSibling() {
         if (parent == null) {
             return null;
         }
-        return index + 1 < parent.regulatedChildCount ? parent.regulatedChildBuffer[index + 1] : null;
+        return index + 1 < parent.childCount ? parent.childBuffer[index + 1] : null;
     }
 
     private TemplateElement getFirstChild() {
-        if (nestedBlock != null) {
-            return nestedBlock;
-        }
-        if (regulatedChildCount == 0) {
-            return null;
-        }
-        return regulatedChildBuffer[0];
+        return childCount == 0 ? null : childBuffer[0];
     }
 
     private TemplateElement getLastChild() {
-        if (nestedBlock != null) {
-            return nestedBlock;
-        }
-        final int regulatedChildCount = this.regulatedChildCount;
-        if (regulatedChildCount == 0) {
-            return null;
-        }
-        return regulatedChildBuffer[regulatedChildCount - 1];
+        final int regulatedChildCount = this.childCount;
+        return regulatedChildCount == 0 ? null : childBuffer[regulatedChildCount - 1];
     }
 
     private TemplateElement getFirstLeaf() {
@@ -522,6 +458,16 @@ abstract public class TemplateElement extends TemplateObject {
      */
     boolean isOutputCacheable() {
         return false;
+    }
+    
+    boolean isChildrenOutputCacheable() {
+        int ln = childCount;
+        for (int i = 0; i < ln; i++) {
+            if (!childBuffer[i].isOutputCacheable()) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**

@@ -54,7 +54,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
          List bodyParameterNames) {
         this.nameExp = nameExp;
         this.namedArgs = namedArgs;
-        setNestedBlock(nestedBlock);
+        setChildrenFromElement(nestedBlock);
         this.bodyParameterNames = bodyParameterNames;
     }
 
@@ -67,7 +67,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         if (nestedBlock == TextBlock.EMPTY_BLOCK) {
             nestedBlock = null;
         }
-        setNestedBlock(nestedBlock);
+        setChildrenFromElement(nestedBlock);
         this.bodyParameterNames = bodyParameterNames;
     }
 
@@ -83,8 +83,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                         + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
                         "<@someDirective someParam=f() />", ".");
             }    
-            env.invoke(macro, namedArgs, positionalArgs, bodyParameterNames,
-                    getNestedBlock());
+            env.invoke(macro, namedArgs, positionalArgs, bodyParameterNames, getChildBuffer());
         } else {
             boolean isDirectiveModel = tm instanceof TemplateDirectiveModel; 
             if (isDirectiveModel || tm instanceof TemplateTransformModel) {
@@ -102,9 +101,9 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                     args = EmptyMap.instance;
                 }
                 if (isDirectiveModel) {
-                    env.visit(getNestedBlock(), (TemplateDirectiveModel) tm, args, bodyParameterNames);
+                    env.visit(getChildBuffer(), (TemplateDirectiveModel) tm, args, bodyParameterNames);
                 } else { 
-                    env.visitAndTransform(getNestedBlock(), (TemplateTransformModel) tm, args);
+                    env.visitAndTransform(getChildBuffer(), (TemplateTransformModel) tm, args);
                 }
             } else if (tm == null) {
                 throw InvalidReferenceException.getInstance(nameExp, env);
@@ -152,11 +151,11 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
             }
         }
         if (canonical) {
-            if (getNestedBlock() == null) {
+            if (getChildCount() == 0) {
                 sb.append("/>");
             } else {
                 sb.append('>');
-                sb.append(getNestedBlock().getCanonicalForm());
+                sb.append(getChildrenCanonicalForm());
                 sb.append("</@");
                 if (!nameIsInParen
                         && (nameExp instanceof Identifier
@@ -303,8 +302,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     public boolean isNestedOutputCacheable() {
-        if (getNestedBlock() == null) return true;
-        return getNestedBlock().isOutputCacheable();
+        return isChildrenOutputCacheable();
     }
     
 /*

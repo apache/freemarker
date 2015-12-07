@@ -31,25 +31,23 @@ import freemarker.template.TemplateException;
 final class IfBlock extends TemplateElement {
 
     IfBlock(ConditionalBlock block) {
-        setRegulatedChildBufferCapacity(1);
+        setChildBufferCapacity(1);
         addBlock(block);
     }
 
     void addBlock(ConditionalBlock block) {
-        addRegulatedChild(block);
+        addChild(block);
     }
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        int ln  = getRegulatedChildCount();
+        int ln  = getChildCount();
         for (int i = 0; i < ln; i++) {
-            ConditionalBlock cblock = (ConditionalBlock) getRegulatedChild(i);
+            ConditionalBlock cblock = (ConditionalBlock) getChild(i);
             Expression condition = cblock.condition;
             env.replaceElementStackTop(cblock);
             if (condition == null || condition.evalToBoolean(env)) {
-                if (cblock.getNestedBlock() != null) {
-                    return cblock.getRegulatedChildren();
-                }
+                return cblock.getChildBuffer();
             }
         }
         return null;
@@ -58,8 +56,8 @@ final class IfBlock extends TemplateElement {
     @Override
     TemplateElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
-        if (getRegulatedChildCount() == 1) {
-            ConditionalBlock cblock = (ConditionalBlock) getRegulatedChild(0);
+        if (getChildCount() == 1) {
+            ConditionalBlock cblock = (ConditionalBlock) getChild(0);
             cblock.setLocation(getTemplate(), cblock, this);
             return cblock.postParseCleanup(stripWhitespace);
         } else {
@@ -71,9 +69,9 @@ final class IfBlock extends TemplateElement {
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
-            int ln = getRegulatedChildCount();
+            int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                ConditionalBlock cblock = (ConditionalBlock) getRegulatedChild(i);
+                ConditionalBlock cblock = (ConditionalBlock) getChild(i);
                 buf.append(cblock.dump(canonical));
             }
             buf.append("</#if>");

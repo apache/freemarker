@@ -37,15 +37,11 @@ public final class ReturnInstruction extends TemplateElement {
         if (exp != null) {
             env.setLastReturnValue(exp.eval(env));
         }
-        if (nextSibling() != null) {
-            // We need to jump out using an exception.
-            throw Return.INSTANCE;
+        if (nextSibling() == null && getParentElement() instanceof Macro) {
+            // Avoid unnecessary exception throwing 
+            return null;
         }
-        if (!(getParentElement() instanceof Macro || getParentElement().getParentElement() instanceof Macro)) {
-            // Here also, we need to jump out using an exception.
-            throw Return.INSTANCE;
-        }
-        return null;
+        throw Return.INSTANCE;
     }
 
     @Override

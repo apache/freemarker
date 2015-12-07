@@ -28,9 +28,9 @@ class ListElseContainer extends TemplateElement {
     private final ElseOfList elsePart;
 
     public ListElseContainer(IteratorBlock listPart, ElseOfList elsePart) {
-        setRegulatedChildBufferCapacity(2);
-        addRegulatedChild(listPart);
-        addRegulatedChild(elsePart);
+        setChildBufferCapacity(2);
+        addChild(listPart);
+        addChild(elsePart);
         this.listPart = listPart;
         this.elsePart = elsePart;
     }
@@ -52,9 +52,9 @@ class ListElseContainer extends TemplateElement {
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
-            int ln = getRegulatedChildCount();
+            int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                TemplateElement element = getRegulatedChild(i);
+                TemplateElement element = getChild(i);
                 buf.append(element.dump(canonical));
             }
             buf.append("</#list>");

@@ -260,9 +260,9 @@ public class ASTPrinter {
     }
 
     private static void validateAST(TemplateElement te) {
-        int ln = te.getRegulatedChildCount();
-        for (int i = 0; i < ln; i++) {
-            TemplateElement child = te.getRegulatedChild(i);
+        int childCount = te.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            TemplateElement child = te.getChild(i);
             TemplateElement parentElement = child.getParentElement();
             // As MixedContent.accept does nothing but return its regulatedChildren, it's optimized out in the final
             // AST tree. While it will be present as a child, the parent element also will have regularedChildren
@@ -283,45 +283,36 @@ public class ASTPrinter {
                         + "\nActual index: " + child.getIndex());
             }
         }
-        if (te instanceof MixedContent && te.getRegulatedChildCount() < 2) {
+        if (te instanceof MixedContent && te.getChildCount() < 2) {
             throw new InvalidASTException("Mixed content with child count less than 2 should removed by optimizatoin, "
-                    + "but found one with " + te.getRegulatedChildCount() + " child(ren).");
+                    + "but found one with " + te.getChildCount() + " child(ren).");
         }
-        TemplateElement nestedBlock = te.getNestedBlock();
-        TemplateElement[] regulatedChildren = te.getRegulatedChildren();
-        if (nestedBlock != null) {
-            if (regulatedChildren == null) {
-                throw new InvalidASTException(
-                        "RegularChildren must be filled after postParseCleanup if there's a nestedBlock."
-                        + "\nNode: " + te.dump(false));
-            }
-            if (nestedBlock instanceof MixedContent
-                    && (te.getRegulatedChildCount() != nestedBlock.getRegulatedChildCount()
-                    || regulatedChildren != nestedBlock.getRegulatedChildren())) {
-                throw new InvalidASTException(
-                        "MixedContent.regularChildren must be the same as its parent's regularChildren."
-                        + "\nNode: " + te.dump(false));
-            } else if (!(nestedBlock instanceof MixedContent) && te.getRegulatedChildCount() != 1) {
-                throw new InvalidASTException(
-                        "non-MixedContent-related regularChildren must be of lenght 1 where there's a nestedBlock, "
-                        + "but was " + te.getRegulatedChildCount()
-                        + "\nNode: " + te.dump(false));
-            }
-        }
+        TemplateElement[] regulatedChildren = te.getChildBuffer();
         if (regulatedChildren != null) {
-            for (int i = 0; i < te.getRegulatedChildCount(); i++) {
+            if (childCount == 0) {
+                throw new InvalidASTException(
+                        "regularChildren must be null when regularChild is 0."
+                        + "\nNode: " + te.dump(false));
+            }
+            for (int i = 0; i < te.getChildCount(); i++) {
                 if (regulatedChildren[i] == null) {
                     throw new InvalidASTException(
                             "regularChildren can't be null at index " + i
                             + "\nNode: " + te.dump(false));
                 }
             }
-            for (int i = te.getRegulatedChildCount(); i < regulatedChildren.length; i++) {
+            for (int i = te.getChildCount(); i < regulatedChildren.length; i++) {
                 if (regulatedChildren[i] != null) {
                     throw new InvalidASTException(
                             "regularChildren can't be non-null at index " + i
                             + "\nNode: " + te.dump(false));
                 }
+            }
+        } else {
+            if (childCount != 0) {
+                throw new InvalidASTException(
+                        "regularChildren mustn't be null when regularChild isn't 0."
+                        + "\nNode: " + te.dump(false));
             }
         }
     }

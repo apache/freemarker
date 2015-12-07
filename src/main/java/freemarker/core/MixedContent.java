@@ -31,18 +31,18 @@ final class MixedContent extends TemplateElement {
     MixedContent() { }
 
     void addElement(TemplateElement element) {
-        addRegulatedChild(element);
+        addChild(element);
     }
 
     void addElement(int index, TemplateElement element) {
-        addRegulatedChild(index, element);
+        addChild(index, element);
     }
     
     @Override
     TemplateElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
         super.postParseCleanup(stripWhitespace);
-        return getRegulatedChildCount() == 1 ? getRegulatedChild(0) : this;
+        return getChildCount() == 1 ? getChild(0) : this;
     }
 
     /**
@@ -52,18 +52,13 @@ final class MixedContent extends TemplateElement {
     @Override
     TemplateElement[] accept(Environment env)
         throws TemplateException, IOException {
-        return getRegulatedChildren();
+        return getChildBuffer();
     }
 
     @Override
     protected String dump(boolean canonical) {
         if (canonical) {
-            StringBuilder buf = new StringBuilder();
-            int ln = getRegulatedChildCount();
-            for (int i = 0; i < ln; i++) {
-                buf.append(getRegulatedChild(i).getCanonicalForm());
-            }
-            return buf.toString();
+            return getChildrenCanonicalForm();
         } else {
             if (getParentElement() == null) {
                 return "root";
@@ -74,9 +69,9 @@ final class MixedContent extends TemplateElement {
 
     @Override
     protected boolean isOutputCacheable() {
-        int ln = getRegulatedChildCount();
+        int ln = getChildCount();
         for (int i = 0; i < ln; i++) {
-            if (!getRegulatedChild(i).isOutputCacheable()) {
+            if (!getChild(i).isOutputCacheable()) {
                 return false;
             }
         }
@@ -104,8 +99,8 @@ final class MixedContent extends TemplateElement {
     }
     
     @Override
-    boolean isIgnorable() {
-        return getRegulatedChildCount() == 0;
+    boolean isIgnorable(boolean stripWhitespace) {
+        return getChildCount() == 0;
     }
 
     @Override

@@ -32,7 +32,7 @@ class Items extends TemplateElement {
 
     public Items(String loopVariableName, TemplateElement nestedBlock) {
         this.loopVarName = loopVariableName;
-        setNestedBlock(nestedBlock);
+        setChildrenFromElement(nestedBlock);
     }
 
     @Override
@@ -44,7 +44,7 @@ class Items extends TemplateElement {
                     getNodeTypeSymbol(), " without iteraton in context");
         }
         
-        iterCtx.loopForItemsElement(env, getNestedBlock(), loopVarName);
+        iterCtx.loopForItemsElement(env, getChildBuffer(), loopVarName);
         return null;
     }
 
@@ -62,7 +62,7 @@ class Items extends TemplateElement {
         sb.append(loopVarName);
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
+            sb.append(getChildrenCanonicalForm());
             sb.append("</");
             sb.append(getNodeTypeSymbol());
             sb.append('>');

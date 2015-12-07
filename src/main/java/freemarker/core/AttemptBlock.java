@@ -34,9 +34,9 @@ final class AttemptBlock extends TemplateElement {
     AttemptBlock(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) {
         this.attemptBlock = attemptBlock;
         this.recoveryBlock = recoveryBlock;
-        setRegulatedChildBufferCapacity(2);
-        addRegulatedChild(attemptBlock);
-        addRegulatedChild(recoveryBlock);
+        setChildBufferCapacity(2);
+        addChild(attemptBlock);
+        addChild(recoveryBlock);
     }
 
     @Override

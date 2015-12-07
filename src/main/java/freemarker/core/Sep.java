@@ -29,7 +29,7 @@ import freemarker.template.TemplateException;
 class Sep extends TemplateElement {
 
     public Sep(TemplateElement nestedBlock) {
-        setNestedBlock(nestedBlock);
+        setChildrenFromElement(nestedBlock);
     }
 
     @Override
@@ -42,7 +42,7 @@ class Sep extends TemplateElement {
         }
         
         if (iterCtx.hasNext()) {
-            return getRegulatedChildren();
+            return getChildBuffer();
         }
         return null;
     }
@@ -59,7 +59,7 @@ class Sep extends TemplateElement {
         sb.append(getNodeTypeSymbol());
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
+            sb.append(getChildrenCanonicalForm());
             sb.append("</");
             sb.append(getNodeTypeSymbol());
             sb.append('>');

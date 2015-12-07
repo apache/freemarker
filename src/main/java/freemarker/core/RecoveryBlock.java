@@ -26,12 +26,12 @@ import freemarker.template.TemplateException;
 final class RecoveryBlock extends TemplateElement {
     
     RecoveryBlock(TemplateElement block) {
-        setNestedBlock(block);
+        setChildrenFromElement(block);
     }
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        return getRegulatedChildren();
+        return getChildBuffer();
     }
 
     @Override
@@ -39,9 +39,7 @@ final class RecoveryBlock extends TemplateElement {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
             buf.append('<').append(getNodeTypeSymbol()).append('>');
-            if (getNestedBlock() != null) {
-                buf.append(getNestedBlock().getCanonicalForm());            
-            }
+            buf.append(getChildrenCanonicalForm());            
             return buf.toString();
         } else {
             return getNodeTypeSymbol();

@@ -31,12 +31,12 @@ final class Case extends TemplateElement {
 
     Case(Expression matchingValue, TemplateElement nestedBlock) {
         this.condition = matchingValue;
-        setNestedBlock(nestedBlock);
+        setChildrenFromElement(nestedBlock);
     }
 
     @Override
     TemplateElement[] accept(Environment env) {
-        return getRegulatedChildren();
+        return getChildBuffer();
     }
 
     @Override
@@ -50,7 +50,7 @@ final class Case extends TemplateElement {
         }
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
+            sb.append(getChildrenCanonicalForm());
         }
         return sb.toString();
     }

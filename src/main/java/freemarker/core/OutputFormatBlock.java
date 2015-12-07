@@ -32,20 +32,19 @@ final class OutputFormatBlock extends TemplateElement {
 
     OutputFormatBlock(TemplateElement nestedBlock, Expression paramExp) { 
         this.paramExp = paramExp; 
-        setNestedBlock(nestedBlock);
+        setChildrenFromElement(nestedBlock);
     }
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        return getRegulatedChildren();
+        return getChildBuffer();
     }
 
     @Override
     protected String dump(boolean canonical) {
         if (canonical) {
-            String nested = getNestedBlock() != null ? getNestedBlock().getCanonicalForm() : "";
             return "<" + getNodeTypeSymbol() + " \"" + paramExp.getCanonicalForm() + "\">"
-                    + nested + "</" + getNodeTypeSymbol() + ">";
+                    + getChildrenCanonicalForm() + "</" + getNodeTypeSymbol() + ">";
         } else {
             return getNodeTypeSymbol();
         }
@@ -76,8 +75,8 @@ final class OutputFormatBlock extends TemplateElement {
     }
 
     @Override
-    boolean isIgnorable() {
-        return getNestedBlock() == null || getNestedBlock().isIgnorable();
+    boolean isIgnorable(boolean stripWhitespace) {
+        return getChildCount() == 0;
     }
 
     @Override
