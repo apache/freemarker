@@ -47,7 +47,7 @@ public class SiblingTest extends TemplateTest {
         }
     }
 
-    @Test
+   @Test
     public void testEmptyPreviousSibling() throws IOException, TemplateException {
         String ftl = "${doc.person.name?previousSibling}";
         assertOutput(ftl, "\n    ");
@@ -71,15 +71,60 @@ public class SiblingTest extends TemplateTest {
         assertOutput(ftl, "Chennai, India");
     }
 
+
     @Test
-    public void testSignificantNextSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.name.@@next}";
-        assertOutput(ftl, "12th August");
+    public void testNullPreviousSibling() throws IOException, TemplateException {
+        String ftl = "<#if doc.person?previousSibling??> " +
+                        "previous is not null" +
+                      "<#else>" +
+                         "previous is null" +
+                    "</#if>";
+        assertOutput(ftl, "previous is null");
+
     }
 
     @Test
     public void testSignificantPreviousSibling() throws IOException, TemplateException {
         String ftl = "${doc.person.name.@@previous}";
         assertOutput(ftl, "male");
+
     }
+
+
+    @Test
+    public void testSignificantNextSibling() throws IOException, TemplateException {
+        String ftl = "${doc.person.name.@@next}";
+        assertOutput(ftl, "12th August");
+
+    }
+
+    @Test
+    public void testNullSignificantPreviousSibling() throws IOException, TemplateException {
+        String ftl = "<#if doc.person.phone.@@next?size == 0>" +
+                "Next is null" +
+                "<#else>" +
+                "Next is not null" +
+                "</#if>";
+        assertOutput(ftl, "Next is null");
+
+    }
+
+    @Test
+    public void testSkippingCommentNode() throws IOException, TemplateException {
+        String ftl = "${doc.person.profession.@@previous}";
+        assertOutput(ftl, "Chennai, India");
+
+    }
+
+    @Test
+    public void testpreviousSiblingforPINode() throws IOException, TemplateException {
+        String ftl = "${doc.person.profession?previousSibling?previousSibling}";
+        assertOutput(ftl, "Chennai, India");
+    }
+    /*@Test
+    public void testSkippingCdataNode() throws IOException, TemplateException {
+        String ftl = "${doc.person.phone.@@previous}";
+        assertOutput(ftl, "Chennai, India");
+    }*/
+
 }

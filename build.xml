@@ -397,7 +397,7 @@
   <target name="test" depends="compileTest" description="Run test cases">
     <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
-    <junit haltonfailure="on" fork="true" forkmode="once">
+    <junit haltonfailure="on" fork="true" forkmode="once" showoutput="yes">
       <classpath>
         <pathelement path="build/test-classes" />
         <pathelement path="build/classes" />
@@ -407,11 +407,11 @@
       <formatter type="xml" />
       <batchtest todir="build/junit-reports">
         <fileset dir="src/test/java">
-          <include name="**/*Test.java" />
-          <include name="**/*TestSuite.java" />
+          <include name="**/SiblingTest.java" />
           <exclude name="**/Abstract*.java" />
         </fileset>
       </batchtest>
+        <formatter type="brief" usefile="false"/>
     </junit>
   </target>
   

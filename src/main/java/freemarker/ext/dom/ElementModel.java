@@ -33,8 +33,10 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
 
+import java.util.ArrayList;
+
 class ElementModel extends NodeModel implements TemplateScalarModel {
-    
+    private final static ArrayList EMPTY_ARRAYLIST = new ArrayList();
     public ElementModel(Element element) {
         super(element);
     }
@@ -91,17 +93,26 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
             }
             if (key.equals("@@previous")) {
                 Node previousSibling = node.getPreviousSibling();
-                while(!this.isSignificantNode(previousSibling)) {
+                while(previousSibling != null && !this.isSignificantNode(previousSibling)) {
                     previousSibling = previousSibling.getPreviousSibling();
                 }
-                return wrap(previousSibling);
+                if(previousSibling == null) {
+                    return new NodeListModel(EMPTY_ARRAYLIST, null);
+                } else {
+                    return wrap(previousSibling);
+                }
             }
             if (key.equals("@@next")) {
                 Node nextSibling = node.getNextSibling();
-                while(!this.isSignificantNode(nextSibling)) {
+                while(nextSibling != null && !this.isSignificantNode(nextSibling)) {
                     nextSibling = nextSibling.getNextSibling();
                 }
-                return wrap(nextSibling);
+                if(nextSibling == null) {
+                    return new NodeListModel(EMPTY_ARRAYLIST, null);
+                }
+                else {
+                    return wrap(nextSibling);
+                }
             }
             if (StringUtil.isXMLID(key.substring(1))) {
                 Attr att = getAttribute(key.substring(1));
@@ -122,10 +133,15 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     }
 
     public boolean isSignificantNode(Node node) throws TemplateModelException {
-        boolean isEmpty =  node.getTextContent().trim().isEmpty();
-        boolean significantNode = !isEmpty;
+        boolean significantNode = false;
+        if(node != null) {
+            boolean isEmpty = StringUtil.isTrimmableToEmpty(node.getTextContent().toCharArray());
+            boolean isPINode = node.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE;
+            significantNode = !(isEmpty || isPINode);
+        }
         return significantNode;
     }
+
     public String getAsString() throws TemplateModelException {
         NodeList nl = node.getChildNodes();
         String result = "";

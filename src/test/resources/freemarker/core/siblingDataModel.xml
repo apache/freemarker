@@ -3,4 +3,9 @@
     <gender>male</gender>
     <name>pradeep</name>
     <dob>12th August</dob><address>Chennai, India</address>
+    <!--This is a comment Node -->
+    <?xml-stylesheet type="text/css" href="style.css"?>
+    <profession>Software Engineer</profession>
+    <![CDATA[ <a>test<a> ]]>
+    <phone>12345678</phone>
 </person>
