@@ -30,9 +30,9 @@ class Items extends TemplateElement {
 
     private final String loopVarName;
 
-    public Items(String loopVariableName, TemplateElement nestedBlock) {
+    Items(String loopVariableName, TemplateElements children) {
         this.loopVarName = loopVariableName;
-        setChildrenFromElement(nestedBlock);
+        setChildren(children);
     }
 
     @Override

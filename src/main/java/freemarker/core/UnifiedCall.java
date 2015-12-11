@@ -50,24 +50,21 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     UnifiedCall(Expression nameExp,
          Map namedArgs,
-         TemplateElement nestedBlock,
+         TemplateElements children,
          List bodyParameterNames) {
         this.nameExp = nameExp;
         this.namedArgs = namedArgs;
-        setChildrenFromElement(nestedBlock);
+        setChildren(children);
         this.bodyParameterNames = bodyParameterNames;
     }
 
     UnifiedCall(Expression nameExp,
          List positionalArgs,
-         TemplateElement nestedBlock,
+         TemplateElements children,
          List bodyParameterNames) {
         this.nameExp = nameExp;
         this.positionalArgs = positionalArgs;
-        if (nestedBlock == TextBlock.EMPTY_BLOCK) {
-            nestedBlock = null;
-        }
-        setChildrenFromElement(nestedBlock);
+        setChildren(children);
         this.bodyParameterNames = bodyParameterNames;
     }
 

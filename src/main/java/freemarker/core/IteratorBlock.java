@@ -35,7 +35,7 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Constants;
 
 /**
- * A #list or #foreach element.
+ * A #list (or #foreach) element, or pre-#else section of it inside a {@link ListElseContainer}.
  */
 final class IteratorBlock extends TemplateElement {
 
@@ -48,17 +48,17 @@ final class IteratorBlock extends TemplateElement {
      *            a variable referring to a sequence or collection ("the list" from now on)
      * @param loopVarName
      *            The name of the variable that will hold the value of the current item when looping through the list.
-     * @param nestedBlock
+     * @param childrenBeforeElse
      *            The nested content to execute if the list wasn't empty; can't be {@code null}. If the loop variable
      *            was specified in the start tag, this is also what we will iterator over.
      */
     IteratorBlock(Expression listExp,
                   String loopVarName,
-                  TemplateElement nestedBlock,
+                  TemplateElements childrenBeforeElse,
                   boolean isForEach) {
         this.listExp = listExp;
         this.loopVarName = loopVarName;
-        setChildrenFromElement(nestedBlock);
+        setChildren(childrenBeforeElse);
         this.isForEach = isForEach;
     }
 

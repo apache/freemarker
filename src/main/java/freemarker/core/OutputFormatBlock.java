@@ -30,9 +30,9 @@ final class OutputFormatBlock extends TemplateElement {
     
     private final Expression paramExp;
 
-    OutputFormatBlock(TemplateElement nestedBlock, Expression paramExp) { 
+    OutputFormatBlock(TemplateElements children, Expression paramExp) { 
         this.paramExp = paramExp; 
-        setChildrenFromElement(nestedBlock);
+        setChildren(children);
     }
 
     @Override

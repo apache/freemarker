@@ -29,9 +29,9 @@ final class Case extends TemplateElement {
     
     Expression condition;
 
-    Case(Expression matchingValue, TemplateElement nestedBlock) {
+    Case(Expression matchingValue, TemplateElements children) {
         this.condition = matchingValue;
-        setChildrenFromElement(nestedBlock);
+        setChildren(children);
     }
 
     @Override

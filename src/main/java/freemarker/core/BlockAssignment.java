@@ -40,8 +40,8 @@ final class BlockAssignment extends TemplateElement {
     private final int scope;
     private final MarkupOutputFormat<?> markupOutputFormat;
 
-    BlockAssignment(TemplateElement nestedBlock, String varName, int scope, Expression namespaceExp, MarkupOutputFormat<?> markupOutputFormat) {
-        setChildrenFromElement(nestedBlock);
+    BlockAssignment(TemplateElements children, String varName, int scope, Expression namespaceExp, MarkupOutputFormat<?> markupOutputFormat) {
+        setChildren(children);
         this.varName = varName;
         this.namespaceExp = namespaceExp;
         this.scope = scope;

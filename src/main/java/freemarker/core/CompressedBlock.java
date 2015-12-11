@@ -31,8 +31,8 @@ import freemarker.template.utility.StandardCompress;
  */
 final class CompressedBlock extends TemplateElement {
 
-    CompressedBlock(TemplateElement nestedBlock) { 
-        setChildrenFromElement(nestedBlock);
+    CompressedBlock(TemplateElements children) { 
+        setChildren(children);
     }
 
     @Override

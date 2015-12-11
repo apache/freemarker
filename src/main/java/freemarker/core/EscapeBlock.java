@@ -40,8 +40,8 @@ class EscapeBlock extends TemplateElement {
         this.escapedExpr = escapedExpr;
     }
 
-    void setContent(TemplateElement nestedBlock) {
-        setChildrenFromElement(nestedBlock);
+    void setContent(TemplateElements children) {
+        setChildren(children);
         // We don't need it anymore at this point
         this.escapedExpr = null;
     }

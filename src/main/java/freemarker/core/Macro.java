@@ -43,7 +43,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             Collections.EMPTY_LIST, 
             Collections.EMPTY_MAP,
             null, false,
-            TextBlock.EMPTY_BLOCK);
+            TemplateElements.EMPTY);
     
     final static int TYPE_MACRO = 0;
     final static int TYPE_FUNCTION = 1;
@@ -56,7 +56,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     Macro(String name, List argumentNames, Map args, 
             String catchAllParamName, boolean function,
-            TemplateElement nestedBlock) {
+            TemplateElements children) {
         this.name = name;
         this.paramNames = (String[]) argumentNames.toArray(
                 new String[argumentNames.size()]);
@@ -65,7 +65,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.function = function;
         this.catchAllParamName = catchAllParamName; 
         
-        this.setChildrenFromElement(nestedBlock);
+        this.setChildren(children);
     }
 
     public String getCatchAll() {

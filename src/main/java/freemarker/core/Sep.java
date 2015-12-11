@@ -28,8 +28,8 @@ import freemarker.template.TemplateException;
  */
 class Sep extends TemplateElement {
 
-    public Sep(TemplateElement nestedBlock) {
-        setChildrenFromElement(nestedBlock);
+    public Sep(TemplateElements children) {
+        setChildren(children);
     }
 
     @Override

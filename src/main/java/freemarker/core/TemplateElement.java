@@ -31,8 +31,7 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * <b>Internal API - subject to change:</b> Represent directive call, interpolation, text block, or other such
  * non-expression node in the parsed template. Some information that can be found here can be accessed through the
- * {@link Environment#getCurrentDirectiveCallPlace()}, which a published API, and thus promises backward
- * compatibility.
+ * {@link Environment#getCurrentDirectiveCallPlace()}, which a published API, and thus promises backward compatibility.
  * 
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
@@ -45,14 +44,14 @@ abstract public class TemplateElement extends TemplateObject {
     private TemplateElement parent;
 
     /**
-     * Contains 1 or more nested elements with optional trailing {@code null}-s, or is {@code null} exactly if there
-     * are no nested elements.
+     * Contains 1 or more nested elements with optional trailing {@code null}-s, or is {@code null} exactly if there are
+     * no nested elements.
      */
     private TemplateElement[] childBuffer;
-    
+
     /**
-     * Contains the number of elements in the {@link #childBuffer}, not counting the trailing {@code null}-s.
-     * If this is 0, then and only then {@link #childBuffer} must be {@code null}.
+     * Contains the number of elements in the {@link #childBuffer}, not counting the trailing {@code null}-s. If this is
+     * 0, then and only then {@link #childBuffer} must be {@code null}.
      */
     private int childCount;
 
@@ -72,18 +71,17 @@ abstract public class TemplateElement extends TemplateObject {
      * 
      * @return The template elements to execute (meant to be used for nested elements), or {@code null}. Can have
      *         <em>trailing</em> {@code null}-s (unused buffer capacity). Returning the nested elements instead of
-     *         executing them inside this method is a trick used for decreasing stack usage when there's nothing to
-     *         do after the children was processed anyway.
+     *         executing them inside this method is a trick used for decreasing stack usage when there's nothing to do
+     *         after the children was processed anyway.
      */
     abstract TemplateElement[] accept(Environment env) throws TemplateException, IOException;
 
     /**
-     * One-line description of the element, that contain all the information that is used in
-     * {@link #getCanonicalForm()}, except the nested content (elements) of the element. The expressions inside the 
-     * element (the parameters) has to be shown. Meant to be used for stack traces, also for tree views that don't go
-     * down to the expression-level. There are no backward-compatibility guarantees regarding the format used ATM, but
-     * it must be regular enough to be machine-parseable, and it must contain all information necessary for restoring an
-     * AST equivalent to the original.
+     * One-line description of the element, that contain all the information that is used in {@link #getCanonicalForm()}
+     * , except the nested content (elements) of the element. The expressions inside the element (the parameters) has to
+     * be shown. Meant to be used for stack traces, also for tree views that don't go down to the expression-level.
+     * There are no backward-compatibility guarantees regarding the format used ATM, but it must be regular enough to be
+     * machine-parseable, and it must contain all information necessary for restoring an AST equivalent to the original.
      * 
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      * 
@@ -93,7 +91,7 @@ abstract public class TemplateElement extends TemplateObject {
     public final String getDescription() {
         return dump(false);
     }
-    
+
     /**
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      */
@@ -101,19 +99,25 @@ abstract public class TemplateElement extends TemplateObject {
     public final String getCanonicalForm() {
         return dump(true);
     }
-    
+
     final String getChildrenCanonicalForm() {
-        int ln = childCount;
-        if (ln == 0) {
+        return getChildrenCanonicalForm(childBuffer);
+    }
+    
+    static String getChildrenCanonicalForm(TemplateElement[] children) {
+        if (children == null) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < ln; i++) {
-            sb.append(childBuffer[i].getCanonicalForm());
+        for (TemplateElement child : children) {
+            if (child == null) {
+                break;
+            }
+            sb.append(child.getCanonicalForm());
         }
         return sb.toString();
     }
-    
+
     /**
      * Tells if the element should show up in error stack traces. Note that this will be ignored for the top (current)
      * element of a stack trace, as that's always shown.
@@ -121,39 +125,40 @@ abstract public class TemplateElement extends TemplateObject {
     boolean isShownInStackTrace() {
         return false;
     }
-    
+
     /**
      * Tells if this element possibly executes its nested content for many times. This flag is useful when a template
      * AST is modified for running time limiting (see {@link ThreadInterruptionSupportTemplatePostProcessor}). Elements
-     * that use {@link #childBuffer} should not need this, as the insertion of the timeout checks is impossible
-     * there, given their rigid nested element schema.
+     * that use {@link #childBuffer} should not need this, as the insertion of the timeout checks is impossible there,
+     * given their rigid nested element schema.
      */
     abstract boolean isNestedBlockRepeater();
 
     /**
-     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place.
-     * Don't call those methods in method on {@code this}, because that will result in infinite recursion! 
+     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place. Don't
+     * call those methods in method on {@code this}, because that will result in infinite recursion!
      * 
-     * @param canonical if {@code true}, it calculates the return value of {@link #getCanonicalForm()},
-     *        otherwise of {@link #getDescription()}.
+     * @param canonical
+     *            if {@code true}, it calculates the return value of {@link #getCanonicalForm()}, otherwise of
+     *            {@link #getDescription()}.
      */
     abstract protected String dump(boolean canonical);
-    
-// Methods to implement TemplateNodeModel 
+
+    // Methods to implement TemplateNodeModel
 
     public TemplateNodeModel getParentNode() {
-//        return parent;
-         return null;
+        // return parent;
+        return null;
     }
-    
+
     public String getNodeNamespace() {
         return null;
     }
-    
+
     public String getNodeType() {
         return "element";
     }
-    
+
     public TemplateSequenceModel getChildNodes() {
         SimpleSequence result = new SimpleSequence(1);
         if (childBuffer != null) {
@@ -165,14 +170,14 @@ abstract public class TemplateElement extends TemplateObject {
         }
         return result;
     }
-    
+
     public String getNodeName() {
         String classname = this.getClass().getName();
         int shortNameOffset = classname.lastIndexOf('.') + 1;
         return classname.substring(shortNameOffset);
     }
-    
-    // Methods so that we can implement the Swing TreeNode API.    
+
+    // Methods so that we can implement the Swing TreeNode API.
 
     public boolean isLeaf() {
         return childCount == 0;
@@ -188,7 +193,7 @@ abstract public class TemplateElement extends TemplateObject {
 
     public int getIndex(TemplateElement node) {
         for (int i = 0; i < childCount; i++) {
-            if (childBuffer[i].equals(node)) { 
+            if (childBuffer[i].equals(node)) {
                 return i;
             }
         }
@@ -230,7 +235,7 @@ abstract public class TemplateElement extends TemplateObject {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + childCount);
         }
     }
-    
+
     /**
      * The element whose child this element is, or {@code null} if this is the root node.
      * 
@@ -240,7 +245,7 @@ abstract public class TemplateElement extends TemplateObject {
     public TemplateElement getParent() {
         return parent;
     }
-    
+
     final void setChildBufferCapacity(int capacity) {
         int ln = childCount;
         TemplateElement[] newRegulatedChildBuffer = new TemplateElement[capacity];
@@ -249,9 +254,9 @@ abstract public class TemplateElement extends TemplateObject {
         }
         childBuffer = newRegulatedChildBuffer;
     }
-    
+
     /**
-     * Inserts a new nested element after the last nested element. 
+     * Inserts a new nested element after the last nested element.
      */
     final void addChild(TemplateElement nestedElement) {
         addChild(childCount, nestedElement);
@@ -262,14 +267,14 @@ abstract public class TemplateElement extends TemplateObject {
      */
     final void addChild(int index, TemplateElement nestedElement) {
         final int lRegulatedChildCount = childCount;
-        
+
         TemplateElement[] lRegulatedChildBuffer = childBuffer;
         if (lRegulatedChildBuffer == null) {
             lRegulatedChildBuffer = new TemplateElement[INITIAL_REGULATED_CHILD_BUFFER_CAPACITY];
             childBuffer = lRegulatedChildBuffer;
         } else if (lRegulatedChildCount == lRegulatedChildBuffer.length) {
             setChildBufferCapacity(lRegulatedChildCount != 0 ? lRegulatedChildCount * 2 : 1);
-            lRegulatedChildBuffer = childBuffer; 
+            lRegulatedChildBuffer = childBuffer;
         }
         // At this point: nestedElements == this.nestedElements, and has sufficient capacity.
 
@@ -283,48 +288,47 @@ abstract public class TemplateElement extends TemplateObject {
         lRegulatedChildBuffer[index] = nestedElement;
         childCount = lRegulatedChildCount + 1;
     }
-    
+
     final TemplateElement getChild(int index) {
         return childBuffer[index];
     }
-    
+
     /**
      * @return Array containing 1 or more nested elements with optional trailing {@code null}-s, or is {@code null}
      *         exactly if there are no nested elements.
      */
-    final TemplateElement[] getChildBuffer(){
+    final TemplateElement[] getChildBuffer() {
         return childBuffer;
     }
-    
-    // TODO Workaround until the parser doesn't emit TemplateElement[]-s for "blocks" 
-    final void setChildrenFromElement(TemplateElement nestedBlock) {
-        if (nestedBlock == null) {
-            childBuffer = null;
-            childCount = 0;
-        } else if (nestedBlock instanceof MixedContent) {
-            MixedContent mixedContent = (MixedContent) nestedBlock;
-            childBuffer = mixedContent.getChildBuffer();
-            childCount = mixedContent.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                childBuffer[i].parent = this;
-            }
-        } else {
-            childBuffer = new TemplateElement[] { nestedBlock };
-            childCount = 1;
+
+    /**
+     * @param buffWithCnt Maybe {@code null}
+     * 
+     * @since 2.3.24
+     */
+    final void setChildren(TemplateElements buffWithCnt) {
+        TemplateElement[] childBuffer = buffWithCnt.getBuffer();
+        int childCount = buffWithCnt.getCount();
+        for (int i = 0; i < childCount; i++) {
+            TemplateElement child = childBuffer[i];
+            child.index = i;
+            child.parent = this;
         }
+        this.childBuffer = childBuffer;
+        this.childCount = childCount;
     }
-    
+
     final int getIndex() {
         return index;
     }
-    
+
     /**
      * The element whose child this element is, or {@code null} if this is the root node.
      */
     final TemplateElement getParentElement() {
         return parent;
     }
-    
+
     /**
      * This is a special case, because a root element is not contained in another element, so we couldn't set the
      * private fields.
@@ -350,6 +354,17 @@ abstract public class TemplateElement extends TemplateObject {
         if (regulatedChildCount != 0) {
             for (int i = 0; i < regulatedChildCount; i++) {
                 TemplateElement te = childBuffer[i];
+                
+                //!!T temporal assertion
+                if (te.getIndex() != i) {
+                    throw new BugException("Invalid index " + te.getIndex() + " (expected: "
+                            + i + ") for: " + te.dump(false));
+                }
+                if (te.getParent() != this) {
+                    throw new BugException("Invalid parent " + te.getParent() + " (expected: "
+                            + this.dump(false) + ") for: " + te.dump(false));
+                }
+                
                 te = te.postParseCleanup(stripWhitespace);
                 childBuffer[i] = te;
                 te.parent = this;
@@ -361,7 +376,7 @@ abstract public class TemplateElement extends TemplateObject {
                     // TODO Optimize this...
                     regulatedChildCount--;
                     for (int j = i; j < regulatedChildCount; j++) {
-                        final TemplateElement te2 = childBuffer[j  + 1];
+                        final TemplateElement te2 = childBuffer[j + 1];
                         childBuffer[j] = te2;
                         te2.index = j;
                     }
@@ -373,14 +388,14 @@ abstract public class TemplateElement extends TemplateObject {
             if (regulatedChildCount == 0) {
                 childBuffer = null;
             } else if (regulatedChildCount < childBuffer.length
-                && regulatedChildCount <= childBuffer.length * 3 / 4) {
+                    && regulatedChildCount <= childBuffer.length * 3 / 4) {
                 TemplateElement[] trimmedregulatedChildBuffer = new TemplateElement[regulatedChildCount];
                 for (int i = 0; i < regulatedChildCount; i++) {
                     trimmedregulatedChildBuffer[i] = childBuffer[i];
                 }
                 childBuffer = trimmedregulatedChildBuffer;
             }
-        } 
+        }
         return this;
     }
 
@@ -388,8 +403,8 @@ abstract public class TemplateElement extends TemplateObject {
         return false;
     }
 
-// The following methods exist to support some fancier tree-walking 
-// and were introduced to support the whitespace cleanup feature in 2.2
+    // The following methods exist to support some fancier tree-walking
+    // and were introduced to support the whitespace cleanup feature in 2.2
 
     TemplateElement prevTerminalNode() {
         TemplateElement prev = previousSibling();
@@ -437,7 +452,7 @@ abstract public class TemplateElement extends TemplateObject {
     private TemplateElement getFirstLeaf() {
         TemplateElement te = this;
         while (!te.isLeaf() && !(te instanceof Macro) && !(te instanceof BlockAssignment)) {
-             // A macro or macro invocation is treated as a leaf here for special reasons
+            // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getFirstChild();
         }
         return te;
@@ -459,7 +474,7 @@ abstract public class TemplateElement extends TemplateObject {
     boolean isOutputCacheable() {
         return false;
     }
-    
+
     boolean isChildrenOutputCacheable() {
         int ln = childCount;
         for (int i = 0; i < ln; i++) {
@@ -469,20 +484,18 @@ abstract public class TemplateElement extends TemplateObject {
         }
         return true;
     }
-    
+
     /**
-     * determines whether this element's presence on a line 
-     * indicates that we should not strip opening whitespace
-     * in the post-parse whitespace gobbling step.
+     * determines whether this element's presence on a line indicates that we should not strip opening whitespace in the
+     * post-parse whitespace gobbling step.
      */
     boolean heedsOpeningWhitespace() {
         return false;
     }
 
     /**
-     * determines whether this element's presence on a line 
-     * indicates that we should not strip trailing whitespace
-     * in the post-parse whitespace gobbling step.
+     * determines whether this element's presence on a line indicates that we should not strip trailing whitespace in
+     * the post-parse whitespace gobbling step.
      */
     boolean heedsTrailingWhitespace() {
         return false;

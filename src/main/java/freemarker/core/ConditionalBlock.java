@@ -37,9 +37,9 @@ final class ConditionalBlock extends TemplateElement {
     final Expression condition;
     private final int type;
 
-    ConditionalBlock(Expression condition, TemplateElement nestedBlock, int type) {
+    ConditionalBlock(Expression condition, TemplateElements children, int type) {
         this.condition = condition;
-        setChildrenFromElement(nestedBlock);
+        setChildren(children);
         this.type = type;
     }
 

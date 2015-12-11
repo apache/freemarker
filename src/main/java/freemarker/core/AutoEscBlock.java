@@ -28,8 +28,8 @@ import freemarker.template.TemplateException;
  */
 final class AutoEscBlock extends TemplateElement {
     
-    AutoEscBlock(TemplateElement nestedBlock) { 
-        setChildrenFromElement(nestedBlock);
+    AutoEscBlock(TemplateElements children) { 
+        setChildren(children);
     }
 
     @Override

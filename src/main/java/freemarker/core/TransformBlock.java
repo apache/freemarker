@@ -48,10 +48,10 @@ final class TransformBlock extends TemplateElement {
      */
     TransformBlock(Expression transformExpression, 
                    Map namedArgs,
-                   TemplateElement nestedBlock) {
+                   TemplateElements children) {
         this.transformExpression = transformExpression;
         this.namedArgs = namedArgs;
-        setChildrenFromElement(nestedBlock);
+        setChildren(children);
     }
 
     @Override

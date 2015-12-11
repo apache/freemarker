@@ -28,8 +28,8 @@ import freemarker.template.TemplateException;
  */
 final class ElseOfList extends TemplateElement {
     
-    ElseOfList(TemplateElement block) {
-        setChildrenFromElement(block);
+    ElseOfList(TemplateElements children) {
+        setChildren(children);
     }
 
     @Override

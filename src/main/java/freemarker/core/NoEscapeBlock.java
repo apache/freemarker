@@ -27,8 +27,8 @@ import freemarker.template.TemplateException;
  */
 class NoEscapeBlock extends TemplateElement {
 
-    NoEscapeBlock(TemplateElement nestedBlock) {
-        setChildrenFromElement(nestedBlock);
+    NoEscapeBlock(TemplateElements children) {
+        setChildren(children);
     }
     
     @Override

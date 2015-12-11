@@ -25,8 +25,8 @@ import freemarker.template.TemplateException;
 
 final class RecoveryBlock extends TemplateElement {
     
-    RecoveryBlock(TemplateElement block) {
-        setChildrenFromElement(block);
+    RecoveryBlock(TemplateElements children) {
+        setChildren(children);
     }
 
     @Override

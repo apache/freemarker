@@ -469,8 +469,9 @@ public final class Environment extends Configurable {
     /**
      * Visit a block using buffering/recovery
      */
-     void visitAttemptRecover(TemplateElement attemptBlock, RecoveryBlock recoveryBlock)
-            throws TemplateException, IOException {
+     void visitAttemptRecover(
+             AttemptBlock attemptBlock, TemplateElement[] attemptBlockChildren, RecoveryBlock recoveryBlock)
+             throws TemplateException, IOException {
         Writer prevOut = this.out;
         StringWriter sw = new StringWriter();
         this.out = sw;
@@ -479,7 +480,7 @@ public final class Environment extends Configurable {
         boolean lastInAttemptBlock = inAttemptBlock;
         try {
             inAttemptBlock = true;
-            visit(attemptBlock);
+            visit(attemptBlockChildren);
         } catch (TemplateException te) {
             thrownException = te;
         } finally {

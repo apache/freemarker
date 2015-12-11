@@ -28,20 +28,20 @@ import freemarker.template.TemplateException;
  */
 final class AttemptBlock extends TemplateElement {
     
-    private TemplateElement attemptBlock;
+    private TemplateElement[] attemptBlockChildren;
     private RecoveryBlock recoveryBlock;
     
-    AttemptBlock(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) {
-        this.attemptBlock = attemptBlock;
+    AttemptBlock(TemplateElements attemptBlock, RecoveryBlock recoveryBlock) {
+        this.attemptBlockChildren = attemptBlock.getBuffer();
         this.recoveryBlock = recoveryBlock;
         setChildBufferCapacity(2);
-        addChild(attemptBlock);
+        addChild(attemptBlock.asSingleElement()); // for backward compatibility
         addChild(recoveryBlock);
     }
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        env.visitAttemptRecover(attemptBlock, recoveryBlock);
+        env.visitAttemptRecover(this, attemptBlockChildren, recoveryBlock);
         return null;
     }
 
@@ -52,9 +52,7 @@ final class AttemptBlock extends TemplateElement {
         } else {
             StringBuilder buf = new StringBuilder();
             buf.append("<").append(getNodeTypeSymbol()).append(">");
-            if (attemptBlock != null) {
-                buf.append(attemptBlock.getCanonicalForm());            
-            }
+            buf.append(getChildrenCanonicalForm(attemptBlockChildren));            
             if (recoveryBlock != null) {
                 buf.append(recoveryBlock.getCanonicalForm());
             }
