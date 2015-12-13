@@ -6,6 +6,8 @@
     <!--This is a comment Node -->
     <?xml-stylesheet type="text/css" href="style.css"?>
     <profession>Software Engineer</profession>
-    <![CDATA[ <a>test<a> ]]>
+    <![CDATA[    ]]>
+    <hobby>gardening</hobby>
+    <![CDATA[this is a valid cdata]]>
     <phone>12345678</phone>
 </person>

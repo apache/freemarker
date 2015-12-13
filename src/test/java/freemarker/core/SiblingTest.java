@@ -47,7 +47,7 @@ public class SiblingTest extends TemplateTest {
         }
     }
 
-   @Test
+    @Test
     public void testEmptyPreviousSibling() throws IOException, TemplateException {
         String ftl = "${doc.person.name?previousSibling}";
         assertOutput(ftl, "\n    ");
@@ -80,14 +80,12 @@ public class SiblingTest extends TemplateTest {
                          "previous is null" +
                     "</#if>";
         assertOutput(ftl, "previous is null");
-
     }
 
     @Test
     public void testSignificantPreviousSibling() throws IOException, TemplateException {
         String ftl = "${doc.person.name.@@previous}";
         assertOutput(ftl, "male");
-
     }
 
 
@@ -95,7 +93,6 @@ public class SiblingTest extends TemplateTest {
     public void testSignificantNextSibling() throws IOException, TemplateException {
         String ftl = "${doc.person.name.@@next}";
         assertOutput(ftl, "12th August");
-
     }
 
     @Test
@@ -113,18 +110,17 @@ public class SiblingTest extends TemplateTest {
     public void testSkippingCommentNode() throws IOException, TemplateException {
         String ftl = "${doc.person.profession.@@previous}";
         assertOutput(ftl, "Chennai, India");
-
     }
 
     @Test
-    public void testpreviousSiblingforPINode() throws IOException, TemplateException {
-        String ftl = "${doc.person.profession?previousSibling?previousSibling}";
-        assertOutput(ftl, "Chennai, India");
+    public void testSkippingEmptyCdataNode() throws IOException, TemplateException {
+        String ftl = "${doc.person.hobby.@@previous}";
+        assertOutput(ftl, "Software Engineer");
     }
-    /*@Test
-    public void testSkippingCdataNode() throws IOException, TemplateException {
-        String ftl = "${doc.person.phone.@@previous}";
-        assertOutput(ftl, "Chennai, India");
-    }*/
 
+    @Test
+    public void testValidCdataNode() throws IOException, TemplateException {
+        String ftl = "${doc.person.phone.@@previous}";
+        assertOutput(ftl, "\n    this is a valid cdata\n    ");
+    }
 }

@@ -137,7 +137,8 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         if(node != null) {
             boolean isEmpty = StringUtil.isTrimmableToEmpty(node.getTextContent().toCharArray());
             boolean isPINode = node.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE;
-            significantNode = !(isEmpty || isPINode);
+            boolean isCommentNode = node.getNodeType() == Node.COMMENT_NODE;
+            significantNode = !(isEmpty || isPINode || isCommentNode);
         }
         return significantNode;
     }
