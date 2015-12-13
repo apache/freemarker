@@ -3925,7 +3925,7 @@ TextBlock PCData() :
         }
     )+
     {
-        if (stripText && mixedContentNesting == 1) return new TextBlock(CollectionUtils.EMPTY_CHAR_ARRAY, false);
+        if (stripText && mixedContentNesting == 1) return null;
 
         TextBlock result = new TextBlock(buf.toString(), false);
         result.setLocation(template, start, t);
@@ -3980,17 +3980,20 @@ TemplateElements MixedContentElements() :
             elem = FreemarkerDirective()
         )
         {
-            childCount++;
-            if (childBuffer == null) {
-                childBuffer = new TemplateElement[16]; 
-            } else if (childBuffer.length < childCount) {
-                TemplateElement[] newChildBuffer = new TemplateElement[childCount * 2];
-                for (int i = 0; i < childBuffer.length; i++) {
-                    newChildBuffer[i] = childBuffer[i];
-                }
-                childBuffer = newChildBuffer;
+            // Note: elem == null when it's was top-level PCData removed by stripText
+            if (elem != null) {
+	            childCount++;
+	            if (childBuffer == null) {
+	                childBuffer = new TemplateElement[16]; 
+	            } else if (childBuffer.length < childCount) {
+	                TemplateElement[] newChildBuffer = new TemplateElement[childCount * 2];
+	                for (int i = 0; i < childBuffer.length; i++) {
+	                    newChildBuffer[i] = childBuffer[i];
+	                }
+	                childBuffer = newChildBuffer;
+	            }
+	            childBuffer[childCount - 1] = elem;
             }
-            childBuffer[childCount - 1] = elem;
         }
     )*
     {
