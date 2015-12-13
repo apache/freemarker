@@ -84,20 +84,20 @@ public class SiblingTest extends TemplateTest {
 
     @Test
     public void testSignificantPreviousSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.name.@@previous}";
+        String ftl = "${doc.person.name.@@previous_significant}";
         assertOutput(ftl, "male");
     }
 
 
     @Test
     public void testSignificantNextSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.name.@@next}";
+        String ftl = "${doc.person.name.@@next_significant}";
         assertOutput(ftl, "12th August");
     }
 
     @Test
     public void testNullSignificantPreviousSibling() throws IOException, TemplateException {
-        String ftl = "<#if doc.person.phone.@@next?size == 0>" +
+        String ftl = "<#if doc.person.phone.@@next_significant?size == 0>" +
                 "Next is null" +
                 "<#else>" +
                 "Next is not null" +
@@ -108,19 +108,19 @@ public class SiblingTest extends TemplateTest {
 
     @Test
     public void testSkippingCommentNode() throws IOException, TemplateException {
-        String ftl = "${doc.person.profession.@@previous}";
+        String ftl = "${doc.person.profession.@@previous_significant}";
         assertOutput(ftl, "Chennai, India");
     }
 
     @Test
     public void testSkippingEmptyCdataNode() throws IOException, TemplateException {
-        String ftl = "${doc.person.hobby.@@previous}";
+        String ftl = "${doc.person.hobby.@@previous_significant}";
         assertOutput(ftl, "Software Engineer");
     }
 
     @Test
     public void testValidCdataNode() throws IOException, TemplateException {
-        String ftl = "${doc.person.phone.@@previous}";
+        String ftl = "${doc.person.phone.@@previous_significant}";
         assertOutput(ftl, "\n    this is a valid cdata\n    ");
     }
 }

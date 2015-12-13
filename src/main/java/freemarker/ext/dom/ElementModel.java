@@ -91,7 +91,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                 nu.outputContent(node.getAttributes(), buf);
                 return new SimpleScalar(buf.toString().trim());
             }
-            if (key.equals("@@previous")) {
+            if (key.equals("@@previous_significant")) {
                 Node previousSibling = node.getPreviousSibling();
                 while(previousSibling != null && !this.isSignificantNode(previousSibling)) {
                     previousSibling = previousSibling.getPreviousSibling();
@@ -102,7 +102,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     return wrap(previousSibling);
                 }
             }
-            if (key.equals("@@next")) {
+            if (key.equals("@@next_significant")) {
                 Node nextSibling = node.getNextSibling();
                 while(nextSibling != null && !this.isSignificantNode(nextSibling)) {
                     nextSibling = nextSibling.getNextSibling();
