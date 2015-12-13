@@ -24,24 +24,25 @@ import java.io.IOException;
 import freemarker.template.TemplateException;
 
 /**
- * #attempt element; might has a nested {@link RecoveryBlock}.
+ * Holder for the attempted section of the #attempt element and of the nested #recover element ({@link RecoveryBlock}).
  */
 final class AttemptBlock extends TemplateElement {
     
-    private TemplateElement[] attemptBlockChildren;
-    private RecoveryBlock recoveryBlock;
+    private TemplateElement attemptedSection;
+    private RecoveryBlock recoverySection;
     
-    AttemptBlock(TemplateElements attemptBlock, RecoveryBlock recoveryBlock) {
-        this.attemptBlockChildren = attemptBlock.getBuffer();
-        this.recoveryBlock = recoveryBlock;
+    AttemptBlock(TemplateElements attemptedSectionChildren, RecoveryBlock recoverySection) {
+        TemplateElement attemptedSection = attemptedSectionChildren.asSingleElement();
+        this.attemptedSection = attemptedSection;
+        this.recoverySection = recoverySection;
         setChildBufferCapacity(2);
-        addChild(attemptBlock.asSingleElement()); // for backward compatibility
-        addChild(recoveryBlock);
+        addChild(attemptedSection); // for backward compatibility
+        addChild(recoverySection);
     }
 
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
-        env.visitAttemptRecover(this, attemptBlockChildren, recoveryBlock);
+        env.visitAttemptRecover(this, attemptedSection, recoverySection);
         return null;
     }
 
@@ -52,10 +53,7 @@ final class AttemptBlock extends TemplateElement {
         } else {
             StringBuilder buf = new StringBuilder();
             buf.append("<").append(getNodeTypeSymbol()).append(">");
-            buf.append(getChildrenCanonicalForm(attemptBlockChildren));            
-            if (recoveryBlock != null) {
-                buf.append(recoveryBlock.getCanonicalForm());
-            }
+            buf.append(getChildrenCanonicalForm());            
             buf.append("</").append(getNodeTypeSymbol()).append(">");
             return buf.toString();
         }
@@ -69,7 +67,7 @@ final class AttemptBlock extends TemplateElement {
     @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
-        return recoveryBlock;
+        return recoverySection;
     }
 
     @Override
