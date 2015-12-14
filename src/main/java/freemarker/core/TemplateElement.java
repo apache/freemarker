@@ -160,15 +160,15 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     public TemplateSequenceModel getChildNodes() {
-        SimpleSequence result = new SimpleSequence(1);
         if (childBuffer != null) {
             final SimpleSequence seq = new SimpleSequence(childCount);
             for (int i = 0; i < childCount; i++) {
                 seq.add(childBuffer[i]);
             }
             return seq;
+        } else {
+            return new SimpleSequence(0);
         }
-        return result;
     }
 
     public String getNodeName() {
