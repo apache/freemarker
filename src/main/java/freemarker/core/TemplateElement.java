@@ -350,9 +350,9 @@ abstract public class TemplateElement extends TemplateObject {
      *         is the duty of the caller, not of this method.
      */
     TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
-        int regulatedChildCount = this.childCount;
-        if (regulatedChildCount != 0) {
-            for (int i = 0; i < regulatedChildCount; i++) {
+        int childCount = this.childCount;
+        if (childCount != 0) {
+            for (int i = 0; i < childCount; i++) {
                 TemplateElement te = childBuffer[i];
                 
                 //!!T temporal assertion
@@ -370,30 +370,30 @@ abstract public class TemplateElement extends TemplateObject {
                 te.parent = this;
                 te.index = i;
             }
-            for (int i = 0; i < regulatedChildCount; i++) {
+            for (int i = 0; i < childCount; i++) {
                 TemplateElement te = childBuffer[i];
                 if (te.isIgnorable(stripWhitespace)) {
-                    // TODO Optimize this...
-                    regulatedChildCount--;
-                    for (int j = i; j < regulatedChildCount; j++) {
+                    childCount--;
+                    // As later isIgnorable calls might investigates the siblings, we have to move all the items now. 
+                    for (int j = i; j < childCount; j++) {
                         final TemplateElement te2 = childBuffer[j + 1];
                         childBuffer[j] = te2;
                         te2.index = j;
                     }
-                    childBuffer[regulatedChildCount] = null;
-                    this.childCount = regulatedChildCount;
+                    childBuffer[childCount] = null;
+                    this.childCount = childCount;
                     i--;
                 }
             }
-            if (regulatedChildCount == 0) {
+            if (childCount == 0) {
                 childBuffer = null;
-            } else if (regulatedChildCount < childBuffer.length
-                    && regulatedChildCount <= childBuffer.length * 3 / 4) {
-                TemplateElement[] trimmedregulatedChildBuffer = new TemplateElement[regulatedChildCount];
-                for (int i = 0; i < regulatedChildCount; i++) {
-                    trimmedregulatedChildBuffer[i] = childBuffer[i];
+            } else if (childCount < childBuffer.length
+                    && childCount <= childBuffer.length * 3 / 4) {
+                TemplateElement[] trimmedChildBuffer = new TemplateElement[childCount];
+                for (int i = 0; i < childCount; i++) {
+                    trimmedChildBuffer[i] = childBuffer[i];
                 }
-                childBuffer = trimmedregulatedChildBuffer;
+                childBuffer = trimmedChildBuffer;
             }
         }
         return this;
