@@ -320,6 +320,7 @@ public final class Environment extends Configurable {
      * "Visit" the template element.
      */
     void visit(TemplateElement element) throws IOException, TemplateException {
+        // ATTENTION: This method body is manually "inlined" into visit(TemplateElement[]); keep them in sync!
         pushElement(element);
         try {
             TemplateElement[] templateElementsToVisit = element.accept(this);
@@ -336,6 +337,7 @@ public final class Environment extends Configurable {
         } finally {
             popElement();
         }
+        // ATTENTION: This method body above is manually "inlined" into visit(TemplateElement[]); keep them in sync!
     }
     
     /**
@@ -348,11 +350,30 @@ public final class Environment extends Configurable {
         if (elementBuffer == null) {
             return;
         }
-        for (TemplateElement el : elementBuffer) {
-            if (el == null) {
+        for (TemplateElement element : elementBuffer) {
+            if (element == null) {
                 break;  // Skip unused trailing buffer capacity 
             }
-            visit(el);
+            
+            // ATTENTION: This part is the manually "inlining" of visit(TemplateElement[]); keep them in sync!
+            // We don't just let Hotspot to do it, as we want a hard guarantee regarding maximum stack usage. 
+            pushElement(element);
+            try {
+                TemplateElement[] templateElementsToVisit = element.accept(this);
+                if (templateElementsToVisit != null) {
+                    for (TemplateElement el : templateElementsToVisit) {
+                        if (el == null) {
+                            break;  // Skip unused trailing buffer capacity 
+                        }
+                        visit(el);
+                    }
+                }
+            } catch (TemplateException te) {
+                handleTemplateException(te);
+            } finally {
+                popElement();
+            }
+            // ATTENTION: This part above is the manually "inlining" of visit(TemplateElement[]); keep them in sync!
         }
     }
 
