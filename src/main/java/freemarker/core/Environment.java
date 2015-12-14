@@ -344,7 +344,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.24
      */
-    void visit(TemplateElement[] elementBuffer) throws IOException, TemplateException {
+    final void visit(TemplateElement[] elementBuffer) throws IOException, TemplateException {
         if (elementBuffer == null) {
             return;
         }
@@ -689,7 +689,8 @@ public final class Environment extends Configurable {
             currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
 
             try {
-                macroCtx.runMacro(this);
+                macroCtx.sanityCheck(this);
+                visit(macro.getChildBuffer());
             } catch (ReturnInstruction.Return re) {
                 // Not an error, just a <#return>
             } catch (TemplateException te) {

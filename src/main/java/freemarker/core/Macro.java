@@ -19,7 +19,6 @@
 
 package freemarker.core;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -174,11 +173,6 @@ public final class Macro extends TemplateElement implements TemplateModel {
         
         Macro getMacro() {
             return Macro.this;
-        }
-
-        void runMacro(Environment env) throws TemplateException, IOException {
-            sanityCheck(env);
-            env.visit(getChildBuffer());
         }
 
         // Set default parameters, check if all the required parameters are defined.
