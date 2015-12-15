@@ -466,4 +466,12 @@ public class _CoreAPI {
         }
     }
     
+    public static TemplateElement getParentElement(TemplateElement te) {
+        return te.getParentElement();
+    }
+
+    public static TemplateElement getChildElement(TemplateElement te, int index) {
+        return te.getChild(index);
+    }
+    
 }

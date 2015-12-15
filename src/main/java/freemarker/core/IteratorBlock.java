@@ -35,7 +35,7 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Constants;
 
 /**
- * A #list or #foreach element.
+ * A #list (or #foreach) element, or pre-#else section of it inside a {@link ListElseContainer}.
  */
 final class IteratorBlock extends TemplateElement {
 
@@ -48,23 +48,24 @@ final class IteratorBlock extends TemplateElement {
      *            a variable referring to a sequence or collection ("the list" from now on)
      * @param loopVarName
      *            The name of the variable that will hold the value of the current item when looping through the list.
-     * @param nestedBlock
+     * @param childrenBeforeElse
      *            The nested content to execute if the list wasn't empty; can't be {@code null}. If the loop variable
      *            was specified in the start tag, this is also what we will iterator over.
      */
     IteratorBlock(Expression listExp,
                   String loopVarName,
-                  TemplateElement nestedBlock,
+                  TemplateElements childrenBeforeElse,
                   boolean isForEach) {
         this.listExp = listExp;
         this.loopVarName = loopVarName;
-        setNestedBlock(nestedBlock);
+        setChildren(childrenBeforeElse);
         this.isForEach = isForEach;
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         acceptWithResult(env);
+        return null;
     }
     
     boolean acceptWithResult(Environment env) throws TemplateException, IOException {
@@ -88,7 +89,7 @@ final class IteratorBlock extends TemplateElement {
      */
     static IterationContext findEnclosingIterationContext(Environment env, String loopVariableName)
             throws _MiscTemplateException {
-        ArrayList ctxStack = env.getLocalContextStack();
+        LocalContextStack ctxStack = env.getLocalContextStack();
         if (ctxStack != null) {
             for (int i = ctxStack.size() - 1; i >= 0; i--) {
                 Object ctx = ctxStack.get(i);
@@ -121,9 +122,7 @@ final class IteratorBlock extends TemplateElement {
         }
         if (canonical) {
             buf.append(">");
-            if (getNestedBlock() != null) {
-                buf.append(getNestedBlock().getCanonicalForm());
-            }
+            buf.append(getChildrenCanonicalForm());
             if (!(getParentElement() instanceof ListElseContainer)) {
                 buf.append("</");
                 buf.append(getNodeTypeSymbol());
@@ -198,10 +197,10 @@ final class IteratorBlock extends TemplateElement {
         }
         
         boolean accept(Environment env) throws TemplateException, IOException {
-            return executeNestedBlock(env, getNestedBlock());
+            return executeNestedContent(env, getChildBuffer());
         }
 
-        void loopForItemsElement(Environment env, TemplateElement nestedBlock, String loopVarName)
+        void loopForItemsElement(Environment env, TemplateElement[] childBuffer, String loopVarName)
                     throws NonSequenceOrCollectionException, TemplateModelException, InvalidReferenceException,
                     TemplateException, IOException {
             try {
@@ -211,7 +210,7 @@ final class IteratorBlock extends TemplateElement {
                 }
                 alreadyEntered = true;
                 this.loopVarName = loopVarName;
-                executeNestedBlock(env, nestedBlock);
+                executeNestedContent(env, childBuffer);
             } finally {
                 this.loopVarName = null;
             }
@@ -221,13 +220,7 @@ final class IteratorBlock extends TemplateElement {
          * Executes the given block for the {@link #listValue}: if {@link #loopVarName} is non-{@code null}, then for
          * each list item once, otherwise once if {@link #listValue} isn't empty.
          */
-        private boolean executeNestedBlock(Environment env, TemplateElement nestedBlock)
-                throws TemplateModelException, TemplateException, IOException,
-                NonSequenceOrCollectionException, InvalidReferenceException {
-            return executeNestedBlockInner(env, nestedBlock);
-        }
-
-        private boolean executeNestedBlockInner(Environment env, TemplateElement nestedBlock)
+        private boolean executeNestedContent(Environment env, TemplateElement[] childBuffer)
                 throws TemplateModelException, TemplateException, IOException, NonSequenceOrCollectionException,
                 InvalidReferenceException {
             final boolean listNotEmpty;
@@ -243,9 +236,7 @@ final class IteratorBlock extends TemplateElement {
                             while (hasNext) {
                                 loopVar = iterModel.next();
                                 hasNext = iterModel.hasNext();
-                                if (nestedBlock != null) {
-                                    env.visitByHiddingParent(nestedBlock);
-                                }
+                                env.visit(childBuffer);
                                 index++;
                             }
                         } catch (BreakInstruction.Break br) {
@@ -256,9 +247,7 @@ final class IteratorBlock extends TemplateElement {
                         // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
                         // allow one iterator() call.
                         openedIteratorModel = iterModel;
-                        if (nestedBlock != null) {
-                            env.visitByHiddingParent(nestedBlock);
-                        }
+                        env.visit(childBuffer);
                     }
                 }
             } else if (listValue instanceof TemplateSequenceModel) {
@@ -271,17 +260,13 @@ final class IteratorBlock extends TemplateElement {
                             for (index = 0; index < size; index++) {
                                 loopVar = seqModel.get(index);
                                 hasNext = (size > index + 1);
-                                if (nestedBlock != null) {
-                                    env.visitByHiddingParent(nestedBlock);
-                                }
+                                env.visit(childBuffer);
                             }
                         } catch (BreakInstruction.Break br) {
                             // Silently exit loop
                         }
                     } else {
-                        if (nestedBlock != null) {
-                            env.visitByHiddingParent(nestedBlock);
-                        }
+                        env.visit(childBuffer);
                     }
                 }
             } else if (env.isClassicCompatible()) {
@@ -291,9 +276,7 @@ final class IteratorBlock extends TemplateElement {
                     hasNext = false;
                 }
                 try {
-                    if (nestedBlock != null) {
-                        env.visitByHiddingParent(nestedBlock);
-                    }
+                    env.visit(childBuffer);
                 } catch (BreakInstruction.Break br) {
                     // Silently exit "loop"
                 }

@@ -36,21 +36,19 @@ final class ConditionalBlock extends TemplateElement {
     
     final Expression condition;
     private final int type;
-    boolean isLonelyIf;
 
-    ConditionalBlock(Expression condition, TemplateElement nestedBlock, int type) {
+    ConditionalBlock(Expression condition, TemplateElements children, int type) {
         this.condition = condition;
-        setNestedBlock(nestedBlock);
+        setChildren(children);
         this.type = type;
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         if (condition == null || condition.evalToBoolean(env)) {
-            if (getNestedBlock() != null) {
-                env.visitByHiddingParent(getNestedBlock());
-            }
+            return getChildBuffer();
         }
+        return null;
     }
     
     @Override
@@ -64,10 +62,8 @@ final class ConditionalBlock extends TemplateElement {
         }
         if (canonical) {
             buf.append(">");
-            if (getNestedBlock() != null) {
-                buf.append(getNestedBlock().getCanonicalForm());
-            }
-            if (isLonelyIf) {
+            buf.append(getChildrenCanonicalForm());
+            if (!(getParentElement() instanceof IfBlock)) {
                 buf.append("</#if>");
             }
         }

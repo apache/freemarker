@@ -2357,37 +2357,37 @@ TemplateElement If() :
 {
     Token start, end, t;
     Expression condition;
-    TemplateElement block;
+    TemplateElements children;
     IfBlock ifBlock;
     ConditionalBlock cblock;
 }
 {
     start = <IF>
     condition = Expression()
-    <DIRECTIVE_END>
-    block = OptionalBlock()
+    end = <DIRECTIVE_END>
+    children = MixedContentElements()
     {
-        cblock = new ConditionalBlock(condition, block, ConditionalBlock.TYPE_IF);
-        cblock.setLocation(template, start, block);
+        cblock = new ConditionalBlock(condition, children, ConditionalBlock.TYPE_IF);
+        cblock.setLocation(template, start, end, children);
         ifBlock = new IfBlock(cblock);
     }
     (
         t = <ELSE_IF>
         condition = Expression()
-        LooseDirectiveEnd()
-        block = OptionalBlock()
+        end = LooseDirectiveEnd()
+        children = MixedContentElements()
         {
-            cblock = new ConditionalBlock(condition, block, ConditionalBlock.TYPE_ELSE_IF);
-            cblock.setLocation(template, t, block);
+            cblock = new ConditionalBlock(condition, children, ConditionalBlock.TYPE_ELSE_IF);
+            cblock.setLocation(template, t, end, children);
             ifBlock.addBlock(cblock);
         }
     )*
     [
             t = <ELSE>
-            block = OptionalBlock()
+            children = MixedContentElements()
             {
-                cblock = new ConditionalBlock(null, block, ConditionalBlock.TYPE_ELSE);
-                cblock.setLocation(template, t, block);
+                cblock = new ConditionalBlock(null, children, ConditionalBlock.TYPE_ELSE);
+                cblock.setLocation(template, t, t, children);
                 ifBlock.addBlock(cblock);
             }
     ]
@@ -2401,12 +2401,12 @@ TemplateElement If() :
 AttemptBlock Attempt() :
 {
     Token start, end;
-    TemplateElement block;
+    TemplateElements children;
     RecoveryBlock recoveryBlock;
 }
 {
     start = <ATTEMPT>
-    block = OptionalBlock()
+    children = MixedContentElements()
     recoveryBlock = Recover()
     (
         end = <END_RECOVER>
@@ -2414,7 +2414,7 @@ AttemptBlock Attempt() :
         end = <END_ATTEMPT>
     )
     {
-        AttemptBlock result = new AttemptBlock(block, recoveryBlock);
+        AttemptBlock result = new AttemptBlock(children, recoveryBlock);
         result.setLocation(template, start, end);
         return result;
     }
@@ -2423,14 +2423,14 @@ AttemptBlock Attempt() :
 RecoveryBlock Recover() : 
 {
     Token start;
-    TemplateElement block;
+    TemplateElements children;
 }
 {
     start = <RECOVER>
-    block = OptionalBlock()
+    children = MixedContentElements()
     {
-        RecoveryBlock result = new RecoveryBlock(block);
-        result.setLocation(template, start, block);
+        RecoveryBlock result = new RecoveryBlock(children);
+        result.setLocation(template, start, start, children);
         return result;
     }
 }
@@ -2439,7 +2439,7 @@ TemplateElement List() :
 {
     Expression exp;
     Token loopVar = null, start, end;
-    TemplateElement mainBlock;
+    TemplateElements childrendBeforeElse;
     ElseOfList elseOfList = null;
     ParserIteratorBlockContext iterCtx;
 }
@@ -2459,7 +2459,7 @@ TemplateElement List() :
         }
     }
     
-    mainBlock = OptionalBlock()
+    childrendBeforeElse = MixedContentElements()
     {
         if (loopVar != null) {
             breakableDirectiveNesting--;
@@ -2477,7 +2477,7 @@ TemplateElement List() :
     
     end = <END_LIST>
     {
-        IteratorBlock list = new IteratorBlock(exp, loopVar != null ? loopVar.image : null, mainBlock, false);
+        IteratorBlock list = new IteratorBlock(exp, loopVar != null ? loopVar.image : null, childrendBeforeElse, false);
         list.setLocation(template, start, end);
 
         TemplateElement result;
@@ -2494,14 +2494,14 @@ TemplateElement List() :
 ElseOfList ElseOfList() :
 {
     Token start;
-    TemplateElement block;
+    TemplateElements children;
 }
 {
         start = <ELSE>
-        block = OptionalBlock()
+        children = MixedContentElements()
         {
-            ElseOfList result = new ElseOfList(block);
-	        result.setLocation(template, start, block);
+            ElseOfList result = new ElseOfList(children);
+	        result.setLocation(template, start, start, children);
 	        return result;
         }
 }
@@ -2510,7 +2510,7 @@ IteratorBlock ForEach() :
 {
     Expression exp;
     Token loopVar, start, end;
-    TemplateElement block;
+    TemplateElements children;
 }
 {
     start = <FOREACH>
@@ -2525,14 +2525,14 @@ IteratorBlock ForEach() :
         breakableDirectiveNesting++;
     }
     
-    block = OptionalBlock()
+    children = MixedContentElements()
     
     end = <END_FOREACH>
     {
         breakableDirectiveNesting--;
         popIteratorBlockContext();
                 
-        IteratorBlock result = new IteratorBlock(exp, loopVar.image, block, true);
+        IteratorBlock result = new IteratorBlock(exp, loopVar.image, children, true);
         result.setLocation(template, start, end);
         return result;
     }
@@ -2541,7 +2541,7 @@ IteratorBlock ForEach() :
 Items Items() :
 {
     Token loopVar, start, end;
-    TemplateElement block;
+    TemplateElements children;
     ParserIteratorBlockContext iterCtx;
 }
 {
@@ -2570,14 +2570,14 @@ Items Items() :
         breakableDirectiveNesting++;
     }
     
-    block = OptionalBlock()
+    children = MixedContentElements()
     
     end = <END_ITEMS>
     {
         breakableDirectiveNesting--;
         iterCtx.loopVarName = null;
         
-        Items result = new Items(loopVar.image, block);
+        Items result = new Items(loopVar.image, children);
         result.setLocation(template, start, end);
         return result;
     }
@@ -2586,7 +2586,7 @@ Items Items() :
 Sep Sep() :
 {
     Token loopVar, start, end = null;
-    TemplateElement block;
+    TemplateElements children;
 }
 {
     start = <SEP>
@@ -2597,17 +2597,17 @@ Sep Sep() :
                     template, start);
         }
     }
-    block = OptionalBlock()
+    children = MixedContentElements()
     [
         LOOKAHEAD(1)
         end = <END_SEP>
     ]
     {
-        Sep result = new Sep(block);
+        Sep result = new Sep(children);
         if (end != null) {
-            result.setLocation(template, start, end); // Template, Token, Token
+            result.setLocation(template, start, end);
         } else {
-            result.setLocation(template, start, block); // Template, Token, TemplateObject
+            result.setLocation(template, start, start, children);
         }
         return result;
     }
@@ -2832,7 +2832,7 @@ TemplateElement Assign() :
     String varName;
     ArrayList assignments = new ArrayList();
     Assignment ass;
-    TemplateElement block;
+    TemplateElements children;
 }
 {
     (
@@ -2962,7 +2962,7 @@ TemplateElement Assign() :
 	            }
 	        ]
 	        <DIRECTIVE_END>
-	        block = OptionalBlock()
+	        children = MixedContentElements()
 	        (
 	            end = <END_LOCAL>
 	            {
@@ -2986,7 +2986,7 @@ TemplateElement Assign() :
 	        )
 	        {
 	            BlockAssignment ba = new BlockAssignment(
-	                   block, varName, scope, nsExp,
+	                   children, varName, scope, nsExp,
 	                   getMarkupOutputFormat());
 	            ba.setLocation(template, start, end);
 	            return ba;
@@ -3070,7 +3070,7 @@ Macro Macro() :
     Expression defValue = null;
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
-    TemplateElement block;
+    TemplateElements children;
     boolean isFunction = false, hasDefaults = false;
     boolean isCatchAll = false;
     String catchAll = null;
@@ -3146,16 +3146,16 @@ Macro Macro() :
             lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
         }
     }
-    block = OptionalBlock()
+    children = MixedContentElements()
     (
         end = <END_MACRO>
         {
-        	if(isFunction) throw new ParseException("Expected function end tag here.", template, start);
+        	if (isFunction) throw new ParseException("Expected function end tag here.", template, start);
     	}
         |
         end = <END_FUNCTION>
         {
-    		if(!isFunction) throw new ParseException("Expected macro end tag here.", template, start);
+    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, start);
     	}
     )
     {
@@ -3165,7 +3165,7 @@ Macro Macro() :
         }
         
         inMacro = inFunction = false;
-        UnboundCallable result = new UnboundCallable(name, argNames, args, catchAll, isFunction, block);
+        UnboundCallable result = new UnboundCallable(name, argNames, args, catchAll, isFunction, children);
         result.setLocation(template, start, end);
         template.addUnboundCallable(result);
         return result;
@@ -3174,15 +3174,15 @@ Macro Macro() :
 
 CompressedBlock Compress() :
 {
-    TemplateElement block;
+    TemplateElements children;
     Token start, end;
 }
 {
     start = <COMPRESS>
-    block = OptionalBlock()
+    children = MixedContentElements()
     end = <END_COMPRESS>
     {
-        CompressedBlock cb = new CompressedBlock(block);
+        CompressedBlock cb = new CompressedBlock(children);
         cb.setLocation(template, start, end);
         return cb;
     }
@@ -3194,7 +3194,7 @@ TemplateElement UnifiedMacroTransform() :
     HashMap namedArgs = null;
     ArrayList positionalArgs = null, bodyParameters = null;
     Expression startTagNameExp;
-    TemplateElement nestedBlock = null;
+    TemplateElements children;
     Expression exp;
     int pushedCtxCount = 0;
 }
@@ -3226,7 +3226,7 @@ TemplateElement UnifiedMacroTransform() :
         ]
     ]
     (
-        end = <EMPTY_DIRECTIVE_END>
+        end = <EMPTY_DIRECTIVE_END> { children = TemplateElements.EMPTY; }
         |
         (
             <DIRECTIVE_END> {
@@ -3253,7 +3253,7 @@ TemplateElement UnifiedMacroTransform() :
                    }
                 }
             }
-            nestedBlock = OptionalBlock()
+            children = MixedContentElements()
             end = <UNIFIED_CALL_END>
             {
                 for (int i = 0; i < pushedCtxCount; i++) {
@@ -3276,8 +3276,8 @@ TemplateElement UnifiedMacroTransform() :
     )
     {
         TemplateElement result = (positionalArgs != null)
-        		? new UnifiedCall(exp, positionalArgs, nestedBlock, bodyParameters)
-	            : new UnifiedCall(exp, namedArgs, nestedBlock, bodyParameters);
+        		? new UnifiedCall(exp, positionalArgs, children, bodyParameters)
+	            : new UnifiedCall(exp, namedArgs, children, bodyParameters);
         result.setLocation(template, start, end);
         return result;
     }
@@ -3310,9 +3310,9 @@ TemplateElement Call() :
     {
         UnifiedCall result = null;
         if (positionalArgs != null) {
-            result = new UnifiedCall(new Identifier(macroName), positionalArgs, null, null);
+            result = new UnifiedCall(new Identifier(macroName), positionalArgs, TemplateElements.EMPTY, null);
         } else {
-            result = new UnifiedCall(new Identifier(macroName), namedArgs, null, null);
+            result = new UnifiedCall(new Identifier(macroName), namedArgs, TemplateElements.EMPTY, null);
         }
         result.legacySyntax = true;
         result.setLocation(template, start, end);
@@ -3402,7 +3402,7 @@ TransformBlock Transform() :
 {
     Token start, end, argName;
     Expression exp, argExp;
-    TemplateElement content = null;
+    TemplateElements children = null;
     HashMap args = null;
 }
 {
@@ -3423,12 +3423,12 @@ TransformBlock Transform() :
         |
         (
             <DIRECTIVE_END>
-            content = OptionalBlock()
+            children = MixedContentElements()
             end = <END_TRANSFORM>
         )
     )
     {
-        TransformBlock result = new TransformBlock(exp, args, content);
+        TransformBlock result = new TransformBlock(exp, args, children);
         result.setLocation(template, start, end);
         return result;
     }
@@ -3476,7 +3476,7 @@ SwitchBlock Switch() :
 Case Case() :
 {
     Expression exp;
-    TemplateElement block;
+    TemplateElements children;
     Token start;
 }
 {
@@ -3486,10 +3486,10 @@ Case Case() :
         |
         start = <DEFAUL> { exp = null; }
     )
-    block = OptionalBlock()
+    children = MixedContentElements()
     {
-        Case result = new Case(exp, block);
-        result.setLocation(template, start, block);
+        Case result = new Case(exp, children);
+        result.setLocation(template, start, start, children);
         return result;
     }
 }
@@ -3498,7 +3498,7 @@ EscapeBlock Escape() :
 {
     Token variable, start, end;
     Expression escapeExpr;
-    TemplateElement content;
+    TemplateElements children;
 }
 {
     start = <ESCAPE>
@@ -3519,9 +3519,9 @@ EscapeBlock Escape() :
         EscapeBlock result = new EscapeBlock(variable.image, escapeExpr, escapedExpression(escapeExpr));
         escapes.addFirst(result);
     }
-    content = OptionalBlock()
+    children = MixedContentElements()
     {
-        result.setContent(content);
+        result.setContent(children);
         escapes.removeFirst();
     }
     end = <END_ESCAPE>
@@ -3534,7 +3534,7 @@ EscapeBlock Escape() :
 NoEscapeBlock NoEscape() :
 {
     Token start, end;
-    TemplateElement content;
+    TemplateElements children;
 }
 {
     start = <NOESCAPE>
@@ -3544,11 +3544,11 @@ NoEscapeBlock NoEscape() :
         }
         Object escape = escapes.removeFirst();
     }
-    content = OptionalBlock()
+    children = MixedContentElements()
     end = <END_NOESCAPE>
     {
         escapes.addFirst(escape);
-        NoEscapeBlock result = new NoEscapeBlock(content);
+        NoEscapeBlock result = new NoEscapeBlock(children);
         result.setLocation(template, start, end);
         return result;
     }
@@ -3558,7 +3558,7 @@ OutputFormatBlock OutputFormat() :
 {
     Token start, end;
     Expression paramExp;
-    TemplateElement content;
+    TemplateElements children;
     OutputFormat lastOutputFormat;
 }
 {
@@ -3631,10 +3631,10 @@ OutputFormatBlock OutputFormat() :
             throw new ParseException(e.getMessage(), template, start, e.getCause());
         }
     }
-    content = OptionalBlock()
+    children = MixedContentElements()
     end = <END_OUTPUTFORMAT>
     {
-        OutputFormatBlock result = new OutputFormatBlock(content, paramExp);
+        OutputFormatBlock result = new OutputFormatBlock(children, paramExp);
         result.setLocation(template, start, end);
         
         outputFormat = lastOutputFormat;
@@ -3646,7 +3646,7 @@ OutputFormatBlock OutputFormat() :
 AutoEscBlock AutoEsc() :
 {
     Token start, end;
-    TemplateElement content;
+    TemplateElements children;
     int lastAutoEscapingPolicy;
 }
 {
@@ -3657,10 +3657,10 @@ AutoEscBlock AutoEsc() :
         autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
         recalculateAutoEscapingField();
     }
-    content = OptionalBlock()
+    children = MixedContentElements()
     end = <END_AUTOESC>
     {
-        AutoEscBlock result = new AutoEscBlock(content);
+        AutoEscBlock result = new AutoEscBlock(children);
         result.setLocation(template, start, end);
         
         autoEscapingPolicy = lastAutoEscapingPolicy; 
@@ -3672,7 +3672,7 @@ AutoEscBlock AutoEsc() :
 NoAutoEscBlock NoAutoEsc() :
 {
     Token start, end;
-    TemplateElement content;
+    TemplateElements children;
     int lastAutoEscapingPolicy;
 }
 {
@@ -3682,10 +3682,10 @@ NoAutoEscBlock NoAutoEsc() :
         autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
         recalculateAutoEscapingField();
     }
-    content = OptionalBlock()
+    children = MixedContentElements()
     end = <END_NOAUTOESC>
     {
-        NoAutoEscBlock result = new NoAutoEscBlock(content);
+        NoAutoEscBlock result = new NoAutoEscBlock(children);
         result.setLocation(template, start, end);
         
         autoEscapingPolicy = lastAutoEscapingPolicy;
@@ -3740,7 +3740,7 @@ TemplateElement FreemarkerDirective() :
 }
 {
     // Note that this doesn't include elements like "else", "recover", etc., because those indicate the end
-    // of the OptionalBlock() of "if", "attempt", etc.
+    // of the MixedContentElements of "if", "attempt", etc.
     (
         tp = If()
         |
@@ -3838,7 +3838,7 @@ TextBlock PCData() :
         }
     )+
     {
-        if (stripText && mixedContentNesting == 1) return TextBlock.EMPTY_BLOCK;
+        if (stripText && mixedContentNesting == 1) return null;
 
         TextBlock result = new TextBlock(buf.toString(), false);
         result.setLocation(template, start, t);
@@ -3873,10 +3873,11 @@ Token UnparsedContent(Token start, StringBuilder buf) :
     }
 }
 
-MixedContent MixedContent() :
+TemplateElements MixedContentElements() :
 {
-    MixedContent mixedContent = new MixedContent();
-    TemplateElement elem, begin = null;
+    TemplateElement[] childBuffer = null;
+    int childCount = 0;
+    TemplateElement elem;
     mixedContentNesting++;
 }
 {
@@ -3892,16 +3893,25 @@ MixedContent MixedContent() :
             elem = FreemarkerDirective()
         )
         {
-            if (begin == null) {
-                begin = elem;
+            // Note: elem == null when it's was top-level PCData removed by stripText
+            if (elem != null) {
+	            childCount++;
+	            if (childBuffer == null) {
+	                childBuffer = new TemplateElement[16]; 
+	            } else if (childBuffer.length < childCount) {
+	                TemplateElement[] newChildBuffer = new TemplateElement[childCount * 2];
+	                for (int i = 0; i < childBuffer.length; i++) {
+	                    newChildBuffer[i] = childBuffer[i];
+	                }
+	                childBuffer = newChildBuffer;
+	            }
+	            childBuffer[childCount - 1] = elem;
             }
-            mixedContent.addElement(elem);
         }
-    )+
+    )*
     {
         mixedContentNesting--;
-        mixedContent.setLocation(template, begin, elem);
-        return mixedContent;
+        return childBuffer != null ? new TemplateElements(childBuffer, childCount) : TemplateElements.EMPTY;
     }
 }
 
@@ -3927,31 +3937,12 @@ TemplateElement FreeMarkerText() :
             if (begin == null) {
             	begin = elem;
             }
-            nodes.addElement(elem);
+            nodes.addChild(elem);
         }
     )+
     {
         nodes.setLocation(template, begin, elem);
         return nodes;
-    }
-}
-
-/**
- * A production for a block of optional content.
- * Returns an empty Text block if there is no
- * content.
- */
-TemplateElement OptionalBlock() :
-{
-    TemplateElement tp = TextBlock.EMPTY_BLOCK;
-}
-{
-    [
-        LOOKAHEAD(1) // has no effect but to get rid of a spurious warning.
-        tp = MixedContent()
-    ]
-    {
-        return tp;
     }
 }
 
@@ -4183,20 +4174,21 @@ List<Object> StaticTextAndInterpolations() :
  */
 TemplateElement Root() :
 {
-    TemplateElement doc;
+    TemplateElements children;
 }
 {
     [
         LOOKAHEAD([<STATIC_TEXT_WS>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
         HeaderElement()
     ]
-    doc = OptionalBlock()
+    children = MixedContentElements()
     <EOF>
     {
-        doc.setFieldsForRootElement();
-        doc = doc.postParseCleanup(stripWhitespace);
+        TemplateElement root = children.asSingleElement(); 
+        root.setFieldsForRootElement();
+        root = root.postParseCleanup(stripWhitespace);
         // The cleanup result is possibly an element from deeper:
-        doc.setFieldsForRootElement();
-        return doc;
+        root.setFieldsForRootElement();
+        return root;
     }
 }

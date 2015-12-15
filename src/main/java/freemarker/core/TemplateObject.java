@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import freemarker.template.Template;
 
 /**
  * <b>Internal API - subject to change:</b> Represent a node in the parsed template (either a {@link Expression} or a
@@ -41,28 +42,34 @@ public abstract class TemplateObject {
      *  by a negative line numbers, starting from this constant as line 1. */
     static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
-    final void setLocation(UnboundTemplate unboundTemplate, Token begin, Token end)
-    throws ParseException {
+    final void setLocation(UnboundTemplate unboundTemplate, Token begin, Token end) {
         setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(UnboundTemplate unboundTemplate, Token begin, TemplateObject end)
-    throws ParseException {
+    final void setLocation(UnboundTemplate unboundTemplate, Token tagBegin, Token tagEnd, TemplateElements children) {
+        TemplateElement lastChild = children.getLast();
+        if (lastChild != null) {
+            // [<#if exp>children]<#else>
+            setLocation(unboundTemplate, tagBegin, lastChild);
+        } else {
+            // [<#if exp>]<#else>
+            setLocation(unboundTemplate, tagBegin, tagEnd);
+        }
+    }
+    
+    final void setLocation(UnboundTemplate unboundTemplate, Token begin, TemplateObject end) {
+        setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
+    }
+    
+    final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, Token end) {
         setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, Token end)
-    throws ParseException {
+    final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, TemplateObject end) {
         setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, TemplateObject end)
-    throws ParseException {
-        setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
-    }
-
-    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws ParseException {
+    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine) {
         this.unboundTemplate = unboundTemplate;
         this.beginColumn = beginColumn;
         this.beginLine = beginLine;

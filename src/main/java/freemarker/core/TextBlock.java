@@ -21,14 +21,14 @@ package freemarker.core;
 
 import java.io.IOException;
 
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.StringUtil;
 
 /**
  * A TemplateElement representing a block of plain text.
  */
 public final class TextBlock extends TemplateElement {
-    private static final char[] EMPTY_CHAR_ARRAY = new char[0];
-    static final TextBlock EMPTY_BLOCK = new TextBlock(EMPTY_CHAR_ARRAY, false);
+    
     // We're using char[] instead of String for storing the text block because
     // Writer.write(String) involves copying the String contents to a char[] 
     // using String.getChars(), and then calling Writer.write(char[]). By
@@ -45,7 +45,7 @@ public final class TextBlock extends TemplateElement {
         this(text.toCharArray(), unparsed);
     }
 
-    private TextBlock(char[] text, boolean unparsed) {
+    TextBlock(char[] text, boolean unparsed) {
         this.text = text;
         this.unparsed = unparsed;
     }
@@ -58,9 +58,10 @@ public final class TextBlock extends TemplateElement {
      * Simply outputs the text.
      */
     @Override
-    public void accept(Environment env) 
+    public TemplateElement[] accept(Environment env)
     throws IOException {
         env.getOut().write(text);
+        return null;
     }
 
     @Override
@@ -107,7 +108,10 @@ public final class TextBlock extends TemplateElement {
         if (!stripWhitespace || text.length == 0 ) {
             return this;
         }
-        if (getParentElement().getParentElement() == null && previousSibling() == null) return this;
+        TemplateElement parentElement = getParentElement();
+        if (isTopLevelTextIfParentIs(parentElement) && previousSibling() == null) {
+            return this;
+        }
         if (!deliberateLeftTrim) {
             trailingCharsToStrip = trailingCharsToStrip();
         }
@@ -217,7 +221,7 @@ public final class TextBlock extends TemplateElement {
                                     break;
                                 }
                             }
-                            if (trimTrailingPart) trailingPart = EMPTY_CHAR_ARRAY;
+                            if (trimTrailingPart) trailingPart = CollectionUtils.EMPTY_CHAR_ARRAY;
                         }
                         this.text = concat(printablePart, trailingPart);
                     }
@@ -305,7 +309,7 @@ public final class TextBlock extends TemplateElement {
 
     @Override
     boolean heedsTrailingWhitespace() {
-        if (isIgnorable()) {
+        if (isIgnorable(true)) {
             return false;
         }
         for (int i = 0; i < text.length; i++) {
@@ -322,7 +326,7 @@ public final class TextBlock extends TemplateElement {
 
     @Override
     boolean heedsOpeningWhitespace() {
-        if (isIgnorable()) {
+        if (isIgnorable(true)) {
             return false;
         }
         for (int i = text.length - 1; i >= 0; i--) {
@@ -338,18 +342,28 @@ public final class TextBlock extends TemplateElement {
     }
 
     @Override
-    boolean isIgnorable() {
+    boolean isIgnorable(boolean stripWhitespace) {
         if (text == null || text.length == 0) {
             return true;
         }
-        if (!StringUtil.isTrimmableToEmpty(text)) {
+        if (stripWhitespace) {
+            if (!StringUtil.isTrimmableToEmpty(text)) {
+                return false;
+            }
+            TemplateElement parentElement = getParentElement();
+            boolean atTopLevel = isTopLevelTextIfParentIs(parentElement);
+            TemplateElement prevSibling = previousSibling();
+            TemplateElement nextSibling = nextSibling();
+            return ((prevSibling == null && atTopLevel) || nonOutputtingType(prevSibling))
+                    && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
+        } else {
             return false;
         }
-        boolean atTopLevel = (getParentElement().getParentElement() == null);
-        TemplateElement prevSibling = previousSibling();
-        TemplateElement nextSibling = nextSibling();
-        return ((prevSibling == null && atTopLevel) || nonOutputtingType(prevSibling))
-                && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
+    }
+
+    private boolean isTopLevelTextIfParentIs(TemplateElement parentElement) {
+        return parentElement == null
+                || parentElement.getParentElement() == null && parentElement instanceof MixedContent;
     }
     
 

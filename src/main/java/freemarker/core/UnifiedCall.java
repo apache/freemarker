@@ -50,31 +50,28 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     UnifiedCall(Expression nameExp,
          Map namedArgs,
-         TemplateElement nestedBlock,
+         TemplateElements children,
          List bodyParameterNames) {
         this.nameExp = nameExp;
         this.namedArgs = namedArgs;
-        setNestedBlock(nestedBlock);
+        setChildren(children);
         this.bodyParameterNames = bodyParameterNames;
     }
 
     UnifiedCall(Expression nameExp,
          List positionalArgs,
-         TemplateElement nestedBlock,
+         TemplateElements children,
          List bodyParameterNames) {
         this.nameExp = nameExp;
         this.positionalArgs = positionalArgs;
-        if (nestedBlock == TextBlock.EMPTY_BLOCK) {
-            nestedBlock = null;
-        }
-        setNestedBlock(nestedBlock);
+        setChildren(children);
         this.bodyParameterNames = bodyParameterNames;
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         final TemplateModel tm = nameExp.eval(env);
-        if (tm == UnboundCallable.NO_OP_MACRO) return; // shortcut here.
+        if (tm == UnboundCallable.NO_OP_MACRO) return null; // shortcut here.
         if (tm instanceof BoundCallable) {
             final BoundCallable boundMacro = (BoundCallable) tm;
             final Macro unboundMacro = boundMacro.getUnboundCallable();
@@ -84,8 +81,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                         + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
                         "<@someDirective someParam=f() />", ".");
             }    
-            env.invoke(boundMacro, namedArgs, positionalArgs, bodyParameterNames,
-                    getNestedBlock());
+            env.invoke(boundMacro, namedArgs, positionalArgs, bodyParameterNames, getChildBuffer());
         } else {
             boolean isDirectiveModel = tm instanceof TemplateDirectiveModel; 
             if (isDirectiveModel || tm instanceof TemplateTransformModel) {
@@ -103,9 +99,9 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                     args = EmptyMap.instance;
                 }
                 if (isDirectiveModel) {
-                    env.visit(getNestedBlock(), (TemplateDirectiveModel) tm, args, bodyParameterNames);
+                    env.visit(getChildBuffer(), (TemplateDirectiveModel) tm, args, bodyParameterNames);
                 } else { 
-                    env.visitAndTransform(getNestedBlock(), (TemplateTransformModel) tm, args);
+                    env.visitAndTransform(getChildBuffer(), (TemplateTransformModel) tm, args);
                 }
             } else if (tm == null) {
                 throw InvalidReferenceException.getInstance(nameExp, env);
@@ -113,6 +109,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 throw new NonUserDefinedDirectiveLikeException(nameExp, tm, env);
             }
         }
+        return null;
     }
 
     @Override
@@ -152,11 +149,11 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
             }
         }
         if (canonical) {
-            if (getNestedBlock() == null) {
+            if (getChildCount() == 0) {
                 sb.append("/>");
             } else {
                 sb.append('>');
-                sb.append(getNestedBlock().getCanonicalForm());
+                sb.append(getChildrenCanonicalForm());
                 sb.append("</@");
                 if (!nameIsInParen
                         && (nameExp instanceof Identifier
@@ -303,8 +300,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     public boolean isNestedOutputCacheable() {
-        if (getNestedBlock() == null) return true;
-        return getNestedBlock().isOutputCacheable();
+        return isChildrenOutputCacheable();
     }
     
 /*
@@ -339,6 +335,11 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     @Override
     boolean isNestedBlockRepeater() {
+        return true;
+    }
+
+    @Override
+    boolean isShownInStackTrace() {
         return true;
     }
     

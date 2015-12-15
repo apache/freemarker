@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache._CacheAPI;
 import freemarker.ext.beans.BeansWrapper;
@@ -110,7 +111,8 @@ public final class Environment extends Configurable {
 
     private final Configuration configuration;
     private final TemplateHashModel rootDataModel;
-    private final ArrayList/* <TemplateElement> */ instructionStack = new ArrayList();
+    private TemplateElement[] instructionStack = new TemplateElement[16];
+    private int instructionStackSize = 0;
     private final ArrayList recoveredErrorStack = new ArrayList();
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
@@ -160,7 +162,7 @@ public final class Environment extends Configurable {
     private CallableInvocationContext currentMacroContext;
     
     private Writer out;
-    private ArrayList localContextStack;
+    private LocalContextStack localContextStack;
     private final Namespace mainNamespace;
     private Namespace globalNamespace;
     private HashMap loadedLibs;
@@ -251,6 +253,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.23
      */
+    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public Template getCurrentTemplate() {
         return currentTemplate;
     }
@@ -263,13 +266,14 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.22
      */
+    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
-        int ln = instructionStack.size();
+        int ln = instructionStackSize;
         if (ln == 0) return null;
-        TemplateElement te = (TemplateElement) instructionStack.get(ln - 1);
+        TemplateElement te = instructionStack[ln - 1];
         if (te instanceof UnifiedCall) return (UnifiedCall) te;
-        if (te instanceof Macro && ln > 1 && instructionStack.get(ln - 2) instanceof UnifiedCall) {
-            return (UnifiedCall) instructionStack.get(ln - 2);
+        if (te instanceof Macro && ln > 1 && instructionStack[ln - 2] instanceof UnifiedCall) {
+            return (UnifiedCall) instructionStack[ln - 2];
         }
         return null;
     }
@@ -317,51 +321,89 @@ public final class Environment extends Configurable {
     /**
      * "Visit" the template element.
      */
-    void visit(TemplateElement element)
-            throws TemplateException, IOException {
+    void visit(TemplateElement element) throws IOException, TemplateException {
+        // ATTENTION: This method body is manually "inlined" into visit(TemplateElement[]); keep them in sync!
         pushElement(element);
         try {
-            element.accept(this);
+            TemplateElement[] templateElementsToVisit = element.accept(this);
+            if (templateElementsToVisit != null) {
+                for (TemplateElement el : templateElementsToVisit) {
+                    if (el == null) {
+                        break;  // Skip unused trailing buffer capacity 
+                    }
+                    visit(el);
+                }
+            }
         } catch (TemplateException te) {
             handleTemplateException(te);
         } finally {
             popElement();
         }
+        // ATTENTION: This method body above is manually "inlined" into visit(TemplateElement[]); keep them in sync!
     }
-
+    
     /**
-     * Instead of pushing into the element stack, we replace the top element for the time the parameter element is
-     * visited, and then we restore the top element. The main purpose of this is to get rid of elements in the error
-     * stack trace that from user perspective shouldn't have a stack frame. The typical example is
-     * {@code [#if foo]...[@failsHere/]...[/#if]}, where the #if call shouldn't be in the stack trace. (Simply marking
-     * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)
+     * @param elementBuffer
+     *            The elements to visit; might contains trailing {@code null}-s. Can be {@code null}.
+     * 
+     * @since 2.3.24
      */
-    void visitByHiddingParent(TemplateElement element)
-            throws TemplateException, IOException {
-        TemplateElement parent = replaceTopElement(element);
-        try {
-            element.accept(this);
-        } catch (TemplateException te) {
-            handleTemplateException(te);
-        } finally {
-            replaceTopElement(parent);
+    final void visit(TemplateElement[] elementBuffer) throws IOException, TemplateException {
+        if (elementBuffer == null) {
+            return;
+        }
+        for (TemplateElement element : elementBuffer) {
+            if (element == null) {
+                break;  // Skip unused trailing buffer capacity 
+            }
+            
+            // ATTENTION: This part is the manually "inlining" of visit(TemplateElement[]); keep them in sync!
+            // We don't just let Hotspot to do it, as we want a hard guarantee regarding maximum stack usage. 
+            pushElement(element);
+            try {
+                TemplateElement[] templateElementsToVisit = element.accept(this);
+                if (templateElementsToVisit != null) {
+                    for (TemplateElement el : templateElementsToVisit) {
+                        if (el == null) {
+                            break;  // Skip unused trailing buffer capacity 
+                        }
+                        visit(el);
+                    }
+                }
+            } catch (TemplateException te) {
+                handleTemplateException(te);
+            } finally {
+                popElement();
+            }
+            // ATTENTION: This part above is the manually "inlining" of visit(TemplateElement[]); keep them in sync!
         }
     }
 
+    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
     private TemplateElement replaceTopElement(TemplateElement element) {
-        return (TemplateElement) instructionStack.set(instructionStack.size() - 1, element);
+        return instructionStack[instructionStackSize - 1] = element;
     }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
 
+    /**
+     * @deprecated Should be internal API
+     */
+    @Deprecated
     public void visit(final TemplateElement element,
             TemplateDirectiveModel directiveModel, Map args,
             final List bodyParameterNames) throws TemplateException, IOException {
+        visit(new TemplateElement[] { element }, directiveModel, args, bodyParameterNames);
+    }
+    
+    void visit(final TemplateElement[] childBuffer,
+            TemplateDirectiveModel directiveModel, Map args,
+            final List bodyParameterNames) throws TemplateException, IOException {
         TemplateDirectiveBody nested;
-        if (element == null) {
+        if (childBuffer == null) {
             nested = null;
         } else {
-            nested = new NestedElementTemplateDirectiveBody(element);
+            nested = new NestedElementTemplateDirectiveBody(childBuffer);
         }
         final TemplateModel[] outArgs;
         if (bodyParameterNames == null || bodyParameterNames.isEmpty()) {
@@ -386,7 +428,7 @@ public final class Environment extends Configurable {
             directiveModel.execute(this, args, outArgs, nested);
         } finally {
             if (outArgs.length > 0) {
-                popLocalContext();
+                localContextStack.pop();
             }
         }
     }
@@ -394,14 +436,14 @@ public final class Environment extends Configurable {
     /**
      * "Visit" the template element, passing the output through a TemplateTransformModel
      * 
-     * @param element
-     *            the element to visit through a transform
+     * @param elementBuffer
+     *            the element to visit through a transform; might contains trailing {@code null}-s
      * @param transform
      *            the transform to pass the element output through
      * @param args
      *            optional arguments fed to the transform
      */
-    void visitAndTransform(TemplateElement element,
+    void visitAndTransform(TemplateElement[] elementBuffer,
             TemplateTransformModel transform,
             Map args)
                     throws TemplateException, IOException {
@@ -417,9 +459,7 @@ public final class Environment extends Configurable {
             try {
                 if (tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
                     do {
-                        if (element != null) {
-                            visitByHiddingParent(element);
-                        }
+                        visit(elementBuffer);
                     } while (tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
                 }
             } catch (Throwable t) {
@@ -452,8 +492,9 @@ public final class Environment extends Configurable {
     /**
      * Visit a block using buffering/recovery
      */
-    void visitAttemptRecover(TemplateElement attemptBlock, RecoveryBlock recoveryBlock)
-            throws TemplateException, IOException {
+     void visitAttemptRecover(
+             AttemptBlock attemptBlock, TemplateElement attemptedSection, RecoveryBlock recoverySection)
+             throws TemplateException, IOException {
         Writer prevOut = this.out;
         StringWriter sw = new StringWriter();
         this.out = sw;
@@ -462,7 +503,7 @@ public final class Environment extends Configurable {
         boolean lastInAttemptBlock = inAttemptBlock;
         try {
             inAttemptBlock = true;
-            visitByHiddingParent(attemptBlock);
+            visit(attemptedSection);
         } catch (TemplateException te) {
             thrownException = te;
         } finally {
@@ -477,7 +518,7 @@ public final class Environment extends Configurable {
             }
             try {
                 recoveredErrorStack.add(thrownException);
-                visit(recoveryBlock);
+                visit(recoverySection);
             } finally {
                 recoveredErrorStack.remove(recoveredErrorStack.size() - 1);
             }
@@ -509,9 +550,9 @@ public final class Environment extends Configurable {
      */
     void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         CallableInvocationContext invokingMacroContext = getCurrentMacroContext();
-        ArrayList prevLocalContextStack = localContextStack;
-        TemplateElement nestedContent = invokingMacroContext.nestedContent;
-        if (nestedContent != null) {
+        LocalContextStack prevLocalContextStack = localContextStack;
+        TemplateElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
+        if (nestedContentBuffer != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
             
             final Namespace prevCurrentNamespace = currentNamespace;  
@@ -534,10 +575,10 @@ public final class Environment extends Configurable {
                 pushLocalContext(bodyCtx);
             }
             try {
-                visit(nestedContent);
+                visit(nestedContentBuffer);
             } finally {
                 if (invokingMacroContext.nestedContentParameterNames != null) {
-                    popLocalContext();
+                    localContextStack.pop();
                 }
                 this.currentMacroContext = invokingMacroContext;
                 currentNamespace = prevCurrentNamespace;
@@ -564,7 +605,7 @@ public final class Environment extends Configurable {
             handleTemplateException(te);
             return true;
         } finally {
-            popLocalContext();
+            localContextStack.pop();
         }
     }
 
@@ -657,7 +698,7 @@ public final class Environment extends Configurable {
      */
     void invoke(BoundCallable boundCallable, 
             Map namedArgs, List positionalArgs,
-            List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
+            List bodyParameterNames, TemplateElement[] childBuffer) throws TemplateException, IOException {
         UnboundCallable unboundCallable = boundCallable.getUnboundCallable();
         if (unboundCallable == UnboundCallable.NO_OP_MACRO) {
             return;
@@ -665,13 +706,13 @@ public final class Environment extends Configurable {
 
         pushElement(unboundCallable);
         try {
-            final CallableInvocationContext macroCtx = new CallableInvocationContext(unboundCallable, this, nestedBlock, bodyParameterNames);
+            final CallableInvocationContext macroCtx = new CallableInvocationContext(unboundCallable, this, childBuffer, bodyParameterNames);
             setMacroContextLocalsFromArguments(macroCtx, unboundCallable, namedArgs, positionalArgs);
 
             final CallableInvocationContext prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
 
-            final ArrayList prevLocalContextStack = localContextStack;
+            final LocalContextStack prevLocalContextStack = localContextStack;
             localContextStack = null;
 
             final Namespace prevCurrentNamespace = currentNamespace;
@@ -681,7 +722,8 @@ public final class Environment extends Configurable {
             currentTemplate = boundCallable.getTemplate();
 
             try {
-                macroCtx.invoce(this);
+                macroCtx.sanityCheck(this);
+                visit(unboundCallable.getChildBuffer());
             } catch (ReturnInstruction.Return re) {
                 // Not an error, just a <#return>
             } catch (TemplateException te) {
@@ -1830,7 +1872,7 @@ public final class Environment extends Configurable {
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
-                LocalContext lc = (LocalContext) localContextStack.get(i);
+                LocalContext lc = localContextStack.get(i);
                 TemplateModel tm = lc.getLocalVariable(name);
                 if (tm != null) {
                     return tm;
@@ -1957,7 +1999,7 @@ public final class Environment extends Configurable {
         }
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
-                LocalContext lc = (LocalContext) localContextStack.get(i);
+                LocalContext lc = localContextStack.get(i);
                 set.addAll(lc.getLocalVariableNames());
             }
         }
@@ -2064,11 +2106,11 @@ public final class Environment extends Configurable {
      */
     TemplateElement[] getInstructionStackSnapshot() {
         int requiredLength = 0;
-        int ln = instructionStack.size();
+        int ln = instructionStackSize;
 
         for (int i = 0; i < ln; i++) {
-            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
-            if (i == ln || stackEl.isShownInStackTrace()) {
+            TemplateElement stackEl = instructionStack[i];
+            if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 requiredLength++;
             }
         }
@@ -2078,8 +2120,8 @@ public final class Environment extends Configurable {
         TemplateElement[] result = new TemplateElement[requiredLength];
         int dstIdx = requiredLength - 1;
         for (int i = 0; i < ln; i++) {
-            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
-            if (i == ln || stackEl.isShownInStackTrace()) {
+            TemplateElement stackEl = instructionStack[i];
+            if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 result[dstIdx--] = stackEl;
             }
         }
@@ -2118,16 +2160,12 @@ public final class Environment extends Configurable {
 
     private void pushLocalContext(LocalContext localContext) {
         if (localContextStack == null) {
-            localContextStack = new ArrayList();
+            localContextStack = new LocalContextStack();
         }
-        localContextStack.add(localContext);
+        localContextStack.push(localContext);
     }
 
-    private void popLocalContext() {
-        localContextStack.remove(localContextStack.size() - 1);
-    }
-
-    ArrayList getLocalContextStack() {
+    LocalContextStack getLocalContextStack() {
         return localContextStack;
     }
 
@@ -2249,15 +2287,25 @@ public final class Environment extends Configurable {
     }
 
     private void pushElement(TemplateElement element) {
-        instructionStack.add(element);
+        final int newSize = ++instructionStackSize;
+        TemplateElement[] instructionStack = this.instructionStack;
+        if (newSize > instructionStack.length) {
+            final TemplateElement[] newInstructionStack = new TemplateElement[newSize * 2];
+            for (int i = 0; i < instructionStack.length; i++) {
+                newInstructionStack[i] = instructionStack[i]; 
+            }
+            instructionStack = newInstructionStack;
+            this.instructionStack = instructionStack;
+        }
+        instructionStack[newSize - 1] = element;
     }
 
     private void popElement() {
-        instructionStack.remove(instructionStack.size() - 1);
+        instructionStackSize--;
     }
 
     void replaceElementStackTop(TemplateElement instr) {
-        instructionStack.set(instructionStack.size() - 1, instr);
+        instructionStack[instructionStackSize - 1] = instr;
     }
 
     public TemplateNodeModel getCurrentVisitorNode() {
@@ -2686,24 +2734,24 @@ public final class Environment extends Configurable {
 
     final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
 
-        private final TemplateElement element;
+        private final TemplateElement[] childBuffer;
 
-        private NestedElementTemplateDirectiveBody(TemplateElement element) {
-            this.element = element;
+        private NestedElementTemplateDirectiveBody(TemplateElement[] childBuffer) {
+            this.childBuffer = childBuffer;
         }
 
         public void render(Writer newOut) throws TemplateException, IOException {
             Writer prevOut = out;
             out = newOut;
             try {
-                Environment.this.visit(element);
+                visit(childBuffer);
             } finally {
                 out = prevOut;
             }
         }
-
-        public TemplateElement getElement() {
-            return element;
+        
+        TemplateElement[] getChildrenBuffer() {
+            return childBuffer;
         }
 
     }

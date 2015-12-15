@@ -28,22 +28,19 @@ import freemarker.template.TemplateException;
  */
 final class NoAutoEscBlock extends TemplateElement {
     
-    NoAutoEscBlock(TemplateElement nestedBlock) { 
-        setNestedBlock(nestedBlock);
+    NoAutoEscBlock(TemplateElements children) { 
+        setChildren(children);
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
-        if (getNestedBlock() != null) {
-            env.visitByHiddingParent(getNestedBlock());
-        }
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        return getChildBuffer();
     }
 
     @Override
     protected String dump(boolean canonical) {
         if (canonical) {
-            String nested = getNestedBlock() != null ? getNestedBlock().getCanonicalForm() : "";
-            return "<" + getNodeTypeSymbol() + "\">" + nested + "</" + getNodeTypeSymbol() + ">";
+            return "<" + getNodeTypeSymbol() + "\">" + getChildrenCanonicalForm() + "</" + getNodeTypeSymbol() + ">";
         } else {
             return getNodeTypeSymbol();
         }
@@ -70,8 +67,8 @@ final class NoAutoEscBlock extends TemplateElement {
     }
 
     @Override
-    boolean isIgnorable() {
-        return getNestedBlock() == null || getNestedBlock().isIgnorable();
+    boolean isIgnorable(boolean stripWhitespace) {
+        return getChildCount() == 0;
     }
 
     @Override

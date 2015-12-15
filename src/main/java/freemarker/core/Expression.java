@@ -57,8 +57,7 @@ abstract public class Expression extends TemplateObject {
     // Hook in here to set the constant value if possible.
     
     @Override
-    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws ParseException {
+    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine) {
         super.setLocation(unboundTemplate, beginColumn, beginLine, endColumn, endLine);
         if (isLiteral()) {
             try {

@@ -113,8 +113,8 @@ final class BoundCallable extends Macro {
 
     /** For backward compatibility only; delegates to the {@link UnboundCallable}'s identical method. */
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
-        unboundCallable.accept(env);
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        return unboundCallable.accept(env);
     }
 
     /** For backward compatibility only; delegates to the {@link UnboundCallable}'s identical method. */

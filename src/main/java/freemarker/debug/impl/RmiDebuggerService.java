@@ -39,6 +39,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.core.DebugBreak;
 import freemarker.core.Environment;
 import freemarker.core.TemplateElement;
+import freemarker.core._CoreAPI;
 import freemarker.debug.Breakpoint;
 import freemarker.debug.DebuggerListener;
 import freemarker.debug.EnvironmentSuspendedEvent;
@@ -188,7 +189,7 @@ extends
         if (te == null) {
             return;
         }
-        TemplateElement parent = te.getParent();
+        TemplateElement parent = _CoreAPI.getParentElement(te);
         DebugBreak db = new DebugBreak(te);
         // TODO: Ensure there always is a parent by making sure
         // that the root element in the template is always a MixedContent
@@ -285,13 +286,13 @@ extends
                 db = (DebugBreak) te;
                 break;
             }
-            te = te.getParent();
+            te = _CoreAPI.getParentElement(te);
         }
         if (db == null) {
             return;
         }
-        TemplateElement parent = db.getParent(); 
-        parent.setChildAt(parent.getIndex(db), db.getChildAt(0));
+        TemplateElement parent = _CoreAPI.getParentElement(db); 
+        parent.setChildAt(parent.getIndex(db), _CoreAPI.getChildElement(db, 0));
     }
     
     void removeBreakpoints(String templateName) {
@@ -334,9 +335,9 @@ extends
     private void removeDebugBreaks(TemplateElement te) {
         int count = te.getChildCount();
         for (int i = 0; i < count; ++i) {
-            TemplateElement child = te.getChildAt(i);
+            TemplateElement child = _CoreAPI.getChildElement(te, i);
             while (child instanceof DebugBreak) {
-                TemplateElement dbchild = child.getChildAt(0); 
+                TemplateElement dbchild = _CoreAPI.getChildElement(child, 0); 
                 te.setChildAt(i, dbchild);
                 child = dbchild;
             }

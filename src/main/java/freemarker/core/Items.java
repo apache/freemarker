@@ -30,13 +30,13 @@ class Items extends TemplateElement {
 
     private final String loopVarName;
 
-    public Items(String loopVariableName, TemplateElement nestedBlock) {
+    Items(String loopVariableName, TemplateElements children) {
         this.loopVarName = loopVariableName;
-        setNestedBlock(nestedBlock);
+        setChildren(children);
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         final IterationContext iterCtx = IteratorBlock.findEnclosingIterationContext(env, null);
         if (iterCtx == null) {
             // The parser should prevent this situation
@@ -44,7 +44,8 @@ class Items extends TemplateElement {
                     getNodeTypeSymbol(), " without iteraton in context");
         }
         
-        iterCtx.loopForItemsElement(env, getNestedBlock(), loopVarName);
+        iterCtx.loopForItemsElement(env, getChildBuffer(), loopVarName);
+        return null;
     }
 
     @Override
@@ -61,7 +62,7 @@ class Items extends TemplateElement {
         sb.append(loopVarName);
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
+            sb.append(getChildrenCanonicalForm());
             sb.append("</");
             sb.append(getNodeTypeSymbol());
             sb.append('>');

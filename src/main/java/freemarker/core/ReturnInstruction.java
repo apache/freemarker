@@ -33,18 +33,15 @@ public final class ReturnInstruction extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException {
+    TemplateElement[] accept(Environment env) throws TemplateException {
         if (exp != null) {
             env.setLastReturnValue(exp.eval(env));
         }
-        if (nextSibling() != null) {
-            // We need to jump out using an exception.
-            throw Return.INSTANCE;
+        if (nextSibling() == null && getParentElement() instanceof Macro) {
+            // Avoid unnecessary exception throwing 
+            return null;
         }
-        if (!(getParentElement() instanceof Macro || getParentElement().getParentElement() instanceof Macro)) {
-            // Here also, we need to jump out using an exception.
-            throw Return.INSTANCE;
-        }
+        throw Return.INSTANCE;
     }
 
     @Override

@@ -45,7 +45,7 @@ class UnboundCallable extends Macro {
             Collections.EMPTY_LIST, 
             Collections.EMPTY_MAP,
             null, false,
-            TextBlock.EMPTY_BLOCK);
+            TemplateElements.EMPTY);
     
     final static int TYPE_MACRO = 0;
     final static int TYPE_FUNCTION = 1;
@@ -58,7 +58,7 @@ class UnboundCallable extends Macro {
 
     UnboundCallable(String name, List argumentNames, Map args, 
             String catchAllParamName, boolean function,
-            TemplateElement nestedBlock) {
+            TemplateElements children) {
         this.name = name;
         this.paramNames = (String[]) argumentNames.toArray(
                 new String[argumentNames.size()]);
@@ -67,7 +67,7 @@ class UnboundCallable extends Macro {
         this.function = function;
         this.catchAllParamName = catchAllParamName; 
         
-        this.setNestedBlock(nestedBlock);
+        this.setChildren(children);
     }
     
     String[] getParamNames() {
@@ -102,8 +102,9 @@ class UnboundCallable extends Macro {
     }
 
     @Override
-    void accept(Environment env) {
+    TemplateElement[] accept(Environment env) {
         env.visitCallableDefinition(this);
+        return null;
     }
 
     @Override
@@ -149,9 +150,7 @@ class UnboundCallable extends Macro {
         if (function) sb.append(')');
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) {
-                sb.append(getNestedBlock().getCanonicalForm());
-            }
+            sb.append(getChildrenCanonicalForm());
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }
         return sb.toString();

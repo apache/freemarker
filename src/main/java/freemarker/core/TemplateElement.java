@@ -31,8 +31,7 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * <b>Internal API - subject to change:</b> Represent directive call, interpolation, text block, or other such
  * non-expression node in the parsed template. Some information that can be found here can be accessed through the
- * {@link Environment#getCurrentDirectiveCallPlace()}, which a published API, and thus promises backward
- * compatibility.
+ * {@link Environment#getCurrentDirectiveCallPlace()}, which a published API, and thus promises backward compatibility.
  * 
  * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
  *             it.
@@ -45,44 +44,44 @@ abstract public class TemplateElement extends TemplateObject {
     private TemplateElement parent;
 
     /**
-     * Used by elements that has no fixed schema for its child elements. For example, a {@code #case} can enclose any
-     * kind of elements. Only one of {@link #nestedBlock} and {@link #regulatedChildBuffer} can be non-{@code null}.
-     * This element is typically a {@link MixedContent}, at least before {@link #postParseCleanup(boolean)} (which
-     * optimizes out {@link MixedContent} with child count less than 2).
+     * Contains 1 or more nested elements with optional trailing {@code null}-s, or is {@code null} exactly if there are
+     * no nested elements.
      */
-    private TemplateElement nestedBlock;
-    
-    /**
-     * Used by elements that has a fixed schema for its child elements. For example, {@code #switch} can only have
-     * {@code #case} and {@code #default} child elements. Only one of {@link #nestedBlock} and
-     * {@link #regulatedChildBuffer} can be non-{@code null}.
-     */
-    private TemplateElement[] regulatedChildBuffer;
-    private int regulatedChildCount;
+    private TemplateElement[] childBuffer;
 
     /**
-     * The index of the element in the parent's {@link #regulatedChildBuffer} array, or 0 if this is the
-     * {@link #nestedBlock} of the parent.
+     * Contains the number of elements in the {@link #childBuffer}, not counting the trailing {@code null}-s. If this is
+     * 0, then and only then {@link #childBuffer} must be {@code null}.
+     */
+    private int childCount;
+
+    /**
+     * The index of the element in the parent's {@link #childBuffer} array.
      * 
      * @since 2.3.23
      */
     private int index;
 
     /**
-     * Processes the contents of this <tt>TemplateElement</tt> and
-     * outputs the resulting text
+     * Executes this {@link TemplateElement}. Usually should not be called directly, but through
+     * {@link Environment#visit(TemplateElement)} or a similar {@link Environment} method.
      *
-     * @param env The runtime environment
+     * @param env
+     *            The runtime environment
+     * 
+     * @return The template elements to execute (meant to be used for nested elements), or {@code null}. Can have
+     *         <em>trailing</em> {@code null}-s (unused buffer capacity). Returning the nested elements instead of
+     *         executing them inside this method is a trick used for decreasing stack usage when there's nothing to do
+     *         after the children was processed anyway.
      */
-    abstract void accept(Environment env) throws TemplateException, IOException;
+    abstract TemplateElement[] accept(Environment env) throws TemplateException, IOException;
 
     /**
-     * One-line description of the element, that contain all the information that is used in
-     * {@link #getCanonicalForm()}, except the nested content (elements) of the element. The expressions inside the 
-     * element (the parameters) has to be shown. Meant to be used for stack traces, also for tree views that don't go
-     * down to the expression-level. There are no backward-compatibility guarantees regarding the format used ATM, but
-     * it must be regular enough to be machine-parseable, and it must contain all information necessary for restoring an
-     * AST equivalent to the original.
+     * One-line description of the element, that contain all the information that is used in {@link #getCanonicalForm()}
+     * , except the nested content (elements) of the element. The expressions inside the element (the parameters) has to
+     * be shown. Meant to be used for stack traces, also for tree views that don't go down to the expression-level.
+     * There are no backward-compatibility guarantees regarding the format used ATM, but it must be regular enough to be
+     * machine-parseable, and it must contain all information necessary for restoring an AST equivalent to the original.
      * 
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      * 
@@ -92,7 +91,7 @@ abstract public class TemplateElement extends TemplateObject {
     public final String getDescription() {
         return dump(false);
     }
-    
+
     /**
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      */
@@ -100,74 +99,88 @@ abstract public class TemplateElement extends TemplateObject {
     public final String getCanonicalForm() {
         return dump(true);
     }
-    
-    /**
-     * Tells if the element should show up in error stack traces. If you think you need to set this to {@code false} for
-     * an element, always consider if you should use {@link Environment#visitByHiddingParent(TemplateElement)} instead.
-     * 
-     * Note that this will be ignored for the top (current) element of a stack trace, as that's always shown.
-     */
-    boolean isShownInStackTrace() {
-        return true;
+
+    final String getChildrenCanonicalForm() {
+        return getChildrenCanonicalForm(childBuffer);
     }
     
+    static String getChildrenCanonicalForm(TemplateElement[] children) {
+        if (children == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (TemplateElement child : children) {
+            if (child == null) {
+                break;
+            }
+            sb.append(child.getCanonicalForm());
+        }
+        return sb.toString();
+    }
+
     /**
-     * Tells if this element possibly executes its {@link #nestedBlock} for many times. This flag is useful when
-     * a template AST is modified for running time limiting (see {@link ThreadInterruptionSupportTemplatePostProcessor}).
-     * Elements that use {@link #regulatedChildBuffer} should not need this, as the insertion of the timeout checks is
-     * impossible there, given their rigid nested element schema.
+     * Tells if the element should show up in error stack traces. Note that this will be ignored for the top (current)
+     * element of a stack trace, as that's always shown.
+     */
+    boolean isShownInStackTrace() {
+        return false;
+    }
+
+    /**
+     * Tells if this element possibly executes its nested content for many times. This flag is useful when a template
+     * AST is modified for running time limiting (see {@link ThreadInterruptionSupportTemplatePostProcessor}). Elements
+     * that use {@link #childBuffer} should not need this, as the insertion of the timeout checks is impossible there,
+     * given their rigid nested element schema.
      */
     abstract boolean isNestedBlockRepeater();
 
     /**
-     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place.
-     * Don't call those methods in method on {@code this}, because that will result in infinite recursion! 
+     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place. Don't
+     * call those methods in method on {@code this}, because that will result in infinite recursion!
      * 
-     * @param canonical if {@code true}, it calculates the return value of {@link #getCanonicalForm()},
-     *        otherwise of {@link #getDescription()}.
+     * @param canonical
+     *            if {@code true}, it calculates the return value of {@link #getCanonicalForm()}, otherwise of
+     *            {@link #getDescription()}.
      */
     abstract protected String dump(boolean canonical);
-    
-// Methods to implement TemplateNodeModel 
+
+    // Methods to implement TemplateNodeModel
 
     public TemplateNodeModel getParentNode() {
-//        return parent;
-         return null;
+        // return parent;
+        return null;
     }
-    
+
     public String getNodeNamespace() {
         return null;
     }
-    
+
     public String getNodeType() {
         return "element";
     }
-    
+
     public TemplateSequenceModel getChildNodes() {
-        if (regulatedChildBuffer != null) {
-            final SimpleSequence seq = new SimpleSequence(regulatedChildCount);
-            for (int i = 0; i < regulatedChildCount; i++) {
-                seq.add(regulatedChildBuffer[i]);
+        if (childBuffer != null) {
+            final SimpleSequence seq = new SimpleSequence(childCount);
+            for (int i = 0; i < childCount; i++) {
+                seq.add(childBuffer[i]);
             }
             return seq;
+        } else {
+            return new SimpleSequence(0);
         }
-        SimpleSequence result = new SimpleSequence(1);
-        if (nestedBlock != null) {
-            result.add(nestedBlock);
-        } 
-        return result;
     }
-    
+
     public String getNodeName() {
         String classname = this.getClass().getName();
         int shortNameOffset = classname.lastIndexOf('.') + 1;
         return classname.substring(shortNameOffset);
     }
-    
-    // Methods so that we can implement the Swing TreeNode API.    
+
+    // Methods so that we can implement the Swing TreeNode API.
 
     public boolean isLeaf() {
-        return nestedBlock == null && regulatedChildCount == 0;
+        return childCount == 0;
     }
 
     /**
@@ -179,31 +192,16 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     public int getIndex(TemplateElement node) {
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.getIndex(node);
-        }
-        if (nestedBlock != null) {
-            if (node == nestedBlock) {
-                return 0;
-            }
-        } else {
-            for (int i = 0; i < regulatedChildCount; i++) {
-                if (regulatedChildBuffer[i].equals(node)) { 
-                    return i;
-                }
+        for (int i = 0; i < childCount; i++) {
+            if (childBuffer[i].equals(node)) {
+                return i;
             }
         }
         return -1;
     }
 
     public int getChildCount() {
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.getChildCount();
-        }
-        if (nestedBlock != null) {
-            return 1;
-        }
-        return regulatedChildCount;
+        return childCount;
     }
 
     /**
@@ -211,57 +209,37 @@ abstract public class TemplateElement extends TemplateObject {
      * {@link MixedContent}.
      */
     public Enumeration children() {
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.children();
-        }
-        if (nestedBlock != null) {
-            return Collections.enumeration(Collections.singletonList(nestedBlock));
-        } else if (regulatedChildBuffer != null) {
-            return new _ArrayEnumeration(regulatedChildBuffer, regulatedChildCount);
-        }
-        return Collections.enumeration(Collections.EMPTY_LIST);
+        return childBuffer != null
+                ? new _ArrayEnumeration(childBuffer, childCount)
+                : Collections.enumeration(Collections.EMPTY_LIST);
     }
 
+    /**
+     * @deprecated Internal API - even internally, use {@link #getChild(int)} instead.
+     */
+    @Deprecated
     public TemplateElement getChildAt(int index) {
-        if (nestedBlock instanceof MixedContent) {
-            return nestedBlock.getChildAt(index);
+        if (childCount == 0) {
+            throw new IndexOutOfBoundsException("Template element has no children");
         }
-        if (nestedBlock != null) {
-            if (index == 0) {
-                return nestedBlock;
-            }
-            throw new ArrayIndexOutOfBoundsException("invalid index");
-        } else if (regulatedChildCount != 0) {
-            try {
-                return regulatedChildBuffer[index];
-            } catch (ArrayIndexOutOfBoundsException e) {
-                // nestedElements was a List earlier, so we emulate the same kind of exception
-                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + regulatedChildCount);
-            }
+        try {
+            return childBuffer[index];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // nestedElements was a List earlier, so we emulate the same kind of exception
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + childCount);
         }
-        throw new ArrayIndexOutOfBoundsException("Template element has no children");
     }
 
     public void setChildAt(int index, TemplateElement element) {
-        if (nestedBlock instanceof MixedContent) {
-            nestedBlock.setChildAt(index, element);
-        } else if (nestedBlock != null) {
-            if (index == 0) {
-                nestedBlock = element;
-                element.index = 0;
-                element.parent = this;
-            } else {
-                throw new IndexOutOfBoundsException("invalid index");
-            }
-        } else if (regulatedChildBuffer != null) {
-            regulatedChildBuffer[index] = element;
+        if (index < childCount && index >= 0) {
+            childBuffer[index] = element;
             element.index = index;
             element.parent = this;
         } else {
-            throw new IndexOutOfBoundsException("element has no children");
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + childCount);
         }
     }
-    
+
     /**
      * The element whose child this element is, or {@code null} if this is the root node.
      * 
@@ -272,29 +250,42 @@ abstract public class TemplateElement extends TemplateObject {
         return parent;
     }
     
-    final void setRegulatedChildBufferCapacity(int capacity) {
-        int ln = regulatedChildCount;
-        TemplateElement[] newRegulatedChildBuffer = new TemplateElement[capacity];
-        for (int i = 0; i < ln; i++) {
-            newRegulatedChildBuffer[i] = regulatedChildBuffer[i];
-        }
-        regulatedChildBuffer = newRegulatedChildBuffer;
-    }
-    
-    final void addRegulatedChild(TemplateElement nestedElement) {
-        addRegulatedChild(regulatedChildCount, nestedElement);
+    /**
+     * The element whose child this element is, or {@code null} if this is the root node.
+     */
+    final TemplateElement getParentElement() {
+        return parent;
     }
 
-    final void addRegulatedChild(int index, TemplateElement nestedElement) {
-        final int lRegulatedChildCount = regulatedChildCount;
-        
-        TemplateElement[] lRegulatedChildBuffer = regulatedChildBuffer;
+    final void setChildBufferCapacity(int capacity) {
+        int ln = childCount;
+        TemplateElement[] newRegulatedChildBuffer = new TemplateElement[capacity];
+        for (int i = 0; i < ln; i++) {
+            newRegulatedChildBuffer[i] = childBuffer[i];
+        }
+        childBuffer = newRegulatedChildBuffer;
+    }
+
+    /**
+     * Inserts a new nested element after the last nested element.
+     */
+    final void addChild(TemplateElement nestedElement) {
+        addChild(childCount, nestedElement);
+    }
+
+    /**
+     * Inserts a new nested element at the given index, which can also be one higher than the current highest index.
+     */
+    final void addChild(int index, TemplateElement nestedElement) {
+        final int lRegulatedChildCount = childCount;
+
+        TemplateElement[] lRegulatedChildBuffer = childBuffer;
         if (lRegulatedChildBuffer == null) {
             lRegulatedChildBuffer = new TemplateElement[INITIAL_REGULATED_CHILD_BUFFER_CAPACITY];
-            regulatedChildBuffer = lRegulatedChildBuffer;
+            childBuffer = lRegulatedChildBuffer;
         } else if (lRegulatedChildCount == lRegulatedChildBuffer.length) {
-            setRegulatedChildBufferCapacity(lRegulatedChildCount != 0 ? lRegulatedChildCount * 2 : 1);
-            lRegulatedChildBuffer = regulatedChildBuffer; 
+            setChildBufferCapacity(lRegulatedChildCount != 0 ? lRegulatedChildCount * 2 : 1);
+            lRegulatedChildBuffer = childBuffer;
         }
         // At this point: nestedElements == this.nestedElements, and has sufficient capacity.
 
@@ -306,40 +297,42 @@ abstract public class TemplateElement extends TemplateObject {
         nestedElement.index = index;
         nestedElement.parent = this;
         lRegulatedChildBuffer[index] = nestedElement;
-        regulatedChildCount = lRegulatedChildCount + 1;
+        childCount = lRegulatedChildCount + 1;
     }
-    
-    final int getRegulatedChildCount() {
-       return regulatedChildCount; 
+
+    final TemplateElement getChild(int index) {
+        return childBuffer[index];
     }
-    
-    final TemplateElement getRegulatedChild(int index) {
-        return regulatedChildBuffer[index];
+
+    /**
+     * @return Array containing 1 or more nested elements with optional trailing {@code null}-s, or is {@code null}
+     *         exactly if there are no nested elements.
+     */
+    final TemplateElement[] getChildBuffer() {
+        return childBuffer;
     }
-    
+
+    /**
+     * @param buffWithCnt Maybe {@code null}
+     * 
+     * @since 2.3.24
+     */
+    final void setChildren(TemplateElements buffWithCnt) {
+        TemplateElement[] childBuffer = buffWithCnt.getBuffer();
+        int childCount = buffWithCnt.getCount();
+        for (int i = 0; i < childCount; i++) {
+            TemplateElement child = childBuffer[i];
+            child.index = i;
+            child.parent = this;
+        }
+        this.childBuffer = childBuffer;
+        this.childCount = childCount;
+    }
+
     final int getIndex() {
         return index;
     }
-    
-    /**
-     * The element whose child this element is, or {@code null} if this is the root node.
-     */
-    final TemplateElement getParentElement() {
-        return parent;
-    }
-    
-    final TemplateElement getNestedBlock() {
-        return nestedBlock;
-    }
 
-    final void setNestedBlock(TemplateElement nestedBlock) {
-        if (nestedBlock != null) {
-            nestedBlock.parent = this;
-            nestedBlock.index = 0;
-        }
-        this.nestedBlock = nestedBlock;
-    }
-    
     /**
      * This is a special case, because a root element is not contained in another element, so we couldn't set the
      * private fields.
@@ -350,7 +343,7 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     /**
-     * Walk the AST subtree rooted by this element, and do simplifications where possible, also remove superfluous
+     * Walk the AST subtree rooted by this element, and do simplifications where possible, also removes superfluous
      * whitespace.
      * 
      * @param stripWhitespace
@@ -361,56 +354,63 @@ abstract public class TemplateElement extends TemplateObject {
      *         is the duty of the caller, not of this method.
      */
     TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
-        int regulatedChildCount = this.regulatedChildCount;
-        if (regulatedChildCount != 0) {
-            for (int i = 0; i < regulatedChildCount; i++) {
-                TemplateElement te = regulatedChildBuffer[i];
+        int childCount = this.childCount;
+        if (childCount != 0) {
+            for (int i = 0; i < childCount; i++) {
+                TemplateElement te = childBuffer[i];
+                
+                /*
+                // Assertion:
+                if (te.getIndex() != i) {
+                    throw new BugException("Invalid index " + te.getIndex() + " (expected: "
+                            + i + ") for: " + te.dump(false));
+                }
+                if (te.getParent() != this) {
+                    throw new BugException("Invalid parent " + te.getParent() + " (expected: "
+                            + this.dump(false) + ") for: " + te.dump(false));
+                }
+                */
+                
                 te = te.postParseCleanup(stripWhitespace);
-                regulatedChildBuffer[i] = te;
+                childBuffer[i] = te;
                 te.parent = this;
                 te.index = i;
             }
-            if (stripWhitespace) {
-                for (int i = 0; i < regulatedChildCount; i++) {
-                    TemplateElement te = regulatedChildBuffer[i];
-                    if (te.isIgnorable()) {
-                        regulatedChildCount--;
-                        for (int j = i; j < regulatedChildCount; j++) {
-                            final TemplateElement te2 = regulatedChildBuffer[j  + 1];
-                            regulatedChildBuffer[j] = te2;
-                            te2.index = j;
-                        }
-                        regulatedChildBuffer[regulatedChildCount] = null;
-                        this.regulatedChildCount = regulatedChildCount;
-                        i--;
+            for (int i = 0; i < childCount; i++) {
+                TemplateElement te = childBuffer[i];
+                if (te.isIgnorable(stripWhitespace)) {
+                    childCount--;
+                    // As later isIgnorable calls might investigates the siblings, we have to move all the items now. 
+                    for (int j = i; j < childCount; j++) {
+                        final TemplateElement te2 = childBuffer[j + 1];
+                        childBuffer[j] = te2;
+                        te2.index = j;
                     }
+                    childBuffer[childCount] = null;
+                    this.childCount = childCount;
+                    i--;
                 }
             }
-            if (regulatedChildCount < regulatedChildBuffer.length
-                    && regulatedChildCount <= regulatedChildBuffer.length * 3 / 4) {
-                TemplateElement[] trimmedregulatedChildBuffer = new TemplateElement[regulatedChildCount];
-                for (int i = 0; i < regulatedChildCount; i++) {
-                    trimmedregulatedChildBuffer[i] = regulatedChildBuffer[i];
+            if (childCount == 0) {
+                childBuffer = null;
+            } else if (childCount < childBuffer.length
+                    && childCount <= childBuffer.length * 3 / 4) {
+                TemplateElement[] trimmedChildBuffer = new TemplateElement[childCount];
+                for (int i = 0; i < childCount; i++) {
+                    trimmedChildBuffer[i] = childBuffer[i];
                 }
-                regulatedChildBuffer = trimmedregulatedChildBuffer;
-            }
-        } else if (nestedBlock != null) {
-            nestedBlock = nestedBlock.postParseCleanup(stripWhitespace);
-            if (nestedBlock.isIgnorable()) {
-                nestedBlock = null;
-            } else {
-                nestedBlock.parent = this;
+                childBuffer = trimmedChildBuffer;
             }
         }
         return this;
     }
 
-    boolean isIgnorable() {
+    boolean isIgnorable(boolean stripWhitespace) {
         return false;
     }
 
-// The following methods exist to support some fancier tree-walking 
-// and were introduced to support the whitespace cleanup feature in 2.2
+    // The following methods exist to support some fancier tree-walking
+    // and were introduced to support the whitespace cleanup feature in 2.2
 
     TemplateElement prevTerminalNode() {
         TemplateElement prev = previousSibling();
@@ -436,41 +436,29 @@ abstract public class TemplateElement extends TemplateObject {
         if (parent == null) {
             return null;
         }
-        return index > 0 ? parent.regulatedChildBuffer[index - 1] : null;
+        return index > 0 ? parent.childBuffer[index - 1] : null;
     }
 
     TemplateElement nextSibling() {
         if (parent == null) {
             return null;
         }
-        return index + 1 < parent.regulatedChildCount ? parent.regulatedChildBuffer[index + 1] : null;
+        return index + 1 < parent.childCount ? parent.childBuffer[index + 1] : null;
     }
 
     private TemplateElement getFirstChild() {
-        if (nestedBlock != null) {
-            return nestedBlock;
-        }
-        if (regulatedChildCount == 0) {
-            return null;
-        }
-        return regulatedChildBuffer[0];
+        return childCount == 0 ? null : childBuffer[0];
     }
 
     private TemplateElement getLastChild() {
-        if (nestedBlock != null) {
-            return nestedBlock;
-        }
-        final int regulatedChildCount = this.regulatedChildCount;
-        if (regulatedChildCount == 0) {
-            return null;
-        }
-        return regulatedChildBuffer[regulatedChildCount - 1];
+        final int regulatedChildCount = this.childCount;
+        return regulatedChildCount == 0 ? null : childBuffer[regulatedChildCount - 1];
     }
 
     private TemplateElement getFirstLeaf() {
         TemplateElement te = this;
         while (!te.isLeaf() && !(te instanceof Macro) && !(te instanceof BlockAssignment)) {
-             // A macro or macro invocation is treated as a leaf here for special reasons
+            // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getFirstChild();
         }
         return te;
@@ -492,20 +480,28 @@ abstract public class TemplateElement extends TemplateObject {
     boolean isOutputCacheable() {
         return false;
     }
-    
+
+    boolean isChildrenOutputCacheable() {
+        int ln = childCount;
+        for (int i = 0; i < ln; i++) {
+            if (!childBuffer[i].isOutputCacheable()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
-     * determines whether this element's presence on a line 
-     * indicates that we should not strip opening whitespace
-     * in the post-parse whitespace gobbling step.
+     * determines whether this element's presence on a line indicates that we should not strip opening whitespace in the
+     * post-parse whitespace gobbling step.
      */
     boolean heedsOpeningWhitespace() {
         return false;
     }
 
     /**
-     * determines whether this element's presence on a line 
-     * indicates that we should not strip trailing whitespace
-     * in the post-parse whitespace gobbling step.
+     * determines whether this element's presence on a line indicates that we should not strip trailing whitespace in
+     * the post-parse whitespace gobbling step.
      */
     boolean heedsTrailingWhitespace() {
         return false;

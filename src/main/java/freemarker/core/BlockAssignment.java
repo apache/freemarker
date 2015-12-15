@@ -40,8 +40,8 @@ final class BlockAssignment extends TemplateElement {
     private final int scope;
     private final MarkupOutputFormat<?> markupOutputFormat;
 
-    BlockAssignment(TemplateElement nestedBlock, String varName, int scope, Expression namespaceExp, MarkupOutputFormat<?> markupOutputFormat) {
-        setNestedBlock(nestedBlock);
+    BlockAssignment(TemplateElements children, String varName, int scope, Expression namespaceExp, MarkupOutputFormat<?> markupOutputFormat) {
+        setChildren(children);
         this.varName = varName;
         this.namespaceExp = namespaceExp;
         this.scope = scope;
@@ -49,9 +49,10 @@ final class BlockAssignment extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
-        if (getNestedBlock() != null) {
-            env.visitAndTransform(getNestedBlock(), new CaptureOutput(env), null);
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        TemplateElement[] children = getChildBuffer();
+        if (children != null) {
+            env.visitAndTransform(children, new CaptureOutput(env), null);
         } else {
             TemplateModel value = capturedStringToModel("");
             if (namespaceExp != null) {
@@ -65,6 +66,7 @@ final class BlockAssignment extends TemplateElement {
                 env.setLocalVariable(varName, value);
             }
         }
+        return null;
     }
 
     private TemplateModel capturedStringToModel(String s) throws TemplateModelException {
@@ -134,7 +136,7 @@ final class BlockAssignment extends TemplateElement {
         }
         if (canonical) {
             sb.append('>');
-            sb.append(getNestedBlock() == null ? "" : getNestedBlock().getCanonicalForm());
+            sb.append(getChildrenCanonicalForm());
             sb.append("</");
             sb.append(getNodeTypeSymbol());
             sb.append('>');

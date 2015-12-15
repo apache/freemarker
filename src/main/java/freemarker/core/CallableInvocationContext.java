@@ -19,8 +19,6 @@
 
 package freemarker.core;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -37,20 +35,20 @@ import freemarker.template.TemplateModelIterator;
 class CallableInvocationContext implements LocalContext {
     final UnboundCallable callableDefinition;
     final Environment.Namespace localVars; 
-    final TemplateElement nestedContent;
+    final TemplateElement[] nestedContentBuffer;
     final Environment.Namespace nestedContentNamespace;
     final Template nestedContentTemplate;
     final List nestedContentParameterNames;
-    final ArrayList prevLocalContextStack;
+    final LocalContextStack prevLocalContextStack;
     final CallableInvocationContext prevMacroContext;
     
     CallableInvocationContext(UnboundCallable callableDefinition,
             Environment env, 
-            TemplateElement nestedContent,
+            TemplateElement[] nestedContentBuffer,
             List nestedContentParameterNames) {
         this.callableDefinition = callableDefinition;
         this.localVars = env.new Namespace();
-        this.nestedContent = nestedContent;
+        this.nestedContentBuffer = nestedContentBuffer;
         this.nestedContentNamespace = env.getCurrentNamespace();
         this.nestedContentTemplate = env.getCurrentTemplate();
         this.nestedContentParameterNames = nestedContentParameterNames;
@@ -60,14 +58,6 @@ class CallableInvocationContext implements LocalContext {
     
     Macro getCallableDefinition() {
         return callableDefinition;
-    }
-
-    void invoce(Environment env) throws TemplateException, IOException {
-        sanityCheck(env);
-        // Set default values for unspecified parameters
-        if (callableDefinition.getNestedBlock() != null) {
-            env.visit(callableDefinition.getNestedBlock());
-        }
     }
 
     // Set default parameters, check if all the required parameters are defined.
