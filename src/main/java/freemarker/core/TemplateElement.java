@@ -355,7 +355,8 @@ abstract public class TemplateElement extends TemplateObject {
             for (int i = 0; i < childCount; i++) {
                 TemplateElement te = childBuffer[i];
                 
-                //!!T temporal assertion
+                /*
+                // Assertion:
                 if (te.getIndex() != i) {
                     throw new BugException("Invalid index " + te.getIndex() + " (expected: "
                             + i + ") for: " + te.dump(false));
@@ -364,6 +365,7 @@ abstract public class TemplateElement extends TemplateObject {
                     throw new BugException("Invalid parent " + te.getParent() + " (expected: "
                             + this.dump(false) + ") for: " + te.dump(false));
                 }
+                */
                 
                 te = te.postParseCleanup(stripWhitespace);
                 childBuffer[i] = te;

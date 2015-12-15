@@ -22,9 +22,13 @@ class TemplateElements {
      *            The number of utilized buffer elements; if 0, then {@code null} must be {@code null}.
      */
     TemplateElements(TemplateElement[] buffer, int count) {
-        if (count == 0 && buffer != null) { // !!T temporal assertion
+        /*
+        // Assertion:
+        if (count == 0 && buffer != null) {
             throw new IllegalArgumentException(); 
         }
+        */
+        
         this.buffer = buffer;
         this.count = count;
     }
