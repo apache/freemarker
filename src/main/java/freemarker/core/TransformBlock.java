@@ -48,14 +48,14 @@ final class TransformBlock extends TemplateElement {
      */
     TransformBlock(Expression transformExpression, 
                    Map namedArgs,
-                   TemplateElement nestedBlock) {
+                   TemplateElements children) {
         this.transformExpression = transformExpression;
         this.namedArgs = namedArgs;
-        setNestedBlock(nestedBlock);
+        setChildren(children);
     }
 
     @Override
-    void accept(Environment env) 
+    TemplateElement[] accept(Environment env)
     throws TemplateException, IOException {
         TemplateTransformModel ttm = env.getTransform(transformExpression);
         if (ttm != null) {
@@ -72,13 +72,14 @@ final class TransformBlock extends TemplateElement {
             } else {
                 args = EmptyMap.instance;
             }
-            env.visitAndTransform(getNestedBlock(), ttm, args);
+            env.visitAndTransform(getChildBuffer(), ttm, args);
         } else {
             TemplateModel tm = transformExpression.eval(env);
             throw new UnexpectedTypeException(
                     transformExpression, tm,
                     "transform", new Class[] { TemplateTransformModel.class }, env);
         }
+        return null;
     }
 
     @Override
@@ -99,9 +100,7 @@ final class TransformBlock extends TemplateElement {
         }
         if (canonical) {
             sb.append(">");
-            if (getNestedBlock() != null) {
-                sb.append(getNestedBlock().getCanonicalForm());
-            }
+            sb.append(getChildrenCanonicalForm());
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }
         return sb.toString();
@@ -159,6 +158,11 @@ final class TransformBlock extends TemplateElement {
     @Override
     boolean isNestedBlockRepeater() {
         return false;
+    }
+
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
     }
     
 }

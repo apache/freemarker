@@ -24,24 +24,26 @@ import java.io.IOException;
 import freemarker.template.TemplateException;
 
 /**
- * #attempt element; might has a nested {@link RecoveryBlock}.
+ * Holder for the attempted section of the #attempt element and of the nested #recover element ({@link RecoveryBlock}).
  */
 final class AttemptBlock extends TemplateElement {
     
-    private TemplateElement attemptBlock;
-    private RecoveryBlock recoveryBlock;
+    private TemplateElement attemptedSection;
+    private RecoveryBlock recoverySection;
     
-    AttemptBlock(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) {
-        this.attemptBlock = attemptBlock;
-        this.recoveryBlock = recoveryBlock;
-        setRegulatedChildBufferCapacity(2);
-        addRegulatedChild(attemptBlock);
-        addRegulatedChild(recoveryBlock);
+    AttemptBlock(TemplateElements attemptedSectionChildren, RecoveryBlock recoverySection) {
+        TemplateElement attemptedSection = attemptedSectionChildren.asSingleElement();
+        this.attemptedSection = attemptedSection;
+        this.recoverySection = recoverySection;
+        setChildBufferCapacity(2);
+        addChild(attemptedSection); // for backward compatibility
+        addChild(recoverySection);
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
-        env.visitAttemptRecover(attemptBlock, recoveryBlock);
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        env.visitAttemptRecover(this, attemptedSection, recoverySection);
+        return null;
     }
 
     @Override
@@ -51,12 +53,7 @@ final class AttemptBlock extends TemplateElement {
         } else {
             StringBuilder buf = new StringBuilder();
             buf.append("<").append(getNodeTypeSymbol()).append(">");
-            if (attemptBlock != null) {
-                buf.append(attemptBlock.getCanonicalForm());            
-            }
-            if (recoveryBlock != null) {
-                buf.append(recoveryBlock.getCanonicalForm());
-            }
+            buf.append(getChildrenCanonicalForm());            
             buf.append("</").append(getNodeTypeSymbol()).append(">");
             return buf.toString();
         }
@@ -70,7 +67,7 @@ final class AttemptBlock extends TemplateElement {
     @Override
     Object getParameterValue(int idx) {
         if (idx != 0) throw new IndexOutOfBoundsException();
-        return recoveryBlock;
+        return recoverySection;
     }
 
     @Override
@@ -84,11 +81,6 @@ final class AttemptBlock extends TemplateElement {
         return "#attempt";
     }
     
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
-    }
-
     @Override
     boolean isNestedBlockRepeater() {
         return false;

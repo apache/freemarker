@@ -99,7 +99,6 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
     public SimpleSequence(int capacity) {
         list = new ArrayList(capacity);
     }
-
     
     /**
      * Constructs a simple sequence that will contain the elements

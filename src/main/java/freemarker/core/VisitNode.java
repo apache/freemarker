@@ -42,7 +42,7 @@ final class VisitNode extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws IOException, TemplateException {
+    TemplateElement[] accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
             throw new NonNodeException(targetNode, node, env);
@@ -69,6 +69,7 @@ final class VisitNode extends TemplateElement {
             }
         }
         env.invokeNodeHandlerFor((TemplateNodeModel) node, (TemplateSequenceModel) nss);
+        return null;
     }
 
     @Override
@@ -116,6 +117,11 @@ final class VisitNode extends TemplateElement {
 
     @Override
     boolean isNestedBlockRepeater() {
+        return true;
+    }
+
+    @Override
+    boolean isShownInStackTrace() {
         return true;
     }
     

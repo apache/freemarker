@@ -50,7 +50,7 @@ public final class LibraryLoad extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         final String importedTemplateName = importedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullImportedTemplateName;
         try {
@@ -71,6 +71,7 @@ public final class LibraryLoad extends TemplateElement {
                     "):\n", new _DelayedGetMessage(e));
         }
         env.importLib(importedTemplate, namespace);
+        return null;
     }
 
     @Override
@@ -122,4 +123,10 @@ public final class LibraryLoad extends TemplateElement {
     boolean isNestedBlockRepeater() {
         return false;
     }
+    
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
+    }
+    
 }

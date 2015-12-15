@@ -356,23 +356,28 @@ public class Template extends Configurable {
     }
 
     /**
-     * Executes template, using the data-model provided, writing the generated output
-     * to the supplied {@link Writer}.
+     * Executes template, using the data-model provided, writing the generated output to the supplied {@link Writer}.
      * 
-     * <p>For finer control over the runtime environment setup, such as per-HTTP-request configuring of FreeMarker
-     * settings, you may need to use {@link #createProcessingEnvironment(Object, Writer)} instead. 
+     * <p>
+     * For finer control over the runtime environment setup, such as per-HTTP-request configuring of FreeMarker
+     * settings, you may need to use {@link #createProcessingEnvironment(Object, Writer)} instead.
      * 
-     * @param dataModel the holder of the variables visible from the template (name-value pairs); usually a
-     *     {@code Map<String, Object>} or a JavaBean (where the JavaBean properties will be the variables).
-     *     Can be any object that the {@link ObjectWrapper} in use turns into a {@link TemplateHashModel}.
-     *     You can also use an object that already implements {@link TemplateHashModel}; in that case it won't be
-     *     wrapped. If it's {@code null}, an empty data model is used.
-     * @param out The {@link Writer} where the output of the template will go. Note that unless you have used
-     *    {@link Configuration#setAutoFlush(boolean)} to disable this, {@link Writer#flush()} will be called at the
-     *    when the template processing was finished. {@link Writer#close()} is not called.
+     * @param dataModel
+     *            the holder of the variables visible from the template (name-value pairs); usually a
+     *            {@code Map<String, Object>} or a JavaBean (where the JavaBean properties will be the variables). Can
+     *            be any object that the {@link ObjectWrapper} in use turns into a {@link TemplateHashModel}. You can
+     *            also use an object that already implements {@link TemplateHashModel}; in that case it won't be
+     *            wrapped. If it's {@code null}, an empty data model is used.
+     * @param out
+     *            The {@link Writer} where the output of the template will go. Note that unless you have used
+     *            {@link Configuration#setAutoFlush(boolean)} to disable this, {@link Writer#flush()} will be called at
+     *            the when the template processing was finished. {@link Writer#close()} is not called. Can't be
+     *            {@code null}.
      * 
-     * @throws TemplateException if an exception occurs during template processing
-     * @throws IOException if an I/O exception occurs during writing to the writer.
+     * @throws TemplateException
+     *             if an exception occurs during template processing
+     * @throws IOException
+     *             if an I/O exception occurs during writing to the writer.
      */
     public void process(Object dataModel, Writer out)
     throws TemplateException, IOException {

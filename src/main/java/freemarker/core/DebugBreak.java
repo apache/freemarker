@@ -33,17 +33,17 @@ import freemarker.template.TemplateException;
 @Deprecated
 public class DebugBreak extends TemplateElement {
     public DebugBreak(TemplateElement nestedBlock) {
-        setNestedBlock(nestedBlock);
+        addChild(nestedBlock);
         copyLocationFrom(nestedBlock);
     }
     
     @Override
-    protected void accept(Environment env) throws TemplateException, IOException {
+    protected TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         if (!DebuggerService.suspendEnvironment(
-                env, this.getTemplate().getSourceName(), getNestedBlock().getBeginLine())) {
-            getNestedBlock().accept(env);
+                env, this.getTemplate().getSourceName(), getChild(0).getBeginLine())) {
+            return getChild(0).accept(env);
         } else {
-            throw new StopException(env, "Stopped by debugger");        
+            throw new StopException(env, "Stopped by debugger");
         }
     }
 
@@ -53,11 +53,11 @@ public class DebugBreak extends TemplateElement {
             StringBuilder sb = new StringBuilder();
             sb.append("<#-- ");
             sb.append("debug break");
-            if (getNestedBlock() == null) {
+            if (getChildCount() == 0) {
                 sb.append(" /-->");
             } else {
                 sb.append(" -->");
-                sb.append(getNestedBlock().getCanonicalForm());                
+                sb.append(getChild(0).getCanonicalForm());                
                 sb.append("<#--/ debug break -->");
             }
             return sb.toString();

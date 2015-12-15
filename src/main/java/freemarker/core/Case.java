@@ -19,10 +19,6 @@
 
 package freemarker.core;
 
-import java.io.IOException;
-
-import freemarker.template.TemplateException;
-
 /**
  * Represents a case in a switch statement.
  */
@@ -33,17 +29,14 @@ final class Case extends TemplateElement {
     
     Expression condition;
 
-    Case(Expression matchingValue, TemplateElement nestedBlock) {
+    Case(Expression matchingValue, TemplateElements children) {
         this.condition = matchingValue;
-        setNestedBlock(nestedBlock);
+        setChildren(children);
     }
 
     @Override
-    void accept(Environment env) 
-        throws TemplateException, IOException {
-        if (getNestedBlock() != null) {
-            env.visitByHiddingParent(getNestedBlock());
-        }
+    TemplateElement[] accept(Environment env) {
+        return getChildBuffer();
     }
 
     @Override
@@ -57,7 +50,7 @@ final class Case extends TemplateElement {
         }
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) sb.append(getNestedBlock().getCanonicalForm());
+            sb.append(getChildrenCanonicalForm());
         }
         return sb.toString();
     }

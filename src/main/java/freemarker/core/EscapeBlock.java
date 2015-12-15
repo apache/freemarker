@@ -40,17 +40,15 @@ class EscapeBlock extends TemplateElement {
         this.escapedExpr = escapedExpr;
     }
 
-    void setContent(TemplateElement nestedBlock) {
-        setNestedBlock(nestedBlock);
+    void setContent(TemplateElements children) {
+        setChildren(children);
         // We don't need it anymore at this point
         this.escapedExpr = null;
     }
 
     @Override
-    void accept(Environment env) throws TemplateException, IOException {
-        if (getNestedBlock() != null) {
-            env.visit(getNestedBlock());
-        }
+    TemplateElement[] accept(Environment env) throws TemplateException, IOException {
+        return getChildBuffer();
     }
 
     Expression doEscape(Expression expression) {
@@ -66,9 +64,7 @@ class EscapeBlock extends TemplateElement {
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) {
-                sb.append(getNestedBlock().getCanonicalForm());
-            }
+            sb.append(getChildrenCanonicalForm());
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }
         return sb.toString();
@@ -77,11 +73,6 @@ class EscapeBlock extends TemplateElement {
     @Override
     String getNodeTypeSymbol() {
         return "#escape";
-    }
-    
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
     }
     
     @Override

@@ -58,6 +58,10 @@ public class ASTTest extends FileTestCase {
     public void testMixedContentSimplifications() throws Exception {
         testAST("ast-mixedcontentsimplifications");
     }
+
+    public void testMultipleIgnoredChildren() throws Exception {
+        testAST("ast-multipleignoredchildren");
+    }
     
     private void testAST(String testName) throws FileNotFoundException, IOException {
         final String templateName = testName + ".ftl";

@@ -42,28 +42,34 @@ public abstract class TemplateObject {
      *  by a negative line numbers, starting from this constant as line 1. */
     static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
-    final void setLocation(Template template, Token begin, Token end)
-    throws ParseException {
+    final void setLocation(Template template, Token begin, Token end) {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(Template template, Token begin, TemplateObject end)
-    throws ParseException {
+    final void setLocation(Template template, Token tagBegin, Token tagEnd, TemplateElements children) {
+        TemplateElement lastChild = children.getLast();
+        if (lastChild != null) {
+            // [<#if exp>children]<#else>
+            setLocation(template, tagBegin, lastChild);
+        } else {
+            // [<#if exp>]<#else>
+            setLocation(template, tagBegin, tagEnd);
+        }
+    }
+    
+    final void setLocation(Template template, Token begin, TemplateObject end) {
+        setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
+    }
+    
+    final void setLocation(Template template, TemplateObject begin, Token end) {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(Template template, TemplateObject begin, Token end)
-    throws ParseException {
+    final void setLocation(Template template, TemplateObject begin, TemplateObject end) {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(Template template, TemplateObject begin, TemplateObject end)
-    throws ParseException {
-        setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
-    }
-
-    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws ParseException {
+    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine) {
         this.template = template;
         this.beginColumn = beginColumn;
         this.beginLine = beginLine;

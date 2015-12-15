@@ -1,0 +1,12 @@
+#mixed_content  // f.c.MixedContent
+    #text  // f.c.TextBlock
+        - content: "a\n"  // String
+    #text  // f.c.TextBlock
+        - content: "b\n"  // String
+    #text  // f.c.TextBlock
+        - content: "c\n"  // String
+    #text  // f.c.TextBlock
+        - content: "d\n"  // String
+    #if  // f.c.ConditionalBlock
+        - condition: true  // f.c.BooleanLiteral
+        - AST-node subtype: "0"  // Integer

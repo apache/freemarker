@@ -189,7 +189,11 @@ extends
         if (te == null) {
             return;
         }
+<<<<<<< HEAD
+        TemplateElement parent = (TemplateElement) te.getParent();
+=======
         TemplateElement parent = _CoreAPI.getParentElement(te);
+>>>>>>> origin/2.3-gae
         DebugBreak db = new DebugBreak(te);
         // TODO: Ensure there always is a parent by making sure
         // that the root element in the template is always a MixedContent
@@ -286,13 +290,22 @@ extends
                 db = (DebugBreak) te;
                 break;
             }
+<<<<<<< HEAD
+            te = (TemplateElement) te.getParent();
+=======
             te = _CoreAPI.getParentElement(te);
+>>>>>>> origin/2.3-gae
         }
         if (db == null) {
             return;
         }
+<<<<<<< HEAD
+        TemplateElement parent = (TemplateElement) db.getParent(); 
+        parent.setChildAt(parent.getIndex(db), (TemplateElement) db.getChildAt(0));
+=======
         TemplateElement parent = _CoreAPI.getParentElement(db); 
         parent.setChildAt(parent.getIndex(db), _CoreAPI.getChildElement(db, 0));
+>>>>>>> origin/2.3-gae
     }
     
     void removeBreakpoints(String templateName) {
@@ -335,9 +348,15 @@ extends
     private void removeDebugBreaks(TemplateElement te) {
         int count = te.getChildCount();
         for (int i = 0; i < count; ++i) {
+<<<<<<< HEAD
+            TemplateElement child = (TemplateElement) te.getChildAt(i);
+            while (child instanceof DebugBreak) {
+                TemplateElement dbchild = (TemplateElement) child.getChildAt(0); 
+=======
             TemplateElement child = _CoreAPI.getChildElement(te, i);
             while (child instanceof DebugBreak) {
                 TemplateElement dbchild = _CoreAPI.getChildElement(child, 0); 
+>>>>>>> origin/2.3-gae
                 te.setChildAt(i, dbchild);
                 child = dbchild;
             }

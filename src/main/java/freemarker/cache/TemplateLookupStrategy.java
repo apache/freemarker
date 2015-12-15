@@ -26,7 +26,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
- * Finds the {@link TemplateLoader}-level (storage-level) template source for the template name witch which the template
+ * Finds the {@link TemplateLoader}-level (storage-level) template source for the template name with which the template
  * was requested (as in {@link Configuration#getTemplate(String)}). This usually means trying various
  * {@link TemplateLoader}-level template names (so called source names; see also {@link Template#getSourceName()}) that
  * were deduced from the requested name. Trying a name usually means calling

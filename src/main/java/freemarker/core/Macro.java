@@ -19,8 +19,6 @@
 
 package freemarker.core;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,7 +42,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             Collections.EMPTY_LIST, 
             Collections.EMPTY_MAP,
             null, false,
-            TextBlock.EMPTY_BLOCK);
+            TemplateElements.EMPTY);
     
     final static int TYPE_MACRO = 0;
     final static int TYPE_FUNCTION = 1;
@@ -57,7 +55,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     Macro(String name, List argumentNames, Map args, 
             String catchAllParamName, boolean function,
-            TemplateElement nestedBlock) {
+            TemplateElements children) {
         this.name = name;
         this.paramNames = (String[]) argumentNames.toArray(
                 new String[argumentNames.size()]);
@@ -66,7 +64,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.function = function;
         this.catchAllParamName = catchAllParamName; 
         
-        this.setNestedBlock(nestedBlock);
+        this.setChildren(children);
     }
 
     public String getCatchAll() {
@@ -90,8 +88,9 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
 
     @Override
-    void accept(Environment env) {
+    TemplateElement[] accept(Environment env) {
         env.visitMacroDef(this);
+        return null;
     }
 
     @Override
@@ -137,9 +136,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         if (function) sb.append(')');
         if (canonical) {
             sb.append('>');
-            if (getNestedBlock() != null) {
-                sb.append(getNestedBlock().getCanonicalForm());
-            }
+            sb.append(getChildrenCanonicalForm());
             sb.append("</").append(getNodeTypeSymbol()).append('>');
         }
         return sb.toString();
@@ -150,28 +147,23 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return function ? "#function" : "#macro";
     }
     
-    @Override
-    boolean isShownInStackTrace() {
-        return false;
-    }
-    
     public boolean isFunction() {
         return function;
     }
 
     class Context implements LocalContext {
         final Environment.Namespace localVars; 
-        final TemplateElement nestedContent;
+        final TemplateElement[] nestedContentBuffer;
         final Environment.Namespace nestedContentNamespace;
         final List nestedContentParameterNames;
-        final ArrayList prevLocalContextStack;
+        final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
         
         Context(Environment env, 
-                TemplateElement nestedContent,
+                TemplateElement[] nestedContentBuffer,
                 List nestedContentParameterNames) {
-            this.localVars = env.new Namespace();
-            this.nestedContent = nestedContent;
+            this.localVars = env.new Namespace(); 
+            this.nestedContentBuffer = nestedContentBuffer;
             this.nestedContentNamespace = env.getCurrentNamespace();
             this.nestedContentParameterNames = nestedContentParameterNames;
             this.prevLocalContextStack = env.getLocalContextStack();
@@ -181,14 +173,6 @@ public final class Macro extends TemplateElement implements TemplateModel {
         
         Macro getMacro() {
             return Macro.this;
-        }
-
-        void runMacro(Environment env) throws TemplateException, IOException {
-            sanityCheck(env);
-            // Set default values for unspecified parameters
-            if (getNestedBlock() != null) {
-                env.visit(getNestedBlock());
-            }
         }
 
         // Set default parameters, check if all the required parameters are defined.

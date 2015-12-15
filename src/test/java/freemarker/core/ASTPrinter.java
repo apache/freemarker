@@ -260,14 +260,21 @@ public class ASTPrinter {
     }
 
     private static void validateAST(TemplateElement te) {
-        int ln = te.getRegulatedChildCount();
-        for (int i = 0; i < ln; i++) {
-            TemplateElement child = te.getRegulatedChild(i);
-            if (child.getParentElement() != te) {
+        int childCount = te.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            TemplateElement child = te.getChild(i);
+            TemplateElement parentElement = child.getParentElement();
+            // As MixedContent.accept does nothing but return its regulatedChildren, it's optimized out in the final
+            // AST tree. While it will be present as a child, the parent element also will have regularedChildren
+            // that contains the children of the MixedContent directly. 
+            if (parentElement instanceof MixedContent && parentElement.getParentElement() != null) {
+                parentElement = parentElement.getParentElement();
+            }
+            if (parentElement != te) {
                 throw new InvalidASTException("Wrong parent node."
                         + "\nNode: " + child.dump(false)
                         + "\nExpected parent: " + te.dump(false)
-                        + "\nActual parent: " + child.getParentElement().dump(false));
+                        + "\nActual parent: " + parentElement.dump(false));
             }
             if (child.getIndex() != i) {
                 throw new InvalidASTException("Wrong node index."
@@ -276,13 +283,37 @@ public class ASTPrinter {
                         + "\nActual index: " + child.getIndex());
             }
         }
-        if (te instanceof MixedContent && te.getRegulatedChildCount() < 2) {
+        if (te instanceof MixedContent && te.getChildCount() < 2) {
             throw new InvalidASTException("Mixed content with child count less than 2 should removed by optimizatoin, "
-                    + "but found one with " + te.getRegulatedChildCount() + " child(ren).");
+                    + "but found one with " + te.getChildCount() + " child(ren).");
         }
-        if (te.getRegulatedChildCount() != 0 && te.getNestedBlock() != null) {
-            throw new InvalidASTException("Can't have both nestedBlock and regulatedChildren."
-                    + "\nNode: " + te.dump(false));
+        TemplateElement[] regulatedChildren = te.getChildBuffer();
+        if (regulatedChildren != null) {
+            if (childCount == 0) {
+                throw new InvalidASTException(
+                        "regularChildren must be null when regularChild is 0."
+                        + "\nNode: " + te.dump(false));
+            }
+            for (int i = 0; i < te.getChildCount(); i++) {
+                if (regulatedChildren[i] == null) {
+                    throw new InvalidASTException(
+                            "regularChildren can't be null at index " + i
+                            + "\nNode: " + te.dump(false));
+                }
+            }
+            for (int i = te.getChildCount(); i < regulatedChildren.length; i++) {
+                if (regulatedChildren[i] != null) {
+                    throw new InvalidASTException(
+                            "regularChildren can't be non-null at index " + i
+                            + "\nNode: " + te.dump(false));
+                }
+            }
+        } else {
+            if (childCount != 0) {
+                throw new InvalidASTException(
+                        "regularChildren mustn't be null when regularChild isn't 0."
+                        + "\nNode: " + te.dump(false));
+            }
         }
     }
 

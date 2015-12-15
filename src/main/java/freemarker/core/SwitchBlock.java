@@ -36,7 +36,7 @@ final class SwitchBlock extends TemplateElement {
      */
     SwitchBlock(Expression searched) {
         this.searched = searched;
-        setRegulatedChildBufferCapacity(4);
+        setChildBufferCapacity(4);
     }
 
     /**
@@ -46,17 +46,17 @@ final class SwitchBlock extends TemplateElement {
         if (cas.condition == null) {
             defaultCase = cas;
         }
-        addRegulatedChild(cas);
+        addChild(cas);
     }
 
     @Override
-    void accept(Environment env) 
+    TemplateElement[] accept(Environment env)
         throws TemplateException, IOException {
         boolean processedCase = false;
-        int ln = getRegulatedChildCount();
+        int ln = getChildCount();
         try {
             for (int i = 0; i < ln; i++) {
-                Case cas = (Case) getRegulatedChild(i);
+                Case cas = (Case) getChild(i);
                 boolean processCase = false;
 
                 // Fall through if a previous case tested true.
@@ -69,7 +69,7 @@ final class SwitchBlock extends TemplateElement {
                             EvalUtil.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
                 }
                 if (processCase) {
-                    env.visitByHiddingParent(cas);
+                    env.visit(cas);
                     processedCase = true;
                 }
             }
@@ -77,9 +77,10 @@ final class SwitchBlock extends TemplateElement {
             // If we didn't process any nestedElements, and we have a default,
             // process it.
             if (!processedCase && defaultCase != null) {
-                env.visitByHiddingParent(defaultCase);
+                env.visit(defaultCase);
             }
         } catch (BreakInstruction.Break br) {}
+        return null;
     }
 
     @Override
@@ -91,9 +92,9 @@ final class SwitchBlock extends TemplateElement {
         buf.append(searched.getCanonicalForm());
         if (canonical) {
             buf.append('>');
-            int ln = getRegulatedChildCount();
+            int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                Case cas = (Case) getRegulatedChild(i);
+                Case cas = (Case) getChild(i);
                 buf.append(cas.getCanonicalForm());
             }
             buf.append("</").append(getNodeTypeSymbol()).append('>');

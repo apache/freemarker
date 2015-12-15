@@ -26200,6 +26200,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Decrease the stack usage of template execution, which can
+              have importance if you have very very deeply nested
+              templates.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed, only with
               <literal>incompatible_improvements</literal> set to 2.3.24
               (<link linkend="topic.defaultObjectWrapperIcI">see how
@@ -26284,6 +26290,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>jar</literal>-s (and other <literal>zip</literal>-s)
               which can't be loaded due to zip format errors in the error
               message.</para>
+            </listitem>
+
+            <listitem>
+              <para>Internal reworking to simplify the AST (the
+              <literal>TemplateElement</literal> structure). The API related
+              technically public API was marked as internal for a good while.
+              For those who still use that API, the visible change is that
+              <literal>TemplateElement</literal>-s now almost never has a
+              <literal>MixedContent</literal> parent, instead, the parent is
+              directly whatever element the child element indeed belongs under
+              when you look at the source code (like the enclosing
+              <literal>#list</literal> for example, no a
+              <literal>MixedContent</literal> whose parent is the
+              <literal>#list</literal>). Note that when you have moved
+              downwards, towards the child elements, these
+              <literal>MixedContent</literal> parents weren't visible either
+              either, so the tree traversal API was in fact inconsistent. Now
+              it's consistent.</para>
             </listitem>
 
             <listitem>

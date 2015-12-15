@@ -37,8 +37,9 @@ class NestedContentNotSupportedException extends TemplateException {
             return;
         }
         if (body instanceof NestedElementTemplateDirectiveBody) {
-            TemplateElement te = ((NestedElementTemplateDirectiveBody) body).getElement();
-            if (te == null || te instanceof ThreadInterruptionCheck) {
+            TemplateElement[] tes = ((NestedElementTemplateDirectiveBody) body).getChildrenBuffer();
+            if (tes == null || tes.length == 0
+                    || tes[0] instanceof ThreadInterruptionCheck && (tes.length == 1 || tes[1] == null)) {
                 return;
             }
         }

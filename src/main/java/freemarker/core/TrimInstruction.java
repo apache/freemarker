@@ -38,8 +38,9 @@ final class TrimInstruction extends TemplateElement {
     }
 
     @Override
-    void accept(Environment env) {
+    TemplateElement[] accept(Environment env) {
         // This instruction does nothing at render-time, only parse-time.
+        return null;
     }
 
     @Override
@@ -65,7 +66,7 @@ final class TrimInstruction extends TemplateElement {
     }
     
     @Override
-    boolean isIgnorable() {
+    boolean isIgnorable(boolean stripWhitespace) {
         return true;
     }
 
