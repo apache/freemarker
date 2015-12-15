@@ -28,10 +28,9 @@ Non-backward compatible (all are unlikely to affect real world applications):
   - freemarker.core.FMParser constructors were removed or has become non-public
   - freemarker.core.FMParser.createExpressionParser war removed
 
-New features:  
+New features:
 - There are no separate org.freemarker:freemarker-gae and org.freemarker:freemarker artifacts any more.
   There's only org.freemarker:freemarker, which is GAE compatible.
-- Added Environment.getCurrentTemplate()
 - TemplateLoader.getLastModified(Object templateSource) can now throw GetLastModifiedException to indicate an
   error instead of returning -1 (which doesn't count as an error).
 - Custom attributes now keep the order of adding them
