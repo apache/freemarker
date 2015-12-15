@@ -63,7 +63,7 @@ final class ConditionalBlock extends TemplateElement {
         if (canonical) {
             buf.append(">");
             buf.append(getChildrenCanonicalForm());
-            if (!(getParent() instanceof IfBlock)) {
+            if (!(getParentElement() instanceof IfBlock)) {
                 buf.append("</#if>");
             }
         }

@@ -267,8 +267,8 @@ public class ASTPrinter {
             // As MixedContent.accept does nothing but return its regulatedChildren, it's optimized out in the final
             // AST tree. While it will be present as a child, the parent element also will have regularedChildren
             // that contains the children of the MixedContent directly. 
-            if (parentElement instanceof MixedContent && parentElement.getParent() != null) {
-                parentElement = parentElement.getParent();
+            if (parentElement instanceof MixedContent && parentElement.getParentElement() != null) {
+                parentElement = parentElement.getParentElement();
             }
             if (parentElement != te) {
                 throw new InvalidASTException("Wrong parent node."

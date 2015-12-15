@@ -214,6 +214,10 @@ abstract public class TemplateElement extends TemplateObject {
                 : Collections.enumeration(Collections.EMPTY_LIST);
     }
 
+    /**
+     * @deprecated Internal API - even internally, use {@link #getChild(int)} instead.
+     */
+    @Deprecated
     public TemplateElement getChildAt(int index) {
         if (childCount == 0) {
             throw new IndexOutOfBoundsException("Template element has no children");
@@ -243,6 +247,13 @@ abstract public class TemplateElement extends TemplateObject {
      */
     @Deprecated
     public TemplateElement getParent() {
+        return parent;
+    }
+    
+    /**
+     * The element whose child this element is, or {@code null} if this is the root node.
+     */
+    final TemplateElement getParentElement() {
         return parent;
     }
 
@@ -320,13 +331,6 @@ abstract public class TemplateElement extends TemplateObject {
 
     final int getIndex() {
         return index;
-    }
-
-    /**
-     * The element whose child this element is, or {@code null} if this is the root node.
-     */
-    final TemplateElement getParentElement() {
-        return parent;
     }
 
     /**
