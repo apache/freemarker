@@ -22,6 +22,7 @@ package freemarker.core;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import freemarker.core.ASTPrinter.Options;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.utility.FileTestCase;
 
@@ -67,13 +68,27 @@ public class ASTTest extends FileTestCase {
         testAST("ast-nestedignoredchildren");
     }
 
+    public void testLocations() throws Exception {
+        testASTWithLocations("ast-locations");
+    }
+    
     private void testAST(String testName) throws FileNotFoundException, IOException {
+        testAST(testName, null);
+    }
+
+    private void testASTWithLocations(String testName) throws FileNotFoundException, IOException {
+        Options options = new Options();
+        options.setShowLocation(true);
+        testAST(testName, options);
+    }
+
+    private void testAST(String testName, Options ops) throws FileNotFoundException, IOException {
         final String templateName = testName + ".ftl";
         assertExpectedFileEqualsString(
                 testName + ".ast",
-                ASTPrinter.getASTAsString(templateName, normalizeLineBreaks(templateName)));
+                ASTPrinter.getASTAsString(templateName, normalizeLineBreaks(templateName), ops));
     }
-
+    
     private String normalizeLineBreaks(final String templateName) throws FileNotFoundException, IOException {
         return StringUtil.replace(loadResource(templateName), "\r\n", "\n").replace('\r', '\n');
     }

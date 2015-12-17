@@ -1,0 +1,87 @@
+#mixed_content  // f.c.MixedContent; Location 1:1-10:33
+    #if  // f.c.ConditionalBlock; Location 1:1-1:15
+        - condition: exp  // f.c.Identifier; Location 1:6-1:8
+        - AST-node subtype: "0"  // Integer
+    #if  // f.c.ConditionalBlock; Location 2:1-2:16
+        - condition: exp  // f.c.Identifier; Location 2:6-2:8
+        - AST-node subtype: "0"  // Integer
+        #text  // f.c.TextBlock; Location 2:10-2:10
+            - content: "1"  // String
+    #text  // f.c.TextBlock; Location 2:17-2:17
+        - content: "\n"  // String
+    #if  // f.c.ConditionalBlock; Location 3:1-3:20
+        - condition: exp  // f.c.Identifier; Location 3:6-3:8
+        - AST-node subtype: "0"  // Integer
+        ${...}  // f.c.DollarVariable; Location 3:10-3:13
+            - content: 1  // f.c.NumberLiteral; Location 3:12-3:12
+        #text  // f.c.TextBlock; Location 3:14-3:14
+            - content: "2"  // String
+    #text  // f.c.TextBlock; Location 3:21-3:21
+        - content: "\n"  // String
+    #if-#elseif-#else-container  // f.c.IfBlock; Location 4:1-4:22
+        #if  // f.c.ConditionalBlock; Location 4:1-4:9
+            - condition: exp  // f.c.Identifier; Location 4:6-4:8
+            - AST-node subtype: "0"  // Integer
+        #else  // f.c.ConditionalBlock; Location 4:10-4:16
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+    #if-#elseif-#else-container  // f.c.IfBlock; Location 5:1-5:24
+        #if  // f.c.ConditionalBlock; Location 5:1-5:10
+            - condition: exp  // f.c.Identifier; Location 5:6-5:8
+            - AST-node subtype: "0"  // Integer
+            #text  // f.c.TextBlock; Location 5:10-5:10
+                - content: "1"  // String
+        #else  // f.c.ConditionalBlock; Location 5:11-5:18
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            #text  // f.c.TextBlock; Location 5:18-5:18
+                - content: "1"  // String
+    #text  // f.c.TextBlock; Location 5:25-5:25
+        - content: "\n"  // String
+    #if-#elseif-#else-container  // f.c.IfBlock; Location 6:1-6:32
+        #if  // f.c.ConditionalBlock; Location 6:1-6:14
+            - condition: exp  // f.c.Identifier; Location 6:6-6:8
+            - AST-node subtype: "0"  // Integer
+            ${...}  // f.c.DollarVariable; Location 6:10-6:13
+                - content: 1  // f.c.NumberLiteral; Location 6:12-6:12
+            #text  // f.c.TextBlock; Location 6:14-6:14
+                - content: "2"  // String
+        #else  // f.c.ConditionalBlock; Location 6:15-6:26
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            ${...}  // f.c.DollarVariable; Location 6:22-6:25
+                - content: 1  // f.c.NumberLiteral; Location 6:24-6:24
+            #text  // f.c.TextBlock; Location 6:26-6:26
+                - content: "2"  // String
+    #text  // f.c.TextBlock; Location 6:33-6:33
+        - content: "\n"  // String
+    #if-#elseif-#else-container  // f.c.IfBlock; Location 7:1-7:28
+        #if  // f.c.ConditionalBlock; Location 7:1-7:9
+            - condition: exp  // f.c.Identifier; Location 7:6-7:8
+            - AST-node subtype: "0"  // Integer
+        #elseif  // f.c.ConditionalBlock; Location 7:10-7:22
+            - condition: exp  // f.c.Identifier; Location 7:19-7:21
+            - AST-node subtype: "2"  // Integer
+    #if-#elseif-#else-container  // f.c.IfBlock; Location 8:1-8:29
+        #if  // f.c.ConditionalBlock; Location 8:1-8:9
+            - condition: exp  // f.c.Identifier; Location 8:6-8:8
+            - AST-node subtype: "0"  // Integer
+        #elseif  // f.c.ConditionalBlock; Location 8:10-8:23
+            - condition: exp  // f.c.Identifier; Location 8:19-8:21
+            - AST-node subtype: "2"  // Integer
+            #text  // f.c.TextBlock; Location 8:23-8:23
+                - content: "1"  // String
+    #text  // f.c.TextBlock; Location 8:30-8:30
+        - content: "\n"  // String
+    #attempt  // f.c.AttemptBlock; Location 9:1-9:31
+        - error handler: #recover  // f.c.RecoveryBlock; Location 9:11-9:20
+        #recover  // f.c.RecoveryBlock; Location 9:11-9:20
+    #attempt  // f.c.AttemptBlock; Location 10:1-10:33
+        - error handler: #recover  // f.c.RecoveryBlock; Location 10:12-10:22
+            #text  // f.c.TextBlock; Location 10:22-10:22
+                - content: "1"  // String
+        #text  // f.c.TextBlock; Location 10:11-10:11
+            - content: "1"  // String
+        #recover  // f.c.RecoveryBlock; Location 10:12-10:22
+            #text  // f.c.TextBlock; Location 10:22-10:22
+                - content: "1"  // String
