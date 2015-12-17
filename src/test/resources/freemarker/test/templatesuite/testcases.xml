@@ -122,6 +122,7 @@
    <testCase name="loopvariable" />
    <testCase name="macros"/>
    <testCase name="macros2"/>
+   <testCase name="macros-return"/>
    <testCase name="multimodels"/>
    <testCase name="nested" />
    <testCase name="newlines1" />
