@@ -63,6 +63,10 @@ public class ASTTest extends FileTestCase {
         testAST("ast-multipleignoredchildren");
     }
     
+    public void testNestedIgnoredChildren() throws Exception {
+        testAST("ast-nestedignoredchildren");
+    }
+
     private void testAST(String testName) throws FileNotFoundException, IOException {
         final String templateName = testName + ".ftl";
         assertExpectedFileEqualsString(
