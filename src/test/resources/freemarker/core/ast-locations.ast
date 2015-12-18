@@ -1,4 +1,4 @@
-#mixed_content  // f.c.MixedContent; Location 1:1-10:33
+#mixed_content  // f.c.MixedContent; Location 1:1-18:8
     #if  // f.c.ConditionalBlock; Location 1:1-1:15
         - condition: exp  // f.c.Identifier; Location 1:6-1:8
         - AST-node subtype: "0"  // Integer
@@ -85,3 +85,53 @@
         #recover  // f.c.RecoveryBlock; Location 10:12-10:22
             #text  // f.c.TextBlock; Location 10:22-10:22
                 - content: "1"  // String
+    #text  // f.c.TextBlock; Location 10:34-10:34
+        - content: "\n"  // String
+    #list  // f.c.IteratorBlock; Location 11:1-11:22
+        - list source: s  // f.c.Identifier; Location 11:8-11:8
+        - target loop variable: "i"  // String
+    #list  // f.c.IteratorBlock; Location 12:1-12:23
+        - list source: s  // f.c.Identifier; Location 12:8-12:8
+        - target loop variable: "i"  // String
+        #text  // f.c.TextBlock; Location 12:15-12:15
+            - content: "1"  // String
+    #text  // f.c.TextBlock; Location 12:24-12:24
+        - content: "\n"  // String
+    #list  // f.c.IteratorBlock; Location 13:1-13:28
+        - list source: s  // f.c.Identifier; Location 13:8-13:8
+        - target loop variable: "i"  // String
+        #sep  // f.c.Sep; Location 13:15-13:20
+    #list  // f.c.IteratorBlock; Location 14:1-14:30
+        - list source: s  // f.c.Identifier; Location 14:8-14:8
+        - target loop variable: "i"  // String
+        #text  // f.c.TextBlock; Location 14:15-14:15
+            - content: "1"  // String
+        #sep  // f.c.Sep; Location 14:16-14:22
+            #text  // f.c.TextBlock; Location 14:22-14:22
+                - content: "1"  // String
+    #text  // f.c.TextBlock; Location 14:31-14:31
+        - content: "\n"  // String
+    #list  // f.c.IteratorBlock; Location 15:1-15:45
+        - list source: s  // f.c.Identifier; Location 15:8-15:8
+        #items  // f.c.Items; Location 15:10-15:37
+            - target loop variable: "i"  // String
+            #sep  // f.c.Sep; Location 15:23-15:28
+    #list  // f.c.IteratorBlock; Location 16:1-16:49
+        - list source: s  // f.c.Identifier; Location 16:8-16:8
+        #text  // f.c.TextBlock; Location 16:10-16:10
+            - content: "1"  // String
+        #items  // f.c.Items; Location 16:11-16:40
+            - target loop variable: "i"  // String
+            #text  // f.c.TextBlock; Location 16:24-16:24
+                - content: "1"  // String
+            #sep  // f.c.Sep; Location 16:25-16:31
+                #text  // f.c.TextBlock; Location 16:31-16:31
+                    - content: "1"  // String
+        #text  // f.c.TextBlock; Location 16:41-16:41
+            - content: "1"  // String
+    #text  // f.c.TextBlock; Location 16:50-17:2
+        - content: "\n1\n"  // String
+    ${...}  // f.c.DollarVariable; Location 18:1-18:8
+        - content: +  // f.c.AddConcatExpression; Location 18:3-18:7
+            - left-hand operand: x  // f.c.Identifier; Location 18:3-18:3
+            - right-hand operand: y  // f.c.Identifier; Location 18:7-18:7
