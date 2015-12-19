@@ -40,4 +40,9 @@ abstract class Interpolation extends TemplateElement {
      */
     protected abstract Object calculateInterpolatedStringOrMarkup(Environment env) throws TemplateException;
 
+    @Override
+    boolean isShownInStackTrace() {
+        return true;
+    }
+    
 }

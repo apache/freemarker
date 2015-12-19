@@ -1,0 +1,2 @@
+#outputformat  // f.c.OutputFormatBlock
+    - value: "HTML"  // f.c.StringLiteral

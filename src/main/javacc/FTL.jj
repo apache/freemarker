@@ -4003,6 +4003,66 @@ TemplateElements MixedContentElements() :
 }
 
 /**
+ * Not used anymore; kept for backward compatibility.
+ *
+ * @deprecated Use {@link #MixedContentElements} instead.
+ */
+MixedContent MixedContent() :
+{
+    MixedContent mixedContent = new MixedContent();
+    TemplateElement elem, begin = null;
+    mixedContentNesting++;
+}
+{
+    (
+        LOOKAHEAD(1) // Just tells javacc that we know what we're doing.
+        (
+            elem = PCData()
+            |
+            elem = StringOutput()
+            |
+            elem = NumericalOutput()
+            |
+            elem = FreemarkerDirective()
+        )
+        {
+            if (begin == null) {
+                begin = elem;
+            }
+            mixedContent.addElement(elem);
+        }
+    )+
+    {
+        mixedContentNesting--;
+        mixedContent.setLocation(template, begin, elem);
+        return mixedContent;
+    }
+}
+
+/**
+ * Not used anymore; kept for backward compatibility.
+ *
+ * <p>A production for a block of optional content.
+ * Returns an empty Text block if there is no
+ * content.
+ *
+ * @deprecated Use {@link #MixedContentElements} instead.
+ */
+TemplateElement OptionalBlock() :
+{
+    TemplateElement tp = null;
+}
+{
+    [
+        LOOKAHEAD(1) // has no effect but to get rid of a spurious warning.
+        tp = MixedContent()
+    ]
+    {
+        return tp != null ? tp : new TextBlock(CollectionUtils.EMPTY_CHAR_ARRAY, false);
+    }
+}
+
+/**
  * A production freemarker text that may contain
  * ${...} and #{...} but no directives.
  */

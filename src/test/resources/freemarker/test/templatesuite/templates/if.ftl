@@ -1,6 +1,8 @@
 <#assign x = 1>
 
 - <#if x == 1>good</#if>
+- <#if x == 1></#if>good
+- <#if x == 1>goo${missing!'d'}</#if>
 - <#if x == 0>wrong</#if>good
 
 - <#if x == 1>good<#else>wrong</#if>
@@ -14,9 +16,12 @@
 - <#if x == 1>good<#elseif x == 1>wrong</#if>
 - <#if x == 0>wrong<#elseif x == 1>good</#if>
 - <#if x == 0>wrong<#elseif x == 2>wrong</#if>good
+- <#if x == 0>wrong<#elseif x == 1><#else>wrong</#if>good
 
 <#-- Same with pre-calculable results, just in case later the dead code will be optimized out: -->
 - <#if 1 == 1>good</#if>
+- <#if 1 == 0>wrong</#if>good
+- <#if 1 == 1>goo${missing!'d'}</#if>
 - <#if 1 == 0>wrong</#if>good
 
 - <#if 1 == 1>good<#else>wrong</#if>
@@ -30,6 +35,7 @@
 - <#if 1 == 1>good<#elseif 1 == 1>wrong</#if>
 - <#if 1 == 0>wrong<#elseif 1 == 1>good</#if>
 - <#if 1 == 0>wrong<#elseif 1 == 2>wrong</#if>good
+- <#if 1 == 0>wrong<#elseif 1 == 1><#else>wrong</#if>good
 
 <#-- Varying branch choice of the same AST nodes: -->
 <#list [1, 2, 3, 4] as x>
