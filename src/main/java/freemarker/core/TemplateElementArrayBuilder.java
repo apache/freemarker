@@ -40,6 +40,10 @@ class TemplateElements {
     int getCount() {
         return count;
     }
+
+    TemplateElement getFirst() {
+        return buffer != null ? buffer[0] : null;
+    }
     
     TemplateElement getLast() {
         return buffer != null ? buffer[count - 1] : null;
