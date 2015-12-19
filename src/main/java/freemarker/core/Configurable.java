@@ -41,10 +41,10 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.cache.AndMatcher;
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
-import freemarker.cache.FirstMatchTemplateConfigurerFactory;
-import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.FirstMatchTemplateConfigurationFactory;
+import freemarker.cache.MergingTemplateConfigurationFactory;
 import freemarker.cache.NotMatcher;
 import freemarker.cache.OrMatcher;
 import freemarker.cache.PathGlobMatcher;
@@ -1807,8 +1807,8 @@ public class Configurable {
      *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
      *       {@code yes}, etc.
      *       
-     *   <li><p>{@code "template_configurers"}:
-     *       See: {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}.
+     *   <li><p>{@code "template_configurations"}:
+     *       See: {@link Configuration#setTemplateConfigurations(freemarker.cache.TemplateConfigurationFactory)}.
      *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>,
      *       can be {@code null}.
      *       
@@ -1903,9 +1903,9 @@ public class Configurable {
      *   <li>
      *     <p>The following classes can be referred to with short class name instead of full qualified name:
      *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
-     *     {@link TemplateConfigurer}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
-     *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurerFactory},
-     *     {@link MergingTemplateConfigurerFactory}, {@link FirstMatchTemplateConfigurerFactory},
+     *     {@link TemplateConfiguration}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
+     *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
+     *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
      *     {@link UndefinedOutputFormat}.
      *   </li>

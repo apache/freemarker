@@ -22,14 +22,14 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileExtensionMatcher;
-import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.FirstMatchTemplateConfigurationFactory;
 import freemarker.cache.OrMatcher;
 import freemarker.cache.PathGlobMatcher;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.RTFOutputFormat;
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.core.XMLOutputFormat;
 import freemarker.template.Configuration;
 
@@ -47,11 +47,11 @@ public class ConfigureOutputFormatExamples extends ExamplesTest {
         
         // Example 2/a:
         {
-            TemplateConfigurer tcHTML = new TemplateConfigurer();
+            TemplateConfiguration tcHTML = new TemplateConfiguration();
             tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
             
-            cfg.setTemplateConfigurers(
-                    new ConditionalTemplateConfigurerFactory(
+            cfg.setTemplateConfigurations(
+                    new ConditionalTemplateConfigurationFactory(
                             new PathGlobMatcher("mail/**"),
                             tcHTML));
             
@@ -60,7 +60,7 @@ public class ConfigureOutputFormatExamples extends ExamplesTest {
 
         // Example 2/b:
         {
-            cfg.setTemplateConfigurers(null); // Just to be sure...
+            cfg.setTemplateConfigurations(null); // Just to be sure...
             
             cfg.setSettings(loadPropertiesFile("ConfigureOutputFormatExamples1.properties"));
                 
@@ -69,26 +69,26 @@ public class ConfigureOutputFormatExamples extends ExamplesTest {
         
         // Example 3/a:
         {
-            TemplateConfigurer tcHTML = new TemplateConfigurer();
+            TemplateConfiguration tcHTML = new TemplateConfiguration();
             tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
             
-            TemplateConfigurer tcXML = new TemplateConfigurer();
+            TemplateConfiguration tcXML = new TemplateConfiguration();
             tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
-            TemplateConfigurer tcRTF = new TemplateConfigurer();
+            TemplateConfiguration tcRTF = new TemplateConfiguration();
             tcRTF.setOutputFormat(RTFOutputFormat.INSTANCE);
             
-            cfg.setTemplateConfigurers(
-                    new FirstMatchTemplateConfigurerFactory(
-                            new ConditionalTemplateConfigurerFactory(
+            cfg.setTemplateConfigurations(
+                    new FirstMatchTemplateConfigurationFactory(
+                            new ConditionalTemplateConfigurationFactory(
                                     new FileExtensionMatcher("xml"),
                                     tcXML),
-                            new ConditionalTemplateConfigurerFactory(
+                            new ConditionalTemplateConfigurationFactory(
                                     new OrMatcher(
                                             new FileExtensionMatcher("html"),
                                             new FileExtensionMatcher("htm")),
                                     tcHTML),
-                            new ConditionalTemplateConfigurerFactory(
+                            new ConditionalTemplateConfigurationFactory(
                                     new FileExtensionMatcher("rtf"),
                                     tcRTF)
                     ).allowNoMatch(true)
@@ -102,7 +102,7 @@ public class ConfigureOutputFormatExamples extends ExamplesTest {
 
         // Example 3/b:
         {
-            cfg.setTemplateConfigurers(null); // Just to be sure...
+            cfg.setTemplateConfigurations(null); // Just to be sure...
             
             cfg.setSettings(loadPropertiesFile("ConfigureOutputFormatExamples2.properties"));
             

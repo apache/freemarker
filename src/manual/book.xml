@@ -7991,10 +7991,10 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
           <listitem>
             <para><literal>Template</literal> layer: Settings on individual
             templates are normally set by <link
-            linkend="pgui_config_templateconfigurers">template configurers
-            (see them in their own chapter)</link>, which basically associate
-            setting assignments to template name (template path) patterns.
-            There's a deviation from this approach with the
+            linkend="pgui_config_templateconfigurations">template
+            configurations (see them in their own chapter)</link>, which
+            basically associate setting assignments to template name (template
+            path) patterns. There's a deviation from this approach with the
             <literal>locale</literal> setting, because that you can also
             specify to <literal>Configuration.getTemplate(...)</literal> as
             parameter, to get the template for the requested locale (so called
@@ -8689,13 +8689,13 @@ c</programlisting>
         </section>
       </section>
 
-      <section xml:id="pgui_config_templateconfigurers">
-        <title>Template configurers</title>
+      <section xml:id="pgui_config_templateconfigurations">
+        <title>Template configurations</title>
 
-        <para>Template configurers refers to the
-        <literal>template_configurers</literal> setting of
+        <para><quote>Template configurations</quote> refers to the
+        <literal>template_configurations</literal> setting of
         <literal>Configuration</literal>
-        (<literal>Configuration.setTemplateConfigurers(<replaceable>...</replaceable>)</literal>).
+        (<literal>Configuration.setTemplateConfigurations(<replaceable>...</replaceable>)</literal>).
         This setting lets you override individual settings coming from the
         common <literal>Configuration</literal> object, depending on the name
         (path) of the template.</para>
@@ -8713,13 +8713,13 @@ c</programlisting>
 
         <itemizedlist>
           <listitem>
-            <para><literal>TemplateConfigurer</literal>-s: These store the
+            <para><literal>TemplateConfiguration</literal>-s: These store the
             actual setting assignments that you want to do. For example, this
-            <literal>TemplateConfigurer</literal> will set the encoding and
+            <literal>TemplateConfiguration</literal> will set the encoding and
             the output format of the matched template (and leave all other
             settings of it alone):</para>
 
-            <programlisting role="unspecified">TemplateConfigurer tcUTF8XML = new TemplateConfigurer();
+            <programlisting role="unspecified">TemplateConfiguration tcUTF8XML = new TemplateConfiguration();
 tc.setEncoding("utf-8");
 tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           </listitem>
@@ -8736,11 +8736,11 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>TemplateConfigurerFactory</literal>-es: This is
-            what connects <literal>TemplateConfigurer</literal> and
+            <para><literal>TemplateConfigurationFactory</literal>-es: This is
+            what connects <literal>TemplateConfiguration</literal> and
             <literal>TemplateSourceMatcher</literal> together. This is the
-            Java type of the <literal>template_configurers</literal> setting.
-            See the examples below for more.</para>
+            Java type of the <literal>template_configurations</literal>
+            setting. See the examples below for more.</para>
           </listitem>
         </itemizedlist>
 
@@ -8748,12 +8748,12 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           <title>Example 1</title>
 
           <para>This setup combines our earlier two example object with a
-          <literal>ConditionalTemplateConfigurerFactory</literal>, causing all
-          templates with <literal>xml</literal> extension to get UTF-8
+          <literal>ConditionalTemplateConfigurationFactory</literal>, causing
+          all templates with <literal>xml</literal> extension to get UTF-8
           encoding and XML output format:</para>
 
-          <programlisting role="unspecified">cfg.setTemplateConfigurers(
-        new ConditionalTemplateConfigurerFactory(
+          <programlisting role="unspecified">cfg.setTemplateConfigurations(
+        new ConditionalTemplateConfigurationFactory(
                 new FileExtensionMatcher("xml"),
                 tcUTF8XML));</programlisting>
 
@@ -8763,10 +8763,10 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           key value pairs (the <literal>\</literal>-s are prescribed by the
           Java Properties file format):</para>
 
-          <programlisting role="unspecified">templateConfigurers = \
-    ConditionalTemplateConfigurerFactory( \
+          <programlisting role="unspecified">templateConfigurations = \
+    ConditionalTemplateConfigurationFactory( \
         FileExtensionMatcher("xml"), \
-        TemplateConfigurer( \
+        TemplateConfiguration( \
             encoding = "utf-8", \
             outputFormat = XMLOutputFormat() \
         ) \
@@ -8784,20 +8784,20 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           Subject templates must get <literal>plainText</literal> output
           format, while body templates must get <literal>HTML</literal> output
           format. So we have to make a choice here, and that's when you need a
-          <literal>FirstMatchTemplateConfigurerFactory</literal>.</para>
+          <literal>FirstMatchTemplateConfigurationFactory</literal>.</para>
 
           <para>Assuming <literal>cfg</literal> stores the shared
           <literal>Configuration</literal> singleton, you set this up like
           this:</para>
 
-          <programlisting role="unspecified">cfg.setTemplateConfigurers(
-        new ConditionalTemplateConfigurerFactory(
+          <programlisting role="unspecified">cfg.setTemplateConfigurations(
+        new ConditionalTemplateConfigurationFactory(
                 new PathGlobMatcher("mail/**"),
-                new FirstMatchTemplateConfigurerFactory(
-                        new ConditionalTemplateConfigurerFactory(
+                new FirstMatchTemplateConfigurationFactory(
+                        new ConditionalTemplateConfigurationFactory(
                                 new FileNameGlobMatcher("*.subject.*"),
                                 tcSubject),
-                        new ConditionalTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurationFactory(
                                 new FileNameGlobMatcher("*.body.*"),
                                 tcBody)
                         )
@@ -8810,17 +8810,17 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           key value pairs (the <literal>\</literal>-s are prescribed by the
           Java Properties file format only):</para>
 
-          <programlisting role="unspecified">templateConfigurers = \
-    ConditionalTemplateConfigurerFactory( \
+          <programlisting role="unspecified">templateConfigurations = \
+    ConditionalTemplateConfigurationFactory( \
         PathGlobMatcher("mail/**"), \
-        FirstMatchTemplateConfigurerFactory( \
-            ConditionalTemplateConfigurerFactory( \
+        FirstMatchTemplateConfigurationFactory( \
+            ConditionalTemplateConfigurationFactory( \
                 FileNameGlobMatcher("*.subject.*"), \
-                TemplateConfigurer(outputFormat = PlainTextOutputFormat()) \
+                TemplateConfiguration(outputFormat = PlainTextOutputFormat()) \
             ), \
-            ConditionalTemplateConfigurerFactory( \
+            ConditionalTemplateConfigurationFactory( \
                 FileNameGlobMatcher("*.body.*"), \
-                TemplateConfigurer(outputFormat = HTMLOutputFormat()) \
+                TemplateConfiguration(outputFormat = HTMLOutputFormat()) \
             ), \
             noMatchErrorDetails = 'Mail template names must contain ".subject." or ".body."!' \
         ) \
@@ -8858,42 +8858,42 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
           <para>Here we have 3 independent concerns, and possibly multiple (or
           none) of those apply to a template; that's when you need a
-          <literal>MergingTemplateConfigurerFactory</literal>. The last point
-          describes a rule where you have mutually exclusive choices; that's
-          when you need a
-          <literal>FirstMatchTemplateConfigurerFactory</literal>, but this
+          <literal>MergingTemplateConfigurationFactory</literal>. The last
+          point describes a rule where you have mutually exclusive choices;
+          that's when you need a
+          <literal>FirstMatchTemplateConfigurationFactory</literal>, but this
           time no choice is also allowed. Here's the source code, assuming
           <literal>cfg</literal> stores the shared
           <literal>Configuration</literal> instance:</para>
 
-          <programlisting role="unspecified">TemplateConfigurer tcStats = new TemplateConfigurer();
+          <programlisting role="unspecified">TemplateConfiguration tcStats = new TemplateConfiguration();
 tcStats.setDateTimeFormat("iso");
 tcStats.setDateFormat("iso");
 tcStats.setTimeFormat("iso");
 tcStats.setTimeZone(DateUtil.UTC);
 
-TemplateConfigurer tcMail = new TemplateConfigurer();
+TemplateConfiguration tcMail = new TemplateConfiguration();
 tcMail.setEncoding("utf-8");
 
-TemplateConfigurer tcHTML = new TemplateConfigurer();
+TemplateConfiguration tcHTML = new TemplateConfiguration();
 tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
 
-TemplateConfigurer tcXML = new TemplateConfigurer();
+TemplateConfiguration tcXML = new TemplateConfiguration();
 tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
-cfg.setTemplateConfigurers(
-        new MergingTemplateConfigurerFactory(
-                new ConditionalTemplateConfigurerFactory(
+cfg.setTemplateConfigurations(
+        new MergingTemplateConfigurationFactory(
+                new ConditionalTemplateConfigurationFactory(
                         new FileNameGlobMatcher("*.stats.*"),
                         tcStats),
-                new ConditionalTemplateConfigurerFactory(
+                new ConditionalTemplateConfigurationFactory(
                         new PathGlobMatcher("mail/**"),
                         tcMail),
-                new FirstMatchTemplateConfigurerFactory(
-                        new ConditionalTemplateConfigurerFactory(
+                new FirstMatchTemplateConfigurationFactory(
+                        new ConditionalTemplateConfigurationFactory(
                                 new FileExtensionMatcher("xml"),
                                 tcXML),
-                        new ConditionalTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurationFactory(
                                 new OrMatcher(
                                         new FileExtensionMatcher("html"),
                                         new FileExtensionMatcher("htm")),
@@ -8907,32 +8907,32 @@ cfg.setTemplateConfigurers(
           key value pairs (the <literal>\</literal>-s are prescribed by the
           Java Properties file format only):</para>
 
-          <programlisting role="unspecified">templateConfigurers = \
-    MergingTemplateConfigurerFactory( \
-        ConditionalTemplateConfigurerFactory( \
+          <programlisting role="unspecified">templateConfigurations = \
+    MergingTemplateConfigurationFactory( \
+        ConditionalTemplateConfigurationFactory( \
             FileNameGlobMatcher("*.stats.*"), \
-            TemplateConfigurer( \
+            TemplateConfiguration( \
                 dateTimeFormat = "iso", \
                 dateFormat = "iso", \
                 timeFormat = "iso", \
                 timeZone = TimeZone("UTC") \
             ) \
         ), \
-        ConditionalTemplateConfigurerFactory( \
+        ConditionalTemplateConfigurationFactory( \
             PathGlobMatcher("mail/**"), \
-            TemplateConfigurer(encoding = "utf-8") \
+            TemplateConfiguration(encoding = "utf-8") \
         ), \
-        FirstMatchTemplateConfigurerFactory( \
-            ConditionalTemplateConfigurerFactory( \
+        FirstMatchTemplateConfigurationFactory( \
+            ConditionalTemplateConfigurationFactory( \
                 FileExtensionMatcher("xml"), \
-                TemplateConfigurer(outputFormat = XMLOutputFormat()) \
+                TemplateConfiguration(outputFormat = XMLOutputFormat()) \
             ), \
-            ConditionalTemplateConfigurerFactory( \
+            ConditionalTemplateConfigurationFactory( \
                 OrMatcher( \
                     FileExtensionMatcher("html"), \
                     FileExtensionMatcher("htm") \
                 ), \
-                TemplateConfigurer(outputFormat = HTMLOutputFormat()) \
+                TemplateConfiguration(outputFormat = HTMLOutputFormat()) \
             ), \
             allowNoMatch = true \
         ) \
@@ -8970,7 +8970,7 @@ cfg.setTemplateConfigurers(
         file extensions is the recommended way of activating HTML and XML
         auto-escaping. You can also associate output formats to templates
         based on arbitrary name patterns with the <link
-        linkend="pgui_config_templateconfigurers"><literal>template_configurers</literal>
+        linkend="pgui_config_templateconfigurations"><literal>template_configurations</literal>
         setting</link>; see some examples of that below.</para>
 
         <para>There's another a related setting, called
@@ -9038,11 +9038,11 @@ cfg.setRecognizeStandardFileExtensions(true);</programlisting>
 
             <programlisting role="unspecified">// Where you initalize the Configuration singletion, add:
 
-TemplateConfigurer tcHTML = new TemplateConfigurer();
+TemplateConfiguration tcHTML = new TemplateConfiguration();
 tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
 
-cfg.setTemplateConfigurers(
-        new ConditionalTemplateConfigurerFactory(
+cfg.setTemplateConfigurations(
+        new ConditionalTemplateConfigurationFactory(
                 new PathGlobMatcher("mail/**"),
                 tcHTML));</programlisting>
 
@@ -9050,10 +9050,10 @@ cfg.setTemplateConfigurers(
             <literal>*.properties</literal> file (the <literal>\</literal>-s
             are required for the Java Properties file format only):</para>
 
-            <programlisting role="unspecified">templateConfigurers = \
-    ConditionalTemplateConfigurerFactory( \
+            <programlisting role="unspecified">templateConfigurations = \
+    ConditionalTemplateConfigurationFactory( \
         PathGlobMatcher("mail/**"), \
-        TemplateConfigurer(outputFormat = HTMLOutputFormat()))</programlisting>
+        TemplateConfiguration(outputFormat = HTMLOutputFormat()))</programlisting>
           </listitem>
 
           <listitem>
@@ -9067,26 +9067,26 @@ cfg.setTemplateConfigurers(
             <literal>cfg.getTemplate(<replaceable>...</replaceable>)</literal>,
             and not instantiating them yourself):</para>
 
-            <programlisting role="unspecified">TemplateConfigurer tcHTML = new TemplateConfigurer();
+            <programlisting role="unspecified">TemplateConfiguration tcHTML = new TemplateConfiguration();
 tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
 
-TemplateConfigurer tcXML = new TemplateConfigurer();
+TemplateConfiguration tcXML = new TemplateConfiguration();
 tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
-TemplateConfigurer tcRTF = new TemplateConfigurer();
+TemplateConfiguration tcRTF = new TemplateConfiguration();
 tcRTF.setOutputFormat(RTFOutputFormat.INSTANCE);
 
-cfg.setTemplateConfigurers(
-        new FirstMatchTemplateConfigurerFactory(
-                new ConditionalTemplateConfigurerFactory(
+cfg.setTemplateConfigurations(
+        new FirstMatchTemplateConfigurationFactory(
+                new ConditionalTemplateConfigurationFactory(
                         new FileExtensionMatcher("xml"),
                         tcXML),
-                new ConditionalTemplateConfigurerFactory(
+                new ConditionalTemplateConfigurationFactory(
                         new OrMatcher(
                                 new FileExtensionMatcher("html"),
                                 new FileExtensionMatcher("htm")),
                         tcHTML),
-                new ConditionalTemplateConfigurerFactory(
+                new ConditionalTemplateConfigurationFactory(
                         new FileExtensionMatcher("rtf"),
                         tcRTF)
         ).allowNoMatch(true)
@@ -9096,26 +9096,26 @@ cfg.setTemplateConfigurers(
             <literal>*.properties</literal> file (the <literal>\</literal>-s
             are required for the Java Properties file format only):</para>
 
-            <programlisting role="unspecified">templateConfigurers = \
-    FirstMatchTemplateConfigurerFactory( \
-        ConditionalTemplateConfigurerFactory( \
+            <programlisting role="unspecified">templateConfigurations = \
+    FirstMatchTemplateConfigurationFactory( \
+        ConditionalTemplateConfigurationFactory( \
             FileExtensionMatcher("xml"), \
-            TemplateConfigurer(outputFormat = XMLOutputFormat())), \
-        ConditionalTemplateConfigurerFactory( \
+            TemplateConfiguration(outputFormat = XMLOutputFormat())), \
+        ConditionalTemplateConfigurationFactory( \
             OrMatcher( \
                 FileExtensionMatcher("html"), \
                 FileExtensionMatcher("htm")), \
-            TemplateConfigurer(outputFormat = HTMLOutputFormat())), \
-        ConditionalTemplateConfigurerFactory( \
+            TemplateConfiguration(outputFormat = HTMLOutputFormat())), \
+        ConditionalTemplateConfigurationFactory( \
             FileExtensionMatcher("rtf"), \
-            TemplateConfigurer(outputFormat = RTFOutputFormat())), \
+            TemplateConfiguration(outputFormat = RTFOutputFormat())), \
         allowNoMatch = true)</programlisting>
           </listitem>
         </itemizedlist>
 
         <para>(You can find some more complex
-        <literal>template_configurers</literal> setups <link
-        linkend="pgui_config_templateconfigurers">here...</link>)</para>
+        <literal>template_configurations</literal> setups <link
+        linkend="pgui_config_templateconfigurations">here...</link>)</para>
       </section>
 
       <section xml:id="pgui_config_custom_formats">
@@ -19091,9 +19091,9 @@ All rights reserved.</emphasis></programlisting>
               included template. You shouldn't use this option anymore; if
               different template use different encodings, then the programmers
               should associated the encoding to the templates via
-              <literal>Configuration.setTemplateConfigurers(<replaceable>...</replaceable>)</literal>-s
+              <literal>Configuration.setTemplateConfigurations(<replaceable>...</replaceable>)</literal>-s
               (which also overrides that you specify here). If
-              <literal>Configuration.setTemplateConfigurers(<replaceable>...</replaceable>)</literal>
+              <literal>Configuration.setTemplateConfigurations(<replaceable>...</replaceable>)</literal>
               doesn't specify an encoding for the included template, then the
               included file inherits the encoding (the charset) of the
               top-level template, unless you specify an encoding with this
@@ -25881,11 +25881,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added new configuration setting:
-              <literal>template_configurers</literal>. This allows overriding
-              the settings coming from the shared
+              <literal>template_configurations</literal>. This allows
+              overriding the settings coming from the shared
               <literal>Configuration</literal> object for individual
               templates, based on template name patterns. <link
-              linkend="pgui_config_templateconfigurers">See more
+              linkend="pgui_config_templateconfigurations">See more
               here...</link></para>
             </listitem>
 
@@ -25921,7 +25921,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>XML</literal>, <literal>plainText</literal>, etc.)
                   that governs auto-escaping. The output format can be
                   different for different templates, using the
-                  <literal>template_configurers</literal> setting (<link
+                  <literal>template_configurations</literal> setting (<link
                   linkend="pgui_config_outputformatsautoesc">see here
                   how...</link>).</para>
                 </listitem>
@@ -25997,7 +25997,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>custom_number_formats</literal> and
                   <literal>custom_date_formats</literal> settings can be set
                   per-template (via the new
-                  <literal>template_configurers</literal> settings) or
+                  <literal>template_configurations</literal> settings) or
                   per-<literal>Environment</literal> too, thus
                   <literal>@foo</literal> can mean something different in
                   different templates.</para>
@@ -26505,6 +26505,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   charset).</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>The new <literal>TemplateConfigurer</literal> class was
+              renamed to <literal>TemplateConfiguration</literal>, and the
+              related configuration setting from
+              <literal>template_configurers</literal> to
+              <literal>template_configurations</literal>. Also, the
+              <literal>TemplateConfigurer.configure</literal> method was
+              renamed to
+              <literal>TemplateConfiguration.apply</literal>.</para>
             </listitem>
 
             <listitem>

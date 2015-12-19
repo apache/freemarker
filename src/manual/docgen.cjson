@@ -42,14 +42,8 @@ olinks: {
   freemarkerdownload: "http://freemarker.org/freemarkerdownload.html"
   contribute: "http://freemarker.org/contribute.html"
   history: "http://freemarker.org/history.html"
-  what-is-freemarker: "http://freemarker.org/index.html"
+  what-is-freemarker: "id:preface"
   mailing-lists: "http://freemarker.org/mailing-lists.html"
-  
-  // Manual links:
-  templateAuthorsGuide: "id:dgui_quickstart_basics"
-  license: "id:app_license"
-  versionHistory: "id:app_versions"
-  freemarkerServlet: "id:pgui_misc_servlet"
   
   // External URL-s:
   onlineTemplateTester: "http://freemarker-online.kenshoo.com/"

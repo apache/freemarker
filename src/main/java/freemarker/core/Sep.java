@@ -38,7 +38,7 @@ class Sep extends TemplateElement {
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new _MiscTemplateException(env,
-                    getNodeTypeSymbol(), " without iteraton in context");
+                    getNodeTypeSymbol(), " without iteration in context");
         }
         
         if (iterCtx.hasNext()) {

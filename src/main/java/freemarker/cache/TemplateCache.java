@@ -33,7 +33,7 @@ import java.util.StringTokenizer;
 import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
@@ -77,7 +77,7 @@ public class TemplateCache {
     private final CacheStorage storage;
     private final TemplateLookupStrategy templateLookupStrategy;
     private final TemplateNameFormat templateNameFormat;
-    private final TemplateConfigurerFactory templateConfigurers;
+    private final TemplateConfigurationFactory templateConfigurations;
     
     private final boolean isStorageConcurrent;
     /** {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} */
@@ -143,7 +143,7 @@ public class TemplateCache {
     /**
      * Same as
      * {@link TemplateCache#TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat,
-     * TemplateConfigurerFactory, Configuration)} with {@code null} for {@code templateConfigurer}-s.
+     * TemplateConfigurationFactory, Configuration)} with {@code null} for {@code templateConfigurations}-s.
      * 
      * @since 2.3.22
      */
@@ -162,8 +162,8 @@ public class TemplateCache {
      *            The {@link TemplateLookupStrategy} to use. Can't be {@code null}.
      * @param templateNameFormat
      *            The {@link TemplateNameFormat} to use. Can't be {@code null}.
-     * @param templateConfigurers
-     *            The {@link TemplateConfigurerFactory} to use. Can be {@code null} (then all templates will use the
+     * @param templateConfigurations
+     *            The {@link TemplateConfigurationFactory} to use. Can be {@code null} (then all templates will use the
      *            settings coming from the {@link Configuration} as is).
      * @param config
      *            The {@link Configuration} this cache will be used for. Can be {@code null} for backward compatibility,
@@ -173,7 +173,7 @@ public class TemplateCache {
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage,
             TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
-            TemplateConfigurerFactory templateConfigurers,
+            TemplateConfigurationFactory templateConfigurations,
             Configuration config) {
         this.templateLoader = templateLoader;
         
@@ -189,7 +189,7 @@ public class TemplateCache {
         this.templateNameFormat = templateNameFormat;
 
         // Can be null
-        this.templateConfigurers = templateConfigurers;
+        this.templateConfigurations = templateConfigurations;
         
         this.config = config;
     }
@@ -232,8 +232,8 @@ public class TemplateCache {
     /**
      * @since 2.3.24
      */
-    public TemplateConfigurerFactory getTemplateConfigurers() {
-        return templateConfigurers;
+    public TemplateConfigurationFactory getTemplateConfigurations() {
+        return templateConfigurations;
     }
 
     /**
@@ -523,11 +523,11 @@ public class TemplateCache {
             final TemplateLoader templateLoader, final Object source,
             final String name, final String sourceName, Locale locale, final Object customLookupCondition,
             String initialEncoding, final boolean parseAsFTL) throws IOException {
-        final TemplateConfigurer tc;
+        final TemplateConfiguration tc;
         try {
-            tc = templateConfigurers != null ? templateConfigurers.get(sourceName, source) : null;
-        } catch (TemplateConfigurerFactoryException e) {
-            throw newIOException("Error while getting TemplateConfigurer; see cause exception.", e);
+            tc = templateConfigurations != null ? templateConfigurations.get(sourceName, source) : null;
+        } catch (TemplateConfigurationFactoryException e) {
+            throw newIOException("Error while getting TemplateConfiguration; see cause exception.", e);
         }
         if (tc != null) {
             // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
@@ -586,7 +586,7 @@ public class TemplateCache {
         }
 
         if (tc != null) {
-            tc.configure(template);
+            tc.apply(template);
         }
         
         template.setLocale(locale);

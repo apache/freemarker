@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
 import freemarker.cache.OrMatcher;
 import freemarker.template.Configuration;
@@ -111,10 +111,10 @@ public class OutputFormatTest extends TemplateTest {
             case 3:
                 cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
                 cfg.unsetOutputFormat();
-                TemplateConfigurer tcXml = new TemplateConfigurer();
+                TemplateConfiguration tcXml = new TemplateConfiguration();
                 tcXml.setOutputFormat(XMLOutputFormat.INSTANCE);
-                cfg.setTemplateConfigurers(
-                        new ConditionalTemplateConfigurerFactory(
+                cfg.setTemplateConfigurations(
+                        new ConditionalTemplateConfigurationFactory(
                                 new OrMatcher(
                                         new FileNameGlobMatcher("*.ftlh"),
                                         new FileNameGlobMatcher("*.FTLH"),
@@ -130,7 +130,7 @@ public class OutputFormatTest extends TemplateTest {
                 ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
                 break;
             case 5:
-                cfg.setTemplateConfigurers(null);
+                cfg.setTemplateConfigurations(null);
                 cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
                 ftlhOutputFormat = UndefinedOutputFormat.INSTANCE;
                 ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
@@ -182,25 +182,25 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t.ftl",
                 "${'{}'} ${'{}'?esc} ${'{}'?noEsc}");
         
-        TemplateConfigurer tcHTML = new TemplateConfigurer();
+        TemplateConfiguration tcHTML = new TemplateConfiguration();
         tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
-        ConditionalTemplateConfigurerFactory tcfHTML = new ConditionalTemplateConfigurerFactory(
+        ConditionalTemplateConfigurationFactory tcfHTML = new ConditionalTemplateConfigurationFactory(
                 new FileNameGlobMatcher("t.*"), tcHTML);
 
-        TemplateConfigurer tcNoAutoEsc = new TemplateConfigurer();
+        TemplateConfiguration tcNoAutoEsc = new TemplateConfiguration();
         tcNoAutoEsc.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
-        ConditionalTemplateConfigurerFactory tcfNoAutoEsc = new ConditionalTemplateConfigurerFactory(
+        ConditionalTemplateConfigurationFactory tcfNoAutoEsc = new ConditionalTemplateConfigurationFactory(
                 new FileNameGlobMatcher("t.*"), tcNoAutoEsc);
 
         Configuration cfg = getConfiguration();
         cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-        cfg.setTemplateConfigurers(tcfHTML);
+        cfg.setTemplateConfigurations(tcfHTML);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-        cfg.setTemplateConfigurers(tcfNoAutoEsc);
+        cfg.setTemplateConfigurations(tcfNoAutoEsc);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         
-        cfg.setTemplateConfigurers(null);
+        cfg.setTemplateConfigurations(null);
         cfg.unsetOutputFormat();
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);  // Extensions has no effect
         assertErrorContainsForNamed("t.ftlx", UndefinedOutputFormat.INSTANCE.getName());
@@ -208,21 +208,21 @@ public class OutputFormatTest extends TemplateTest {
         assertOutputForNamed("t.ftlx", "&#39; &#39; '");
         cfg.setOutputFormat(XMLOutputFormat.INSTANCE);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");
-        cfg.setTemplateConfigurers(tcfHTML);
+        cfg.setTemplateConfigurations(tcfHTML);
         assertOutputForNamed("t.ftlx", "&#39; &#39; '");
-        cfg.setTemplateConfigurers(tcfNoAutoEsc);
+        cfg.setTemplateConfigurations(tcfNoAutoEsc);
         assertOutputForNamed("t.ftlx", "' &apos; '");
         
         cfg.setRecognizeStandardFileExtensions(true);
-        cfg.setTemplateConfigurers(tcfHTML);
+        cfg.setTemplateConfigurations(tcfHTML);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-        cfg.setTemplateConfigurers(tcfNoAutoEsc);
+        cfg.setTemplateConfigurations(tcfNoAutoEsc);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         
-        cfg.setTemplateConfigurers(null);
+        cfg.setTemplateConfigurations(null);
         cfg.unsetOutputFormat();
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
-        cfg.setTemplateConfigurers(tcfHTML);
+        cfg.setTemplateConfigurations(tcfHTML);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         cfg.setRecognizeStandardFileExtensions(false);
         assertOutputForNamed("t.ftlx", "&#39; &#39; '");
@@ -1005,10 +1005,10 @@ public class OutputFormatTest extends TemplateTest {
     protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         
-        TemplateConfigurer xmlTC = new TemplateConfigurer();
+        TemplateConfiguration xmlTC = new TemplateConfiguration();
         xmlTC.setOutputFormat(XMLOutputFormat.INSTANCE);
-        cfg.setTemplateConfigurers(
-                new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*.xml"), xmlTC));
+        cfg.setTemplateConfigurations(
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.xml"), xmlTC));
 
         cfg.setSharedVariable("rtfPlain", RTFOutputFormat.INSTANCE.fromPlainTextByEscaping("\\par a & b"));
         cfg.setSharedVariable("rtfMarkup", RTFOutputFormat.INSTANCE.fromMarkup("\\par c"));

@@ -20,7 +20,7 @@ package freemarker.cache;
 
 import java.io.IOException;
 
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
@@ -28,28 +28,28 @@ import freemarker.template.utility.StringUtil;
  * Returns the first non-{@code null} result of the child factories, ignoring all further child factories. The child
  * factories are called in the order as they were added.
  */
-public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFactory {
+public class FirstMatchTemplateConfigurationFactory extends TemplateConfigurationFactory {
     
-    private final TemplateConfigurerFactory[] templateConfigurerFactories;
+    private final TemplateConfigurationFactory[] templateConfigurationFactories;
     private boolean allowNoMatch;
     private String noMatchErrorDetails;
     
-    public FirstMatchTemplateConfigurerFactory(TemplateConfigurerFactory... templateConfigurerFactories) {
-        this.templateConfigurerFactories = templateConfigurerFactories;
+    public FirstMatchTemplateConfigurationFactory(TemplateConfigurationFactory... templateConfigurationFactories) {
+        this.templateConfigurationFactories = templateConfigurationFactories;
     }
 
     @Override
-    public TemplateConfigurer get(String sourceName, Object templateSource)
-            throws IOException, TemplateConfigurerFactoryException {
-        for (TemplateConfigurerFactory tcf : templateConfigurerFactories) {
-            TemplateConfigurer tc = tcf.get(sourceName, templateSource); 
+    public TemplateConfiguration get(String sourceName, Object templateSource)
+            throws IOException, TemplateConfigurationFactoryException {
+        for (TemplateConfigurationFactory tcf : templateConfigurationFactories) {
+            TemplateConfiguration tc = tcf.get(sourceName, templateSource); 
             if (tc != null) {
                 return tc;
             }
         }
         if (!allowNoMatch) {
-            throw new TemplateConfigurerFactoryException(
-                    FirstMatchTemplateConfigurerFactory.class.getSimpleName()
+            throw new TemplateConfigurationFactoryException(
+                    FirstMatchTemplateConfigurationFactory.class.getSimpleName()
                     + " has found no matching choice for source name "
                     + StringUtil.jQuote(sourceName) + ". "
                     + (noMatchErrorDetails != null
@@ -95,7 +95,7 @@ public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFacto
     /**
      * Same as {@link #setAllowNoMatch(boolean)}, but return this object to support "fluent API" style. 
      */
-    public FirstMatchTemplateConfigurerFactory allowNoMatch(boolean allow) {
+    public FirstMatchTemplateConfigurationFactory allowNoMatch(boolean allow) {
         setAllowNoMatch(allow);
         return this;
     }
@@ -103,15 +103,15 @@ public class FirstMatchTemplateConfigurerFactory extends TemplateConfigurerFacto
     /**
      * Same as {@link #setNoMatchErrorDetails(String)}, but return this object to support "fluent API" style. 
      */
-    public FirstMatchTemplateConfigurerFactory noMatchErrorDetails(String message) {
+    public FirstMatchTemplateConfigurationFactory noMatchErrorDetails(String message) {
         setNoMatchErrorDetails(message);
         return this;
     }
 
     @Override
     protected void setConfigurationOfChildren(Configuration cfg) {
-        for (TemplateConfigurerFactory templateConfigurerFactory : templateConfigurerFactories) {
-            templateConfigurerFactory.setConfiguration(cfg);
+        for (TemplateConfigurationFactory templateConfigurationFactory : templateConfigurationFactories) {
+            templateConfigurationFactory.setConfiguration(cfg);
         }
     }
     

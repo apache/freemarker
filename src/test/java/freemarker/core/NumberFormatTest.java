@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleNumber;
@@ -251,11 +251,11 @@ public class NumberFormatTest extends TemplateTest {
                 "d", new AliasTemplateNumberFormatFactory("0.0#"),
                 "hex", HexTemplateNumberFormatFactory.INSTANCE));
         
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         tc.setCustomNumberFormats(ImmutableMap.of(
                 "d", new AliasTemplateNumberFormatFactory("0.#'d'"),
                 "i", new AliasTemplateNumberFormatFactory("@hex")));
-        cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*2*"), tc));
+        cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*2*"), tc));
         
         String commonFtl = "${1?string.@f} ${1?string.@d} "
                 + "<#setting locale='fr_FR'>${1.5?string.@d} "

@@ -66,7 +66,6 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
-import freemarker.core.ParseException;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.TemplateDateFormatFactory;
 import freemarker.core.TemplateNumberFormatFactory;
@@ -812,9 +811,9 @@ public class ConfigurationTest extends TestCase {
         assertEquals(0, cache.getSize());
     }
     
-    public void testSetTemplateConfigurers() throws TemplateException, TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+    public void testSetTemplateConfigurations() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
-        assertNull(cfg.getTemplateConfigurers());
+        assertNull(cfg.getTemplateConfigurations());
 
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("t.de.ftlh", "");
@@ -825,25 +824,25 @@ public class ConfigurationTest extends TestCase {
         
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+09"));
         
-        cfg.setSetting(Configuration.TEMPLATE_CONFIGURERS_KEY,
-                "MergingTemplateConfigurerFactory("
-                    + "FirstMatchTemplateConfigurerFactory("
-                        + "ConditionalTemplateConfigurerFactory("
-                            + "FileNameGlobMatcher('*.de.*'), TemplateConfigurer(timeZone=TimeZone('GMT+01'))), "
-                        + "ConditionalTemplateConfigurerFactory("
-                            + "FileNameGlobMatcher('*.fr.*'), TemplateConfigurer(timeZone=TimeZone('GMT'))), "
+        cfg.setSetting(Configuration.TEMPLATE_CONFIGURATIONS_KEY,
+                "MergingTemplateConfigurationFactory("
+                    + "FirstMatchTemplateConfigurationFactory("
+                        + "ConditionalTemplateConfigurationFactory("
+                            + "FileNameGlobMatcher('*.de.*'), TemplateConfiguration(timeZone=TimeZone('GMT+01'))), "
+                        + "ConditionalTemplateConfigurationFactory("
+                            + "FileNameGlobMatcher('*.fr.*'), TemplateConfiguration(timeZone=TimeZone('GMT'))), "
                         + "allowNoMatch=true"
                     + "), "
-                    + "FirstMatchTemplateConfigurerFactory("
-                        + "ConditionalTemplateConfigurerFactory("
-                            + "FileExtensionMatcher('ftlh'), TemplateConfigurer(booleanFormat='TODO,HTML')), "
-                        + "ConditionalTemplateConfigurerFactory("
-                            + "FileExtensionMatcher('ftlx'), TemplateConfigurer(booleanFormat='TODO,XML')), "
+                    + "FirstMatchTemplateConfigurationFactory("
+                        + "ConditionalTemplateConfigurationFactory("
+                            + "FileExtensionMatcher('ftlh'), TemplateConfiguration(booleanFormat='TODO,HTML')), "
+                        + "ConditionalTemplateConfigurationFactory("
+                            + "FileExtensionMatcher('ftlx'), TemplateConfiguration(booleanFormat='TODO,XML')), "
                         + "noMatchErrorDetails='Unrecognized template file extension'"
                     + "), "
-                    + "ConditionalTemplateConfigurerFactory("
+                    + "ConditionalTemplateConfigurationFactory("
                         + "PathGlobMatcher('stat/**', caseInsensitive=true), "
-                        + "TemplateConfigurer(timeZone=TimeZone('UTC'))"
+                        + "TemplateConfiguration(timeZone=TimeZone('UTC'))"
                     + ")"
                 + ")");
         
@@ -868,9 +867,9 @@ public class ConfigurationTest extends TestCase {
             assertEquals(DateUtil.UTC, t.getTimeZone());
         }
         
-        assertNotNull(cfg.getTemplateConfigurers());
-        cfg.setSetting(Configuration.TEMPLATE_CONFIGURERS_KEY, "null");
-        assertNull(cfg.getTemplateConfigurers());
+        assertNotNull(cfg.getTemplateConfigurations());
+        cfg.setSetting(Configuration.TEMPLATE_CONFIGURATIONS_KEY, "null");
+        assertNull(cfg.getTemplateConfigurations());
     }
 
     public void testSetAutoEscaping() throws Exception {
@@ -1013,7 +1012,7 @@ public class ConfigurationTest extends TestCase {
                 new ArrayList(cfg.getRegisteredCustomOutputFormats()));
         
         try {
-            cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfigurer()]");
+            cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfiguration()]");
             fail();
         } catch (Exception e) {
             assertThat(e.getCause().getMessage(), containsString(OutputFormat.class.getSimpleName()));
