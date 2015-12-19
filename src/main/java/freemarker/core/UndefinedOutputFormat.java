@@ -23,9 +23,9 @@ import freemarker.template.Configuration;
 /**
  * Represents the output format used when the template output format is undecided. This is the default output format if
  * FreeMarker can't select anything more specific (see
- * {@link Configuration#setTemplateConfigurers(freemarker.cache.TemplateConfigurerFactory)}). This format doesn't
- * support auto-escaping ({@link Configuration#setAutoEscapingPolicy(int)}). It will print {@link TemplateMarkupOutputModel}-s
- * as is (doesn't try to convert them).
+ * {@link Configuration#setTemplateConfigurations(freemarker.cache.TemplateConfigurationFactory)}). This format doesn't
+ * support auto-escaping ({@link Configuration#setAutoEscapingPolicy(int)}). It will print
+ * {@link TemplateMarkupOutputModel}-s as is (doesn't try to convert them).
  * 
  * @see PlainTextOutputFormat
  * 

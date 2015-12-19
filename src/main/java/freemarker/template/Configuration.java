@@ -51,7 +51,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateCache.MaybeMissingTemplate;
-import freemarker.cache.TemplateConfigurerFactory;
+import freemarker.cache.TemplateConfigurationFactory;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupStrategy;
@@ -68,7 +68,7 @@ import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
 import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.core.TemplateMarkupOutputModel;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
@@ -268,11 +268,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String TEMPLATE_NAME_FORMAT_KEY = TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE;
 
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
-    public static final String TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE = "template_configurers";
+    public static final String TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE = "template_configurations";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
-    public static final String TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE = "templateConfigurers";
+    public static final String TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE = "templateConfigurations";
     /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.24 */
-    public static final String TEMPLATE_CONFIGURERS_KEY = TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE;
+    public static final String TEMPLATE_CONFIGURATIONS_KEY = TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE = "incompatible_improvements";
@@ -303,7 +303,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
-        TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE,
+        TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
         TEMPLATE_LOADER_KEY_SNAKE_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE,
         TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE,
@@ -326,7 +326,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
-        TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE,
+        TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
         TEMPLATE_LOADER_KEY_CAMEL_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE,
         TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE,
@@ -818,10 +818,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private void recreateTemplateCacheWith(
             TemplateLoader loader, CacheStorage storage,
             TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
-            TemplateConfigurerFactory templateConfigurers) {
+            TemplateConfigurationFactory templateConfigurations) {
         TemplateCache oldCache = cache;
         cache = new TemplateCache(
-                loader, storage, templateLookupStrategy, templateNameFormat, templateConfigurers, this);
+                loader, storage, templateLookupStrategy, templateNameFormat, templateConfigurations, this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
@@ -830,7 +830,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private void recreateTemplateCache() {
         recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
                 cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                getTemplateConfigurers());
+                getTemplateConfigurations());
     }
     
     private TemplateLoader getDefaultTemplateLoader() {
@@ -935,7 +935,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             copy.recreateTemplateCacheWith(
                     cache.getTemplateLoader(), cache.getCacheStorage(),
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                    cache.getTemplateConfigurers());
+                    cache.getTemplateConfigurations());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException("Cloning failed", e);
@@ -1125,7 +1125,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (cache.getTemplateLoader() != templateLoader) {
                 recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(),
                         cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                        cache.getTemplateConfigurers());
+                        cache.getTemplateConfigurations());
             }
             templateLoaderExplicitlySet = true;
         }
@@ -1174,7 +1174,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
                     templateLookupStrategy, cache.getTemplateNameFormat(),
-                    cache.getTemplateConfigurers());
+                    cache.getTemplateConfigurations());
         }
         templateLookupStrategyExplicitlySet = true;
     }
@@ -1223,7 +1223,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         if (cache.getTemplateNameFormat() != templateNameFormat) {
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
                     cache.getTemplateLookupStrategy(), templateNameFormat,
-                    cache.getTemplateConfigurers());
+                    cache.getTemplateConfigurations());
         }
         templateNameFormatExplicitlySet = true;
     }
@@ -1262,38 +1262,38 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets a {@link TemplateConfigurerFactory} that will configure individual templates where their settings differ
+     * Sets a {@link TemplateConfigurationFactory} that will configure individual templates where their settings differ
      * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
-     * {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} for templates based on their file
+     * {@link TemplateConfiguration#setOutputFormat(OutputFormat) outputFormat} for templates based on their file
      * extension or parent directory.
      * 
      * <p>
      * Note that the settings suggested by standard file extensions are stronger than that you set here. See
      * {@link #setRecognizeStandardFileExtensions(boolean)} for more information about standard file extensions.
      * 
-     * <p>See "Template configurers" in the FreeMarker Manual for examples.
+     * <p>See "Template configurations" in the FreeMarker Manual for examples.
      * 
      * @since 2.3.24
      */
-    public void setTemplateConfigurers(TemplateConfigurerFactory templateConfigurers) {
-        if (cache.getTemplateConfigurers() != templateConfigurers) {
-            if (templateConfigurers != null) {
-                templateConfigurers.setConfiguration(this);
+    public void setTemplateConfigurations(TemplateConfigurationFactory templateConfigurations) {
+        if (cache.getTemplateConfigurations() != templateConfigurations) {
+            if (templateConfigurations != null) {
+                templateConfigurations.setConfiguration(this);
             }
             recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                    templateConfigurers);
+                    templateConfigurations);
         }
     }
     
     /**
-     * The getter pair of {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
+     * The getter pair of {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
      */
-    public TemplateConfigurerFactory getTemplateConfigurers() {
+    public TemplateConfigurationFactory getTemplateConfigurations() {
         if (cache == null) {
             return null;
         }
-        return cache.getTemplateConfigurers();
+        return cache.getTemplateConfigurations();
     }
 
     /**
@@ -1314,7 +1314,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (getCacheStorage() != cacheStorage) {
                 recreateTemplateCacheWith(cache.getTemplateLoader(), cacheStorage,
                         cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                        cache.getTemplateConfigurers());
+                        cache.getTemplateConfigurations());
             }
             cacheStorageExplicitlySet = true;
         }
@@ -1743,7 +1743,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Auto-escaping has significance when a value is printed with <code>${...}</code> (or <code>#{...}</code>). If
      * auto-escaping is on, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
      * rich text), so it will escape it according the current output format (see {@link #setOutputFormat(OutputFormat)}
-     * and {@link TemplateConfigurer#setOutputFormat(OutputFormat)}). If auto-escaping is off, FreeMarker will assume
+     * and {@link TemplateConfiguration#setOutputFormat(OutputFormat)}). If auto-escaping is off, FreeMarker will assume
      * that the string value is already in the output format, so it prints it as is to the output.
      *
      * <p>Further notes on auto-escaping:
@@ -1762,16 +1762,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * </ul>
      * 
      * <p>Note that what you set here is just a default, which can be overridden for individual templates via
-     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. This setting is also overridden by the standard file
+     * {@link #setTemplateConfigurations(TemplateConfigurationFactory)}. This setting is also overridden by the standard file
      * extensions; see them at {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
      * @param autoEscapingPolicy
      *          One of the {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
      *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, and {@link #DISABLE_AUTO_ESCAPING_POLICY} constants.  
      * 
-     * @see TemplateConfigurer#setAutoEscapingPolicy(int)
+     * @see TemplateConfiguration#setAutoEscapingPolicy(int)
      * @see Configuration#setOutputFormat(OutputFormat)
-     * @see TemplateConfigurer#setOutputFormat(OutputFormat)
+     * @see TemplateConfiguration#setOutputFormat(OutputFormat)
      * 
      * @since 2.3.24
      */
@@ -1797,7 +1797,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Sets the (default) output format. Usually, you leave this on its default, which is
      * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like
-     * based on their "file" extension) with {@link #setTemplateConfigurers(TemplateConfigurerFactory)}. This setting is
+     * based on their "file" extension) with {@link #setTemplateConfigurations(TemplateConfigurationFactory)}. This setting is
      * also overridden by the standard file extensions; see them at
      * {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
@@ -1806,7 +1806,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * also used by the embedding application to set the HTTP response MIME type, etc.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
-     * @see #setTemplateConfigurers(TemplateConfigurerFactory)
+     * @see #setTemplateConfigurations(TemplateConfigurationFactory)
      * @see #setRecognizeStandardFileExtensions(boolean)
      * @see #setAutoEscapingPolicy(int)
      * 
@@ -2021,26 +2021,26 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Sets if the "file" extension part of the source name ({@link Template#getSourceName()}) will influence certain
      * parsing settings. For backward compatibility, it defaults to {@code false} if
      * {@link #getIncompatibleImprovements()} is less than 2.3.24. Starting from {@code incompatibleImprovements}
-     * 2.3.24, defaults to {@code true}, so the following standard file extensions take their effect:
+     * 2.3.24, it defaults to {@code true}, so the following standard file extensions take their effect:
      * 
      * <ul>
-     *   <li>{@code ftlh}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "HTML"}
-     *       (i.e., {@link HTMLOutputFormat#INSTANCE} unless the {@code "HTML"} name is overridden by
+     *   <li>{@code ftlh}: Sets {@link TemplateConfiguration#setOutputFormat(OutputFormat) outputFormat} to
+     *       {@code "HTML"} (i.e., {@link HTMLOutputFormat#INSTANCE}, unless the {@code "HTML"} name is overridden by
      *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}
-     *       {@link TemplateConfigurer#setAutoEscapingPolicy(int) autoEscapingPolicy}.
-     *   <li>{@code ftlx}: Sets {@link TemplateConfigurer#setOutputFormat(OutputFormat) outputFormat} to {@code "XML"}
-     *       (i.e., {@link XMLOutputFormat#INSTANCE} unless the {@code "XML"} name is overridden by
+     *       {@link TemplateConfiguration#setAutoEscapingPolicy(int) autoEscapingPolicy} to
+     *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
+     *   <li>{@code ftlx}: Sets {@link TemplateConfiguration#setOutputFormat(OutputFormat) outputFormat} to
+     *       {@code "XML"} (i.e., {@link XMLOutputFormat#INSTANCE}, unless the {@code "XML"} name is overridden by
      *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}
-     *       {@link TemplateConfigurer#setAutoEscapingPolicy(int) autoEscapingPolicy}.
+     *       {@link TemplateConfiguration#setAutoEscapingPolicy(int) autoEscapingPolicy} to
+     *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
      * </ul>
      * 
      * <p>These file extensions are not case sensitive. The file extension is the part after the last dot in the source
      * name. If the source name contains no dot, then it has no file extension.
      * 
-     * <p>The settings activated by these file extensions override the settings values dictated by
-     * {@link #setTemplateConfigurers(TemplateConfigurerFactory)}.
+     * <p>The settings activated by these file extensions override the setting values dictated by
+     * {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
      */
     public void setRecognizeStandardFileExtensions(boolean recognizeStandardFileExtensions) {
         boolean prevEffectiveValue = getRecognizeStandardFileExtensions();
@@ -2277,7 +2277,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *
      * @param locale
      *            The requested locale of the template. This is what {@link Template#getLocale()} on the resulting
-     *            {@link Template} will return (unless it's overridden via {@link #getTemplateConfigurers()}). This
+     *            {@link Template} will return (unless it's overridden via {@link #getTemplateConfigurations()}). This
      *            parameter can be {@code null} since 2.3.22, in which case it defaults to
      *            {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the default value,
      *            not {@code null}). This parameter also drives localized template lookup. Assuming that you have
@@ -2287,7 +2287,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
      *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
      *            finds {@code myTemplate.ftl}. Note that when the {@code locale} setting is overridden with a
-     *            {@link TemplateConfigurer} provided by {@link #getTemplateConfigurers()}, that overrides the
+     *            {@link TemplateConfiguration} provided by {@link #getTemplateConfigurations()}, that overrides the
      *            value specified here, but only after the localized lookup, that is, it modifies the template
      *            found by the localized lookup.
      * 
@@ -2308,7 +2308,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *            instead). Why is this deprecated: It doesn't make sense to get the <em>same</em> template with
      *            different encodings, hence, it's error prone to specify the encoding where you get the template.
      *            Instead, if you have template "files" with different charsets, you should use
-     *            {@link #setTemplateConfigurers(TemplateConfigurerFactory)}, where you can associate encodings to
+     *            {@link #setTemplateConfigurations(TemplateConfigurationFactory)}, where you can associate encodings to
      *            individual templates based on their names (like which "directory" are they in, what's their file
      *            extension, etc.). The encoding associated with the templates that way overrides the encoding that you
      *            specify here.
@@ -2903,13 +2903,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
-            } else if (TEMPLATE_CONFIGURERS_KEY_SNAKE_CASE.equals(name)
-                    || TEMPLATE_CONFIGURERS_KEY_CAMEL_CASE.equals(name)) {
+            } else if (TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE.equals(name)
+                    || TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equals(NULL)) {
-                    setTemplateConfigurers(null);
+                    setTemplateConfigurations(null);
                 } else {
-                    setTemplateConfigurers((TemplateConfigurerFactory) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateConfigurerFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                    setTemplateConfigurations((TemplateConfigurationFactory) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateConfigurationFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else {
                 unknown = true;

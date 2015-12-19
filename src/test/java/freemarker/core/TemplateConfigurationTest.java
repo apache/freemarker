@@ -54,7 +54,7 @@ import freemarker.template.Version;
 import freemarker.template.utility.NullArgumentException;
 
 @SuppressWarnings("boxing")
-public class TemplateConfigurerTest {
+public class TemplateConfigurationTest {
 
     private final class DummyArithmeticEngine extends ArithmeticEngine {
 
@@ -191,12 +191,12 @@ public class TemplateConfigurerTest {
         return isSetMethodName;
     }
 
-    public static List<PropertyDescriptor> getTemplateConfigurerSettingPropDescs(
+    public static List<PropertyDescriptor> getTemplateConfigurationSettingPropDescs(
             boolean includeCompilerSettings, boolean includeSpecialSettings)
             throws IntrospectionException {
         List<PropertyDescriptor> settingPropDescs = new ArrayList<PropertyDescriptor>();
 
-        BeanInfo beanInfo = Introspector.getBeanInfo(TemplateConfigurer.class);
+        BeanInfo beanInfo = Introspector.getBeanInfo(TemplateConfiguration.class);
         for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
             String name = pd.getName();
             if (pd.getWriteMethod() != null && !IGNORED_PROP_NAMES.contains(name)
@@ -282,10 +282,10 @@ public class TemplateConfigurerTest {
 
     @Test
     public void testMergeBasicFunctionality() throws Exception {
-        for (PropertyDescriptor propDesc1 : getTemplateConfigurerSettingPropDescs(true, true)) {
-            for (PropertyDescriptor propDesc2 : getTemplateConfigurerSettingPropDescs(true, true)) {
-                TemplateConfigurer tc1 = new TemplateConfigurer();
-                TemplateConfigurer tc2 = new TemplateConfigurer();
+        for (PropertyDescriptor propDesc1 : getTemplateConfigurationSettingPropDescs(true, true)) {
+            for (PropertyDescriptor propDesc2 : getTemplateConfigurationSettingPropDescs(true, true)) {
+                TemplateConfiguration tc1 = new TemplateConfiguration();
+                TemplateConfiguration tc2 = new TemplateConfiguration();
 
                 Object value1 = SETTING_ASSIGNMENTS.get(propDesc1.getName());
                 propDesc1.getWriteMethod().invoke(tc1, value1);
@@ -304,7 +304,7 @@ public class TemplateConfigurerTest {
     
     @Test
     public void testMergeMapSettings() throws Exception {
-        TemplateConfigurer tc1 = new TemplateConfigurer();
+        TemplateConfiguration tc1 = new TemplateConfiguration();
         tc1.setCustomDateFormats(ImmutableMap.of(
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
                 "x", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE));
@@ -312,7 +312,7 @@ public class TemplateConfigurerTest {
                 "hex", HexTemplateNumberFormatFactory.INSTANCE,
                 "x", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
         
-        TemplateConfigurer tc2 = new TemplateConfigurer();
+        TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomDateFormats(ImmutableMap.of(
                 "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
                 "x", EpochMillisDivTemplateDateFormatFactory.INSTANCE));
@@ -333,12 +333,12 @@ public class TemplateConfigurerTest {
         assertEquals(BaseNTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("x"));
         
         // Empty map merging optimization:
-        tc1.merge(new TemplateConfigurer());
+        tc1.merge(new TemplateConfiguration());
         assertSame(mergedCustomDateFormats, tc1.getCustomDateFormats());
         assertSame(mergedCustomNumberFormats, tc1.getCustomNumberFormats());
         
         // Empty map merging optimization:
-        TemplateConfigurer tc3 = new TemplateConfigurer();
+        TemplateConfiguration tc3 = new TemplateConfiguration();
         tc3.merge(tc1);
         assertSame(mergedCustomDateFormats, tc3.getCustomDateFormats());
         assertSame(mergedCustomNumberFormats, tc3.getCustomNumberFormats());
@@ -346,16 +346,16 @@ public class TemplateConfigurerTest {
     
     @Test
     public void testMergePriority() throws Exception {
-        TemplateConfigurer tc1 = new TemplateConfigurer();
+        TemplateConfiguration tc1 = new TemplateConfiguration();
         tc1.setDateFormat("1");
         tc1.setTimeFormat("1");
         tc1.setDateTimeFormat("1");
 
-        TemplateConfigurer tc2 = new TemplateConfigurer();
+        TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setDateFormat("2");
         tc2.setTimeFormat("2");
 
-        TemplateConfigurer tc3 = new TemplateConfigurer();
+        TemplateConfiguration tc3 = new TemplateConfiguration();
         tc3.setDateFormat("3");
 
         tc1.merge(tc2);
@@ -368,7 +368,7 @@ public class TemplateConfigurerTest {
     
     @Test
     public void testMergeCustomAttributes() throws Exception {
-        TemplateConfigurer tc1 = new TemplateConfigurer();
+        TemplateConfiguration tc1 = new TemplateConfiguration();
         tc1.setCustomAttribute("k1", "v1");
         tc1.setCustomAttribute("k2", "v1");
         tc1.setCustomAttribute("k3", "v1");
@@ -376,13 +376,13 @@ public class TemplateConfigurerTest {
         CA2.set("V1", tc1);
         CA3.set("V1", tc1);
 
-        TemplateConfigurer tc2 = new TemplateConfigurer();
+        TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomAttribute("k1", "v2");
         tc2.setCustomAttribute("k2", "v2");
         CA1.set("V2", tc2);
         CA2.set("V2", tc2);
 
-        TemplateConfigurer tc3 = new TemplateConfigurer();
+        TemplateConfiguration tc3 = new TemplateConfiguration();
         tc3.setCustomAttribute("k1", "v3");
         CA1.set("V3", tc2);
 
@@ -399,7 +399,7 @@ public class TemplateConfigurerTest {
     
     @Test
     public void testMergeNullCustomAttributes() throws Exception {
-        TemplateConfigurer tc1 = new TemplateConfigurer();
+        TemplateConfiguration tc1 = new TemplateConfiguration();
         tc1.setCustomAttribute("k1", "v1");
         tc1.setCustomAttribute("k2", "v1");
         tc1.setCustomAttribute(null, "v1");
@@ -414,13 +414,13 @@ public class TemplateConfigurerTest {
         assertEquals("V1", CA2.get(tc1));
         assertNull(CA3.get(tc1));
 
-        TemplateConfigurer tc2 = new TemplateConfigurer();
+        TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomAttribute("k1", "v2");
         tc2.setCustomAttribute("k2", null);
         CA1.set("V2", tc2);
         CA2.set(null, tc2);
 
-        TemplateConfigurer tc3 = new TemplateConfigurer();
+        TemplateConfiguration tc3 = new TemplateConfiguration();
         tc3.setCustomAttribute("k1", null);
         CA1.set(null, tc2);
 
@@ -434,7 +434,7 @@ public class TemplateConfigurerTest {
         assertNull(CA2.get(tc1));
         assertNull(CA3.get(tc1));
         
-        TemplateConfigurer tc4 = new TemplateConfigurer();
+        TemplateConfiguration tc4 = new TemplateConfiguration();
         tc4.setCustomAttribute("k1", "v4");
         CA1.set("V4", tc4);
         
@@ -450,8 +450,8 @@ public class TemplateConfigurerTest {
 
     @Test
     public void testConfigureNonParserConfig() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(false, true)) {
-            TemplateConfigurer tc = new TemplateConfigurer();
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(false, true)) {
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
     
             Object newValue = SETTING_ASSIGNMENTS.get(pd.getName());
@@ -461,7 +461,7 @@ public class TemplateConfigurerTest {
             Method tReaderMethod = t.getClass().getMethod(pd.getReadMethod().getName());
             
             assertNotEquals("For \"" + pd.getName() + "\"", newValue, tReaderMethod.invoke(t));
-            tc.configure(t);
+            tc.apply(t);
             assertEquals("For \"" + pd.getName() + "\"", newValue, tReaderMethod.invoke(t));
         }
     }
@@ -473,7 +473,7 @@ public class TemplateConfigurerTest {
         cfg.setCustomAttribute("k2", "c");
         cfg.setCustomAttribute("k3", "c");
 
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         tc.setCustomAttribute("k2", "tc");
         tc.setCustomAttribute("k3", null);
         tc.setCustomAttribute("k4", "tc");
@@ -492,7 +492,7 @@ public class TemplateConfigurerTest {
         CA4.set("t", t);
         
         tc.setParentConfiguration(cfg);
-        tc.configure(t);
+        tc.apply(t);
         
         assertEquals("c", t.getCustomAttribute("k1"));
         assertEquals("tc", t.getCustomAttribute("k2"));
@@ -512,7 +512,7 @@ public class TemplateConfigurerTest {
         Set<String> testedProps = new HashSet<String>();
         
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
             assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
@@ -520,7 +520,7 @@ public class TemplateConfigurerTest {
         }
         
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
             assertOutputWithoutAndWithTC(tc, "<#if true>y<#elseif false>n</#if>", "y", null);
@@ -528,7 +528,7 @@ public class TemplateConfigurerTest {
         }
         
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setWhitespaceStripping(false);
             assertOutputWithoutAndWithTC(tc, "<#if true>\nx\n</#if>\n", "x\n", "\nx\n\n");
@@ -536,7 +536,7 @@ public class TemplateConfigurerTest {
         }
 
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setArithmeticEngine(new DummyArithmeticEngine());
             assertOutputWithoutAndWithTC(tc, "${1} ${1+1}", "1 2", "11 22");
@@ -544,7 +544,7 @@ public class TemplateConfigurerTest {
         }
 
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setOutputFormat(XMLOutputFormat.INSTANCE);
             assertOutputWithoutAndWithTC(tc, "${.outputFormat} ${\"a'b\"}",
@@ -554,7 +554,7 @@ public class TemplateConfigurerTest {
         }
 
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setOutputFormat(XMLOutputFormat.INSTANCE);
             tc.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
@@ -563,7 +563,7 @@ public class TemplateConfigurerTest {
         }
         
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setStrictSyntaxMode(false);
             assertOutputWithoutAndWithTC(tc, "<if true>y</if>", "<if true>y</if>", "y");
@@ -571,7 +571,7 @@ public class TemplateConfigurerTest {
         }
 
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
             assertOutputWithoutAndWithTC(tc, "<#foo>", null, "<#foo>");
             testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
@@ -579,7 +579,7 @@ public class TemplateConfigurerTest {
 
 
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
             tc.setRecognizeStandardFileExtensions(true);
             assertOutputWithoutAndWithTC(tc, "${.outputFormat}",
@@ -593,8 +593,8 @@ public class TemplateConfigurerTest {
     @Test
     public void testConfigureParserTooLowIcI() throws Exception {
         Configuration cfgWithTooLowIcI = new Configuration(Configuration.VERSION_2_3_21);
-        for (PropertyDescriptor propDesc : getTemplateConfigurerSettingPropDescs(true, false)) {
-            TemplateConfigurer tc = new TemplateConfigurer();
+        for (PropertyDescriptor propDesc : getTemplateConfigurationSettingPropDescs(true, false)) {
+            TemplateConfiguration tc = new TemplateConfiguration();
 
             String propName = propDesc.getName();
             Object value = SETTING_ASSIGNMENTS.get(propName);
@@ -626,7 +626,7 @@ public class TemplateConfigurerTest {
     
     @Test
     public void testArithmeticEngine() throws TemplateException, IOException {
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         tc.setParentConfiguration(DEFAULT_CFG);
         tc.setArithmeticEngine(new DummyArithmeticEngine());
         assertOutputWithoutAndWithTC(tc,
@@ -640,7 +640,7 @@ public class TemplateConfigurerTest {
 
     @Test
     public void testStringInterpolate() throws TemplateException, IOException {
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         tc.setParentConfiguration(DEFAULT_CFG);
         tc.setArithmeticEngine(new DummyArithmeticEngine());
         assertOutputWithoutAndWithTC(tc,
@@ -654,7 +654,7 @@ public class TemplateConfigurerTest {
     
     @Test
     public void testInterpret() throws TemplateException, IOException {
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         tc.setParentConfiguration(DEFAULT_CFG);
         tc.setArithmeticEngine(new DummyArithmeticEngine());
         assertOutputWithoutAndWithTC(tc,
@@ -670,7 +670,7 @@ public class TemplateConfigurerTest {
     @Test
     public void testEval() throws TemplateException, IOException {
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             tc.setArithmeticEngine(new DummyArithmeticEngine());
             assertOutputWithoutAndWithTC(tc,
@@ -682,7 +682,7 @@ public class TemplateConfigurerTest {
         }
         
         {
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
             String outputEncoding = "ISO-8859-2";
             tc.setOutputEncoding(outputEncoding);
@@ -708,11 +708,11 @@ public class TemplateConfigurerTest {
     
     @Test
     public void testSetParentConfiguration() throws IOException {
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         
         Template t = new Template(null, "", DEFAULT_CFG);
         try {
-            tc.configure(t);
+            tc.apply(t);
             fail();
         } catch (IllegalStateException e) {
             assertThat(e.getMessage(), containsString("Configuration"));
@@ -744,23 +744,23 @@ public class TemplateConfigurerTest {
         
         tc.setParent(DEFAULT_CFG);
         
-        tc.configure(t);
+        tc.apply(t);
     }
     
-    private void assertOutputWithoutAndWithTC(TemplateConfigurer tc, String ftl, String expectedDefaultOutput,
+    private void assertOutputWithoutAndWithTC(TemplateConfiguration tc, String ftl, String expectedDefaultOutput,
             String expectedConfiguredOutput) throws TemplateException, IOException {
         assertOutput(tc, ftl, expectedConfiguredOutput);
         assertOutput(null, ftl, expectedDefaultOutput);
     }
 
-    private void assertOutput(TemplateConfigurer tc, String ftl, String expectedConfiguredOutput)
+    private void assertOutput(TemplateConfiguration tc, String ftl, String expectedConfiguredOutput)
             throws TemplateException, IOException {
         StringWriter sw = new StringWriter();
         try {
             Configuration cfg = tc != null ? tc.getParentConfiguration() : DEFAULT_CFG;
             Template t = new Template("adhoc.ftlh", null, new StringReader(ftl), cfg, tc, null);
             if (tc != null) {
-                tc.configure(t);
+                tc.apply(t);
             }
             t.process(null, sw);
             if (expectedConfiguredOutput == null) {
@@ -782,22 +782,22 @@ public class TemplateConfigurerTest {
 
     @Test
     public void testIsSet() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true, true)) {
-            TemplateConfigurer tc = new TemplateConfigurer();
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true, true)) {
+            TemplateConfiguration tc = new TemplateConfiguration();
             checkAllIsSetFalseExcept(tc, null);
             pd.getWriteMethod().invoke(tc, SETTING_ASSIGNMENTS.get(pd.getName()));
             checkAllIsSetFalseExcept(tc, pd.getName());
         }
     }
 
-    private void checkAllIsSetFalseExcept(TemplateConfigurer tc, String setSetting)
+    private void checkAllIsSetFalseExcept(TemplateConfiguration tc, String setSetting)
             throws SecurityException, IntrospectionException,
             IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true, true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true, true)) {
             String isSetMethodName = getIsSetMethodName(pd.getReadMethod().getName());
             Method isSetMethod;
             try {
-                isSetMethod = TemplateConfigurer.class.getMethod(isSetMethodName);
+                isSetMethod = TemplateConfiguration.class.getMethod(isSetMethodName);
             } catch (NoSuchMethodException e) {
                 fail("Missing " + isSetMethodName + " method for \"" + pd.getName() + "\".");
                 return;
@@ -815,7 +815,7 @@ public class TemplateConfigurerTest {
      */
     @Test
     public void checkTestAssignments() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurerSettingPropDescs(true, true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true, true)) {
             String propName = pd.getName();
             if (!SETTING_ASSIGNMENTS.containsKey(propName)) {
                 fail("Test case doesn't cover all settings in SETTING_ASSIGNMENTS. Missing: " + propName);
@@ -832,7 +832,7 @@ public class TemplateConfigurerTest {
             assertNotEquals("SETTING_ASSIGNMENTS must contain a non-default value for " + propName,
                     assignedValue, defaultSettingValue);
 
-            TemplateConfigurer tc = new TemplateConfigurer();
+            TemplateConfiguration tc = new TemplateConfiguration();
             try {
                 pd.getWriteMethod().invoke(tc, assignedValue);
             } catch (Exception e) {

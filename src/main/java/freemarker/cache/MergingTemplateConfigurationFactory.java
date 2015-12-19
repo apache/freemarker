@@ -20,7 +20,7 @@ package freemarker.cache;
 
 import java.io.IOException;
 
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 
 /**
@@ -30,21 +30,21 @@ import freemarker.template.Configuration;
  * 
  * @since 2.3.24
  */
-public class MergingTemplateConfigurerFactory extends TemplateConfigurerFactory {
+public class MergingTemplateConfigurationFactory extends TemplateConfigurationFactory {
     
-    private final TemplateConfigurerFactory[] templateConfigurerFactories;
+    private final TemplateConfigurationFactory[] templateConfigurationFactories;
     
-    public MergingTemplateConfigurerFactory(TemplateConfigurerFactory... templateConfigurerFactories) {
-        this.templateConfigurerFactories = templateConfigurerFactories;
+    public MergingTemplateConfigurationFactory(TemplateConfigurationFactory... templateConfigurationFactories) {
+        this.templateConfigurationFactories = templateConfigurationFactories;
     }
 
     @Override
-    public TemplateConfigurer get(String sourceName, Object templateSource)
-            throws IOException, TemplateConfigurerFactoryException {
-        TemplateConfigurer mergedTC = null;
-        TemplateConfigurer resultTC = null;
-        for (TemplateConfigurerFactory tcf : templateConfigurerFactories) {
-            TemplateConfigurer tc = tcf.get(sourceName, templateSource);
+    public TemplateConfiguration get(String sourceName, Object templateSource)
+            throws IOException, TemplateConfigurationFactoryException {
+        TemplateConfiguration mergedTC = null;
+        TemplateConfiguration resultTC = null;
+        for (TemplateConfigurationFactory tcf : templateConfigurationFactories) {
+            TemplateConfiguration tc = tcf.get(sourceName, templateSource);
             if (tc != null) {
                 if (resultTC == null) {
                     resultTC = tc;
@@ -53,10 +53,10 @@ public class MergingTemplateConfigurerFactory extends TemplateConfigurerFactory 
                         Configuration cfg = getConfiguration();
                         if (cfg == null) {
                             throw new IllegalStateException(
-                                    "The TemplateConfigurerFactory wasn't associated to a Configuration yet.");
+                                    "The TemplateConfigurationFactory wasn't associated to a Configuration yet.");
                         }
                         
-                        mergedTC = new TemplateConfigurer();
+                        mergedTC = new TemplateConfiguration();
                         mergedTC.setParentConfiguration(cfg);
                         mergedTC.merge(resultTC);
                         resultTC = mergedTC;
@@ -70,8 +70,8 @@ public class MergingTemplateConfigurerFactory extends TemplateConfigurerFactory 
     
     @Override
     protected void setConfigurationOfChildren(Configuration cfg) {
-        for (TemplateConfigurerFactory templateConfigurerFactory : templateConfigurerFactories) {
-            templateConfigurerFactory.setConfiguration(cfg);
+        for (TemplateConfigurationFactory templateConfigurationFactory : templateConfigurationFactories) {
+            templateConfigurationFactory.setConfiguration(cfg);
         }
     }
 

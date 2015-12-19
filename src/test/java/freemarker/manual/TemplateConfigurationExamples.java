@@ -24,23 +24,23 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileExtensionMatcher;
 import freemarker.cache.FileNameGlobMatcher;
-import freemarker.cache.FirstMatchTemplateConfigurerFactory;
-import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.FirstMatchTemplateConfigurationFactory;
+import freemarker.cache.MergingTemplateConfigurationFactory;
 import freemarker.cache.OrMatcher;
 import freemarker.cache.PathGlobMatcher;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.PlainTextOutputFormat;
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.XMLOutputFormat;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.utility.DateUtil;
 
-public class TemplateConfigurerExamples extends ExamplesTest {
+public class TemplateConfigurationExamples extends ExamplesTest {
 
     @Test
     public void example1() throws Exception {
@@ -48,12 +48,12 @@ public class TemplateConfigurerExamples extends ExamplesTest {
 
         addTemplate("t.xml", "");
         
-        TemplateConfigurer tcUTF8XML = new TemplateConfigurer();
+        TemplateConfiguration tcUTF8XML = new TemplateConfiguration();
         tcUTF8XML.setEncoding("utf-8");
         tcUTF8XML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
         {
-            cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(
+            cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
                     new FileExtensionMatcher("xml"), tcUTF8XML));
             
             Template t = cfg.getTemplate("t.xml");
@@ -62,8 +62,8 @@ public class TemplateConfigurerExamples extends ExamplesTest {
         }
 
         {
-            cfg.setTemplateConfigurers(null);
-            cfg.setSettings(loadPropertiesFile("TemplateConfigurerExamples1.properties"));
+            cfg.setTemplateConfigurations(null);
+            cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples1.properties"));
             
             Template t = cfg.getTemplate("t.xml");
             assertEquals("utf-8", t.getEncoding());
@@ -79,20 +79,20 @@ public class TemplateConfigurerExamples extends ExamplesTest {
         addTemplate("mail/t.subject.ftl", "");
         addTemplate("mail/t.body.ftl", "");
 
-        TemplateConfigurer tcSubject = new TemplateConfigurer();
+        TemplateConfiguration tcSubject = new TemplateConfiguration();
         tcSubject.setOutputFormat(PlainTextOutputFormat.INSTANCE);
         
-        TemplateConfigurer tcBody = new TemplateConfigurer();
+        TemplateConfiguration tcBody = new TemplateConfiguration();
         tcBody.setOutputFormat(HTMLOutputFormat.INSTANCE);
         
-        cfg.setTemplateConfigurers(
-                new ConditionalTemplateConfigurerFactory(
+        cfg.setTemplateConfigurations(
+                new ConditionalTemplateConfigurationFactory(
                         new PathGlobMatcher("mail/**"),
-                        new FirstMatchTemplateConfigurerFactory(
-                                new ConditionalTemplateConfigurerFactory(
+                        new FirstMatchTemplateConfigurationFactory(
+                                new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher("*.subject.*"),
                                         tcSubject),
-                                new ConditionalTemplateConfigurerFactory(
+                                new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher("*.body.*"),
                                         tcBody)
                                 )
@@ -105,8 +105,8 @@ public class TemplateConfigurerExamples extends ExamplesTest {
         
         // From properties:
         
-        cfg.setTemplateConfigurers(null);
-        cfg.setSettings(loadPropertiesFile("TemplateConfigurerExamples2.properties"));
+        cfg.setTemplateConfigurations(null);
+        cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples2.properties"));
         
         assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getTemplate("t.subject.ftl").getOutputFormat());
         assertEquals(PlainTextOutputFormat.INSTANCE, cfg.getTemplate("mail/t.subject.ftl").getOutputFormat());
@@ -125,34 +125,34 @@ public class TemplateConfigurerExamples extends ExamplesTest {
         addTemplate("t.xml", "");
         addTemplate("mail/t.html", "");
 
-        TemplateConfigurer tcStats = new TemplateConfigurer();
+        TemplateConfiguration tcStats = new TemplateConfiguration();
         tcStats.setDateTimeFormat("iso");
         tcStats.setDateFormat("iso");
         tcStats.setTimeFormat("iso");
         tcStats.setTimeZone(DateUtil.UTC);
 
-        TemplateConfigurer tcMail = new TemplateConfigurer();
+        TemplateConfiguration tcMail = new TemplateConfiguration();
         tcMail.setEncoding("utf-8");
         
-        TemplateConfigurer tcHTML = new TemplateConfigurer();
+        TemplateConfiguration tcHTML = new TemplateConfiguration();
         tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
         
-        TemplateConfigurer tcXML = new TemplateConfigurer();
+        TemplateConfiguration tcXML = new TemplateConfiguration();
         tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
         
-        cfg.setTemplateConfigurers(
-                new MergingTemplateConfigurerFactory(
-                        new ConditionalTemplateConfigurerFactory(
+        cfg.setTemplateConfigurations(
+                new MergingTemplateConfigurationFactory(
+                        new ConditionalTemplateConfigurationFactory(
                                 new FileNameGlobMatcher("*.stats.*"),
                                 tcStats),
-                        new ConditionalTemplateConfigurerFactory(
+                        new ConditionalTemplateConfigurationFactory(
                                 new PathGlobMatcher("mail/**"),
                                 tcMail),
-                        new FirstMatchTemplateConfigurerFactory(
-                                new ConditionalTemplateConfigurerFactory(
+                        new FirstMatchTemplateConfigurationFactory(
+                                new ConditionalTemplateConfigurationFactory(
                                         new FileExtensionMatcher("xml"),
                                         tcXML),
-                                new ConditionalTemplateConfigurerFactory(
+                                new ConditionalTemplateConfigurationFactory(
                                         new OrMatcher(
                                                 new FileExtensionMatcher("html"),
                                                 new FileExtensionMatcher("htm")),
@@ -171,8 +171,8 @@ public class TemplateConfigurerExamples extends ExamplesTest {
         
         // From properties:
         
-        cfg.setTemplateConfigurers(null);
-        cfg.setSettings(loadPropertiesFile("TemplateConfigurerExamples3.properties"));
+        cfg.setTemplateConfigurations(null);
+        cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples3.properties"));
         
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
         assertEquals("ISO-8859-1", cfg.getTemplate("t.html").getEncoding());

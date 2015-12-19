@@ -43,17 +43,17 @@ public class CustomAttributeInUnboundTemplatesTest {
     }
     
     @Test
-    public void inTemplateConfigurerTest() throws IOException {
+    public void inTemplateConfigurationTest() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
         
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         tc.setCustomAttribute("a", 1);
         tc.setParentConfiguration(cfg);
         
         Template t = new Template(null, null, new StringReader(""), cfg, tc, null);
         t.setCustomAttribute("b", 2);
         assertNull(t.getCustomAttribute("a"));
-        tc.configure(t);
+        tc.apply(t);
         assertEquals(1, t.getCustomAttribute("a"));
         assertEquals(2, t.getCustomAttribute("b"));
         assertNull(t.getUnboundTemplate().getCustomAttributes());

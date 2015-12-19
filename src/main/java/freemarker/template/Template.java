@@ -39,7 +39,7 @@ import freemarker.core.Macro;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.core.TemplateElement;
 import freemarker.core.UnboundTemplate;
 import freemarker.core._CoreAPI;
@@ -186,7 +186,7 @@ public class Template extends Configurable {
 
     /**
      * Same as {@link #Template(String, String, Reader, Configuration, String)}, but also specifies a
-     * {@link TemplateConfigurer}. This is mostly meant to be used by FreeMarker internally, but advanced users might
+     * {@link TemplateConfiguration}. This is mostly meant to be used by FreeMarker internally, but advanced users might
      * still find this useful.
      * 
      * @param customParserCfg
@@ -195,15 +195,15 @@ public class Template extends Configurable {
      *            templates, and so it's not good for specifying template-specific settings. (While
      *            {@link Template} itself has methods to specify settings just for that template, those don't influence
      *            the parsing, and you only have opportunity to call them after the parsing anyway.) This objects is
-     *            often a {@link TemplateConfigurer} whose parent is the {@link Configuration} parameter, and then it
+     *            often a {@link TemplateConfiguration} whose parent is the {@link Configuration} parameter, and then it
      *            practically just overrides some of the parser settings, as the others are inherited from the
-     *            {@link Configuration}. Note that if this is a {@link TemplateConfigurer}, you will also want to call
-     *            {@link TemplateConfigurer#configure(Template)} on the resulting {@link Template} so that
+     *            {@link Configuration}. Note that if this is a {@link TemplateConfiguration}, you will also want to call
+     *            {@link TemplateConfiguration#apply(Template)} on the resulting {@link Template} so that
      *            {@link Configurable} settings will be set too, because this constructor only uses it as a
      *            {@link ParserConfiguration}.  
      * @param encoding
      *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
-     *            null}, it overrides the value coming from the {@code TemplateConfigurer#getEncoding()} method of the
+     *            null}, it overrides the value coming from the {@code TemplateConfiguration#getEncoding()} method of the
      *            {@code templateConfigurer} parameter.
      * 
      * @since 2.3.24
@@ -493,7 +493,7 @@ public class Template extends Configurable {
     
     /**
      * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
-     * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfigurer}, or something else. It's
+     * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfiguration}, or something else. It's
      * never {@code null}.
      * 
      * @since 2.3.24
@@ -595,7 +595,7 @@ public class Template extends Configurable {
      * Returns the output format (see {@link Configuration#setOutputFormat(OutputFormat)}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:
      * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
-     * provided by {@link Configuration#getTemplateConfigurers()}) and the {@code #ftl} header's {@code output_format}
+     * provided by {@link Configuration#getTemplateConfigurations()}) and the {@code #ftl} header's {@code output_format}
      * option in the template.
      * 
      * @since 2.3.24
@@ -608,7 +608,7 @@ public class Template extends Configurable {
      * Returns if the template actually uses auto-escaping (see {@link Configuration#setAutoEscapingPolicy(int)}). This value
      * is decided by the parser based on the actual {@link OutputFormat}, and the auto-escaping enums, in order of
      * increasing priority: {@link Configuration#getAutoEscapingPolicy()}, {@link ParserConfiguration#getAutoEscapingPolicy()}
-     * (which is usually provided by {@link Configuration#getTemplateConfigurers()}), and finally on the {@code #ftl}
+     * (which is usually provided by {@link Configuration#getTemplateConfigurations()}), and finally on the {@code #ftl}
      * header's {@code auto_esc} option in the template.
      * 
      * @since 2.3.24

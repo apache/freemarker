@@ -34,7 +34,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
@@ -347,11 +347,11 @@ public class DateFormatTest extends TemplateTest {
                 "m", new AliasTemplateDateFormatFactory("yyyy-MMM"),
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE));
         
-        TemplateConfigurer tc = new TemplateConfigurer();
+        TemplateConfiguration tc = new TemplateConfiguration();
         tc.setCustomDateFormats(ImmutableMap.of(
                 "m", new AliasTemplateDateFormatFactory("yyyy-MMMM"),
                 "i", new AliasTemplateDateFormatFactory("@epoch")));
-        cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*2*"), tc));
+        cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*2*"), tc));
         
         addToDataModel("d", TM);
         String commonFtl = "${d?string.@d} ${d?string.@m} "

@@ -28,16 +28,16 @@ import java.util.Locale;
 import org.junit.Test;
 
 import freemarker.cache.ByteArrayTemplateLoader;
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
-import freemarker.cache.FirstMatchTemplateConfigurerFactory;
-import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.FirstMatchTemplateConfigurationFactory;
+import freemarker.cache.MergingTemplateConfigurationFactory;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-public class TemplateConfigurerWithTemplateCacheTest {
+public class TemplateConfigurationWithTemplateCacheTest {
 
     private static final String TEXT_WITH_ACCENTS = "pr\u00F3ba";
 
@@ -123,9 +123,9 @@ public class TemplateConfigurerWithTemplateCacheTest {
                 ("<#ftl locale='fr_FR'>${.locale}"));
         cfg.setTemplateLoader(tl);
 
-        TemplateConfigurer tcDe = new TemplateConfigurer();
+        TemplateConfiguration tcDe = new TemplateConfiguration();
         tcDe.setLocale(Locale.GERMANY);
-        cfg.setTemplateConfigurers(new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(de)*"), tcDe));
+        cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(de)*"), tcDe));
         
         {
             Template t = cfg.getTemplate("(de).ftl");
@@ -154,15 +154,15 @@ public class TemplateConfigurerWithTemplateCacheTest {
         Configuration cfg = createCommonEncodingTesterConfig();
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
         
-        TemplateConfigurer tcDE = new TemplateConfigurer();
+        TemplateConfiguration tcDE = new TemplateConfiguration();
         tcDE.setLocale(Locale.GERMANY);
-        TemplateConfigurer tcYN = new TemplateConfigurer();
+        TemplateConfiguration tcYN = new TemplateConfiguration();
         tcYN.setBooleanFormat("Y,N");
-        cfg.setTemplateConfigurers(
-                    new MergingTemplateConfigurerFactory(
-                            cfg.getTemplateConfigurers(),
-                            new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("utf16.ftl"), tcDE),
-                            new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("utf16.ftl"), tcYN)
+        cfg.setTemplateConfigurations(
+                    new MergingTemplateConfigurationFactory(
+                            cfg.getTemplateConfigurations(),
+                            new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("utf16.ftl"), tcDE),
+                            new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("utf16.ftl"), tcYN)
                     )
                 );
         
@@ -197,17 +197,17 @@ public class TemplateConfigurerWithTemplateCacheTest {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setLocale(Locale.US);
         
-        TemplateConfigurer tcFR = new TemplateConfigurer();
+        TemplateConfiguration tcFR = new TemplateConfiguration();
         tcFR.setLocale(Locale.FRANCE);
-        TemplateConfigurer tcYN = new TemplateConfigurer();
+        TemplateConfiguration tcYN = new TemplateConfiguration();
         tcYN.setBooleanFormat("Y,N");
-        TemplateConfigurer tc00 = new TemplateConfigurer();
+        TemplateConfiguration tc00 = new TemplateConfiguration();
         tc00.setNumberFormat("0.00");
-        cfg.setTemplateConfigurers(
-                new MergingTemplateConfigurerFactory(
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(fr)*"), tcFR),
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(yn)*"), tcYN),
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(00)*"), tc00)
+        cfg.setTemplateConfigurations(
+                new MergingTemplateConfigurationFactory(
+                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(fr)*"), tcFR),
+                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(yn)*"), tcYN),
+                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(00)*"), tc00)
                 )
         );
         
@@ -229,21 +229,21 @@ public class TemplateConfigurerWithTemplateCacheTest {
     public void testCustomAttributes() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         
-        TemplateConfigurer tc1 = new TemplateConfigurer();
+        TemplateConfiguration tc1 = new TemplateConfiguration();
         tc1.setCustomAttribute("a1", "a1tc1");
         tc1.setCustomAttribute("a2", "a2tc1");
         tc1.setCustomAttribute("a3", "a3tc1");
         CUST_ATT_1.set("ca1tc1", tc1);
         CUST_ATT_2.set("ca2tc1", tc1);
         
-        TemplateConfigurer tc2 = new TemplateConfigurer();
+        TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomAttribute("a1", "a1tc2");
         CUST_ATT_1.set("ca1tc2", tc2);
         
-        cfg.setTemplateConfigurers(
-                new MergingTemplateConfigurerFactory(
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(tc1)*"), tc1),
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*(tc2)*"), tc2)
+        cfg.setTemplateConfigurations(
+                new MergingTemplateConfigurationFactory(
+                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(tc1)*"), tc1),
+                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(tc2)*"), tc2)
                 )
         );
         
@@ -310,14 +310,14 @@ public class TemplateConfigurerWithTemplateCacheTest {
                 ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes("iso-8859-2"));
         cfg.setTemplateLoader(tl);
         
-        TemplateConfigurer tcUtf8 = new TemplateConfigurer();
+        TemplateConfiguration tcUtf8 = new TemplateConfiguration();
         tcUtf8.setEncoding("utf-8");
-        TemplateConfigurer tcUtf16 = new TemplateConfigurer();
+        TemplateConfiguration tcUtf16 = new TemplateConfiguration();
         tcUtf16.setEncoding("utf-16");
-        cfg.setTemplateConfigurers(
-                new FirstMatchTemplateConfigurerFactory(
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8),
-                        new ConditionalTemplateConfigurerFactory(new FileNameGlobMatcher("*utf16*"), tcUtf16)
+        cfg.setTemplateConfigurations(
+                new FirstMatchTemplateConfigurationFactory(
+                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8),
+                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*utf16*"), tcUtf16)
                 ).allowNoMatch(true));
         return cfg;
     }
