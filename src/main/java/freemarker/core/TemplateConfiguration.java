@@ -30,14 +30,14 @@ import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * Used for customizing the configuration settings for individual {@link Template}-s, relatively to the common setting
- * values coming from the {@link Configuration}. This was designed with the standard template loading mechanism of
- * FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}), though can also be reused
- * for custom template loading and caching solutions.
+ * Used for customizing the configuration settings for individual {@link Template}-s (or rather groups of templates),
+ * relatively to the common setting values coming from the {@link Configuration}. This was designed with the standard
+ * template loading mechanism of FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}
+ * ), though can also be reused for custom template loading and caching solutions.
  * 
  * <p>
- * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism
- * ({@link Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale}
+ * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism (
+ * {@link Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale}
  * specified here could have effect. The {@code locale} will be only set in the template that the localized looks has
  * already found.
  * 
@@ -54,26 +54,25 @@ import freemarker.template.utility.NullArgumentException;
  * you should be aware of a few more details:
  * 
  * <ul>
- * <li>This class implements both {@link Configurable} and
- * {@link ParserConfiguration}. This means that it can influence both the template parsing phase and the runtime
- * settings. For both aspects (i.e., {@link Configurable} and {@link ParserConfiguration}) to take effect, you have
- * first pass this object to the {@link Template} constructor (this is where the {@link ParserConfiguration} interface
- * is used), and then you have to call {@link #configure(Template)} on the resulting {@link Template} object (this is
- * where the {@link Configurable} aspect is used).
+ * <li>This class implements both {@link Configurable} and {@link ParserConfiguration}. This means that it can influence
+ * both the template parsing phase and the runtime settings. For both aspects (i.e., {@link ParserConfiguration} and
+ * {@link Configurable}) to take effect, you have first pass this object to the {@link Template} constructor
+ * (this is where the {@link ParserConfiguration} interface is used), and then you have to call {@link #apply(Template)}
+ * on the resulting {@link Template} object (this is where the {@link Configurable} aspect is used).
  * 
- * <li>{@link #configure(Template)} only change the settings that weren't yet set on the {@link Template} (but are
- * inherited from the {@link Configuration}). This is primarily because if the template configures itself via the
- * {@code #ftl} header, those values should have precedence. A consequence of this is that if you want to configure
- * the same {@link Template} with multiple {@link TemplateConfigurer}-s, you either should merge them to a single one
- * before that (with {@link #merge(TemplateConfigurer)}), or you have to apply them in reverse order of their intended
- * precedence. 
+ * <li>{@link #apply(Template)} only change the settings that weren't yet set on the {@link Template} (but are inherited
+ * from the {@link Configuration}). This is primarily because if the template configures itself via the {@code #ftl}
+ * header, those values should have precedence. A consequence of this is that if you want to configure the same
+ * {@link Template} with multiple {@link TemplateConfiguration}-s, you either should merge them to a single one before
+ * that (with {@link #merge(TemplateConfiguration)}), or you have to apply them in reverse order of their intended
+ * precedence.
  * </ul>
  * 
  * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, String)
  * 
  * @since 2.3.24
  */
-public final class TemplateConfigurer extends Configurable implements ParserConfiguration {
+public final class TemplateConfiguration extends Configurable implements ParserConfiguration {
 
     private boolean parentConfigurationSet;
     private Integer tagSyntax;
@@ -90,27 +89,24 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * be changed to the real parent {@link Configuration} when this object is added to the {@link Configuration}. (It's
      * not allowed to add the same instance to multiple {@link Configuration}-s).
      */
-    public TemplateConfigurer() {
+    public TemplateConfiguration() {
         super(Configuration.getDefaultConfiguration());
     }
 
     /**
      * Same as {@link #setParentConfiguration(Configuration)}.
-     * 
-     * @throws IllegalArgumentException
-     *             if the argument is {@code null} or not a {@link Configuration}.
      */
     @Override
     void setParent(Configurable cfg) {
         NullArgumentException.check("cfg", cfg);
         if (!(cfg instanceof Configuration)) {
-            throw new IllegalArgumentException("The parent of a TemplateConfigurer can only be a Configuration");
+            throw new IllegalArgumentException("The parent of a TemplateConfiguration can only be a Configuration");
         }
         
         if (parentConfigurationSet) {
             if (getParent() != cfg) {
                 throw new IllegalStateException(
-                        "This TemplateConfigurer is already associated with a different Configuration instance.");
+                        "This TemplateConfiguration is already associated with a different Configuration instance.");
             }
             return;
         }
@@ -118,7 +114,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
         if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22
                 && hasAnyConfigurableSet()) {
             throw new IllegalStateException(
-                    "This TemplateConfigurer can't be associated to a Configuration that has incompatibleImprovements "
+                    "This TemplateConfiguration can't be associated to a Configuration that has incompatibleImprovements "
                     + "less than 2.3.22, because it changes non-parser settings.");
         }
         
@@ -131,10 +127,12 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * when this instance is added to a {@link Configuration}. This method can be called only once (except with the same
      * {@link Configuration} parameter again, as that changes nothing anyway).
      * 
-     * @throws IllegalStateException
-     *             If the parent configuration was already set to a different {@link Configuration} instance.
      * @throws IllegalArgumentException
-     *             if the argument is {@code null}.
+     *             if the argument is {@code null} or not a {@link Configuration}
+     * @throws IllegalStateException
+     *             if this object is already associated to a different {@link Configuration} object,
+     *             or if the {@code Configuration} has {@code #getIncompatibleImprovements()} less than 2.3.22 and
+     *             this object tries to change any non-parser settings  
      */
     public void setParentConfiguration(Configuration cfg) {
         setParent(cfg);
@@ -148,11 +146,11 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     }
     
     /**
-     * Set all settings in this {@link TemplateConfigurer} that that were set in the parameter
-     * {@link TemplateConfigurer}, possibly overwriting the earlier value in this object. (A setting is said to be set
-     * in a {@link TemplateConfigurer} if it was explicitly set via a setter method, as opposed to be inherited.)
+     * Set all settings in this {@link TemplateConfiguration} that were set in the parameter
+     * {@link TemplateConfiguration}, possibly overwriting the earlier value in this object. (A setting is said to be
+     * set in a {@link TemplateConfiguration} if it was explicitly set via a setter method, as opposed to be inherited.)
      */
-    public void merge(TemplateConfigurer tc) {
+    public void merge(TemplateConfiguration tc) {
         if (tc.isAPIBuiltinEnabledSet()) {
             setAPIBuiltinEnabled(tc.isAPIBuiltinEnabled());
         }
@@ -246,8 +244,8 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
 
     /**
      * Sets the settings of the {@link Template} which are not yet set in the {@link Template} and are set in this
-     * {@link TemplateConfigurer}, leaves the other settings as is. A setting is said to be set in a
-     * {@link TemplateConfigurer} or {@link Template} if it was explicitly set via a setter method on that object, as
+     * {@link TemplateConfiguration}, leaves the other settings as is. A setting is said to be set in a
+     * {@link TemplateConfiguration} or {@link Template} if it was explicitly set via a setter method on that object, as
      * opposed to be inherited from the {@link Configuration}.
      * 
      * <p>
@@ -257,13 +255,13 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
      */
-    public void configure(Template template) {
+    public void apply(Template template) {
         checkParentConfigurationSet();
         Configuration cfg = getParentConfiguration();
         if (template.getConfiguration() != cfg) {
             // This is actually not a problem right now, but for future BC we enforce this.
             throw new IllegalArgumentException(
-                    "The argument Template doesn't belong to the same Configuration as the TemplateConfigurer");
+                    "The argument Template doesn't belong to the same Configuration as the TemplateConfiguration");
         }
 
         if (isAPIBuiltinEnabledSet() && !template.isAPIBuiltinEnabledSet()) {
@@ -494,7 +492,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
     @Override
     public void setStrictBeanModels(boolean strict) {
         throw new UnsupportedOperationException(
-                "Setting strictBeanModels on " + TemplateConfigurer.class.getSimpleName() + " level isn't supported.");
+                "Setting strictBeanModels on " + TemplateConfiguration.class.getSimpleName() + " level isn't supported.");
     }
 
     public String getEncoding() {
@@ -512,7 +510,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
      * <p>
      * If you are developing your own template loading/caching mechanism instead of the standard one, note that the
      * above behavior is not guaranteed by this class alone; you have to ensure it. Also, read the note on
-     * {@code encoding} in the documentation of {@link #configure(Template)}.
+     * {@code encoding} in the documentation of {@link #apply(Template)}.
      */
     public void setEncoding(String encoding) {
         NullArgumentException.check("encoding", encoding);
@@ -537,7 +535,7 @@ public final class TemplateConfigurer extends Configurable implements ParserConf
 
     private void checkParentConfigurationSet() {
         if (!parentConfigurationSet) {
-            throw new IllegalStateException("The TemplateConfigurer wasn't associated with a Configuration yet.");
+            throw new IllegalStateException("The TemplateConfiguration wasn't associated with a Configuration yet.");
         }
     }
 

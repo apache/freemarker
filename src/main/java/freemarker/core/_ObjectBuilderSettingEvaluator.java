@@ -36,11 +36,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import freemarker.cache.AndMatcher;
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileExtensionMatcher;
 import freemarker.cache.FileNameGlobMatcher;
-import freemarker.cache.FirstMatchTemplateConfigurerFactory;
-import freemarker.cache.MergingTemplateConfigurerFactory;
+import freemarker.cache.FirstMatchTemplateConfigurationFactory;
+import freemarker.cache.MergingTemplateConfigurationFactory;
 import freemarker.cache.NotMatcher;
 import freemarker.cache.OrMatcher;
 import freemarker.cache.PathGlobMatcher;
@@ -661,7 +661,7 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, BeansWrapper.class);
             addWithSimpleName(SHORTHANDS, SimpleObjectWrapper.class);
 
-            addWithSimpleName(SHORTHANDS, TemplateConfigurer.class);
+            addWithSimpleName(SHORTHANDS, TemplateConfiguration.class);
             
             addWithSimpleName(SHORTHANDS, PathGlobMatcher.class);
             addWithSimpleName(SHORTHANDS, FileNameGlobMatcher.class);
@@ -671,9 +671,9 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, OrMatcher.class);
             addWithSimpleName(SHORTHANDS, NotMatcher.class);
             
-            addWithSimpleName(SHORTHANDS, ConditionalTemplateConfigurerFactory.class);
-            addWithSimpleName(SHORTHANDS, MergingTemplateConfigurerFactory.class);
-            addWithSimpleName(SHORTHANDS, FirstMatchTemplateConfigurerFactory.class);
+            addWithSimpleName(SHORTHANDS, ConditionalTemplateConfigurationFactory.class);
+            addWithSimpleName(SHORTHANDS, MergingTemplateConfigurationFactory.class);
+            addWithSimpleName(SHORTHANDS, FirstMatchTemplateConfigurationFactory.class);
 
             addWithSimpleName(SHORTHANDS, HTMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, XMLOutputFormat.class);

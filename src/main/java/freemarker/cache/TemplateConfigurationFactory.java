@@ -20,21 +20,21 @@ package freemarker.cache;
 
 import java.io.IOException;
 
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 /**
- * Creates (or returns) {@link TemplateConfigurer}-s for template sources.
+ * Creates (or returns) {@link TemplateConfiguration}-s for template sources.
  * 
  * @since 2.3.24
  */
-public abstract class TemplateConfigurerFactory {
+public abstract class TemplateConfigurationFactory {
     
     private Configuration cfg;
 
     /**
-     * Returns (maybe creates) the {@link TemplateConfigurer} for the given template source.
+     * Returns (maybe creates) the {@link TemplateConfiguration} for the given template source.
      * 
      * @param sourceName
      *            The name (path) that was used for {@link TemplateLoader#findTemplateSource(String)}. See
@@ -42,28 +42,28 @@ public abstract class TemplateConfigurerFactory {
      * @param templateSource
      *            The object returned by {@link TemplateLoader#findTemplateSource(String)}.
      * 
-     * @return The {@link TemplateConfigurer} to apply, or {@code null} if the there's no {@link TemplateConfigurer} for
+     * @return The {@link TemplateConfiguration} to apply, or {@code null} if the there's no {@link TemplateConfiguration} for
      *         this template source.
      * 
      * @throws IOException
      *             Typically, if there factory needs further I/O to find out more about the template source, but that
      *             fails.
-     * @throws TemplateConfigurerFactoryException
+     * @throws TemplateConfigurationFactoryException
      *             If there's a problem that's specific to the factory logic.
      */
-    public abstract TemplateConfigurer get(String sourceName, Object templateSource)
-            throws IOException, TemplateConfigurerFactoryException;
+    public abstract TemplateConfiguration get(String sourceName, Object templateSource)
+            throws IOException, TemplateConfigurationFactoryException;
     
     /**
-     * Binds this {@link TemplateConfigurerFactory} to a {@link Configuration}. Once it's bound, it can't be bound to
+     * Binds this {@link TemplateConfigurationFactory} to a {@link Configuration}. Once it's bound, it can't be bound to
      * another {@link Configuration} any more. This is automatically called by
-     * {@link Configuration#setTemplateConfigurers(TemplateConfigurerFactory)}.
+     * {@link Configuration#setTemplateConfigurations(TemplateConfigurationFactory)}.
      */
     public final void setConfiguration(Configuration cfg) {
         if (this.cfg != null) {
             if (cfg != this.cfg) {
                 throw new IllegalStateException(
-                        "The TemplateConfigurerFactory is already bound to another Configuration");
+                        "The TemplateConfigurationFactory is already bound to another Configuration");
             }
             return;
         } else {
@@ -81,9 +81,9 @@ public abstract class TemplateConfigurerFactory {
     }
     
     /**
-     * Calls {@link TemplateConfigurer#setParentConfiguration(Configuration)} on each enclosed
-     * {@link TemplateConfigurer} and {@link TemplateConfigurerFactory#setConfiguration(Configuration)}
-     * on each enclosed {@link TemplateConfigurerFactory} objects. It only supposed to call these on the direct
+     * Calls {@link TemplateConfiguration#setParentConfiguration(Configuration)} on each enclosed
+     * {@link TemplateConfiguration} and {@link TemplateConfigurationFactory#setConfiguration(Configuration)}
+     * on each enclosed {@link TemplateConfigurationFactory} objects. It only supposed to call these on the direct
      * "children" of this object, not on the children of the children.
      */
     protected abstract void setConfigurationOfChildren(Configuration cfg);

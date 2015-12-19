@@ -19,17 +19,17 @@
 package freemarker.cache;
 
 /**
- * Non-I/O exception thrown by {@link TemplateConfigurerFactory}-s.  
+ * Non-I/O exception thrown by {@link TemplateConfigurationFactory}-s.  
  * 
  * @since 2.3.24
  */
-public class TemplateConfigurerFactoryException extends Exception {
+public class TemplateConfigurationFactoryException extends Exception {
 
-    public TemplateConfigurerFactoryException(String message) {
+    public TemplateConfigurationFactoryException(String message) {
         super(message);
     }
 
-    public TemplateConfigurerFactoryException(String message, Throwable cause) {
+    public TemplateConfigurationFactoryException(String message, Throwable cause) {
         super(message, cause);
     }
 

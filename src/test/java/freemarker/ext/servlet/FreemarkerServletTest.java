@@ -38,13 +38,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
-import freemarker.cache.ConditionalTemplateConfigurerFactory;
+import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
-import freemarker.cache.FirstMatchTemplateConfigurerFactory;
+import freemarker.cache.FirstMatchTemplateConfigurationFactory;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.Environment;
-import freemarker.core.TemplateConfigurer;
+import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -491,7 +491,7 @@ public class FreemarkerServletTest {
         @Override
         protected Configuration createConfiguration() {
             Configuration cfg = super.createConfiguration();
-            // Needed for the TemplateConfigurer that sets outputEncoding:
+            // Needed for the TemplateConfiguration that sets outputEncoding:
             cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
 
             // Set a test runner environment independent default locale:
@@ -499,17 +499,17 @@ public class FreemarkerServletTest {
             cfg.setDefaultEncoding(CFG_DEFAULT_ENCODING);
 
             {
-                TemplateConfigurer outUtf8TC = new TemplateConfigurer();
+                TemplateConfiguration outUtf8TC = new TemplateConfiguration();
                 outUtf8TC.setOutputEncoding("UTF-8");
                 
-                TemplateConfigurer srcUtf8TC = new TemplateConfigurer();
+                TemplateConfiguration srcUtf8TC = new TemplateConfiguration();
                 srcUtf8TC.setEncoding("UTF-8");
                 
-                cfg.setTemplateConfigurers(
-                        new FirstMatchTemplateConfigurerFactory(
-                                new ConditionalTemplateConfigurerFactory(
+                cfg.setTemplateConfigurations(
+                        new FirstMatchTemplateConfigurationFactory(
+                                new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher(FOO_SRC_UTF8_FTL), srcUtf8TC),
-                                new ConditionalTemplateConfigurerFactory(
+                                new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher(FOO_OUT_UTF8_FTL), outUtf8TC)
                         )
                         .allowNoMatch(true)

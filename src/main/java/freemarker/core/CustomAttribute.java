@@ -131,15 +131,15 @@ public class CustomAttribute {
     }
     
     /**
-     * Same as {@link #get(Template)}, but applies to a {@link TemplateConfigurer}.  
+     * Same as {@link #get(Template)}, but applies to a {@link TemplateConfiguration}.  
      * 
      * @since 2.3.24
      */
-    public Object get(TemplateConfigurer templateConfigurer) {
+    public Object get(TemplateConfiguration templateConfiguration) {
         if (scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        return templateConfigurer.getCustomAttribute(key, this);
+        return templateConfiguration.getCustomAttribute(key, this);
     }
     
     /**
@@ -209,15 +209,15 @@ public class CustomAttribute {
     }
 
     /**
-     * Same as {@link #set(Object, Template)}, but applicable to a {@link TemplateConfigurer}. 
+     * Same as {@link #set(Object, Template)}, but applicable to a {@link TemplateConfiguration}. 
      * 
      * @since 2.3.24
      */
-    public final void set(Object value, TemplateConfigurer templateConfigurer) {
+    public final void set(Object value, TemplateConfiguration templateConfiguration) {
         if (scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        templateConfigurer.setCustomAttribute(key, value);
+        templateConfiguration.setCustomAttribute(key, value);
     }
     
     /**

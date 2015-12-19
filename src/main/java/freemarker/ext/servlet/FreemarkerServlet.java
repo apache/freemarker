@@ -199,7 +199,7 @@ import freemarker.template.utility.StringUtil;
  * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template usually comes
  * from {@link Configuration#getDefaultEncoding()} (i.e., from the {@code default_encoding} FreeMarker setting),
  * occasionally from {@link Configuration#getEncoding(Locale)} (when FreeMarker was configured to use different charsets
- * depending on the locale) or even more rarely from {@link Configuration#getTemplateConfigurers()} (when FreeMarker was
+ * depending on the locale) or even more rarely from {@link Configuration#getTemplateConfigurations()} (when FreeMarker was
  * configured to use a specific charset for certain templates).
  * <li>{@value #INIT_PARAM_VALUE_FROM_TEMPLATE}: This should be used in most applications, but it's not the default for
  * backward compatibility. It reads the {@link Configurable#getOutputEncoding()} setting of the template (note that the
