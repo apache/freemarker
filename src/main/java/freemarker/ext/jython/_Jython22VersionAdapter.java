@@ -19,8 +19,10 @@
 
 package freemarker.ext.jython;
 
-import org.python.core.PyJavaInstance;
+import java.lang.reflect.Method;
+
 import org.python.core.PyObject;
+import org.python.core.PyType;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
@@ -30,16 +32,40 @@ import org.python.core.PyObject;
  */
 public class _Jython22VersionAdapter extends JythonVersionAdapter {
 
+    @Override
     public boolean isPyInstance(Object obj) {
-        return obj instanceof PyJavaInstance;
+        return obj != null && getPyInstanceClass().isAssignableFrom(obj.getClass());
     }
 
+    @Override
     public Object pyInstanceToJava(Object pyInstance) {
-        return ((PyJavaInstance) pyInstance).__tojava__(java.lang.Object.class);
+        try {
+            // java.lang.Object org.python.core.PyInstance#__tojava__(java.lang.Class)
+            final Method toJavaMethod = getPyInstanceClass().getMethod("__tojava__", Class.class);
+            return toJavaMethod.invoke(pyInstance, Object.class);
+        } catch (Exception ex) {
+            throw new IllegalStateException(
+                    "Fail to invoke pyInstance.__tojava__() - " + ex.getClass().getName() + ": " + ex.getMessage());
+        }
     }
 
+    @Override
     public String getPythonClassName(PyObject pyObject) {
-        return pyObject.getType().getFullName();
+        try {
+            // org.python.core.PyType org.python.core.PyObject#getType()
+            Method getTypeMethod = PyObject.class.getMethod("getType");
+            PyType pyType = (PyType) getTypeMethod.invoke(pyObject);
+            // java.lang.String org.python.core.PyType#getFullName()
+            Method getFullNameMethod = PyType.class.getMethod("getFullName");
+            return (String) getFullNameMethod.invoke(pyType);
+        } catch (Exception ex) {
+            throw new IllegalStateException(
+                    "Fail to invoke pyObject.getType().getFullName() - " + ex.getClass().getName() + ": " + ex.getMessage());
+        }
     }
 
+    @Override
+    protected String getPyInstanceClassName() {
+        return "org.python.core.PyJavaInstance";
+    }
 }

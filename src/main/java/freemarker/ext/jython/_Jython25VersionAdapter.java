@@ -45,4 +45,9 @@ public class _Jython25VersionAdapter extends JythonVersionAdapter {
         return pyObject.getType().getName();
     }
 
+    @Override
+    protected String getPyInstanceClassName() {
+        return PyInstance.class.getName();
+    }
+
 }
