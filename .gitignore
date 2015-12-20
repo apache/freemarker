@@ -7,3 +7,12 @@
 
 src/manual/book.xml~
 
+*.iml
+*.iws
+*.ipr
+.idea
+.DS_Store
+.DS_Store?
+.Trashes
+*~
+
