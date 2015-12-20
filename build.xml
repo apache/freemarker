@@ -548,6 +548,7 @@
   
   <macrodef name="manual" uri="http://freemarker.org/util">
     <attribute name="offline" />
+    <attribute name="locale" />
     <sequential>
       <ivy:cachepath conf="manual" pathid="ivy.dep" />
       <taskdef resource="org/freemarker/docgen/antlib.properties"
@@ -556,20 +557,28 @@
       />
       
       <docgen:transform
-        srcdir="src/manual" destdir="build/manual"
+        srcdir="src/manual/@{locale}" destdir="build/manual/@{locale}"
         offline="@{offline}"
       />
     </sequential>
   </macrodef>
   
   <target name="manualOffline" depends="init" description="Build the Manual for offline use" >
-    <u:manual offline="true" />
+    <u:manual offline="true" locale="en_US" />
   </target>
 
   <target name="manualFreemarkerOrg" depends="init" description="Build the Manual to be upload to freemarker.org" >
-    <u:manual offline="false" />
+    <u:manual offline="false" locale="en_US" />
+  </target>
+  
+  <target name="manualOffline_zh_CN" depends="init" description="Build the Manual for offline use" >
+    <u:manual offline="true" locale="zh_CN" />
   </target>
 
+  <target name="manualFreemarkerOrg_zh_CN" depends="init" description="Build the Manual to be upload to freemarker.org" >
+    <u:manual offline="false" locale="zh_CN" />
+  </target>
+  
   <!-- ====================== -->
   <!-- Examples               -->
   <!-- ====================== -->
@@ -680,8 +689,13 @@
     <copy todir="${dist.dir}/">
       <fileset dir="src/dist/" />
     </copy>
+    <!--
+      The US English Manual is the source of any translations and this it's the
+      only one that is guaranteed to be up to date when doing the release, so we only pack
+      that into it.
+    -->
     <copy todir="${dist.dir}/documentation/_html" includeEmptyDirs="no">
-      <fileset dir="build/manual" />
+      <fileset dir="build/manual/en-US" />
     </copy>
     <copy todir="${dist.dir}/documentation/_html/api" includeEmptyDirs="no">
       <fileset dir="build/api" />
