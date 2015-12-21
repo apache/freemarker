@@ -72,6 +72,7 @@ import freemarker.core.TemplateConfiguration;
 import freemarker.core.TemplateMarkupOutputModel;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
+import freemarker.core.XHTMLOutputFormat;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
@@ -339,6 +340,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         STANDARD_OUTPUT_FORMATS = new HashMap<String, OutputFormat>();
         STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(XHTMLOutputFormat.INSTANCE.getName(), XHTMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(XMLOutputFormat.INSTANCE.getName(), XMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(RTFOutputFormat.INSTANCE.getName(), RTFOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(PlainTextOutputFormat.INSTANCE.getName(), PlainTextOutputFormat.INSTANCE);

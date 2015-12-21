@@ -5322,6 +5322,20 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
 
                 <td><literal>HTMLOutputFormat.INSTANCE</literal></td>
               </tr>
+
+              <tr>
+                <td><literal>XHTML</literal></td>
+
+                <td>Escapes <literal>&lt;</literal>, <literal>&gt;</literal>,
+                <literal>&amp;</literal>, <literal>"</literal>,
+                <literal>'</literal> as <literal>&amp;lt;</literal>,
+                <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;#39;</literal></td>
+
+                <td><literal>application/xhtml+xml</literal></td>
+
+                <td><literal>XHTMLOutputFormat.INSTANCE</literal></td>
+              </tr>
             </tbody>
 
             <tbody>
