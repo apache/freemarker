@@ -951,6 +951,13 @@ public class ObjectBuilderSettingsTest {
             assertThat(e.getMessage(),
                     containsString("freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST"));
         }
+        try {
+            assertEqualsEvaled(123, "java.lang.String(freemarker.core.ObjectBuilderSettingsTest$TestBean5.INSTANCE)");
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(),
+                    containsString("freemarker.core.ObjectBuilderSettingsTest$TestBean5()"));
+        }
     }
     
     private void assertEqualsEvaled(Object expectedValue, String s)
