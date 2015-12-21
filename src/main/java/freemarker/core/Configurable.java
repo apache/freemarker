@@ -1887,6 +1887,8 @@ public class Configurable {
      *            The keys and values can be any kind of expression, like even object builder expressions.
      *            The resulting Java object will be a {@link Map} that keeps the item order ({@link LinkedHashMap} as
      *            of this writing).
+     *        <li>A reference to a public static filed, like {@code Configuration.AUTO_DETECT_TAG_SYNTAX} or
+     *            {@code com.example.MyClass.MY_CONSTANT}.
      *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
      *      </ul>
      *   </li>
@@ -1901,13 +1903,13 @@ public class Configurable {
      *     can't be omitted for nested expressions.
      *   </li>
      *   <li>
-     *     <p>The following classes can be referred to with short class name instead of full qualified name:
+     *     <p>The following classes can be referred to with simple (unqualified) name instead of fully qualified name:
      *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
      *     {@link TemplateConfiguration}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link UndefinedOutputFormat}.
+     *     {@link UndefinedOutputFormat}, {@link Configuration}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such

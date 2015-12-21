@@ -913,6 +913,46 @@ public class ObjectBuilderSettingsTest {
                 "{ -1: -11, -0.5: -0.55, -0.1bd: -0.11bd }");
     }
     
+    @Test
+    public void testStaticFields() throws Exception {
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean1("
+                    + "freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST, true)",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            assertEquals(TestStaticFields.CONST, (int) res.i);
+        }
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean1("
+                    + "p2 = freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST)",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            assertEquals(TestStaticFields.CONST, res.getP2());
+        }
+        assertEqualsEvaled(123, "freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST");
+        
+        // With shorthand class name:
+        assertEqualsEvaled(Configuration.AUTO_DETECT_TAG_SYNTAX, "Configuration.AUTO_DETECT_TAG_SYNTAX");
+        
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.ObjectBuilderSettingsTest$TestBean1("
+                    + "p2 = freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST())",
+                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(),
+                    containsString("freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST"));
+        }
+        try {
+            assertEqualsEvaled(123, "freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST()");
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getMessage(),
+                    containsString("freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST"));
+        }
+    }
+    
     private void assertEqualsEvaled(Object expectedValue, String s)
             throws _ObjectBuilderSettingEvaluationException, ClassNotFoundException, InstantiationException,
             IllegalAccessException {
@@ -1352,6 +1392,9 @@ public class ObjectBuilderSettingsTest {
         
     }
     
+    public static class TestStaticFields {
+        public static final int CONST = 123;
+    }
     
     public static class DummyArithmeticEngine extends ArithmeticEngine {
         

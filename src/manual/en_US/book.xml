@@ -26131,12 +26131,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Fixes and improvements in the <quote>object
-              builder</quote> syntax used for configuring FreeMarker from
-              <literal>java.util.Properties</literal> (or other string-only
-              sources). This is not to be confused with the template language
-              syntax, which has nothing to do with the <quote>object
-              builder</quote> syntax we are writing about here. The
-              improvements are:</para>
+              builder</quote> mini-language used for configuring FreeMarker
+              from <literal>java.util.Properties</literal> or other
+              string-only sources (not used in templates). This is not to be
+              confused with the template language syntax, which has nothing to
+              do with the <quote>object builder</quote> syntax we are writing
+              about here. The improvements are:</para>
 
               <itemizedlist>
                 <listitem>
@@ -26195,6 +26195,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>l</literal>), plus <literal>bd</literal> for
                   <literal>BigDecimal</literal> and <literal>bi</literal> for
                   <literal>BigInteger</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Public static fields can be referred, like
+                  <literal>com.example.MyClass.MY_CONSTANT</literal> or
+                  <literal>Configuration.AUTO_DETECT_TAG_SYNTAX</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
