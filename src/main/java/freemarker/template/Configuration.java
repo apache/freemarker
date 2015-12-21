@@ -1794,13 +1794,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Sets the (default) output format. Usually, you leave this on its default, which is
      * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like
-     * based on their "file" extension) with {@link #setTemplateConfigurations(TemplateConfigurationFactory)}. This setting is
-     * also overridden by the standard file extensions; see them at
+     * based on their "file" extension) with {@link #setTemplateConfigurations(TemplateConfigurationFactory)}. This
+     * setting is also overridden by the standard file extensions; see them at
      * {@link #setRecognizeStandardFileExtensions(boolean)}.
      * 
      * <p>
-     * The output format is mostly important because of auto-escaping (see {@link #setAutoEscapingPolicy(int)}), but maybe
-     * also used by the embedding application to set the HTTP response MIME type, etc.
+     * The output format is mostly important because of auto-escaping (see {@link #setAutoEscapingPolicy(int)}), but
+     * maybe also used by the embedding application to set the HTTP response MIME type, etc.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
      * @see #setTemplateConfigurations(TemplateConfigurationFactory)
@@ -1854,19 +1854,23 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Returns the output format for a name (not {@code null}).
+     * Returns the output format for a name.
      * 
-     * <p>
-     * The name can also refer to a combined format that's created ad-hoc from the registered formats. For example, if
-     * you need RTF embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
-     * existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is also valid.
+     * @param name
+     *            Either the name of the output format as it was registered with
+     *            {@link Configuration#setRegisteredCustomOutputFormats(Collection)}, or a combined output format name.
+     *            A output combined format is created ad-hoc from the registered formats. For example, if you need RTF
+     *            embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
+     *            existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is
+     *            also valid.
+     * 
+     * @return Not {@code null}.
      * 
      * @throws UnregisteredOutputFormatException
      *             If there's no output format registered with the given name.
      * @throws IllegalArgumentException
-     *             If the usage of <code>{</code> and <code>}</code> in the name is syntactically wrong, or if not
-     *             all {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <code>...{...}</code>
-     *             expression.
+     *             If the usage of <code>{</code> and <code>}</code> in the name is syntactically wrong, or if not all
+     *             {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <code>...{...}</code> expression.
      * 
      * @since 2.3.24
      */
@@ -1882,7 +1886,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             }
             
             MarkupOutputFormat outerOF = getMarkupOutputFormatForCombined(name.substring(0, openBrcIdx));
-            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombined(name.substring(openBrcIdx + 1, name.length() - 1));
+            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombined(
+                    name.substring(openBrcIdx + 1, name.length() - 1));
             
             return new CombinedMarkupOutputFormat(name, outerOF, innerOF);
         } else {
@@ -1943,8 +1948,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The default value is an empty collection.
      * 
      * @param registeredCustomOutputFormats
-     *            The collection of the {@link OutputFormat}-s, each must be different and has a unique name within this
-     *            collection.
+     *            The collection of the {@link OutputFormat}-s, each must be different and has a unique name (
+     *            {@link OutputFormat#getName()}) within this collection.
      * 
      * @throws IllegalArgumentException
      *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection. When
@@ -2002,7 +2007,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         this.registeredCustomOutputFormats = Collections.unmodifiableMap(m);
         
-        cache.clear();
+        clearTemplateCache();
     }
     
     /**

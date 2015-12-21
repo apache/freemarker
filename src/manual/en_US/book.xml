@@ -913,9 +913,9 @@ All Rights Reserved.
           extension to activate XML auto-escaping.</para>
 
           <para>You can try if auto-escaping is on like
-          <literal>${"&lt;"}</literal> (for HTML or XML escaping). If it's
-          not, and the configuration won't be adjusted, add this as the very
-          first line of the template:</para>
+          <literal>${"&lt;"}</literal> and then checking the raw output (for
+          HTML or XML escaping). If it's not, and the configuration won't be
+          adjusted, add this as the very first line of the template:</para>
 
           <programlisting role="template">&lt;#ftl output_format="HTML"&gt;</programlisting>
 
@@ -5282,7 +5282,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
           literal</link>. It also specifies a MIME type (e.g.
           <literal>"text/HTML"</literal>) and a canonical name (e.g.
           <literal>"HTML"</literal>) that the embedding application/framework
-          can leverage for its own purposes.</para>
+          can use for its own purposes.</para>
 
           <para>It's the programmer's responsibility to <link
           linkend="pgui_config_outputformatsautoesc">associate output format
@@ -5318,7 +5318,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
                 <literal>&amp;#39;</literal></td>
 
-                <td><literal>text/HTML</literal></td>
+                <td><literal>text/html</literal></td>
 
                 <td><literal>HTMLOutputFormat.INSTANCE</literal></td>
               </tr>
@@ -5370,8 +5370,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <td><literal>plainText</literal></td>
 
                 <td>Doesn't escape. Doesn't accept markup output values from
-                other output formats. The output format inside string
-                literals.</td>
+                other output formats.</td>
 
                 <td><literal>text/plain</literal></td>
 
@@ -5380,9 +5379,8 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
             </tbody>
           </informaltable>
 
-          <para>The programmers can extend this with their your own output
-          formats, so this is maybe not all the output formats in your
-          application!</para>
+          <para>The programmers can add their your own output formats, so this
+          is maybe not all the output formats in your application!</para>
         </section>
 
         <section xml:id="dgui_misc_autoescaping_overrideoformat">
@@ -5412,7 +5410,7 @@ ${"'"}  &lt;#-- Prints: &amp;apos; --&gt;</programlisting>
             output_format="XML" auto_esc=true&gt;</literal> might helps (and
             that means that FreeMarker was configured to use
             <quote>disable</quote> auto-escaping <emphasis>policy</emphasis>,
-            which is usually not recommended).</para>
+            which is generally not recommended).</para>
           </note>
 
           <para>The output format can also be applied to only a section of a
@@ -5431,16 +5429,16 @@ ${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
           everywhere in the template. This association sticks to the positions
           and won't change as the template executes. So if, for example, you
           call a macro from inside an <literal>outputformat</literal> block
-          that's defined outside that block, it won't get the output format of
-          it. Or, if you have a macro that's defined in a template with HTML
-          output format, no mater from where you call it, that macro will
-          always execute with HTML output format. This is like if you were
-          coloring each characters of the template files by output format in
-          the text editor, and then later when the templates are executed, it
-          only considers the color of the statement being executed. This gives
-          you firm control over the output format and hence escaping; you
-          don't have to consider the possible execution paths that can lead to
-          a point.</para>
+          and the called macro is defined outside that block, it won't get the
+          output format of it. Or, if you have a macro that's defined in a
+          template with HTML output format, no mater from where you call it,
+          that macro will always execute with HTML output format. This is like
+          if you were coloring each characters of the template files by output
+          format in the text editor, and then later when the templates are
+          executed, it only considers the color of the statement being
+          executed. This gives you firm control over the output format and
+          hence escaping; you don't have to consider the possible execution
+          paths that can lead to a point.</para>
         </section>
 
         <section xml:id="dgui_misc_autoescaping_disableautoesc">
@@ -5494,7 +5492,7 @@ ${'&amp;'}  &lt;#-- prints: &amp; --&gt;</programlisting>
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
 ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
 
-          <para>Of course, both <literal>autoesc</literal> and
+          <para>Naturally, both <literal>autoesc</literal> and
           <literal>?esc</literal> works inside <literal>noautoesc</literal>
           blocks too.</para>
         </section>
@@ -5502,7 +5500,7 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
         <section xml:id="dgui_misc_autoescaping_movalues">
           <title><quote>Markup output</quote> values</title>
 
-          <para>In FTL, <link linkend="dgui_datamodel_basics">values has
+          <para>In FTL, <link linkend="dgui_datamodel_basics">values have
           type</link>, like string, number, boolean, etc. One such type is
           called <quote>markup output</quote>. A value of that type is a piece
           of text that's already in the output format (like HTML), and hence
@@ -5524,11 +5522,11 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
             </listitem>
           </itemizedlist>
 
-          <para>Hence these can be used outside
+          <para>These can be useful outside
           <literal>${<replaceable>...</replaceable>}</literal> too. For
           example, here the caller of the <literal>infoBox</literal> macro can
-          decide if the message is plain text (that so needs escaping) or HTML
-          (that so mustn't be escaped):</para>
+          decide if the message is plain text (hence needs escaping) or HTML
+          (hence it mustn't be escaped):</para>
 
           <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 
@@ -5559,7 +5557,7 @@ Captured output: ${captured}</programlisting>
           <programlisting role="output">Just a string: &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
 Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
 
-          <para>Because the captured output is markup output it wasn't
+          <para>Because the captured output is markup output, it wasn't
           auto-escaped.</para>
 
           <para>It's important that markup output values aren't strings, and
@@ -5568,7 +5566,7 @@ Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
           etc., will give an error with them. You won't be able to pass them
           to Java methods for <literal>String</literal> parameters either. But
           sometimes you need the markup that's behind the value as a string,
-          and you can get that as
+          which you can get as
           <literal><replaceable>markupOutput</replaceable>?markup_string</literal>.
           Be sure you know what you are doing though. Applying string
           operations on markup (as opposed to on plain text) can result in
@@ -5584,7 +5582,7 @@ As expected:
 ${markupOutput1}
 ${markupOutput2}
 
-Double escaping:
+Possibly unintended double escaping:
 ${markupOutput1?markup_string}
 ${markupOutput2?markup_string}</programlisting>
 
@@ -5592,7 +5590,7 @@ ${markupOutput2?markup_string}</programlisting>
 &lt;b&gt;Test&lt;/b&gt;
 Foo &amp;amp; bar
 
-Double escaping:
+Possibly unintended double escaping:
 &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
 Foo &amp;amp;amp; bar</programlisting>
         </section>
@@ -5667,10 +5665,11 @@ RTF:  Failed</programlisting>
             that, which is the output format used for templates for which no
             output format was specified in the configuration:</para>
 
-            <programlisting role="template">&lt;#outputformat "HTML"&gt;&lt;#assign htmlMO&gt;&lt;p&gt;Test&lt;/#assign&gt;&lt;/#outputformat&gt;
+            <programlisting role="template">&lt;#-- We assume that we have "undefined" output format here. --&gt;
+
+&lt;#outputformat "HTML"&gt;&lt;#assign htmlMO&gt;&lt;p&gt;Test&lt;/#assign&gt;&lt;/#outputformat&gt;
 &lt;#outputformat "XML"&gt;&lt;#assign xmlMO&gt;&lt;p&gt;Test&lt;/p&gt;&lt;/#assign&gt;&lt;/#outputformat&gt;
 &lt;#outputformat "RTF"&gt;&lt;#assign rtfMO&gt;\par Test&lt;/#assign&gt;&lt;/#outputformat&gt;
-&lt;#-- We assume that we have "undefined" output format here. --&gt;
 HTML: ${htmlMO}
 XML:  ${xmlMO}
 RTF:  ${rtfMO}</programlisting>
@@ -5692,7 +5691,7 @@ RTF:  \par Test</programlisting>
             value</link> in one side, the other side gets promoted to markup
             output value of the same output format (if it's not already that),
             by escaping its string value, and finally the two markups are
-            concatenated to form a new markup value. Example:</para>
+            concatenated to form a new markup output value. Example:</para>
 
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
@@ -5703,8 +5702,8 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             markup values of different output formats, the right side operand
             is converted to the output format of the left side. If that's not
             possible, then the left side operand is converted to the output
-            format of the right side. If that wasn't possible either, that's
-            an error. (See the <link
+            format of the right side. If that isn't possible either, that's an
+            error. (See the <link
             linkend="dgui_misc_autoescaping_mixingoutputformats">limitations
             of conversions here</link>.)</para>
           </section>
@@ -5717,8 +5716,8 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             <literal>&lt;#assign s = "Hello ${name}!"&gt;</literal>), it's
             just a shorthand of using the <literal>+</literal> operator
             (<literal>&lt;#assign s = "Hello" + name + "!"&gt;</literal>).
-            Thus, <literal>${<replaceable>...</replaceable>}</literal> inside
-            string expressions isn't auto-escaped.</para>
+            Thus, <literal>${<replaceable>...</replaceable>}</literal>-s
+            inside string expressions aren't auto-escaped.</para>
 
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 &lt;#assign name = "Foo &amp; Bar"&gt;
@@ -5733,7 +5732,7 @@ ${s?replace('&amp;'), 'and'}</programlisting>
             <programlisting role="output">&amp;lt;p&amp;gt;Hello Foo &amp;amp; Bar!
 &lt;p&gt;Hello Foo &amp;amp; Bar!
 
-To prove that s didn't contain the value in escaped form:
+To prove that "s" didn't contain the value in escaped form:
 &amp;lt;p&amp;gt;Hello Foo and Bar!</programlisting>
           </section>
 
