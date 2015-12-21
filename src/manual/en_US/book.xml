@@ -5334,7 +5334,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
                 <literal>&amp;apos;</literal></td>
 
-                <td><literal>text/xml</literal></td>
+                <td><literal>application/xml</literal></td>
 
                 <td><literal>XMLOutputFormat.INSTANCE</literal></td>
               </tr>
@@ -26455,6 +26455,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Added <literal>XHTMLOutputFormat</literal> and
               <literal>TemplateXHTMLOutputModel</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>XMLOutputFormat</literal> now uses
+              application/xml MIME type instead of text/xml MIME type</para>
             </listitem>
 
             <listitem>

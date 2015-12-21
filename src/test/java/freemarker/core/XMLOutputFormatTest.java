@@ -54,7 +54,7 @@ public class XMLOutputFormatTest {
     
     @Test
     public void testGetMimeType() {
-        assertEquals("text/xml", INSTANCE.getMimeType());
+        assertEquals("application/xml", INSTANCE.getMimeType());
     }
     
 }

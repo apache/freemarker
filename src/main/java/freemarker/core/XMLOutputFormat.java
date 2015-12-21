@@ -47,7 +47,7 @@ public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLO
 
     @Override
     public String getMimeType() {
-        return "text/xml";
+        return "application/xml";
     }
 
     @Override
