@@ -26579,6 +26579,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>BigDecimal</literal> and <literal>bi</literal> for
                   <literal>BigInteger</literal>.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Public static fields can be referred, like
+                  <literal>com.example.MyClass.MY_CONSTANT</literal> or
+                  <literal>Configuration.AUTO_DETECT_TAG_SYNTAX</literal>.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
