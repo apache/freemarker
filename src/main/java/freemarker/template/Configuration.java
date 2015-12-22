@@ -1800,11 +1800,15 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets the (default) output format. Usually, you leave this on its default, which is
-     * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like
-     * based on their "file" extension) with {@link #setTemplateConfigurations(TemplateConfigurationFactory)}. This
-     * setting is also overridden by the standard file extensions; see them at
-     * {@link #setRecognizeStandardFileExtensions(boolean)}.
+     * Sets the default output format. Usually, you should leave this on its default, which is
+     * {@link UndefinedOutputFormat#INSTANCE}, and then use standard file extensions like "ftlh" (for HTML output) and
+     * ensure that {@link #setRecognizeStandardFileExtensions(boolean)} is {@code true} (see the description of standard
+     * file extensions there too). Where that approach doesn't fit, like you have no control over the file extensions,
+     * templates can be associated to output formats with patterns matching their name (their path) using
+     * {@link #setTemplateConfigurations(TemplateConfigurationFactory)}. Last not least, if all templates will have the
+     * same output format, you may use {@link #setOutputFormat(OutputFormat)} to set a value like
+     * {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note templates can specify their
+     * own output format like {@code <#ftl output_format="HTML">}, which overrides any configuration settings. 
      * 
      * <p>
      * The output format is mostly important because of auto-escaping (see {@link #setAutoEscapingPolicy(int)}), but
