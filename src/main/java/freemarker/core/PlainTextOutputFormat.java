@@ -19,12 +19,8 @@
 package freemarker.core;
 
 /**
- * Represents the plain text output format. Plain text is text without any characters with special meaning. As such, it
- * doesn't support escaping.
- * 
- * <p>
- * String literals in FTL expressions use this output format, which has importance when <code>${...}</code> is used
- * inside them.
+ * Represents the plain text output format (MIME type "text/plain", name "plainText"). This format doesn't support
+ * escaping. This format doesn't allow mixing in template output values of other output formats.
  * 
  * <p>
  * The main difference from {@link UndefinedOutputFormat} is that this format doesn't allow inserting values of another

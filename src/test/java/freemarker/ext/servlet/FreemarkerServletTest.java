@@ -57,6 +57,14 @@ public class FreemarkerServletTest {
     private static final String FOO_FTL = "foo.ftl";
     private static final String FOO_SRC_UTF8_FTL = "foo-src-utf8.ftl";
     private static final String FOO_OUT_UTF8_FTL = "foo-out-utf8.ftl";
+    private static final String STD_OUTPUT_FORMAT_HTML_FTL = "stdOutputFormatHTML.ftl";
+    private static final String STD_OUTPUT_FORMAT_XML_FTL = "stdOutputFormatXML.ftl";
+    private static final String STD_OUTPUT_FORMAT_XHTML_FTL = "stdOutputFormatXHTML.ftl";
+    private static final String STD_OUTPUT_FORMAT_JAVA_SCRIPT_FTL = "stdOutputFormatJavaScript.ftl";
+    private static final String STD_OUTPUT_FORMAT_JSON_FTL = "stdOutputFormatJSON.ftl";
+    private static final String STD_OUTPUT_FORMAT_CSS_FTL = "stdOutputFormatCSS.ftl";
+    private static final String STD_OUTPUT_FORMAT_PLAIN_TEXT_FTL = "stdOutputFormatPlainText.ftl";
+    private static final String STD_OUTPUT_FORMAT_RTF_FTL = "stdOutputFormatRTF.ftl";
 
     private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final String CFG_DEFAULT_ENCODING = "US-ASCII";
@@ -153,6 +161,42 @@ public class FreemarkerServletTest {
                 OUTPUT_FORMAT_HEADER_FTL, "application/json"); // <- request
     }
 
+    @Test
+    public void testStandardContentType() throws Exception {
+        assertResponseContentTypeEquals(
+                "text/html; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_HTML_FTL, null); // <- request
+        assertResponseContentTypeEquals(
+                "application/xhtml+xml; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_XHTML_FTL, null); // <- request
+        assertResponseContentTypeEquals(
+                "application/xml; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_XML_FTL, null); // <- request
+        assertResponseContentTypeEquals(
+                "application/javascript; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_JAVA_SCRIPT_FTL, null); // <- request
+        assertResponseContentTypeEquals(
+                "application/json; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_JSON_FTL, null); // <- request
+        assertResponseContentTypeEquals(
+                "text/css; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_CSS_FTL, null); // <- request
+        assertResponseContentTypeEquals(
+                "text/plain; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_PLAIN_TEXT_FTL, null); // <- request
+        assertResponseContentTypeEquals(
+                "application/rtf; charset=UTF-8", // <- expected
+                null, null, // <- init-params
+                STD_OUTPUT_FORMAT_RTF_FTL, null); // <- request
+    }
+    
     @Test
     public void testResponseLocaleInitParams() throws Exception {
         assertTemplateLocaleEquals(
@@ -524,12 +568,23 @@ public class FreemarkerServletTest {
             // Override default template loader
             if (templatePath.equals("class://")) {
                 StringTemplateLoader tl = new StringTemplateLoader();
+                
                 tl.putTemplate(FOO_FTL, "foo");
                 tl.putTemplate(FOO_SRC_UTF8_FTL, "foo");
                 tl.putTemplate(FOO_OUT_UTF8_FTL, "foo");
                 tl.putTemplate(CONTENT_TYPE_ATTR_FTL, "<#ftl attributes={ 'content_type': 'text/plain' }>foo");
                 tl.putTemplate(CONTENT_TYPE_ATTR_WITH_CHARSET_FTL, "<#ftl attributes={ 'content_type': 'text/plain; charset=UTF-8' }>foo");
                 tl.putTemplate(OUTPUT_FORMAT_HEADER_FTL, "<#ftl outputFormat='plainText'>foo");
+                
+                tl.putTemplate(STD_OUTPUT_FORMAT_HTML_FTL, "<#ftl outputFormat='HTML'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_XHTML_FTL, "<#ftl outputFormat='XHTML'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_XML_FTL, "<#ftl outputFormat='XML'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_JAVA_SCRIPT_FTL, "<#ftl outputFormat='JavaScript'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_JSON_FTL, "<#ftl outputFormat='JSON'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_CSS_FTL, "<#ftl outputFormat='CSS'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_PLAIN_TEXT_FTL, "<#ftl outputFormat='plainText'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_RTF_FTL, "<#ftl outputFormat='RTF'>");
+                
                 return tl;
             } else {
                 return super.createTemplateLoader(templatePath);

@@ -5383,12 +5383,41 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
               <tr>
                 <td><literal>plainText</literal></td>
 
-                <td>Doesn't escape. Doesn't accept markup output values from
-                other output formats.</td>
+                <td>Doesn't escape.</td>
 
                 <td><literal>text/plain</literal></td>
 
                 <td><literal>PlainTextOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>JavaScript</literal></td>
+
+                <td>Doesn't escape.</td>
+
+                <td><literal>application/javascript</literal></td>
+
+                <td><literal>JavaScriptOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>JSON</literal></td>
+
+                <td>Doesn't escape.</td>
+
+                <td><literal>application/json</literal></td>
+
+                <td><literal>JSONOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>CSS</literal></td>
+
+                <td>Doesn't escape.</td>
+
+                <td><literal>text/css</literal></td>
+
+                <td><literal>CSSOutputFormat.INSTANCE</literal></td>
               </tr>
             </tbody>
           </informaltable>
@@ -26479,6 +26508,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><literal>RTFOutputFormat</literal> now uses
               application/rtf MIME type instead of text/rtf</para>
+            </listitem>
+
+            <listitem>
+              <para>Added non-escaping formats (just for the MIME type):
+              <literal>JavaScriptOutputFormat</literal>,
+              <literal>JSONOutputFormat</literal>,
+              <literal>CSSOutputFormat</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added JavaScriptOutput</para>
             </listitem>
 
             <listitem>
