@@ -47,7 +47,7 @@ public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFO
 
     @Override
     public String getMimeType() {
-        return "text/rtf";
+        return "application/rtf";
     }
 
     @Override

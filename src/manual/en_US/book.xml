@@ -5360,7 +5360,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <literal>\</literal> as <literal>\{</literal>,
                 <literal>\}</literal>, <literal>\\</literal></td>
 
-                <td><literal>text/rtf</literal></td>
+                <td><literal>application/rtf</literal></td>
 
                 <td><literal>RTFOutputFormat.INSTANCE</literal></td>
               </tr>
@@ -26474,6 +26474,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><literal>XMLOutputFormat</literal> now uses
               application/xml MIME type instead of text/xml MIME type</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>RTFOutputFormat</literal> now uses
+              application/rtf MIME type instead of text/rtf</para>
             </listitem>
 
             <listitem>
