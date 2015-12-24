@@ -4119,7 +4119,7 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           value will be converted to string according the default number
           format. This may includes the maximum number of decimals, grouping,
           and like. Usually the programmer should set the default number
-          format; the template author don't have to deal with it (but he can
+          format; the template author doesn't have to deal with it (but he can
           with the <literal>number_format</literal> setting; see in the <link
           linkend="ref_directive_setting">documentation of
           <literal>setting</literal> directive</link>). Also, you can override
@@ -4168,8 +4168,8 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
 
           <para>If the expression evaluates to a date-like value then that
           will be transformed to a text according to a default format. Usually
-          the programmer should set the default format; you don't have to deal
-          with it (but if you care, <link
+          the programmer should set the default format; the template author
+          doesn't have to deal with it (but if you care, <link
           linkend="topic.dateTimeFormatSettings">see the
           <literal>date_format</literal>, <literal>time_format</literal> and
           <literal>datetime_format</literal> settings</link> in the
@@ -9163,30 +9163,594 @@ cfg.setTemplateConfigurations(
       <section xml:id="pgui_config_custom_formats">
         <title>Custom number and date/time formats</title>
 
-        <para>FreeMarker allows you to define your own number and
-        date/time/datetime formatter algorithms by implementing
-        <literal>freemarker.core.TemplateNumberFormatFactory</literal> and
-        <literal>freemarker.core.TemplateDateFormatFactory</literal>. These
-        formats can be registered with the
-        <literal>custom_number_formats</literal> and
-        <literal>custom_date_formats</literal> configuration settings. After
-        that, anywhere where you can specify formats with a
-        <literal>String</literal>, now you can refer to your custom format as
-        <literal>"@<replaceable>name</replaceable>"</literal>. So for example,
-        if you have registered your number format implementation with name
-        <literal>"smart"</literal>, then you could set the
-        <literal>number_format</literal> setting
-        (<literal>Configurable.setNumberFormat(String)</literal>) to
-        <literal>"@smart"</literal>, or issue
-        <literal>${n?string.@smart}</literal> or <literal>&lt;#setting
-        number_format="@smart"&gt;</literal> in a template.</para>
+        <section>
+          <title>Overview</title>
 
-        <para>[TODO] What other applications exist (aliasing, model-aware
-        formatters)</para>
+          <para>FreeMarker allows you to define your own number and
+          date/time/datetime formats, and associate a name to them. This
+          mechanism has several applications:</para>
 
-        <para>[TODO] Simple complete example</para>
+          <itemizedlist>
+            <listitem>
+              <para>Custom formatter algorithms: You can use your own
+              formatter algorithm instead of relying on those provided by
+              FreeMarker. For this, implement
+              <literal>freemarker.core.TemplateNumberFormatFactory</literal>
+              or <literal>freemarker.core.TemplateDateFormatFactory</literal>.
+              You will find a few examples of this <link
+              linkend="pgui_config_custom_formats_ex_cust_alg_simple">below</link>.</para>
+            </listitem>
 
-        <para>[TODO] Complex formatter example (base N with fallback)</para>
+            <listitem>
+              <para>Aliasing: You can give application-specific names (like
+              <quote>price</quote>, <quote>weight</quote>,
+              <quote>fileDate</quote>, <quote>logEventTime</quote>, etc.) to
+              other formats by using
+              <literal>AliasTemplateNumberFormatFactory</literal> and
+              <literal>AliasTemplateDateFormatFactory</literal>. Thus
+              templates can just refer to that name, like in
+              <literal>${lastModified?string.@fileDate}</literal>, instead of
+              specifying the format directly. Thus the formats can be
+              specified on a single central place (where you configure
+              FreeMarker), instead of being specified repeatedly in templates.
+              Also thus template authors don't have to enter complex and hard
+              to remember formatting patterns. <link
+              linkend="pgui_config_custom_formats_ex_alias">See example
+              below</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Model-sensitive formatting: Applications can put custom
+              <literal>freemarker.TemplateModel</literal>-s into the
+              data-model instead of dropping plain values (like
+              <literal>int</literal>-s, <literal>double</literal>-s, etc.)
+              into it, to attach rendering-related information to the value.
+              Custom formatters can utilize this information (for example, to
+              show the unit after numbers), as they receive the
+              <literal>TemplateModel</literal> itself, not the wrapped raw
+              value. <link
+              linkend="pgui_config_custom_formats_ex_model_aware">See example
+              below</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Format that prints markup instead of plain text: You might
+              want to use HTML tags (or other markup) in the formatted values,
+              such as coloring negative numbers to red or using HTML
+              <literal>sup</literal> element for exponents. This is possible
+              if you write a custom format as shown in previous cases, but
+              override the <literal>format</literal> method in the formatter
+              class so that it returns a
+              <literal>TemplateMarkupOutputModel</literal> instead of a
+              <literal>String</literal>. (You shouldn't just return the markup
+              as <literal>String</literal>, as then it might will be escaped;
+              see <link
+              linkend="dgui_misc_autoescaping">auto-escaping</link>.)</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Custom formats can be registered with the
+          <literal>custom_number_formats</literal> and
+          <literal>custom_date_formats</literal> configuration settings. After
+          that, anywhere where you can specify formats with a
+          <literal>String</literal>, now you can refer to your custom format
+          as <literal>"@<replaceable>name</replaceable>"</literal>. So for
+          example, if you have registered your number format implementation
+          with name <literal>"smart"</literal>, then you could set the
+          <literal>number_format</literal> setting
+          (<literal>Configurable.setNumberFormat(String)</literal>) to
+          <literal>"@smart"</literal>, or issue
+          <literal>${n?string.@smart}</literal> or <literal>&lt;#setting
+          number_format="@smart"&gt;</literal> in a template. Furthermore, you
+          can define parameters for your custom format, like <literal>"@smart
+          2"</literal>, and the interpretation of the parameters is up to your
+          formatter implementation.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_cust_alg_simple">
+          <title>Simple custom number format example</title>
+
+          <para>This custom number format shows numbers in hexadecimal
+          form:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Locale;
+
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.NumberUtil;
+
+public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+
+    public static final HexTemplateNumberFormatFactory INSTANCE
+            = new HexTemplateNumberFormatFactory();
+    
+    private HexTemplateNumberFormatFactory() {
+        // Defined to decrease visibility
+    }
+    
+    @Override
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException {
+        TemplateFormatUtil.checkHasNoParameters(params);
+        return HexTemplateNumberFormat.INSTANCE;
+    }
+
+    private static class HexTemplateNumberFormat extends TemplateNumberFormat {
+
+        private static final HexTemplateNumberFormat INSTANCE = new HexTemplateNumberFormat();
+        
+        private HexTemplateNumberFormat() { }
+        
+        @Override
+        public String formatToPlainText(TemplateNumberModel numberModel)
+                throws UnformattableValueException, TemplateModelException {
+            Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
+            try {
+                return Integer.toHexString(NumberUtil.toIntExact(n));
+            } catch (ArithmeticException e) {
+                throw new UnformattableValueException(n + " doesn't fit into an int");
+            }
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return false;
+        }
+
+        @Override
+        public String getDescription() {
+            return "hexadecimal int";
+        }
+        
+    }
+
+}</programlisting>
+
+          <para>We register the above format with name
+          <quote>hex</quote>:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+...
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats = ...;
+...
+customNumberFormats.put("hex", HexTemplateNumberFormatFactory.INSTANCE);
+...
+cfg.setCustomNumberFormats(customNumberFormats);</programlisting>
+
+          <para>Now we can use this format in templates:</para>
+
+          <programlisting role="template">${x?string.@hex}</programlisting>
+
+          <para>or even set it as the default number format:</para>
+
+          <programlisting role="unspecified">cfg.setNumberFormat("@hex");</programlisting>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_cust_algo_advanced">
+          <title>Advanced custom number format example</title>
+
+          <para>This is a more complex custom number format that shows how to
+          deal with parameters in the format string, also how to delegate to
+          another format:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Locale;
+
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.NumberUtil;
+import freemarker.template.utility.StringUtil;
+
+/**
+ * Shows a number in base N number system. Can only format numbers that fit into an {@code int},
+ * however, optionally you can specify a fallback format. This format has one required parameter,
+ * the numerical system base. That can be optionally followed by "|" and a fallback format.
+ */
+public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+
+    public static final BaseNTemplateNumberFormatFactory INSTANCE
+            = new BaseNTemplateNumberFormatFactory();
+    
+    private BaseNTemplateNumberFormatFactory() {
+        // Defined to decrease visibility
+    }
+    
+    @Override
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException {
+        TemplateNumberFormat fallbackFormat;
+        {
+            int barIdx = params.indexOf('|');
+            if (barIdx != -1) {
+                String fallbackFormatStr = params.substring(barIdx + 1);
+                params = params.substring(0, barIdx);
+                try {
+                    fallbackFormat = env.getTemplateNumberFormat(fallbackFormatStr, locale);
+                } catch (TemplateValueFormatException e) {
+                    throw new InvalidFormatParametersException(
+                            "Couldn't get the fallback number format (specified after the \"|\"), "
+                            + StringUtil.jQuote(fallbackFormatStr) + ". Reason: " + e.getMessage(),
+                            e);
+                }
+            } else {
+                fallbackFormat = null;
+            }
+        }
+        
+        int base;
+        try {
+            base = Integer.parseInt(params);
+        } catch (NumberFormatException e) {
+            if (params.length() == 0) {
+                throw new InvalidFormatParametersException(
+                        "A format parameter is required to specify the numerical system base.");
+            }
+            throw new InvalidFormatParametersException(
+                    "The format paramter must be an integer, but was (shown quoted): "
+                    + StringUtil.jQuote(params));
+        }
+        if (base &lt; 2) {
+            throw new InvalidFormatParametersException("A base must be at least 2.");
+        }
+        return new BaseNTemplateNumberFormat(base, fallbackFormat);
+    }
+
+    private static class BaseNTemplateNumberFormat extends TemplateNumberFormat {
+
+        private final int base;
+        private final TemplateNumberFormat fallbackFormat;
+        
+        private BaseNTemplateNumberFormat(int base, TemplateNumberFormat fallbackFormat) {
+            this.base = base;
+            this.fallbackFormat = fallbackFormat;
+        }
+        
+        @Override
+        public String formatToPlainText(TemplateNumberModel numberModel)
+                throws TemplateModelException, TemplateValueFormatException {
+            Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
+            try {
+                return Integer.toString(NumberUtil.toIntExact(n), base);
+            } catch (ArithmeticException e) {
+                if (fallbackFormat == null) {
+                    throw new UnformattableValueException(
+                            n + " doesn't fit into an int, and there was no fallback format "
+                            + "specified.");
+                } else {
+                    return fallbackFormat.formatToPlainText(numberModel);
+                }
+            }
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return false;
+        }
+
+        @Override
+        public String getDescription() {
+            return "base " + base;
+        }
+        
+    }
+
+}</programlisting>
+
+          <para>We register the above format with name
+          <quote>base</quote>:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+...
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats = ...;
+...
+customNumberFormats.put("hex", BaseNTemplateNumberFormatFactory.INSTANCE);
+...
+cfg.setCustomNumberFormats(customNumberFormats);</programlisting>
+
+          <para>Now we can use this format in templates:</para>
+
+          <programlisting role="template">${x?string.@base_8}</programlisting>
+
+          <para>Above there the parameter string was <literal>"8"</literal>,
+          as FreeMarker allows separating that from the format name with
+          <literal>_</literal> instead of whitespace, so that you don't have
+          to write the longer
+          <literal><replaceable>n</replaceable>?string["@base 8"]</literal>
+          form.</para>
+
+          <para>Of course, we could also set this as the default number format
+          like:</para>
+
+          <programlisting role="unspecified">cfg.setNumberFormat("@base 8");</programlisting>
+
+          <para>Here's an example of using the a fallback number format (which
+          is <literal>"0.0###"</literal>):</para>
+
+          <programlisting role="unspecified">cfg.setNumberFormat("@base 8|0.0###");</programlisting>
+
+          <para>Note that this functionality, with the <literal>|</literal>
+          syntax and all, is purely implemented in the example code
+          earlier.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_cust_algo_date">
+          <title>Custom date/time format example</title>
+
+          <para>This simple date format formats the date/time value to the
+          milliseconds since the epoch:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateModelException;
+
+public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFactory {
+
+    public static final EpochMillisTemplateDateFormatFactory INSTANCE
+            = new EpochMillisTemplateDateFormatFactory();
+    
+    private EpochMillisTemplateDateFormatFactory() {
+        // Defined to decrease visibility
+    }
+    
+    @Override
+    public TemplateDateFormat get(String params, int dateType,
+            Locale locale, TimeZone timeZone, boolean zonelessInput,
+            Environment env)
+            throws InvalidFormatParametersException {
+        TemplateFormatUtil.checkHasNoParameters(params);
+        return EpochMillisTemplateDateFormat.INSTANCE;
+    }
+
+    private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
+
+        private static final EpochMillisTemplateDateFormat INSTANCE
+                = new EpochMillisTemplateDateFormat();
+        
+        private EpochMillisTemplateDateFormat() { }
+        
+        @Override
+        public String formatToPlainText(TemplateDateModel dateModel)
+                throws UnformattableValueException, TemplateModelException {
+            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return false;
+        }
+
+        @Override
+        public boolean isTimeZoneBound() {
+            return false;
+        }
+
+        @Override
+        public Date parse(String s, int dateType) throws UnparsableValueException {
+            try {
+                return new Date(Long.parseLong(s));
+            } catch (NumberFormatException e) {
+                throw new UnparsableValueException("Malformed long");
+            }
+        }
+
+        @Override
+        public String getDescription() {
+            return "millis since the epoch";
+        }
+        
+    }
+
+}</programlisting>
+
+          <para>We register the above format with name
+          <quote>epoch</quote>:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+...
+Map&lt;String, TemplateDateFormatFactory&gt; customDateFormats = ...;
+...
+customDateFormats.put("epoch", EpochMillisTemplateDateFormatFactory.INSTANCE);
+...
+cfg.setCustomDateFormats(customDateFormats);</programlisting>
+
+          <para>Now we can use this format in templates:</para>
+
+          <programlisting role="template">${t?string.@epoch}</programlisting>
+
+          <para>Of course, we could also set this as the default date-time
+          format like:</para>
+
+          <programlisting role="unspecified">cfg.setDateTimeFormat("@epoch");</programlisting>
+
+          <para>For a more complex that for example uses format parameters,
+          refer to the <link
+          linkend="pgui_config_custom_formats_ex_cust_algo_advanced">advanced
+          number format example</link>. Doing that with date formats is very
+          similar.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_alias">
+          <title>Alias format example</title>
+
+          <para>In this example we specify some number formats and date
+          formats that are aliases to another format:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats
+        = new HashMap&lt;String, TemplateNumberFormatFactory&gt;();
+customNumberFormats.put("price", new AliasTemplateNumberFormatFactory(",000.00"));
+customNumberFormats.put("weight",
+        new AliasTemplateNumberFormatFactory("0.##;; roundingMode=halfUp"));
+cfg.setCustomNumberFormats(customNumberFormats);
+
+Map&lt;String, TemplateDateFormatFactory&gt; customDateFormats
+        = new HashMap&lt;String, TemplateDateFormatFactory&gt;();
+customDateFormats.put("fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a"));
+customDateFormats.put("logEventTime", new AliasTemplateDateFormatFactory("iso ms u"));
+cfg.setCustomDateFormats(customDateFormats);</programlisting>
+
+          <para>So now you can do this in a template:</para>
+
+          <programlisting role="template">${product.price?string.@price}
+${product.weight?string.@weight}
+${lastModified?string.@fileDate}
+${lastError.timestamp?string.@logEventTime}</programlisting>
+
+          <para>Note that the constructor parameter of
+          <literal>AliasTemplateNumberFormatFactory</literal> can naturally
+          refer to a custom format too:</para>
+
+          <programlisting role="unspecified">Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats
+        = new HashMap&lt;String, TemplateNumberFormatFactory&gt;();
+customNumberFormats.put("base", BaseNTemplateNumberFormatFactory.INSTANCE);
+customNumberFormats.put("oct", new AliasTemplateNumberFormatFactory("@base 8"));
+cfg.setCustomNumberFormats(customNumberFormats);</programlisting>
+
+          <para>So now
+          <literal><replaceable>n</replaceable>?string.@oct</literal> will
+          format the number to octal form.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_model_aware">
+          <title>Model-aware format example</title>
+
+          <para>In this example we specify a number format that automatically
+          show the unit after the number if that was put into the data-model
+          as <literal>UnitAwareTemplateNumberModel</literal>. First let's see
+          <literal>UnitAwareTemplateNumberModel</literal>:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+
+public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
+
+    private final Number value;
+    private final String unit;
+    
+    public UnitAwareTemplateNumberModel(Number value, String unit) {
+        this.value = value;
+        this.unit = unit;
+    }
+
+    @Override
+    public Number getAsNumber() throws TemplateModelException {
+        return value;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+}</programlisting>
+
+          <para>When you fill the data-model, you could do something like
+          this:</para>
+
+          <programlisting role="unspecified">Map&lt;String, Object&gt; dataModel = new HashMap&lt;&gt;();
+dataModel.put("weight", new UnitAwareTemplateNumberModel(1.5, "kg"));
+// Rather than just: dataModel.put("weight", 1.5);</programlisting>
+
+          <para>Then if we have this in the template:</para>
+
+          <programlisting role="template">${weight}</programlisting>
+
+          <para>we want to see this:</para>
+
+          <programlisting role="output">1.5 kg</programlisting>
+
+          <para>To achieve that, we define this custom number format:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Locale;
+
+import freemarker.core.Environment;
+import freemarker.core.TemplateNumberFormat;
+import freemarker.core.TemplateNumberFormatFactory;
+import freemarker.core.TemplateValueFormatException;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+
+/**
+ * A number format that takes any other number format as parameter (specified as a string, as
+ * usual in FreeMarker), then if the model is a {@link UnitAwareTemplateNumberModel}, it  shows
+ * the unit after the number formatted with the other format, otherwise it just shows the formatted
+ * number without unit.
+ */
+public class UnitAwareTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+
+    public static final UnitAwareTemplateNumberFormatFactory INSTANCE
+            = new UnitAwareTemplateNumberFormatFactory();
+
+    private UnitAwareTemplateNumberFormatFactory() {
+        // Defined to decrease visibility
+    }
+
+    @Override
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws TemplateValueFormatException {
+        return new UnitAwareNumberFormat(env.getTemplateNumberFormat(params, locale));
+    }
+
+    private static class UnitAwareNumberFormat extends TemplateNumberFormat {
+
+        private final TemplateNumberFormat innerFormat;
+
+        private UnitAwareNumberFormat(TemplateNumberFormat innerFormat) {
+            this.innerFormat = innerFormat;
+        }
+
+        @Override
+        public String formatToPlainText(TemplateNumberModel numberModel)
+                throws TemplateModelException, TemplateValueFormatException {
+            String innerResult = innerFormat.formatToPlainText(numberModel);
+            return numberModel instanceof UnitAwareTemplateNumberModel
+                    ? innerResult + " " + ((UnitAwareTemplateNumberModel) numberModel).getUnit()
+                    : innerResult;
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return innerFormat.isLocaleBound();
+        }
+
+        @Override
+        public String getDescription() {
+            return "unit-aware " + innerFormat.getDescription();
+        }
+
+    }
+
+}</programlisting>
+
+          <para>Finally, we set the above custom format as the default number
+          format:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats = new HashMap&lt;&gt;();
+customNumberFormats.put("ua", UnitAwareTemplateNumberFormatFactory.INSTANCE);
+cfg.setCustomNumberFormats(customNumberFormats);
+
+// Note: "0.####;; roundingMode=halfUp" is a standard format specified in FreeMarker.
+cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
+        </section>
       </section>
 
       <section xml:id="pgui_config_incompatible_improvements">
@@ -15346,7 +15910,8 @@ Tue, Apr 8, '03
           </note>
 
           <para>To prevent misunderstandings, the format need not be a string
-          literal, it can be a variable or any other expression, like in
+          literal, it can be a variable or any other expression as far as it
+          evaluates to a string. For example, it can be like
           <literal>"<replaceable>...</replaceable>"?string[myFormat]</literal>.</para>
 
           <para>See also: <link

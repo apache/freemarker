@@ -27,22 +27,26 @@ import freemarker.template.TemplateModelException;
 
 public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
-    public static final EpochMillisTemplateDateFormatFactory INSTANCE = new EpochMillisTemplateDateFormatFactory();
+    public static final EpochMillisTemplateDateFormatFactory INSTANCE
+            = new EpochMillisTemplateDateFormatFactory();
     
     private EpochMillisTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
     
     @Override
-    public TemplateDateFormat get(String params, int dateType, Locale locale, TimeZone timeZone, boolean zonelessInput,
-            Environment env) throws UnknownDateTypeFormattingUnsupportedException, InvalidFormatParametersException {
+    public TemplateDateFormat get(String params, int dateType,
+            Locale locale, TimeZone timeZone, boolean zonelessInput,
+            Environment env)
+            throws InvalidFormatParametersException {
         TemplateFormatUtil.checkHasNoParameters(params);
         return EpochMillisTemplateDateFormat.INSTANCE;
     }
 
     private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
 
-        private static final EpochMillisTemplateDateFormat INSTANCE = new EpochMillisTemplateDateFormat();
+        private static final EpochMillisTemplateDateFormat INSTANCE
+                = new EpochMillisTemplateDateFormat();
         
         private EpochMillisTemplateDateFormat() { }
         

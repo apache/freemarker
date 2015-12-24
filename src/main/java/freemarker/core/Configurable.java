@@ -722,9 +722,9 @@ public class Configurable {
      *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax has a FreeMarker-specific
      *       extension, so that you can specify options like the rounding mode and the symbols used in this string. For
-     *       example, {@code ",000;; rnd=hu grp=_"} will format numbers like {@code ",000"} would, but with half-up
-     *       rounding mode, and {@code _} as the group separator. See more about "extended Java decimal format" in the
-     *       FreeMarker Manual.
+     *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
+     *       would, but with half-up rounding mode, and {@code _} as the group separator. See more about "extended Java
+     *       decimal format" in the FreeMarker Manual.
      *       </li>
      *   <li>If the string starts with {@code @} character followed by a letter then it's interpreted as a custom number
      *       format, but only if either {@link Configuration#getIncompatibleImprovements()} is at least 2.3.24, or
@@ -779,7 +779,7 @@ public class Configurable {
      * 
      * @param customNumberFormats
      *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
-     *            letters and digits.
+     *            letters and digits (not {@code _}).
      * 
      * @since 2.3.24
      */

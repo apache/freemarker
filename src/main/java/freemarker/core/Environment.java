@@ -1501,7 +1501,7 @@ public final class Environment extends Configurable {
     
     /**
      * Gets a {@link TemplateDateFormat} for the specified parameters. This is mostly meant to be used by
-     * {@link TemplateDateFormatFactory} implementations to delegate to a format based on a specific format string. It's
+     * {@link TemplateDateFormatFactory} implementations to delegate to a format based on a specific format string. It
      * works well for that, as its parameters are the same low level values as the parameters of
      * {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}. For other tasks
      * consider the other overloads of this method.
@@ -1635,7 +1635,7 @@ public final class Environment extends Configurable {
     /**
      * Used to get the {@link TemplateDateFormat} according the date/time/datetime format settings, for the current
      * locale and time zone. See {@link #getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} for the meaning
-     * of some if the parameters.
+     * of some of the parameters.
      */
     private TemplateDateFormat getTemplateDateFormat(int dateType, boolean useSQLDTTZ, boolean zonelessInput)
             throws TemplateValueFormatException {
