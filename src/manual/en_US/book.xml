@@ -8069,7 +8069,7 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>Environment </literal>layer: There are two ways
+            <para><literal>Environment </literal>layer: There are two ways of
             doing it:</para>
 
             <itemizedlist>
@@ -17617,7 +17617,7 @@ Sorted by name.last:
             <primary>interpret built-in</primary>
           </indexterm>
 
-          <para>This built-in parser a string as an FTL template, and returns
+          <para>This built-in parses a string as an FTL template, and returns
           an user-defined directive that executes that template, just as if a
           template with that content were <link
           linkend="ref_directive_include"><literal>include</literal>-d</link>
@@ -17642,7 +17642,7 @@ Sorted by name.last:
           <literal>Configuration</literal> object, not from template that
           calls <literal>interpret</literal>. This also means that the
           previously auto-detected tag syntax or auto-detected naming
-          convention don't effect the parsing of the interpreted template.
+          convention doesn't effect the parsing of the interpreted template.
           This is consistent with how the <link
           linkend="ref_directive_include"><literal>include</literal>
           directive</link> works.</para>

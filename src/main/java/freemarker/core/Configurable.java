@@ -1536,8 +1536,9 @@ public class Configurable {
     /**
      * Sets a FreeMarker setting by a name and string value. If you can configure FreeMarker directly with Java (or
      * other programming language), you should use the dedicated setter methods instead (like
-     * {@link #setObjectWrapper(ObjectWrapper)}. This meant to be used if you get the settings from somewhere
-     * as text. Regardless, below you will find an overview of the settings available no matter how you set them. 
+     * {@link #setObjectWrapper(ObjectWrapper)}. This meant to be used only when you get settings from somewhere
+     * as {@link String}-{@link String} name-value pairs (typically, as a {@link Properties} object). Below you find an
+     * overview of the settings available.
      * 
      * <p>Note: As of FreeMarker 2.3.23, setting names can be written in camel case too. For example, instead of
      * {@code date_format} you can also use {@code dateFormat}. It's likely that camel case will become to the
