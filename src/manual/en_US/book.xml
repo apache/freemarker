@@ -15003,21 +15003,22 @@ rif: foo XYr baar</programlisting>
             <secondary>number</secondary>
           </indexterm>
 
-          <para>Converts a number to a string. It uses the default format that
-          the programmer has specified via the
+          <para>Converts a number to a string. In its simplest form
+          (<literal><replaceable>expression</replaceable>?string</literal>) it
+          uses the default format that the programmer has specified via the
           <literal>number_format</literal> and the <literal>locale</literal>
-          settings. You can also specify a number format explicitly with this
-          built-in, as it will be shown later.</para>
+          configuration settings. You can also specify a number format
+          explicitly with this built-in, as it will be shown later.</para>
 
           <para>There are four predefined number formats:
           <literal>computer</literal>, <literal>currency</literal>,
           <literal>number</literal>, and <literal>percent</literal>. The exact
           meaning of these is locale (nationality) specific, and is controlled
-          by the Java platform installation, rather than by FreeMarker, except
-          for <literal>computer</literal>, which uses the same formatting as
-          <link linkend="ref_builtin_c">the <literal>c</literal>
-          built-in</link>. There can also be programmer-defined formats, whose
-          name starts with <literal>@</literal> (programmers <link
+          by the Java platform installation, not by FreeMarker, except for
+          <literal>computer</literal>, which uses the same formatting as <link
+          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>.
+          There can also be programmer-defined formats, whose name starts with
+          <literal>@</literal> (programmers <link
           linkend="pgui_config_custom_formats">see more here...</link>). You
           can use these predefined formats like this:</para>
 
@@ -15039,8 +15040,9 @@ $42.00
 42</programlisting>
 
           <para>The output of first three expressions is identical because the
-          first two expressions use the default format, which is "number"
-          here. You can change this default using a setting:</para>
+          first two expressions use the default format, which is
+          <quote>number</quote> here. You can change this default using a
+          setting:</para>
 
           <programlisting role="template">&lt;#setting number_format="currency"&gt;
 &lt;#assign x=42&gt;
@@ -15058,20 +15060,23 @@ $42.00
 $42.00
 4,200%</programlisting>
 
-          <para>since the default number format was set to "currency".</para>
+          <para>since the default number format was set to
+          <quote>currency</quote>.</para>
 
           <para>You can also refer to named custom formats that were defined
           when configuring FreeMarker (programmers <link
           linkend="pgui_config_custom_formats">see more here</link>),
           like:</para>
 
-          <programlisting role="template">${x?strong.@price}
-${x?strong.@weight}</programlisting>
+          <programlisting role="template">${x?string.@price}
+${x?string.@weight}</programlisting>
 
           <para>where the custom format names were <quote>price</quote> and
-          <quote>weight</quote>. Note that hence the templates can just refer
-          to the application-domain meaning, and the exact format can be
-          specified outside the templates, on a single central place.</para>
+          <quote>weight</quote>. This way the templates can just refer to the
+          application-domain meaning, and the exact format can be specified
+          outside the templates, on a single central place. (Programmers can
+          read about <link linkend="pgui_config_custom_formats">defining such
+          named formats here...</link>)</para>
 
           <para>Beside named formats, you can specify number format patterns
           directly, using the <link
@@ -15803,28 +15808,28 @@ ${openingTime?string.short}
 ${openingTime?string.medium}
 ${openingTime?string.long}
 ${openingTime?string.full}
-${openingTime?string.xs}
-${openingTime?string.iso}
+${openingTime?string.xs} &lt;#-- XSD xs:time --&gt;
+${openingTime?string.iso} &lt;#-- ISO 8601 time --&gt;
 
 ${nextDiscountDay?string.short}
 ${nextDiscountDay?string.medium}
 ${nextDiscountDay?string.long}
 ${nextDiscountDay?string.full}
-${nextDiscountDay?string.xs}
-${nextDiscountDay?string.iso}
+${nextDiscountDay?string.xs} &lt;#-- XSD xs:date --&gt;
+${nextDiscountDay?string.iso} &lt;#-- ISO 8601 date --&gt;
 
 ${lastUpdated?string.short}
 ${lastUpdated?string.medium}
 ${lastUpdated?string.long}
 ${lastUpdated?string.full}
 ${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;
-${lastUpdated?string.xs}
-${lastUpdated?string.iso}
+${lastUpdated?string.xs} &lt;#-- XSD xs:dateTime --&gt;
+${lastUpdated?string.iso} &lt;#-- ISO 8601 combined date and time --&gt;
 
-&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined formats</link> (starts with @ + letter): --&gt;
-${lastUpdated?string.@lastMod}
+&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined named format</link> (@ + name): --&gt;
+${lastUpdated?string.@fileDate}
 
-&lt;#-- More advanced ISO 8601-related formats: --&gt;
+&lt;#-- Advanced ISO 8601 and XSD formatting: --&gt;
 ${lastUpdated?string.iso_m_u}
 ${lastUpdated?string.xs_ms_nz}
 
@@ -15870,9 +15875,12 @@ Tue, Apr 8, '03
 2003</programlisting>
 
           <para>Note that with custom formats like in
-          <literal>lastUpdated?string.@lastMod</literal> above, templates can
+          <literal>lastUpdated?string.@fileDate</literal> above, templates can
           just refer to the application-domain meaning, and the exact format
-          can be specified outside the templates, on a central place.</para>
+          can be specified outside the templates, on a central place.
+          (Programmers can read about <link
+          linkend="pgui_config_custom_formats">defining such named formats
+          here...</link>)</para>
 
           <warning>
             <para>Unfortunately, because of the limitations of the Java
