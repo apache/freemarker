@@ -25,10 +25,12 @@ import freemarker.template.utility.NullArgumentException;
 abstract class OutputFormatBoundBuiltIn extends SpecialBuiltIn {
     
     protected OutputFormat outputFormat;
+    protected int autoEscapingPolicy;
     
-    void bindToOutputFormat(OutputFormat outputFormat) {
+    void bindToOutputFormat(OutputFormat outputFormat, int autoEscapingPolicy) {
         NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
+        this.autoEscapingPolicy = autoEscapingPolicy;
     }
     
     @Override

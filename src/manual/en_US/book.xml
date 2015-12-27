@@ -17570,10 +17570,10 @@ Sorted by name.last:
           built-ins</link> that refer to a loop variable that was created
           outside <literal><replaceable>s</replaceable></literal>.</para>
 
-          <para>The configuration settings that affect the expression parsing
-          (like syntax) are coming from the <literal>Configuration</literal>
-          object, not from template that invokes
-          <literal>eval</literal>.</para>
+          <para>Regarding the configuration settings that affect the parsing
+          (like syntax) and evaluation the rules are the same as with the
+          <link linkend="ref_builtin_interpret"><literal>interpret</literal>
+          built-in</link>.</para>
         </section>
 
         <section xml:id="ref_builtin_has_content">
@@ -17637,16 +17637,6 @@ Sorted by name.last:
           user-defined directive that, when executed, runs the template whose
           content is the value of <literal>templateSource</literal>.</para>
 
-          <para>The configuration settings that affect the parsing (like tag
-          syntax and naming convention) are coming from the
-          <literal>Configuration</literal> object, not from template that
-          calls <literal>interpret</literal>. This also means that the
-          previously auto-detected tag syntax or auto-detected naming
-          convention doesn't effect the parsing of the interpreted template.
-          This is consistent with how the <link
-          linkend="ref_directive_include"><literal>include</literal>
-          directive</link> works.</para>
-
           <para>The name of the template created by
           <literal>interpret</literal> is the name of the template that calls
           <literal>interpret</literal>, plus
@@ -17673,6 +17663,29 @@ Sorted by name.last:
           a sequence of two items, in which case the first item is the FTL
           string to interpret, and the second items is the template name used
           after the <literal>"-&gt;"</literal>.</para>
+
+          <para>The configuration settings that affect the interpreted
+          template are the same as of the surrounding template, except that
+          parser settings specified in the <link
+          linkend="ref.directive.ftl"><literal>ftl</literal> directive</link>
+          or was established via tag syntax or naming convention
+          auto-detection are instead coming from the
+          <literal>Configuration</literal> object (or naturally, from the
+          <link
+          linkend="pgui_config_templateconfigurations"><literal>TemplateConfiguration</literal></link>,
+          if there's any). Thus the tag syntax, naming convention, whitespace
+          handling, etc. of the interpreted template is independent of that
+          established <emphasis>inside</emphasis> the surrounding template. An
+          important exception from this rule is that the <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          and auto-escaping policy is inherited from the lexical context where
+          <literal>interpret</literal> is called from. For example in a
+          template that has <literal>&lt;#ftl
+          output_format="XML"&gt;</literal> header (or if you are inside a
+          <literal>&lt;#output_format
+          "XML"&gt;<replaceable>...</replaceable>&lt;/#output_format&gt;</literal>
+          block), <literal>interpret</literal> calls in it will produce
+          directives with XML output format.</para>
         </section>
 
         <section xml:id="ref_builtin_isType">
@@ -27218,6 +27231,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>Configuration.AUTO_DETECT_TAG_SYNTAX</literal>.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>The parser used by <literal>?interpet</literal> and
+              <literal>?eval</literal> inherits not only the
+              <literal>output_format</literal> of its surrounding lexical
+              context, but also the auto-escaping policy of it (basically, if
+              auto-escapig is on or off).</para>
             </listitem>
           </itemizedlist>
         </section>

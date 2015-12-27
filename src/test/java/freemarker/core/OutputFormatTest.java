@@ -868,10 +868,32 @@ public class OutputFormatTest extends TemplateTest {
                 + "<#outputFormat 'XML'>" + commonFTL + "</#outputFormat>",
                 "Eval: RTF; Interpret: RTF \\{&\\}\n"
                 + "Eval: XML; Interpret: XML {&amp;}");
+        
+        // parser.autoEscapingPolicy is inherited too:
+        assertOutput(
+                "<#ftl autoEsc=false outputFormat='XML'>"
+                + commonFTL + " ${'.autoEsc'?eval?c}",
+                "Eval: XML; Interpret: XML {&} false");
+        assertOutput(
+                "<#ftl outputFormat='XML'>"
+                + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
+                "Eval: XML; Interpret: XML {&} false");
         assertOutput(
                 "<#ftl autoEsc=false outputFormat='XML'>"
                 + "<#noAutoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#noAutoEsc>",
+                "Eval: XML; Interpret: XML {&} false");
+        assertOutput(
+                "<#ftl autoEsc=false outputFormat='XML'>"
+                + "<#autoEsc>" + commonFTL + " ${'.autoEsc'?eval?c}</#autoEsc>",
                 "Eval: XML; Interpret: XML {&amp;} true");
+        assertOutput(
+                "${.outputFormat}<#assign ftl='<#ftl outputFormat=\\'RTF\\'>$\\{.outputFormat}'> <@ftl?interpret/>",
+                "undefined RTF");
+        assertOutput(
+                "${.outputFormat}<#outputFormat 'RTF'>"
+                + "<#assign ftl='$\\{.outputFormat}'> <@ftl?interpret/> ${'.outputFormat'?eval}"
+                + "</#outputFormat>",
+                "undefined RTF RTF");
     }
 
     @Test

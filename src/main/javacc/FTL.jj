@@ -2128,7 +2128,7 @@ Expression BuiltIn(Expression lhoExp) :
         }
 
         if (result instanceof OutputFormatBoundBuiltIn) {
-            ((OutputFormatBoundBuiltIn) result).bindToOutputFormat(outputFormat);
+            ((OutputFormatBoundBuiltIn) result).bindToOutputFormat(outputFormat, autoEscapingPolicy);
             
             return result;
         }
