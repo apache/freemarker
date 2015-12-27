@@ -2421,7 +2421,7 @@ public final class Environment extends Configurable {
 
     /**
      * Same as {@link #getTemplateForInclusion(String, String, boolean, boolean)} with {@code false}
-     * {@code ignoreMissign} argument.
+     * {@code ignoreMissing} argument.
      */
     public Template getTemplateForInclusion(String name, String encoding, boolean parse)
             throws IOException {
@@ -2560,11 +2560,14 @@ public final class Environment extends Configurable {
         if (existingNamespace != null) {
             if (namespace != null) {
                 setVariable(namespace, existingNamespace);
+                if (isIcI2324OrLater() && currentNamespace == mainNamespace) {
+                    globalNamespace.put(namespace, existingNamespace);
+                }
             }
         } else {
             Namespace newNamespace = new Namespace(loadedTemplate);
             if (namespace != null) {
-                currentNamespace.put(namespace, newNamespace);
+                setVariable(namespace, newNamespace);
                 if (currentNamespace == mainNamespace) {
                     globalNamespace.put(namespace, newNamespace);
                 }

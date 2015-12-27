@@ -19527,7 +19527,9 @@ or
           by the caller of <literal>import</literal> (as if you would create
           it with <literal>assign</literal> directive), with the name given
           with the <literal><replaceable>hash</replaceable></literal>
-          parameter.</para>
+          parameter. If the import happens in the namespace of the main
+          template, the hash variable is also created in the global
+          namespace.</para>
 
           <para>If you call <literal>import</literal> with the same
           <literal><replaceable>path</replaceable></literal> for multiple
@@ -26915,6 +26917,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed, with
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>): The <literal>#import</literal> directive meant
+              to copy the library variable into a global variable if it's
+              executed in the main namespace, but that haven't happened when
+              the imported template was already imported earlier in another
+              namespace.</para>
+            </listitem>
+
+            <listitem>
               <para>Internal code cleanup: Mostly source code formatting, also
               many parser construction/setup cleanup</para>
             </listitem>
@@ -26951,7 +26964,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               but some might used these regardless to introspect templates.
               Earlier it had an <quote>embedded template</quote> parameter
               inside, now it has 0 (for purely static string literals), one or
-              multiple <quote>value part</quote>-ts, which are
+              more <quote>value part</quote>-s, which are
               <literal>String</literal>-s and
               <literal>Interpolation</literal>-s.</para>
             </listitem>
@@ -27239,6 +27252,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>output_format</literal> of its surrounding lexical
               context, but also the auto-escaping policy of it (basically, if
               auto-escapig is on or off).</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed, with
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>): The <literal>#import</literal> directive meant
+              to copy the library variable into a global variable if it's
+              executed in the main namespace, but that haven't happened when
+              the imported template was already imported earlier in another
+              namespace.</para>
             </listitem>
           </itemizedlist>
         </section>

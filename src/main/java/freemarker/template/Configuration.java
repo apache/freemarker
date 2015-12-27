@@ -775,6 +775,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          {@code incompatibleImprovements} version number than that of the {@link Configuration}, if that's
      *          really what you want.)
      *       </li>
+     *       <li><p>
+     *          Fixed bug: The {@code #import} directive meant to copy the library variable into a global variable if
+     *          it's executed in the main namespace, but that haven't happened when the imported template was already
+     *          imported earlier in another namespace. 
+     *       </li>
      *     </ul>
      *   </li>
      * </ul>
@@ -2977,7 +2982,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
-     * templates. The order of the imports will be the same as the order in which they were added with this method.
+     * top-level templates (that is, to all templates that weren't included/imported from another template). While it
+     * only affects the top-level (main) template directly, as the imports there will create a global variable, the
+     * imports will be visible from the further imported templates too (though note that
+     * {@link #getIncompatibleImprovements()} set to 2.3.24 fixes a rarely surfacing bug here).
+     * 
+     * <p>
+     * The order of the imports will be the same as the order in which they were added with this method. Note that if
+     * there are also auto-includes ({@link #addAutoInclude(String)}), those inclusions will be executed after the
+     * auto-includes.
+     * 
+     * @see #setAutoImports(Map)
      */
     public void addAutoImport(String namespaceVarName, String templateName) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
@@ -3040,7 +3055,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Adds an invisible <code>#include <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
-     * templates. The order of the inclusions will be the same as the order in which they were added with this method.
+     * top-level templates (that is, to all templates that weren't included/imported from another template).
+     * 
+     * <p>
+     * The order of the inclusions will be the same as the order in which they were added with this method. Note that if
+     * there are also auto-imports ({@link #addAutoImport(String, String)}), those imports will be executed before the
+     * auto-includes, hence the library variables are accessible for the auto-includes.
+     * 
+     * @see #setAutoIncludes(List)
      */
     public void addAutoInclude(String templateName) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
