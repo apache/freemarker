@@ -66,11 +66,17 @@ public class DOMTest extends TemplateTest {
                 "<root xmlns=\"http://example.com/ns1\" xmlns:a=\"http://example.com/ns2\">"
                 + "<a>A</a><a:b>B</a:b><c a1=\"1\" a:a2=\"2\" /></root>");
         
-        // 
+        // When there's no matching prefix declared via the #ftl header, return null for qname:
         assertOutput("${doc?children[0].@@qname!'null'}", "null");
         assertOutput("${doc?children[0]?children[1].@@qname!'null'}", "null");
+        assertOutput("${doc?children[0]?children[2]['@*'][1].@@qname!'null'}", "null");
+        
+        // When we have prefix declared in the #ftl header:
         assertOutput(ftlHeader + "${doc?children[0].@@qname}", "root");
         assertOutput(ftlHeader + "${doc?children[0]?children[1].@@qname}", "n2:b");
+        assertOutput(ftlHeader + "${doc?children[0]?children[2].@@qname}", "c");
+        assertOutput(ftlHeader + "${doc?children[0]?children[2]['@*'][0].@@qname}", "a1");
+        assertOutput(ftlHeader + "${doc?children[0]?children[2]['@*'][1].@@qname}", "n2:a2");
         // Unfortunately these include the xmlns attributes, but that would be non-BC to fix now:
         assertThat(getOutput(ftlHeader + "${doc?children[0].@@start_tag}"), startsWith("<root"));
         assertThat(getOutput(ftlHeader + "${doc?children[0]?children[1].@@start_tag}"), startsWith("<n2:b"));
