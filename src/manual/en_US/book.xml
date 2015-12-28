@@ -7250,7 +7250,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
           nested calls of the same directive, or directive objects used as
           shared variables accessed by multiple threads concurrently.</para>
 
-          <para>Unfortunatelly, <literal>TemplateDirectiveModel</literal>-s
+          <para>Unfortunately, <literal>TemplateDirectiveModel</literal>-s
           don't support passing parameters by position (rather than by name).
           This is fixed starting from FreeMarker 2.4.</para>
         </section>
@@ -26928,6 +26928,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed: XPath queries that has only contained
+              characters that are valid in XML element names and has also
+              contained <literal>::</literal> (which is valid in names in
+              namespace-unware documents), like
+              <literal>e['following-sibling::foo']</literal>, were interpreted
+              as literal element names (giving 0 hits) rather than as XPath
+              expressions. Note that there were no such problem with
+              <literal>e['following-sibling::*']</literal> for example, as
+              it's not a valid XML element name according the XML
+              specification. This fix can actually break applications that has
+              processed namespace unaware XML that use <literal>::</literal>
+              as part of element or attribute names, but such an application
+              is highly unlikely, unlike running into the fixed problem.
+              (Unfortunately, using
+              <literal>incompatible_improvements</literal> wasn't technically
+              possible here.)</para>
+            </listitem>
+
+            <listitem>
               <para>Internal code cleanup: Mostly source code formatting, also
               many parser construction/setup cleanup</para>
             </listitem>
@@ -27263,6 +27282,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               executed in the main namespace, but that haven't happened when
               the imported template was already imported earlier in another
               namespace.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: XPath queries that has only contained
+              characters that are valid in XML element names and has also
+              contained <literal>::</literal> (which is valid in names in
+              namespace-unware documents), like
+              <literal>e['following-sibling::foo']</literal>, were interpreted
+              as literal element names (giving 0 hits) rather than as XPath
+              expressions. Note that there were no such problem with
+              <literal>e['following-sibling::*']</literal> for example, as
+              it's not a valid XML element name according the XML
+              specification. This fix can actually break applications that has
+              processed namespace unaware XML that use <literal>::</literal>
+              as part of element or attribute names, but such an application
+              is highly unlikely, unlike running into the fixed problem.
+              (Unfortunately, using
+              <literal>incompatible_improvements</literal> wasn't technically
+              possible here.)</para>
             </listitem>
           </itemizedlist>
         </section>

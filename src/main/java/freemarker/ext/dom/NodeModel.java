@@ -63,12 +63,16 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * A base class for wrapping a W3C DOM Node as a FreeMarker template model.
+ * A base class for wrapping a single W3C DOM Node as a FreeMarker template model.
  * 
  * <p>
  * Note that {@link DefaultObjectWrapper} automatically wraps W3C DOM {@link Node}-s into this, so you may not need to
  * do that with this class manually. Though, before dropping the {@link Node}-s into the data-model, you may want to
  * apply {@link NodeModel#simplify(Node)} on them.
+ * 
+ * <p>
+ * Note that this class shouldn't be used to represent a result set of 0 or multiple nodes (we use {@link NodeListModel}
+ * then), but should be used to represent a node set of exactly 1 node.
  */
 abstract public class NodeModel
 implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
