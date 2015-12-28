@@ -28,6 +28,37 @@ public class DOMTest extends TemplateTest {
     }
 
     @Test
+    public void xmlnsPrefixes() throws Exception {
+        addDocToDataModel("<root xmlns='http://example.com/ns1' xmlns:ns2='http://example.com/ns2'>"
+                + "<a>A</a><ns2:b>B</ns2:b><c a1='1' ns2:a2='2'/></root>");
+
+        String ftlHeader = "<#ftl ns_prefixes={'D':'http://example.com/ns1', 'n2':'http://example.com/ns2'}>";
+        
+        // @@markup:
+        assertOutput("${doc.@@markup}",
+                "<a:root xmlns:a=\"http://example.com/ns1\" xmlns:b=\"http://example.com/ns2\">"
+                + "<a:a>A</a:a><b:b>B</b:b><a:c a1=\"1\" b:a2=\"2\" />"
+                + "</a:root>");
+        assertOutput(ftlHeader
+                + "${doc.@@markup}",
+                "<root xmlns=\"http://example.com/ns1\" xmlns:n2=\"http://example.com/ns2\">"
+                + "<a>A</a><n2:b>B</n2:b><c a1=\"1\" n2:a2=\"2\" /></root>");
+        assertOutput("<#ftl ns_prefixes={'D':'http://example.com/ns1'}>"
+                + "${doc.@@markup}",
+                "<root xmlns=\"http://example.com/ns1\" xmlns:a=\"http://example.com/ns2\">"
+                + "<a>A</a><a:b>B</a:b><c a1=\"1\" a:a2=\"2\" /></root>");
+        
+        // 
+        assertOutput("${doc?children[0].@@qname!'null'}", "null");
+        assertOutput("${doc?children[0]?children[1].@@qname!'null'}", "null");
+        assertOutput(ftlHeader + "${doc?children[0].@@qname}", "root");
+        assertOutput(ftlHeader + "${doc?children[0]?children[1].@@qname}", "n2:b");
+        // Unfortunately these include the xmlns attributes, but that would be non-BC to fix now:
+        assertThat(getOutput(ftlHeader + "${doc?children[0].@@start_tag}"), startsWith("<root"));
+        assertThat(getOutput(ftlHeader + "${doc?children[0]?children[1].@@start_tag}"), startsWith("<n2:b"));
+    }
+    
+    @Test
     public void namespaceUnaware() throws Exception {
         addNSUnawareDocToDataModel("<root><x:a>A</x:a><:>B</:><xyz::c>C</xyz::c></root>");
         assertOutput("${doc.root['x:a']}", "A");

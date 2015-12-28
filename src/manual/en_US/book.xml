@@ -26928,22 +26928,49 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed: XPath queries that has only contained
-              characters that are valid in XML element names and has also
-              contained <literal>::</literal> (which is valid in names in
-              namespace-unware documents), like
-              <literal>e['following-sibling::foo']</literal>, were interpreted
-              as literal element names (giving 0 hits) rather than as XPath
-              expressions. Note that there were no such problem with
-              <literal>e['following-sibling::*']</literal> for example, as
-              it's not a valid XML element name according the XML
-              specification. This fix can actually break applications that has
-              processed namespace unaware XML that use <literal>::</literal>
-              as part of element or attribute names, but such an application
-              is highly unlikely, unlike running into the fixed problem.
-              (Unfortunately, using
-              <literal>incompatible_improvements</literal> wasn't technically
-              possible here.)</para>
+              <para>Fixes in the XML processing feature
+              (<literal>freemarker.ext.dom</literal>):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Bug fixed: XPath queries that has only contained
+                  characters that are valid in XML element names and has also
+                  contained <literal>::</literal> (which is valid in names in
+                  namespace-unware documents), like
+                  <literal>e['following-sibling::foo']</literal>, were
+                  interpreted as literal element names (giving 0 hits) rather
+                  than as XPath expressions. Note that there were no such
+                  problem with <literal>e['following-sibling::*']</literal>
+                  for example, as it's not a valid XML element name according
+                  the XML specification. This fix can actually break
+                  applications that has processed namespace unaware XML that
+                  use <literal>::</literal> as part of element or attribute
+                  names, but such an application is highly unlikely, unlike
+                  running into the fixed problem. (Unfortunately, using
+                  <literal>incompatible_improvements</literal> wasn't
+                  technically possible here.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: The <literal>@@qname</literal> of elements
+                  that belong to the XML namespace declared as the default via
+                  <literal>&lt;#ftl ns_prefixes={'D':'...', ...
+                  }&gt;</literal> no longer starts with <literal>D:</literal>,
+                  instead they just start with no name space prefix.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: In the markup returned by the
+                  <literal>@@markup</literal> key, when there were multiple
+                  namespaces for which there was no prefix associated with via
+                  <literal>&lt;#ftl
+                  ns_prefixes=<replaceable>...</replaceable>&gt;</literal>,
+                  all those namespaces were assigned to the same
+                  auto-generated <literal>xmlns</literal> prefix (usually
+                  <quote>a</quote>). Now they will get <quote>a</quote>,
+                  <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -27285,22 +27312,49 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed: XPath queries that has only contained
-              characters that are valid in XML element names and has also
-              contained <literal>::</literal> (which is valid in names in
-              namespace-unware documents), like
-              <literal>e['following-sibling::foo']</literal>, were interpreted
-              as literal element names (giving 0 hits) rather than as XPath
-              expressions. Note that there were no such problem with
-              <literal>e['following-sibling::*']</literal> for example, as
-              it's not a valid XML element name according the XML
-              specification. This fix can actually break applications that has
-              processed namespace unaware XML that use <literal>::</literal>
-              as part of element or attribute names, but such an application
-              is highly unlikely, unlike running into the fixed problem.
-              (Unfortunately, using
-              <literal>incompatible_improvements</literal> wasn't technically
-              possible here.)</para>
+              <para>Fixes in the XML processing feature
+              (<literal>freemarker.ext.dom</literal>):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Bug fixed: XPath queries that has only contained
+                  characters that are valid in XML element names and has also
+                  contained <literal>::</literal> (which is valid in names in
+                  namespace-unware documents), like
+                  <literal>e['following-sibling::foo']</literal>, were
+                  interpreted as literal element names (giving 0 hits) rather
+                  than as XPath expressions. Note that there were no such
+                  problem with <literal>e['following-sibling::*']</literal>
+                  for example, as it's not a valid XML element name according
+                  the XML specification. This fix can actually break
+                  applications that has processed namespace unaware XML that
+                  use <literal>::</literal> as part of element or attribute
+                  names, but such an application is highly unlikely, unlike
+                  running into the fixed problem. (Unfortunately, using
+                  <literal>incompatible_improvements</literal> wasn't
+                  technically possible here.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: The <literal>@@qname</literal> of elements
+                  that belong to the XML namespace declared as the default via
+                  <literal>&lt;#ftl ns_prefixes={'D':'...', ...
+                  }&gt;</literal> no longer starts with <literal>D:</literal>,
+                  instead they just start with no name space prefix.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: In the markup returned by the
+                  <literal>@@markup</literal> key, when there were multiple
+                  namespaces for which there was no prefix associated with via
+                  <literal>&lt;#ftl
+                  ns_prefixes=<replaceable>...</replaceable>&gt;</literal>,
+                  all those namespaces were assigned to the same
+                  auto-generated <literal>xmlns</literal> prefix (usually
+                  <quote>a</quote>). Now they will get <quote>a</quote>,
+                  <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
