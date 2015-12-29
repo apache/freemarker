@@ -6288,10 +6288,10 @@ cfg.setLogTemplateExceptions(false);</programlisting>
           <listitem>
             <para>Use your custom bean class for hashes where the items
             correspond to the bean properties. For example the
-            <literal>price</literal> property
-            (<literal>getProperty()</literal>) of <literal>product</literal>
-            can be get as <literal>product.price</literal>. (The actions of
-            the beans can be exposed as well; see much later <link
+            <literal>price</literal> property (<literal>getPrice()</literal>)
+            of <literal>product</literal> can be get as
+            <literal>product.price</literal>. (The actions of the beans can be
+            exposed as well; see much later <link
             linkend="pgui_misc_beanwrapper">here</link>)</para>
           </listitem>
         </itemizedlist>
@@ -6312,66 +6312,74 @@ cfg.setLogTemplateExceptions(false);</programlisting>
 
         <para>This Java code fragment that builds this data-model:</para>
 
-        <programlisting role="unspecified">// Create the root hash
+        <programlisting role="unspecified">// Create the root hash. We use a Map here, but it could be a JavaBean too.
 Map&lt;String, Object&gt; root = new HashMap&lt;&gt;();
-// Put string ``user'' into the root
+
+// Put string "user" into the root
 root.put("user", "Big Joe");
-// Create the hash for ``latestProduct''
-Map&lt;String, Object&gt; latest = new HashMap&lt;&gt;();
+
+// Create the "latestProduct" hash. We use a JavaBean here, but it could be a Map too.
+Product latest = new Product();
+latest.setUrl("products/greenmouse.html");
+latest.setName("green mouse");
 // and put it into the root
 root.put("latestProduct", latest);
-// put ``url'' and ``name'' into latest
-latest.put("url", "products/greenmouse.html");
-latest.put("name", "green mouse");</programlisting>
+</programlisting>
 
-        <para>In real applications, instead of <literal>Map</literal>-s, you
-        will often use application-specific classes that has
+        <para>As demonstrated above, for hashes (something that stores other
+        named items) you can use either a <literal>Map</literal> or any kind
+        of public class that has public
         <literal>get<replaceable>Xxx</replaceable></literal>/<literal>is<replaceable>Xxx</replaceable></literal>
-        methods as prescribed by the JavaBeans specification. Like you have a
-        class similar to this:</para>
+        methods as prescribed by the JavaBeans specification. Like the above
+        <literal>Product</literal> class could be something like:</para>
 
-        <programlisting role="unspecified">public class Product {
+        <programlisting role="unspecified">/**
+ * Product bean; note that it must be a public class!
+ */
+public class Product {
 
     private String url;
     private String name;
-    ...
-    
+
     // As per the JavaBeans spec., this defines the "url" bean property
+    // It must be public!
     public String getUrl() {
         return url;
     }
-    
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     // As per the JavaBean spec., this defines the "name" bean property
+    // It must be public!
     public String getName() {
         return name;
     }
-    
-    ...
-    
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }</programlisting>
 
-        <para>and you add an instance of it to the data-model somehow like
-        this:</para>
-
-        <programlisting role="unspecified">Product latestProducts = getLatestProductFromDatabaseOrSomething();
-root.put("latestProduct", latestProduct);</programlisting>
-
-        <para>The template will be the same as if
-        <literal>latestProduct</literal> was a <literal>Map</literal>, like
-        <literal>${latestProduct.name}</literal> works in both cases.</para>
-
-        <para>The root itself need not be a <literal>Map</literal> either. It
-        could be an object with <literal>getUser()</literal> and
+        <para>Regardless if <literal>latestProduct</literal> is a
+        <literal>Map</literal> that contains the <literal>"name"</literal> and
+        <literal>"url"</literal> keys, or it's a JavaBean as shown above, in
+        the template you can use <literal>${latestProduct.name}</literal> .The
+        root itself need not be a <literal>Map</literal> either. It could be
+        an object with <literal>getUser()</literal> and
         <literal>getLastestProduct()</literal> methods too.</para>
 
         <note>
           <para>The behavior described here only stands if the value of the
           <literal>object_wrapper</literal> configuration setting is something
           that's used in almost all real world setups anyway. Anything that
-          the <literal>ObjectWrapper</literal> wraps to be a hash can be used
-          as the root, and can be traversed in templates with the dot and
-          <literal>[]</literal> operators. Something that it doesn't wrap to
-          be a hash can't be used as the root or be traversed like
+          the <literal>ObjectWrapper</literal> wraps to be a hash (something
+          that implements the <literal>TemplateHashModel</literal> interface)
+          can be used as the root, and can be traversed in templates with the
+          dot and <literal>[]</literal> operators. Something that it doesn't
+          wrap to be a hash can't be used as the root or be traversed like
           that.</para>
         </note>
       </section>
@@ -6392,21 +6400,21 @@ root.put("latestProduct", latestProduct);</programlisting>
         template instance you can get it with its
         <literal>getTemplate</literal> method. Store <link
         linkend="example.first">the example template</link> in the
-        <literal>test.ftl</literal> file of the <link
+        <literal>test.ftlh</literal> file of the <link
         linkend="pgui_quickstart_createconfiguration">earlier</link> set
         directory, then you can do this:</para>
 
-        <programlisting role="unspecified">Template temp = cfg.getTemplate("test.ftl");</programlisting>
+        <programlisting role="unspecified">Template temp = cfg.getTemplate("test.ftlh");</programlisting>
 
         <para>When you call this, it will create a <literal>Template</literal>
-        instance corresponds to <literal>test.ftl</literal>, by reading
-        <literal><replaceable>/where/you/store/templates/</replaceable>test.ftl</literal>
+        instance corresponds to <literal>test.ftlh</literal>, by reading
+        <literal><replaceable>/where/you/store/templates/</replaceable>test.ftlh</literal>
         and parsing (compile) it. The <literal>Template</literal> instance
         stores the template in the parsed form, and not as text.</para>
 
         <para><literal>Configuration</literal> caches
         <literal>Template</literal> instances, so when you get
-        <literal>test.ftl</literal> again, it probably won't read and parse
+        <literal>test.ftlh</literal> again, it probably won't read and parse
         the template file again, just returns the same
         <literal>Template</literal> instance as for the first time.</para>
       </section>
@@ -6453,7 +6461,7 @@ temp.process(root, out);</programlisting>
         <para>Note that once you have obtained a <literal>Template</literal>
         instance, you can merge it with different data-models for unlimited
         times (<literal>Template</literal> instances are stateless). Also, the
-        <literal>test.ftl</literal> file is accessed only while the
+        <literal>test.ftlh</literal> file is accessed only while the
         <literal>Template</literal> instance is created, not when you call the
         process method.</para>
       </section>
@@ -6480,7 +6488,7 @@ public class Test {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
 
         /* ------------------------------------------------------------------------ */    
@@ -6489,13 +6497,13 @@ public class Test {
         /* Create a data-model */
         Map root = new HashMap();
         root.put("user", "Big Joe");
-        Map latest = new HashMap();
+        Product latest = new Product();
+        latest.setUrl("products/greenmouse.html");
+        latest.setName("green mouse");
         root.put("latestProduct", latest);
-        latest.put("url", "products/greenmouse.html");
-        latest.put("name", "green mouse");
 
         /* Get the template (uses cache internally) */
-        Template temp = cfg.getTemplate("test.ftl");
+        Template temp = cfg.getTemplate("test.ftlh");
 
         /* Merge data-model with template */
         Writer out = new OutputStreamWriter(System.out);
@@ -6509,6 +6517,52 @@ public class Test {
           <para>I have suppressed the exceptions for the sake of simplicity.
           Don't do it in real products.</para>
         </note>
+
+        <para>For the sake completeness, here's the the Product class used in
+        the data model:</para>
+
+        <programlisting role="unspecified">/**
+ * Product bean; note that it must be a public class!
+ */
+public class Product {
+
+    private String url;
+    private String name;
+
+    // As per the JavaBeans spec., this defines the "url" bean property
+    // It must be public!
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    // As per the JavaBean spec., this defines the "name" bean property
+    // It must be public!
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+}</programlisting>
+
+        <para>and the template:</para>
+
+        <programlisting role="template">&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Welcome!&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Welcome ${user}!&lt;/h1&gt;
+  &lt;p&gt;Our latest product:
+  &lt;a href="${latestProduct.url}"&gt;${latestProduct.name}&lt;/a&gt;!
+&lt;/body&gt;
+&lt;/html&gt;</programlisting>
       </section>
     </chapter>
 
@@ -8623,7 +8677,7 @@ cfg.setTemplateExceptionHandler(new MyTemplateExceptionHandler());</programlisti
 
           <para>will print this:</para>
 
-          <programlisting role="output">a[ERROR: Expression badVar is undefined on line 1, column 7 in test.ftl.]b</programlisting>
+          <programlisting role="output">a[ERROR: Expression badVar is undefined on line 1, column 7 in test.ftlh.]b</programlisting>
 
           <para>Note that the error occurred in the <literal>if</literal>
           start-tag (<literal>&lt;#if badVar&gt;</literal>), but the whole
@@ -8667,7 +8721,7 @@ b
 
           <programlisting role="output">a
   Foo
-  [ERROR: Expression badVar is undefined on line 4, column 5 in test.ftl.]
+  [ERROR: Expression badVar is undefined on line 4, column 5 in test.ftlh.]
   Bar
 c</programlisting>
 
