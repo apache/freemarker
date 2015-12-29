@@ -780,6 +780,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          it's executed in the main namespace, but that haven't happened when the imported template was already
      *          imported earlier in another namespace. 
      *       </li>
+     *       <li><p>
+     *          {@code ?is_sequence} doesn't return {@code true} for Java methods wrapped by {@link BeansWrapper} and
+     *          its subclasses (most notably {@link DefaultObjectWrapper}) anymore, as they only implement the
+     *          {@code [index]} operator, but not {@code ?size}, which causes {@code <#list ...>} to fail among others.
+     *          (They shouldn't implement either, but this is historical heritage.)
      *     </ul>
      *   </li>
      * </ul>

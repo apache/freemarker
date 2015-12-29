@@ -17886,7 +17886,13 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_sequence</literal></td>
 
-                <td>sequence</td>
+                <td>sequence (Historical quirk: Before <link
+                linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal></link>
+                2.3.24 it returns <literal>true</literal> for Java methods as
+                they implement the
+                <literal>[<replaceable>index</replaceable>]</literal>
+                operator, however, they fail on
+                <literal>?size</literal>.)</td>
               </tr>
 
               <tr>
@@ -17911,7 +17917,10 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_indexable</literal></td>
 
-                <td>sequence</td>
+                <td>sequence (Historical quirk: it returns
+                <literal>true</literal> for Java methods as they implement the
+                <literal>[<replaceable>index</replaceable>]</literal>
+                operator.)</td>
               </tr>
 
               <tr>
@@ -26553,10 +26562,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para><literal>&lt;@</literal> and <literal>&lt;/@</literal> is
-              now allowed in String literals that contain
+              now allowed in string literals that contain
               <literal>${<replaceable>exp</replaceable>}</literal>, and will
               be part of the literal as is. Earlier it was a syntactical
               error.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: With
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>),
+              <literal><replaceable>m</replaceable>?is_sequence</literal>
+              doesn't return <literal>true</literal> for Java methods wrapped
+              by <literal>BeansWrapper</literal> and its subclasses (most
+              notably <literal>DefaultObjectWrapper</literal>) anymore, as
+              they only implement the
+              <literal>[<replaceable>index</replaceable>]</literal> operator,
+              but not <literal>?size</literal>, which causes
+              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
+              to fail among others. (They shouldn't implement either, but this
+              is historical heritage.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -27445,6 +27471,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: With
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>),
+              <literal><replaceable>m</replaceable>?is_sequence</literal>
+              doesn't return <literal>true</literal> for Java methods wrapped
+              by <literal>BeansWrapper</literal> and its subclasses (most
+              notably <literal>DefaultObjectWrapper</literal>) anymore, as
+              they only implement the
+              <literal>[<replaceable>index</replaceable>]</literal> operator,
+              but not <literal>?size</literal>, which causes
+              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
+              to fail among others. (They shouldn't implement either, but this
+              is historical heritage.)</para>
             </listitem>
 
             <listitem>

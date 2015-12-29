@@ -436,7 +436,12 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateSequenceModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+            return (tm instanceof TemplateSequenceModel
+                        && (
+                            !(tm instanceof OverloadedMethodsModel || tm instanceof SimpleMethodModel)
+                            || !env.isIcI2324OrLater())
+                        )
+                        ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 

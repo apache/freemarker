@@ -92,7 +92,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
  */
 public final class Environment extends Configurable {
-
+    
     private static final ThreadLocal threadEnv = new ThreadLocal();
 
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
@@ -2779,7 +2779,7 @@ public final class Environment extends Configurable {
         return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
     }
 
-    private boolean isIcI2324OrLater() {
+    boolean isIcI2324OrLater() {
         return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
     }
 
