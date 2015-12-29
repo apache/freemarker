@@ -26986,6 +26986,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added an overload to
+              <literal>Configuration.getSupportedBuiltInNames</literal> and
+              <literal>Configuration.getSupportedBuiltInDirectiveNames</literal>
+              that has a <literal>namingConvention</literal> parameter. This
+              is useful for tooling as since 2.3.23 we support both camel case
+              naming convention (like
+              <literal><replaceable>s</replaceable>?upperCase</literal>) and
+              the legacy one (like
+              <literal><replaceable>s</replaceable>?upper_case</literal>).
+              Furthermore the old 0 argument overload will now utilize
+              <literal>Configuration.getNamingConvention()</literal> to only
+              return the relevant names if it's not
+              <literal>AUTO_DETECT_NAMING_CONVENTION</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Internal reworking to simplify the AST (the
               <literal>TemplateElement</literal> structure). The API related
               technically public API was marked as internal for a good while.
@@ -27355,6 +27371,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added an overload to
+              <literal>Configuration.getSupportedBuiltInNames</literal> and
+              <literal>Configuration.getSupportedBuiltInDirectiveNames</literal>
+              that has a <literal>namingConvention</literal> parameter. This
+              is useful for tooling as since 2.3.23 we support both camel case
+              naming convention (like
+              <literal><replaceable>s</replaceable>?upperCase</literal>) and
+              the legacy one (like
+              <literal><replaceable>s</replaceable>?upper_case</literal>).
+              Furthermore the old 0 argument overload will now utilize
+              <literal>Configuration.getNamingConvention()</literal> to only
+              return the relevant names if it's not
+              <literal>AUTO_DETECT_NAMING_CONVENTION</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>

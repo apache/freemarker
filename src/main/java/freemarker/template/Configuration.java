@@ -3157,30 +3157,62 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
-     * writing, this information doesn't depend on the configuration options, so it could be a static method, but
-     * to be future-proof, it's an instance method. 
-     * 
-     * @return {@link Set} of {@link String}-s.
+     * Same as {@link #getSupportedBuiltInNames(int)} with argument {@link #getNamingConvention()}.
      * 
      * @since 2.3.20
      */
     public Set getSupportedBuiltInNames() {
-        return _CoreAPI.getSupportedBuiltInNames();
+        return getSupportedBuiltInNames(getNamingConvention());
+    }
+
+    /**
+     * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
+     * writing, this information doesn't depend on the configuration options, so it could be a static method, but
+     * to be future-proof, it's an instance method. 
+     * 
+     * @param namingConvention
+     *            One of {@link #AUTO_DETECT_NAMING_CONVENTION}, {@link #LEGACY_NAMING_CONVENTION}, and
+     *            {@link #CAMEL_CASE_NAMING_CONVENTION}. If it's {@link #AUTO_DETECT_NAMING_CONVENTION} then the union
+     *            of the names in all the naming conventions is returned. 
+     * 
+     * @since 2.3.24
+     */
+    public Set<String> getSupportedBuiltInNames(int namingConvention) {
+        return _CoreAPI.getSupportedBuiltInNames(namingConvention);
     }
     
     /**
-     * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
-     * <tt>&lt;#directiveName ...&gt;</tt>.
-     * 
-     * @return {@link Set} of {@link String}-s.
+     * Same as {@link #getSupportedBuiltInDirectiveNames(int)} with argument {@link #getNamingConvention()}.
      * 
      * @since 2.3.21
      */
     public Set getSupportedBuiltInDirectiveNames() {
-        return _CoreAPI.BUILT_IN_DIRECTIVE_NAMES;
+        return getSupportedBuiltInDirectiveNames(getNamingConvention());
     }
 
+    /**
+     * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
+     * <tt>&lt;#directiveName ...&gt;</tt>.
+     * 
+     * @param namingConvention
+     *            One of {@link #AUTO_DETECT_NAMING_CONVENTION}, {@link #LEGACY_NAMING_CONVENTION}, and
+     *            {@link #CAMEL_CASE_NAMING_CONVENTION}. If it's {@link #AUTO_DETECT_NAMING_CONVENTION} then the union
+     *            of the names in all the naming conventions is returned. 
+     * 
+     * @since 2.3.24
+     */
+    public Set<String> getSupportedBuiltInDirectiveNames(int namingConvention) {
+        if (namingConvention == AUTO_DETECT_NAMING_CONVENTION) {
+            return _CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES;
+        } else if (namingConvention == LEGACY_NAMING_CONVENTION) {
+            return _CoreAPI.LEGACY_BUILT_IN_DIRECTIVE_NAMES;
+        } else if (namingConvention == CAMEL_CASE_NAMING_CONVENTION) {
+            return _CoreAPI.CAMEL_CASE_BUILT_IN_DIRECTIVE_NAMES;
+        } else {
+            throw new IllegalArgumentException("Unsupported naming convention constant: " + namingConvention);
+        }
+    }
+    
     private static String getRequiredVersionProperty(Properties vp, String properyName) {
         String s = vp.getProperty(properyName);
         if (s == null) {
