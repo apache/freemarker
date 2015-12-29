@@ -6218,7 +6218,10 @@ cfg.setDefaultEncoding("UTF-8");
 
 // Sets how errors will appear.
 // During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
-cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</programlisting>
+cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+
+// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
+cfg.setLogTemplateExceptions(false);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -6478,6 +6481,7 @@ public class Test {
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
+        cfg.setLogTemplateExceptions(false);
 
         /* ------------------------------------------------------------------------ */    
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
@@ -8705,6 +8709,22 @@ c</programlisting>
               linkend="misc.faq.niceErrorPage">see the FAQ</link>.</para>
             </listitem>
           </itemizedlist>
+        </section>
+
+        <section>
+          <title>TemplateException logging</title>
+
+          <para>By default FreeMarker <link
+          linkend="pgui_misc_logging">logs</link> all
+          <literal>TemplateException</literal>-s under the
+          <literal>freemarker.runtime</literal> log category, even when it
+          will throw it at you from its public API. As logging has become
+          common practice in Java applications, this usually leads to double
+          logging of exceptions now, so it's recommended to disable this
+          legacy behavior by
+          <literal>cfg.setLogTemplateExceptions(false)</literal> (or
+          <literal>log_template_exceptions=false</literal>) where you
+          configure FreeMarker.</para>
         </section>
 
         <section>
