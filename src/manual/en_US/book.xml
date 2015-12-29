@@ -6366,8 +6366,8 @@ public class Product {
         <para>Regardless if <literal>latestProduct</literal> is a
         <literal>Map</literal> that contains the <literal>"name"</literal> and
         <literal>"url"</literal> keys, or it's a JavaBean as shown above, in
-        the template you can use <literal>${latestProduct.name}</literal> .The
-        root itself need not be a <literal>Map</literal> either. It could be
+        the template you can use <literal>${latestProduct.name}</literal>. The
+        root itself need not be a <literal>Map</literal> either; it could be
         an object with <literal>getUser()</literal> and
         <literal>getLastestProduct()</literal> methods too.</para>
 
