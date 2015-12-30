@@ -42,8 +42,6 @@ import java.util.TreeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import junit.framework.AssertionFailedError;
-
 import org.junit.Ignore;
 import org.xml.sax.InputSource;
 
@@ -51,6 +49,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import freemarker.cache.FileTemplateLoader;
 import freemarker.core.ASTPrinter;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BooleanModel;
@@ -76,6 +75,7 @@ import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
+import freemarker.test.CopyrightCommentRemoverTemplateLoader;
 import freemarker.test.templatesuite.models.BooleanAndStringTemplateModel;
 import freemarker.test.templatesuite.models.BooleanHash1;
 import freemarker.test.templatesuite.models.BooleanHash2;
@@ -93,6 +93,7 @@ import freemarker.test.utility.AssertEqualsDirective;
 import freemarker.test.utility.AssertFailsDirective;
 import freemarker.test.utility.FileTestCase;
 import freemarker.test.utility.NoOutputDirective;
+import junit.framework.AssertionFailedError;
 
 /**
  * Instances of this are created and called by {@link TemplateTestSuite}. (It's on "Ignore" so that Eclipse doesn't try
@@ -177,7 +178,8 @@ public class TemplateTestCase extends FileTestCase {
     @Override
     @SuppressWarnings("boxing")
     public void setUp() throws Exception {
-        conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
+        conf.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
+                new FileTemplateLoader(new File(getTestClassDirectory(), "templates"))));
         
         dataModel.put(ASSERT_VAR_NAME, AssertDirective.INSTANCE);
         dataModel.put(ASSERT_EQUALS_VAR_NAME, AssertEqualsDirective.INSTANCE);
