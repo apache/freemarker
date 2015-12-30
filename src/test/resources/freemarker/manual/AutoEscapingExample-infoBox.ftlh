@@ -1,5 +1,3 @@
-<#ftl output_format="HTML"><#-- Needed for the Eclipse plugin -->
-
 <@infoBox "Foo & bar" />
 <@infoBox "Foo <b>bar</b>"?no_esc />
 

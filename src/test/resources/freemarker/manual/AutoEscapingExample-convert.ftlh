@@ -1,5 +1,3 @@
-<#ftl output_format="HTML"><#-- Needed for the Eclipse plugin -->
-
 <#assign mo1 = "Foo's bar {}"?esc>
 HTLM: ${mo1}
 XML:  <#outputformat 'XML'>${mo1}</#outputformat>
