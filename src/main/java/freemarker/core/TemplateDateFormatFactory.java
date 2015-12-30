@@ -59,7 +59,7 @@ public abstract class TemplateDateFormatFactory extends TemplateValueFormatFacto
      *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
      *            forever (i.e. locale changes in the {@link Environment} must not be followed).
      * @param timeZone
-     *            The time zone to format for. Not {@code null}. The resulting format should be bound to this time zone
+     *            The time zone to format for. Not {@code null}. The resulting format must be bound to this time zone
      *            forever (i.e. time zone changes in the {@link Environment} must not be followed).
      * @param zonelessInput
      *            Indicates that the input Java {@link Date} is not from a time zone aware source. When this is

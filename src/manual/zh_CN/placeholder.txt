@@ -1,0 +1,5 @@
+Add the Chinese Manual here, then delete this file.
+You can use these to test if the Manual is generated succesfully:
+
+  ant manualOffline_zh_CN
+  ant manualFreemarkerOrg_zh_CN

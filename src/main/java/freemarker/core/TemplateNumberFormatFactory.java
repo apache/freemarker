@@ -48,7 +48,7 @@ public abstract class TemplateNumberFormatFactory extends TemplateValueFormatFac
      *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
      *            {@link TemplateNumberFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param locale
-     *            The locale to format for. Not {@code null}. The resulting format should be bound to this locale
+     *            The locale to format for. Not {@code null}. The resulting format must be bound to this locale
      *            forever (i.e. locale changes in the {@link Environment} must not be followed).
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for

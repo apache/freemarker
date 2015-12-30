@@ -722,9 +722,9 @@ public class Configurable {
      *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
      *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax has a FreeMarker-specific
      *       extension, so that you can specify options like the rounding mode and the symbols used in this string. For
-     *       example, {@code ",000;; rnd=hu grp=_"} will format numbers like {@code ",000"} would, but with half-up
-     *       rounding mode, and {@code _} as the group separator. See more about "extended Java decimal format" in the
-     *       FreeMarker Manual.
+     *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
+     *       would, but with half-up rounding mode, and {@code _} as the group separator. See more about "extended Java
+     *       decimal format" in the FreeMarker Manual.
      *       </li>
      *   <li>If the string starts with {@code @} character followed by a letter then it's interpreted as a custom number
      *       format, but only if either {@link Configuration#getIncompatibleImprovements()} is at least 2.3.24, or
@@ -779,7 +779,7 @@ public class Configurable {
      * 
      * @param customNumberFormats
      *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
-     *            letters and digits.
+     *            letters and digits (not {@code _}).
      * 
      * @since 2.3.24
      */
@@ -1536,8 +1536,9 @@ public class Configurable {
     /**
      * Sets a FreeMarker setting by a name and string value. If you can configure FreeMarker directly with Java (or
      * other programming language), you should use the dedicated setter methods instead (like
-     * {@link #setObjectWrapper(ObjectWrapper)}. This meant to be used if you get the settings from somewhere
-     * as text. Regardless, below you will find an overview of the settings available no matter how you set them. 
+     * {@link #setObjectWrapper(ObjectWrapper)}. This meant to be used only when you get settings from somewhere
+     * as {@link String}-{@link String} name-value pairs (typically, as a {@link Properties} object). Below you find an
+     * overview of the settings available.
      * 
      * <p>Note: As of FreeMarker 2.3.23, setting names can be written in camel case too. For example, instead of
      * {@code date_format} you can also use {@code dateFormat}. It's likely that camel case will become to the
@@ -1887,6 +1888,8 @@ public class Configurable {
      *            The keys and values can be any kind of expression, like even object builder expressions.
      *            The resulting Java object will be a {@link Map} that keeps the item order ({@link LinkedHashMap} as
      *            of this writing).
+     *        <li>A reference to a public static filed, like {@code Configuration.AUTO_DETECT_TAG_SYNTAX} or
+     *            {@code com.example.MyClass.MY_CONSTANT}.
      *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
      *      </ul>
      *   </li>
@@ -1901,13 +1904,13 @@ public class Configurable {
      *     can't be omitted for nested expressions.
      *   </li>
      *   <li>
-     *     <p>The following classes can be referred to with short class name instead of full qualified name:
+     *     <p>The following classes can be referred to with simple (unqualified) name instead of fully qualified name:
      *     {@link DefaultObjectWrapper}, {@link BeansWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
      *     {@link TemplateConfiguration}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link UndefinedOutputFormat}.
+     *     {@link UndefinedOutputFormat}, {@link Configuration}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such

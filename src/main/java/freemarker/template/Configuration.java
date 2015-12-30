@@ -58,10 +58,13 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.BugException;
+import freemarker.core.CSSOutputFormat;
 import freemarker.core.CombinedMarkupOutputFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.HTMLOutputFormat;
+import freemarker.core.JSONOutputFormat;
+import freemarker.core.JavaScriptOutputFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
@@ -72,6 +75,7 @@ import freemarker.core.TemplateConfiguration;
 import freemarker.core.TemplateMarkupOutputModel;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
+import freemarker.core.XHTMLOutputFormat;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
@@ -339,9 +343,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         STANDARD_OUTPUT_FORMATS = new HashMap<String, OutputFormat>();
         STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(HTMLOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(XHTMLOutputFormat.INSTANCE.getName(), XHTMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(XMLOutputFormat.INSTANCE.getName(), XMLOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(RTFOutputFormat.INSTANCE.getName(), RTFOutputFormat.INSTANCE);
         STANDARD_OUTPUT_FORMATS.put(PlainTextOutputFormat.INSTANCE.getName(), PlainTextOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(CSSOutputFormat.INSTANCE.getName(), CSSOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(JavaScriptOutputFormat.INSTANCE.getName(), JavaScriptOutputFormat.INSTANCE);
+        STANDARD_OUTPUT_FORMATS.put(JSONOutputFormat.INSTANCE.getName(), JSONOutputFormat.INSTANCE);
     }
     
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
@@ -767,6 +775,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          {@code incompatibleImprovements} version number than that of the {@link Configuration}, if that's
      *          really what you want.)
      *       </li>
+     *       <li><p>
+     *          Fixed bug: The {@code #import} directive meant to copy the library variable into a global variable if
+     *          it's executed in the main namespace, but that haven't happened when the imported template was already
+     *          imported earlier in another namespace. 
+     *       </li>
+     *       <li><p>
+     *          {@code ?is_sequence} doesn't return {@code true} for Java methods wrapped by {@link BeansWrapper} and
+     *          its subclasses (most notably {@link DefaultObjectWrapper}) anymore, as they only implement the
+     *          {@code [index]} operator, but not {@code ?size}, which causes {@code <#list ...>} to fail among others.
+     *          (They shouldn't implement either, but this is historical heritage.)
      *     </ul>
      *   </li>
      * </ul>
@@ -1792,15 +1810,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets the (default) output format. Usually, you leave this on its default, which is
-     * {@link UndefinedOutputFormat#INSTANCE}, and then override it for individual templates based on their name (like
-     * based on their "file" extension) with {@link #setTemplateConfigurations(TemplateConfigurationFactory)}. This setting is
-     * also overridden by the standard file extensions; see them at
-     * {@link #setRecognizeStandardFileExtensions(boolean)}.
+     * Sets the default output format. Usually, you should leave this on its default, which is
+     * {@link UndefinedOutputFormat#INSTANCE}, and then use standard file extensions like "ftlh" (for HTML) or "ftlx"
+     * (for XML) and ensure that {@link #setRecognizeStandardFileExtensions(boolean)} is {@code true} (see more there).
+     * Where you can't use standard the file extensions, templates still can be associated to output formats with
+     * patterns matching their name (their path) using {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
+     * But if all templates will have the same output format, you may use {@link #setOutputFormat(OutputFormat)} after
+     * all, to set a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note
+     * that templates can specify their own output format like {@code 
+     * <#ftl output_format="HTML">}, which overrides any configuration settings.
      * 
      * <p>
-     * The output format is mostly important because of auto-escaping (see {@link #setAutoEscapingPolicy(int)}), but maybe
-     * also used by the embedding application to set the HTTP response MIME type, etc.
+     * The output format is mostly important because of auto-escaping (see {@link #setAutoEscapingPolicy(int)}), but
+     * maybe also used by the embedding application to set the HTTP response MIME type, etc.
      * 
      * @see #setRegisteredCustomOutputFormats(Collection)
      * @see #setTemplateConfigurations(TemplateConfigurationFactory)
@@ -1854,19 +1876,23 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Returns the output format for a name (not {@code null}).
+     * Returns the output format for a name.
      * 
-     * <p>
-     * The name can also refer to a combined format that's created ad-hoc from the registered formats. For example, if
-     * you need RTF embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
-     * existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is also valid.
+     * @param name
+     *            Either the name of the output format as it was registered with
+     *            {@link Configuration#setRegisteredCustomOutputFormats(Collection)}, or a combined output format name.
+     *            A output combined format is created ad-hoc from the registered formats. For example, if you need RTF
+     *            embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
+     *            existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is
+     *            also valid.
+     * 
+     * @return Not {@code null}.
      * 
      * @throws UnregisteredOutputFormatException
      *             If there's no output format registered with the given name.
      * @throws IllegalArgumentException
-     *             If the usage of <code>{</code> and <code>}</code> in the name is syntactically wrong, or if not
-     *             all {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <code>...{...}</code>
-     *             expression.
+     *             If the usage of <code>{</code> and <code>}</code> in the name is syntactically wrong, or if not all
+     *             {@link OutputFormat}-s are {@link MarkupOutputFormat}-s in the <code>...{...}</code> expression.
      * 
      * @since 2.3.24
      */
@@ -1882,7 +1908,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             }
             
             MarkupOutputFormat outerOF = getMarkupOutputFormatForCombined(name.substring(0, openBrcIdx));
-            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombined(name.substring(openBrcIdx + 1, name.length() - 1));
+            MarkupOutputFormat innerOF = getMarkupOutputFormatForCombined(
+                    name.substring(openBrcIdx + 1, name.length() - 1));
             
             return new CombinedMarkupOutputFormat(name, outerOF, innerOF);
         } else {
@@ -1943,8 +1970,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The default value is an empty collection.
      * 
      * @param registeredCustomOutputFormats
-     *            The collection of the {@link OutputFormat}-s, each must be different and has a unique name within this
-     *            collection.
+     *            The collection of the {@link OutputFormat}-s, each must be different and has a unique name (
+     *            {@link OutputFormat#getName()}) within this collection.
      * 
      * @throws IllegalArgumentException
      *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection. When
@@ -2002,7 +2029,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         this.registeredCustomOutputFormats = Collections.unmodifiableMap(m);
         
-        cache.clear();
+        clearTemplateCache();
     }
     
     /**
@@ -2960,7 +2987,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
-     * templates. The order of the imports will be the same as the order in which they were added with this method.
+     * top-level templates (that is, to all templates that weren't included/imported from another template). While it
+     * only affects the top-level (main) template directly, as the imports there will create a global variable, the
+     * imports will be visible from the further imported templates too (though note that
+     * {@link #getIncompatibleImprovements()} set to 2.3.24 fixes a rarely surfacing bug here).
+     * 
+     * <p>
+     * The order of the imports will be the same as the order in which they were added with this method. Note that if
+     * there are also auto-includes ({@link #addAutoInclude(String)}), those inclusions will be executed after the
+     * auto-includes.
+     * 
+     * @see #setAutoImports(Map)
      */
     public void addAutoImport(String namespaceVarName, String templateName) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
@@ -3023,7 +3060,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Adds an invisible <code>#include <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
-     * templates. The order of the inclusions will be the same as the order in which they were added with this method.
+     * top-level templates (that is, to all templates that weren't included/imported from another template).
+     * 
+     * <p>
+     * The order of the inclusions will be the same as the order in which they were added with this method. Note that if
+     * there are also auto-imports ({@link #addAutoImport(String, String)}), those imports will be executed before the
+     * auto-includes, hence the library variables are accessible for the auto-includes.
+     * 
+     * @see #setAutoIncludes(List)
      */
     public void addAutoInclude(String templateName) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
@@ -3118,30 +3162,62 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
-     * writing, this information doesn't depend on the configuration options, so it could be a static method, but
-     * to be future-proof, it's an instance method. 
-     * 
-     * @return {@link Set} of {@link String}-s.
+     * Same as {@link #getSupportedBuiltInNames(int)} with argument {@link #getNamingConvention()}.
      * 
      * @since 2.3.20
      */
     public Set getSupportedBuiltInNames() {
-        return _CoreAPI.getSupportedBuiltInNames();
+        return getSupportedBuiltInNames(getNamingConvention());
+    }
+
+    /**
+     * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
+     * writing, this information doesn't depend on the configuration options, so it could be a static method, but
+     * to be future-proof, it's an instance method. 
+     * 
+     * @param namingConvention
+     *            One of {@link #AUTO_DETECT_NAMING_CONVENTION}, {@link #LEGACY_NAMING_CONVENTION}, and
+     *            {@link #CAMEL_CASE_NAMING_CONVENTION}. If it's {@link #AUTO_DETECT_NAMING_CONVENTION} then the union
+     *            of the names in all the naming conventions is returned. 
+     * 
+     * @since 2.3.24
+     */
+    public Set<String> getSupportedBuiltInNames(int namingConvention) {
+        return _CoreAPI.getSupportedBuiltInNames(namingConvention);
     }
     
     /**
-     * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
-     * <tt>&lt;#directiveName ...&gt;</tt>.
-     * 
-     * @return {@link Set} of {@link String}-s.
+     * Same as {@link #getSupportedBuiltInDirectiveNames(int)} with argument {@link #getNamingConvention()}.
      * 
      * @since 2.3.21
      */
     public Set getSupportedBuiltInDirectiveNames() {
-        return _CoreAPI.BUILT_IN_DIRECTIVE_NAMES;
+        return getSupportedBuiltInDirectiveNames(getNamingConvention());
     }
 
+    /**
+     * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
+     * <tt>&lt;#directiveName ...&gt;</tt>.
+     * 
+     * @param namingConvention
+     *            One of {@link #AUTO_DETECT_NAMING_CONVENTION}, {@link #LEGACY_NAMING_CONVENTION}, and
+     *            {@link #CAMEL_CASE_NAMING_CONVENTION}. If it's {@link #AUTO_DETECT_NAMING_CONVENTION} then the union
+     *            of the names in all the naming conventions is returned. 
+     * 
+     * @since 2.3.24
+     */
+    public Set<String> getSupportedBuiltInDirectiveNames(int namingConvention) {
+        if (namingConvention == AUTO_DETECT_NAMING_CONVENTION) {
+            return _CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES;
+        } else if (namingConvention == LEGACY_NAMING_CONVENTION) {
+            return _CoreAPI.LEGACY_BUILT_IN_DIRECTIVE_NAMES;
+        } else if (namingConvention == CAMEL_CASE_NAMING_CONVENTION) {
+            return _CoreAPI.CAMEL_CASE_BUILT_IN_DIRECTIVE_NAMES;
+        } else {
+            throw new IllegalArgumentException("Unsupported naming convention constant: " + namingConvention);
+        }
+    }
+    
     private static String getRequiredVersionProperty(Properties vp, String properyName) {
         String s = vp.getProperty(properyName);
         if (s == null) {

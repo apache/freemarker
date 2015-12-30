@@ -25,7 +25,9 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Represents the XHTML output format.
+ * Represents the XML output format (MIME type "application/xhtml+xml", name "XHTML"). This format escapes by default
+ * (via {@link StringUtil#XHTMLEnc(String)}). The {@code ?xml} built-in silently bypasses template output values of the
+ * type produced by this output format ({@link TemplateXHTMLOutputModel}).
  * 
  * @since 2.3.24
  */

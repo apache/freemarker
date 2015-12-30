@@ -860,7 +860,7 @@ TOKEN:
     <#CLOSE_TAG2 : (<BLANK>)* ("/")? (">" | "]")>
     |
     /*
-     * ATTENTION: Update _CoreAPI.BUILT_IN_DIRECTIVE_NAMES if you add new directives!
+     * ATTENTION: Update _CoreAPI.*_BUILT_IN_DIRECTIVE_NAMES if you add new directives!
      */
     <ATTEMPT : <START_TAG> "attempt" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -1033,7 +1033,7 @@ TOKEN:
     <TRIVIAL_FTL_HEADER : ("<#ftl" | "[#ftl") ("/")? (">" | "]")> { ftlHeader(matchedToken); }
     |
     /*
-     * ATTENTION: Update _CoreAPI.BUILT_IN_DIRECTIVE_NAMES if you add new directives!
+     * ATTENTION: Update _CoreAPI.*_BUILT_IN_DIRECTIVE_NAMES if you add new directives!
      */
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z", "A"-"Z", "_"])+>
     {
@@ -1060,7 +1060,7 @@ TOKEN:
                 // doesn't match any directive starter tokens, because that token requires whitespace after the
                 // name as it should be followed by parameters. For now we work this around so we don't report
                 // unknown directive:
-                if (_CoreAPI.BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
+                if (_CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                     throw new TokenMgrError(
                             "#" + dn + " is an existing directive, but the tag is malformed. " 
                             + " (See FreeMarker Manual / Directive Reference.)",
@@ -2128,7 +2128,7 @@ Expression BuiltIn(Expression lhoExp) :
         }
 
         if (result instanceof OutputFormatBoundBuiltIn) {
-            ((OutputFormatBoundBuiltIn) result).bindToOutputFormat(outputFormat);
+            ((OutputFormatBoundBuiltIn) result).bindToOutputFormat(outputFormat, autoEscapingPolicy);
             
             return result;
         }

@@ -145,7 +145,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         String defaultNS = env.getDefaultNS();
         String prefix;
         if (defaultNS != null && defaultNS.equals(nsURI)) {
-            prefix = Template.DEFAULT_NAMESPACE_PREFIX;
+            prefix = "";
         } else {
             prefix = env.getPrefixForNamespace(nsURI);
             

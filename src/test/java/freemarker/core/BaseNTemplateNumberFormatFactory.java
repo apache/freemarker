@@ -25,9 +25,15 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.NumberUtil;
 import freemarker.template.utility.StringUtil;
 
+/**
+ * Shows a number in base N number system. Can only format numbers that fit into an {@code int},
+ * however, optionally you can specify a fallback format. This format has one required parameter,
+ * the numerical system base. That can be optionally followed by "|" and a fallback format.
+ */
 public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
 
-    public static final BaseNTemplateNumberFormatFactory INSTANCE = new BaseNTemplateNumberFormatFactory();
+    public static final BaseNTemplateNumberFormatFactory INSTANCE
+            = new BaseNTemplateNumberFormatFactory();
     
     private BaseNTemplateNumberFormatFactory() {
         // Defined to decrease visibility
@@ -61,10 +67,14 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         } catch (NumberFormatException e) {
             if (params.length() == 0) {
                 throw new InvalidFormatParametersException(
-                        "A format parameter is required, which specifies the numerical system base.");
+                        "A format parameter is required to specify the numerical system base.");
             }
             throw new InvalidFormatParametersException(
-                    "The format paramter must be an integer, but was (shown quoted): " + StringUtil.jQuote(params));
+                    "The format paramter must be an integer, but was (shown quoted): "
+                    + StringUtil.jQuote(params));
+        }
+        if (base < 2) {
+            throw new InvalidFormatParametersException("A base must be at least 2.");
         }
         return new BaseNTemplateNumberFormat(base, fallbackFormat);
     }
@@ -88,7 +98,8 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
             } catch (ArithmeticException e) {
                 if (fallbackFormat == null) {
                     throw new UnformattableValueException(
-                            n + " doesn't fit into an int, and there was no fallback format specified.");
+                            n + " doesn't fit into an int, and there was no fallback format "
+                            + "specified.");
                 } else {
                     return fallbackFormat.formatToPlainText(numberModel);
                 }
@@ -102,7 +113,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
 
         @Override
         public String getDescription() {
-            return "hexadecimal int";
+            return "base " + base;
         }
         
     }

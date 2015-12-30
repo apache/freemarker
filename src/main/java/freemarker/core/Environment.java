@@ -92,7 +92,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
  */
 public final class Environment extends Configurable {
-
+    
     private static final ThreadLocal threadEnv = new ThreadLocal();
 
     private static final Logger LOG = Logger.getLogger("freemarker.runtime");
@@ -1501,7 +1501,7 @@ public final class Environment extends Configurable {
     
     /**
      * Gets a {@link TemplateDateFormat} for the specified parameters. This is mostly meant to be used by
-     * {@link TemplateDateFormatFactory} implementations to delegate to a format based on a specific format string. It's
+     * {@link TemplateDateFormatFactory} implementations to delegate to a format based on a specific format string. It
      * works well for that, as its parameters are the same low level values as the parameters of
      * {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}. For other tasks
      * consider the other overloads of this method.
@@ -1635,7 +1635,7 @@ public final class Environment extends Configurable {
     /**
      * Used to get the {@link TemplateDateFormat} according the date/time/datetime format settings, for the current
      * locale and time zone. See {@link #getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} for the meaning
-     * of some if the parameters.
+     * of some of the parameters.
      */
     private TemplateDateFormat getTemplateDateFormat(int dateType, boolean useSQLDTTZ, boolean zonelessInput)
             throws TemplateValueFormatException {
@@ -2421,7 +2421,7 @@ public final class Environment extends Configurable {
 
     /**
      * Same as {@link #getTemplateForInclusion(String, String, boolean, boolean)} with {@code false}
-     * {@code ignoreMissign} argument.
+     * {@code ignoreMissing} argument.
      */
     public Template getTemplateForInclusion(String name, String encoding, boolean parse)
             throws IOException {
@@ -2560,11 +2560,14 @@ public final class Environment extends Configurable {
         if (existingNamespace != null) {
             if (namespace != null) {
                 setVariable(namespace, existingNamespace);
+                if (isIcI2324OrLater() && currentNamespace == mainNamespace) {
+                    globalNamespace.put(namespace, existingNamespace);
+                }
             }
         } else {
             Namespace newNamespace = new Namespace(loadedTemplate);
             if (namespace != null) {
-                currentNamespace.put(namespace, newNamespace);
+                setVariable(namespace, newNamespace);
                 if (currentNamespace == mainNamespace) {
                     globalNamespace.put(namespace, newNamespace);
                 }
@@ -2776,7 +2779,7 @@ public final class Environment extends Configurable {
         return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
     }
 
-    private boolean isIcI2324OrLater() {
+    boolean isIcI2324OrLater() {
         return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
     }
 

@@ -1653,18 +1653,31 @@ public class StringUtil {
     }
     
     /**
-     * @return whether the name is a valid XML tagname.
-     * (This routine might only be 99% accurate. Should maybe REVISIT) 
+     * Used internally by the XML DOM wrapper to check if the subvariable name is just an element name, or a more
+     * complex XPath expression.
+     * 
+     * @return whether the name is a valid XML tagname. (This routine might only be 99% accurate. Should maybe REVISIT)
+     * 
+     * @deprecated Don't use this outside FreeMarker; it's name if misleading, and it doesn't follow the XML specs.
      */
+    @Deprecated
     static public boolean isXMLID(String name) {
-        for (int i = 0; i < name.length(); i++) {
+        int ln = name.length();
+        for (int i = 0; i < ln; i++) {
             char c = name.charAt(i);
-            if (i == 0) {
-                if (c == '-' || c == '.' || Character.isDigit(c))
+            if (i == 0 && (c == '-' || c == '.' || Character.isDigit(c))) {
                     return false;
             }
-            if (!Character.isLetterOrDigit(c) && c != ':' && c != '_' && c != '-' && c != '.') {
-                return false;
+            if (!Character.isLetterOrDigit(c) && c != '_' && c != '-' && c != '.') {
+                if (c == ':') {
+                    if (i + 1 < ln && name.charAt(i + 1) == ':') {
+                        // "::" is used in XPath
+                        return false;
+                    }
+                    // We don't return here, as a lonely ":" is allowed.
+                } else {
+                    return false;
+                }
             }
         }
         return true;

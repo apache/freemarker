@@ -18,39 +18,44 @@
  */
 package freemarker.core;
 
+import freemarker.template.Configuration;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Encapsulates the {@link TemplateMarkupOutputModel} factories and {@code TemplateOutputModel} operations, and other
- * meta information (like MIME type) about a certain output format.
+ * Represents an output format.
+ * 
+ * @see Configuration#setOutputFormat(OutputFormat)
+ * @see Configuration#setRegisteredCustomOutputFormats(java.util.Collection)
+ * @see MarkupOutputFormat
  * 
  * @since 2.3.24
  */
 public abstract class OutputFormat {
 
     /**
-     * The short name we used to refer to this format (like in the {@code #ftl} header).
+     * The short name used to refer to this format (like in the {@code #ftl} header).
      */
     public abstract String getName();
     
     /**
-     * Returns the MIME type of the output format. This might comes handy when generating generating a HTTP response.
-     * {@code null} if the output format doesn't clearly corresponds to a specific MIME type.
+     * Returns the MIME type of the output format. This might comes handy when generating a HTTP response. {@code null}
+     * if this output format doesn't clearly corresponds to a specific MIME type.
      */
     public abstract String getMimeType();
 
     /**
-     * Tells if this output format allows inserting {@link TemplateMarkupOutputModel}-s of another output formats into it. If
-     * {@code true}, the foreign {@link TemplateMarkupOutputModel} will be inserted into the output as is (like if the
-     * surrounding output format was the same). This is usually a bad idea, as such an even could indicate application
-     * bugs. If this method returns {@code false} (recommended), then FreeMarker will try to assimilate the inserted
-     * value by converting its format to this format, which will currently (2.3.24) cause exception, unless the inserted
-     * value is made by escaping plain text and the target format is not escaping, in which case format conversion is
-     * trivially possible. (It's not impossible to extending conversions beyond this, if there will be real world demand
-     * for it.)
+     * Tells if this output format allows inserting {@link TemplateMarkupOutputModel}-s of another output formats into
+     * it. If {@code true}, the foreign {@link TemplateMarkupOutputModel} will be inserted into the output as is (like
+     * if the surrounding output format was the same). This is usually a bad idea allow, as such an event could indicate
+     * application bugs. If this method returns {@code false} (recommended), then FreeMarker will try to assimilate the
+     * inserted value by converting its format to this format, which will currently (2.3.24) cause exception, unless the
+     * inserted value is made by escaping plain text and the target format is non-escaping, in which case format
+     * conversion is trivially possible. (It's not impossible that conversions will be extended beyond this, if there
+     * will be demand for that.)
      * 
-     * <p>{@code true} value is used by {@link UndefinedOutputFormat}.
+     * <p>
+     * {@code true} value is used by {@link UndefinedOutputFormat}.
      */
     public abstract boolean isOutputFormatMixingAllowed();
 
@@ -70,7 +75,7 @@ public abstract class OutputFormat {
     
     /**
      * Should be like {@code "foo=\"something\", bar=123"}; this will be inserted inside the parentheses in
-     * {@link #toString()}. 
+     * {@link #toString()}. Shouldn't return {@code null}; should return {@code ""} if there are no extra properties.  
      */
     protected String toStringExtraProperties() {
         return "";

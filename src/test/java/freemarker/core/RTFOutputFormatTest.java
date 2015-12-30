@@ -123,7 +123,7 @@ public class RTFOutputFormatTest {
     
     @Test
     public void testGetMimeType() {
-        assertEquals("text/rtf", INSTANCE.getMimeType());
+        assertEquals("application/rtf", INSTANCE.getMimeType());
     }
     
 }

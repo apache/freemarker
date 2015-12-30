@@ -186,7 +186,10 @@
       <setting incompatible_improvements="min, 2.3.20"/>
    </testCase>
    <testCase name="type-builtins[#endTN]-ici-2.3.21">
-   	  <setting incompatible_improvements="2.3.21, max"/>
+   	  <setting incompatible_improvements="2.3.21, 2.3.23"/>
+   </testCase>
+   <testCase name="type-builtins[#endTN]-ici-2.3.24">
+      <setting incompatible_improvements="2.3.24, max"/>
    </testCase>
    <testCase name="date-type-builtins" noOutput="true" />
    <testCase name="url" noOutput="true" />

@@ -187,7 +187,7 @@ public class CombinedMarkupOutputFormatTest {
     @Test
     public void testGetMimeType() {
         assertEquals("text/html", HTML_RTF.getMimeType());
-        assertEquals("text/xml", XML_XML.getMimeType());
+        assertEquals("application/xml", XML_XML.getMimeType());
     }
     
 }

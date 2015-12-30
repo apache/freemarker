@@ -19,8 +19,8 @@
  
 package freemarker.ext.dom;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -30,6 +30,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.template.Template;
 import freemarker.template.utility.StringUtil;
@@ -41,8 +42,9 @@ class NodeOutputter {
     private String defaultNS;
     private boolean hasDefaultNS;
     private boolean explicitDefaultNSPrefix;
-    private HashMap namespacesToPrefixLookup = new HashMap();
+    private LinkedHashMap<String, String> namespacesToPrefixLookup = new LinkedHashMap<String, String>();
     private String namespaceDecl;
+    int nextGeneratedPrefixNumber = 1;
     
     NodeOutputter(Node node) {
         if (node instanceof Element) {
@@ -72,6 +74,15 @@ class NodeOutputter {
         String nsURI = n.getNamespaceURI();
         if (nsURI != null && nsURI.length() > 0) {
             String prefix = env.getPrefixForNamespace(nsURI);
+            if (prefix == null) {
+                prefix = namespacesToPrefixLookup.get(nsURI);
+                if (prefix == null) {
+                    // Assign a generated prefix:
+                    do {
+                        prefix = StringUtil.toLowerABC(nextGeneratedPrefixNumber++);
+                    } while (env.getNamespaceForPrefix(prefix) != null);
+                }
+            }
             namespacesToPrefixLookup.put(nsURI, prefix);
         } else if (hasDefaultNS && n.getNodeType() == Node.ELEMENT_NODE) {
             namespacesToPrefixLookup.put(defaultNS, Template.DEFAULT_NAMESPACE_PREFIX); 
@@ -93,28 +104,14 @@ class NodeOutputter {
             buf.append(defaultNS);
             buf.append("\"");
         }
-        for (Iterator it = namespacesToPrefixLookup.keySet().iterator(); it.hasNext(); ) {
-            String nsURI = (String) it.next();
+        for (Iterator<String> it = namespacesToPrefixLookup.keySet().iterator(); it.hasNext(); ) {
+            String nsURI = it.next();
             if (nsURI == null || nsURI.length() == 0) {
                 continue;
             }
-            String prefix = (String) namespacesToPrefixLookup.get(nsURI);
+            String prefix = namespacesToPrefixLookup.get(nsURI);
             if (prefix == null) {
-                // Okay, let's auto-assign a prefix.
-                // Should we do this??? (REVISIT)
-                for (int i = 0; i < 26; i++) {
-                    char[] cc = new char[1];
-                    cc[0] = (char) ('a' + i);
-                    prefix = new String(cc);
-                    if (env.getNamespaceForPrefix(prefix) == null) {
-                        break;
-                    }
-                    prefix = null;
-                }
-                if (prefix == null) {
-                    throw new RuntimeException("This will almost never happen!");
-                }
-                namespacesToPrefixLookup.put(nsURI, prefix);
+                throw new BugException("No xmlns prefix was associated to URI: " + nsURI);
             }
             buf.append(" xmlns");
             if (prefix.length() > 0) {
@@ -133,7 +130,7 @@ class NodeOutputter {
         if (nsURI == null || nsURI.length() == 0) {
             buf.append(n.getNodeName());
         } else {
-            String prefix = (String) namespacesToPrefixLookup.get(nsURI);
+            String prefix = namespacesToPrefixLookup.get(nsURI);
             if (prefix == null) {
                 //REVISIT!
                 buf.append(n.getNodeName());
