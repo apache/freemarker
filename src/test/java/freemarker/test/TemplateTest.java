@@ -69,8 +69,12 @@ public abstract class TemplateTest {
     }
 
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
+        assertOutput(createTemplate(ftl), expectedOut, false);
+    }
+
+    private Template createTemplate(String ftl) throws IOException {
         Template t = new Template(null, ftl, getConfiguration());
-        assertOutput(t, expectedOut, false);
+        return t;
     }
 
     protected void assertOutputForNamed(String name, String expectedOut) throws IOException, TemplateException {
@@ -101,15 +105,24 @@ public abstract class TemplateTest {
     
     protected void assertOutput(Template t, String expectedOut, boolean normalizeNewlines)
             throws TemplateException, IOException {
-        StringWriter out = new StringWriter();
-        t.process(getDataModel(), out);
-        String actualOut = out.toString();
+        String actualOut = getOutput(t);
         
         if (normalizeNewlines) {
             expectedOut = normalizeNewLines(expectedOut);
             actualOut = normalizeNewLines(actualOut);
         }
         assertEquals(expectedOut, actualOut);
+    }
+
+    protected String getOutput(String ftl) throws IOException, TemplateException {
+        return getOutput(createTemplate(ftl));
+    }
+    
+    protected String getOutput(Template t) throws TemplateException, IOException {
+        StringWriter out = new StringWriter();
+        t.process(getDataModel(), out);
+        String actualOut = out.toString();
+        return actualOut;
     }
     
     protected Configuration createConfiguration() throws Exception {

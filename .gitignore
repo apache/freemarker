@@ -5,5 +5,26 @@
 /archive/
 /ide-dependencies/
 
-src/manual/book.xml~
+/out/
+/bin/
+/target/
 
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+*.tmp
+*.bak
+*.swp
+*~
+
+.gradle
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+.directory
+.Trash-*

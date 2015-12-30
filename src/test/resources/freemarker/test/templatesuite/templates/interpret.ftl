@@ -3,3 +3,5 @@
 <#transform templateSource?interpret>def</#transform>
 <#transform [templateSource]?interpret>def</#transform>
 <#transform [templateSource,"id"]?interpret>def</#transform>
+
+<#assign t = '<#macro m>M</#macro>'?interpret><@t /><@m/>

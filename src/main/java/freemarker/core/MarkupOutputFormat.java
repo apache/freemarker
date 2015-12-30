@@ -25,8 +25,12 @@ import freemarker.template.TemplateModelException;
 
 /**
  * An {@link OutputFormat}-s that represent a "markup", which is any format where certain character sequences have
- * special meaning and thus may need escaping. Escaping is important for FreeMarker, as typically it has to insert
- * non-markup data from the data-model.
+ * special meaning and thus may need escaping. (Escaping is important for FreeMarker, as typically it has to insert
+ * non-markup text from the data-model into the output markup.) This class, among others, defines the operations related
+ * to {@link TemplateMarkupOutputModel}-s that belong to the output format.
+ * 
+ * @param <MO>
+ *            The {@link TemplateMarkupOutputModel} class this output format can deal with.
  * 
  * @since 2.3.24
  */
@@ -47,7 +51,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     public abstract MO fromPlainTextByEscaping(String textToEsc) throws TemplateModelException;
 
     /**
-     * Wraps {@link String} that's already markup to {@link TemplateMarkupOutputModel} interface, to indicate its
+     * Wraps a {@link String} that's already markup to {@link TemplateMarkupOutputModel} interface, to indicate its
      * format. This corresponds to {@code ?noEsc}. (This methods is allowed to throw {@link TemplateModelException} if
      * the parameter markup text is malformed, but it's unlikely that an implementation chooses to parse the parameter
      * until, and if ever, that becomes necessary.)
@@ -63,14 +67,15 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
 
     /**
      * Equivalent to calling {@link #fromPlainTextByEscaping(String)} and then
-     * {@link #output(TemplateMarkupOutputModel, Writer)}, but implementators should chose a more efficient way.
+     * {@link #output(TemplateMarkupOutputModel, Writer)}, but the implementation may uses a more efficient solution.
      */
     public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
     
     /**
      * If this {@link TemplateMarkupOutputModel} was created with {@link #fromPlainTextByEscaping(String)}, it returns
-     * the original plain text, otherwise it might returns {@code null}. Used when converting between different type of
-     * markups and the source was made from plain text.
+     * the original plain text, otherwise it returns {@code null}. Useful for converting between different types
+     * of markups, as if the source format can be converted to plain text without loss, then that just has to be
+     * re-escaped with the target format to do the conversion.
      */
     public abstract String getSourcePlainText(MO mo) throws TemplateModelException;
 
@@ -78,7 +83,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * Returns the content as markup text; never {@code null}. If this {@link TemplateMarkupOutputModel} was created
      * with {@link #fromMarkup(String)}, it might returns the original markup text literally, but this is not required
      * as far as the returned markup means the same. If this {@link TemplateMarkupOutputModel} wasn't created
-     * with {@link #fromMarkup(String)} and it doesn't yet have to markup, it has to generate the markup now.
+     * with {@link #fromMarkup(String)} and it doesn't yet have the markup, it has to generate the markup now.
      */
     public abstract String getMarkupString(MO mo) throws TemplateModelException;
     
@@ -90,12 +95,12 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     
     /**
      * Should give the same result as {@link #fromPlainTextByEscaping(String)} and then
-     * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may uses a more efficient approach.
+     * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may uses a more efficient solution.
      */
     public abstract String escapePlainText(String plainTextContent) throws TemplateModelException;
 
     /**
-     * Returns if the markup is empty (0 length). This is used be at least {@code ?hasContent}.
+     * Returns if the markup is empty (0 length). This is used by at least {@code ?hasContent}.
      */
     public abstract boolean isEmpty(MO mo) throws TemplateModelException;
     
@@ -107,7 +112,8 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     public abstract boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateModelException;
     
     /**
-     * Usually {@code true}; tells if by default auto-escaping should be on for this format. 
+     * Tells if by default auto-escaping should be on for this format. It should be {@code true} if you need to escape
+     * on most of the places where you insert values. 
      */
     public abstract boolean isAutoEscapedByDefault();
     

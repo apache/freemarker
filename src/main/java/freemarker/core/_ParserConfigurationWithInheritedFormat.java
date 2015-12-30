@@ -22,19 +22,17 @@ import freemarker.template.Version;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
- * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't. 
  */ 
 public final class _ParserConfigurationWithInheritedFormat implements ParserConfiguration {
 
     private final OutputFormat outputFormat;
-    private final Integer autoEscaping;
+    private final Integer autoEscapingPolicy;
     private final ParserConfiguration wrappedPCfg;
 
     public _ParserConfigurationWithInheritedFormat(ParserConfiguration wrappedPCfg, OutputFormat outputFormat,
-            Integer autoEscaping) {
+            Integer autoEscapingPolicy) {
         this.outputFormat = outputFormat;
-        this.autoEscaping = autoEscaping;
+        this.autoEscapingPolicy = autoEscapingPolicy;
         this.wrappedPCfg = wrappedPCfg;
     }
 
@@ -67,7 +65,7 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     }
 
     public int getAutoEscapingPolicy() {
-        return autoEscaping != null ? autoEscaping.intValue() : wrappedPCfg.getAutoEscapingPolicy();
+        return autoEscapingPolicy != null ? autoEscapingPolicy.intValue() : wrappedPCfg.getAutoEscapingPolicy();
     }
 
     public ArithmeticEngine getArithmeticEngine() {

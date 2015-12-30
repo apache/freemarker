@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import freemarker.core.BuiltInsForDates.iso_BI;
 import freemarker.core.BuiltInsForDates.iso_utc_or_local_BI;
@@ -77,8 +79,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
     protected Expression target;
     protected String key;
 
+    static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
+    static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
+    
     static final int NUMBER_OF_BIS = 259;
-    static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
+    static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
         
@@ -272,7 +277,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("url", new BuiltInsForStringsEncoding.urlBI());
         putBI("url_path", "urlPath", new BuiltInsForStringsEncoding.urlPathBI());
         putBI("values", new BuiltInsForHashes.valuesBI());
-        putBI("web_safe", "webSafe", (BuiltIn) builtins.get("html"));  // deprecated; use ?html instead
+        putBI("web_safe", "webSafe", BUILT_INS_BY_NAME.get("html"));  // deprecated; use ?html instead
         putBI("word_list", "wordList", new BuiltInsForStringsBasic.word_listBI());
         putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
         putBI("xml", new BuiltInsForStringsEncoding.xmlBI());
@@ -280,18 +285,22 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("groups", new BuiltInsForStringsRegexp.groupsBI());
         putBI("replace", new BuiltInsForStringsRegexp.replace_reBI());
         
-        if (NUMBER_OF_BIS < builtins.size()) {
-            throw new AssertionError("Update NUMBER_OF_BIS! Should be: " + builtins.size());
+        if (NUMBER_OF_BIS < BUILT_INS_BY_NAME.size()) {
+            throw new AssertionError("Update NUMBER_OF_BIS! Should be: " + BUILT_INS_BY_NAME.size());
         }
     }
     
     private static void putBI(String name, BuiltIn bi) {
-        builtins.put(name, bi);
+        BUILT_INS_BY_NAME.put(name, bi);
+        SNAKE_CASE_NAMES.add(name);
+        CAMEL_CASE_NAMES.add(name);
     }
 
-    private static void putBI(String name, String nameCamelCase, BuiltIn bi) {
-        builtins.put(name, bi);
-        builtins.put(nameCamelCase, bi);
+    private static void putBI(String nameSnakeCase, String nameCamelCase, BuiltIn bi) {
+        BUILT_INS_BY_NAME.put(nameSnakeCase, bi);
+        BUILT_INS_BY_NAME.put(nameCamelCase, bi);
+        SNAKE_CASE_NAMES.add(nameSnakeCase);
+        CAMEL_CASE_NAMES.add(nameCamelCase);
     }
     
     /**
@@ -303,7 +312,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, Token keyTk,
             FMParserTokenManager tokenManager) throws ParseException {
         String key = keyTk.image;
-        BuiltIn bi = (BuiltIn) builtins.get(key);
+        BuiltIn bi = BUILT_INS_BY_NAME.get(key);
         if (bi == null) {
             StringBuilder buf = new StringBuilder("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
             
@@ -311,8 +320,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
                     "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
                     + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
                     + "The alphabetical list of built-ins:");
-            List names = new ArrayList(builtins.keySet().size());
-            names.addAll(builtins.keySet());
+            List names = new ArrayList(BUILT_INS_BY_NAME.keySet().size());
+            names.addAll(BUILT_INS_BY_NAME.keySet());
             Collections.sort(names);
             char lastLetter = 0;
             

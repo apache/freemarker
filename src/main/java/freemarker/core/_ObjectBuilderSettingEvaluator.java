@@ -46,6 +46,7 @@ import freemarker.cache.OrMatcher;
 import freemarker.cache.PathGlobMatcher;
 import freemarker.cache.PathRegexMatcher;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.TemplateHashModel;
@@ -75,7 +76,7 @@ public class _ObjectBuilderSettingEvaluator {
 
     private static final String BUILDER_CLASS_POSTFIX = "Builder";
 
-    private static Map/*<String,String>*/ SHORTHANDS;
+    private static Map<String,String> SHORTHANDS;
     
     private static final Object VOID = new Object();
 
@@ -165,9 +166,12 @@ public class _ObjectBuilderSettingEvaluator {
         int startPos = pos;
         
         BuilderCallExpression exp = new BuilderCallExpression();
+        // We need the canBeStaticField/mustBeStaticFiled complication to deal with legacy syntax where parentheses
+        // weren't required for constructor calls.
+        exp.canBeStaticField = true;
         
+        final String fetchedClassName = fetchClassName(optional);
         {
-            final String fetchedClassName = fetchClassName(optional);
             if (fetchedClassName == null) {
                 if (!optional) {
                     throw new _ObjectBuilderSettingEvaluationException("class name", src, pos);
@@ -178,6 +182,7 @@ public class _ObjectBuilderSettingEvaluator {
             if (!fetchedClassName.equals(exp.className)) {
                 // Before 2.3.21 only full-qualified class names were allowed
                 modernMode = true;
+                exp.canBeStaticField = false;
             }
         }
         
@@ -186,15 +191,17 @@ public class _ObjectBuilderSettingEvaluator {
         char openParen = fetchOptionalChar("(");
         // Only the top-level expression can omit the "(...)"
         if (openParen == 0 && !topLevel) {
-            if (!optional) {
-                throw new _ObjectBuilderSettingEvaluationException("(", src, pos);
+            if (fetchedClassName.indexOf('.') != -1) {
+                exp.mustBeStaticField = true;
+            } else {
+                pos = startPos;
+                return VOID;
             }
-            pos = startPos;
-            return VOID;
         }
     
         if (openParen != 0) {
             fetchParameterListInto(exp);
+            exp.canBeStaticField = false;
         }
         
         return exp;
@@ -683,8 +690,11 @@ public class _ObjectBuilderSettingEvaluator {
             
             addWithSimpleName(SHORTHANDS, Locale.class);
             SHORTHANDS.put("TimeZone", "freemarker.core._TimeZone");
+
+            // For accessing static fields:
+            addWithSimpleName(SHORTHANDS, Configuration.class);
         }
-        String fullClassName = (String) SHORTHANDS.get(className);
+        String fullClassName = SHORTHANDS.get(className);
         return fullClassName == null ? className : fullClassName;
     }
     
@@ -842,20 +852,41 @@ public class _ObjectBuilderSettingEvaluator {
     
     private class BuilderCallExpression extends ExpressionWithParameters {
         private String className;
+        private boolean canBeStaticField;
+        private boolean mustBeStaticField;
         
         @Override
         Object eval() throws _ObjectBuilderSettingEvaluationException {
+            if (mustBeStaticField) {
+                if (!canBeStaticField) {
+                    throw new BugException();
+                }
+                return getStaticFieldValue(className);
+            }
+            
             Class cl;
             
             if (!modernMode) {
                 try {
-                    return ClassUtil.forName(className).newInstance();
-                } catch (InstantiationException e) {
-                    throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
-                } catch (IllegalAccessException e) {
-                    throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
-                } catch (ClassNotFoundException e) {
-                    throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
+                    try {
+                        return ClassUtil.forName(className).newInstance();
+                    } catch (InstantiationException e) {
+                        throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
+                    } catch (IllegalAccessException e) {
+                        throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
+                    } catch (ClassNotFoundException e) {
+                        throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
+                    }
+                } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
+                    if (!canBeStaticField) {
+                        throw e;
+                    }
+                    // Silently try to interpret className as static filed, throw the original exception if that fails. 
+                    try {
+                        return getStaticFieldValue(className);
+                    } catch (_ObjectBuilderSettingEvaluationException e2) {
+                        throw e;
+                    }
                 }
             }
 
@@ -868,8 +899,23 @@ public class _ObjectBuilderSettingEvaluator {
                 try {
                     cl = ClassUtil.forName(className);
                 } catch (Exception e2) {
+                    boolean failedToGetAsStaticField;
+                    if (canBeStaticField) {
+                        // Try to interpret className as static filed: 
+                        try {
+                            return getStaticFieldValue(className);
+                        } catch (_ObjectBuilderSettingEvaluationException e3) {
+                            // Suppress it
+                            failedToGetAsStaticField = true;
+                        }
+                    } else {
+                        failedToGetAsStaticField = false;
+                    }
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "Failed to get class " + StringUtil.jQuote(className) + ".", e2);
+                            "Failed to get class " + StringUtil.jQuote(className)
+                            + (failedToGetAsStaticField ? " (also failed to resolve name as static field)" : "")
+                            + ".",
+                            e2);
                 }
             }
             
@@ -908,6 +954,53 @@ public class _ObjectBuilderSettingEvaluator {
             return result;
         }
         
+        private Object getStaticFieldValue(String dottedName) throws _ObjectBuilderSettingEvaluationException {
+            int lastDotIdx = dottedName.lastIndexOf('.');
+            if (lastDotIdx == -1) {
+                throw new IllegalArgumentException();
+            }
+            String className = shorthandToFullQualified(dottedName.substring(0, lastDotIdx));
+            String fieldName = dottedName.substring(lastDotIdx + 1);
+
+            Class<?> cl;
+            try {
+                cl = ClassUtil.forName(className);
+            } catch (Exception e) {
+                throw new _ObjectBuilderSettingEvaluationException(
+                        "Failed to get field's parent class, " + StringUtil.jQuote(className) + ".",
+                        e);
+            }
+            
+            Field field;
+            try {
+                field = cl.getField(fieldName);
+            } catch (Exception e) {
+                throw new _ObjectBuilderSettingEvaluationException(
+                        "Failed to get field " + StringUtil.jQuote(fieldName) + " from class "
+                        + StringUtil.jQuote(className) + ".",
+                        e);
+            }
+            
+            if ((field.getModifiers() & Modifier.STATIC) == 0) {
+                throw new _ObjectBuilderSettingEvaluationException("Referred field isn't static: " + field);
+            }
+            if ((field.getModifiers() & Modifier.PUBLIC) == 0) {
+                throw new _ObjectBuilderSettingEvaluationException("Referred field isn't public: " + field);
+            }
+
+            if (field.getName().equals(INSTANCE_FIELD_NAME)) {
+                throw new _ObjectBuilderSettingEvaluationException(
+                        "The " + INSTANCE_FIELD_NAME + " field is only accessible through pseudo-constructor call: "
+                        + className + "()");
+            }
+            
+            try {
+                return field.get(null);
+            } catch (Exception e) {
+                throw new _ObjectBuilderSettingEvaluationException("Failed to get field value: " + field, e);
+            }
+        }
+
         private Object callConstructor(Class cl)
                 throws _ObjectBuilderSettingEvaluationException {
             if (hasNoParameters()) {

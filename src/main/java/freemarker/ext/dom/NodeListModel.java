@@ -42,6 +42,11 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
 
+/**
+ * Used when the result set contains 0 or multiple nodes; shouldn't be used when you have exactly 1 node. For exactly 1
+ * node, use {@link NodeModel#wrap(Node)}, because {@link NodeModel} subclasses can have extra features building on that
+ * restriction, like single elements with text content can be used as FTL string-s.
+ */
 class NodeListModel extends SimpleSequence implements TemplateHashModel, _UnexpectedTypeErrorExplainerTemplateModel {
     
     NodeModel contextNode;

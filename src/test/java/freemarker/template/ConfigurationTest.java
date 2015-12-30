@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.junit.Test;
@@ -1638,6 +1639,46 @@ public class ConfigurationTest extends TestCase {
                 }
             }
         }
+    }
+    
+    @Test
+    public void testGetSupportedBuiltInDirectiveNames() {
+        Configuration cfg = new Configuration();
+        
+        Set<String> allNames = cfg.getSupportedBuiltInDirectiveNames(Configuration.AUTO_DETECT_NAMING_CONVENTION);
+        Set<String> lNames = cfg.getSupportedBuiltInDirectiveNames(Configuration.LEGACY_NAMING_CONVENTION);
+        Set<String> cNames = cfg.getSupportedBuiltInDirectiveNames(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        
+        checkNamingConventionNameSets(allNames, lNames, cNames);
+        
+        for (String name : cNames) {
+            assertThat(name.toLowerCase(), isIn(lNames));
+        }
+    }
+
+    @Test
+    public void testGetSupportedBuiltInNames() {
+        Configuration cfg = new Configuration();
+        
+        Set<String> allNames = cfg.getSupportedBuiltInNames(Configuration.AUTO_DETECT_NAMING_CONVENTION);
+        Set<String> lNames = cfg.getSupportedBuiltInNames(Configuration.LEGACY_NAMING_CONVENTION);
+        Set<String> cNames = cfg.getSupportedBuiltInNames(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        
+        checkNamingConventionNameSets(allNames, lNames, cNames);
+    }
+
+    private void checkNamingConventionNameSets(Set<String> allNames, Set<String> lNames, Set<String> cNames) {
+        for (String name : lNames) {
+            assertThat(allNames, hasItem(name));
+            assertTrue("Should be all-lowercase: " + name, name.equals(name.toLowerCase()));
+        }
+        for (String name : cNames) {
+            assertThat(allNames, hasItem(name));
+        }
+        for (String name : allNames) {
+            assertThat(name, anyOf(isIn(lNames), isIn(cNames)));
+        }
+        assertEquals(lNames.size(), cNames.size());
     }
     
     @SuppressWarnings("boxing")

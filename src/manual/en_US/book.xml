@@ -913,9 +913,9 @@ All Rights Reserved.
           extension to activate XML auto-escaping.</para>
 
           <para>You can try if auto-escaping is on like
-          <literal>${"&lt;"}</literal> (for HTML or XML escaping). If it's
-          not, and the configuration won't be adjusted, add this as the very
-          first line of the template:</para>
+          <literal>${"&lt;"}</literal> and then checking the raw output (for
+          HTML or XML escaping). If it's not, and the configuration won't be
+          adjusted, add this as the very first line of the template:</para>
 
           <programlisting role="template">&lt;#ftl output_format="HTML"&gt;</programlisting>
 
@@ -4119,7 +4119,7 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           value will be converted to string according the default number
           format. This may includes the maximum number of decimals, grouping,
           and like. Usually the programmer should set the default number
-          format; the template author don't have to deal with it (but he can
+          format; the template author doesn't have to deal with it (but he can
           with the <literal>number_format</literal> setting; see in the <link
           linkend="ref_directive_setting">documentation of
           <literal>setting</literal> directive</link>). Also, you can override
@@ -4168,8 +4168,8 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
 
           <para>If the expression evaluates to a date-like value then that
           will be transformed to a text according to a default format. Usually
-          the programmer should set the default format; you don't have to deal
-          with it (but if you care, <link
+          the programmer should set the default format; the template author
+          doesn't have to deal with it (but if you care, <link
           linkend="topic.dateTimeFormatSettings">see the
           <literal>date_format</literal>, <literal>time_format</literal> and
           <literal>datetime_format</literal> settings</link> in the
@@ -5282,7 +5282,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
           literal</link>. It also specifies a MIME type (e.g.
           <literal>"text/HTML"</literal>) and a canonical name (e.g.
           <literal>"HTML"</literal>) that the embedding application/framework
-          can leverage for its own purposes.</para>
+          can use for its own purposes.</para>
 
           <para>It's the programmer's responsibility to <link
           linkend="pgui_config_outputformatsautoesc">associate output format
@@ -5318,9 +5318,23 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
                 <literal>&amp;#39;</literal></td>
 
-                <td><literal>text/HTML</literal></td>
+                <td><literal>text/html</literal></td>
 
                 <td><literal>HTMLOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>XHTML</literal></td>
+
+                <td>Escapes <literal>&lt;</literal>, <literal>&gt;</literal>,
+                <literal>&amp;</literal>, <literal>"</literal>,
+                <literal>'</literal> as <literal>&amp;lt;</literal>,
+                <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;#39;</literal></td>
+
+                <td><literal>application/xhtml+xml</literal></td>
+
+                <td><literal>XHTMLOutputFormat.INSTANCE</literal></td>
               </tr>
             </tbody>
 
@@ -5334,7 +5348,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
                 <literal>&amp;apos;</literal></td>
 
-                <td><literal>text/xml</literal></td>
+                <td><literal>application/xml</literal></td>
 
                 <td><literal>XMLOutputFormat.INSTANCE</literal></td>
               </tr>
@@ -5346,7 +5360,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
                 <literal>\</literal> as <literal>\{</literal>,
                 <literal>\}</literal>, <literal>\\</literal></td>
 
-                <td><literal>text/rtf</literal></td>
+                <td><literal>application/rtf</literal></td>
 
                 <td><literal>RTFOutputFormat.INSTANCE</literal></td>
               </tr>
@@ -5369,20 +5383,47 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
               <tr>
                 <td><literal>plainText</literal></td>
 
-                <td>Doesn't escape. Doesn't accept markup output values from
-                other output formats. The output format inside string
-                literals.</td>
+                <td>Doesn't escape.</td>
 
                 <td><literal>text/plain</literal></td>
 
                 <td><literal>PlainTextOutputFormat.INSTANCE</literal></td>
               </tr>
+
+              <tr>
+                <td><literal>JavaScript</literal></td>
+
+                <td>Doesn't escape.</td>
+
+                <td><literal>application/javascript</literal></td>
+
+                <td><literal>JavaScriptOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>JSON</literal></td>
+
+                <td>Doesn't escape.</td>
+
+                <td><literal>application/json</literal></td>
+
+                <td><literal>JSONOutputFormat.INSTANCE</literal></td>
+              </tr>
+
+              <tr>
+                <td><literal>CSS</literal></td>
+
+                <td>Doesn't escape.</td>
+
+                <td><literal>text/css</literal></td>
+
+                <td><literal>CSSOutputFormat.INSTANCE</literal></td>
+              </tr>
             </tbody>
           </informaltable>
 
-          <para>The programmers can extend this with their your own output
-          formats, so this is maybe not all the output formats in your
-          application!</para>
+          <para>The programmers can add their your own output formats, so this
+          is maybe not all the output formats in your application!</para>
         </section>
 
         <section xml:id="dgui_misc_autoescaping_overrideoformat">
@@ -5412,7 +5453,7 @@ ${"'"}  &lt;#-- Prints: &amp;apos; --&gt;</programlisting>
             output_format="XML" auto_esc=true&gt;</literal> might helps (and
             that means that FreeMarker was configured to use
             <quote>disable</quote> auto-escaping <emphasis>policy</emphasis>,
-            which is usually not recommended).</para>
+            which is generally not recommended).</para>
           </note>
 
           <para>The output format can also be applied to only a section of a
@@ -5431,16 +5472,16 @@ ${"'"}  &lt;#-- Prints: &amp;#39; --&gt;
           everywhere in the template. This association sticks to the positions
           and won't change as the template executes. So if, for example, you
           call a macro from inside an <literal>outputformat</literal> block
-          that's defined outside that block, it won't get the output format of
-          it. Or, if you have a macro that's defined in a template with HTML
-          output format, no mater from where you call it, that macro will
-          always execute with HTML output format. This is like if you were
-          coloring each characters of the template files by output format in
-          the text editor, and then later when the templates are executed, it
-          only considers the color of the statement being executed. This gives
-          you firm control over the output format and hence escaping; you
-          don't have to consider the possible execution paths that can lead to
-          a point.</para>
+          and the called macro is defined outside that block, it won't get the
+          output format of it. Or, if you have a macro that's defined in a
+          template with HTML output format, no mater from where you call it,
+          that macro will always execute with HTML output format. This is like
+          if you were coloring each characters of the template files by output
+          format in the text editor, and then later when the templates are
+          executed, it only considers the color of the statement being
+          executed. This gives you firm control over the output format and
+          hence escaping; you don't have to consider the possible execution
+          paths that can lead to a point.</para>
         </section>
 
         <section xml:id="dgui_misc_autoescaping_disableautoesc">
@@ -5494,7 +5535,7 @@ ${'&amp;'}  &lt;#-- prints: &amp; --&gt;</programlisting>
 ${'&amp;'}  &lt;#-- prints: &amp; --&gt;
 ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programlisting>
 
-          <para>Of course, both <literal>autoesc</literal> and
+          <para>Naturally, both <literal>autoesc</literal> and
           <literal>?esc</literal> works inside <literal>noautoesc</literal>
           blocks too.</para>
         </section>
@@ -5502,7 +5543,7 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
         <section xml:id="dgui_misc_autoescaping_movalues">
           <title><quote>Markup output</quote> values</title>
 
-          <para>In FTL, <link linkend="dgui_datamodel_basics">values has
+          <para>In FTL, <link linkend="dgui_datamodel_basics">values have
           type</link>, like string, number, boolean, etc. One such type is
           called <quote>markup output</quote>. A value of that type is a piece
           of text that's already in the output format (like HTML), and hence
@@ -5524,11 +5565,11 @@ ${'&amp;'<emphasis>?esc</emphasis>}  &lt;#-- prints: &amp;amp; --&gt;</programli
             </listitem>
           </itemizedlist>
 
-          <para>Hence these can be used outside
+          <para>These can be useful outside
           <literal>${<replaceable>...</replaceable>}</literal> too. For
           example, here the caller of the <literal>infoBox</literal> macro can
-          decide if the message is plain text (that so needs escaping) or HTML
-          (that so mustn't be escaped):</para>
+          decide if the message is plain text (hence needs escaping) or HTML
+          (hence it mustn't be escaped):</para>
 
           <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 
@@ -5559,7 +5600,7 @@ Captured output: ${captured}</programlisting>
           <programlisting role="output">Just a string: &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
 Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
 
-          <para>Because the captured output is markup output it wasn't
+          <para>Because the captured output is markup output, it wasn't
           auto-escaped.</para>
 
           <para>It's important that markup output values aren't strings, and
@@ -5568,7 +5609,7 @@ Captured output: &lt;b&gt;Test&lt;/b&gt;</programlisting>
           etc., will give an error with them. You won't be able to pass them
           to Java methods for <literal>String</literal> parameters either. But
           sometimes you need the markup that's behind the value as a string,
-          and you can get that as
+          which you can get as
           <literal><replaceable>markupOutput</replaceable>?markup_string</literal>.
           Be sure you know what you are doing though. Applying string
           operations on markup (as opposed to on plain text) can result in
@@ -5584,7 +5625,7 @@ As expected:
 ${markupOutput1}
 ${markupOutput2}
 
-Double escaping:
+Possibly unintended double escaping:
 ${markupOutput1?markup_string}
 ${markupOutput2?markup_string}</programlisting>
 
@@ -5592,7 +5633,7 @@ ${markupOutput2?markup_string}</programlisting>
 &lt;b&gt;Test&lt;/b&gt;
 Foo &amp;amp; bar
 
-Double escaping:
+Possibly unintended double escaping:
 &amp;lt;b&amp;gt;Test&amp;lt;/b&amp;gt;
 Foo &amp;amp;amp; bar</programlisting>
         </section>
@@ -5667,10 +5708,11 @@ RTF:  Failed</programlisting>
             that, which is the output format used for templates for which no
             output format was specified in the configuration:</para>
 
-            <programlisting role="template">&lt;#outputformat "HTML"&gt;&lt;#assign htmlMO&gt;&lt;p&gt;Test&lt;/#assign&gt;&lt;/#outputformat&gt;
+            <programlisting role="template">&lt;#-- We assume that we have "undefined" output format here. --&gt;
+
+&lt;#outputformat "HTML"&gt;&lt;#assign htmlMO&gt;&lt;p&gt;Test&lt;/#assign&gt;&lt;/#outputformat&gt;
 &lt;#outputformat "XML"&gt;&lt;#assign xmlMO&gt;&lt;p&gt;Test&lt;/p&gt;&lt;/#assign&gt;&lt;/#outputformat&gt;
 &lt;#outputformat "RTF"&gt;&lt;#assign rtfMO&gt;\par Test&lt;/#assign&gt;&lt;/#outputformat&gt;
-&lt;#-- We assume that we have "undefined" output format here. --&gt;
 HTML: ${htmlMO}
 XML:  ${xmlMO}
 RTF:  ${rtfMO}</programlisting>
@@ -5692,7 +5734,7 @@ RTF:  \par Test</programlisting>
             value</link> in one side, the other side gets promoted to markup
             output value of the same output format (if it's not already that),
             by escaping its string value, and finally the two markups are
-            concatenated to form a new markup value. Example:</para>
+            concatenated to form a new markup output value. Example:</para>
 
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
@@ -5703,8 +5745,8 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             markup values of different output formats, the right side operand
             is converted to the output format of the left side. If that's not
             possible, then the left side operand is converted to the output
-            format of the right side. If that wasn't possible either, that's
-            an error. (See the <link
+            format of the right side. If that isn't possible either, that's an
+            error. (See the <link
             linkend="dgui_misc_autoescaping_mixingoutputformats">limitations
             of conversions here</link>.)</para>
           </section>
@@ -5717,8 +5759,8 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             <literal>&lt;#assign s = "Hello ${name}!"&gt;</literal>), it's
             just a shorthand of using the <literal>+</literal> operator
             (<literal>&lt;#assign s = "Hello" + name + "!"&gt;</literal>).
-            Thus, <literal>${<replaceable>...</replaceable>}</literal> inside
-            string expressions isn't auto-escaped.</para>
+            Thus, <literal>${<replaceable>...</replaceable>}</literal>-s
+            inside string expressions aren't auto-escaped.</para>
 
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 &lt;#assign name = "Foo &amp; Bar"&gt;
@@ -5733,7 +5775,7 @@ ${s?replace('&amp;'), 'and'}</programlisting>
             <programlisting role="output">&amp;lt;p&amp;gt;Hello Foo &amp;amp; Bar!
 &lt;p&gt;Hello Foo &amp;amp; Bar!
 
-To prove that s didn't contain the value in escaped form:
+To prove that "s" didn't contain the value in escaped form:
 &amp;lt;p&amp;gt;Hello Foo and Bar!</programlisting>
           </section>
 
@@ -6176,7 +6218,10 @@ cfg.setDefaultEncoding("UTF-8");
 
 // Sets how errors will appear.
 // During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
-cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</programlisting>
+cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+
+// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
+cfg.setLogTemplateExceptions(false);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -6243,10 +6288,10 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</prog
           <listitem>
             <para>Use your custom bean class for hashes where the items
             correspond to the bean properties. For example the
-            <literal>price</literal> property
-            (<literal>getProperty()</literal>) of <literal>product</literal>
-            can be get as <literal>product.price</literal>. (The actions of
-            the beans can be exposed as well; see much later <link
+            <literal>price</literal> property (<literal>getPrice()</literal>)
+            of <literal>product</literal> can be get as
+            <literal>product.price</literal>. (The actions of the beans can be
+            exposed as well; see much later <link
             linkend="pgui_misc_beanwrapper">here</link>)</para>
           </listitem>
         </itemizedlist>
@@ -6267,66 +6312,74 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</prog
 
         <para>This Java code fragment that builds this data-model:</para>
 
-        <programlisting role="unspecified">// Create the root hash
+        <programlisting role="unspecified">// Create the root hash. We use a Map here, but it could be a JavaBean too.
 Map&lt;String, Object&gt; root = new HashMap&lt;&gt;();
-// Put string ``user'' into the root
+
+// Put string "user" into the root
 root.put("user", "Big Joe");
-// Create the hash for ``latestProduct''
-Map&lt;String, Object&gt; latest = new HashMap&lt;&gt;();
+
+// Create the "latestProduct" hash. We use a JavaBean here, but it could be a Map too.
+Product latest = new Product();
+latest.setUrl("products/greenmouse.html");
+latest.setName("green mouse");
 // and put it into the root
 root.put("latestProduct", latest);
-// put ``url'' and ``name'' into latest
-latest.put("url", "products/greenmouse.html");
-latest.put("name", "green mouse");</programlisting>
+</programlisting>
 
-        <para>In real applications, instead of <literal>Map</literal>-s, you
-        will often use application-specific classes that has
+        <para>As demonstrated above, for hashes (something that stores other
+        named items) you can use either a <literal>Map</literal> or any kind
+        of public class that has public
         <literal>get<replaceable>Xxx</replaceable></literal>/<literal>is<replaceable>Xxx</replaceable></literal>
-        methods as prescribed by the JavaBeans specification. Like you have a
-        class similar to this:</para>
+        methods as prescribed by the JavaBeans specification. Like the above
+        <literal>Product</literal> class could be something like:</para>
 
-        <programlisting role="unspecified">public class Product {
+        <programlisting role="unspecified">/**
+ * Product bean; note that it must be a public class!
+ */
+public class Product {
 
     private String url;
     private String name;
-    ...
-    
+
     // As per the JavaBeans spec., this defines the "url" bean property
+    // It must be public!
     public String getUrl() {
         return url;
     }
-    
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     // As per the JavaBean spec., this defines the "name" bean property
+    // It must be public!
     public String getName() {
         return name;
     }
-    
-    ...
-    
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }</programlisting>
 
-        <para>and you add an instance of it to the data-model somehow like
-        this:</para>
-
-        <programlisting role="unspecified">Product latestProducts = getLatestProductFromDatabaseOrSomething();
-root.put("latestProduct", latestProduct);</programlisting>
-
-        <para>The template will be the same as if
-        <literal>latestProduct</literal> was a <literal>Map</literal>, like
-        <literal>${latestProduct.name}</literal> works in both cases.</para>
-
-        <para>The root itself need not be a <literal>Map</literal> either. It
-        could be an object with <literal>getUser()</literal> and
+        <para>Regardless if <literal>latestProduct</literal> is a
+        <literal>Map</literal> that contains the <literal>"name"</literal> and
+        <literal>"url"</literal> keys, or it's a JavaBean as shown above, in
+        the template you can use <literal>${latestProduct.name}</literal>. The
+        root itself need not be a <literal>Map</literal> either; it could be
+        an object with <literal>getUser()</literal> and
         <literal>getLastestProduct()</literal> methods too.</para>
 
         <note>
           <para>The behavior described here only stands if the value of the
           <literal>object_wrapper</literal> configuration setting is something
           that's used in almost all real world setups anyway. Anything that
-          the <literal>ObjectWrapper</literal> wraps to be a hash can be used
-          as the root, and can be traversed in templates with the dot and
-          <literal>[]</literal> operators. Something that it doesn't wrap to
-          be a hash can't be used as the root or be traversed like
+          the <literal>ObjectWrapper</literal> wraps to be a hash (something
+          that implements the <literal>TemplateHashModel</literal> interface)
+          can be used as the root, and can be traversed in templates with the
+          dot and <literal>[]</literal> operators. Something that it doesn't
+          wrap to be a hash can't be used as the root or be traversed like
           that.</para>
         </note>
       </section>
@@ -6347,21 +6400,21 @@ root.put("latestProduct", latestProduct);</programlisting>
         template instance you can get it with its
         <literal>getTemplate</literal> method. Store <link
         linkend="example.first">the example template</link> in the
-        <literal>test.ftl</literal> file of the <link
+        <literal>test.ftlh</literal> file of the <link
         linkend="pgui_quickstart_createconfiguration">earlier</link> set
         directory, then you can do this:</para>
 
-        <programlisting role="unspecified">Template temp = cfg.getTemplate("test.ftl");</programlisting>
+        <programlisting role="unspecified">Template temp = cfg.getTemplate("test.ftlh");</programlisting>
 
         <para>When you call this, it will create a <literal>Template</literal>
-        instance corresponds to <literal>test.ftl</literal>, by reading
-        <literal><replaceable>/where/you/store/templates/</replaceable>test.ftl</literal>
+        instance corresponds to <literal>test.ftlh</literal>, by reading
+        <literal><replaceable>/where/you/store/templates/</replaceable>test.ftlh</literal>
         and parsing (compile) it. The <literal>Template</literal> instance
         stores the template in the parsed form, and not as text.</para>
 
         <para><literal>Configuration</literal> caches
         <literal>Template</literal> instances, so when you get
-        <literal>test.ftl</literal> again, it probably won't read and parse
+        <literal>test.ftlh</literal> again, it probably won't read and parse
         the template file again, just returns the same
         <literal>Template</literal> instance as for the first time.</para>
       </section>
@@ -6408,7 +6461,7 @@ temp.process(root, out);</programlisting>
         <para>Note that once you have obtained a <literal>Template</literal>
         instance, you can merge it with different data-models for unlimited
         times (<literal>Template</literal> instances are stateless). Also, the
-        <literal>test.ftl</literal> file is accessed only while the
+        <literal>test.ftlh</literal> file is accessed only while the
         <literal>Template</literal> instance is created, not when you call the
         process method.</para>
       </section>
@@ -6435,7 +6488,8 @@ public class Test {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        cfg.setLogTemplateExceptions(false);
 
         /* ------------------------------------------------------------------------ */    
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
@@ -6443,13 +6497,13 @@ public class Test {
         /* Create a data-model */
         Map root = new HashMap();
         root.put("user", "Big Joe");
-        Map latest = new HashMap();
+        Product latest = new Product();
+        latest.setUrl("products/greenmouse.html");
+        latest.setName("green mouse");
         root.put("latestProduct", latest);
-        latest.put("url", "products/greenmouse.html");
-        latest.put("name", "green mouse");
 
         /* Get the template (uses cache internally) */
-        Template temp = cfg.getTemplate("test.ftl");
+        Template temp = cfg.getTemplate("test.ftlh");
 
         /* Merge data-model with template */
         Writer out = new OutputStreamWriter(System.out);
@@ -6463,6 +6517,52 @@ public class Test {
           <para>I have suppressed the exceptions for the sake of simplicity.
           Don't do it in real products.</para>
         </note>
+
+        <para>For the sake completeness, here's the the Product class used in
+        the data model:</para>
+
+        <programlisting role="unspecified">/**
+ * Product bean; note that it must be a public class!
+ */
+public class Product {
+
+    private String url;
+    private String name;
+
+    // As per the JavaBeans spec., this defines the "url" bean property
+    // It must be public!
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    // As per the JavaBean spec., this defines the "name" bean property
+    // It must be public!
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+}</programlisting>
+
+        <para>and the template:</para>
+
+        <programlisting role="template">&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Welcome!&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Welcome ${user}!&lt;/h1&gt;
+  &lt;p&gt;Our latest product:
+  &lt;a href="${latestProduct.url}"&gt;${latestProduct.name}&lt;/a&gt;!
+&lt;/body&gt;
+&lt;/html&gt;</programlisting>
       </section>
     </chapter>
 
@@ -7208,7 +7308,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
           nested calls of the same directive, or directive objects used as
           shared variables accessed by multiple threads concurrently.</para>
 
-          <para>Unfortunatelly, <literal>TemplateDirectiveModel</literal>-s
+          <para>Unfortunately, <literal>TemplateDirectiveModel</literal>-s
           don't support passing parameters by position (rather than by name).
           This is fixed starting from FreeMarker 2.4.</para>
         </section>
@@ -8027,7 +8127,7 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>Environment </literal>layer: There are two ways
+            <para><literal>Environment </literal>layer: There are two ways of
             doing it:</para>
 
             <itemizedlist>
@@ -8577,7 +8677,7 @@ cfg.setTemplateExceptionHandler(new MyTemplateExceptionHandler());</programlisti
 
           <para>will print this:</para>
 
-          <programlisting role="output">a[ERROR: Expression badVar is undefined on line 1, column 7 in test.ftl.]b</programlisting>
+          <programlisting role="output">a[ERROR: Expression badVar is undefined on line 1, column 7 in test.ftlh.]b</programlisting>
 
           <para>Note that the error occurred in the <literal>if</literal>
           start-tag (<literal>&lt;#if badVar&gt;</literal>), but the whole
@@ -8621,7 +8721,7 @@ b
 
           <programlisting role="output">a
   Foo
-  [ERROR: Expression badVar is undefined on line 4, column 5 in test.ftl.]
+  [ERROR: Expression badVar is undefined on line 4, column 5 in test.ftlh.]
   Bar
 c</programlisting>
 
@@ -8663,6 +8763,22 @@ c</programlisting>
               linkend="misc.faq.niceErrorPage">see the FAQ</link>.</para>
             </listitem>
           </itemizedlist>
+        </section>
+
+        <section>
+          <title>TemplateException logging</title>
+
+          <para>By default FreeMarker <link
+          linkend="pgui_misc_logging">logs</link> all
+          <literal>TemplateException</literal>-s under the
+          <literal>freemarker.runtime</literal> log category, even when it
+          will throw it at you from its public API. As logging has become
+          common practice in Java applications, this usually leads to double
+          logging of exceptions now, so it's recommended to disable this
+          legacy behavior by
+          <literal>cfg.setLogTemplateExceptions(false)</literal> (or
+          <literal>log_template_exceptions=false</literal>) where you
+          configure FreeMarker.</para>
         </section>
 
         <section>
@@ -9121,30 +9237,594 @@ cfg.setTemplateConfigurations(
       <section xml:id="pgui_config_custom_formats">
         <title>Custom number and date/time formats</title>
 
-        <para>FreeMarker allows you to define your own number and
-        date/time/datetime formatter algorithms by implementing
-        <literal>freemarker.core.TemplateNumberFormatFactory</literal> and
-        <literal>freemarker.core.TemplateDateFormatFactory</literal>. These
-        formats can be registered with the
-        <literal>custom_number_formats</literal> and
-        <literal>custom_date_formats</literal> configuration settings. After
-        that, anywhere where you can specify formats with a
-        <literal>String</literal>, now you can refer to your custom format as
-        <literal>"@<replaceable>name</replaceable>"</literal>. So for example,
-        if you have registered your number format implementation with name
-        <literal>"smart"</literal>, then you could set the
-        <literal>number_format</literal> setting
-        (<literal>Configurable.setNumberFormat(String)</literal>) to
-        <literal>"@smart"</literal>, or issue
-        <literal>${n?string.@smart}</literal> or <literal>&lt;#setting
-        number_format="@smart"&gt;</literal> in a template.</para>
+        <section>
+          <title>Overview</title>
 
-        <para>[TODO] What other applications exist (aliasing, model-aware
-        formatters)</para>
+          <para>FreeMarker allows you to define your own number and
+          date/time/datetime formats, and associate a name to them. This
+          mechanism has several applications:</para>
 
-        <para>[TODO] Simple complete example</para>
+          <itemizedlist>
+            <listitem>
+              <para>Custom formatter algorithms: You can use your own
+              formatter algorithm instead of relying on those provided by
+              FreeMarker. For this, implement
+              <literal>freemarker.core.TemplateNumberFormatFactory</literal>
+              or <literal>freemarker.core.TemplateDateFormatFactory</literal>.
+              You will find a few examples of this <link
+              linkend="pgui_config_custom_formats_ex_cust_alg_simple">below</link>.</para>
+            </listitem>
 
-        <para>[TODO] Complex formatter example (base N with fallback)</para>
+            <listitem>
+              <para>Aliasing: You can give application-specific names (like
+              <quote>price</quote>, <quote>weight</quote>,
+              <quote>fileDate</quote>, <quote>logEventTime</quote>, etc.) to
+              other formats by using
+              <literal>AliasTemplateNumberFormatFactory</literal> and
+              <literal>AliasTemplateDateFormatFactory</literal>. Thus
+              templates can just refer to that name, like in
+              <literal>${lastModified?string.@fileDate}</literal>, instead of
+              specifying the format directly. Thus the formats can be
+              specified on a single central place (where you configure
+              FreeMarker), instead of being specified repeatedly in templates.
+              Also thus template authors don't have to enter complex and hard
+              to remember formatting patterns. <link
+              linkend="pgui_config_custom_formats_ex_alias">See example
+              below</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Model-sensitive formatting: Applications can put custom
+              <literal>freemarker.TemplateModel</literal>-s into the
+              data-model instead of dropping plain values (like
+              <literal>int</literal>-s, <literal>double</literal>-s, etc.)
+              into it, to attach rendering-related information to the value.
+              Custom formatters can utilize this information (for example, to
+              show the unit after numbers), as they receive the
+              <literal>TemplateModel</literal> itself, not the wrapped raw
+              value. <link
+              linkend="pgui_config_custom_formats_ex_model_aware">See example
+              below</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Format that prints markup instead of plain text: You might
+              want to use HTML tags (or other markup) in the formatted values,
+              such as coloring negative numbers to red or using HTML
+              <literal>sup</literal> element for exponents. This is possible
+              if you write a custom format as shown in previous cases, but
+              override the <literal>format</literal> method in the formatter
+              class so that it returns a
+              <literal>TemplateMarkupOutputModel</literal> instead of a
+              <literal>String</literal>. (You shouldn't just return the markup
+              as <literal>String</literal>, as then it might will be escaped;
+              see <link
+              linkend="dgui_misc_autoescaping">auto-escaping</link>.)</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Custom formats can be registered with the
+          <literal>custom_number_formats</literal> and
+          <literal>custom_date_formats</literal> configuration settings. After
+          that, anywhere where you can specify formats with a
+          <literal>String</literal>, now you can refer to your custom format
+          as <literal>"@<replaceable>name</replaceable>"</literal>. So for
+          example, if you have registered your number format implementation
+          with name <literal>"smart"</literal>, then you could set the
+          <literal>number_format</literal> setting
+          (<literal>Configurable.setNumberFormat(String)</literal>) to
+          <literal>"@smart"</literal>, or issue
+          <literal>${n?string.@smart}</literal> or <literal>&lt;#setting
+          number_format="@smart"&gt;</literal> in a template. Furthermore, you
+          can define parameters for your custom format, like <literal>"@smart
+          2"</literal>, and the interpretation of the parameters is up to your
+          formatter implementation.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_cust_alg_simple">
+          <title>Simple custom number format example</title>
+
+          <para>This custom number format shows numbers in hexadecimal
+          form:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Locale;
+
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.NumberUtil;
+
+public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+
+    public static final HexTemplateNumberFormatFactory INSTANCE
+            = new HexTemplateNumberFormatFactory();
+    
+    private HexTemplateNumberFormatFactory() {
+        // Defined to decrease visibility
+    }
+    
+    @Override
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException {
+        TemplateFormatUtil.checkHasNoParameters(params);
+        return HexTemplateNumberFormat.INSTANCE;
+    }
+
+    private static class HexTemplateNumberFormat extends TemplateNumberFormat {
+
+        private static final HexTemplateNumberFormat INSTANCE = new HexTemplateNumberFormat();
+        
+        private HexTemplateNumberFormat() { }
+        
+        @Override
+        public String formatToPlainText(TemplateNumberModel numberModel)
+                throws UnformattableValueException, TemplateModelException {
+            Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
+            try {
+                return Integer.toHexString(NumberUtil.toIntExact(n));
+            } catch (ArithmeticException e) {
+                throw new UnformattableValueException(n + " doesn't fit into an int");
+            }
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return false;
+        }
+
+        @Override
+        public String getDescription() {
+            return "hexadecimal int";
+        }
+        
+    }
+
+}</programlisting>
+
+          <para>We register the above format with name
+          <quote>hex</quote>:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+...
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats = ...;
+...
+customNumberFormats.put("hex", HexTemplateNumberFormatFactory.INSTANCE);
+...
+cfg.setCustomNumberFormats(customNumberFormats);</programlisting>
+
+          <para>Now we can use this format in templates:</para>
+
+          <programlisting role="template">${x?string.@hex}</programlisting>
+
+          <para>or even set it as the default number format:</para>
+
+          <programlisting role="unspecified">cfg.setNumberFormat("@hex");</programlisting>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_cust_algo_advanced">
+          <title>Advanced custom number format example</title>
+
+          <para>This is a more complex custom number format that shows how to
+          deal with parameters in the format string, also how to delegate to
+          another format:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Locale;
+
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.NumberUtil;
+import freemarker.template.utility.StringUtil;
+
+/**
+ * Shows a number in base N number system. Can only format numbers that fit into an {@code int},
+ * however, optionally you can specify a fallback format. This format has one required parameter,
+ * the numerical system base. That can be optionally followed by "|" and a fallback format.
+ */
+public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+
+    public static final BaseNTemplateNumberFormatFactory INSTANCE
+            = new BaseNTemplateNumberFormatFactory();
+    
+    private BaseNTemplateNumberFormatFactory() {
+        // Defined to decrease visibility
+    }
+    
+    @Override
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws InvalidFormatParametersException {
+        TemplateNumberFormat fallbackFormat;
+        {
+            int barIdx = params.indexOf('|');
+            if (barIdx != -1) {
+                String fallbackFormatStr = params.substring(barIdx + 1);
+                params = params.substring(0, barIdx);
+                try {
+                    fallbackFormat = env.getTemplateNumberFormat(fallbackFormatStr, locale);
+                } catch (TemplateValueFormatException e) {
+                    throw new InvalidFormatParametersException(
+                            "Couldn't get the fallback number format (specified after the \"|\"), "
+                            + StringUtil.jQuote(fallbackFormatStr) + ". Reason: " + e.getMessage(),
+                            e);
+                }
+            } else {
+                fallbackFormat = null;
+            }
+        }
+        
+        int base;
+        try {
+            base = Integer.parseInt(params);
+        } catch (NumberFormatException e) {
+            if (params.length() == 0) {
+                throw new InvalidFormatParametersException(
+                        "A format parameter is required to specify the numerical system base.");
+            }
+            throw new InvalidFormatParametersException(
+                    "The format paramter must be an integer, but was (shown quoted): "
+                    + StringUtil.jQuote(params));
+        }
+        if (base &lt; 2) {
+            throw new InvalidFormatParametersException("A base must be at least 2.");
+        }
+        return new BaseNTemplateNumberFormat(base, fallbackFormat);
+    }
+
+    private static class BaseNTemplateNumberFormat extends TemplateNumberFormat {
+
+        private final int base;
+        private final TemplateNumberFormat fallbackFormat;
+        
+        private BaseNTemplateNumberFormat(int base, TemplateNumberFormat fallbackFormat) {
+            this.base = base;
+            this.fallbackFormat = fallbackFormat;
+        }
+        
+        @Override
+        public String formatToPlainText(TemplateNumberModel numberModel)
+                throws TemplateModelException, TemplateValueFormatException {
+            Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
+            try {
+                return Integer.toString(NumberUtil.toIntExact(n), base);
+            } catch (ArithmeticException e) {
+                if (fallbackFormat == null) {
+                    throw new UnformattableValueException(
+                            n + " doesn't fit into an int, and there was no fallback format "
+                            + "specified.");
+                } else {
+                    return fallbackFormat.formatToPlainText(numberModel);
+                }
+            }
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return false;
+        }
+
+        @Override
+        public String getDescription() {
+            return "base " + base;
+        }
+        
+    }
+
+}</programlisting>
+
+          <para>We register the above format with name
+          <quote>base</quote>:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+...
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats = ...;
+...
+customNumberFormats.put("hex", BaseNTemplateNumberFormatFactory.INSTANCE);
+...
+cfg.setCustomNumberFormats(customNumberFormats);</programlisting>
+
+          <para>Now we can use this format in templates:</para>
+
+          <programlisting role="template">${x?string.@base_8}</programlisting>
+
+          <para>Above there the parameter string was <literal>"8"</literal>,
+          as FreeMarker allows separating that from the format name with
+          <literal>_</literal> instead of whitespace, so that you don't have
+          to write the longer
+          <literal><replaceable>n</replaceable>?string["@base 8"]</literal>
+          form.</para>
+
+          <para>Of course, we could also set this as the default number format
+          like:</para>
+
+          <programlisting role="unspecified">cfg.setNumberFormat("@base 8");</programlisting>
+
+          <para>Here's an example of using the a fallback number format (which
+          is <literal>"0.0###"</literal>):</para>
+
+          <programlisting role="unspecified">cfg.setNumberFormat("@base 8|0.0###");</programlisting>
+
+          <para>Note that this functionality, with the <literal>|</literal>
+          syntax and all, is purely implemented in the example code
+          earlier.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_cust_algo_date">
+          <title>Custom date/time format example</title>
+
+          <para>This simple date format formats the date/time value to the
+          milliseconds since the epoch:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateModelException;
+
+public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFactory {
+
+    public static final EpochMillisTemplateDateFormatFactory INSTANCE
+            = new EpochMillisTemplateDateFormatFactory();
+    
+    private EpochMillisTemplateDateFormatFactory() {
+        // Defined to decrease visibility
+    }
+    
+    @Override
+    public TemplateDateFormat get(String params, int dateType,
+            Locale locale, TimeZone timeZone, boolean zonelessInput,
+            Environment env)
+            throws InvalidFormatParametersException {
+        TemplateFormatUtil.checkHasNoParameters(params);
+        return EpochMillisTemplateDateFormat.INSTANCE;
+    }
+
+    private static class EpochMillisTemplateDateFormat extends TemplateDateFormat {
+
+        private static final EpochMillisTemplateDateFormat INSTANCE
+                = new EpochMillisTemplateDateFormat();
+        
+        private EpochMillisTemplateDateFormat() { }
+        
+        @Override
+        public String formatToPlainText(TemplateDateModel dateModel)
+                throws UnformattableValueException, TemplateModelException {
+            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return false;
+        }
+
+        @Override
+        public boolean isTimeZoneBound() {
+            return false;
+        }
+
+        @Override
+        public Date parse(String s, int dateType) throws UnparsableValueException {
+            try {
+                return new Date(Long.parseLong(s));
+            } catch (NumberFormatException e) {
+                throw new UnparsableValueException("Malformed long");
+            }
+        }
+
+        @Override
+        public String getDescription() {
+            return "millis since the epoch";
+        }
+        
+    }
+
+}</programlisting>
+
+          <para>We register the above format with name
+          <quote>epoch</quote>:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+...
+Map&lt;String, TemplateDateFormatFactory&gt; customDateFormats = ...;
+...
+customDateFormats.put("epoch", EpochMillisTemplateDateFormatFactory.INSTANCE);
+...
+cfg.setCustomDateFormats(customDateFormats);</programlisting>
+
+          <para>Now we can use this format in templates:</para>
+
+          <programlisting role="template">${t?string.@epoch}</programlisting>
+
+          <para>Of course, we could also set this as the default date-time
+          format like:</para>
+
+          <programlisting role="unspecified">cfg.setDateTimeFormat("@epoch");</programlisting>
+
+          <para>For a more complex that for example uses format parameters,
+          refer to the <link
+          linkend="pgui_config_custom_formats_ex_cust_algo_advanced">advanced
+          number format example</link>. Doing that with date formats is very
+          similar.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_alias">
+          <title>Alias format example</title>
+
+          <para>In this example we specify some number formats and date
+          formats that are aliases to another format:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats
+        = new HashMap&lt;String, TemplateNumberFormatFactory&gt;();
+customNumberFormats.put("price", new AliasTemplateNumberFormatFactory(",000.00"));
+customNumberFormats.put("weight",
+        new AliasTemplateNumberFormatFactory("0.##;; roundingMode=halfUp"));
+cfg.setCustomNumberFormats(customNumberFormats);
+
+Map&lt;String, TemplateDateFormatFactory&gt; customDateFormats
+        = new HashMap&lt;String, TemplateDateFormatFactory&gt;();
+customDateFormats.put("fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a"));
+customDateFormats.put("logEventTime", new AliasTemplateDateFormatFactory("iso ms u"));
+cfg.setCustomDateFormats(customDateFormats);</programlisting>
+
+          <para>So now you can do this in a template:</para>
+
+          <programlisting role="template">${product.price?string.@price}
+${product.weight?string.@weight}
+${lastModified?string.@fileDate}
+${lastError.timestamp?string.@logEventTime}</programlisting>
+
+          <para>Note that the constructor parameter of
+          <literal>AliasTemplateNumberFormatFactory</literal> can naturally
+          refer to a custom format too:</para>
+
+          <programlisting role="unspecified">Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats
+        = new HashMap&lt;String, TemplateNumberFormatFactory&gt;();
+customNumberFormats.put("base", BaseNTemplateNumberFormatFactory.INSTANCE);
+customNumberFormats.put("oct", new AliasTemplateNumberFormatFactory("@base 8"));
+cfg.setCustomNumberFormats(customNumberFormats);</programlisting>
+
+          <para>So now
+          <literal><replaceable>n</replaceable>?string.@oct</literal> will
+          format the number to octal form.</para>
+        </section>
+
+        <section xml:id="pgui_config_custom_formats_ex_model_aware">
+          <title>Model-aware format example</title>
+
+          <para>In this example we specify a number format that automatically
+          show the unit after the number if that was put into the data-model
+          as <literal>UnitAwareTemplateNumberModel</literal>. First let's see
+          <literal>UnitAwareTemplateNumberModel</literal>:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+
+public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
+
+    private final Number value;
+    private final String unit;
+    
+    public UnitAwareTemplateNumberModel(Number value, String unit) {
+        this.value = value;
+        this.unit = unit;
+    }
+
+    @Override
+    public Number getAsNumber() throws TemplateModelException {
+        return value;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+}</programlisting>
+
+          <para>When you fill the data-model, you could do something like
+          this:</para>
+
+          <programlisting role="unspecified">Map&lt;String, Object&gt; dataModel = new HashMap&lt;&gt;();
+dataModel.put("weight", new UnitAwareTemplateNumberModel(1.5, "kg"));
+// Rather than just: dataModel.put("weight", 1.5);</programlisting>
+
+          <para>Then if we have this in the template:</para>
+
+          <programlisting role="template">${weight}</programlisting>
+
+          <para>we want to see this:</para>
+
+          <programlisting role="output">1.5 kg</programlisting>
+
+          <para>To achieve that, we define this custom number format:</para>
+
+          <programlisting role="unspecified">package com.example;
+
+import java.util.Locale;
+
+import freemarker.core.Environment;
+import freemarker.core.TemplateNumberFormat;
+import freemarker.core.TemplateNumberFormatFactory;
+import freemarker.core.TemplateValueFormatException;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+
+/**
+ * A number format that takes any other number format as parameter (specified as a string, as
+ * usual in FreeMarker), then if the model is a {@link UnitAwareTemplateNumberModel}, it  shows
+ * the unit after the number formatted with the other format, otherwise it just shows the formatted
+ * number without unit.
+ */
+public class UnitAwareTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+
+    public static final UnitAwareTemplateNumberFormatFactory INSTANCE
+            = new UnitAwareTemplateNumberFormatFactory();
+
+    private UnitAwareTemplateNumberFormatFactory() {
+        // Defined to decrease visibility
+    }
+
+    @Override
+    public TemplateNumberFormat get(String params, Locale locale, Environment env)
+            throws TemplateValueFormatException {
+        return new UnitAwareNumberFormat(env.getTemplateNumberFormat(params, locale));
+    }
+
+    private static class UnitAwareNumberFormat extends TemplateNumberFormat {
+
+        private final TemplateNumberFormat innerFormat;
+
+        private UnitAwareNumberFormat(TemplateNumberFormat innerFormat) {
+            this.innerFormat = innerFormat;
+        }
+
+        @Override
+        public String formatToPlainText(TemplateNumberModel numberModel)
+                throws TemplateModelException, TemplateValueFormatException {
+            String innerResult = innerFormat.formatToPlainText(numberModel);
+            return numberModel instanceof UnitAwareTemplateNumberModel
+                    ? innerResult + " " + ((UnitAwareTemplateNumberModel) numberModel).getUnit()
+                    : innerResult;
+        }
+
+        @Override
+        public boolean isLocaleBound() {
+            return innerFormat.isLocaleBound();
+        }
+
+        @Override
+        public String getDescription() {
+            return "unit-aware " + innerFormat.getDescription();
+        }
+
+    }
+
+}</programlisting>
+
+          <para>Finally, we set the above custom format as the default number
+          format:</para>
+
+          <programlisting role="unspecified">// Where you initalize the application-wide Configuration singleton:
+Configuration cfg = ...;
+
+Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats = new HashMap&lt;&gt;();
+customNumberFormats.put("ua", UnitAwareTemplateNumberFormatFactory.INSTANCE);
+cfg.setCustomNumberFormats(customNumberFormats);
+
+// Note: "0.####;; roundingMode=halfUp" is a standard format specified in FreeMarker.
+cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
+        </section>
       </section>
 
       <section xml:id="pgui_config_incompatible_improvements">
@@ -14397,21 +15077,22 @@ rif: foo XYr baar</programlisting>
             <secondary>number</secondary>
           </indexterm>
 
-          <para>Converts a number to a string. It uses the default format that
-          the programmer has specified via the
+          <para>Converts a number to a string. In its simplest form
+          (<literal><replaceable>expression</replaceable>?string</literal>) it
+          uses the default format that the programmer has specified via the
           <literal>number_format</literal> and the <literal>locale</literal>
-          settings. You can also specify a number format explicitly with this
-          built-in, as it will be shown later.</para>
+          configuration settings. You can also specify a number format
+          explicitly with this built-in, as it will be shown later.</para>
 
           <para>There are four predefined number formats:
           <literal>computer</literal>, <literal>currency</literal>,
           <literal>number</literal>, and <literal>percent</literal>. The exact
           meaning of these is locale (nationality) specific, and is controlled
-          by the Java platform installation, rather than by FreeMarker, except
-          for <literal>computer</literal>, which uses the same formatting as
-          <link linkend="ref_builtin_c">the <literal>c</literal>
-          built-in</link>. There can also be programmer-defined formats, whose
-          name starts with <literal>@</literal> (programmers <link
+          by the Java platform installation, not by FreeMarker, except for
+          <literal>computer</literal>, which uses the same formatting as <link
+          linkend="ref_builtin_c">the <literal>c</literal> built-in</link>.
+          There can also be programmer-defined formats, whose name starts with
+          <literal>@</literal> (programmers <link
           linkend="pgui_config_custom_formats">see more here...</link>). You
           can use these predefined formats like this:</para>
 
@@ -14433,8 +15114,9 @@ $42.00
 42</programlisting>
 
           <para>The output of first three expressions is identical because the
-          first two expressions use the default format, which is "number"
-          here. You can change this default using a setting:</para>
+          first two expressions use the default format, which is
+          <quote>number</quote> here. You can change this default using a
+          setting:</para>
 
           <programlisting role="template">&lt;#setting number_format="currency"&gt;
 &lt;#assign x=42&gt;
@@ -14452,20 +15134,23 @@ $42.00
 $42.00
 4,200%</programlisting>
 
-          <para>since the default number format was set to "currency".</para>
+          <para>since the default number format was set to
+          <quote>currency</quote>.</para>
 
           <para>You can also refer to named custom formats that were defined
           when configuring FreeMarker (programmers <link
           linkend="pgui_config_custom_formats">see more here</link>),
           like:</para>
 
-          <programlisting role="template">${x?strong.@price}
-${x?strong.@weight}</programlisting>
+          <programlisting role="template">${x?string.@price}
+${x?string.@weight}</programlisting>
 
           <para>where the custom format names were <quote>price</quote> and
-          <quote>weight</quote>. Note that hence the templates can just refer
-          to the application-domain meaning, and the exact format can be
-          specified outside the templates, on a single central place.</para>
+          <quote>weight</quote>. This way the templates can just refer to the
+          application-domain meaning, and the exact format can be specified
+          outside the templates, on a single central place. (Programmers can
+          read about <link linkend="pgui_config_custom_formats">defining such
+          named formats here...</link>)</para>
 
           <para>Beside named formats, you can specify number format patterns
           directly, using the <link
@@ -15197,28 +15882,28 @@ ${openingTime?string.short}
 ${openingTime?string.medium}
 ${openingTime?string.long}
 ${openingTime?string.full}
-${openingTime?string.xs}
-${openingTime?string.iso}
+${openingTime?string.xs} &lt;#-- XSD xs:time --&gt;
+${openingTime?string.iso} &lt;#-- ISO 8601 time --&gt;
 
 ${nextDiscountDay?string.short}
 ${nextDiscountDay?string.medium}
 ${nextDiscountDay?string.long}
 ${nextDiscountDay?string.full}
-${nextDiscountDay?string.xs}
-${nextDiscountDay?string.iso}
+${nextDiscountDay?string.xs} &lt;#-- XSD xs:date --&gt;
+${nextDiscountDay?string.iso} &lt;#-- ISO 8601 date --&gt;
 
 ${lastUpdated?string.short}
 ${lastUpdated?string.medium}
 ${lastUpdated?string.long}
 ${lastUpdated?string.full}
 ${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;
-${lastUpdated?string.xs}
-${lastUpdated?string.iso}
+${lastUpdated?string.xs} &lt;#-- XSD xs:dateTime --&gt;
+${lastUpdated?string.iso} &lt;#-- ISO 8601 combined date and time --&gt;
 
-&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined formats</link> (starts with @ + letter): --&gt;
-${lastUpdated?string.@lastMod}
+&lt;#-- <link linkend="pgui_config_custom_formats">Programmer-defined named format</link> (@ + name): --&gt;
+${lastUpdated?string.@fileDate}
 
-&lt;#-- More advanced ISO 8601-related formats: --&gt;
+&lt;#-- Advanced ISO 8601 and XSD formatting: --&gt;
 ${lastUpdated?string.iso_m_u}
 ${lastUpdated?string.xs_ms_nz}
 
@@ -15264,9 +15949,12 @@ Tue, Apr 8, '03
 2003</programlisting>
 
           <para>Note that with custom formats like in
-          <literal>lastUpdated?string.@lastMod</literal> above, templates can
+          <literal>lastUpdated?string.@fileDate</literal> above, templates can
           just refer to the application-domain meaning, and the exact format
-          can be specified outside the templates, on a central place.</para>
+          can be specified outside the templates, on a central place.
+          (Programmers can read about <link
+          linkend="pgui_config_custom_formats">defining such named formats
+          here...</link>)</para>
 
           <warning>
             <para>Unfortunately, because of the limitations of the Java
@@ -15304,7 +15992,8 @@ Tue, Apr 8, '03
           </note>
 
           <para>To prevent misunderstandings, the format need not be a string
-          literal, it can be a variable or any other expression, like in
+          literal, it can be a variable or any other expression as far as it
+          evaluates to a string. For example, it can be like
           <literal>"<replaceable>...</replaceable>"?string[myFormat]</literal>.</para>
 
           <para>See also: <link
@@ -16955,10 +17644,10 @@ Sorted by name.last:
           built-ins</link> that refer to a loop variable that was created
           outside <literal><replaceable>s</replaceable></literal>.</para>
 
-          <para>The configuration settings that affect the expression parsing
-          (like syntax) are coming from the <literal>Configuration</literal>
-          object, not from template that invokes
-          <literal>eval</literal>.</para>
+          <para>Regarding the configuration settings that affect the parsing
+          (like syntax) and evaluation the rules are the same as with the
+          <link linkend="ref_builtin_interpret"><literal>interpret</literal>
+          built-in</link>.</para>
         </section>
 
         <section xml:id="ref_builtin_has_content">
@@ -17002,7 +17691,7 @@ Sorted by name.last:
             <primary>interpret built-in</primary>
           </indexterm>
 
-          <para>This built-in parser a string as an FTL template, and returns
+          <para>This built-in parses a string as an FTL template, and returns
           an user-defined directive that executes that template, just as if a
           template with that content were <link
           linkend="ref_directive_include"><literal>include</literal>-d</link>
@@ -17021,16 +17710,6 @@ Sorted by name.last:
           <para>As you can see, <literal>inlineTemplate</literal> is a
           user-defined directive that, when executed, runs the template whose
           content is the value of <literal>templateSource</literal>.</para>
-
-          <para>The configuration settings that affect the parsing (like tag
-          syntax and naming convention) are coming from the
-          <literal>Configuration</literal> object, not from template that
-          calls <literal>interpret</literal>. This also means that the
-          previously auto-detected tag syntax or auto-detected naming
-          convention don't effect the parsing of the interpreted template.
-          This is consistent with how the <link
-          linkend="ref_directive_include"><literal>include</literal>
-          directive</link> works.</para>
 
           <para>The name of the template created by
           <literal>interpret</literal> is the name of the template that calls
@@ -17058,6 +17737,29 @@ Sorted by name.last:
           a sequence of two items, in which case the first item is the FTL
           string to interpret, and the second items is the template name used
           after the <literal>"-&gt;"</literal>.</para>
+
+          <para>The configuration settings that affect the interpreted
+          template are the same as of the surrounding template, except that
+          parser settings specified in the <link
+          linkend="ref.directive.ftl"><literal>ftl</literal> directive</link>
+          or was established via tag syntax or naming convention
+          auto-detection are instead coming from the
+          <literal>Configuration</literal> object (or naturally, from the
+          <link
+          linkend="pgui_config_templateconfigurations"><literal>TemplateConfiguration</literal></link>,
+          if there's any). Thus the tag syntax, naming convention, whitespace
+          handling, etc. of the interpreted template is independent of that
+          established <emphasis>inside</emphasis> the surrounding template. An
+          important exception from this rule is that the <link
+          linkend="dgui_misc_autoescaping_outputformat">output format</link>
+          and auto-escaping policy is inherited from the lexical context where
+          <literal>interpret</literal> is called from. For example in a
+          template that has <literal>&lt;#ftl
+          output_format="XML"&gt;</literal> header (or if you are inside a
+          <literal>&lt;#output_format
+          "XML"&gt;<replaceable>...</replaceable>&lt;/#output_format&gt;</literal>
+          block), <literal>interpret</literal> calls in it will produce
+          directives with XML output format.</para>
         </section>
 
         <section xml:id="ref_builtin_isType">
@@ -17184,7 +17886,13 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_sequence</literal></td>
 
-                <td>sequence</td>
+                <td>sequence (Historical quirk: Before <link
+                linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal></link>
+                2.3.24 it returns <literal>true</literal> for Java methods as
+                they implement the
+                <literal>[<replaceable>index</replaceable>]</literal>
+                operator, however, they fail on
+                <literal>?size</literal>.)</td>
               </tr>
 
               <tr>
@@ -17209,7 +17917,10 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_indexable</literal></td>
 
-                <td>sequence</td>
+                <td>sequence (Historical quirk: it returns
+                <literal>true</literal> for Java methods as they implement the
+                <literal>[<replaceable>index</replaceable>]</literal>
+                operator.)</td>
               </tr>
 
               <tr>
@@ -18899,7 +19610,9 @@ or
           by the caller of <literal>import</literal> (as if you would create
           it with <literal>assign</literal> directive), with the name given
           with the <literal><replaceable>hash</replaceable></literal>
-          parameter.</para>
+          parameter. If the import happens in the namespace of the main
+          template, the hash variable is also created in the global
+          namespace.</para>
 
           <para>If you call <literal>import</literal> with the same
           <literal><replaceable>path</replaceable></literal> for multiple
@@ -25849,10 +26562,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para><literal>&lt;@</literal> and <literal>&lt;/@</literal> is
-              now allowed in String literals that contain
+              now allowed in string literals that contain
               <literal>${<replaceable>exp</replaceable>}</literal>, and will
               be part of the literal as is. Earlier it was a syntactical
               error.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: With
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>),
+              <literal><replaceable>m</replaceable>?is_sequence</literal>
+              doesn't return <literal>true</literal> for Java methods wrapped
+              by <literal>BeansWrapper</literal> and its subclasses (most
+              notably <literal>DefaultObjectWrapper</literal>) anymore, as
+              they only implement the
+              <literal>[<replaceable>index</replaceable>]</literal> operator,
+              but not <literal>?size</literal>, which causes
+              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
+              to fail among others. (They shouldn't implement either, but this
+              is historical heritage.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -26131,12 +26861,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Fixes and improvements in the <quote>object
-              builder</quote> syntax used for configuring FreeMarker from
-              <literal>java.util.Properties</literal> (or other string-only
-              sources). This is not to be confused with the template language
-              syntax, which has nothing to do with the <quote>object
-              builder</quote> syntax we are writing about here. The
-              improvements are:</para>
+              builder</quote> mini-language used for configuring FreeMarker
+              from <literal>java.util.Properties</literal> or other
+              string-only sources (not used in templates). This is not to be
+              confused with the template language syntax, which has nothing to
+              do with the <quote>object builder</quote> syntax we are writing
+              about here. The improvements are:</para>
 
               <itemizedlist>
                 <listitem>
@@ -26195,6 +26925,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>l</literal>), plus <literal>bd</literal> for
                   <literal>BigDecimal</literal> and <literal>bi</literal> for
                   <literal>BigInteger</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Public static fields can be referred, like
+                  <literal>com.example.MyClass.MY_CONSTANT</literal> or
+                  <literal>Configuration.AUTO_DETECT_TAG_SYNTAX</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -26281,6 +27017,63 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed, with
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>): The <literal>#import</literal> directive meant
+              to copy the library variable into a global variable if it's
+              executed in the main namespace, but that haven't happened when
+              the imported template was already imported earlier in another
+              namespace.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixes in the XML processing feature
+              (<literal>freemarker.ext.dom</literal>):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Bug fixed: XPath queries that has only contained
+                  characters that are valid in XML element names and has also
+                  contained <literal>::</literal> (which is valid in names in
+                  namespace-unware documents), like
+                  <literal>e['following-sibling::foo']</literal>, were
+                  interpreted as literal element names (giving 0 hits) rather
+                  than as XPath expressions. Note that there were no such
+                  problem with <literal>e['following-sibling::*']</literal>
+                  for example, as it's not a valid XML element name according
+                  the XML specification. This fix can actually break
+                  applications that has processed namespace unaware XML that
+                  use <literal>::</literal> as part of element or attribute
+                  names, but such an application is highly unlikely, unlike
+                  running into the fixed problem. (Unfortunately, using
+                  <literal>incompatible_improvements</literal> wasn't
+                  technically possible here.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: The <literal>@@qname</literal> of elements
+                  that belong to the XML namespace declared as the default via
+                  <literal>&lt;#ftl ns_prefixes={'D':'...', ...
+                  }&gt;</literal> no longer starts with <literal>D:</literal>,
+                  instead they just start with no name space prefix.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: In the markup returned by the
+                  <literal>@@markup</literal> key, when there were multiple
+                  namespaces for which there was no prefix associated with via
+                  <literal>&lt;#ftl
+                  ns_prefixes=<replaceable>...</replaceable>&gt;</literal>,
+                  all those namespaces were assigned to the same
+                  auto-generated <literal>xmlns</literal> prefix (usually
+                  <quote>a</quote>). Now they will get <quote>a</quote>,
+                  <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>Internal code cleanup: Mostly source code formatting, also
               many parser construction/setup cleanup</para>
             </listitem>
@@ -26290,6 +27083,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>jar</literal>-s (and other <literal>zip</literal>-s)
               which can't be loaded due to zip format errors in the error
               message.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added an overload to
+              <literal>Configuration.getSupportedBuiltInNames</literal> and
+              <literal>Configuration.getSupportedBuiltInDirectiveNames</literal>
+              that has a <literal>namingConvention</literal> parameter. This
+              is useful for tooling as since 2.3.23 we support both camel case
+              naming convention (like
+              <literal><replaceable>s</replaceable>?upperCase</literal>) and
+              the legacy one (like
+              <literal><replaceable>s</replaceable>?upper_case</literal>).
+              Furthermore the old 0 argument overload will now utilize
+              <literal>Configuration.getNamingConvention()</literal> to only
+              return the relevant names if it's not
+              <literal>AUTO_DETECT_NAMING_CONVENTION</literal>.</para>
             </listitem>
 
             <listitem>
@@ -26317,7 +27126,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               but some might used these regardless to introspect templates.
               Earlier it had an <quote>embedded template</quote> parameter
               inside, now it has 0 (for purely static string literals), one or
-              multiple <quote>value part</quote>-ts, which are
+              more <quote>value part</quote>-s, which are
               <literal>String</literal>-s and
               <literal>Interpolation</literal>-s.</para>
             </listitem>
@@ -26453,6 +27262,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>XMLOutputFormat</literal> now uses
+              application/xml MIME type instead of text/xml MIME type</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>RTFOutputFormat</literal> now uses
+              application/rtf MIME type instead of text/rtf</para>
+            </listitem>
+
+            <listitem>
+              <para>Added non-escaping formats (just for the MIME type):
+              <literal>JavaScriptOutputFormat</literal>,
+              <literal>JSONOutputFormat</literal>,
+              <literal>CSSOutputFormat</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added JavaScriptOutput</para>
+            </listitem>
+
+            <listitem>
               <para>Added new built-in: <literal>is_markup_output</literal>,
               returns <literal>true</literal> if the value is of type
               <quote>markup output</quote>.</para>
@@ -26569,7 +27399,111 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>BigDecimal</literal> and <literal>bi</literal> for
                   <literal>BigInteger</literal>.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Public static fields can be referred, like
+                  <literal>com.example.MyClass.MY_CONSTANT</literal> or
+                  <literal>Configuration.AUTO_DETECT_TAG_SYNTAX</literal>.</para>
+                </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>The parser used by <literal>?interpet</literal> and
+              <literal>?eval</literal> inherits not only the
+              <literal>output_format</literal> of its surrounding lexical
+              context, but also the auto-escaping policy of it (basically, if
+              auto-escapig is on or off).</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed, with
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>): The <literal>#import</literal> directive meant
+              to copy the library variable into a global variable if it's
+              executed in the main namespace, but that haven't happened when
+              the imported template was already imported earlier in another
+              namespace.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixes in the XML processing feature
+              (<literal>freemarker.ext.dom</literal>):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Bug fixed: XPath queries that has only contained
+                  characters that are valid in XML element names and has also
+                  contained <literal>::</literal> (which is valid in names in
+                  namespace-unware documents), like
+                  <literal>e['following-sibling::foo']</literal>, were
+                  interpreted as literal element names (giving 0 hits) rather
+                  than as XPath expressions. Note that there were no such
+                  problem with <literal>e['following-sibling::*']</literal>
+                  for example, as it's not a valid XML element name according
+                  the XML specification. This fix can actually break
+                  applications that has processed namespace unaware XML that
+                  use <literal>::</literal> as part of element or attribute
+                  names, but such an application is highly unlikely, unlike
+                  running into the fixed problem. (Unfortunately, using
+                  <literal>incompatible_improvements</literal> wasn't
+                  technically possible here.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: The <literal>@@qname</literal> of elements
+                  that belong to the XML namespace declared as the default via
+                  <literal>&lt;#ftl ns_prefixes={'D':'...', ...
+                  }&gt;</literal> no longer starts with <literal>D:</literal>,
+                  instead they just start with no name space prefix.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: In the markup returned by the
+                  <literal>@@markup</literal> key, when there were multiple
+                  namespaces for which there was no prefix associated with via
+                  <literal>&lt;#ftl
+                  ns_prefixes=<replaceable>...</replaceable>&gt;</literal>,
+                  all those namespaces were assigned to the same
+                  auto-generated <literal>xmlns</literal> prefix (usually
+                  <quote>a</quote>). Now they will get <quote>a</quote>,
+                  <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: With
+              <literal>incompatible_improvements</literal> set to 2.3.24
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>),
+              <literal><replaceable>m</replaceable>?is_sequence</literal>
+              doesn't return <literal>true</literal> for Java methods wrapped
+              by <literal>BeansWrapper</literal> and its subclasses (most
+              notably <literal>DefaultObjectWrapper</literal>) anymore, as
+              they only implement the
+              <literal>[<replaceable>index</replaceable>]</literal> operator,
+              but not <literal>?size</literal>, which causes
+              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
+              to fail among others. (They shouldn't implement either, but this
+              is historical heritage.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added an overload to
+              <literal>Configuration.getSupportedBuiltInNames</literal> and
+              <literal>Configuration.getSupportedBuiltInDirectiveNames</literal>
+              that has a <literal>namingConvention</literal> parameter. This
+              is useful for tooling as since 2.3.23 we support both camel case
+              naming convention (like
+              <literal><replaceable>s</replaceable>?upperCase</literal>) and
+              the legacy one (like
+              <literal><replaceable>s</replaceable>?upper_case</literal>).
+              Furthermore the old 0 argument overload will now utilize
+              <literal>Configuration.getNamingConvention()</literal> to only
+              return the relevant names if it's not
+              <literal>AUTO_DETECT_NAMING_CONVENTION</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>
