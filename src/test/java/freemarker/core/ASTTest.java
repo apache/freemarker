@@ -54,7 +54,7 @@ public class ASTTest extends FileTestCase {
     }
     
     public void testWhitespaceStripping() throws Exception {
-        testAST("ast-whitesoacestripping");
+        testAST("ast-whitespacestripping");
     }
 
     public void testMixedContentSimplifications() throws Exception {
