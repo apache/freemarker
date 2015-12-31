@@ -345,6 +345,7 @@ public class TemplateTestCase extends FileTestCase {
             f.setNamespaceAware(true);
             DocumentBuilder db = f.newDocumentBuilder();
             org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/xmlfragment.xml")));
+            NodeModel.simplify(doc);
             dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
         } else if (simpleTestName.equals("xmlns1")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns.xml"));
