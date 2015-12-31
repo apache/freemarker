@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import freemarker.core.ASTPrinter.Options;
 import freemarker.template.utility.StringUtil;
+import freemarker.test.TestUtil;
 import freemarker.test.utility.FileTestCase;
 
 public class ASTTest extends FileTestCase {
@@ -86,7 +87,8 @@ public class ASTTest extends FileTestCase {
         final String templateName = testName + ".ftl";
         assertExpectedFileEqualsString(
                 testName + ".ast",
-                ASTPrinter.getASTAsString(templateName, normalizeLineBreaks(templateName), ops));
+                ASTPrinter.getASTAsString(templateName,
+                        TestUtil.removeCopyrightCommentFromFTL(normalizeLineBreaks(templateName)), ops));
     }
     
     private String normalizeLineBreaks(final String templateName) throws FileNotFoundException, IOException {
