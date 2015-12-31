@@ -81,7 +81,9 @@
     <conf name="parser" extends="default" description="for generating parser" />
     
     <conf name="manual" description="for generating the manual with Docgen" />
-    
+
+    <conf name="rat" description="for generating the Rat report" />
+
     <conf name="bnd" description="for creating OSGi bundle" />
     
     <conf name="example.servlet" description="servlet-based examples" />
@@ -176,7 +178,11 @@
     <!-- bnd -->
     
     <dependency org="biz.aQute" name="bnd" rev="1.50.0" conf="bnd->default" />
+
+    <!-- Rat -->
     
+    <dependency org="org.apache.rat" name="apache-rat-tasks" rev="0.11" conf="rat->default" />
+
     <!-- As the tests *run* on Ant, so it's a provided dependency there. -->
     <exclude org="ant" module="ant" conf="run.test" />
     

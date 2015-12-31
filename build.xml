@@ -23,6 +23,7 @@
   xmlns:javacc="http://javacc.dev.java.net/"
   xmlns:docgen="http://freemarker.org/docgen"
   xmlns:bnd="http://www.aqute.biz/bnd"
+  xmlns:rat="antlib:org.apache.rat.anttasks"
   xmlns:u="http://freemarker.org/util"
 >
 
@@ -1136,6 +1137,22 @@ Proceed? </input>
       <artifact name="freemarker" type="jar" ext="jar" />
     </ivy:publish>
     <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
+  </target>
+  
+  <target name="rat">
+    <ivy:cachepath conf="rat" pathid="ivy.dep" />
+    <taskdef
+      uri="antlib:org.apache.rat.anttasks"
+      resource="org/apache/rat/anttasks/antlib.xml"
+      classpathref="ivy.dep"
+    />  
+    
+    <rat:report reportFile="build/rat-report.txt">
+        <fileset dir="src"/>
+    </rat:report>
+    <echo level="info"><!--
+    -->Rat report was written into build/rat-report.txt<!--
+    --></echo>
   </target>
 
   <target name="archive" depends=""
