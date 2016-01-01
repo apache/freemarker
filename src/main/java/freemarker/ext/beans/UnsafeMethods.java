@@ -44,7 +44,7 @@ class UnsafeMethods {
     
     private static final Set createUnsafeMethodsSet() {
         Properties props = new Properties();
-        InputStream in = BeansWrapper.class.getResourceAsStream("unsafeMethods.txt");
+        InputStream in = BeansWrapper.class.getResourceAsStream("unsafeMethods.properties");
         if (in != null) {
             String methodSpec = null;
             try {
