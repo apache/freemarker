@@ -88,7 +88,7 @@ public class ASTTest extends FileTestCase {
         assertExpectedFileEqualsString(
                 testName + ".ast",
                 ASTPrinter.getASTAsString(templateName,
-                        TestUtil.removeCopyrightCommentFromFTL(normalizeLineBreaks(templateName)), ops));
+                        TestUtil.removeFTLCopyrightComment(normalizeLineBreaks(templateName)), ops));
     }
     
     private String normalizeLineBreaks(final String templateName) throws FileNotFoundException, IOException {

@@ -91,7 +91,7 @@ public abstract class TemplateTest {
                 throw new IOException("Reference output resource not found: " + this.getClass() + ", " + resName);
             }
             try {
-                expectedOut = IOUtils.toString(in, "utf-8");
+                expectedOut = TestUtil.removeFTLCopyrightComment(IOUtils.toString(in, "utf-8"));
             } finally {
                 in.close();
             }

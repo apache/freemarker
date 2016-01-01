@@ -24,7 +24,7 @@ public final class TestUtil {
         // Not meant to be instantiated
     }
 
-    public static String removeCopyrightCommentFromFTL(String ftl) {
+    public static String removeFTLCopyrightComment(String ftl) {
         if (ftl.contains("<#ftl ns_prefixes = {\"D\" : \"http://example.com/eBook\"}>")) {
             System.out.println();
         }
