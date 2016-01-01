@@ -33,8 +33,9 @@ generateEclipseTOC
 
 removeNodesWhenOnline: [ "preface" ]
 
-copyrightHolder: "The FreeMarker Project"
+copyrightHolder: "The Apache Software Foundation"
 copyrightStartYear: 1999
+copyrightCommentFile: "docgen-misc/copyrightComment.txt"
 
 seoMeta: {
   "dgui_quickstart": {
