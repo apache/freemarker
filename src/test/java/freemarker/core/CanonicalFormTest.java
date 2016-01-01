@@ -64,10 +64,7 @@ public class CanonicalFormTest extends FileTestCase {
         StringWriter sw = new StringWriter();
         cfg.getTemplate(ftlFileName).dump(sw);
 
-        int lastDotIdx = ftlFileName.lastIndexOf('.');
-        String canonicalFtlName = ftlFileName.substring(0, lastDotIdx) + "-canonical"
-                + ftlFileName.substring(lastDotIdx);
-        assertExpectedFileEqualsString(canonicalFtlName, sw.toString());
+        assertExpectedFileEqualsString(ftlFileName + ".out", sw.toString());
     }
 
 }

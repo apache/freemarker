@@ -88,11 +88,11 @@ public class ASTTest extends FileTestCase {
         assertExpectedFileEqualsString(
                 testName + ".ast",
                 ASTPrinter.getASTAsString(templateName,
-                        TestUtil.removeFTLCopyrightComment(normalizeLineBreaks(templateName)), ops));
+                        TestUtil.removeFTLCopyrightComment(normalizeLineBreaks(loadResource(templateName))), ops));
     }
     
-    private String normalizeLineBreaks(final String templateName) throws FileNotFoundException, IOException {
-        return StringUtil.replace(loadResource(templateName), "\r\n", "\n").replace('\r', '\n');
+    private String normalizeLineBreaks(final String s) throws FileNotFoundException, IOException {
+        return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
     
 }

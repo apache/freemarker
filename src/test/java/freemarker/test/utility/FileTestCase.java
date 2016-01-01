@@ -145,7 +145,7 @@ public abstract class FileTestCase extends TestCase {
     }
 
     protected String loadFile(File f) throws FileNotFoundException, IOException {
-        return TestUtil.removeFTLCopyrightComment(loadFile(f, getDefaultCharset()));
+        return TestUtil.removeTxtCopyrightComment(loadFile(f, getDefaultCharset()));
     }
     
     protected String loadFile(File f, String charset) throws FileNotFoundException, IOException {

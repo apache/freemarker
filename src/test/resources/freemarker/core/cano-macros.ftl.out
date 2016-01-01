@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-<html>
-<head>
-<title>FreeMarker: Last Character Test</title>
-</head>
-<body>
-
-<p>A simple test follows:</p>
-  
-    13
-    
-    ELLO, WORLD!
-    
-    message: Hello, Worl
+<#macro m></#macro>
+<#macro m a></#macro>
+<#macro m a b></#macro>
+<#macro m a b c...></#macro>
+<#macro m a...></#macro>
+<#function f()></#function>
+<#function f(a)></#function>
+<#function f(a, b)></#function>
+<#function f(a, b, c...)></#function>
+<#function f(a...)></#function>

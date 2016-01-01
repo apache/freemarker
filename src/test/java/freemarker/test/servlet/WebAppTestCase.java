@@ -179,7 +179,7 @@ public class WebAppTestCase {
         {
             final InputStream in = new URL(getWebAppDirURL(webAppName) + EXPECTED_DIR + expectedFileName).openStream();
             try {
-                expected = TestUtil.removeFTLCopyrightComment(normalizeWS(IOUtils.toString(in, "utf-8"), compressWS));
+                expected = TestUtil.removeTxtCopyrightComment(normalizeWS(IOUtils.toString(in, "utf-8"), compressWS));
             } finally {
                 in.close();
             }

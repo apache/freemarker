@@ -16,16 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-<html>
-<head>
-<title>FreeMarker: Last Character Test</title>
-</head>
-<body>
-
-<p>A simple test follows:</p>
-  
-    13
-    
-    ELLO, WORLD!
-    
-    message: Hello, Worl
+<@m x="${e1 + \"a'b$\{x}\"}#{x ; m0M2}" y="$\{e2}"/>
