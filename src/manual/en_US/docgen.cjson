@@ -60,7 +60,7 @@ olinks: {
   freemarkerdownload: "http://freemarker.org/freemarkerdownload.html"
   contribute: "http://freemarker.org/contribute.html"
   history: "http://freemarker.org/history.html"
-  what-is-freemarker: "id:preface"
+  what-is-freemarker: "http://freemarker.org/"
   mailing-lists: "http://freemarker.org/mailing-lists.html"
   
   // External URL-s:
