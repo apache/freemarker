@@ -27,6 +27,17 @@
 
 ===============================================================================
 
+  DISCLAIMER
+
+  Apache FreeMarker is an effort undergoing incubation at The Apache
+  Software Foundation (ASF). Incubation is required of all newly accepted
+  projects until a further review indicates that the infrastructure,
+  communications, and decision making process have stabilized in a manner
+  consistent with other successful ASF projects. While incubation status is
+  not necessarily a reflection of the completeness or stability of the
+  code, it does indicate that the project has yet to be fully endorsed by
+  the ASF.
+
 
 What is Apache FreeMarker?
 --------------------------
@@ -88,7 +99,7 @@ application already uses the related library.
 Change log
 ----------
 
-Online:
+Online (for stable releases only):
 http://freemarker.org/docs/app_versions.html
 
 Offline:

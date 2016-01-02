@@ -1,6 +1,8 @@
 Where to find the change log:
 
-- http://freemarker.org/docs/app_versions.html
+- Online (for stable releases only):
+  http://freemarker.org/docs/app_versions.html
 
-- It's included in the binary release:
-  Open documentation/index.html, and you will find the offline link.
+- Offline:
+  In the binary release, open documentation/index.html, and you will find the
+  link.
