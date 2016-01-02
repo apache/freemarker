@@ -26412,15 +26412,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_24">
         <title>2.3.24 Release Candidate 1</title>
 
-        <para>Date of release for Release Candidate 1: [FIXME]</para>
+        <para>Date of release for Release Candidate 1: 2015-01-12</para>
 
-        <para>Date of release for Preview 1: 2015-09-01</para>
-
-        <para>Date of release for final is not yet known (end of
-        October?).</para>
+        <para>Planned final release date: around 2016-02-20</para>
 
         <para>Please test for backward compatibility, and help polishing the
         new features!</para>
+
+        <section>
+          <title>Legal changes</title>
+
+          <para>The owner of FreeMarker is now the Apache Software Foundation.
+          The license is still Apache License Version 2.0, just like earlier,
+          but the owner is different. The official full product name has
+          changed to Apache FreeMarker.</para>
+
+          <para>Disclaimer: Apache FreeMarker is an effort undergoing
+          incubation at The Apache Software Foundation (ASF). Incubation is
+          required of all newly accepted projects until a further review
+          indicates that the infrastructure, communications, and decision
+          making process have stabilized in a manner consistent with other
+          successful ASF projects. While incubation status is not necessarily
+          a reflection of the completeness or stability of the code, it does
+          indicate that the project has yet to be fully endorsed by the ASF.
+          </para>
+        </section>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -26650,9 +26666,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Changes related to the <link
-              linkend="dgui_misc_autoescaping">new auto-escaping
-              mechanism</link>:</para>
+              <para>Related to the <link linkend="dgui_misc_autoescaping">new
+              auto-escaping mechanism</link>:</para>
 
               <itemizedlist>
                 <listitem>
@@ -26966,7 +26981,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Decrease the stack usage of template execution, which can
+              <para>Decreased the stack usage of template execution, which can
               have importance if you have very very deeply nested
               templates.</para>
             </listitem>
@@ -27104,8 +27119,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Internal code cleanup: Mostly source code formatting, also
-              many parser construction/setup cleanup</para>
+              <para>Internal code cleanup: Mostly for consistent source code
+              formatting, also many parser construction/setup cleanup</para>
             </listitem>
 
             <listitem>
@@ -27133,20 +27148,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Internal reworking to simplify the AST (the
-              <literal>TemplateElement</literal> structure). The API related
+              <literal>TemplateElement</literal> structure). The related
               technically public API was marked as internal for a good while.
               For those who still use that API, the visible change is that
               <literal>TemplateElement</literal>-s now almost never has a
               <literal>MixedContent</literal> parent, instead, the parent is
               directly whatever element the child element indeed belongs under
               when you look at the source code (like the enclosing
-              <literal>#list</literal> for example, no a
-              <literal>MixedContent</literal> whose parent is the
-              <literal>#list</literal>). Note that when you have moved
-              downwards, towards the child elements, these
-              <literal>MixedContent</literal> parents weren't visible either
-              either, so the tree traversal API was in fact inconsistent. Now
-              it's consistent.</para>
+              <literal>#list</literal> for example, while earlier you often
+              had to go through a <literal>MixedContent</literal> first whose
+              parent was the <literal>#list</literal>). Note that when you
+              have moved downwards, i.e., towards the child elements, these
+              <literal>MixedContent</literal> parents weren't visible and were
+              silently skipped, so the tree traversal API was inconsistent.
+              Now it's consistent.</para>
             </listitem>
 
             <listitem>
