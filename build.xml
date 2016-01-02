@@ -602,7 +602,7 @@
     <antcall target="clean" />  <!-- To improve the reliability -->
     <antcall target="_dist" />
   </target>
-
+  
   <target name="_dist"
     depends="jar, javadoc, manualOffline"
   >
@@ -652,17 +652,10 @@
       <fileset dir="build/api" />
     </copy>
     
-    <!-- Package -->
-    <property name="bin.tar" value="build/dist/apache-freemarker-gae-${version}-bin.tar" />
-    <property name="bin.gzip" value="${bin.tar}.gz" />
-    <delete file="${bin.tar}" />
-    <tar tarfile="${bin.tar}" basedir="${dist.dir}/bin" />
-    <delete file="${bin.gzip}" />
-    <gzip zipfile="${bin.gzip}" src="${bin.tar}" />
-    <delete file="${bin.tar}" />
-
-    <!-- Sign and hash: -->
-    <!-- TODO -->
+    <u:packageAndSignDist
+        srcDir="${dist.dir}/bin"
+        archiveNameWithoutExt="apache-freemarker-gae-${version}-bin"
+    />
 
     <!-- ..................................... -->
     <!-- Source distribution                        -->
@@ -702,19 +695,60 @@
       </fileset>
     </copy>
     
-    <!-- Package -->
-    <property name="src.tar" value="build/dist/apache-freemarker-gae-${version}-src.tar" />
-    <property name="src.gzip" value="${src.tar}.gz" />
-    <delete file="${src.tar}" />
-    <tar tarfile="${src.tar}" basedir="${dist.dir}/src" />
-    <delete file="${src.gzip}" />
-    <gzip zipfile="${src.gzip}" src="${src.tar}" />
-    <delete file="${src.tar}" />
-    
-    <!-- Sign and hash: -->
-    <!-- TODO -->
+    <u:packageAndSignDist
+        srcDir="${dist.dir}/src"
+        archiveNameWithoutExt="apache-freemarker-gae-${version}-src"
+    />
   </target>
 
+  <macrodef name="packageAndSignDist" uri="http://freemarker.org/util">
+    <attribute name="srcDir" />
+    <attribute name="archiveNameWithoutExt" />
+    <sequential>
+      <local name="archive.tar"/>
+      <property name="archive.tar" value="build/dist/@{archiveNameWithoutExt}.tar" />
+      <local name="archive.gzip"/>
+      <property name="archive.gzip" value="${archive.tar}.gz" />
+      <delete file="${archive.tar}" />
+      <tar tarfile="${archive.tar}" basedir="@{srcDir}" />
+      <delete file="${archive.gzip}" />
+      <gzip zipfile="${archive.gzip}" src="${archive.tar}" />
+      <delete file="${archive.tar}" />
+
+      <echo>Signing "${archive.gzip}"...</echo>
+      <!-- gpg may hang if it exists: -->
+      <delete file="${archive.gzip}.asc" />
+      <exec executable="${gpgCommand}" failonerror="true">
+        <arg value="--armor" />
+        <arg value="--output" />
+        <arg value="${archive.gzip}.asc" />
+        <arg value="--detach-sig" />
+        <arg value="${archive.gzip}" />
+      </exec>
+      
+      <echo>*** Signature verification: ***</echo>
+      <exec executable="${gpgCommand}" failonerror="true">
+        <arg value="--verify" />
+        <arg value="${archive.gzip}.asc" />
+        <arg value="${archive.gzip}" />
+      </exec>
+      <local name="signatureGood" />
+      <local name="signatureGood.y" />
+      <input
+         validargs="y,n"
+         addproperty="signatureGood"
+      >Is the above signer the intended one for Apache releases?</input>
+      <condition property="signatureGood.y">
+        <equals arg1="y" arg2="${signatureGood}"/>
+      </condition>
+      <fail unless="signatureGood.y" message="Task aborted by user." />
+    
+      <echo>Creating checksum files for "${archive.gzip}"...</echo>
+      <checksum file="${archive.gzip}" fileext=".md5" algorithm="MD5" forceOverwrite="yes" />
+      <checksum file="${archive.gzip}" fileext=".sha512" algorithm="SHA-512" forceOverwrite="yes" />
+    </sequential>
+  </macrodef>
+  
   <target name="maven-pom">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <!--
@@ -831,7 +865,7 @@ Proceed? </input>
     <fail unless="mavenUpload.yes" message="Task aborted by user." />
     
 		<!-- Sign and deploy the main artifact -->
-		<exec executable="${mvnCommand}">
+		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
@@ -841,7 +875,7 @@ Proceed? </input>
 		</exec>
 
 		<!-- Sign and deploy the sources artifact -->
-		<exec executable="${mvnCommand}">
+		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
@@ -852,7 +886,7 @@ Proceed? </input>
 		</exec>
 
 		<!-- Sign and deploy the javadoc artifact -->
-		<exec executable="${mvnCommand}">
+		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
