@@ -22,9 +22,11 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.TemplateNotFoundException;
+import freemarker.test.CopyrightCommentRemoverTemplateLoader;
 import freemarker.test.utility.FileTestCase;
 
 public class CanonicalFormTest extends FileTestCase {
@@ -56,14 +58,13 @@ public class CanonicalFormTest extends FileTestCase {
     private void assertCanonicalFormOf(String ftlFileName)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        cfg.setClassForTemplateLoading(CanonicalFormTest.class, "");
+        cfg.setTemplateLoader(
+                new CopyrightCommentRemoverTemplateLoader(
+                        new ClassTemplateLoader(CanonicalFormTest.class, "")));
         StringWriter sw = new StringWriter();
         cfg.getTemplate(ftlFileName).dump(sw);
 
-        int lastDotIdx = ftlFileName.lastIndexOf('.');
-        String canonicalFtlName = ftlFileName.substring(0, lastDotIdx) + "-canonical"
-                + ftlFileName.substring(lastDotIdx);
-        assertExpectedFileEqualsString(canonicalFtlName, sw.toString());
+        assertExpectedFileEqualsString(ftlFileName + ".out", sw.toString());
     }
 
 }

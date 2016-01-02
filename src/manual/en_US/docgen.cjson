@@ -33,8 +33,9 @@ generateEclipseTOC
 
 removeNodesWhenOnline: [ "preface" ]
 
-copyrightHolder: "The FreeMarker Project"
+copyrightHolder: "The Apache Software Foundation"
 copyrightStartYear: 1999
+copyrightCommentFile: "docgen-misc/copyrightComment.txt"
 
 seoMeta: {
   "dgui_quickstart": {
@@ -59,7 +60,7 @@ olinks: {
   freemarkerdownload: "http://freemarker.org/freemarkerdownload.html"
   contribute: "http://freemarker.org/contribute.html"
   history: "http://freemarker.org/history.html"
-  what-is-freemarker: "id:preface"
+  what-is-freemarker: "http://freemarker.org/"
   mailing-lists: "http://freemarker.org/mailing-lists.html"
   
   // External URL-s:

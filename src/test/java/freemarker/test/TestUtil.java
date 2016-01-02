@@ -24,7 +24,41 @@ public final class TestUtil {
         // Not meant to be instantiated
     }
 
-    public static String removeCopyrightCommentFromFTL(String ftl) {
+    public static String removeTxtCopyrightComment(String s) {
+        if (!s.startsWith("/*")) {
+            return s;
+        }
+        
+        int commentEnd = s.indexOf("*/");
+        if (commentEnd == -1) {
+            return s;
+        }
+        commentEnd += 2;
+        if (commentEnd < s.length()) {
+            char c = s.charAt(commentEnd);
+            if (c == '\n' || c == '\r') {
+                commentEnd++;
+                if (c == '\r' && commentEnd < s.length()) {
+                    if (s.charAt(commentEnd) == '\n') {
+                        commentEnd++;
+                    }
+                }
+            }
+        }
+        
+        String comment = s.substring(0, commentEnd);
+        int copyrightIdx = comment.indexOf("copyright");
+        if (copyrightIdx == -1) {
+            copyrightIdx = comment.indexOf("Copyright");
+        }
+        if (copyrightIdx == -1) {
+            return s;
+        }
+        
+        return s.substring(commentEnd);
+    }
+    
+    public static String removeFTLCopyrightComment(String ftl) {
         if (ftl.contains("<#ftl ns_prefixes = {\"D\" : \"http://example.com/eBook\"}>")) {
             System.out.println();
         }
