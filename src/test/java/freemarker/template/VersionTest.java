@@ -58,6 +58,14 @@ public class VersionTest {
         assertEquals(3, v.getMicro());
     }
     
+    public void testFromNumberIncubating() {
+        Version v = new Version(2, 3, 24, "rc01-incubating", Boolean.FALSE, new Date(5000));
+        assertEquals("2.3.24-rc01-incubating", v.toString());
+        assertEquals("rc01-incubating", v.getExtraInfo());
+        assertFalse(v.isGAECompliant().booleanValue());
+        assertEquals(new Date(5000), v.getBuildDate());
+    }
+    
     @Test
     public void testFromString() {
         Version v = new Version("1.2.3-beta2");
@@ -111,6 +119,16 @@ public class VersionTest {
         assertEquals(3, v.getMicro());
         assertEquals("mod", v.getExtraInfo());
         
+    }
+
+    @Test
+    public void testFromStringIncubating() {
+        Version v = new Version("2.3.24-rc01-incubating");
+        assertEquals("2.3.24-rc01-incubating", v.toString());
+        assertEquals(2, v.getMajor());
+        assertEquals(3, v.getMinor());
+        assertEquals(24, v.getMicro());
+        assertEquals("rc01-incubating", v.getExtraInfo());
     }
     
     @Test
