@@ -20,12 +20,13 @@
 <book conformance="docgen" version="5.0" xml:lang="en"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
       xmlns:ns5="http://www.w3.org/1999/xhtml"
       xmlns:ns4="http://www.w3.org/2000/svg"
       xmlns:ns3="http://www.w3.org/1998/Math/MathML"
       xmlns:ns="http://docbook.org/ns/docbook">
   <info>
-    <title>FreeMarker Manual</title>
+    <title>Apache FreeMarker Manual</title>
 
     <titleabbrev>Manual</titleabbrev>
 
@@ -33,7 +34,7 @@
   </info>
 
   <preface role="index.html" xml:id="preface">
-    <title>What is FreeMarker?</title>
+    <title>What is Apache FreeMarker?</title>
 
     <para>FreeMarker is a <emphasis>template engine</emphasis>: a generic tool
     to generate text output (HTML web pages, e-mails, configuration files,
@@ -71,6 +72,17 @@
     <para>FreeMarker is <link
     xlink:href="http://www.fsf.org/philosophy/free-sw.html">Free</link>,
     released under the Apache License, Version 2.0.</para>
+
+    <para><emphasis><emphasis><emphasis role="bold">Disclaimer: Apache
+    FreeMarker is an effort undergoing <link
+    xlink:href="http://incubator.apache.org">incubation</link> at The Apache
+    Software Foundation (ASF).</emphasis></emphasis> Incubation is required of
+    all newly accepted projects until a further review indicates that the
+    infrastructure, communications, and decision making process have
+    stabilized in a manner consistent with other successful ASF projects.
+    While incubation status is not necessarily a reflection of the
+    completeness or stability of the code, it does indicate that the project
+    has yet to be fully endorsed by the ASF.</emphasis></para>
   </preface>
 
   <part xml:id="dgui">
