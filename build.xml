@@ -776,9 +776,9 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>9</version>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>17</version>
   </parent>
   
   <groupId>org.freemarker</groupId>
@@ -787,36 +787,57 @@
   
   <packaging>jar</packaging>
   
-  <name>FreeMarker</name>
+  <name>Apache FreeMarker</name>
   <description>
     Google App Engine compliant variation of FreeMarker.
     FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
   </description>
   <url>http://freemarker.org/</url>
+  <organization>
+    <name>Apache Software Foundation</name>
+    <url>http://apache.org</url>
+  </organization>
+  
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
-      <url>http://freemarker.org/LICENSE.txt</url>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>      
     </license>
   </licenses>
+  
   <scm>
     <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</connection>
-    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/maven.git</developerConnection>
-    <!-- <url>https://github.com/apache/freemarker/tree/${project.scm.tag}</url> -->
-    <tag>2.3-gae</tag>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=incubator-freemarker.git</url>
+    <tag>${version}</tag>
   </scm>
-  <developers>
-    <developer>
-      <name>Attila Szegedi</name>
-    </developer>
-    <developer>
-      <name>Daniel Dekany</name>
-      <email>ddekany@apache.org</email>
-    </developer>
-    <developer>
-      <name>Jonathan Revusky</name>
-    </developer>
-  </developers>  
+
+  <issueManagement>
+    <system>jira</system>
+    <url>https://issues.apache.org/jira/browse/FREEMARKER/</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+        <name>FreeMarker developer list</name>
+        <post>dev@freemarker.incubator.apache.org</post>
+        <subscribe>dev-subscribe@freemarker.incubator.apache.org</subscribe>
+        <unsubscribe>dev-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-dev/</archive>
+    </mailingList>
+    <mailingList>
+        <name>FreeMarker commit and Jira notifications list</name>
+        <post>notifications@freemarker.incubator.apache.org</post>
+        <subscribe>notifications-subscribe@freemarker.incubator.apache.org</subscribe>
+        <unsubscribe>notifications-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-notifications/</archive>
+    </mailingList>
+    <mailingList>
+      <name>FreeMarker management private</name>
+      <post>private@freemarker.incubator.apache.org</post>
+    </mailingList>
+  </mailingLists>
   
   <dependencies>
     <!-- no required dependencies -->
@@ -833,21 +854,21 @@
   <target name="maven-dist" depends="maven-pom"
       description="Releases the already built distro to a Maven repository">
     <jar destfile="build/maven-source-attachment.jar">
-      <fileset dir="${dist.dir}/source/src/main/java" />
-      <fileset dir="${dist.dir}/source/src/main/resources" />
+      <fileset dir="${dist.dir}/src/src/main/java" />
+      <fileset dir="${dist.dir}/src/src/main/resources" />
     </jar>
 
     <jar destfile="build/maven-javadoc-attachment.jar">
-      <fileset dir="${dist.dir}/documentation/_html/api" />
+      <fileset dir="${dist.dir}/bin/documentation/_html/api" />
     </jar>
 
-    <property name="maven-server-id" value="ossrh" />
-    <property name="maven-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+    <!-- These were copy-pasted from the org.apacha:apache parent POM: -->
+    <property name="maven-server-id" value="apache.releases.https" />
+    <property name="maven-repository-url" value="https://repository.apache.org/service/local/staging/deploy/maven2" />
     <!--
     Don't deploy to public snapshot repositories here!
     It isn't backward compatible as version ranges will pick them up.
     -->
-    
     <input
        validargs="y,n"
        addproperty="mavenUpload.answer"
@@ -867,10 +888,14 @@ Proceed? </input>
 		<!-- Sign and deploy the main artifact -->
 		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+      <!--
+        As we use the gpg plugin instead of a normal Maven "deploy", sadly we can't just
+        inherit the repo URL and repositoryId from the parent POM.
+      -->
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
 			<arg value="-DpomFile=build/pom.xml" />
-			<arg value="-Dfile=${dist.dir}/freemarker.jar" />
+			<arg value="-Dfile=${dist.dir}/bin/freemarker.jar" />
       <arg value="-Pgpg" />
 		</exec>
 
@@ -898,8 +923,9 @@ Proceed? </input>
     
     <echo>*****************************************************************</echo>
     <echo>Check the above lines for any Maven errors!</echo>
-    <echo>Now you have to release the staged repo on</echo>
-    <echo>https://oss.sonatype.org/.</echo>
+    <echo>Now you need to close and maybe release the staged repo on</echo>
+    <echo>http://repository.apache.org.</echo>
+    <echo>Note that before releasing, voting is needed!</echo>
     <echo>*****************************************************************</echo>
   </target>
   
