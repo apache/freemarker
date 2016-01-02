@@ -69,18 +69,6 @@
     property="boot.classpath.j2se1.6.correct"
   />
   
-  <condition property="example.freemarker.jar.location"
-    value="freemarker.jar" else="build/freemarker.jar">
-    <and>
-      <available  file="freemarker.jar" />
-      <not>
-        <available  file="build/freemarker.jar" />
-      </not>
-    </and>
-  </condition>
-  
-  <available file="lib/struts" property="struts.available" />
-  
   <!-- Set up version/timestamp filters and the version property: -->
   <tstamp>
     <format property="timestampNice" pattern="yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -598,69 +586,6 @@
     <u:manual offline="false" locale="zh_CN" />
   </target>
   
-  <!-- ====================== -->
-  <!-- Examples               -->
-  <!-- ====================== -->
-
-  <macrodef name="buildExampleWebapp" uri="http://freemarker.org/util">
-    <attribute name="exampleName" />
-    <sequential>
-      <mkdir dir="build/examples/@{exampleName}/WEB-INF/classes" />
-      <ivy:cachepath conf="example.@{exampleName}" pathid="ivy.dep" />
-      <javac
-        srcdir="src/examples/@{exampleName}/WEB-INF/classes"
-        destdir="build/examples/@{exampleName}/WEB-INF/classes"
-        deprecation="off" debug="on" optimize="off" target="1.5" source="1.5"
-        encoding="utf-8"
-        includeantruntime="false"
-        classpathref="ivy.dep"
-        bootclasspath="${boot.classpath.j2se1.5}"
-      >
-        <classpath>
-          <pathelement path="${ivy.dep}" />
-          <pathelement location="${example.freemarker.jar.location}" />
-          <fileset dir="lib/struts" erroronmissingdir="false">
-            <include name="*.jar" />
-          </fileset>
-        </classpath>
-      </javac>
-      <copy toDir="build/examples/@{exampleName}">
-        <fileset dir="src/examples/@{exampleName}" excludes="**/*.java" />
-      </copy>
-      <copy file="${example.freemarker.jar.location}"
-        todir="build/examples/@{exampleName}/WEB-INF/lib" />
-      <echo message="*** Example built: build/examples/@{exampleName} ***" />
-    </sequential>
-  </macrodef>
-  
-  <target name="example-webapp1" depends="jar" description="Build example webapp 1">
-    <u:buildExampleWebapp examplename="webapp1" />
-  </target>
-
-  <target name="example-webapp2" depends="jar" description="Build example webapp 2">
-    <u:buildExampleWebapp examplename="webapp2" />
-  </target>
-
-  <target name="example-struts-webapp" depends="jar" description="Build example Struts 1 webapp">
-    <fail unless="struts.available"><!--
-      -->You have to copy the Struts 1.1 jar-s to <!--
-      -->&lt;freemarker_project>/lib/struts to build this example!<!--
-    --></fail>
-    <copy todir="build/examples/struts-webapp/WEB-INF/lib">
-      <fileset dir="lib/struts" />
-    </copy>
-    <u:buildExampleWebapp examplename="struts-webapp" />
-  </target>
-  
-  <target name="example-ant" depends="jar" description="Build Ant example">
-    <mkdir dir="build/examples/ant" />
-    <copy toDir="build/examples/ant">
-      <fileset dir="src/examples/ant" />
-    </copy>
-    <copy file="${example.freemarker.jar.location}"
-      todir="build/examples/ant/lib" />
-    <echo message="*** Example built: build/examples/ant ***" />
-  </target>
 
   <!-- ====================== -->
   <!-- Distributuion building -->
