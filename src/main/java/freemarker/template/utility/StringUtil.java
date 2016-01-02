@@ -823,7 +823,7 @@ public class StringUtil {
     }
 
     /**
-     * Removes the line-break from the end of the string.
+     * Removes a line-break from the end of the string (if there's any).
      */
     public static String chomp(String s) {
         if (s.endsWith("\r\n")) return s.substring(0, s.length() - 2);

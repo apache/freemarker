@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.test.TestUtil;
 
 public class WebAppTestCase {
     
@@ -178,7 +179,7 @@ public class WebAppTestCase {
         {
             final InputStream in = new URL(getWebAppDirURL(webAppName) + EXPECTED_DIR + expectedFileName).openStream();
             try {
-                expected = normalizeWS(IOUtils.toString(in, "utf-8"), compressWS);
+                expected = TestUtil.removeTxtCopyrightComment(normalizeWS(IOUtils.toString(in, "utf-8"), compressWS));
             } finally {
                 in.close();
             }

@@ -1,17 +1,35 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 ===============================================================================
 
- FreeMarker {version}
+ Apache FreeMarker {version}
 
  For the latest version or to report bugs visit:
 
  http://freemarker.org/
- (Mirror: http://freemarker.sourceforge.net/)
 
 ===============================================================================
 
 
-What is FreeMarker?
--------------------
+What is Apache FreeMarker?
+--------------------------
 
 FreeMarker is a "template engine"; a generic tool to generate text
 output (anything from HTML to auto generated source code) based on
@@ -28,17 +46,16 @@ Licensing
 
 FreeMarker is licensed under the Apache License, Version 2.0.
 
-See LICENSE.txt for more details.
+See the LICENSE file for more details!
 
 
 Documentation
 -------------
 
-The full documentation is available offline in this distribution, here:
-documentation/index.html
+Online: http://freemarker.org/docs/
 
-Or, you can read it online: http://freemarker.org/docs/
-(Mirror: http://freemarker.sourceforge.net/docs/)
+Offline: The full documentation is available in the binary distribution
+in the documentation/index.html directory.
 
 
 Installing
@@ -68,10 +85,24 @@ you are using an optional feature that's certainly because your
 application already uses the related library.
 
 
+Change log
+----------
+
+Online:
+http://freemarker.org/docs/app_versions.html
+
+Offline:
+In the binary release, open documentation/index.html, and you will find the
+link.
+
+
 Building
 --------
 
-You need JDK 8(!), Apache Ant and Ivy be installed. (As of this writing
+First of all, if you haven't yet, download the source release, or check
+out FreeMarker from the source code repository.
+
+You need JDK 8(!), Apache Ant and Ivy to be installed. (As of this writing
 it was tested with Ant 1.8.1 and Ivy 2.3.0.)
 
 If you need to ensure compliance with certain J2SE versions, copy
@@ -101,13 +132,3 @@ errors in the XML related parts. To fix that, always add dom4j-*.jar last.
 
 You could also use IvyDE instead, with configuration "IDE", but as the
 dependencies hardly ever change, it might not worth the trouble.
-
-
-Change log
-----------
-
-Open documentation/index.html, and you will find the link.
-
-Online:
-http://freemarker.org/docs/app_versions.html
-(Mirror: http://freemarker.sourceforge.net/docs/app_versions.html)

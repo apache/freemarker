@@ -33,6 +33,7 @@ import java.net.URL;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.template.utility.StringUtil;
+import freemarker.test.TestUtil;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
@@ -144,7 +145,7 @@ public abstract class FileTestCase extends TestCase {
     }
 
     protected String loadFile(File f) throws FileNotFoundException, IOException {
-        return loadFile(f, getDefaultCharset());
+        return TestUtil.removeTxtCopyrightComment(loadFile(f, getDefaultCharset()));
     }
     
     protected String loadFile(File f, String charset) throws FileNotFoundException, IOException {

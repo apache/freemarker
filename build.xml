@@ -102,7 +102,7 @@
   <delete file="build/version.properties.tmp" />
   <filter token="version" value="${version}" />
   
-  <property name="dist.dir" value="build/dist/freemarker-${version}" />
+  <property name="dist.dir" value="build/dist" />
   
   
   <!-- ================================================================== -->
@@ -683,47 +683,87 @@
   >
     <!-- Copy jars and sources and such into the distro -->
     <delete dir="${dist.dir}" />
-    <mkdir dir="${dist.dir}" />
+    <mkdir dir="${dist.dir}/bin" />
+    <mkdir dir="${dist.dir}/src" />
+    
+    <!-- ..................................... -->
+    <!-- Binary distribution                   -->
+    <!-- ..................................... -->
     
     <!-- Copy txt-s -->
-    <copy todir="${dist.dir}" includeEmptyDirs="no">
+    <copy todir="${dist.dir}/bin" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
-        <include name="*.txt" />
-        <!-- Because of the documentation fonts, the distribution has an extended version of these: -->
-        <exclude name="LICENSE.txt" />
-        <exclude name="NOTICE.txt" />
+        <include name="README" />
+        <include name="DISCLAIMER" />
+        <include name="RELEASE-NOTES" />
+        <!-- LICENSE and NOTICE are binary-distribution-specific, and are copied later. -->
       </fileset>
     </copy>
     <replace
-      file="${dist.dir}/README.txt"
+      file="${dist.dir}/bin/README"
       token="{version}"
       value="${version}"
     />
+    <!-- Copy binary-distribution-specific files: -->
+    <copy todir="${dist.dir}/bin/">
+      <fileset dir="src/dist/bin/" />
+    </copy>
 
     <!-- Copy binary -->
-    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker.jar" />
+    <copy file="build/freemarker.jar" tofile="${dist.dir}/bin/freemarker.jar" />
 
     <!-- Copy documentation -->
-    <mkdir dir="${dist.dir}/documentation" />
-    <copy todir="${dist.dir}/">
-      <fileset dir="src/dist/" />
-    </copy>
+    <mkdir dir="${dist.dir}/bin/documentation" />
+    
     <!--
-      The US English Manual is the source of any translations and this it's the
-      only one that is guaranteed to be up to date when doing the release, so we only pack
-      that into it.
+      The US English Manual is the source of any translations and thus it's the
+      only one that is guaranteed to be up to date when doing the release, so we
+      only pack that into it.
     -->
-    <copy todir="${dist.dir}/documentation/_html" includeEmptyDirs="no">
-      <fileset dir="build/manual/en-US" />
+    <copy todir="${dist.dir}/bin/documentation/_html" includeEmptyDirs="no">
+      <fileset dir="build/manual/en_US" />
     </copy>
-    <copy todir="${dist.dir}/documentation/_html/api" includeEmptyDirs="no">
+    <copy todir="${dist.dir}/bin/documentation/_html/api" includeEmptyDirs="no">
       <fileset dir="build/api" />
     </copy>
     
-    <copy todir="${dist.dir}/source" includeEmptyDirs="no">
+    <!-- Package -->
+    <property name="bin.tar" value="build/dist/apache-freemarker-${version}-bin.tar" />
+    <property name="bin.gzip" value="${bin.tar}.gz" />
+    <delete file="${bin.tar}" />
+    <tar tarfile="${bin.tar}" basedir="${dist.dir}/bin" />
+    <delete file="${bin.gzip}" />
+    <gzip zipfile="${bin.gzip}" src="${bin.tar}" />
+    <delete file="${bin.tar}" />
+
+    <!-- Sign and hash: -->
+    <!-- TODO -->
+
+    <!-- ..................................... -->
+    <!-- Source distribution                        -->
+    <!-- ..................................... -->
+
+    <!-- Copy txt-s -->
+    <copy todir="${dist.dir}/src" includeEmptyDirs="no">
+      <fileset dir="." defaultexcludes="no">
+        <include name="README" />
+        <include name="LICENSE" />
+        <include name="NOTICE" />
+        <include name="DISCLAIMER" />
+        <include name="RELEASE-NOTES" />
+      </fileset>
+    </copy>
+    <replace
+      file="${dist.dir}/src/README"
+      token="{version}"
+      value="${version}"
+    />
+    
+    <copy todir="${dist.dir}/src" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <exclude name="**/*.bak" />
         <exclude name="**/*.~*" />
+        <exclude name="**/*.*~" />
         <include name="src/**" />
         <include name="examples/**" />
         <include name=".settings/**" />
@@ -737,18 +777,40 @@
       </fileset>
     </copy>
     
-    <!-- Package the distro -->
-    <property name="freemarker.tar" value="build/freemarker-${version}.tar" />
-    <property name="freemarker.gzip" value="${freemarker.tar}.gz" />
-    <delete file="${freemarker.tar}" />
-    <tar tarfile="${freemarker.tar}" basedir="${dist.dir}" />
-    <delete file="${freemarker.gzip}" />
-    <gzip zipfile="${freemarker.gzip}" src="${freemarker.tar}" />
-    <delete file="${freemarker.tar}" />
+    <!-- Package -->
+    <property name="src.tar" value="build/dist/apache-freemarker-${version}-src.tar" />
+    <property name="src.gzip" value="${src.tar}.gz" />
+    <delete file="${src.tar}" />
+    <tar tarfile="${src.tar}" basedir="${dist.dir}/src" />
+    <delete file="${src.gzip}" />
+    <gzip zipfile="${src.gzip}" src="${src.tar}" />
+    <delete file="${src.tar}" />
+    
+    <!-- Sign and hash: -->
+    <!-- TODO -->
   </target>
 
   <target name="maven-pom">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+    
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -1146,11 +1208,17 @@ Proceed? </input>
       classpathref="ivy.dep"
     />  
     
-    <rat:report reportFile="build/rat-report.txt">
+    <rat:report reportFile="build/rat-report-src.txt">
         <fileset dir="src"/>
     </rat:report>
+    <rat:report reportFile="build/rat-report-dist-src.txt">
+        <fileset dir="build/dist/src"/>
+    </rat:report>
+    <rat:report reportFile="build/rat-report-dist-bin.txt">
+        <fileset dir="build/dist/bin"/>
+    </rat:report>
     <echo level="info"><!--
-    -->Rat report was written into build/rat-report.txt<!--
+    -->Rat reports were written into build/rat-report-*.txt<!--
     --></echo>
   </target>
 
