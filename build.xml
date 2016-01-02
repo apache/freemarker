@@ -823,7 +823,7 @@
   </parent>
   
   <groupId>org.freemarker</groupId>
-  <artifactId>freemarker-gae</artifactId>
+  <artifactId>freemarker</artifactId>
   <version>${mavenVersion}</version>
   
   <packaging>jar</packaging>
