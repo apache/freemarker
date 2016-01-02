@@ -338,9 +338,7 @@
     </copy>
     <copy toDir="build/classes/META-INF">
       <fileset dir="."
-        includes="
-          LICENSE.txt,
-          NOTICE.txt"
+        includes="LICENSE"
       />
     </copy>
   </target>
