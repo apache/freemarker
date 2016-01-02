@@ -728,7 +728,7 @@
     </copy>
     
     <!-- Package -->
-    <property name="bin.tar" value="build/dist/apache-freemarker-${version}-bin.tar" />
+    <property name="bin.tar" value="build/dist/apache-freemarker-gae-${version}-bin.tar" />
     <property name="bin.gzip" value="${bin.tar}.gz" />
     <delete file="${bin.tar}" />
     <tar tarfile="${bin.tar}" basedir="${dist.dir}/bin" />
