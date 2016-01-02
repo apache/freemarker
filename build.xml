@@ -69,18 +69,6 @@
     property="boot.classpath.j2se1.6.correct"
   />
   
-  <condition property="example.freemarker.jar.location"
-    value="freemarker.jar" else="build/freemarker.jar">
-    <and>
-      <available  file="freemarker.jar" />
-      <not>
-        <available  file="build/freemarker.jar" />
-      </not>
-    </and>
-  </condition>
-  
-  <available file="lib/struts" property="struts.available" />
-  
   <!-- Set up version/timestamp filters and the version property: -->
   <tstamp>
     <format property="timestampNice" pattern="yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -350,9 +338,7 @@
     </copy>
     <copy toDir="build/classes/META-INF">
       <fileset dir="."
-        includes="
-          LICENSE.txt,
-          NOTICE.txt"
+        includes="LICENSE"
       />
     </copy>
   </target>
@@ -598,69 +584,6 @@
     <u:manual offline="false" locale="zh_CN" />
   </target>
   
-  <!-- ====================== -->
-  <!-- Examples               -->
-  <!-- ====================== -->
-
-  <macrodef name="buildExampleWebapp" uri="http://freemarker.org/util">
-    <attribute name="exampleName" />
-    <sequential>
-      <mkdir dir="build/examples/@{exampleName}/WEB-INF/classes" />
-      <ivy:cachepath conf="example.@{exampleName}" pathid="ivy.dep" />
-      <javac
-        srcdir="src/examples/@{exampleName}/WEB-INF/classes"
-        destdir="build/examples/@{exampleName}/WEB-INF/classes"
-        deprecation="off" debug="on" optimize="off" target="1.5" source="1.5"
-        encoding="utf-8"
-        includeantruntime="false"
-        classpathref="ivy.dep"
-        bootclasspath="${boot.classpath.j2se1.5}"
-      >
-        <classpath>
-          <pathelement path="${ivy.dep}" />
-          <pathelement location="${example.freemarker.jar.location}" />
-          <fileset dir="lib/struts" erroronmissingdir="false">
-            <include name="*.jar" />
-          </fileset>
-        </classpath>
-      </javac>
-      <copy toDir="build/examples/@{exampleName}">
-        <fileset dir="src/examples/@{exampleName}" excludes="**/*.java" />
-      </copy>
-      <copy file="${example.freemarker.jar.location}"
-        todir="build/examples/@{exampleName}/WEB-INF/lib" />
-      <echo message="*** Example built: build/examples/@{exampleName} ***" />
-    </sequential>
-  </macrodef>
-  
-  <target name="example-webapp1" depends="jar" description="Build example webapp 1">
-    <u:buildExampleWebapp examplename="webapp1" />
-  </target>
-
-  <target name="example-webapp2" depends="jar" description="Build example webapp 2">
-    <u:buildExampleWebapp examplename="webapp2" />
-  </target>
-
-  <target name="example-struts-webapp" depends="jar" description="Build example Struts 1 webapp">
-    <fail unless="struts.available"><!--
-      -->You have to copy the Struts 1.1 jar-s to <!--
-      -->&lt;freemarker_project>/lib/struts to build this example!<!--
-    --></fail>
-    <copy todir="build/examples/struts-webapp/WEB-INF/lib">
-      <fileset dir="lib/struts" />
-    </copy>
-    <u:buildExampleWebapp examplename="struts-webapp" />
-  </target>
-  
-  <target name="example-ant" depends="jar" description="Build Ant example">
-    <mkdir dir="build/examples/ant" />
-    <copy toDir="build/examples/ant">
-      <fileset dir="src/examples/ant" />
-    </copy>
-    <copy file="${example.freemarker.jar.location}"
-      todir="build/examples/ant/lib" />
-    <echo message="*** Example built: build/examples/ant ***" />
-  </target>
 
   <!-- ====================== -->
   <!-- Distributuion building -->
@@ -677,7 +600,7 @@
     <antcall target="clean" />  <!-- To improve the reliability -->
     <antcall target="_dist" />
   </target>
-
+  
   <target name="_dist"
     depends="jar, javadoc, manualOffline"
   >
@@ -727,17 +650,10 @@
       <fileset dir="build/api" />
     </copy>
     
-    <!-- Package -->
-    <property name="bin.tar" value="build/dist/apache-freemarker-${version}-bin.tar" />
-    <property name="bin.gzip" value="${bin.tar}.gz" />
-    <delete file="${bin.tar}" />
-    <tar tarfile="${bin.tar}" basedir="${dist.dir}/bin" />
-    <delete file="${bin.gzip}" />
-    <gzip zipfile="${bin.gzip}" src="${bin.tar}" />
-    <delete file="${bin.tar}" />
-
-    <!-- Sign and hash: -->
-    <!-- TODO -->
+    <u:packageAndSignDist
+        srcDir="${dist.dir}/bin"
+        archiveNameWithoutExt="apache-freemarker-${version}-bin"
+    />
 
     <!-- ..................................... -->
     <!-- Source distribution                        -->
@@ -777,19 +693,60 @@
       </fileset>
     </copy>
     
-    <!-- Package -->
-    <property name="src.tar" value="build/dist/apache-freemarker-${version}-src.tar" />
-    <property name="src.gzip" value="${src.tar}.gz" />
-    <delete file="${src.tar}" />
-    <tar tarfile="${src.tar}" basedir="${dist.dir}/src" />
-    <delete file="${src.gzip}" />
-    <gzip zipfile="${src.gzip}" src="${src.tar}" />
-    <delete file="${src.tar}" />
-    
-    <!-- Sign and hash: -->
-    <!-- TODO -->
+    <u:packageAndSignDist
+        srcDir="${dist.dir}/src"
+        archiveNameWithoutExt="apache-freemarker-${version}-src"
+    />
   </target>
 
+  <macrodef name="packageAndSignDist" uri="http://freemarker.org/util">
+    <attribute name="srcDir" />
+    <attribute name="archiveNameWithoutExt" />
+    <sequential>
+      <local name="archive.tar"/>
+      <property name="archive.tar" value="build/dist/@{archiveNameWithoutExt}.tar" />
+      <local name="archive.gzip"/>
+      <property name="archive.gzip" value="${archive.tar}.gz" />
+      <delete file="${archive.tar}" />
+      <tar tarfile="${archive.tar}" basedir="@{srcDir}" />
+      <delete file="${archive.gzip}" />
+      <gzip zipfile="${archive.gzip}" src="${archive.tar}" />
+      <delete file="${archive.tar}" />
+
+      <echo>Signing "${archive.gzip}"...</echo>
+      <!-- gpg may hang if it exists: -->
+      <delete file="${archive.gzip}.asc" />
+      <exec executable="${gpgCommand}" failonerror="true">
+        <arg value="--armor" />
+        <arg value="--output" />
+        <arg value="${archive.gzip}.asc" />
+        <arg value="--detach-sig" />
+        <arg value="${archive.gzip}" />
+      </exec>
+      
+      <echo>*** Signature verification: ***</echo>
+      <exec executable="${gpgCommand}" failonerror="true">
+        <arg value="--verify" />
+        <arg value="${archive.gzip}.asc" />
+        <arg value="${archive.gzip}" />
+      </exec>
+      <local name="signatureGood" />
+      <local name="signatureGood.y" />
+      <input
+         validargs="y,n"
+         addproperty="signatureGood"
+      >Is the above signer the intended one for Apache releases?</input>
+      <condition property="signatureGood.y">
+        <equals arg1="y" arg2="${signatureGood}"/>
+      </condition>
+      <fail unless="signatureGood.y" message="Task aborted by user." />
+    
+      <echo>Creating checksum files for "${archive.gzip}"...</echo>
+      <checksum file="${archive.gzip}" fileext=".md5" algorithm="MD5" forceOverwrite="yes" />
+      <checksum file="${archive.gzip}" fileext=".sha512" algorithm="SHA-512" forceOverwrite="yes" />
+    </sequential>
+  </macrodef>
+  
   <target name="maven-pom">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <!--
@@ -817,9 +774,9 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>9</version>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>17</version>
   </parent>
   
   <groupId>org.freemarker</groupId>
@@ -828,36 +785,57 @@
   
   <packaging>jar</packaging>
   
-  <name>FreeMarker</name>
+  <name>Apache FreeMarker</name>
   <description>
     Google App Engine compliant variation of FreeMarker.
     FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
   </description>
   <url>http://freemarker.org/</url>
+  <organization>
+    <name>Apache Software Foundation</name>
+    <url>http://apache.org</url>
+  </organization>
+  
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
-      <url>http://freemarker.org/LICENSE.txt</url>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>      
     </license>
   </licenses>
+  
   <scm>
     <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</connection>
-    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/maven.git</developerConnection>
-    <!-- <url>https://github.com/apache/freemarker/tree/${project.scm.tag}</url> -->
-    <tag>master</tag>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=incubator-freemarker.git</url>
+    <tag>${version}</tag>
   </scm>
-  <developers>
-    <developer>
-      <name>Attila Szegedi</name>
-    </developer>
-    <developer>
-      <name>Daniel Dekany</name>
-      <email>ddekany@apache.org</email>
-    </developer>
-    <developer>
-      <name>Jonathan Revusky</name>
-    </developer>
-  </developers>  
+
+  <issueManagement>
+    <system>jira</system>
+    <url>https://issues.apache.org/jira/browse/FREEMARKER/</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+        <name>FreeMarker developer list</name>
+        <post>dev@freemarker.incubator.apache.org</post>
+        <subscribe>dev-subscribe@freemarker.incubator.apache.org</subscribe>
+        <unsubscribe>dev-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-dev/</archive>
+    </mailingList>
+    <mailingList>
+        <name>FreeMarker commit and Jira notifications list</name>
+        <post>notifications@freemarker.incubator.apache.org</post>
+        <subscribe>notifications-subscribe@freemarker.incubator.apache.org</subscribe>
+        <unsubscribe>notifications-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-notifications/</archive>
+    </mailingList>
+    <mailingList>
+      <name>FreeMarker management private</name>
+      <post>private@freemarker.incubator.apache.org</post>
+    </mailingList>
+  </mailingLists>
   
   <dependencies>
     <!-- no required dependencies -->
@@ -874,21 +852,21 @@
   <target name="maven-dist" depends="maven-pom"
       description="Releases the already built distro to a Maven repository">
     <jar destfile="build/maven-source-attachment.jar">
-      <fileset dir="${dist.dir}/source/src/main/java" />
-      <fileset dir="${dist.dir}/source/src/main/resources" />
+      <fileset dir="${dist.dir}/src/src/main/java" />
+      <fileset dir="${dist.dir}/src/src/main/resources" />
     </jar>
 
     <jar destfile="build/maven-javadoc-attachment.jar">
-      <fileset dir="${dist.dir}/documentation/_html/api" />
+      <fileset dir="${dist.dir}/bin/documentation/_html/api" />
     </jar>
 
-    <property name="maven-server-id" value="ossrh" />
-    <property name="maven-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+    <!-- These were copy-pasted from the org.apacha:apache parent POM: -->
+    <property name="maven-server-id" value="apache.releases.https" />
+    <property name="maven-repository-url" value="https://repository.apache.org/service/local/staging/deploy/maven2" />
     <!--
     Don't deploy to public snapshot repositories here!
     It isn't backward compatible as version ranges will pick them up.
     -->
-    
     <input
        validargs="y,n"
        addproperty="mavenUpload.answer"
@@ -906,17 +884,21 @@ Proceed? </input>
     <fail unless="mavenUpload.yes" message="Task aborted by user." />
     
 		<!-- Sign and deploy the main artifact -->
-		<exec executable="${mvnCommand}">
+		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+      <!--
+        As we use the gpg plugin instead of a normal Maven "deploy", sadly we can't just
+        inherit the repo URL and repositoryId from the parent POM.
+      -->
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
 			<arg value="-DpomFile=build/pom.xml" />
-			<arg value="-Dfile=${dist.dir}/freemarker.jar" />
+			<arg value="-Dfile=${dist.dir}/bin/freemarker.jar" />
       <arg value="-Pgpg" />
 		</exec>
 
 		<!-- Sign and deploy the sources artifact -->
-		<exec executable="${mvnCommand}">
+		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
@@ -927,7 +909,7 @@ Proceed? </input>
 		</exec>
 
 		<!-- Sign and deploy the javadoc artifact -->
-		<exec executable="${mvnCommand}">
+		<exec executable="${mvnCommand}" failonerror="true">
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
@@ -939,142 +921,10 @@ Proceed? </input>
     
     <echo>*****************************************************************</echo>
     <echo>Check the above lines for any Maven errors!</echo>
-    <echo>Now you have to release the staged repo on</echo>
-    <echo>https://oss.sonatype.org/.</echo>
+    <echo>Now you need to close and maybe release the staged repo on</echo>
+    <echo>http://repository.apache.org.</echo>
+    <echo>Note that before releasing, voting is needed!</echo>
     <echo>*****************************************************************</echo>
-  </target>
-  
-  
-  <!-- ================================================================== -->
-  <!-- Eclipse                                                            -->
-  <!-- ================================================================== -->
-
-  <property name="eclipseFeatureFileName" value="org.freemarker.freemarker.feature_${versionForOSGi}.jar" />
-  <property name="eclipseSourceFeatureFileName" value="org.freemarker.freemarker.source.feature_${versionForOSGi}.jar" />
-  <property name="eclipsePluginFileName" value="org.freemarker.freemarker_${versionForOSGi}.jar" />
-  <property name="eclipseSourcePluginFileName" value="org.freemarker.freemarker.source_${versionForOSGi}.jar" />
-  
-  <target name="eclipse-update-site" depends="jar">
-    <delete dir="build/eclipse" />
-
-    <!-- Create org.freemarker.freemarker feature: -->
-    
-    <mkdir dir="build/eclipse/freemarker/plugins" />
-    <copy
-        file="build/freemarker.jar"
-        tofile="build/eclipse/freemarker/plugins/org.freemarker.freemarker_${versionForOSGi}.jar"
-    />
-    
-    <mkdir dir="build/eclipse/freemarker/features/tmp" />
-    <echo file="build/eclipse/freemarker/features/tmp/feature.xml"><![CDATA[<?xml version="1.0"?>
-<feature
-    id="org.freemarker.freemarker"
-    label="FreeMarker"
-    version="${versionForOSGi}">
-
-  <description url="http://freemarker.org">
-    Adds barebone FreeMarker as a plug-in (OSGi bundle) to Eclipse.
-  </description>
-
-  <license><!--
-    -->Apache License, Version 2.0; see http://freemarker.org/LICENSE.txt.<!--
-  --></license>
-
-  <plugin
-      id="org.freemarker.freemarker"
-      download-size="0"
-      install-size="0"
-      version="${versionForOSGi}"
-      unpack="false"
-  />
-</feature>
-    ]]></echo>
-    <jar
-        basedir="build/eclipse/freemarker/features/tmp"
-        destfile="build/eclipse/freemarker/features/${eclipseFeatureFileName}"
-    />
-    <delete dir="build/eclipse/freemarker/features/tmp" />
-
-    <!-- Create org.freemarker.freemarker.source feature: -->
-    
-    <mkdir dir="build/eclipse/freemarker/plugins" />
-    <jar 
-        basedir="src/main/java" jarfile="build/eclipse/freemarker/plugins/org.freemarker.freemarker.source_${versionForOSGi}.jar" 
-    >
-      <manifest>
-        <attribute name="Bundle-SymbolicName" value="${moduleOrg}.${moduleName}.source" />
-        <attribute name="Bundle-Version" value="${versionForOSGi}" />
-        <attribute name="Bundle-License" value="Apache License, Version 2.0" />
-        <attribute name="Bundle-Vendor" value="freemarker.org" />
-        <attribute name="Eclipse-SourceBundle" value='org.freemarker.freemarker;version="${versionForOSGi}";roots:="."' />
-      </manifest>
-    </jar>
-    
-    <mkdir dir="build/eclipse/freemarker/features/tmp" />
-    <echo file="build/eclipse/freemarker/features/tmp/feature.xml"><![CDATA[<?xml version="1.0"?>
-<feature
-    id="org.freemarker.freemarker.source"
-    label="FreeMarker source"
-    version="${versionForOSGi}">
-
-  <description url="http://freemarker.org">
-    Adds source code attachment to the barebone FreeMarker plug-in.
-  </description>
-
-  <license><!--
-    -->Apache License, Version 2.0; see http://freemarker.org/LICENSE.txt.<!--
-  --></license>
-
-  <plugin
-      id="org.freemarker.freemarker.source"
-      download-size="0"
-      install-size="0"
-      version="${versionForOSGi}"
-      unpack="false"
-  />
-</feature>
-    ]]></echo>
-    <jar
-        basedir="build/eclipse/freemarker/features/tmp"
-        destfile="build/eclipse/freemarker/features/${eclipseSourceFeatureFileName}"
-    />
-    <delete dir="build/eclipse/freemarker/features/tmp" />
-
-    <!-- Create site: -->
-
-    <echo file="build/eclipse/freemarker/site.xml"><![CDATA[<?xml version="1.0"?>
-<site>
-  <feature url="features/${eclipseFeatureFileName}"
-      id="org.freemarker.freemarker"
-      version="${versionForOSGi}">
-    <category name="core" />
-    <category name="core-with-sources" />
-  </feature>
-  <feature url="features/${eclipseSourceFeatureFileName}"
-      id="org.freemarker.freemarker.source"
-      version="${versionForOSGi}">
-    <category name="core-with-sources" />
-  </feature>
-  <category-def name="core" label="FreeMarker core">
-    <description>
-      Features that are used as dependencies of other products, but do nothing visible themselves.
-    </description>
-  </category-def>
-  <category-def name="core-with-sources" label="FreeMarker core with sources">
-    <description>
-      Features that are used as dependencies of other products, but do nothing visible themselves.
-      Includes source code attachments.
-    </description>
-  </category-def>
-</site>
-    ]]></echo>
-    <echo message="**************************************************************" />
-    <echo message="The new Eclipse update site is created in:" />
-    <echo message="${basedir}/build/eclipse/freemarker" />
-    <echo message="You can use this directory as a local update site in Eclipse," />
-    <echo message="or if you are an admin who makes a release, you should replace" />
-    <echo message="http://freemarker.org/eclipse/freemarker with this directory." />
-    <echo message="**************************************************************" />
   </target>
   
   
