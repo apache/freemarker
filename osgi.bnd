@@ -26,7 +26,7 @@
 
 Bundle-SymbolicName: ${moduleOrg}.${moduleName}
 Bundle-Version: ${versionForOSGi}
-Bundle-License: Apache License, Version 2.0; see: http://freemarker.org/LICENSE.txt
+Bundle-License: Apache License, Version 2.0; see: http://www.apache.org/licenses/LICENSE-2.0.txt
 Bundle-Vendor: freemarker.org
 
 Include-Resource: META-INF=build/classes/META-INF
