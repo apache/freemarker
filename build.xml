@@ -91,7 +91,9 @@
   <filter token="version" value="${version}" />
   
   <property name="dist.dir" value="build/dist" />
-  
+  <property name="dist.archiveBaseName" value="apache-freemarker-gae" />
+  <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}" />
+  <property name="dist.src.dir" value="${dist.dir}/src/${dist.archiveBaseName}-src" />
   
   <!-- ================================================================== -->
   <!-- Initialization                                                     -->
@@ -604,17 +606,16 @@
   <target name="_dist"
     depends="jar, javadoc, manualOffline"
   >
-    <!-- Copy jars and sources and such into the distro -->
     <delete dir="${dist.dir}" />
-    <mkdir dir="${dist.dir}/bin" />
-    <mkdir dir="${dist.dir}/src" />
-    
+
     <!-- ..................................... -->
     <!-- Binary distribution                   -->
     <!-- ..................................... -->
     
+    <mkdir dir="${dist.bin.dir}" />
+    
     <!-- Copy txt-s -->
-    <copy todir="${dist.dir}/bin" includeEmptyDirs="no">
+    <copy todir="${dist.bin.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <include name="README" />
         <include name="DISCLAIMER" />
@@ -623,44 +624,46 @@
       </fileset>
     </copy>
     <replace
-      file="${dist.dir}/bin/README"
+      file="${dist.bin.dir}/README"
       token="{version}"
       value="${version}"
     />
     <!-- Copy binary-distribution-specific files: -->
-    <copy todir="${dist.dir}/bin/">
+    <copy todir="${dist.bin.dir}/">
       <fileset dir="src/dist/bin/" />
     </copy>
 
     <!-- Copy binary -->
-    <copy file="build/freemarker.jar" tofile="${dist.dir}/bin/freemarker.jar" />
+    <copy file="build/freemarker.jar" tofile="${dist.bin.dir}/freemarker.jar" />
 
     <!-- Copy documentation -->
-    <mkdir dir="${dist.dir}/bin/documentation" />
+    <mkdir dir="${dist.bin.dir}/documentation" />
     
     <!--
       The US English Manual is the source of any translations and thus it's the
       only one that is guaranteed to be up to date when doing the release, so we
       only pack that into it.
     -->
-    <copy todir="${dist.dir}/bin/documentation/_html" includeEmptyDirs="no">
+    <copy todir="${dist.bin.dir}/documentation/_html" includeEmptyDirs="no">
       <fileset dir="build/manual/en_US" />
     </copy>
-    <copy todir="${dist.dir}/bin/documentation/_html/api" includeEmptyDirs="no">
+    <copy todir="${dist.bin.dir}/documentation/_html/api" includeEmptyDirs="no">
       <fileset dir="build/api" />
     </copy>
     
     <u:packageAndSignDist
-        srcDir="${dist.dir}/bin"
-        archiveNameWithoutExt="apache-freemarker-gae-${version}-bin"
+        srcDir="${dist.bin.dir}/.."
+        archiveNameWithoutExt="${dist.archiveBaseName}-${version}-bin"
     />
 
     <!-- ..................................... -->
-    <!-- Source distribution                        -->
+    <!-- Source distribution                   -->
     <!-- ..................................... -->
+    
+    <mkdir dir="${dist.src.dir}" />
 
     <!-- Copy txt-s -->
-    <copy todir="${dist.dir}/src" includeEmptyDirs="no">
+    <copy todir="${dist.src.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <include name="README" />
         <include name="LICENSE" />
@@ -670,12 +673,12 @@
       </fileset>
     </copy>
     <replace
-      file="${dist.dir}/src/README"
+      file="${dist.src.dir}/README"
       token="{version}"
       value="${version}"
     />
     
-    <copy todir="${dist.dir}/src" includeEmptyDirs="no">
+    <copy todir="${dist.src.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <exclude name="**/*.bak" />
         <exclude name="**/*.~*" />
@@ -694,8 +697,8 @@
     </copy>
     
     <u:packageAndSignDist
-        srcDir="${dist.dir}/src"
-        archiveNameWithoutExt="apache-freemarker-gae-${version}-src"
+        srcDir="${dist.src.dir}/.."
+        archiveNameWithoutExt="${dist.archiveBaseName}-${version}-src"
     />
   </target>
 
@@ -852,12 +855,12 @@
   <target name="maven-dist" depends="maven-pom"
       description="Releases the already built distro to a Maven repository">
     <jar destfile="build/maven-source-attachment.jar">
-      <fileset dir="${dist.dir}/src/src/main/java" />
-      <fileset dir="${dist.dir}/src/src/main/resources" />
+      <fileset dir="${dist.src.dir}/src/main/java" />
+      <fileset dir="${dist.src.dir}/src/main/resources" />
     </jar>
 
     <jar destfile="build/maven-javadoc-attachment.jar">
-      <fileset dir="${dist.dir}/bin/documentation/_html/api" />
+      <fileset dir="${dist.bin.dir}/documentation/_html/api" />
     </jar>
 
     <!-- These were copy-pasted from the org.apacha:apache parent POM: -->
@@ -872,7 +875,7 @@
        addproperty="mavenUpload.answer"
     >
 You are about uploading
-${dist.dir}/freemarker.jar
+${dist.bin.dir}/freemarker.jar
 and its attachments to this Maven repository:
 ${maven-repository-url}
 with Maven artifact version number ${mavenVersion}.
@@ -893,7 +896,7 @@ Proceed? </input>
 			<arg value="-Durl=${maven-repository-url}" />
 			<arg value="-DrepositoryId=${maven-server-id}" />
 			<arg value="-DpomFile=build/pom.xml" />
-			<arg value="-Dfile=${dist.dir}/bin/freemarker.jar" />
+			<arg value="-Dfile=${dist.bin.dir}/freemarker.jar" />
       <arg value="-Pgpg" />
 		</exec>
 
