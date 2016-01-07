@@ -339,9 +339,7 @@
       />
     </copy>
     <copy toDir="build/classes/META-INF">
-      <fileset dir="."
-        includes="LICENSE"
-      />
+      <fileset dir="." includes="LICENSE, NOTICE, DISCLAIMER" />
     </copy>
   </target>
 
@@ -857,10 +855,12 @@
     <jar destfile="build/maven-source-attachment.jar">
       <fileset dir="${dist.src.dir}/src/main/java" />
       <fileset dir="${dist.src.dir}/src/main/resources" />
+      <metainf dir="${dist.src.dir}" includes="LICENSE, NOTICE, DISCLAIMER" />
     </jar>
 
     <jar destfile="build/maven-javadoc-attachment.jar">
       <fileset dir="${dist.bin.dir}/documentation/_html/api" />
+      <metainf dir="${dist.bin.dir}" includes="LICENSE, DISCLAIMER" />
     </jar>
 
     <!-- These were copy-pasted from the org.apacha:apache parent POM: -->
