@@ -618,9 +618,10 @@
     <copy todir="${dist.bin.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <include name="README" />
+        <include name="LICENSE" />
+        <!-- NOTICE is binary-distribution-specific, and is copied later. -->
         <include name="DISCLAIMER" />
         <include name="RELEASE-NOTES" />
-        <!-- LICENSE and NOTICE are binary-distribution-specific, and are copied later. -->
       </fileset>
     </copy>
     <replace
