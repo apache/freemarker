@@ -91,7 +91,7 @@
   <filter token="version" value="${version}" />
   
   <property name="dist.dir" value="build/dist" />
-  <property name="dist.archiveBaseName" value="apache-freemarker" />
+  <property name="dist.archiveBaseName" value="apache-freemarker-${version}" />
   <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}" />
   <property name="dist.src.dir" value="${dist.dir}/src/${dist.archiveBaseName}-src" />
   
@@ -618,9 +618,10 @@
     <copy todir="${dist.bin.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <include name="README" />
+        <include name="LICENSE" />
+        <!-- NOTICE is binary-distribution-specific, and is copied later. -->
         <include name="DISCLAIMER" />
         <include name="RELEASE-NOTES" />
-        <!-- LICENSE and NOTICE are binary-distribution-specific, and are copied later. -->
       </fileset>
     </copy>
     <replace
@@ -653,7 +654,7 @@
     
     <u:packageAndSignDist
         srcDir="${dist.bin.dir}/.."
-        archiveNameWithoutExt="${dist.archiveBaseName}-${version}-bin"
+        archiveNameWithoutExt="${dist.archiveBaseName}-bin"
     />
 
     <!-- ..................................... -->
@@ -698,7 +699,7 @@
     
     <u:packageAndSignDist
         srcDir="${dist.src.dir}/.."
-        archiveNameWithoutExt="${dist.archiveBaseName}-${version}-src"
+        archiveNameWithoutExt="${dist.archiveBaseName}-src"
     />
   </target>
 
