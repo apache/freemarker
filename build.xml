@@ -91,7 +91,7 @@
   <filter token="version" value="${version}" />
   
   <property name="dist.dir" value="build/dist" />
-  <property name="dist.archiveBaseName" value="apache-freemarker-gae" />
+  <property name="dist.archiveBaseName" value="apache-freemarker-gae-${version}" />
   <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}" />
   <property name="dist.src.dir" value="${dist.dir}/src/${dist.archiveBaseName}-src" />
   
@@ -654,7 +654,7 @@
     
     <u:packageAndSignDist
         srcDir="${dist.bin.dir}/.."
-        archiveNameWithoutExt="${dist.archiveBaseName}-${version}-bin"
+        archiveNameWithoutExt="${dist.archiveBaseName}-bin"
     />
 
     <!-- ..................................... -->
@@ -699,7 +699,7 @@
     
     <u:packageAndSignDist
         srcDir="${dist.src.dir}/.."
-        archiveNameWithoutExt="${dist.archiveBaseName}-${version}-src"
+        archiveNameWithoutExt="${dist.archiveBaseName}-src"
     />
   </target>
 
