@@ -1724,6 +1724,16 @@ public class Configurable {
      *       <br>String value is something like:
      *       <br>{@code /include/common.ftl, "/include/evil name.ftl"}
      *       
+     *   <li><p>{@code "lazy_auto_imports"}:
+     *       See {@link Configuration#setLazyAutoImports(Boolean)}.
+     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
+     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive. Also can be {@code "null"}.
+
+     *   <li><p>{@code "lazy_imports"}:
+     *       See {@link Configuration#setLazyImports(boolean)}.
+     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
+     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive.
+     *       
      *   <li><p>{@code "default_encoding"}:
      *       See {@link Configuration#setDefaultEncoding(String)}.
      *       <br>As the default value is the system default, which can change

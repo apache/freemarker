@@ -1529,6 +1529,28 @@ public class ConfigurationTest extends TestCase {
         cfg.setSetting("naming_convention", "auto_detect");
         assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
     }
+
+    public void testLazyImportsSetSetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+
+        assertFalse(cfg.getLazyImports());
+        cfg.setSetting("lazy_imports", "true");
+        assertTrue(cfg.getLazyImports());
+        cfg.setSetting("lazyImports", "false");
+        assertFalse(cfg.getLazyImports());
+    }
+    
+    public void testLazyAutoImportsSetSetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+
+        assertNull(cfg.getLazyAutoImports());
+        cfg.setSetting("lazy_auto_imports", "true");
+        assertEquals(Boolean.TRUE, cfg.getLazyAutoImports());
+        cfg.setSetting("lazyAutoImports", "false");
+        assertEquals(Boolean.FALSE, cfg.getLazyAutoImports());
+        cfg.setSetting("lazyAutoImports", "null");
+        assertNull(cfg.getLazyAutoImports());
+    }
     
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {

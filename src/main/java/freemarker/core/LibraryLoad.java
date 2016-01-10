@@ -35,17 +35,17 @@ import freemarker.template.TemplateException;
 public final class LibraryLoad extends TemplateElement {
 
     private Expression importedTemplateNameExp;
-    private String namespace;
+    private String targetNsVarName;
 
     /**
      * @param template the template that this <tt>Include</tt> is a part of.
      * @param templateName the name of the template to be included.
-     * @param namespace the namespace to assign this library to
+     * @param targetNsVarName the name of the  variable to assign this library's namespace to
      */
     LibraryLoad(Template template,
             Expression templateName,
-            String namespace) {
-        this.namespace = namespace;
+            String targetNsVarName) {
+        this.targetNsVarName = targetNsVarName;
         this.importedTemplateNameExp = templateName;
     }
 
@@ -61,16 +61,14 @@ public final class LibraryLoad extends TemplateElement {
                     e.getMalformednessDescription());
         }
         
-        final Template importedTemplate;
         try {
-            importedTemplate = env.getTemplateForImporting(fullImportedTemplateName);
+            env.importLib(fullImportedTemplateName, targetNsVarName);
         } catch (IOException e) {
             throw new _MiscTemplateException(e, env,
                     "Template importing failed (for parameter value ",
                     new _DelayedJQuote(importedTemplateName),
                     "):\n", new _DelayedGetMessage(e));
         }
-        env.importLib(importedTemplate, namespace);
         return null;
     }
 
@@ -82,7 +80,7 @@ public final class LibraryLoad extends TemplateElement {
         buf.append(' ');
         buf.append(importedTemplateNameExp.getCanonicalForm());
         buf.append(" as ");
-        buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(namespace));
+        buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(targetNsVarName));
         if (canonical) buf.append("/>");
         return buf.toString();
     }
@@ -101,7 +99,7 @@ public final class LibraryLoad extends TemplateElement {
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return importedTemplateNameExp;
-        case 1: return namespace;
+        case 1: return targetNsVarName;
         default: throw new IndexOutOfBoundsException();
         }
     }

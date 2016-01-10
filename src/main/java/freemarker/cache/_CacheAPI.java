@@ -26,10 +26,10 @@ import freemarker.template.MalformedTemplateNameException;
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
  */ 
-public class _CacheAPI {
+public final class _CacheAPI {
 
-    public _CacheAPI() {
-        // TODO Auto-generated constructor stub
+    private _CacheAPI() {
+        // Not meant to be instantiated
     }
     
     public static String toAbsoluteName(TemplateNameFormat templateNameFormat, String baseName, String targetName)
@@ -37,4 +37,9 @@ public class _CacheAPI {
         return templateNameFormat.toAbsoluteName(baseName, targetName);
     }
 
+    public static String normalizeAbsoluteName(TemplateNameFormat templateNameFormat, String name)
+            throws MalformedTemplateNameException {
+        return templateNameFormat.normalizeAbsoluteName(name);
+    }
+    
 }

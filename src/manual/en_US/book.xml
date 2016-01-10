@@ -26409,6 +26409,44 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_25">
+        <title>2.3.25</title>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>[TODO]</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Lazy imports: With the new boolean
+              <literal>Configuration</literal>-level settings,
+              <literal>lazy_imports</literal> and
+              <literal>lazy_auto_imports</literal>, you can request imports
+              (as in <literal>&lt;#import "lib/utils.ftl" as u&gt;</literal>)
+              and/or auto-imports to be lazy. When the import is lazy, the
+              namespace variable (<literal>u</literal> in this example) will
+              be created immediately, just like before, but the template will
+              be imported and processed only when (and if ever) the content of
+              the imported namespace is accessed. The main application of this
+              is with auto-imports, where you don't want the overhead of
+              importing templates that aren't actually used in a template.
+              (Also, a new <literal>Environment.importLib</literal> method
+              overload was added, where you can specify if you want a lazy or
+              an eager import.)</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_24">
         <title>2.3.24 Release Candidate 1</title>
 
@@ -26434,8 +26472,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           making process have stabilized in a manner consistent with other
           successful ASF projects. While incubation status is not necessarily
           a reflection of the completeness or stability of the code, it does
-          indicate that the project has yet to be fully endorsed by the ASF.
-          </para>
+          indicate that the project has yet to be fully endorsed by the
+          ASF.</para>
         </section>
 
         <section>
