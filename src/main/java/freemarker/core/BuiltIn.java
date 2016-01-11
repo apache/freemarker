@@ -84,7 +84,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
     static final int NUMBER_OF_BIS = 263;
-    static final HashMap builtins = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
+    static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!

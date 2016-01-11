@@ -74,7 +74,6 @@ final class BuiltinVariable extends Expression {
     static final String NOW = "now";
     static final String PREVIOUS_SIBLING = "previous";
     static final String NEXT_SIBLING = "next";
-    private static final BoundCallable PASS_VALUE = new BoundCallable(UnboundCallable.NO_OP_MACRO, null, null);
     
     static final String[] SPEC_VAR_NAMES = new String[] {
         AUTO_ESC_CC,
