@@ -342,7 +342,10 @@
       />
     </copy>
     <copy toDir="build/classes/META-INF">
-      <fileset dir="." includes="LICENSE, NOTICE, DISCLAIMER" />
+      <fileset dir="." includes="LICENSE, DISCLAIMER" />
+    </copy>
+    <copy toDir="build/classes/META-INF">
+      <fileset dir="src/dist/jar/META-INF" includes="*" />
     </copy>
   </target>
 
