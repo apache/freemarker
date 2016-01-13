@@ -31,6 +31,9 @@
   <!-- Properties                                                         -->
   <!-- ================================================================== -->
 
+  <!-- Maven project coordinates: -->
+  <property name="mavenGroupId" value="org.freemarker" />
+  <property name="mavenArtifactId" value="freemarker-gae" />
   <!-- Ivy project coordinates: -->
   <property name="moduleOrg" value="org.freemarker" />
   <property name="moduleName" value="freemarker" />
@@ -91,7 +94,7 @@
   <filter token="version" value="${version}" />
   
   <property name="dist.dir" value="build/dist" />
-  <property name="dist.archiveBaseName" value="apache-freemarker-gae-${version}" />
+  <property name="dist.archiveBaseName" value="apache-${mavenArtifactId}-${version}" />
   <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}" />
   <property name="dist.src.dir" value="${dist.dir}/src/${dist.archiveBaseName}-src" />
   
@@ -781,8 +784,8 @@
     <version>17</version>
   </parent>
   
-  <groupId>org.freemarker</groupId>
-  <artifactId>freemarker-gae</artifactId>
+  <groupId>${mavenGroupId}</groupId>
+  <artifactId>${mavenArtifactId}</artifactId>
   <version>${mavenVersion}</version>
   
   <packaging>jar</packaging>
@@ -872,20 +875,23 @@
 
     <!-- These were copy-pasted from the org.apacha:apache parent POM: -->
     <property name="maven-server-id" value="apache.releases.https" />
-    <property name="maven-repository-url" value="https://repository.apache.org/service/local/staging/deploy/maven2" />
-    <!--
-    Don't deploy to public snapshot repositories here!
-    It isn't backward compatible as version ranges will pick them up.
-    -->
+    <condition property="maven-repository-url"
+        value="https://repository.apache.org/content/repositories/snapshots/"
+        else="https://repository.apache.org/service/local/staging/deploy/maven2">
+      <matches pattern="-SNAPSHOT$" string="${mavenVersion}" />
+    </condition>
+    <!-- Snapshot repo: https://repository.apache.org/content/repositories/snapshots/ -->
     <input
        validargs="y,n"
        addproperty="mavenUpload.answer"
     >
 You are about uploading
 ${dist.bin.dir}/freemarker.jar
-and its attachments to this Maven repository:
+and its attachments with Maven coordinates
+${mavenGroupId}:${mavenArtifactId}:${mavenVersion}
+to this Maven repository:
 ${maven-repository-url}
-with Maven artifact version number ${mavenVersion}.
+
 Note that it's assumed that you have run `ant dist` just before this.
 Proceed? </input>
     <condition property="mavenUpload.yes">
