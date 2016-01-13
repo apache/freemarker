@@ -859,10 +859,16 @@
       <metainf dir="${dist.src.dir}" includes="LICENSE, NOTICE, DISCLAIMER" />
     </jar>
 
+    <mkdir dir="build/javadoc-attachment-metainf"/>
+    <copy todir="build/javadoc-attachment-metainf">
+      <fileset dir="${dist.bin.dir}" includes="LICENSE, DISCLAIMER" />
+    </copy>
+    <copy file="src/dist/javadoc/META-INF/NOTICE" todir="build/javadoc-attachment-metainf" />
     <jar destfile="build/maven-javadoc-attachment.jar">
       <fileset dir="${dist.bin.dir}/documentation/_html/api" />
-      <metainf dir="${dist.bin.dir}" includes="LICENSE, DISCLAIMER" />
+      <metainf dir="build/javadoc-attachment-metainf" includes="**/*" />
     </jar>
+    <delete dir="build/javadoc-attachment-metainf" />
 
     <!-- These were copy-pasted from the org.apacha:apache parent POM: -->
     <property name="maven-server-id" value="apache.releases.https" />
