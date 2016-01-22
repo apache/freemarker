@@ -114,7 +114,8 @@ First of all, if you haven't yet, download the source release, or check
 out FreeMarker from the source code repository.
 
 You need JDK 8(!), Apache Ant and Ivy to be installed. (As of this writing
-it was tested with Ant 1.8.1 and Ivy 2.3.0.)
+it was tested with Ant 1.8.1 and Ivy 2.3.0.) Note that the ivy-<version>.jar
+should be copied to your Ant home directory "lib" subfolder.
 
 If you need to ensure compliance with certain J2SE versions, copy
 build.properties.sample into build.properties, and edit it
