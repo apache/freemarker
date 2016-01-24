@@ -35,7 +35,7 @@
     <!-- Must use a webapp-local class for "class:", otherwise it won't find local resources. -->
     <servlet>
         <servlet-name>freemarker-class-root</servlet-name>
-        <servlet-class>webapps.cfg.WebappLocalFreemarkerServlet</servlet-class>
+        <servlet-class>freemarker.ext.jsp.webapps.config.WebappLocalFreemarkerServlet</servlet-class>
         <init-param>
             <param-name>TemplatePath</param-name>
             <param-value>class://</param-value>
@@ -43,7 +43,7 @@
     </servlet>
     <servlet>
         <servlet-name>freemarker-class-sub</servlet-name>
-        <servlet-class>webapps.cfg.WebappLocalFreemarkerServlet</servlet-class>
+        <servlet-class>freemarker.ext.jsp.webapps.config.WebappLocalFreemarkerServlet</servlet-class>
         <init-param>
             <param-name>TemplatePath</param-name>
             <param-value>class://sub</param-value>
