@@ -26987,6 +26987,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>MultiTemplateLoader.setSticky(boolean)</literal> and
+              <literal>MultiTemplateLoader.isSticky()</literal>, with which
+              you can disable the default behavior, where once a template was
+              found in a child <literal>TemplateLoader</literal>, it will be
+              searched there first next time (typically, when the template
+              update delay is expired). With the <literal>sticky</literal>
+              property set to <literal>false</literal>, the child
+              <literal>TemplateLoader</literal>-s will be always searched in
+              the order as they were added to the
+              <literal>MultiTemplateLoader</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>StringTemplateLoader.removeTemplate(String)</literal>
+              method.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed, only with
               <literal>incompatible_improvements</literal> set to 2.3.24
               (<link linkend="topic.defaultObjectWrapperIcI">see how
