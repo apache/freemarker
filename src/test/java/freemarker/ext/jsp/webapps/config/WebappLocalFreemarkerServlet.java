@@ -16,20 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package freemarker.ext.jsp.webapps.config;
 
-package freemarker.cache;
+import freemarker.ext.servlet.FreemarkerServlet;
 
-import freemarker.template.Configuration;
+public class WebappLocalFreemarkerServlet extends FreemarkerServlet {
 
-/**
- * Interface that can be implemented by {@link TemplateLoader}-s that maintain some 
- * sort of internal state (i.e. caches of earlier lookups for performance 
- * optimization purposes etc.) and support resetting of their state. 
- */
-public interface StatefulTemplateLoader extends TemplateLoader {
-    /**
-     * Invoked by {@link Configuration#clearTemplateCache()} to instruct this
-     * template loader to throw away its current state and start afresh. 
-     */
-    public void resetState();
 }

@@ -34,17 +34,14 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
         this.innerTemplateLoader = innerTemplateLoader;
     }
 
-    @Override
     public Object findTemplateSource(String name) throws IOException {
         return innerTemplateLoader.findTemplateSource(name);
     }
 
-    @Override
     public long getLastModified(Object templateSource) {
         return innerTemplateLoader.getLastModified(templateSource);
     }
 
-    @Override
     public Reader getReader(Object templateSource, String encoding) throws IOException {
         Reader reader = innerTemplateLoader.getReader(templateSource, encoding);
         try {
@@ -55,7 +52,6 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
         }
     }
 
-    @Override
     public void closeTemplateSource(Object templateSource) throws IOException {
         innerTemplateLoader.closeTemplateSource(templateSource);
     }

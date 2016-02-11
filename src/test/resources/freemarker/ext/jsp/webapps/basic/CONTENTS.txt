@@ -16,20 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ 
+// Only the files listed here will be part of the tested Web application deployment! 
 
-package freemarker.cache;
+attributes.ftl
+customELFunctions1.ftl
+customELFunctions1.jsp
+customTags1.ftl
+trivial-jstl-@Ignore.ftl
+trivial.ftl
+trivial.jsp
 
-import freemarker.template.Configuration;
-
-/**
- * Interface that can be implemented by {@link TemplateLoader}-s that maintain some 
- * sort of internal state (i.e. caches of earlier lookups for performance 
- * optimization purposes etc.) and support resetting of their state. 
- */
-public interface StatefulTemplateLoader extends TemplateLoader {
-    /**
-     * Invoked by {@link Configuration#clearTemplateCache()} to instruct this
-     * template loader to throw away its current state and start afresh. 
-     */
-    public void resetState();
-}
+WEB-INF/el-functions.tld
+WEB-INF/expected
+WEB-INF/test.tld
+WEB-INF/web.xml

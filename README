@@ -114,7 +114,8 @@ First of all, if you haven't yet, download the source release, or check
 out FreeMarker from the source code repository.
 
 You need JDK 8(!), Apache Ant and Ivy to be installed. (As of this writing
-it was tested with Ant 1.8.1 and Ivy 2.3.0.)
+it was tested with Ant 1.8.1 and Ivy 2.3.0.) Note that the ivy-<version>.jar
+should be copied to your Ant home directory "lib" subfolder.
 
 If you need to ensure compliance with certain J2SE versions, copy
 build.properties.sample into build.properties, and edit it
@@ -129,17 +130,75 @@ re-download some of them, it will not happen automatically anymore.
 You have to issue "ant update-deps" for that.
 
 
-Eclipse and other IDE-s
------------------------
+Eclipse and other IDE setup
+---------------------------
 
-Run "ant ide-dependencies"; This will create an "ide-dependencies" library
-that contains all the jars that you have to add to the classpath in the IDE.
-Note that here we assume that you have run the build or at least
-"ant update-deps" earlier. 
+Below you find the setp-by-step setup for Eclipse Mars.1. If you are using a
+different version or an entierly different IDE, still read this, and try to
+apply it to your development environment:
 
-Known issue with workaround: An old org.jaxen is included in dom4j-*.jar,
-which conflicts with jaxen-*.jar. If dom4j wins, your IDE will show some
-errors in the XML related parts. To fix that, always add dom4j-*.jar last.
-
-You could also use IvyDE instead, with configuration "IDE", but as the
-dependencies hardly ever change, it might not worth the trouble.
+- Install Ant and Ivy, if you haven't yet; see earlier.
+- From the command line, run `ant clean javacc ide-dependencies`. (Note that
+  now the "ide-dependencies" library was created. Also that
+  "build/generated-sources" was created.)
+- Start Eclipse
+- Many developers prefer to start a new workspace (File -> "Switch workspace")
+- Window -> Preferences
+  - General -> Workspace, set the text file encoding
+    to "UTF-8". (Or, you can set the same later on project level instead.)
+  - Java -> Code Style -> Formatter -> Import...
+    Select src\ide-settings\Eclipse-Mars\Formatter-profile-FreeMarker.xml
+    inside the FreeMarker project directory.
+    This profile uses space-only indentation policy and 120 character line
+    width, and formattings rules that are pretty much standard in modern Java.
+  - Java -> Installed JRE-s:
+    Ensure that you have JDK 6 installed, and that it was added to Eclipse.
+    Note that it's not JRE, but JDK.
+- Create new "Java Project" in Eclipse:
+  - In the first window popping up:
+    - Change the "location" to the directory of the FreeMarker project
+    - Press "Next"
+  - In the next window, you see the build path settings. Ensure that:
+    - On "Source" tab, ensure that exactly these are marked as source
+      directories:
+        build/generated-sources/java
+        src/main/java
+        src/main/resources
+        src/test/java
+        src/test/resources
+    - On the "Libraries" tab:
+      - Delete everyhing from there, except the "JRE System Library [...]".
+      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.6"
+      - Add all jar-s that are directly under the "ide-dependencies" directory
+        (use the "Add JARs..." and select all those files).
+    - On the "Order and Export" tab find dom4j-*.jar, and send it to the
+        bottom of the list (becase, an old org.jaxen is included inside
+        dom4j-*.jar, which casues compilation errors if it wins over
+        jaxen-*.jar).
+   - Press "Finish"
+- Eclipse will indicate many errors at this point; it's expected, read on.
+- Project -> Properties -> Java Compiler
+  - Set "Compiler Compliance Level" to "1.5"
+  - In Errors/Warnings, check in "Enable project specific settings", then set
+    "Forbidden reference (access rules)" from "Error" to "Warning".
+- You will still have errors on these Java files (because different java
+  files depend on different versions of the same library, and Eclipse can't
+  handle that). Exclude them from the Build Path (in the Package Explorer,
+  right click on the problematic file -> "Build Path" -> "Exclude").
+    _Jython20*.java
+    _Jython22*.java
+    _FreeMarkerPageContext2.java
+    FreeMarkerJspFactory2.java
+  Now you shouldn't have any errors.
+- At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
+  project specific settings", and then select "FreeMarker" as active profile.
+- Right click on the project -> Run As -> JUnit Test
+  It should run without problems (all green).
+- It's highly recommened to use the Eclipse FindBugs plugin.
+  - Install it from Eclipse Marketplace (3.0.1 as of this writing)
+  - Window -> Preferences -> Java -> FindBugs:
+    Set all bug marker ranks from Warning to Error. (For false alarms we add
+    @SuppressFBWarnings(value = "...", justification = "...") annotations.)
+  - Project -> Properties -> FindBugs -> [x] Run Automatically
+  - There should 0 errors. But sometimes the plugin fails to take the
+    @SuppressFBWarnings annotations into account; then use Project -> Clean. 

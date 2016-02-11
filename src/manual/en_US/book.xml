@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.24 Preview 1</productname>
+    <productname>Freemarker 2.3.24</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -26410,14 +26410,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_24">
-        <title>2.3.24 Release Candidate 1</title>
+        <title>2.3.24</title>
 
-        <para>Date of release for Release Candidate 1: 2015-01-12</para>
-
-        <para>Planned final release date: around 2016-02-20</para>
-
-        <para>Please test for backward compatibility, and help polishing the
-        new features!</para>
+        <para>Planned final release date: around 2016-03-01</para>
 
         <section>
           <title>Legal changes</title>
@@ -26434,8 +26429,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           making process have stabilized in a manner consistent with other
           successful ASF projects. While incubation status is not necessarily
           a reflection of the completeness or stability of the code, it does
-          indicate that the project has yet to be fully endorsed by the ASF.
-          </para>
+          indicate that the project has yet to be fully endorsed by the
+          ASF.</para>
         </section>
 
         <section>
@@ -26627,8 +26622,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>[<replaceable>index</replaceable>]</literal> operator,
               but not <literal>?size</literal>, which causes
               <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
-              to fail among others. (They shouldn't implement either, but this
-              is historical heritage.)</para>
+              to fail, among others. (They shouldn't implement either, but
+              this is historical heritage.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -26748,13 +26743,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   TemplateNumberFormatFactory&gt;)</literal> and
                   <literal>Configurable.setCustomDateFormats(Map&lt;String,
                   TemplateDateFormatFactory&gt;)</literal>) with which you can
-                  register your own formats. <emphasis>If you <link
-                  linkend="pgui_config_incompatible_improvements_how_to_set">set
-                  <literal>incompatible_improvements</literal></link> to
-                  2.3.24, and only then</emphasis>, these formats can be
-                  referred from everywhere where you can use a string to
-                  define a format (often as a pattern), with a format string
-                  like <literal>"@foo"</literal> or <literal>"@foo
+                  register your own formats. These formats can be referred
+                  from everywhere where you can use a string to define a
+                  format (often as a pattern), with a format string like
+                  <literal>"@foo"</literal> or <literal>"@foo
                   params"</literal>, where <literal>"foo"</literal> is the key
                   in the <literal>Map&lt;String, ...&gt;</literal> parameter
                   of the earlier shown methods, and the parameters (if any)
@@ -26859,7 +26851,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para><literal>OverrideResponseLocale</literal>: Specifies
-                  if should we override the <literal>contentType</literal>
+                  if we should override the <literal>contentType</literal>
                   that's already set (i.e., non-<literal>null</literal>) in
                   the <literal>HttpServletResponse</literal>. Earlier, we have
                   always set it, but now this behavior can be changed so that
@@ -26869,11 +26861,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para><literal>ResponseCharacterEncoding</literal>:
                   Deprecates the old (and quirky) logic of specifying the
-                  output charset, which was putting it into the
+                  output charset, which is putting it into the
                   <literal>ContentType</literal> init-param after the MIME
-                  type, otherwise falling back to using the template file
-                  charset. The possible values are <literal>legacy</literal>
-                  (the default for backward compatibility),
+                  type, otherwise falling back to the template file charset.
+                  The possible values are <literal>legacy</literal> (the
+                  default for backward compatibility),
                   <literal>fromTemplate</literal> (which is
                   <literal>legacy</literal> without quirks, and is aware of
                   the <literal>outputEncoding</literal> setting),
@@ -26955,17 +26947,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Number without decimal point will now be parsed to
+                  <para>A number without decimal point will now be parsed to
                   <literal>Integer</literal>, <literal>Long</literal>, or
-                  <literal>BigInteger</literal>, depending in the size of the
-                  number. Earlier all number were
+                  <literal>BigInteger</literal>, depending on the size of the
+                  number. Earlier all numbers were parsed to
                   <literal>BigDecimal</literal>-s, but it had little
-                  importance as number types are converted to the constructor
-                  parameter type anyway.</para>
+                  importance before lists and maps were added, as the number
+                  was converted to the constructor or setter parameter type
+                  anyway.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Number literals can have Java type specified postfixes
+                  <para>Number literals can have Java type suffixes
                   (<literal>f</literal>, <literal>d</literal>,
                   <literal>l</literal>), plus <literal>bd</literal> for
                   <literal>BigDecimal</literal> and <literal>bi</literal> for
@@ -26984,6 +26977,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Decreased the stack usage of template execution, which can
               have importance if you have very very deeply nested
               templates.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>MultiTemplateLoader.setSticky(boolean)</literal> and
+              <literal>MultiTemplateLoader.isSticky()</literal>, with which
+              you can disable the default behavior, where once a template was
+              found in a child <literal>TemplateLoader</literal>, it will be
+              searched there first next time (typically, when the template
+              update delay is expired). With the <literal>sticky</literal>
+              property set to <literal>false</literal>, the child
+              <literal>TemplateLoader</literal>-s will be always searched in
+              the order as they were added to the
+              <literal>MultiTemplateLoader</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>StringTemplateLoader.removeTemplate(String)</literal>
+              method.</para>
             </listitem>
 
             <listitem>
@@ -27025,11 +27038,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para><literal>DefaultObjectWrapper</literal> (fix is always
                   active): Operations on the <literal>Iterator</literal> that
                   only check if it's empty without reading an element from it,
-                  such as <literal>?has_content</literal>, won't cause the a
-                  later iteration (or further emptiness check) to fail
-                  anymore. Earlier, in certain situations, the second
-                  operation has failed saying that the iterator <quote>can be
-                  listed only once</quote>.</para>
+                  such as <literal>?has_content</literal>, won't cause a later
+                  iteration (or further emptiness check) to fail anymore.
+                  Earlier, in certain situations, the second operation has
+                  failed saying that the iterator <quote>can be listed only
+                  once</quote>.</para>
                 </listitem>
 
                 <listitem>
@@ -27119,11 +27132,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Internal code cleanup: Mostly for consistent source code
-              formatting, also many parser construction/setup cleanup</para>
-            </listitem>
-
-            <listitem>
               <para>JSP TLD loading now quotes the location of
               <literal>jar</literal>-s (and other <literal>zip</literal>-s)
               which can't be loaded due to zip format errors in the error
@@ -27175,380 +27183,70 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>String</literal>-s and
               <literal>Interpolation</literal>-s.</para>
             </listitem>
+
+            <listitem>
+              <para>Internal code cleanup: Mostly for consistent source code
+              formatting, also many parser construction/setup cleanup</para>
+            </listitem>
+
+            <listitem>
+              <para>Source code changes to conform to Apache source release
+              policy, such as adding copyright headers and getting rid of test
+              <literal>jar</literal>-s committed into the source code. Eclipse
+              project files were also removed, instead the
+              <literal>README</literal> describes how to set up the
+              project.</para>
+            </listitem>
+
+            <listitem>
+              <para>Build script and distribution artifact changes to conform
+              to Apache release policy, most notably separate source and
+              binary releases.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
         <section>
-          <title>Changes compared to 2.3.24 Preview 1</title>
+          <title>Changes compared to 2.3.24 Release Candidate 1</title>
 
           <itemizedlist>
             <listitem>
-              <para><literal>Environment</literal> now has public
-              <literal>TemplateDateFormat</literal> returning methods.</para>
-            </listitem>
-
-            <listitem>
-              <para>The various
-              <literal>Template<replaceable>Xxx</replaceable>Format</literal>
-              and
-              <literal>Template<replaceable>Xxx</replaceable>FormatFacotry</literal>
-              exceptions were united under a common abstract superclass,
-              <literal>TemplateValueFormatException</literal>, which is now
-              what the methods of said classes throw (mostly).</para>
+              <para>Added
+              <literal>MultiTemplateLoader.setSticky(boolean)</literal> and
+              <literal>MultiTemplateLoader.isSticky()</literal>, with which
+              you can disable the default behavior, where once a template was
+              found in a child <literal>TemplateLoader</literal>, it will be
+              searched there first next time (typically, when the template
+              update delay is expired). With the <literal>sticky</literal>
+              property set to <literal>false</literal>, the child
+              <literal>TemplateLoader</literal>-s will be always searched in
+              the order as they were added to the
+              <literal>MultiTemplateLoader</literal>.</para>
             </listitem>
 
             <listitem>
               <para>Added
-              <literal>freemarker.core.AliasTemplateNumberFormatFactory</literal>
-              and <literal>AliasTemplateDateFormatFactory</literal>, which can
-              be used to create custom formats that are aliases to other
-              formats. For example, instead of writing
-              <literal>${n?string["0.00"]}</literal> again and again, you can
-              define the custom format <literal>"price"</literal> as the alias
-              to the format string <literal>"0.00"</literal> in the
-              configuration, and then use
-              <literal>${n?string.@price}</literal>. Thus, you can control at
-              a central place how prices look. Furthermore, the alias can
-              chose a different target format string depending on the current
-              locale; this is especially useful for dates, where conventions
-              can significantly differ in different countries.</para>
+              <literal>StringTemplateLoader.removeTemplate(String)</literal>
+              method.</para>
             </listitem>
 
             <listitem>
-              <para>Everywhere where Java <literal>DecimalFormat</literal>
-              patterns are used (like in the <literal>number_format</literal>
-              configuration setting, or in
-              <literal>?string('0.##')</literal>), now it's possible to
-              specify options like rounding mode or the symbols used, with a
-              FreeMarker-specific <link
-              linkend="topic.extendedJavaDecimalFormat">extension to the
-              pattern syntax</link>.</para>
-            </listitem>
-
-            <listitem>
-              <para>In number/date/time/datetime format strings, initial
-              <literal>@</literal> can be used to refer to custom formats even
-              if <literal>incompatible_improvements</literal> is less than
-              2.3.24, as far as there's any custom format defined. As custom
-              formats is also a 2.3.24 feature, it's backward compatible this
-              way.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>@@</literal> can't be used to escape
-              <literal>@</literal> at the beginning of format strings anymore,
-              because it was confusing on Android, where
-              <literal>DecimalFormat</literal> supports patterns like
-              <literal>"@@@@@@"</literal>. If a pattern has to output a
-              literal <literal>@</literal> as the first character, you can
-              simply use quoting as defined by
-              <literal>DecimalFormat</literal> and
-              <literal>SimpleDateFormat</literal> (for example,
-              <literal>"'@'0.##"</literal>).</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>?date</literal>, <literal>?time</literal> and
-              <literal>?datetime</literal> now can be called as 0 argument
-              method, like <literal>?date()</literal>, etc., which returns the
-              exact object that <literal>TemplateDateFormat.parse</literal>
-              returns, instead of the tricky multi-type object that just using
-              <literal>?date</literal> returns. Because custom
-              <literal>TemplateDateFormat</literal> implementations may return
-              custom <literal>TemplateDateModel</literal> implementations,
-              keeping the exact class can be important in some
-              applications.</para>
-            </listitem>
-
-            <listitem>
-              <para>The <literal>TemplateDateFormat.parse</literal> has been
-              worked out (earlier it was a but different and was marked as
-              draft). <literal>TemplateNumberFormat</literal> has also have a
-              parse method now, though it's just a <literal>final</literal>
-              placeholder now.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateNumberFormat.format</literal>/<literal>TemplateDateFormat.format</literal>
-              overloads were changed to <literal>formatToPlainText</literal>
-              and <literal>format</literal>, the last returning either String
-              or a <literal>TemplateMarkupOutputModel</literal>. Also,
-              formatting to markup is now actually used by FreeMarker. Thus,
-              it's now possible to have HTML or other markup in number and
-              date/time/datetime formatting results, like
-              <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which won't
-              be accidentally auto-escaped, as FreeMarker knows that it's
-              already HTML. (See [TODO] as an example.) Note that no
-              out-of-the-box format formats to markup (at the moment), but you
-              could write such custom format.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>${<replaceable>...</replaceable>}</literal>
-              inside string literals is equivalent to using the
-              <literal>+</literal> operator again. This rule was broken by
-              <literal>+</literal> supporting markup operands, while
-              <literal>${<replaceable>...</replaceable>}</literal> inside
-              string literals didn't. Now similarly as <literal>"foo " +
-              someMarkup</literal> works and gives a markup result,
-              <literal>"foo ${someMarkup}"</literal> does too.</para>
-            </listitem>
-
-            <listitem>
-              <para>The extended decimal format options don't use
-              abbreviations anymore. Like instead of
-              <literal>rnd=hu</literal>, now there's
-              <literal>roundingMode=halfUp</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Added <literal>XHTMLOutputFormat</literal> and
-              <literal>TemplateXHTMLOutputModel</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>XMLOutputFormat</literal> now uses
-              application/xml MIME type instead of text/xml MIME type</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>RTFOutputFormat</literal> now uses
-              application/rtf MIME type instead of text/rtf</para>
-            </listitem>
-
-            <listitem>
-              <para>Added non-escaping formats (just for the MIME type):
-              <literal>JavaScriptOutputFormat</literal>,
-              <literal>JSONOutputFormat</literal>,
-              <literal>CSSOutputFormat</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Added JavaScriptOutput</para>
-            </listitem>
-
-            <listitem>
-              <para>Added new built-in: <literal>is_markup_output</literal>,
-              returns <literal>true</literal> if the value is of type
-              <quote>markup output</quote>.</para>
-            </listitem>
-
-            <listitem>
-              <para>New <literal>FreemarkerServlet</literal> init-params (see
-              <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
-              <literal>FreemarkerSerlvet</literal> API documentation</link>
-              for details):</para>
+              <para>Source code changes to conform to Apache release policy
+              and recommendations:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>OverrideResponseContentType</literal>:
-                  Specifies when should we override the
-                  <literal>contentType</literal> that's already set (i.e.,
-                  non-<literal>null</literal>) in the
-                  <literal>HttpServletResponse</literal>. Earlier, we have
-                  always set it, and that's still the default behavior. But
-                  now that this init-param exists, you can change that
-                  behavior, so that the <literal>contentType</literal> you
-                  have specified before forwarding to
-                  <literal>FreemarkerServlet</literal> matters.</para>
+                  <para>No more binary test <literal>jar</literal>-s committed
+                  into the source code (instead, they are generated
+                  on-the-fly)</para>
                 </listitem>
 
                 <listitem>
-                  <para><literal>OverrideResponseLocale</literal>: Specifies
-                  if should we override the <literal>contentType</literal>
-                  that's already set (i.e., non-<literal>null</literal>) in
-                  the <literal>HttpServletResponse</literal>. Earlier, we have
-                  always set it, but now this behavior can be changed so that
-                  we only set it if it wasn't already set.</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>ResponseCharacterEncoding</literal>:
-                  Deprecates the old (and quirky) logic of specifying the
-                  output charset, which was putting it into the
-                  <literal>ContentType</literal> init-param after the MIME
-                  type, otherwise falling back to using the template file
-                  charset. The possible values are <literal>legacy</literal>
-                  (the default for backward compatibility),
-                  <literal>fromTemplate</literal> (which is
-                  <literal>legacy</literal> without quirks, and is aware of
-                  the <literal>outputEncoding</literal> setting),
-                  <literal>doNotSet</literal> (keeps what the caller has
-                  already set in the <literal>ServletRespone</literal>) and
-                  any valid charset name (forces a specific output
-                  charset).</para>
+                  <para>Eclipse project files were removed, instead, the
+                  <literal>README</literal> describes how to set up the
+                  project.</para>
                 </listitem>
               </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>The new <literal>TemplateConfigurer</literal> class was
-              renamed to <literal>TemplateConfiguration</literal>, and the
-              related configuration setting from
-              <literal>template_configurers</literal> to
-              <literal>template_configurations</literal>. Also, the
-              <literal>TemplateConfigurer.configure</literal> method was
-              renamed to
-              <literal>TemplateConfiguration.apply</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed: It wasn't well defined when a Java
-              <literal>Iterator</literal> counts as empty. Depending on what
-              <literal>ObjectWrapper</literal> you are using, one of these
-              fixes apply:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>DefaultObjectWrapper</literal> (fix is always
-                  active): Operations on the <literal>Iterator</literal> that
-                  only check if it's empty without reading an element from it,
-                  such as <literal>?has_content</literal>, won't cause the a
-                  later iteration (or further emptiness check) to fail
-                  anymore. Earlier, in certain situations, the second
-                  operation has failed saying that the iterator <quote>can be
-                  listed only once</quote>.</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>BeansWrapper</literal> (when it's not
-                  extended by <literal>DefaultObjectWrapper</literal>), if
-                  it's <literal>incompatibleImprovements</literal> property is
-                  set to 2.3.24 (or higher): <literal>Iterator</literal>-s
-                  were always said to be non-empty when using
-                  <literal>?has_content</literal> and such (i.e., operators
-                  that check emptiness without reading any elements). Now an
-                  <literal>Iterator</literal> counts as empty exactly if it
-                  has no elements left. (Note that this bug has never affected
-                  basic functionality, like <literal>&lt;#list
-                  ...&gt;</literal>.)</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Fixes and improvements in the <quote>object
-              builder</quote> syntax used for configuring FreeMarker from
-              <literal>java.util.Properties</literal> (or other string-only
-              sources). This is not to be confused with the template language
-              syntax, which has nothing to do with the <quote>object
-              builder</quote> syntax we are writing about here. The
-              improvements are:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Number literals can have Java type specified postfixes
-                  (<literal>f</literal>, <literal>d</literal>,
-                  <literal>l</literal>), plus <literal>bd</literal> for
-                  <literal>BigDecimal</literal> and <literal>bi</literal> for
-                  <literal>BigInteger</literal>.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Public static fields can be referred, like
-                  <literal>com.example.MyClass.MY_CONSTANT</literal> or
-                  <literal>Configuration.AUTO_DETECT_TAG_SYNTAX</literal>.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>The parser used by <literal>?interpet</literal> and
-              <literal>?eval</literal> inherits not only the
-              <literal>output_format</literal> of its surrounding lexical
-              context, but also the auto-escaping policy of it (basically, if
-              auto-escapig is on or off).</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed, with
-              <literal>incompatible_improvements</literal> set to 2.3.24
-              (<link linkend="topic.defaultObjectWrapperIcI">see how
-              here...</link>): The <literal>#import</literal> directive meant
-              to copy the library variable into a global variable if it's
-              executed in the main namespace, but that haven't happened when
-              the imported template was already imported earlier in another
-              namespace.</para>
-            </listitem>
-
-            <listitem>
-              <para>Fixes in the XML processing feature
-              (<literal>freemarker.ext.dom</literal>):</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Bug fixed: XPath queries that has only contained
-                  characters that are valid in XML element names and has also
-                  contained <literal>::</literal> (which is valid in names in
-                  namespace-unware documents), like
-                  <literal>e['following-sibling::foo']</literal>, were
-                  interpreted as literal element names (giving 0 hits) rather
-                  than as XPath expressions. Note that there were no such
-                  problem with <literal>e['following-sibling::*']</literal>
-                  for example, as it's not a valid XML element name according
-                  the XML specification. This fix can actually break
-                  applications that has processed namespace unaware XML that
-                  use <literal>::</literal> as part of element or attribute
-                  names, but such an application is highly unlikely, unlike
-                  running into the fixed problem. (Unfortunately, using
-                  <literal>incompatible_improvements</literal> wasn't
-                  technically possible here.)</para>
-                </listitem>
-
-                <listitem>
-                  <para>Bug fixed: The <literal>@@qname</literal> of elements
-                  that belong to the XML namespace declared as the default via
-                  <literal>&lt;#ftl ns_prefixes={'D':'...', ...
-                  }&gt;</literal> no longer starts with <literal>D:</literal>,
-                  instead they just start with no name space prefix.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Bug fixed: In the markup returned by the
-                  <literal>@@markup</literal> key, when there were multiple
-                  namespaces for which there was no prefix associated with via
-                  <literal>&lt;#ftl
-                  ns_prefixes=<replaceable>...</replaceable>&gt;</literal>,
-                  all those namespaces were assigned to the same
-                  auto-generated <literal>xmlns</literal> prefix (usually
-                  <quote>a</quote>). Now they will get <quote>a</quote>,
-                  <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed: With
-              <literal>incompatible_improvements</literal> set to 2.3.24
-              (<link linkend="topic.defaultObjectWrapperIcI">see how
-              here...</link>),
-              <literal><replaceable>m</replaceable>?is_sequence</literal>
-              doesn't return <literal>true</literal> for Java methods wrapped
-              by <literal>BeansWrapper</literal> and its subclasses (most
-              notably <literal>DefaultObjectWrapper</literal>) anymore, as
-              they only implement the
-              <literal>[<replaceable>index</replaceable>]</literal> operator,
-              but not <literal>?size</literal>, which causes
-              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
-              to fail among others. (They shouldn't implement either, but this
-              is historical heritage.)</para>
-            </listitem>
-
-            <listitem>
-              <para>Added an overload to
-              <literal>Configuration.getSupportedBuiltInNames</literal> and
-              <literal>Configuration.getSupportedBuiltInDirectiveNames</literal>
-              that has a <literal>namingConvention</literal> parameter. This
-              is useful for tooling as since 2.3.23 we support both camel case
-              naming convention (like
-              <literal><replaceable>s</replaceable>?upperCase</literal>) and
-              the legacy one (like
-              <literal><replaceable>s</replaceable>?upper_case</literal>).
-              Furthermore the old 0 argument overload will now utilize
-              <literal>Configuration.getNamingConvention()</literal> to only
-              return the relevant names if it's not
-              <literal>AUTO_DETECT_NAMING_CONVENTION</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>

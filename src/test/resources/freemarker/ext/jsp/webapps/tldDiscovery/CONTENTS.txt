@@ -16,20 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ 
+// Only the files listed here will be part of the tested Web application deployment! 
 
-package freemarker.cache;
+test-noClasspath.ftl
+test1.ftl
 
-import freemarker.template.Configuration;
+WEB-INF/fmtesttag 2.tld
+WEB-INF/fmtesttag4.tld
+WEB-INF/web.xml
 
-/**
- * Interface that can be implemented by {@link TemplateLoader}-s that maintain some 
- * sort of internal state (i.e. caches of earlier lookups for performance 
- * optimization purposes etc.) and support resetting of their state. 
- */
-public interface StatefulTemplateLoader extends TemplateLoader {
-    /**
-     * Invoked by {@link Configuration#clearTemplateCache()} to instruct this
-     * template loader to throw away its current state and start afresh. 
-     */
-    public void resetState();
-}
+WEB-INF/taglib 2.jar/META-INF/taglib.tld
+
+WEB-INF/lib/taglib-foo.jar/META-INF/foo bar.tld
+
+WEB-INF/subdir-with-tld/fmtesttag3.tld
+
+not-auto-scanned/fmtesttag.tld
+
+subdir/test-rel.ftl
