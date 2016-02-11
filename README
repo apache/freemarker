@@ -139,10 +139,10 @@ apply it to your development environment:
 
 - Install Ant and Ivy, if you haven't yet; see earlier.
 - From the command line, run `ant clean javacc ide-dependencies`. (Note that
-  now the "ide-dependencies" library was created. Also that
-  "build/generated-sources" was created.)
+  now the "ide-dependencies" and  "build/generated-sources" was created.)
 - Start Eclipse
-- Many developers prefer to start a new workspace (File -> "Switch workspace")
+- You may prefer to start a new workspace (File -> "Switch workspace"), but
+  it's optional.
 - Window -> Preferences
   - General -> Workspace, set the text file encoding
     to "UTF-8". (Or, you can set the same later on project level instead.)
@@ -150,7 +150,7 @@ apply it to your development environment:
     Select src\ide-settings\Eclipse-Mars\Formatter-profile-FreeMarker.xml
     inside the FreeMarker project directory.
     This profile uses space-only indentation policy and 120 character line
-    width, and formattings rules that are pretty much standard in modern Java.
+    width, and formatting rules that are pretty much standard in modern Java.
   - Java -> Installed JRE-s:
     Ensure that you have JDK 6 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
@@ -158,16 +158,16 @@ apply it to your development environment:
   - In the first window popping up:
     - Change the "location" to the directory of the FreeMarker project
     - Press "Next"
-  - In the next window, you see the build path settings. Ensure that:
+  - In the next window, you see the build path settings:
     - On "Source" tab, ensure that exactly these are marked as source
-      directories:
+      directories (be careful, Eclipse doesn't auto-detect these well):
         build/generated-sources/java
         src/main/java
         src/main/resources
         src/test/java
         src/test/resources
     - On the "Libraries" tab:
-      - Delete everyhing from there, except the "JRE System Library [...]".
+      - Delete everyhing from there, except the "JRE System Library [...]"
       - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.6"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
@@ -178,18 +178,19 @@ apply it to your development environment:
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
-  - Set "Compiler Compliance Level" to "1.5"
+  - Set "Compiler Compliance Level" to "1.5" (you will have to uncheck
+    "Use compliance from execution environment" for that)
   - In Errors/Warnings, check in "Enable project specific settings", then set
     "Forbidden reference (access rules)" from "Error" to "Warning".
-- You will still have errors on these Java files (because different java
+- You will still have errors on these java files (because different java
   files depend on different versions of the same library, and Eclipse can't
-  handle that). Exclude them from the Build Path (in the Package Explorer,
-  right click on the problematic file -> "Build Path" -> "Exclude").
+  handle that). Exclude those java files from the Build Path (in the Package
+  Explorer, right click on the problematic file -> "Build Path" -> "Exclude").
     _Jython20*.java
     _Jython22*.java
     _FreeMarkerPageContext2.java
     FreeMarkerJspFactory2.java
-  Now you shouldn't have any errors.
+  Also, close these files if they are open. Now you shouldn't have any errors.
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
   project specific settings", and then select "FreeMarker" as active profile.
 - Right click on the project -> Run As -> JUnit Test

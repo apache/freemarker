@@ -20342,19 +20342,21 @@ All rights reserved.</emphasis></programlisting>
   &lt;/div&gt;
 &lt;/#list&gt;</programlisting>
 
-            <para>As <literal>sep</literal> is just a convenient way of
-            writing <literal>&lt;#if
-            <replaceable>item</replaceable>?has_next&gt;...&lt;/#if&gt;</literal>,
-            it can be used anywhere where there's a <literal>list</literal> or
-            <literal>items</literal> loop variable is available, and for
-            unlimited times. Also, it can have arbitrary FTL as nested
-            content.</para>
+            <para><literal>sep</literal> is just a shorthand for
+            <literal>&lt;#if
+            <replaceable>item</replaceable>?has_next&gt;...&lt;/#if&gt;</literal>.
+            Thus, it can be used anywhere where there's a
+            <literal>list</literal> or <literal>items</literal> loop variable
+            available, it can occur for multiple times, and it can have
+            arbitrary nested content.</para>
 
-            <para>The parser will check that <literal>sep</literal> is used
-            inside <literal>list <replaceable>...</replaceable> as
-            item</literal> or an <literal>items</literal> directive, so you
-            can't move <literal>sep</literal> out from the repeated part into
-            a macro or included template.</para>
+            <para>The parser ensures that <literal>sep</literal> is only used
+            on a place where there's a visible loop variable. This happens
+            earlier than the actual execution of the template. Thus, you can't
+            move <literal>sep</literal> from inside the associated
+            <literal>list</literal> or <literal>items</literal> directive into
+            a macro or included template (the parser can't know where those
+            will be called from).</para>
           </section>
 
           <section>
