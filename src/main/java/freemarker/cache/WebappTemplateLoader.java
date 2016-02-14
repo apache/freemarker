@@ -51,7 +51,7 @@ public class WebappTemplateLoader implements TemplateLoader {
     private boolean attemptFileAccess = true;
 
     /**
-     * Creates a resource template cache that will use the specified servlet context to load the resources. It will use
+     * Creates a template loader that will use the specified servlet context to load the resources. It will use
      * the base path of <code>"/"</code> meaning templates will be resolved relative to the servlet context root
      * location.
      * 
