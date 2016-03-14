@@ -13396,10 +13396,10 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
 
             <listitem>
               <para>Control characters in <link linkend="gloss.UCS">UCS</link>
-              code point ranges U+0000U+001f and U+007fU+009f are escaped as
-              <literal>\r</literal>, <literal>\n</literal>, etc., or as
-              <literal>\x<replaceable>XX</replaceable></literal> where there's
-              no special escape for them in JavaScript.</para>
+              code point ranges U+0000...U+001f and U+007f...U+009f are
+              escaped as <literal>\r</literal>, <literal>\n</literal>, etc.,
+              or as <literal>\x<replaceable>XX</replaceable></literal> where
+              there's no special escape for them in JavaScript.</para>
             </listitem>
 
             <listitem>
