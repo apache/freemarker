@@ -26488,9 +26488,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <link linkend="dgui_misc_autoescaping">auto-escaping and output
               formats mechanism</link>, which deprecates escaping with the
               <link linkend="ref_directive_escape"><literal>escape</literal>
-              directive</link>. These are the items related to this new
-              mechanism (see <link linkend="dgui_misc_autoescaping">early
-              linked section</link> for a guide):</para>
+              directive</link>. These are the changes related to this new
+              mechanism (see earlier link for a guide):</para>
 
               <itemizedlist>
                 <listitem>
@@ -26532,16 +26531,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new built-in: <literal>markup_string</literal>.
-                  This returns the markup of a <link
+                  <para>New built-in: <literal>markup_string</literal>. This
+                  returns the markup of a <link
                   linkend="dgui_misc_autoescaping_movalues">markup output
-                  value</link> as a string.</para>
+                  value</link> as string.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Added new built-in:
-                  <literal>is_markup_output</literal>, returns
-                  <literal>true</literal> if the value is of type
+                  <para>New built-in: <literal>is_markup_output</literal>,
+                  returns <literal>true</literal> if the value is of type
                   <quote>markup output</quote>.</para>
                 </listitem>
 
@@ -26587,23 +26585,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   works with the new <quote>markup output</quote> type as
                   well. Like <literal>someMarkup + somePlainText</literal>
                   will result in markup where <literal>somePlainText</literal>
-                  is included properly escaped.</para>
+                  is escaped automatically before it's appended to the
+                  markup.</para>
                 </listitem>
 
                 <listitem>
                   <para>The <literal>has_content</literal> built-in now
-                  supports markup output values, considering 0 length markup
-                  as empty.</para>
+                  supports <quote>markup output</quote> values, considering 0
+                  length markup as empty.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>There can be now user defined number and
-              date/time/datetime formatters, defined by the programmers when
-              configuring FreeMarker, which can be referred with strings
-              starting with <literal>"@"</literal>, like in
-              <literal>&lt;#setting number_format='@foo'&gt;</literal>, or
+              <para>You can now define custom number and date/time/datetime
+              formatters. These are defined by the programmers (and thus can
+              implement any kind of exotic formatting rules) when configuring
+              FreeMarker, and can be referred with strings starting with
+              <literal>"@"</literal>, like in <literal>&lt;#setting
+              number_format='@foo'&gt;</literal>, or
               <literal>${n?string.@foo_params}</literal>,
               <literal>&lt;#setting number_format='@foo params'&gt;</literal>,
               or <literal>${n?string.@foo}</literal>,
@@ -26622,7 +26622,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               it's possible to specify options like rounding mode or the
               symbols used, with a FreeMarker-specific <link
               linkend="topic.extendedJavaDecimalFormat">extension to the
-              pattern syntax</link>.</para>
+              <literal>DecimalFormat</literal> pattern syntax</link>.</para>
             </listitem>
 
             <listitem>
@@ -26668,8 +26668,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>[<replaceable>index</replaceable>]</literal> operator,
               but not <literal>?size</literal>, which causes
               <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
-              to fail, among others. (They shouldn't implement either, but
-              this is historical heritage.)</para>
+              to fail, among others.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -26680,7 +26679,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para><emphasis role="strong">Attention!</emphasis> FreeMarker
-              now requires at least 1.5 (aka. Java 5). 2.3.24 has only
+              now requires at least Java 1.5 (aka. Java 5). 2.3.24 has only
               required Java 1.4. (Reason: Without this, new public API-s
               couldn't use generics, which affect negatively the majority of
               users, while old installations that are still using 1.4 are
@@ -26712,6 +26711,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
+                  <para>As FTL has now a new type, <quote>markup
+                  output</quote>, there's also a corresponding new model
+                  interface, <literal>TemplateMarkupOutputModel</literal>.
+                  This also means that you can prevent the auto-escaping of
+                  values coming from the data-model by returning a
+                  <literal>TemplateMarkupOutputModel</literal> instead of a
+                  <literal>String</literal>. Like the template author can just
+                  write <literal>${messages.foo}</literal>, and it will be
+                  auto-escaped or not depending on if the message is known to
+                  be markup or not.</para>
+                </listitem>
+
+                <listitem>
                   <para>Added new configuration setting:
                   <literal>recognize_standard_file_extensions</literal>. When
                   <literal>true</literal>, templates whose source name ends
@@ -26723,20 +26735,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   linkend="pgui_config_incompatible_improvements_how_to_set">the
                   <literal>incompatible_improvements</literal> setting</link>
                   is set to 2.3.24 (or higher) then this setting defaults to
-                  <literal>true</literal>. Otherwise it's
+                  <literal>true</literal>. Otherwise it's default is
                   <literal>false</literal>, but enabling it is highly
                   recommended.</para>
                 </listitem>
 
                 <listitem>
                   <para>Added new configuration setting:
-                  <literal>output_format</literal>. This specifies the name of
-                  the <link
+                  <literal>output_format</literal>. This specifies the <link
                   linkend="dgui_misc_autoescaping_outputformat">output
-                  format</link> (such as <literal>HTML</literal>,
-                  <literal>XML</literal>, <literal>plainText</literal>, etc.)
-                  that governs auto-escaping. The output format can be
-                  different for different templates, using the
+                  format</link> object to use (such as
+                  <literal>HTMLOutputFormat.INSTANCE</literal>,
+                  <literal>XMLOutputFormat.INSTANCE</literal>, etc.) that
+                  governs auto-escaping. The output format can be different
+                  for different templates, using the
                   <literal>template_configurations</literal> setting (<link
                   linkend="pgui_config_outputformatsautoesc">see here
                   how...</link>).</para>
@@ -26771,12 +26783,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateDateFormat</literal>,
                   <literal>TemplateDateFormatFactory</literal>, also the
                   exceptions these can throw. These allow implementing any
-                  kind of formatting rules that are doable in Java (they
+                  kind of formatting rule that's doable in Java (i.e., they
                   aren't restricted to any <literal>java.text</literal>
                   formatters). Furthermore these formatters get the
                   <literal>TemplateModel</literal> instead of a the bare
                   <literal>java.lang.Number</literal> or
-                  <literal>java.util.Date</literal>, which let you use the
+                  <literal>java.util.Date</literal>, which lets you use the
                   extra application-specific meta information that you may
                   pack into the <literal>TemplateModel</literal>-s, such as
                   physical unit, preferred precision, and so on.</para>
@@ -26791,20 +26803,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   TemplateDateFormatFactory&gt;)</literal>) with which you can
                   register your own formats. These formats can be referred
                   from everywhere where you can use a string to define a
-                  format (often as a pattern), with a format string like
-                  <literal>"@foo"</literal> or <literal>"@foo
-                  params"</literal>, where <literal>"foo"</literal> is the key
-                  in the <literal>Map&lt;String, ...&gt;</literal> parameter
-                  of the earlier shown methods, and the parameters (if any)
-                  are interpreted by the
-                  <literal>Template<replaceable>Xxx</replaceable>FormatFactory</literal>.
-                  Like, you can do <literal>cfg.setNumberFormat("@foo
-                  params")</literal>, or <literal>&lt;#setting
-                  number_format='@foo params'&gt;</literal>, or
-                  <literal>${n?string.@foo_params}</literal>. For backward
-                  compatibility, the initial <literal>@</literal> only has
-                  this special meaning if either you have any custom formats
-                  or <link linkend="pgui_config_incompatible_improvements">the
+                  format, with a format string like <literal>"@foo"</literal>
+                  or <literal>"@foo params"</literal>, where
+                  <literal>"foo"</literal> is the key in the
+                  <literal>Map&lt;String, ...&gt;</literal> parameter of the
+                  earlier shown methods, and the parameters (if any) are
+                  interpreted by the
+                  <literal>Template<replaceable>Xxx</replaceable>FormatFactory</literal>
+                  implementation that you provide. Like, you can issue
+                  <literal>cfg.setNumberFormat("@foo params")</literal>, or
+                  <literal>&lt;#setting number_format='@foo
+                  params'&gt;</literal>, or
+                  <literal>${n?string.@foo_params}</literal>, similarly as you
+                  can issue <literal>cfg.setNumberFormat("0.##")</literal>,
+                  etc. For backward compatibility, the initial
+                  <literal>@</literal> only has this special meaning if either
+                  you have any custom formats or <link
+                  linkend="pgui_config_incompatible_improvements">the
                   <literal>incompatible_improvements</literal> setting</link>
                   is at least 2.3.24. Note that the
                   <literal>custom_number_formats</literal> and
@@ -26819,11 +26834,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Added new <literal>Environment</literal> methods
                   returning <literal>TemplateNumberFormat</literal> and
-                  <literal>TemplateDateFormat</literal> objects. See
+                  <literal>TemplateDateFormat</literal> objects. See the
                   <literal>getTemplateNumberFormat(<replaceable>...</replaceable>)</literal>
                   and
                   <literal>getTemplateDateFormat(<replaceable>...</replaceable>)</literal>
-                  variations.</para>
+                  variations in the API.</para>
                 </listitem>
 
                 <listitem>
@@ -26849,17 +26864,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   number and date/time/datetime formatting results, like
                   <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which
                   won't be accidentally auto-escaped, as FreeMarker knows that
-                  it's already HTML. (See [TODO] as an example.) Note that no
-                  out-of-the-box format formats to markup (at the moment), but
-                  you could write such custom format.</para>
+                  it's already HTML. This is done by returning a
+                  <literal>TemplateMarkupOutputModel</literal> instead of a
+                  <literal>String</literal>; see the new auto-escaping
+                  mechanism earlier. Note that no out-of-the-box format
+                  utilizes this (at the moment), but you could write such
+                  custom format.</para>
                 </listitem>
 
                 <listitem>
                   <para>The internal format object caching architecture has
-                  been reworked, so that it can handle custom formats too. But
-                  this reworking also fixes some bottlenecks under highly
-                  concurrent load, and some (otherwise unlikely) memory
-                  leaking possibilities.</para>
+                  been reworked, so that it can handle custom formats too.
+                  This reworking also fixes some bottlenecks under highly
+                  concurrent load, and some (otherwise unlikely) memory leak
+                  possibilities.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -26897,9 +26915,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para><literal>OverrideResponseLocale</literal>: Specifies
-                  if we should override the <literal>contentType</literal>
-                  that's already set (i.e., non-<literal>null</literal>) in
-                  the <literal>HttpServletResponse</literal>. Earlier, we have
+                  if we should override the <literal>locale</literal> that's
+                  already set (i.e., non-<literal>null</literal>) in the
+                  <literal>HttpServletResponse</literal>. Earlier, we have
                   always set it, but now this behavior can be changed so that
                   we only set it if it wasn't already set.</para>
                 </listitem>
@@ -26946,15 +26964,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Fixes and improvements in the <quote>object
               builder</quote> mini-language used for configuring FreeMarker
               from <literal>java.util.Properties</literal> or other
-              string-only sources (not used in templates). This is not to be
-              confused with the template language syntax, which has nothing to
-              do with the <quote>object builder</quote> syntax we are writing
-              about here. The improvements are:</para>
+              string-only sources (not used in templates). This is
+              <emphasis>not to be confused with the template language
+              syntax</emphasis>, which has nothing to do with the
+              <quote>object builder</quote> syntax we are writing about here.
+              The improvements are:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>For nested builder expressions, the top-level result
-                  class restriction were applied accidentally.</para>
+                  <para>Bug fixed: For nested builder expressions, the
+                  top-level result class restriction were applied
+                  accidentally.</para>
                 </listitem>
 
                 <listitem>
@@ -26997,7 +27017,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>Integer</literal>, <literal>Long</literal>, or
                   <literal>BigInteger</literal>, depending on the size of the
                   number. Earlier all numbers were parsed to
-                  <literal>BigDecimal</literal>-s, but it had little
+                  <literal>BigDecimal</literal>-s, but that had little
                   importance before lists and maps were added, as the number
                   was converted to the constructor or setter parameter type
                   anyway.</para>
@@ -27219,6 +27239,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Due to the above change again, the return type of
+              <literal>freemarker.core.DebugBreak.accept()</literal> and
+              <literal>freemarker.core.TextBlock.accept()</literal> has
+              changed from <literal>void</literal> to
+              <literal>TemplateElement[]</literal>. This again is highly
+              unlikely to affect anyone, and these meant to be internal API-s
+              anyway, but as these two <literal>accept</literal> methods has
+              wider than package visibility for historical reasons, we mention
+              this change.</para>
+            </listitem>
+
+            <listitem>
               <para>The non-public AST API of
               <literal>freemarker.core.StringLiteral</literal>-s has been
               changed. In principle it doesn't mater as it isn't a public API,
@@ -27246,8 +27278,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Build script and distribution artifact changes to conform
-              to Apache release policy, most notably separate source and
-              binary releases.</para>
+              to Apache release policy, most notably it produces separate
+              source and binary releases.</para>
             </listitem>
           </itemizedlist>
         </section>
