@@ -21,13 +21,23 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.Writer;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
 
 /**
- * An {@link OutputFormat}-s that represent a "markup", which is any format where certain character sequences have
- * special meaning and thus may need escaping. (Escaping is important for FreeMarker, as typically it has to insert
- * non-markup text from the data-model into the output markup.) This class, among others, defines the operations related
- * to {@link TemplateMarkupOutputModel}-s that belong to the output format.
+ * Superclass of {@link OutputFormat}-s that represent a "markup" format, which is any format where certain character
+ * sequences have special meaning and thus may need escaping. (Escaping is important for FreeMarker, as typically it has
+ * to insert non-markup text from the data-model into the output markup. See also:
+ * {@link Configuration#setOutputFormat(OutputFormat)}.)
+ * 
+ * <p>
+ * An {@link OutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair (like
+ * {@link HTMLOutputFormat} has {@link TemplateHTMLOutputModel}). The {@link OutputFormat} implements the operations
+ * related to {@link TemplateMarkupOutputModel} objects of that kind, while the {@link TemplateMarkupOutputModel} only
+ * encapsulates the data (the actual markup or text).
+ * 
+ * <p>
+ * To implement a custom output format, you may want to extend {@link CommonMarkupOutputFormat}.
  * 
  * @param <MO>
  *            The {@link TemplateMarkupOutputModel} class this output format can deal with.
@@ -105,15 +115,17 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
     public abstract boolean isEmpty(MO mo) throws TemplateModelException;
     
     /**
-     * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left operand can bypass this
-     * object as is. A typical such case would be when a {@link TemplateHTMLOutputModel} of "HTML" format bypasses
+     * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left hand operand can bypass
+     * this object as is. A typical such case would be when a {@link TemplateHTMLOutputModel} of "HTML" format bypasses
      * {@code ?html}.
      */
     public abstract boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateModelException;
     
     /**
      * Tells if by default auto-escaping should be on for this format. It should be {@code true} if you need to escape
-     * on most of the places where you insert values. 
+     * on most of the places where you insert values.
+     * 
+     * @see Configuration#setAutoEscapingPolicy(int)
      */
     public abstract boolean isAutoEscapedByDefault();
     

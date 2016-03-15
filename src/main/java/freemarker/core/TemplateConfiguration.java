@@ -38,11 +38,11 @@ import freemarker.template.utility.NullArgumentException;
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism (
  * {@link Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale}
- * specified here could have effect. The {@code locale} will be only set in the template that the localized looks has
+ * specified here could have effect. The {@code locale} will be only set in the template that the localized lookup has
  * already found.
  * 
  * <p>
- * Note on encoding setting {@code encoding}: See {@link #setEncoding(String)}.
+ * Note on the encoding setting {@code encoding}: See {@link #setEncoding(String)}.
  * 
  * <p>
  * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of

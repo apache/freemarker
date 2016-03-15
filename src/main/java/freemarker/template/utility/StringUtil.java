@@ -1331,12 +1331,12 @@ public class StringUtil {
      * output. Note that for JSON, the quotation marks must be {@code "}, not {@code '}, because JSON doesn't escape
      * {@code '}.
      * 
-     * <p>The escaping rules guarantee that if the inside
-     * of the literal is from one or more touching sections of strings escaped with this, no character sequence will
-     * occur that closes the string literal or has special meaning in HTML/XML that can terminate the script section.
+     * <p>The escaping rules guarantee that if the inside of the JavaScript/JSON string literal is from one or more
+     * touching pieces that were escaped with this, no character sequence can occur that closes the
+     * JavaScript/JSON string literal, or has a meaning in HTML/XML that causes the HTML script section to be closed.
      * (If, however, the escaped section is preceded by or followed by strings from other sources, this can't be
      * guaranteed in some rare cases. Like <tt>x = "&lt;/${a?js_string}"</tt> might closes the "script"
-     * element if {@code a} is is {@code "script>"}.)
+     * element if {@code a} is {@code "script>"}.)
      * 
      * The escaped characters are:
      * 

@@ -944,7 +944,7 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testBannedDirectivesIsWhenAutoEscaping() throws Exception {
+    public void testBannedDirectivesWhenAutoEscaping() throws Exception {
         String commonFTL = "<#escape x as x?html>x</#escape>";
         assertOutput(commonFTL, "x");
         assertErrorContains("<#ftl outputFormat='HTML'>" + commonFTL, "escape", "HTML", "double-escaping");
