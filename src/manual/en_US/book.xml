@@ -26492,7 +26492,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_24">
         <title>2.3.24</title>
 
-        <para>Planned final release date: around 2016-03-01</para>
+        <para>Release date: 2016-03-20 + release process delay</para>
 
         <section>
           <title>Legal changes</title>
