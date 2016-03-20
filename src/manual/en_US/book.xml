@@ -8487,16 +8487,16 @@ cfg.setTemplateLoader(mtl);</programlisting>
 
           <para>If you change the template file, then FreeMarker will re-load
           and re-parse the template automatically when you get the template
-          next time. However, since checking if the file has been changed can
-          be time consuming, there is a <literal>Configuration</literal> level
-          setting called ``update delay''. This is the time that must elapse
-          since the last checking for a newer version of a certain template
-          before FreeMarker will check that again. This is set to 5 seconds by
-          default. If you want to see the changes of templates immediately,
-          set it to 0. Note that some template loaders may have problems with
-          template updating. For example, class-loader based template loaders
-          typically do not notice that you have changed the template
-          file.</para>
+          next time. However, since always checking for changes can be burden
+          for a system that processes lot of templates, there is a
+          <literal>Configuration</literal> level setting called <quote>update
+          delay</quote> (defaults is 5 seconds). Until this much time has
+          elapsed since the last checking for a newer version, FreeMarker will
+          not check again if the template was changed. If you want to see the
+          changes without delay, set this setting to 0. Note that some
+          template loaders won't see that a template was changed because of
+          the underlying storage mechanism doesn't support that; for example,
+          class-loader based template loaders may have this problem.</para>
 
           <para>A template will be removed from the cache if you call
           <literal>getTemplate</literal> and FreeMarker realizes that the
@@ -8504,7 +8504,11 @@ cfg.setTemplateLoader(mtl);</programlisting>
           that it begins to run out of memory, by default it can arbitrarily
           drop templates from the cache. Furthermore, you can empty the cache
           manually with the <literal>clearTemplateCache</literal> method of
-          <literal>Configuration</literal>.</para>
+          <literal>Configuration</literal>. You can also drop selected
+          template from the cache with
+          <literal>removeTemplateFromCache</literal>; this can be also
+          utilized to force re-loading a template regardless of the
+          <quote>update delay</quote> setting.</para>
 
           <para>The actual strategy of when a cached template should be thrown
           away is pluggable with the <literal>cache_storage</literal> setting,
@@ -8533,12 +8537,12 @@ cfg.setTemplateLoader(mtl);</programlisting>
           <literal>strongSizeLimit</literal> is 0, and
           <literal>softSizeLimit</literal> is
           <literal>Integer.MAX_VALUE</literal> (that is, in practice,
-          infinite). But using non-0 <literal>strongSizeLimit</literal> is
-          maybe a better strategy for high load servers, since it seems that,
-          with only softly referenced items, JVM tends to cause just higher
-          resource consumption if the resource consumption was already high,
-          because it constantly throws frequently used templates from the
-          cache, which then have to be re-loaded and re-parsed.</para>
+          infinite). Depending on how smart the JVM is, using non-0
+          <literal>strongSizeLimit</literal> is maybe a safer option, as with
+          only softly referenced items the JVM could even throw the most
+          frequently used templates when there's a resource shortage, which
+          then have to be re-loaded and re-parsed, burdening the system even
+          more.</para>
         </section>
       </section>
 
@@ -8564,47 +8568,47 @@ cfg.setTemplateLoader(mtl);</programlisting>
               <para>Exceptions occurring when you configure FreeMarker:
               Typically you configure FreeMarker only once in your
               application, when your application initializes itself. Of
-              course, during this, exceptions can occur, as it is obvious from
-              the FreeMarker API...</para>
+              course, during this, exceptions can occur.</para>
             </listitem>
 
             <listitem>
               <para>Exceptions occurring when loading and parsing templates:
               When you call
               <literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>,
-              FreeMarker has to load the template file into the memory and
-              parse it (unless the template is already <link
+              FreeMarker has to load the template into the memory and parse it
+              (unless the template is already <link
               linkend="pgui_config_templateloading_caching">cached</link> in
-              that <literal>Configuration</literal> object). During this, two
-              kind of exceptions can occur:</para>
+              that <literal>Configuration</literal> object). During this,
+              these kind of exceptions can occur:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>IOException</literal> because the template
-                  file was not found, or other I/O problem occurred while
-                  trying to read it, for example you have no right to read the
-                  file, or there are disk errors. The emitter of these errors
-                  is the <link
-                  linkend="pgui_config_templateloading"><literal>TemplateLoader</literal>
-                  object</link>, which is plugged into the
-                  <literal>Configuration</literal> object. (For the sake of
-                  correctness: When I say ``file'' here, that's a
-                  simplification. For example, templates can be stored in a
-                  table of a relational database as well. This is the business
-                  of the <literal>TemplateLoader</literal>.)</para>
+                  <para><literal>TemplateNotFoundException</literal> because
+                  the requested template doesn't exist. Note this extends
+                  <literal>IOException</literal>.</para>
                 </listitem>
 
                 <listitem>
                   <para><literal>freemarker.core.ParseException</literal>
-                  because the template file is syntactically incorrect
-                  according the rules of the FTL language. The point is that
-                  this error occurs when you obtain the
-                  <literal>Template</literal> object
+                  because the template is syntactically incorrect according
+                  the rules of the FTL language. Note that this error occurs
+                  when you obtain the <literal>Template</literal> object
                   (<literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>),
-                  and not when you execute
+                  not later when you execute
                   (<literal>Template.process(<replaceable>...</replaceable>)</literal>)
-                  the template. This exception is an
-                  <literal>IOException</literal> subclass.</para>
+                  the template. . Note this extends
+                  <literal>IOException</literal> (legacy).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Any other kind of <literal>IOException</literal>
+                  because an error has occurred while reading an existing
+                  template. For example you have no right to read the file, or
+                  the connection through which you read the template is
+                  broken. The emitter of these is the <link
+                  linkend="pgui_config_templateloading"><literal>TemplateLoader</literal>
+                  object</link>, which is plugged into the
+                  <literal>Configuration</literal> object.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -8624,8 +8628,8 @@ cfg.setTemplateLoader(mtl);</programlisting>
                 <listitem>
                   <para><literal>freemarker.template.TemplatException</literal>
                   because other problem occurred while executing the template.
-                  For example, a frequent error is when a template refers to a
-                  variable which is not existing. Be default, when a
+                  For example, a frequent error is referring to a variable
+                  that doesn't exist in the data-model. By default, when a
                   <literal>TemplatException</literal> occurs, FreeMarker
                   prints the FTL error message and the stack trace to the
                   output writer with plain text format, and then aborts the
@@ -8633,8 +8637,11 @@ cfg.setTemplateLoader(mtl);</programlisting>
                   <literal>TemplatException</literal>, which then you can
                   catch as
                   <literal>Template.process(<replaceable>...</replaceable>)</literal>
-                  throws it. But this behavior can be customized. FreeMarker
-                  always <link linkend="pgui_misc_logging">logs</link>
+                  throws it. This behavior can be customized, and in fact, it
+                  should be; see the recommended configuration <link
+                  linkend="pgui_quickstart_createconfiguration">here</link>.
+                  By default FreeMarker also <link
+                  linkend="pgui_misc_logging">logs</link>
                   <literal>TemplatException</literal>-s.</para>
                 </listitem>
               </itemizedlist>
@@ -8651,20 +8658,66 @@ cfg.setTemplateLoader(mtl);</programlisting>
           object, which is plugged into the <literal>Configuration</literal>
           object with its
           <literal>setTemplateExceptionHandler(<replaceable>...</replaceable>)</literal>
-          mehod. The <literal>TemplateExceptionHandler</literal> contains 1
-          method:</para>
+          method. These are the <literal>TemplateExceptionHandler</literal>
+          implementations with FreeMarker comes with:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>TemplateExceptionHandler.DEBUG_HANDLER</literal>:
+              Prints stack trace (includes FTL error message and FTL stack
+              trace) and re-throws the exception. This is the default handler,
+              however, you should be careful not using it in production
+              environment, as it shows technical information about your
+              system.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateExceptionHandler.HTML_DEBUG_HANDLER</literal>:
+              Same as <literal>DEBUG_HANDLER</literal>, but it formats the
+              stack trace so that it will be readable with Web browsers.
+              Recommended over <literal>DEBUG_HANDLER</literal> when you
+              generate HTML pages, but it should only be used for development
+              as it shows technical information about your system.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateExceptionHandler.IGNORE_HANDLER</literal>:
+              Simply suppresses all exceptions (though FreeMarker will still
+              log them if
+              <literal>Configuration.getLogTemplateExceptions</literal> is
+              <literal>true</literal>). It does nothing to handle the event.
+              It does not re-throw the exception.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateExceptionHandler.RETHROW_HANDLER</literal>:
+              Simply re-throws all exceptions; it doesn't do anything else.
+              This should be used in most applications today. It doesn't print
+              anything to the output about the error, which makes it safe, and
+              the developers can still get the error details from the logs.
+              It's not as convenient during template development as
+              <literal>HTML_DEBUG_HANDLER</literal> or
+              <literal>DEBUG_HANDLER</literal> though. For more information
+              about handling errors in Web applications <link
+              linkend="misc.faq.niceErrorPage">see the FAQ</link>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>You can also write a custom
+          <literal>TemplateExceptionHandler</literal> by implementing that
+          interface, which contains this method:</para>
 
           <programlisting role="unspecified">void handleTemplateException(TemplateException te, Environment env, Writer out) 
         throws TemplateException;</programlisting>
 
           <para>Whenever a <literal>TemplateException</literal> occurs, this
-          method will be called. The exception to handle is passed with the
+          method will be called. The exception to handle is in the
           <literal>te</literal> argument, the runtime environment of the
-          template processing is accessible with the <literal>env</literal>
-          argument, and the handler can print to the output using the
-          <literal>out</literal> argument. If the method throws exception
-          (usually it re-throws <literal>te</literal>), then the template
-          processing will be aborted, and
+          template processing is in the <literal>env</literal> argument, and
+          the handler can print to the output using the <literal>out</literal>
+          argument. If this method throws exception (usually it re-throws
+          <literal>te</literal>), then the template processing will be
+          aborted, and
           <literal>Template.process(<replaceable>...</replaceable>)</literal>
           will throw the same exception. If
           <literal>handleTemplateException</literal> doesn't throw exception,
@@ -8673,12 +8726,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
           later). Of course, the handler can still print an error indicator to
           the output.</para>
 
-          <para>In any case, before the
-          <literal>TemplateExceptionHandler</literal> is invoked, FreeMarker
-          will <link linkend="pgui_misc_logging">log</link> the
-          exception.</para>
-
-          <para>Let's see how FreeMarker skips ``statements'' when the error
+          <para>Let's see how FreeMarker skips statements when the error
           handler doesn't throw exception, through examples. Assume we are
           using this template exception handler:</para>
 
@@ -8717,8 +8765,8 @@ cfg.setTemplateExceptionHandler(new MyTemplateExceptionHandler());</programlisti
 
           <programlisting role="template">a${"moo" + badVar}b</programlisting>
 
-          <para>since, as it was written, the whole interpolation is skipped
-          if any error occurs inside it.</para>
+          <para>because the whole interpolation is skipped if any error occurs
+          inside it.</para>
 
           <para>If an error occurs when evaluating the value of a parameter
           for a directive call, or if there are other problems with the
@@ -8748,8 +8796,8 @@ cfg.setTemplateExceptionHandler(new MyTemplateExceptionHandler());</programlisti
 
           <programlisting role="template">a&lt;#if "foo${badVar}" == "foobar"&gt;Foo&lt;/#if&gt;b</programlisting>
 
-          <para>since, as it was written, the whole directive calling will be
-          skipped if any error occurs during the parameter evaluation.</para>
+          <para>because whole directive calling will be skipped if any error
+          occurs during the parameter evaluation.</para>
 
           <para>The directive call will not be skipped if the error occurs
           after the execution of the directive was already started. That is,
@@ -8781,45 +8829,6 @@ b
   [ERROR: Expression badVar is undefined on line 4, column 5 in test.ftlh.]
   Bar
 c</programlisting>
-
-          <para>FreeMarker comes with these prewritten error handlers:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para><literal>TemplateExceptionHandler.DEBUG_HANDLER</literal>:
-              Prints stack trace (includes FTL error message and FTL stack
-              trace) and re-throws the exception. This is the default handler
-              (that is, it is initially prugged into all new
-              <literal>Configuration</literal> objects).</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateExceptionHandler.HTML_DEBUG_HANDLER</literal>:
-              Same as <literal>DEBUG_HANDLER</literal>, but it formats the
-              stack trace so that it will be readable with Web browsers.
-              Recommended over <literal>DEBUG_HANDLER</literal> when you
-              generate HTML pages.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateExceptionHandler.IGNORE_HANDLER</literal>:
-              Simply suppresses all exceptions (but remember, FreeMarker will
-              still log them). It does nothing to handle the event. It does
-              not re-throw the exception.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateExceptionHandler.RETHROW_HANDLER</literal>:
-              Simply re-throws all exceptions, it doesn't do anything else.
-              This handler can be good for Web applications (assuming you
-              don't want to continue template processing after exception),
-              because it gives the most control to the Web application over
-              page generation on error conditions (since FreeMarker doesn't
-              print anything to the output about the error). For more
-              information about handling errors in Web applications <link
-              linkend="misc.faq.niceErrorPage">see the FAQ</link>.</para>
-            </listitem>
-          </itemizedlist>
         </section>
 
         <section>
@@ -8843,10 +8852,8 @@ c</programlisting>
 
           <para>Although it has nothing to do with the FreeMarker
           configuration (the topic of this chapter), for the sake of
-          completeness it is mentioned here that you can handle errors
-          directly in templates as well. This is usually a bad practice (try
-          keep templates simple and non-technical), but nonetheless necessary
-          sometimes:</para>
+          completeness it's mentioned here that you can handle errors directly
+          inside the templates as well:</para>
 
           <itemizedlist>
             <listitem>
@@ -8855,8 +8862,8 @@ c</programlisting>
             </listitem>
 
             <listitem>
-              <para>Surviving malfunctioning ``portlets'' and such expendable
-              page sections: <xref linkend="ref_directive_attempt"/></para>
+              <para>Substituting failing but expendable page sections: <xref
+              linkend="ref_directive_attempt"/></para>
             </listitem>
           </itemizedlist>
         </section>
@@ -8887,10 +8894,10 @@ c</programlisting>
         <itemizedlist>
           <listitem>
             <para><literal>TemplateConfiguration</literal>-s: These store the
-            actual setting assignments that you want to do. For example, this
-            <literal>TemplateConfiguration</literal> will set the encoding and
-            the output format of the matched template (and leave all other
-            settings of it alone):</para>
+            actual setting assignments that you want to apply. For example,
+            this <literal>TemplateConfiguration</literal> will set the
+            encoding and the output format of the matched template (and leave
+            all other settings of it alone):</para>
 
             <programlisting role="unspecified">TemplateConfiguration tcUTF8XML = new TemplateConfiguration();
 tc.setEncoding("utf-8");
@@ -8910,8 +8917,8 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
           <listitem>
             <para><literal>TemplateConfigurationFactory</literal>-es: This is
-            what connects <literal>TemplateConfiguration</literal> and
-            <literal>TemplateSourceMatcher</literal> together. This is the
+            what connects <literal>TemplateConfiguration</literal>-s and
+            <literal>TemplateSourceMatcher</literal>-s together. This is the
             Java type of the <literal>template_configurations</literal>
             setting. See the examples below for more.</para>
           </listitem>
@@ -8920,7 +8927,7 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
         <simplesect>
           <title>Example 1</title>
 
-          <para>This setup combines our earlier two example object with a
+          <para>This setup combines our earlier two example objects with a
           <literal>ConditionalTemplateConfigurationFactory</literal>, causing
           all templates with <literal>xml</literal> extension to get UTF-8
           encoding and XML output format:</para>
@@ -8934,7 +8941,7 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           to the configuring Java code, but only to a Java
           <literal>*.properties</literal> file or other kind of string-string
           key value pairs (the <literal>\</literal>-s are prescribed by the
-          Java Properties file format):</para>
+          Java Properties file format for multi-line values):</para>
 
           <programlisting role="unspecified">templateConfigurations = \
     ConditionalTemplateConfigurationFactory( \
@@ -26412,8 +26419,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <listitem>
                 <para>Call <literal>httpResp.isCommitted()</literal>, and if
                 that returns <literal>false</literal>, then you call
-                <literal>httpResp.reset()</literal> and print a ``nice error
-                page'' for the visitor. If the return value was
+                <literal>httpResp.reset()</literal> and print a <quote>nice
+                error page</quote> for the visitor. If the return value was
                 <literal>true</literal>, then try to finish the page be
                 printing something that makes clear for the visitor that the
                 page generation was abruptly interrupted because of an error
