@@ -12,10 +12,10 @@ are licensed by the Apache Software Foundation under the Apache License,
 Version 2.0. This is the same license as the license of FreeMaker. These
 files are:
   
-    src/main/freemarker/ext/jsp/web-app_2_2.dtd
-    src/main/freemarker/ext/jsp/web-app_2_3.dtd
-    src/main/freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
-    src/main/freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
+    src/main/resources/freemarker/ext/jsp/web-app_2_2.dtd
+    src/main/resources/freemarker/ext/jsp/web-app_2_3.dtd
+    src/main/resources/freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
+    src/main/resources/freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
 
 =========================================================================
 

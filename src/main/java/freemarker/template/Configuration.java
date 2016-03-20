@@ -1821,7 +1821,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Sets the default output format. Usually, you should leave this on its default, which is
      * {@link UndefinedOutputFormat#INSTANCE}, and then use standard file extensions like "ftlh" (for HTML) or "ftlx"
      * (for XML) and ensure that {@link #setRecognizeStandardFileExtensions(boolean)} is {@code true} (see more there).
-     * Where you can't use the standard the extensions, templates still can be associated to output formats with
+     * Where you can't use the standard extensions, templates still can be associated to output formats with
      * patterns matching their name (their path) using {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
      * But if all templates will have the same output format, you may use {@link #setOutputFormat(OutputFormat)} after
      * all, to set a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note
