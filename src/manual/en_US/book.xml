@@ -5790,7 +5790,9 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             just a shorthand of using the <literal>+</literal> operator
             (<literal>&lt;#assign s = "Hello" + name + "!"&gt;</literal>).
             Thus, <literal>${<replaceable>...</replaceable>}</literal>-s
-            inside string expressions aren't auto-escaped.</para>
+            inside string expressions aren't auto-escaped, but of course when
+            the resulting concatenated string is printed later, it will be
+            possibly auto-escaped.</para>
 
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 &lt;#assign name = "Foo &amp; Bar"&gt;
@@ -6224,11 +6226,11 @@ That's all.</programlisting>
 
         <para>First you have to create a
         <literal>freemarker.template.Configuration</literal> instance and
-        adjust its settings. A <literal>Configuration</literal> instance is a
-        central place to store the application level settings of FreeMarker.
-        Also, it deals with the creation and <emphasis>caching</emphasis> of
-        pre-parsed templates (i.e., <literal>Template</literal>
-        objects).</para>
+        adjust its settings. A <literal>Configuration</literal> instance is
+        the central place to store the application level settings of
+        FreeMarker. Also, it deals with the creation and
+        <emphasis>caching</emphasis> of pre-parsed templates (i.e.,
+        <literal>Template</literal> objects).</para>
 
         <para>Normally you will <emphasis>do this only once</emphasis> at the
         beginning of the application (possibly servlet) life-cycle:</para>
@@ -6261,21 +6263,21 @@ cfg.setLogTemplateExceptions(false);</programlisting>
 
         <warning>
           <para>Do not needlessly re-create <literal>Configuration</literal>
-          instances; it's expensive, among others because you lose the caches.
-          <literal>Configuration</literal> instances meant to
-          application-level singletons.</para>
+          instances; it's expensive, among others because you lose the
+          template cache. <literal>Configuration</literal> instances meant to
+          be application-level singletons.</para>
         </warning>
 
-        <para>When using in multi-threaded applications (like for Web sites),
-        the settings in the <literal>Configuration</literal> instance must not
-        be modified anymore after this point. Then it can be treated as
-        <quote>effectively immutable</quote> object, so you can continue with
-        <emphasis>safe publishing</emphasis> techniques (see JSR 133 and
-        related literature) to make the instance available for the other
-        threads. Like, publish the instance through a final or volatile filed,
-        or through a thread-safe IoC container, but not through a plain field.
-        (<literal>Configuration</literal> methods that don't deal with
-        modifying settings are thread-safe.)</para>
+        <para>In multi-threaded applications (like Web sites) the settings in
+        the <literal>Configuration</literal> instance must not be modified
+        anymore after this point. Thus it can be treated as <quote>effectively
+        immutable</quote> object, so you can continue with <emphasis>safe
+        publishing</emphasis> techniques (see JSR 133 and related literature)
+        to make the instance available for other threads. Like, publish the
+        instance through a final or volatile filed, or through a thread-safe
+        IoC container (like the one provided by Spring).
+        <literal>Configuration</literal> methods that don't deal with
+        modifying settings are thread-safe.</para>
       </section>
 
       <section xml:id="pgui_quickstart_createdatamodel">
@@ -6297,7 +6299,7 @@ cfg.setLogTemplateExceptions(false);</programlisting>
           </listitem>
 
           <listitem>
-            <para>Use <literal>java.lang.Number</literal> descents for
+            <para>Use <literal>java.lang.Number</literal> subclasses for
             numbers.</para>
           </listitem>
 
@@ -6307,12 +6309,18 @@ cfg.setLogTemplateExceptions(false);</programlisting>
           </listitem>
 
           <listitem>
+            <para>Use <literal>java.util.Date</literal> and its subclasses for
+            date/time values</para>
+          </listitem>
+
+          <listitem>
             <para>Use <literal>java.util.List</literal> or Java arrays for
             sequences.</para>
           </listitem>
 
           <listitem>
-            <para>Use <literal>java.util.Map</literal> for hashes.</para>
+            <para>Use <literal>java.util.Map</literal> with
+            <literal>String</literal> keys for hashes.</para>
           </listitem>
 
           <listitem>
@@ -6426,9 +6434,8 @@ public class Product {
         <para>Templates are represented by
         <literal>freemarker.template.Template</literal> instances. Typically
         you obtain a <literal>Template</literal> instance from the
-        <literal>Configuration</literal> instance. Whenever you need a
-        template instance you can get it with its
-        <literal>getTemplate</literal> method. Store <link
+        <literal>Configuration</literal> instance, using its.
+        <literal>getTemplate</literal> method. If you store <link
         linkend="example.first">the example template</link> in the
         <literal>test.ftlh</literal> file of the <link
         linkend="pgui_quickstart_createconfiguration">earlier</link> set
@@ -6436,16 +6443,18 @@ public class Product {
 
         <programlisting role="unspecified">Template temp = cfg.getTemplate("test.ftlh");</programlisting>
 
-        <para>When you call this, it will create a <literal>Template</literal>
-        instance corresponds to <literal>test.ftlh</literal>, by reading
+        <para>This gives you a <literal>Template</literal> instance that was
+        created by reading
         <literal><replaceable>/where/you/store/templates/</replaceable>test.ftlh</literal>
-        and parsing (compile) it. The <literal>Template</literal> instance
-        stores the template in the parsed form, and not as text.</para>
+        and parsing it. The <literal>Template</literal> instance stores the
+        template in parsed form, and not as text. If the template is missing
+        or syntactically incorrect, <literal>getTemplate</literal> will throw
+        exception instead.</para>
 
         <para><literal>Configuration</literal> caches
-        <literal>Template</literal> instances, so when you get
-        <literal>test.ftlh</literal> again, it probably won't read and parse
-        the template file again, just returns the same
+        <literal>Template</literal> instances, so when you call
+        <literal>cfg.getTemplate("test.ftlh")</literal> next time, it probably
+        won't read and parse the template file again, just returns the same
         <literal>Template</literal> instance as for the first time.</para>
       </section>
 
@@ -6462,8 +6471,8 @@ public class Product {
           <primary>merging</primary>
         </indexterm>
 
-        <para>As we know, data-model + template = output, and we have a
-        data-model (<literal>root</literal>) and a template
+        <para>As you might already know, data-model + template = output. We
+        already have a data-model (<literal>root</literal>) and a template
         (<literal>temp</literal>), so to get the output we have to merge them.
         This is done by the <literal>process</literal> method of the template.
         It takes the data-model root and a <literal>Writer</literal> as
@@ -6474,9 +6483,9 @@ public class Product {
         <programlisting role="unspecified">Writer out = new OutputStreamWriter(System.out);
 temp.process(root, out);</programlisting>
 
-        <para>This will print to your terminal the output what you have seen
-        in the <link linkend="example.first">first example</link> of the
-        Template Author's Guide.</para>
+        <para>This will print to your terminal the output you have seen in the
+        <link linkend="example.first">first example</link> of the Template
+        Author's Guide.</para>
 
         <para>Java I/O related notes: Depending on what <literal>out</literal>
         is, you may need to ensure that <literal>out.close()</literal> is
@@ -6485,8 +6494,9 @@ temp.process(root, out);</programlisting>
         other times, like in typical Web applications, you must
         <emphasis>not</emphasis> close <literal>out</literal>. FreeMarker
         calls <literal>out.flush()</literal> after a successful template
-        execution (can be disabled in <literal>Configuration</literal>), so
-        you don't need to worry about that.</para>
+        execution (but tis can be disabled in
+        <literal>Configuration</literal>), so you don't need to worry about
+        that.</para>
 
         <para>Note that once you have obtained a <literal>Template</literal>
         instance, you can merge it with different data-models for unlimited
@@ -7850,22 +7860,26 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
         shared variables). Also, it deals with the creation and caching of
         <literal>Template</literal> instances.</para>
 
-        <para>An application typically should use only a single shared
+        <para>An application typically uses only a single shared
         <literal>Configuration</literal> instance. More precisely, typically
-        you should have one <literal>Configuration</literal> instance per
-        independently developed components (like projects, modules, etc.) that
-        internally use FreeMarker, as each should create its own
-        instance.</para>
+        you have one <literal>Configuration</literal> instance per
+        independently developed component that internally uses FreeMarker, so
+        they can be configured independently of each other. For example, your
+        e-mail sender component and your report generator component (service)
+        probably want to use their own <literal>Configuration</literal>-s, as
+        their needs differ.</para>
 
-        <para>As running templates are influenced by the configuration
-        settings, each <literal>Template</literal> instance has a
-        <literal>Configuration</literal> instance associated with it, via the
-        corresponding <literal>Template</literal> constructor parameter.
-        Usually you obtain <literal>Template</literal> instances with
-        <literal>Configuration.getTemplate</literal> (not by directly calling
-        the <literal>Template</literal> constructor), in which case the
-        associated <literal>Configuration</literal> instance will be the one
-        whose <literal>getTemplate</literal> method has been called.</para>
+        <para>As the behavior of templates depends on the configuration
+        settings, each <literal>Template</literal> instance has an associated
+        <literal>Configuration</literal> instance. If you obtain the
+        <literal>Template</literal> instances with
+        <literal>Configuration.getTemplate</literal>, the associated
+        <literal>Configuration</literal> instance will be the one whose
+        <literal>getTemplate</literal> method was called. If you create the
+        <literal>Template</literal> instances directly with the
+        <literal>Template</literal> constructor, the
+        <literal>Configuration</literal> should be specified as constructor
+        parameter.</para>
       </section>
 
       <section xml:id="pgui_config_sharedvariables">
@@ -7967,17 +7981,17 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
         API documentation of
         <literal>Configuration.setSetting(...)</literal></link>.</para>
 
-        <para>Settings stored in <literal>Configuration</literal> instance can
-        be overridden in a <literal>Template</literal> instance. For example
-        you set <literal>"en_US"</literal> for the <literal>locale</literal>
-        setting in the configuration, then the <literal>locale</literal> in
-        all templates that use this configuration will be
-        <literal>"en_US"</literal>, except in templates where the locale was
-        explicitly specified differently (see <link
-        linkend="ref_directive_include_localized">localization</link>). Thus,
-        values in a <literal>Configuration</literal> serve as defaults that
-        can be overridden in a per template manner. The value comes from
-        <literal>Configuration</literal> instance or
+        <para>The settings coming from the <literal>Configuration</literal>
+        can be overridden in a <literal>Template</literal> instance. For
+        example, if you set the <literal>locale</literal> setting to
+        <literal>"en_US"</literal> in the configuration, then the
+        <literal>locale</literal> in all templates that use this configuration
+        will be <literal>"en_US"</literal>, except in templates where the
+        <literal>locale</literal> was explicitly specified differently (see
+        <link linkend="ref_directive_include_localized">localization</link>).
+        Thus, the setting values in the <literal>Configuration</literal> serve
+        as defaults that can be overridden in a per template manner. The value
+        coming from the <literal>Configuration</literal> instance or
         <literal>Template</literal> instance can be further overridden for a
         single <literal>Template.process</literal> call. For each such call a
         <literal>freemarker.core.Environment</literal> object is created
@@ -7985,7 +7999,8 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
         processing, including the setting values that were overridden on that
         level. The values stored there can even be changed during the template
         processing, so a template can set settings itself, like switching
-        <literal>locale</literal> at the middle of the output.</para>
+        <literal>locale</literal> at the middle of the ongoing
+        processing.</para>
 
         <para>This can be imagined as 3 layers
         (<literal>Configuration</literal>, <literal>Template</literal>,
@@ -8084,22 +8099,22 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 myCfg.setDefaultEncoding("UTF-8");</programlisting>
 
-            <para>You do it before you start to actually use the
+            <para>You do this before you start to actually use the
             <literal>Configuration</literal> object (typically, when you
             initialize the application); you should treat the object as
             read-only after that.</para>
 
-            <para>In practice, in most Web application frameworks you have to
-            specify the settings in a framework-specific configuration file
-            that require specifying setting as <literal>String</literal>
+            <para>In practice, in most frameworks you have to specify the
+            settings in some kind of framework-specific configuration file
+            that require specifying settings as <literal>String</literal>
             name-value pairs (like in a <literal>.properties</literal> file).
             In that case the authors of the frameworks most probably use the
-            <literal>setSetting(String name, String value)</literal> method of
-            <literal>Configuration</literal>; see available setting names and
-            the format of the values in the <link
+            <literal>Confguration.setSetting(String name, String
+            value)</literal> method; see available setting names and the
+            format of the values in the <link
             xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">API
-            doc of <literal>setSetting</literal></link>. Example for Spring
-            Framework:</para>
+            documentation of <literal>setSetting</literal></link>. Example for
+            Spring Framework:</para>
 
             <programlisting role="unspecified">&lt;bean id="freemarkerConfig"
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
@@ -8113,9 +8128,9 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
 &lt;/bean&gt;</programlisting>
 
             <para>Note that this kind of configuring
-            (<literal>String</literal> key-value pairs) is unfortunately
-            limited compared to directly using the API of
-            <literal>Configuration</literal>.</para>
+            (<literal>String</literal> key-value pairs) is somewhat limited
+            compared to directly using Java API, so in some cases you have to
+            find a way to do this in Java.</para>
           </listitem>
 
           <listitem>
@@ -8145,14 +8160,14 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
             <literal>tag_syntax</literal>,
             <literal>whitespace_stripping</literal>, etc.), as these are not
             inherited from the top-level template, instead each template
-            always uses its own, no mater how it was invoked.</para>
+            always uses its own values, no mater how it was invoked.</para>
 
             <note>
               <para>If you are going to use template layer settings, you
               should set <link
               linkend="pgui_config_incompatible_improvements">the
               <literal>incompatible_improvements</literal> setting</link> to
-              2.3.22 or higher, to avoid confusing legacy bugs.</para>
+              2.3.22 or higher, to avoid soe confusing legacy bugs.</para>
             </note>
           </listitem>
 
@@ -8163,14 +8178,13 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
             <itemizedlist>
               <listitem>
                 <para>With Java API: Use the setter methods of the
-                <literal>Environment</literal> object. Certainly you want to
-                do that just before the processing of the template is started,
-                and then you run into the problem that when you call
-                <literal>myTemplate.process(...)</literal> it creates the
-                <literal>Environment</literal> object internally and the
-                immediately processes the template, so you had no chance. The
-                solution is that this two steps can be separated like
-                this:</para>
+                <literal>Environment</literal> object. You may run into the
+                API problem that <literal>myTemplate.process(...)</literal>
+                both creates the <literal>Environment</literal> object
+                internally and processes the template, so you have no
+                opportunity to adjust the <literal>Environment</literal> in
+                between. The solution is that those two steps can be separated
+                like this:</para>
 
                 <programlisting role="unspecified">Environment env = myTemplate.createProcessingEnvironment(root, out);
 env.setLocale(java.util.Locale.ITALY);
@@ -8252,80 +8266,93 @@ env.process();  // process the template</programlisting>
 
           <para>Template loaders are objects that load raw textual data based
           on abstract template paths like <literal>"index.ftl"</literal> or
-          <literal>"products/catalog.ftl"</literal>. It is up to the concrete
-          template loader object what source does it use to fetch the
-          requested data (files in a directory, data base, etc.). When you
-          call <literal>cfg.getTemplate</literal> (where
-          <literal>cfg</literal> is a <literal>Configuration</literal>
-          instance), FreeMarker ask the template loader you have set up for
-          the <literal>cfg</literal> to return the text for the given template
-          path, and then FreeMarker parses that text as template.</para>
+          <literal>"products/catalog.ftl"</literal>. It's up to the concrete
+          template loader if from where and how the template
+          <quote>files</quote> are loaded. They could be real files inside a
+          specified directory, or values in a data base table, or
+          <literal>String</literal>-s in a Java Map, etc. When you call
+          <literal>cfg.getTemplate</literal> (where <literal>cfg</literal> is
+          a <literal>Configuration</literal> instance), FreeMarker asks the
+          template loader (<literal>cfg.getTemplateLoader</literal>) to return
+          the text for the given template path, and then FreeMarker parses
+          that text as template. It doesn't care or even know if the template
+          is a real file or not, and where it is physically; those details are
+          only known by the template loader.</para>
 
           <section>
             <title>Built-in template loaders</title>
 
-            <para>You can set up three template loading methods in the
-            <literal>Configuration</literal> using the following convenience
-            methods. (Each method will create a template loader object
-            internally and set up the <literal>Configuration</literal>
-            instance to use that.)</para>
+            <para>You can set up the three most common template loading
+            mechanism in the <literal>Configuration</literal> using the
+            following <emphasis>convenience</emphasis> methods:</para>
 
-            <programlisting role="unspecified">void setDirectoryForTemplateLoading(File dir);</programlisting>
+            <itemizedlist>
+              <listitem>
+                <para><literal>void setDirectoryForTemplateLoading(File
+                dir)</literal>: Sets a directory on the file system from which
+                to load templates. Template names (template paths) will be
+                interpreted relatively to this physical directory. It won't
+                let you load files outside this directory.</para>
+              </listitem>
 
-            <para>or</para>
+              <listitem>
+                <para><literal>void setClassForTemplateLoading(Class cl,
+                String basePackagePath)</literal> and <literal>void
+                setClassLoaderForTemplateLoading(ClassLoader classLoader,
+                String basePackagePath)</literal>: These are for when you want
+                to load templates via the same mechanism with which Java loads
+                classes (from the class-path, as they used to say vaguely).
+                This is very likely be the preferred means of loading
+                templates for production code, as it allows you to keep
+                everything inside the deployment <literal>jar</literal> files.
+                The first parameter decides which Java
+                <literal>ClassLoader</literal> will be used. The second
+                parameter specifies the package that contains the templates,
+                in <literal>/</literal>-separated format. Note that if you
+                don't start it with <literal>/</literal>, it will be
+                interpreted relatively to the package of the
+                <literal>Class</literal> parameter.</para>
+              </listitem>
 
-            <programlisting role="unspecified">void setClassForTemplateLoading(Class cl, String prefix);</programlisting>
+              <listitem>
+                <para><literal>void setServletContextForTemplateLoading(Object
+                servletContext, String path)</literal>: Takes the context of
+                your Servlet-based web application, and a base path, which is
+                interpreted relative to the web application root directory
+                (that's the parent of the <literal>WEB-INF</literal>
+                directory). Note that we refer to "directory" here although
+                this loading method works even for unpacked
+                <literal>.war</literal> files, since it uses
+                <literal>ServletContext.getResource()</literal> to access the
+                templates. If you omit the second parameter (or use
+                <literal>""</literal>), you can simply store the static files
+                (<literal>.html</literal>, <literal>.jpg</literal>, etc.)
+                mixed with the <literal>.ftl</literal> files. Of course, you
+                must set up a Servlet for the <literal>*.ftl</literal>,
+                <literal>*.ftlh</literal>, <literal>*.ftlx</literal>
+                uri-patterns in <literal>WEB-INF/web.xml</literal> for this,
+                otherwise the client will get the raw templates as is! To
+                avoid a such accident, many prefers storing the templates
+                somewhere inside the <literal>WEB-INF</literal> directory,
+                which is never visitable directly. This mechanism will very
+                likely be the preferred means of loading templates for servlet
+                applications, since the templates can be updated without
+                restarting the web application, while this often doesn't work
+                with the class-loader mechanism.</para>
+              </listitem>
+            </itemizedlist>
 
-            <para>or</para>
+            <para>If you want to use a custom
+            <literal>TemplateLoader</literal> implementation, or need to set
+            up some extra settings of a built-in template loader, you need to
+            instantiate the <literal>TemplateLoader</literal> object yourself,
+            and then call
+            <literal>Configuration.setTemplateLoader(TemplateLoader)</literal>:</para>
 
-            <programlisting role="unspecified">void setServletContextForTemplateLoading(Object servletContext, String path);</programlisting>
-
-            <para>The first method above sets an explicit directory on the
-            file system from which to load templates. Needless to say perhaps,
-            the <literal>File</literal> parameter must be an existing
-            directory. Otherwise, an exception will be thrown.</para>
-
-            <para>The second call takes a <literal>Class</literal> as a
-            parameter and a prefix. This is for when you want to load
-            templates via the same mechanism that a java
-            <literal>ClassLoader</literal> uses to load classes. This means
-            that the class you pass in will be used to call
-            <literal>Class.getResource()</literal> to find the templates. The
-            <literal>prefix</literal> parameter is prepended to the name of
-            the template. The classloading mechanism will very likely be the
-            preferred means of loading templates for production code, since
-            loading from the classpath mechanism is usually more foolproof
-            than specifying an explicit directory location on the file system.
-            It is also nicer in a final application to keep everything in a
-            <literal>.jar</literal> file that the user can simply execute
-            directly and have all the icons and text and everything else
-            inside the <literal>.jar</literal> file.</para>
-
-            <para>The third call takes the context of your web application,
-            and a base path, which is interpreted relative to the web
-            application root directory (that's the parent of the
-            <literal>WEB-INF</literal> directory). This loader will load the
-            templates from the web application directory. Note that we refer
-            to "directory" here although this loading method works even for
-            unpacked <literal>.war</literal> files since it uses
-            <literal>ServletContext.getResource()</literal> to access the
-            templates. If you omit the second parameter (or use
-            <literal>""</literal>), you can simply store the static files
-            (<literal>.html</literal>, <literal>.jpg</literal>, etc.) mixed
-            with the <literal>.ftl</literal> files, just
-            <literal>.ftl</literal> files will be sent to the client
-            processed. Of course, you must set up a Servlet for the
-            <literal>*.ftl</literal> uri-pattern in
-            <literal>WEB-INF/web.xml</literal> for this, otherwise the client
-            will get the templates as is, and thus may see confidential
-            content! You should not use empty path if this is a problem for
-            your site, rather you should store the templates somewhere inside
-            the <literal>WEB-INF</literal> directory, so the raw templates are
-            never served accidentally. This mechanism will very likely be the
-            preferred means of loading templates for servlet applications,
-            since the templates can be updated without restarting the web
-            application, while this often doesn't work with the class-loader
-            mechanism.</para>
+            <programlisting role="unspecified">WebappTemplateLoader templateLoader = new WebappTemplateLoader(servletContext, "WEB-INF/templates");
+templateLoader.setURLConnectionUsesCaches(false);
+templateLoader.setAttemptFileAccess(false);
+cfg.setTemplateLoader(templateLoader);</programlisting>
           </section>
 
           <section>
@@ -8333,12 +8360,12 @@ env.process();  // process the template</programlisting>
 
             <para>If you need to load templates from multiple locations, you
             have to instantiate the template loader objects for every
-            location, wrap them into a special template loader named
-            <literal>MultiTemplateLoader</literal> and finally pass that
-            loader to the <literal>setTemplateLoader(TemplateLoader
-            loader)</literal> method of <literal>Configuration</literal>.
-            Here's an example for loading templates from two distinct
-            directories and with the class-loader:</para>
+            location, wrap them into a <literal>MultiTemplateLoader</literal>,
+            and finally pass that loader to the
+            <literal>setTemplateLoader(TemplateLoader loader)</literal> method
+            of <literal>Configuration</literal>. Here's an example for loading
+            templates from two distinct directories and with the
+            class-loader:</para>
 
             <programlisting role="unspecified">import freemarker.cache.*; // template loaders live in this package
 
@@ -8346,9 +8373,9 @@ env.process();  // process the template</programlisting>
 
 FileTemplateLoader ftl1 = new FileTemplateLoader(new File("/tmp/templates"));
 FileTemplateLoader ftl2 = new FileTemplateLoader(new File("/usr/data/templates"));
-ClassTemplateLoader ctl = new ClassTemplateLoader(getClass(), "");
-TemplateLoader[] loaders = new TemplateLoader[] { ftl1, ftl2, ctl };
-MultiTemplateLoader mtl = new MultiTemplateLoader(loaders);
+ClassTemplateLoader ctl = new ClassTemplateLoader(getClass(), "/com/example/templates");
+
+MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { ftl1, ftl2, ctl });
 
 cfg.setTemplateLoader(mtl);</programlisting>
 
@@ -8356,15 +8383,15 @@ cfg.setTemplateLoader(mtl);</programlisting>
             <literal>/tmp/templates</literal> directory, and if it does not
             find the requested template there, it will try to load that from
             <literal>/usr/data/templates</literal>, and if it still does not
-            find the requested template, then it tries to load that with the
-            class-loader.</para>
+            find the requested template, then it tries to load it from the
+            <literal>com.example.templates</literal> Java package.</para>
           </section>
 
           <section>
             <title>Loading templates from other sources</title>
 
-            <para>If none of the built-in class loaders are good for you, you
-            will have to write your own class that implements the
+            <para>If none of the built-in class loaders fit your needs, you
+            can write your own class that implements the
             <literal>freemarker.cache.TemplateLoader</literal> interface and
             pass it to the <literal>setTemplateLoader(TemplateLoader
             loader)</literal> method of <literal>Configuration</literal>.
