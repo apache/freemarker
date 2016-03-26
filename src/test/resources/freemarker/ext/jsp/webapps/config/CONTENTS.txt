@@ -16,9 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ 
+// Only the files listed here will be part of the tested Web application deployment! 
 
-Add the Chinese Manual here, then delete this file.
-You can use these to test if the Manual is generated succesfully:
+test.ftl
 
-  ant manualOffline_zh_CN
-  ant manualFreemarkerOrg_zh_CN
+WEB-INF/web.xml
+
+WEB-INF/classes/test.ftl
+
+WEB-INF/classes/sub/test.ftl
+
+WEB-INF/lib/templates.jar/sub/test2.ftl
+/freemarker/ext/jsp/webapps/config/WebappLocalFreemarkerServlet.class -> WEB-INF/lib/WebappLocalFreemarkerServlet.jar/freemarker/ext/jsp/webapps/config/WebappLocalFreemarkerServlet.class
+
+WEB-INF/templates/test.ftl

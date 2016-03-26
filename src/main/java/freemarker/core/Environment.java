@@ -162,7 +162,7 @@ public final class Environment extends Configurable {
     private LocalContextStack localContextStack;
     private final Namespace mainNamespace;
     private Namespace currentNamespace, globalNamespace;
-    private HashMap loadedLibs;
+    private HashMap<String, Namespace> loadedLibs;
     private Configurable legacyParent;
 
     private boolean inAttemptBlock;
@@ -2170,7 +2170,7 @@ public final class Environment extends Configurable {
     public Namespace getNamespace(String name) {
         if (name.startsWith("/")) name = name.substring(1);
         if (loadedLibs != null) {
-            return (Namespace) loadedLibs.get(name);
+            return loadedLibs.get(name);
         } else {
             return null;
         }
@@ -2463,22 +2463,25 @@ public final class Environment extends Configurable {
      */
     public Template getTemplateForInclusion(String name, String encoding, boolean parseAsFTL, boolean ignoreMissing)
             throws IOException {
-        final Template inheritedTemplate = getTemplate();
-
-        if (encoding == null) {
-            // This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
-            encoding = inheritedTemplate.getEncoding();
-            if (encoding == null) {
-                encoding = configuration.getEncoding(this.getLocale());
-            }
-        }
-
-        Object customLookupCondition = inheritedTemplate.getCustomLookupCondition();
-
         return configuration.getTemplate(
-                name, getLocale(), customLookupCondition,
-                encoding, parseAsFTL,
+                name, getLocale(), getIncludedTemplateCustomLookupCondition(),
+                encoding != null ? encoding : getIncludedTemplateEncoding(),
+                parseAsFTL,
                 ignoreMissing);
+    }
+
+    private Object getIncludedTemplateCustomLookupCondition() {
+        return getTemplate().getCustomLookupCondition();
+    }
+
+    private String getIncludedTemplateEncoding() {
+        String encoding;
+        // This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
+        encoding = getTemplate().getEncoding();
+        if (encoding == null) {
+            encoding = configuration.getEncoding(this.getLocale());
+        }
+        return encoding;
     }
 
     /**
@@ -2513,21 +2516,62 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Emulates <code>import</code> directive, except that <code>name</code> must be tempate root relative.
+     * Emulates <code>import</code> directive, except that <code>templateName</code> must be template root relative.
      *
      * <p>
-     * It's the same as <code>importLib(getTemplateForImporting(name), namespace)</code>. But, you may want to
+     * It's the same as <code>importLib(getTemplateForImporting(templateName), namespace)</code>. But, you may want to
      * separately call these two methods, so you can determine the source of exceptions more precisely, and thus achieve
      * more intelligent error handling.
+     * 
+     * <p>
+     * If it will be a lazy or an eager import is decided by the value of {@link Configuration#getLazyImports()}. You
+     * can also directly control that aspect by using {@link #importLib(String, String, boolean)} instead.
      *
-     * @see #getTemplateForImporting(String name)
-     * @see #importLib(Template includedTemplate, String namespace)
+     * @return Not {@code null}. This is possibly a lazily self-initializing namespace, which means that it will only
+     *         try to get and process the imported template when you access its content.
+     *
+     * @see #getTemplateForImporting(String templateName)
+     * @see #importLib(Template includedTemplate, String namespaceVarName)
+     * @see #importLib(String, String, boolean)
      */
-    public Namespace importLib(String name, String namespace)
+    public Namespace importLib(String templateName, String targetNsVarName)
             throws IOException, TemplateException {
-        return importLib(getTemplateForImporting(name), namespace);
+        return importLib(templateName, targetNsVarName, configuration.getLazyImports());
     }
 
+    /**
+     * Does what the <code>#import</code> directive does, but with an already loaded template.
+     *
+     * @param loadedTemplate
+     *            The template to import. Note that it does <em>not</em> need to be a template returned by
+     *            {@link #getTemplateForImporting(String name)}.
+     * @param targetNsVarName
+     *            The name of the FTL variable that will store the namespace.
+     *            
+     * @see #getTemplateForImporting(String name)
+     * @see #importLib(Template includedTemplate, String namespaceVarName)
+     */
+    public Namespace importLib(Template loadedTemplate, String targetNsVarName)
+            throws IOException, TemplateException {
+        return importLib(null, loadedTemplate, targetNsVarName);
+    }
+
+    /**
+     * Like {@link #importLib(String, String)}, but you can specify if you want a
+     * {@linkplain Configuration#setLazyImports(boolean) lazy import} or not.
+     * 
+     * @return Not {@code null}. This is possibly a lazily self-initializing namespace, which mean that it will only try
+     *         to get and process the imported template when you access its content.
+     * 
+     * @since 2.3.25
+     */
+    public Namespace importLib(String templateName, String targetNsVarName, boolean lazy)
+            throws IOException, TemplateException {
+        return lazy
+                ? importLib(templateName, null, targetNsVarName)
+                : importLib(null, getTemplateForImporting(templateName), targetNsVarName);
+    }
+    
     /**
      * Gets a template for importing; used with {@link #importLib(Template importedTemplate, String namespace)}. The
      * advantage over simply using <code>config.getTemplate(...)</code> is that it chooses the encoding as the
@@ -2544,53 +2588,83 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Emulates <code>import</code> directive.
-     *
+     * @param templateName
+     *            Ignored if {@code loadedTemaplate} is set (so we do eager import), otherwise it can't be {@code null}.
+     *            Assumed to be template root directory relative (not relative to the current template).
      * @param loadedTemplate
-     *            the template to import. Note that it does <em>not</em> need to be a template returned by
-     *            {@link #getTemplateForImporting(String name)}.
+     *            {@code null} exactly if we want a lazy import
      */
-    public Namespace importLib(Template loadedTemplate, String namespace)
+    private Namespace importLib(
+            String templateName, final Template loadedTemplate, final String targetNsVarName)
             throws IOException, TemplateException {
+        final boolean lazyImport;
+        if (loadedTemplate != null) {
+            lazyImport = false;
+            // As we have an already normalized name, we use it. 2.3.x note: We should use the template.sourceName as
+            // namespace key, but historically we use the looked up name (template.name); check what lazy import does if
+            // that will be fixed, as that can't do the template lookup, yet the keys must be the same.
+            templateName = loadedTemplate.getName();
+        } else {
+            lazyImport = true;
+            // We can't cause a template lookup here (see TemplateLookupStrategy), as that can be expensive. We exploit
+            // that (at least in 2.3.x) the name used for eager import namespace key isn't the template.sourceName, but
+            // the looked up name (template.name), which we can get quickly:
+            TemplateNameFormat tnf = getConfiguration().getTemplateNameFormat();
+            templateName = _CacheAPI.normalizeAbsoluteName(tnf, _CacheAPI.toAbsoluteName(tnf, null, templateName));
+        }
+        
         if (loadedLibs == null) {
             loadedLibs = new HashMap();
         }
-        String templateName = loadedTemplate.getName();
-        Namespace existingNamespace = (Namespace) loadedLibs.get(templateName);
+        final Namespace existingNamespace = loadedLibs.get(templateName);
         if (existingNamespace != null) {
-            if (namespace != null) {
-                setVariable(namespace, existingNamespace);
+            if (targetNsVarName != null) {
+                setVariable(targetNsVarName, existingNamespace);
                 if (isIcI2324OrLater() && currentNamespace == mainNamespace) {
-                    globalNamespace.put(namespace, existingNamespace);
+                    globalNamespace.put(targetNsVarName, existingNamespace);
                 }
+            }
+            if (!lazyImport && existingNamespace instanceof LazilyInitializedNamespace) {
+                ((LazilyInitializedNamespace) existingNamespace).ensureInitializedTME();
             }
         } else {
-            Namespace newNamespace = new Namespace(loadedTemplate);
-            if (namespace != null) {
-                setVariable(namespace, newNamespace);
+            final Namespace newNamespace
+                    = lazyImport ? new LazilyInitializedNamespace(templateName) : new Namespace(loadedTemplate);
+            loadedLibs.put(templateName, newNamespace);
+            
+            if (targetNsVarName != null) {
+                setVariable(targetNsVarName, newNamespace);
                 if (currentNamespace == mainNamespace) {
-                    globalNamespace.put(namespace, newNamespace);
+                    globalNamespace.put(targetNsVarName, newNamespace);
                 }
             }
-            Namespace prevNamespace = this.currentNamespace;
-            this.currentNamespace = newNamespace;
-            loadedLibs.put(templateName, currentNamespace);
-            Writer prevOut = out;
-            this.out = NullWriter.INSTANCE;
-            try {
-                include(loadedTemplate);
-            } finally {
-                this.out = prevOut;
-                this.currentNamespace = prevNamespace;
+            
+            if (!lazyImport) {
+                initializeImportLibNamespace(newNamespace, loadedTemplate);
             }
         }
-        return (Namespace) loadedLibs.get(templateName);
+        return loadedLibs.get(templateName);
+    }
+
+    private void initializeImportLibNamespace(final Namespace newNamespace, Template loadedTemplate)
+            throws TemplateException, IOException {
+        Namespace prevNamespace = this.currentNamespace;
+        this.currentNamespace = newNamespace;
+        Writer prevOut = out;
+        this.out = NullWriter.INSTANCE;
+        try {
+            include(loadedTemplate);
+        } finally {
+            this.out = prevOut;
+            this.currentNamespace = prevNamespace;
+        }
     }
 
     /**
      * Resolves a reference to a template (like the one used in {@code #include} or {@code #import}), assuming a base
      * name. This gives a full (that is, absolute), even if non-normalized template name, that could be used for
-     * {@link Configuration#getTemplate(String)}. This is mostly used when a template refers to another template.
+     * {@link Configuration#getTemplate(String)}. This is mostly used when a 
+     * template refers to another template.
      * 
      * @param baseName
      *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null}, which usually
@@ -2738,7 +2812,7 @@ public final class Environment extends Configurable {
 
     public class Namespace extends SimpleHash {
 
-        private final Template template;
+        private Template template;
 
         Namespace() {
             this.template = Environment.this.getTemplate();
@@ -2754,6 +2828,171 @@ public final class Environment extends Configurable {
         public Template getTemplate() {
             return template == null ? Environment.this.getTemplate() : template;
         }
+        
+        void setTemplate(Template template) {
+            this.template = template; 
+        }
+        
+    }
+    
+    private enum InitializationStatus {
+        UNINITIALIZED, INITIALIZING, INITIALIZED, FAILED
+    }
+    
+    class LazilyInitializedNamespace extends Namespace {
+        
+        private final String templateName;
+        private final Locale locale;
+        private final String encoding;
+        private final Object customLookupCondition;
+        
+        private InitializationStatus status = InitializationStatus.UNINITIALIZED;
+        
+        /**
+         * @param templateName
+         *            Must be root relative
+         */
+        private LazilyInitializedNamespace(String templateName) {
+            super(null);
+            
+            this.templateName = templateName;
+            // Make snapshot of all settings that influence template resolution:
+            this.locale = getLocale();
+            this.encoding = getIncludedTemplateEncoding();
+            this.customLookupCondition = getIncludedTemplateCustomLookupCondition();
+        }
+
+        private void ensureInitializedTME() throws TemplateModelException {
+            if (status != InitializationStatus.INITIALIZED && status != InitializationStatus.INITIALIZING) {
+                if (status == InitializationStatus.FAILED) {
+                    throw new TemplateModelException(
+                            "Lazy initialization of the imported namespace for "
+                            + StringUtil.jQuote(templateName)
+                            + " has already failed earlier; won't retry it.");
+                }
+                try {
+                    status = InitializationStatus.INITIALIZING;
+                    initialize();
+                    status = InitializationStatus.INITIALIZED;
+                } catch (Exception e) {
+                    // [FM3] Rethrow TemplateException-s as is
+                    throw new TemplateModelException(
+                            "Lazy initialization of the imported namespace for "
+                            + StringUtil.jQuote(templateName)
+                            + " has failed; see cause exception", e);
+                } finally {
+                    if (status != InitializationStatus.INITIALIZED) {
+                        status = InitializationStatus.FAILED;
+                    }
+                }
+            }
+        }
+        
+        private void ensureInitializedRTE() {
+            try {
+                ensureInitializedTME();
+            } catch (TemplateModelException e) {
+                throw new RuntimeException(e.getMessage(), e.getCause());
+            }
+        }
+
+        private void initialize() throws IOException, TemplateException {
+            setTemplate(configuration.getTemplate(
+                    templateName, locale, customLookupCondition, encoding,
+                    true, false));
+            Locale lastLocale = getLocale();
+            try {
+                setLocale(locale);
+                initializeImportLibNamespace(this, getTemplate());
+            } finally {
+                setLocale(lastLocale);
+            }
+        }
+
+        @Override
+        protected Map copyMap(Map map) {
+            ensureInitializedRTE();
+            return super.copyMap(map);
+        }
+
+        @Override
+        public Template getTemplate() {
+            ensureInitializedRTE();
+            return super.getTemplate();
+        }
+
+        @Override
+        public void put(String key, Object value) {
+            ensureInitializedRTE();
+            super.put(key, value);
+        }
+
+        @Override
+        public void put(String key, boolean b) {
+            ensureInitializedRTE();
+            super.put(key, b);
+        }
+
+        @Override
+        public TemplateModel get(String key) throws TemplateModelException {
+            ensureInitializedTME();
+            return super.get(key);
+        }
+
+        @Override
+        public boolean containsKey(String key) {
+            ensureInitializedRTE();
+            return super.containsKey(key);
+        }
+
+        @Override
+        public void remove(String key) {
+            ensureInitializedRTE();
+            super.remove(key);
+        }
+
+        @Override
+        public void putAll(Map m) {
+            ensureInitializedRTE();
+            super.putAll(m);
+        }
+
+        @Override
+        public Map toMap() throws TemplateModelException {
+            ensureInitializedTME();
+            return super.toMap();
+        }
+
+        @Override
+        public String toString() {
+            ensureInitializedRTE();
+            return super.toString();
+        }
+
+        @Override
+        public int size() {
+            ensureInitializedRTE();
+            return super.size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            ensureInitializedRTE();
+            return super.isEmpty();
+        }
+
+        @Override
+        public TemplateCollectionModel keys() {
+            ensureInitializedRTE();
+            return super.keys();
+        }
+
+        @Override
+        public TemplateCollectionModel values() {
+            ensureInitializedRTE();
+            return super.values();
+        }
+        
     }
 
     private static final Writer EMPTY_BODY_WRITER = new Writer() {

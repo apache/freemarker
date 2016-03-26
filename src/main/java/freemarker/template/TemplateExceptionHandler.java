@@ -35,14 +35,17 @@ import freemarker.template.utility.StringUtil;
 public interface TemplateExceptionHandler {
     
     /** 
-     * Method called after a {@link TemplateException} was raised inside a template. The error is logged before this is
-     * called, so there's no need to log it here. The exception should be re-thrown unless you want to
-     * suppress the exception.
+     * Method called after a {@link TemplateException} was raised inside a template. The exception should be re-thrown
+     * unless you want to suppress the exception.
      * 
      * <p>Note that you can check with {@link Environment#isInAttemptBlock()} if you are inside a {@code #attempt}
      * block, which then will handle handle this exception and roll back the output generated inside it.
      * 
      * <p>Note that {@link StopException}-s (raised by {@code #stop}) won't be captured.
+     * 
+     * <p>Note that you shouldn't log the exception in this method unless you suppress it. If there's a concern that the
+     * exception might won't be logged after it bubbles up from {@link Template#process(Object, Writer)}, simply
+     * ensure that {@link Configuration#getLogTemplateExceptions()} is {@code true}. 
      * 
      * @param te The exception that occurred; don't forget to re-throw it unless you want to suppress it
      * @param env The runtime environment of the template

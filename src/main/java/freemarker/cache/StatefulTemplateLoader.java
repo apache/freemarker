@@ -22,7 +22,7 @@ package freemarker.cache;
 import freemarker.template.Configuration;
 
 /**
- * Interface that can be implemented by template loaders that maintain some 
+ * Interface that can be implemented by {@link TemplateLoader}-s that maintain some 
  * sort of internal state (i.e. caches of earlier lookups for performance 
  * optimization purposes etc.) and support resetting of their state. 
  */

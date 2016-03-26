@@ -18,23 +18,23 @@
  */
 package freemarker.core;
 
-import freemarker.template.Configuration;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
 
 /**
  * "markup output" template language data-type; stores markup (some kind of "rich text" / structured format, as opposed
- * to plain text) that meant to be printed as template output. Each implementation of this type has a
- * {@link OutputFormat} subclass pair (like {@link TemplateHTMLOutputModel} has {@link HTMLOutputFormat}). This type is
- * related to the {@link Configuration#setOutputFormat(OutputFormat)} and
- * {@link Configuration#setAutoEscapingPolicy(int)} mechanism; see more there. Values of this type are exempt from
- * automatic escaping with that mechanism.
+ * to plain text) that meant to be printed as template output. This type is related to the {@link OutputFormat}
+ * mechanism. Values of this kind are exempt from {@link OutputFormat}-based automatic escaping.
  * 
  * <p>
- * Note that {@link TemplateMarkupOutputModel}-s are by design not handled like {@link TemplateScalarModel}-s, and so
+ * Each implementation of this type has a {@link OutputFormat} subclass pair, whose singleton instance is returned by
+ * {@link #getOutputFormat()}. See more about how markup output values work at {@link OutputFormat}.
+ * 
+ * <p>
+ * Note that {@link TemplateMarkupOutputModel}-s are by design not treated like {@link TemplateScalarModel}-s, and so
  * the implementations of this interface usually shouldn't implement {@link TemplateScalarModel}. (Because, operations
- * applicable on plain strings, like converting to upper case, substringing, etc., can corrupt markup.) The template
- * author should make conscious decision of passing in the markup as String by using {@code ?markup_string}.
+ * applicable on plain strings, like converting to upper case, substringing, etc., can corrupt markup.) If the template
+ * author wants to pass in the "source" of the markup as string somewhere, he should use {@code ?markup_string}.
  * 
  * @param <MO>
  *            Refers to the interface's own type, which is useful in interfaces that extend
@@ -44,6 +44,9 @@ import freemarker.template.TemplateScalarModel;
  */
 public interface TemplateMarkupOutputModel<MO extends TemplateMarkupOutputModel<MO>> extends TemplateModel {
 
+    /**
+     * Returns the singleton {@link OutputFormat} object that implements the operations for the "markup output" value.
+     */
     MarkupOutputFormat<MO> getOutputFormat();
     
 }

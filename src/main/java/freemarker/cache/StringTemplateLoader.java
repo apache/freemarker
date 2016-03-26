@@ -94,6 +94,19 @@ public class StringTemplateLoader implements TemplateLoader {
         templates.put(name, new StringTemplateSource(name, templateSource, lastModified));
     }
     
+    /**
+     * Removes the template with the specified name if it was added earlier.
+     * 
+     * @param name Exactly the key with which the template was added.
+     * 
+     * @return Whether a template was found with the given key (and hence was removed now) 
+     * 
+     * @since 2.3.24
+     */
+    public boolean removeTemplate(String name) {
+        return templates.remove(name) != null;
+    }
+    
     public void closeTemplateSource(Object templateSource) {
     }
     

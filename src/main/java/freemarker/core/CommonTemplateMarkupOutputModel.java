@@ -45,17 +45,20 @@ public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateM
 
     public abstract CommonMarkupOutputFormat<MO> getOutputFormat();
 
-    /** Maybe {@code null}, but then the other field isn't {@code null}. */
+    /** Maybe {@code null}, but then {@link #getMarkupContent()} isn't {@code null}. */
     final String getPlainTextContent() {
         return plainTextContent;
     }
 
-    /** Maybe {@code null}, but then the other field isn't {@code null}. */
+    /** Maybe {@code null}, but then {@link #getPlainTextContent()} isn't {@code null}. */
     final String getMarkupContent() {
         return markupContet;
     }
 
-    /** Use only to set {@code null} field to the value calculated from the other field! */
+    /**
+     * Use only to set the value calculated from {@link #getPlainTextContent()}, when {@link #getMarkupContent()} was
+     * still {@code null}!
+     */
     final void setMarkupContet(String markupContet) {
         this.markupContet = markupContet;
     }

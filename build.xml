@@ -95,7 +95,7 @@
   
   <property name="dist.dir" value="build/dist" />
   <property name="dist.archiveBaseName" value="apache-${mavenArtifactId}-${version}" />
-  <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}" />
+  <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}-bin" />
   <property name="dist.src.dir" value="${dist.dir}/src/${dist.archiveBaseName}-src" />
   
   <!-- ================================================================== -->
@@ -690,13 +690,10 @@
         <exclude name="**/*.*~" />
         <include name="src/**" />
         <include name="examples/**" />
-        <include name=".settings/**" />
         <include name="*.xml" />
         <include name="*.sample" />
         <include name="*.txt" />
         <include name="osgi.bnd" />
-        <include name=".classpath" />
-        <include name=".project" />
         <include name=".git*" />
       </fileset>
     </copy>

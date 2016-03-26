@@ -12,10 +12,10 @@ are licensed by the Apache Software Foundation under the Apache License,
 Version 2.0. This is the same license as the license of FreeMaker. These
 files are:
   
-    src/main/freemarker/ext/jsp/web-app_2_2.dtd
-    src/main/freemarker/ext/jsp/web-app_2_3.dtd
-    src/main/freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
-    src/main/freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
+    src/main/resources/freemarker/ext/jsp/web-app_2_2.dtd
+    src/main/resources/freemarker/ext/jsp/web-app_2_3.dtd
+    src/main/resources/freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
+    src/main/resources/freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
 
 =========================================================================
 
@@ -25,9 +25,5 @@ license of the FreeMarker project:
 
     src/main/misc/overloadedNumberRules/prices.ods
     src/manual/en_US/docgen-originals/figures/overview.odg
-    src/test/resources/freemarker/ext/jsp/webapps/config/WEB-INF/lib/WebappLocalFreemarkerServlet.jar
-    src/test/resources/freemarker/ext/jsp/webapps/config/WEB-INF/lib/templates.jar
-    src/test/resources/freemarker/ext/jsp/webapps/tldDiscovery/WEB-INF/lib/taglib-foo.jar
-    src/test/resources/freemarker/ext/jsp/webapps/tldDiscovery/WEB-INF/taglib 2.jar
 
 =========================================================================
