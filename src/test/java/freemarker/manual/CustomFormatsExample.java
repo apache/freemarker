@@ -19,6 +19,7 @@
 package freemarker.manual;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class CustomFormatsExample extends ExamplesTest {
         cfg.setCustomDateFormats(customDateFormats);
 
         addToDataModel("p", 10000);
-        addToDataModel("w", 10.305);
+        addToDataModel("w", new BigDecimal("10.305"));
         addToDataModel("fd", new Date(1450904944213L));
         addToDataModel("let", new Date(1450904944213L));
         

@@ -23,7 +23,7 @@ import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Represents an output format.
+ * Represents an output format. If you need auto-escaping, see its subclass, {@link MarkupOutputFormat}. 
  * 
  * @see Configuration#setOutputFormat(OutputFormat)
  * @see Configuration#setRegisteredCustomOutputFormats(java.util.Collection)

@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.24 Preview 1</productname>
+    <productname>Freemarker 2.3.24</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -5790,7 +5790,9 @@ ${"&lt;h1&gt;"?no_esc + "Foo &amp; bar" + "&lt;/h1&gt;"?no_esc}</programlisting>
             just a shorthand of using the <literal>+</literal> operator
             (<literal>&lt;#assign s = "Hello" + name + "!"&gt;</literal>).
             Thus, <literal>${<replaceable>...</replaceable>}</literal>-s
-            inside string expressions aren't auto-escaped.</para>
+            inside string expressions aren't auto-escaped, but of course when
+            the resulting concatenated string is printed later, it will be
+            possibly auto-escaped.</para>
 
             <programlisting role="template">&lt;#-- We assume that we have "HTML" output format by default. --&gt;
 &lt;#assign name = "Foo &amp; Bar"&gt;
@@ -6224,11 +6226,11 @@ That's all.</programlisting>
 
         <para>First you have to create a
         <literal>freemarker.template.Configuration</literal> instance and
-        adjust its settings. A <literal>Configuration</literal> instance is a
-        central place to store the application level settings of FreeMarker.
-        Also, it deals with the creation and <emphasis>caching</emphasis> of
-        pre-parsed templates (i.e., <literal>Template</literal>
-        objects).</para>
+        adjust its settings. A <literal>Configuration</literal> instance is
+        the central place to store the application level settings of
+        FreeMarker. Also, it deals with the creation and
+        <emphasis>caching</emphasis> of pre-parsed templates (i.e.,
+        <literal>Template</literal> objects).</para>
 
         <para>Normally you will <emphasis>do this only once</emphasis> at the
         beginning of the application (possibly servlet) life-cycle:</para>
@@ -6261,21 +6263,21 @@ cfg.setLogTemplateExceptions(false);</programlisting>
 
         <warning>
           <para>Do not needlessly re-create <literal>Configuration</literal>
-          instances; it's expensive, among others because you lose the caches.
-          <literal>Configuration</literal> instances meant to
-          application-level singletons.</para>
+          instances; it's expensive, among others because you lose the
+          template cache. <literal>Configuration</literal> instances meant to
+          be application-level singletons.</para>
         </warning>
 
-        <para>When using in multi-threaded applications (like for Web sites),
-        the settings in the <literal>Configuration</literal> instance must not
-        be modified anymore after this point. Then it can be treated as
-        <quote>effectively immutable</quote> object, so you can continue with
-        <emphasis>safe publishing</emphasis> techniques (see JSR 133 and
-        related literature) to make the instance available for the other
-        threads. Like, publish the instance through a final or volatile filed,
-        or through a thread-safe IoC container, but not through a plain field.
-        (<literal>Configuration</literal> methods that don't deal with
-        modifying settings are thread-safe.)</para>
+        <para>In multi-threaded applications (like Web sites) the settings in
+        the <literal>Configuration</literal> instance must not be modified
+        anymore after this point. Thus it can be treated as <quote>effectively
+        immutable</quote> object, so you can continue with <emphasis>safe
+        publishing</emphasis> techniques (see JSR 133 and related literature)
+        to make the instance available for other threads. Like, publish the
+        instance through a final or volatile filed, or through a thread-safe
+        IoC container (like the one provided by Spring).
+        <literal>Configuration</literal> methods that don't deal with
+        modifying settings are thread-safe.</para>
       </section>
 
       <section xml:id="pgui_quickstart_createdatamodel">
@@ -6297,7 +6299,7 @@ cfg.setLogTemplateExceptions(false);</programlisting>
           </listitem>
 
           <listitem>
-            <para>Use <literal>java.lang.Number</literal> descents for
+            <para>Use <literal>java.lang.Number</literal> subclasses for
             numbers.</para>
           </listitem>
 
@@ -6307,12 +6309,18 @@ cfg.setLogTemplateExceptions(false);</programlisting>
           </listitem>
 
           <listitem>
+            <para>Use <literal>java.util.Date</literal> and its subclasses for
+            date/time values</para>
+          </listitem>
+
+          <listitem>
             <para>Use <literal>java.util.List</literal> or Java arrays for
             sequences.</para>
           </listitem>
 
           <listitem>
-            <para>Use <literal>java.util.Map</literal> for hashes.</para>
+            <para>Use <literal>java.util.Map</literal> with
+            <literal>String</literal> keys for hashes.</para>
           </listitem>
 
           <listitem>
@@ -6426,9 +6434,8 @@ public class Product {
         <para>Templates are represented by
         <literal>freemarker.template.Template</literal> instances. Typically
         you obtain a <literal>Template</literal> instance from the
-        <literal>Configuration</literal> instance. Whenever you need a
-        template instance you can get it with its
-        <literal>getTemplate</literal> method. Store <link
+        <literal>Configuration</literal> instance, using its.
+        <literal>getTemplate</literal> method. If you store <link
         linkend="example.first">the example template</link> in the
         <literal>test.ftlh</literal> file of the <link
         linkend="pgui_quickstart_createconfiguration">earlier</link> set
@@ -6436,16 +6443,18 @@ public class Product {
 
         <programlisting role="unspecified">Template temp = cfg.getTemplate("test.ftlh");</programlisting>
 
-        <para>When you call this, it will create a <literal>Template</literal>
-        instance corresponds to <literal>test.ftlh</literal>, by reading
+        <para>This gives you a <literal>Template</literal> instance that was
+        created by reading
         <literal><replaceable>/where/you/store/templates/</replaceable>test.ftlh</literal>
-        and parsing (compile) it. The <literal>Template</literal> instance
-        stores the template in the parsed form, and not as text.</para>
+        and parsing it. The <literal>Template</literal> instance stores the
+        template in parsed form, and not as text. If the template is missing
+        or syntactically incorrect, <literal>getTemplate</literal> will throw
+        exception instead.</para>
 
         <para><literal>Configuration</literal> caches
-        <literal>Template</literal> instances, so when you get
-        <literal>test.ftlh</literal> again, it probably won't read and parse
-        the template file again, just returns the same
+        <literal>Template</literal> instances, so when you call
+        <literal>cfg.getTemplate("test.ftlh")</literal> next time, it probably
+        won't read and parse the template file again, just returns the same
         <literal>Template</literal> instance as for the first time.</para>
       </section>
 
@@ -6462,8 +6471,8 @@ public class Product {
           <primary>merging</primary>
         </indexterm>
 
-        <para>As we know, data-model + template = output, and we have a
-        data-model (<literal>root</literal>) and a template
+        <para>As you might already know, data-model + template = output. We
+        already have a data-model (<literal>root</literal>) and a template
         (<literal>temp</literal>), so to get the output we have to merge them.
         This is done by the <literal>process</literal> method of the template.
         It takes the data-model root and a <literal>Writer</literal> as
@@ -6474,9 +6483,9 @@ public class Product {
         <programlisting role="unspecified">Writer out = new OutputStreamWriter(System.out);
 temp.process(root, out);</programlisting>
 
-        <para>This will print to your terminal the output what you have seen
-        in the <link linkend="example.first">first example</link> of the
-        Template Author's Guide.</para>
+        <para>This will print to your terminal the output you have seen in the
+        <link linkend="example.first">first example</link> of the Template
+        Author's Guide.</para>
 
         <para>Java I/O related notes: Depending on what <literal>out</literal>
         is, you may need to ensure that <literal>out.close()</literal> is
@@ -6485,8 +6494,9 @@ temp.process(root, out);</programlisting>
         other times, like in typical Web applications, you must
         <emphasis>not</emphasis> close <literal>out</literal>. FreeMarker
         calls <literal>out.flush()</literal> after a successful template
-        execution (can be disabled in <literal>Configuration</literal>), so
-        you don't need to worry about that.</para>
+        execution (but tis can be disabled in
+        <literal>Configuration</literal>), so you don't need to worry about
+        that.</para>
 
         <para>Note that once you have obtained a <literal>Template</literal>
         instance, you can merge it with different data-models for unlimited
@@ -7850,22 +7860,26 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
         shared variables). Also, it deals with the creation and caching of
         <literal>Template</literal> instances.</para>
 
-        <para>An application typically should use only a single shared
+        <para>An application typically uses only a single shared
         <literal>Configuration</literal> instance. More precisely, typically
-        you should have one <literal>Configuration</literal> instance per
-        independently developed components (like projects, modules, etc.) that
-        internally use FreeMarker, as each should create its own
-        instance.</para>
+        you have one <literal>Configuration</literal> instance per
+        independently developed component that internally uses FreeMarker, so
+        they can be configured independently of each other. For example, your
+        e-mail sender component and your report generator component (service)
+        probably want to use their own <literal>Configuration</literal>-s, as
+        their needs differ.</para>
 
-        <para>As running templates are influenced by the configuration
-        settings, each <literal>Template</literal> instance has a
-        <literal>Configuration</literal> instance associated with it, via the
-        corresponding <literal>Template</literal> constructor parameter.
-        Usually you obtain <literal>Template</literal> instances with
-        <literal>Configuration.getTemplate</literal> (not by directly calling
-        the <literal>Template</literal> constructor), in which case the
-        associated <literal>Configuration</literal> instance will be the one
-        whose <literal>getTemplate</literal> method has been called.</para>
+        <para>As the behavior of templates depends on the configuration
+        settings, each <literal>Template</literal> instance has an associated
+        <literal>Configuration</literal> instance. If you obtain the
+        <literal>Template</literal> instances with
+        <literal>Configuration.getTemplate</literal>, the associated
+        <literal>Configuration</literal> instance will be the one whose
+        <literal>getTemplate</literal> method was called. If you create the
+        <literal>Template</literal> instances directly with the
+        <literal>Template</literal> constructor, the
+        <literal>Configuration</literal> should be specified as constructor
+        parameter.</para>
       </section>
 
       <section xml:id="pgui_config_sharedvariables">
@@ -7967,17 +7981,17 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
         API documentation of
         <literal>Configuration.setSetting(...)</literal></link>.</para>
 
-        <para>Settings stored in <literal>Configuration</literal> instance can
-        be overridden in a <literal>Template</literal> instance. For example
-        you set <literal>"en_US"</literal> for the <literal>locale</literal>
-        setting in the configuration, then the <literal>locale</literal> in
-        all templates that use this configuration will be
-        <literal>"en_US"</literal>, except in templates where the locale was
-        explicitly specified differently (see <link
-        linkend="ref_directive_include_localized">localization</link>). Thus,
-        values in a <literal>Configuration</literal> serve as defaults that
-        can be overridden in a per template manner. The value comes from
-        <literal>Configuration</literal> instance or
+        <para>The settings coming from the <literal>Configuration</literal>
+        can be overridden in a <literal>Template</literal> instance. For
+        example, if you set the <literal>locale</literal> setting to
+        <literal>"en_US"</literal> in the configuration, then the
+        <literal>locale</literal> in all templates that use this configuration
+        will be <literal>"en_US"</literal>, except in templates where the
+        <literal>locale</literal> was explicitly specified differently (see
+        <link linkend="ref_directive_include_localized">localization</link>).
+        Thus, the setting values in the <literal>Configuration</literal> serve
+        as defaults that can be overridden in a per template manner. The value
+        coming from the <literal>Configuration</literal> instance or
         <literal>Template</literal> instance can be further overridden for a
         single <literal>Template.process</literal> call. For each such call a
         <literal>freemarker.core.Environment</literal> object is created
@@ -7985,7 +7999,8 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
         processing, including the setting values that were overridden on that
         level. The values stored there can even be changed during the template
         processing, so a template can set settings itself, like switching
-        <literal>locale</literal> at the middle of the output.</para>
+        <literal>locale</literal> at the middle of the ongoing
+        processing.</para>
 
         <para>This can be imagined as 3 layers
         (<literal>Configuration</literal>, <literal>Template</literal>,
@@ -8084,22 +8099,22 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 myCfg.setDefaultEncoding("UTF-8");</programlisting>
 
-            <para>You do it before you start to actually use the
+            <para>You do this before you start to actually use the
             <literal>Configuration</literal> object (typically, when you
             initialize the application); you should treat the object as
             read-only after that.</para>
 
-            <para>In practice, in most Web application frameworks you have to
-            specify the settings in a framework-specific configuration file
-            that require specifying setting as <literal>String</literal>
+            <para>In practice, in most frameworks you have to specify the
+            settings in some kind of framework-specific configuration file
+            that require specifying settings as <literal>String</literal>
             name-value pairs (like in a <literal>.properties</literal> file).
             In that case the authors of the frameworks most probably use the
-            <literal>setSetting(String name, String value)</literal> method of
-            <literal>Configuration</literal>; see available setting names and
-            the format of the values in the <link
+            <literal>Confguration.setSetting(String name, String
+            value)</literal> method; see available setting names and the
+            format of the values in the <link
             xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">API
-            doc of <literal>setSetting</literal></link>. Example for Spring
-            Framework:</para>
+            documentation of <literal>setSetting</literal></link>. Example for
+            Spring Framework:</para>
 
             <programlisting role="unspecified">&lt;bean id="freemarkerConfig"
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
@@ -8113,9 +8128,9 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
 &lt;/bean&gt;</programlisting>
 
             <para>Note that this kind of configuring
-            (<literal>String</literal> key-value pairs) is unfortunately
-            limited compared to directly using the API of
-            <literal>Configuration</literal>.</para>
+            (<literal>String</literal> key-value pairs) is somewhat limited
+            compared to directly using Java API, so in some cases you have to
+            find a way to do this in Java.</para>
           </listitem>
 
           <listitem>
@@ -8145,14 +8160,14 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
             <literal>tag_syntax</literal>,
             <literal>whitespace_stripping</literal>, etc.), as these are not
             inherited from the top-level template, instead each template
-            always uses its own, no mater how it was invoked.</para>
+            always uses its own values, no mater how it was invoked.</para>
 
             <note>
               <para>If you are going to use template layer settings, you
               should set <link
               linkend="pgui_config_incompatible_improvements">the
               <literal>incompatible_improvements</literal> setting</link> to
-              2.3.22 or higher, to avoid confusing legacy bugs.</para>
+              2.3.22 or higher, to avoid soe confusing legacy bugs.</para>
             </note>
           </listitem>
 
@@ -8163,14 +8178,13 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
             <itemizedlist>
               <listitem>
                 <para>With Java API: Use the setter methods of the
-                <literal>Environment</literal> object. Certainly you want to
-                do that just before the processing of the template is started,
-                and then you run into the problem that when you call
-                <literal>myTemplate.process(...)</literal> it creates the
-                <literal>Environment</literal> object internally and the
-                immediately processes the template, so you had no chance. The
-                solution is that this two steps can be separated like
-                this:</para>
+                <literal>Environment</literal> object. You may run into the
+                API problem that <literal>myTemplate.process(...)</literal>
+                both creates the <literal>Environment</literal> object
+                internally and processes the template, so you have no
+                opportunity to adjust the <literal>Environment</literal> in
+                between. The solution is that those two steps can be separated
+                like this:</para>
 
                 <programlisting role="unspecified">Environment env = myTemplate.createProcessingEnvironment(root, out);
 env.setLocale(java.util.Locale.ITALY);
@@ -8252,80 +8266,93 @@ env.process();  // process the template</programlisting>
 
           <para>Template loaders are objects that load raw textual data based
           on abstract template paths like <literal>"index.ftl"</literal> or
-          <literal>"products/catalog.ftl"</literal>. It is up to the concrete
-          template loader object what source does it use to fetch the
-          requested data (files in a directory, data base, etc.). When you
-          call <literal>cfg.getTemplate</literal> (where
-          <literal>cfg</literal> is a <literal>Configuration</literal>
-          instance), FreeMarker ask the template loader you have set up for
-          the <literal>cfg</literal> to return the text for the given template
-          path, and then FreeMarker parses that text as template.</para>
+          <literal>"products/catalog.ftl"</literal>. It's up to the concrete
+          template loader if from where and how the template
+          <quote>files</quote> are loaded. They could be real files inside a
+          specified directory, or values in a data base table, or
+          <literal>String</literal>-s in a Java Map, etc. When you call
+          <literal>cfg.getTemplate</literal> (where <literal>cfg</literal> is
+          a <literal>Configuration</literal> instance), FreeMarker asks the
+          template loader (<literal>cfg.getTemplateLoader</literal>) to return
+          the text for the given template path, and then FreeMarker parses
+          that text as template. It doesn't care or even know if the template
+          is a real file or not, and where it is physically; those details are
+          only known by the template loader.</para>
 
           <section>
             <title>Built-in template loaders</title>
 
-            <para>You can set up three template loading methods in the
-            <literal>Configuration</literal> using the following convenience
-            methods. (Each method will create a template loader object
-            internally and set up the <literal>Configuration</literal>
-            instance to use that.)</para>
+            <para>You can set up the three most common template loading
+            mechanism in the <literal>Configuration</literal> using the
+            following <emphasis>convenience</emphasis> methods:</para>
 
-            <programlisting role="unspecified">void setDirectoryForTemplateLoading(File dir);</programlisting>
+            <itemizedlist>
+              <listitem>
+                <para><literal>void setDirectoryForTemplateLoading(File
+                dir)</literal>: Sets a directory on the file system from which
+                to load templates. Template names (template paths) will be
+                interpreted relatively to this physical directory. It won't
+                let you load files outside this directory.</para>
+              </listitem>
 
-            <para>or</para>
+              <listitem>
+                <para><literal>void setClassForTemplateLoading(Class cl,
+                String basePackagePath)</literal> and <literal>void
+                setClassLoaderForTemplateLoading(ClassLoader classLoader,
+                String basePackagePath)</literal>: These are for when you want
+                to load templates via the same mechanism with which Java loads
+                classes (from the class-path, as they used to say vaguely).
+                This is very likely be the preferred means of loading
+                templates for production code, as it allows you to keep
+                everything inside the deployment <literal>jar</literal> files.
+                The first parameter decides which Java
+                <literal>ClassLoader</literal> will be used. The second
+                parameter specifies the package that contains the templates,
+                in <literal>/</literal>-separated format. Note that if you
+                don't start it with <literal>/</literal>, it will be
+                interpreted relatively to the package of the
+                <literal>Class</literal> parameter.</para>
+              </listitem>
 
-            <programlisting role="unspecified">void setClassForTemplateLoading(Class cl, String prefix);</programlisting>
+              <listitem>
+                <para><literal>void setServletContextForTemplateLoading(Object
+                servletContext, String path)</literal>: Takes the context of
+                your Servlet-based web application, and a base path, which is
+                interpreted relative to the web application root directory
+                (that's the parent of the <literal>WEB-INF</literal>
+                directory). Note that we refer to "directory" here although
+                this loading method works even for unpacked
+                <literal>.war</literal> files, since it uses
+                <literal>ServletContext.getResource()</literal> to access the
+                templates. If you omit the second parameter (or use
+                <literal>""</literal>), you can simply store the static files
+                (<literal>.html</literal>, <literal>.jpg</literal>, etc.)
+                mixed with the <literal>.ftl</literal> files. Of course, you
+                must set up a Servlet for the <literal>*.ftl</literal>,
+                <literal>*.ftlh</literal>, <literal>*.ftlx</literal>
+                uri-patterns in <literal>WEB-INF/web.xml</literal> for this,
+                otherwise the client will get the raw templates as is! To
+                avoid a such accident, many prefers storing the templates
+                somewhere inside the <literal>WEB-INF</literal> directory,
+                which is never visitable directly. This mechanism will very
+                likely be the preferred means of loading templates for servlet
+                applications, since the templates can be updated without
+                restarting the web application, while this often doesn't work
+                with the class-loader mechanism.</para>
+              </listitem>
+            </itemizedlist>
 
-            <para>or</para>
+            <para>If you want to use a custom
+            <literal>TemplateLoader</literal> implementation, or need to set
+            up some extra settings of a built-in template loader, you need to
+            instantiate the <literal>TemplateLoader</literal> object yourself,
+            and then call
+            <literal>Configuration.setTemplateLoader(TemplateLoader)</literal>:</para>
 
-            <programlisting role="unspecified">void setServletContextForTemplateLoading(Object servletContext, String path);</programlisting>
-
-            <para>The first method above sets an explicit directory on the
-            file system from which to load templates. Needless to say perhaps,
-            the <literal>File</literal> parameter must be an existing
-            directory. Otherwise, an exception will be thrown.</para>
-
-            <para>The second call takes a <literal>Class</literal> as a
-            parameter and a prefix. This is for when you want to load
-            templates via the same mechanism that a java
-            <literal>ClassLoader</literal> uses to load classes. This means
-            that the class you pass in will be used to call
-            <literal>Class.getResource()</literal> to find the templates. The
-            <literal>prefix</literal> parameter is prepended to the name of
-            the template. The classloading mechanism will very likely be the
-            preferred means of loading templates for production code, since
-            loading from the classpath mechanism is usually more foolproof
-            than specifying an explicit directory location on the file system.
-            It is also nicer in a final application to keep everything in a
-            <literal>.jar</literal> file that the user can simply execute
-            directly and have all the icons and text and everything else
-            inside the <literal>.jar</literal> file.</para>
-
-            <para>The third call takes the context of your web application,
-            and a base path, which is interpreted relative to the web
-            application root directory (that's the parent of the
-            <literal>WEB-INF</literal> directory). This loader will load the
-            templates from the web application directory. Note that we refer
-            to "directory" here although this loading method works even for
-            unpacked <literal>.war</literal> files since it uses
-            <literal>ServletContext.getResource()</literal> to access the
-            templates. If you omit the second parameter (or use
-            <literal>""</literal>), you can simply store the static files
-            (<literal>.html</literal>, <literal>.jpg</literal>, etc.) mixed
-            with the <literal>.ftl</literal> files, just
-            <literal>.ftl</literal> files will be sent to the client
-            processed. Of course, you must set up a Servlet for the
-            <literal>*.ftl</literal> uri-pattern in
-            <literal>WEB-INF/web.xml</literal> for this, otherwise the client
-            will get the templates as is, and thus may see confidential
-            content! You should not use empty path if this is a problem for
-            your site, rather you should store the templates somewhere inside
-            the <literal>WEB-INF</literal> directory, so the raw templates are
-            never served accidentally. This mechanism will very likely be the
-            preferred means of loading templates for servlet applications,
-            since the templates can be updated without restarting the web
-            application, while this often doesn't work with the class-loader
-            mechanism.</para>
+            <programlisting role="unspecified">WebappTemplateLoader templateLoader = new WebappTemplateLoader(servletContext, "WEB-INF/templates");
+templateLoader.setURLConnectionUsesCaches(false);
+templateLoader.setAttemptFileAccess(false);
+cfg.setTemplateLoader(templateLoader);</programlisting>
           </section>
 
           <section>
@@ -8333,12 +8360,12 @@ env.process();  // process the template</programlisting>
 
             <para>If you need to load templates from multiple locations, you
             have to instantiate the template loader objects for every
-            location, wrap them into a special template loader named
-            <literal>MultiTemplateLoader</literal> and finally pass that
-            loader to the <literal>setTemplateLoader(TemplateLoader
-            loader)</literal> method of <literal>Configuration</literal>.
-            Here's an example for loading templates from two distinct
-            directories and with the class-loader:</para>
+            location, wrap them into a <literal>MultiTemplateLoader</literal>,
+            and finally pass that loader to the
+            <literal>setTemplateLoader(TemplateLoader loader)</literal> method
+            of <literal>Configuration</literal>. Here's an example for loading
+            templates from two distinct directories and with the
+            class-loader:</para>
 
             <programlisting role="unspecified">import freemarker.cache.*; // template loaders live in this package
 
@@ -8346,9 +8373,9 @@ env.process();  // process the template</programlisting>
 
 FileTemplateLoader ftl1 = new FileTemplateLoader(new File("/tmp/templates"));
 FileTemplateLoader ftl2 = new FileTemplateLoader(new File("/usr/data/templates"));
-ClassTemplateLoader ctl = new ClassTemplateLoader(getClass(), "");
-TemplateLoader[] loaders = new TemplateLoader[] { ftl1, ftl2, ctl };
-MultiTemplateLoader mtl = new MultiTemplateLoader(loaders);
+ClassTemplateLoader ctl = new ClassTemplateLoader(getClass(), "/com/example/templates");
+
+MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { ftl1, ftl2, ctl });
 
 cfg.setTemplateLoader(mtl);</programlisting>
 
@@ -8356,15 +8383,15 @@ cfg.setTemplateLoader(mtl);</programlisting>
             <literal>/tmp/templates</literal> directory, and if it does not
             find the requested template there, it will try to load that from
             <literal>/usr/data/templates</literal>, and if it still does not
-            find the requested template, then it tries to load that with the
-            class-loader.</para>
+            find the requested template, then it tries to load it from the
+            <literal>com.example.templates</literal> Java package.</para>
           </section>
 
           <section>
             <title>Loading templates from other sources</title>
 
-            <para>If none of the built-in class loaders are good for you, you
-            will have to write your own class that implements the
+            <para>If none of the built-in class loaders fit your needs, you
+            can write your own class that implements the
             <literal>freemarker.cache.TemplateLoader</literal> interface and
             pass it to the <literal>setTemplateLoader(TemplateLoader
             loader)</literal> method of <literal>Configuration</literal>.
@@ -8460,16 +8487,16 @@ cfg.setTemplateLoader(mtl);</programlisting>
 
           <para>If you change the template file, then FreeMarker will re-load
           and re-parse the template automatically when you get the template
-          next time. However, since checking if the file has been changed can
-          be time consuming, there is a <literal>Configuration</literal> level
-          setting called ``update delay''. This is the time that must elapse
-          since the last checking for a newer version of a certain template
-          before FreeMarker will check that again. This is set to 5 seconds by
-          default. If you want to see the changes of templates immediately,
-          set it to 0. Note that some template loaders may have problems with
-          template updating. For example, class-loader based template loaders
-          typically do not notice that you have changed the template
-          file.</para>
+          next time. However, since always checking for changes can be burden
+          for a system that processes lot of templates, there is a
+          <literal>Configuration</literal> level setting called <quote>update
+          delay</quote> (defaults is 5 seconds). Until this much time has
+          elapsed since the last checking for a newer version, FreeMarker will
+          not check again if the template was changed. If you want to see the
+          changes without delay, set this setting to 0. Note that some
+          template loaders won't see that a template was changed because of
+          the underlying storage mechanism doesn't support that; for example,
+          class-loader based template loaders may have this problem.</para>
 
           <para>A template will be removed from the cache if you call
           <literal>getTemplate</literal> and FreeMarker realizes that the
@@ -8477,7 +8504,11 @@ cfg.setTemplateLoader(mtl);</programlisting>
           that it begins to run out of memory, by default it can arbitrarily
           drop templates from the cache. Furthermore, you can empty the cache
           manually with the <literal>clearTemplateCache</literal> method of
-          <literal>Configuration</literal>.</para>
+          <literal>Configuration</literal>. You can also drop selected
+          template from the cache with
+          <literal>removeTemplateFromCache</literal>; this can be also
+          utilized to force re-loading a template regardless of the
+          <quote>update delay</quote> setting.</para>
 
           <para>The actual strategy of when a cached template should be thrown
           away is pluggable with the <literal>cache_storage</literal> setting,
@@ -8506,12 +8537,12 @@ cfg.setTemplateLoader(mtl);</programlisting>
           <literal>strongSizeLimit</literal> is 0, and
           <literal>softSizeLimit</literal> is
           <literal>Integer.MAX_VALUE</literal> (that is, in practice,
-          infinite). But using non-0 <literal>strongSizeLimit</literal> is
-          maybe a better strategy for high load servers, since it seems that,
-          with only softly referenced items, JVM tends to cause just higher
-          resource consumption if the resource consumption was already high,
-          because it constantly throws frequently used templates from the
-          cache, which then have to be re-loaded and re-parsed.</para>
+          infinite). Depending on how smart the JVM is, using non-0
+          <literal>strongSizeLimit</literal> is maybe a safer option, as with
+          only softly referenced items the JVM could even throw the most
+          frequently used templates when there's a resource shortage, which
+          then have to be re-loaded and re-parsed, burdening the system even
+          more.</para>
         </section>
       </section>
 
@@ -8537,47 +8568,47 @@ cfg.setTemplateLoader(mtl);</programlisting>
               <para>Exceptions occurring when you configure FreeMarker:
               Typically you configure FreeMarker only once in your
               application, when your application initializes itself. Of
-              course, during this, exceptions can occur, as it is obvious from
-              the FreeMarker API...</para>
+              course, during this, exceptions can occur.</para>
             </listitem>
 
             <listitem>
               <para>Exceptions occurring when loading and parsing templates:
               When you call
               <literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>,
-              FreeMarker has to load the template file into the memory and
-              parse it (unless the template is already <link
+              FreeMarker has to load the template into the memory and parse it
+              (unless the template is already <link
               linkend="pgui_config_templateloading_caching">cached</link> in
-              that <literal>Configuration</literal> object). During this, two
-              kind of exceptions can occur:</para>
+              that <literal>Configuration</literal> object). During this,
+              these kind of exceptions can occur:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>IOException</literal> because the template
-                  file was not found, or other I/O problem occurred while
-                  trying to read it, for example you have no right to read the
-                  file, or there are disk errors. The emitter of these errors
-                  is the <link
-                  linkend="pgui_config_templateloading"><literal>TemplateLoader</literal>
-                  object</link>, which is plugged into the
-                  <literal>Configuration</literal> object. (For the sake of
-                  correctness: When I say ``file'' here, that's a
-                  simplification. For example, templates can be stored in a
-                  table of a relational database as well. This is the business
-                  of the <literal>TemplateLoader</literal>.)</para>
+                  <para><literal>TemplateNotFoundException</literal> because
+                  the requested template doesn't exist. Note this extends
+                  <literal>IOException</literal>.</para>
                 </listitem>
 
                 <listitem>
                   <para><literal>freemarker.core.ParseException</literal>
-                  because the template file is syntactically incorrect
-                  according the rules of the FTL language. The point is that
-                  this error occurs when you obtain the
-                  <literal>Template</literal> object
+                  because the template is syntactically incorrect according
+                  the rules of the FTL language. Note that this error occurs
+                  when you obtain the <literal>Template</literal> object
                   (<literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>),
-                  and not when you execute
+                  not later when you execute
                   (<literal>Template.process(<replaceable>...</replaceable>)</literal>)
-                  the template. This exception is an
-                  <literal>IOException</literal> subclass.</para>
+                  the template. . Note this extends
+                  <literal>IOException</literal> (legacy).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Any other kind of <literal>IOException</literal>
+                  because an error has occurred while reading an existing
+                  template. For example you have no right to read the file, or
+                  the connection through which you read the template is
+                  broken. The emitter of these is the <link
+                  linkend="pgui_config_templateloading"><literal>TemplateLoader</literal>
+                  object</link>, which is plugged into the
+                  <literal>Configuration</literal> object.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -8597,8 +8628,8 @@ cfg.setTemplateLoader(mtl);</programlisting>
                 <listitem>
                   <para><literal>freemarker.template.TemplatException</literal>
                   because other problem occurred while executing the template.
-                  For example, a frequent error is when a template refers to a
-                  variable which is not existing. Be default, when a
+                  For example, a frequent error is referring to a variable
+                  that doesn't exist in the data-model. By default, when a
                   <literal>TemplatException</literal> occurs, FreeMarker
                   prints the FTL error message and the stack trace to the
                   output writer with plain text format, and then aborts the
@@ -8606,8 +8637,11 @@ cfg.setTemplateLoader(mtl);</programlisting>
                   <literal>TemplatException</literal>, which then you can
                   catch as
                   <literal>Template.process(<replaceable>...</replaceable>)</literal>
-                  throws it. But this behavior can be customized. FreeMarker
-                  always <link linkend="pgui_misc_logging">logs</link>
+                  throws it. This behavior can be customized, and in fact, it
+                  should be; see the recommended configuration <link
+                  linkend="pgui_quickstart_createconfiguration">here</link>.
+                  By default FreeMarker also <link
+                  linkend="pgui_misc_logging">logs</link>
                   <literal>TemplatException</literal>-s.</para>
                 </listitem>
               </itemizedlist>
@@ -8624,20 +8658,66 @@ cfg.setTemplateLoader(mtl);</programlisting>
           object, which is plugged into the <literal>Configuration</literal>
           object with its
           <literal>setTemplateExceptionHandler(<replaceable>...</replaceable>)</literal>
-          mehod. The <literal>TemplateExceptionHandler</literal> contains 1
-          method:</para>
+          method. These are the <literal>TemplateExceptionHandler</literal>
+          implementations with FreeMarker comes with:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>TemplateExceptionHandler.DEBUG_HANDLER</literal>:
+              Prints stack trace (includes FTL error message and FTL stack
+              trace) and re-throws the exception. This is the default handler,
+              however, you should be careful not using it in production
+              environment, as it shows technical information about your
+              system.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateExceptionHandler.HTML_DEBUG_HANDLER</literal>:
+              Same as <literal>DEBUG_HANDLER</literal>, but it formats the
+              stack trace so that it will be readable with Web browsers.
+              Recommended over <literal>DEBUG_HANDLER</literal> when you
+              generate HTML pages, but it should only be used for development
+              as it shows technical information about your system.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateExceptionHandler.IGNORE_HANDLER</literal>:
+              Simply suppresses all exceptions (though FreeMarker will still
+              log them if
+              <literal>Configuration.getLogTemplateExceptions</literal> is
+              <literal>true</literal>). It does nothing to handle the event.
+              It does not re-throw the exception.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateExceptionHandler.RETHROW_HANDLER</literal>:
+              Simply re-throws all exceptions; it doesn't do anything else.
+              This should be used in most applications today. It doesn't print
+              anything to the output about the error, which makes it safe, and
+              the developers can still get the error details from the logs.
+              It's not as convenient during template development as
+              <literal>HTML_DEBUG_HANDLER</literal> or
+              <literal>DEBUG_HANDLER</literal> though. For more information
+              about handling errors in Web applications <link
+              linkend="misc.faq.niceErrorPage">see the FAQ</link>.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>You can also write a custom
+          <literal>TemplateExceptionHandler</literal> by implementing that
+          interface, which contains this method:</para>
 
           <programlisting role="unspecified">void handleTemplateException(TemplateException te, Environment env, Writer out) 
         throws TemplateException;</programlisting>
 
           <para>Whenever a <literal>TemplateException</literal> occurs, this
-          method will be called. The exception to handle is passed with the
+          method will be called. The exception to handle is in the
           <literal>te</literal> argument, the runtime environment of the
-          template processing is accessible with the <literal>env</literal>
-          argument, and the handler can print to the output using the
-          <literal>out</literal> argument. If the method throws exception
-          (usually it re-throws <literal>te</literal>), then the template
-          processing will be aborted, and
+          template processing is in the <literal>env</literal> argument, and
+          the handler can print to the output using the <literal>out</literal>
+          argument. If this method throws exception (usually it re-throws
+          <literal>te</literal>), then the template processing will be
+          aborted, and
           <literal>Template.process(<replaceable>...</replaceable>)</literal>
           will throw the same exception. If
           <literal>handleTemplateException</literal> doesn't throw exception,
@@ -8646,12 +8726,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
           later). Of course, the handler can still print an error indicator to
           the output.</para>
 
-          <para>In any case, before the
-          <literal>TemplateExceptionHandler</literal> is invoked, FreeMarker
-          will <link linkend="pgui_misc_logging">log</link> the
-          exception.</para>
-
-          <para>Let's see how FreeMarker skips ``statements'' when the error
+          <para>Let's see how FreeMarker skips statements when the error
           handler doesn't throw exception, through examples. Assume we are
           using this template exception handler:</para>
 
@@ -8690,8 +8765,8 @@ cfg.setTemplateExceptionHandler(new MyTemplateExceptionHandler());</programlisti
 
           <programlisting role="template">a${"moo" + badVar}b</programlisting>
 
-          <para>since, as it was written, the whole interpolation is skipped
-          if any error occurs inside it.</para>
+          <para>because the whole interpolation is skipped if any error occurs
+          inside it.</para>
 
           <para>If an error occurs when evaluating the value of a parameter
           for a directive call, or if there are other problems with the
@@ -8721,8 +8796,8 @@ cfg.setTemplateExceptionHandler(new MyTemplateExceptionHandler());</programlisti
 
           <programlisting role="template">a&lt;#if "foo${badVar}" == "foobar"&gt;Foo&lt;/#if&gt;b</programlisting>
 
-          <para>since, as it was written, the whole directive calling will be
-          skipped if any error occurs during the parameter evaluation.</para>
+          <para>because whole directive calling will be skipped if any error
+          occurs during the parameter evaluation.</para>
 
           <para>The directive call will not be skipped if the error occurs
           after the execution of the directive was already started. That is,
@@ -8754,45 +8829,6 @@ b
   [ERROR: Expression badVar is undefined on line 4, column 5 in test.ftlh.]
   Bar
 c</programlisting>
-
-          <para>FreeMarker comes with these prewritten error handlers:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para><literal>TemplateExceptionHandler.DEBUG_HANDLER</literal>:
-              Prints stack trace (includes FTL error message and FTL stack
-              trace) and re-throws the exception. This is the default handler
-              (that is, it is initially prugged into all new
-              <literal>Configuration</literal> objects).</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateExceptionHandler.HTML_DEBUG_HANDLER</literal>:
-              Same as <literal>DEBUG_HANDLER</literal>, but it formats the
-              stack trace so that it will be readable with Web browsers.
-              Recommended over <literal>DEBUG_HANDLER</literal> when you
-              generate HTML pages.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateExceptionHandler.IGNORE_HANDLER</literal>:
-              Simply suppresses all exceptions (but remember, FreeMarker will
-              still log them). It does nothing to handle the event. It does
-              not re-throw the exception.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateExceptionHandler.RETHROW_HANDLER</literal>:
-              Simply re-throws all exceptions, it doesn't do anything else.
-              This handler can be good for Web applications (assuming you
-              don't want to continue template processing after exception),
-              because it gives the most control to the Web application over
-              page generation on error conditions (since FreeMarker doesn't
-              print anything to the output about the error). For more
-              information about handling errors in Web applications <link
-              linkend="misc.faq.niceErrorPage">see the FAQ</link>.</para>
-            </listitem>
-          </itemizedlist>
         </section>
 
         <section>
@@ -8816,10 +8852,8 @@ c</programlisting>
 
           <para>Although it has nothing to do with the FreeMarker
           configuration (the topic of this chapter), for the sake of
-          completeness it is mentioned here that you can handle errors
-          directly in templates as well. This is usually a bad practice (try
-          keep templates simple and non-technical), but nonetheless necessary
-          sometimes:</para>
+          completeness it's mentioned here that you can handle errors directly
+          inside the templates as well:</para>
 
           <itemizedlist>
             <listitem>
@@ -8828,8 +8862,8 @@ c</programlisting>
             </listitem>
 
             <listitem>
-              <para>Surviving malfunctioning ``portlets'' and such expendable
-              page sections: <xref linkend="ref_directive_attempt"/></para>
+              <para>Substituting failing but expendable page sections: <xref
+              linkend="ref_directive_attempt"/></para>
             </listitem>
           </itemizedlist>
         </section>
@@ -8860,10 +8894,10 @@ c</programlisting>
         <itemizedlist>
           <listitem>
             <para><literal>TemplateConfiguration</literal>-s: These store the
-            actual setting assignments that you want to do. For example, this
-            <literal>TemplateConfiguration</literal> will set the encoding and
-            the output format of the matched template (and leave all other
-            settings of it alone):</para>
+            actual setting assignments that you want to apply. For example,
+            this <literal>TemplateConfiguration</literal> will set the
+            encoding and the output format of the matched template (and leave
+            all other settings of it alone):</para>
 
             <programlisting role="unspecified">TemplateConfiguration tcUTF8XML = new TemplateConfiguration();
 tc.setEncoding("utf-8");
@@ -8883,8 +8917,8 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
 
           <listitem>
             <para><literal>TemplateConfigurationFactory</literal>-es: This is
-            what connects <literal>TemplateConfiguration</literal> and
-            <literal>TemplateSourceMatcher</literal> together. This is the
+            what connects <literal>TemplateConfiguration</literal>-s and
+            <literal>TemplateSourceMatcher</literal>-s together. This is the
             Java type of the <literal>template_configurations</literal>
             setting. See the examples below for more.</para>
           </listitem>
@@ -8893,7 +8927,7 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
         <simplesect>
           <title>Example 1</title>
 
-          <para>This setup combines our earlier two example object with a
+          <para>This setup combines our earlier two example objects with a
           <literal>ConditionalTemplateConfigurationFactory</literal>, causing
           all templates with <literal>xml</literal> extension to get UTF-8
           encoding and XML output format:</para>
@@ -8907,7 +8941,7 @@ tc.setOutputFormat(XMLOutputFormat.INSTANCE);</programlisting>
           to the configuring Java code, but only to a Java
           <literal>*.properties</literal> file or other kind of string-string
           key value pairs (the <literal>\</literal>-s are prescribed by the
-          Java Properties file format):</para>
+          Java Properties file format for multi-line values):</para>
 
           <programlisting role="unspecified">templateConfigurations = \
     ConditionalTemplateConfigurationFactory( \
@@ -13328,23 +13362,12 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           quotation marks around the inserted value; you meant to use this
           <emphasis>inside</emphasis> the string literal.</para>
 
-          <para>Both quotation mark (<literal>"</literal>) and
-          apostrophe-quoate (<literal>'</literal>) are escaped. It also
-          escapes <literal>&gt;</literal> as <literal>\&gt;</literal> (to
-          avoid <literal>&lt;/script&gt;</literal>).</para>
-
-          <para>All characters under <link linkend="gloss.UCS">UCS</link> code
-          point 0x20 will be escaped. When they have no dedicated escape
-          sequence in JavaScript (like <literal>\n</literal>,
-          <literal>\t</literal>, etc.), they will be replaced with a UNICODE
-          escape
-          (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
-
           <warning>
             <para>When inserting into a JavaScript string literal that's
             inside a HTML attribute, you also must escape the value with HTML
-            escaping. Thus, of you don't have automatic HTML escaping, this is
-            WRONG: <literal>&lt;p
+            escaping. Thus, of you don't have <link
+            linkend="pgui_config_outputformatsautoesc">automatic HTML
+            escaping</link>, this is WRONG: <literal>&lt;p
             onclick="alert('${message?js_string}')"&gt;</literal>, and this is
             good: <literal>&lt;p
             onclick="alert('${message?js_string?html}')"&gt;</literal>.</para>
@@ -13362,6 +13385,65 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <programlisting role="output">&lt;script&gt;
   alert("Welcome Big Joe\'s \"right hand\"!");
 &lt;/script&gt;</programlisting>
+
+          <para>The exact escaping rules are:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>"</literal> is escaped as
+              <literal>\"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>'</literal> is escaped as
+              <literal>\'</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>\</literal> is escaped as
+              <literal>\\</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>/</literal> is escaped as <literal>\/</literal>
+              if the <literal>/</literal> is directly after
+              <literal>&lt;</literal> in the escaped string, or if it's at the
+              beginning of the escaped string</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>&gt;</literal> is escaped as
+              <literal>\&gt;</literal> if the <literal>&gt;</literal> is
+              directly after <literal>]]</literal> or <literal>--</literal> in
+              the escaped string, or if it's at the beginning of the escaped
+              string, or if there's only a <literal>]</literal> or
+              <literal>-</literal> before it at the beginning of the escaped
+              string</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>&lt;</literal> is escaped as
+              <literal>\u003C</literal> if it's followed by
+              <literal>?</literal> or <literal>!</literal> in the escaped
+              string, or if it's at the end of the escaped string</para>
+            </listitem>
+
+            <listitem>
+              <para>Control characters in <link linkend="gloss.UCS">UCS</link>
+              code point ranges U+0000...U+001f and U+007f...U+009f are
+              escaped as <literal>\r</literal>, <literal>\n</literal>, etc.,
+              or as <literal>\x<replaceable>XX</replaceable></literal> where
+              there's no special escape for them in JavaScript.</para>
+            </listitem>
+
+            <listitem>
+              <para>Control characters with <link
+              linkend="gloss.UCS">UCS</link> code point U+2028 (Line
+              separator) and U+2029 (Paragraph separator) are escaped as
+              <literal>\u<replaceable>XXXX</replaceable></literal>, as they
+              are source code line-breaks in ECMAScript.</para>
+            </listitem>
+          </itemizedlist>
         </section>
 
         <section xml:id="ref_builtin_json_string">
@@ -13378,20 +13460,16 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <emphasis>inside</emphasis> the string literal.</para>
 
           <para>This will not escape <literal>'</literal> characters, since
-          JSON strings must be quoted with <literal>"</literal>. It will,
-          however escape the <literal>/</literal> (slash) characters as
-          <literal>\/</literal> where they occur directly after a
-          <literal>&lt;</literal>, to avoid <literal>&lt;/script&gt;</literal>
-          and such. It will also escape the <literal>&gt;</literal> characters
-          as <literal>\u003E</literal> where they occur directly after
-          <literal>]]</literal>, to avoid exiting an XML
-          <literal>CDATA</literal> section.</para>
+          JSON strings must be quoted with <literal>"</literal>.</para>
 
-          <para>All characters under <link linkend="gloss.UCS">UCS</link> code
-          point 0x20 will be escaped. When they have no dedicated escape
-          sequence in JSON (like <literal>\n</literal>, <literal>\t</literal>,
-          etc.), they will be replaced with a UNICODE escape
-          (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
+          <para>The escaping rules are almost identical to those <link
+          linkend="ref_builtin_j_string">documented for
+          <literal>js_string</literal></link>. The differences are that
+          <literal>'</literal> is not escaped at all, that &gt; is escaped as
+          \u003E (not as \&gt;), and that
+          <literal>\u<replaceable>XXXX</replaceable></literal> escapes are
+          used instead of <literal>\x<replaceable>XX</replaceable></literal>
+          escapes.</para>
         </section>
 
         <section xml:id="ref_builtin_keep_after">
@@ -20342,19 +20420,21 @@ All rights reserved.</emphasis></programlisting>
   &lt;/div&gt;
 &lt;/#list&gt;</programlisting>
 
-            <para>As <literal>sep</literal> is just a convenient way of
-            writing <literal>&lt;#if
-            <replaceable>item</replaceable>?has_next&gt;...&lt;/#if&gt;</literal>,
-            it can be used anywhere where there's a <literal>list</literal> or
-            <literal>items</literal> loop variable is available, and for
-            unlimited times. Also, it can have arbitrary FTL as nested
-            content.</para>
+            <para><literal>sep</literal> is just a shorthand for
+            <literal>&lt;#if
+            <replaceable>item</replaceable>?has_next&gt;...&lt;/#if&gt;</literal>.
+            Thus, it can be used anywhere where there's a
+            <literal>list</literal> or <literal>items</literal> loop variable
+            available, it can occur for multiple times, and it can have
+            arbitrary nested content.</para>
 
-            <para>The parser will check that <literal>sep</literal> is used
-            inside <literal>list <replaceable>...</replaceable> as
-            item</literal> or an <literal>items</literal> directive, so you
-            can't move <literal>sep</literal> out from the repeated part into
-            a macro or included template.</para>
+            <para>The parser ensures that <literal>sep</literal> is only used
+            on a place where there's a visible loop variable. This happens
+            earlier than the actual execution of the template. Thus, you can't
+            move <literal>sep</literal> from inside the associated
+            <literal>list</literal> or <literal>items</literal> directive into
+            a macro or included template (the parser can't know where those
+            will be called from).</para>
           </section>
 
           <section>
@@ -26339,8 +26419,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <listitem>
                 <para>Call <literal>httpResp.isCommitted()</literal>, and if
                 that returns <literal>false</literal>, then you call
-                <literal>httpResp.reset()</literal> and print a ``nice error
-                page'' for the visitor. If the return value was
+                <literal>httpResp.reset()</literal> and print a <quote>nice
+                error page</quote> for the visitor. If the return value was
                 <literal>true</literal>, then try to finish the page be
                 printing something that makes clear for the visitor that the
                 page generation was abruptly interrupted because of an error
@@ -26448,14 +26528,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       </section>
 
       <section xml:id="versions_2_3_24">
-        <title>2.3.24 Release Candidate 1</title>
+        <title>2.3.24</title>
 
-        <para>Date of release for Release Candidate 1: 2015-01-12</para>
-
-        <para>Planned final release date: around 2016-02-20</para>
-
-        <para>Please test for backward compatibility, and help polishing the
-        new features!</para>
+        <para>Release date: 2016-03-20 + release process delay</para>
 
         <section>
           <title>Legal changes</title>
@@ -26485,9 +26560,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <link linkend="dgui_misc_autoescaping">auto-escaping and output
               formats mechanism</link>, which deprecates escaping with the
               <link linkend="ref_directive_escape"><literal>escape</literal>
-              directive</link>. These are the items related to this new
-              mechanism (see <link linkend="dgui_misc_autoescaping">early
-              linked section</link> for a guide):</para>
+              directive</link>. These are the changes related to this new
+              mechanism (see earlier link for a guide):</para>
 
               <itemizedlist>
                 <listitem>
@@ -26529,16 +26603,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new built-in: <literal>markup_string</literal>.
-                  This returns the markup of a <link
+                  <para>New built-in: <literal>markup_string</literal>. This
+                  returns the markup of a <link
                   linkend="dgui_misc_autoescaping_movalues">markup output
-                  value</link> as a string.</para>
+                  value</link> as string.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Added new built-in:
-                  <literal>is_markup_output</literal>, returns
-                  <literal>true</literal> if the value is of type
+                  <para>New built-in: <literal>is_markup_output</literal>,
+                  returns <literal>true</literal> if the value is of type
                   <quote>markup output</quote>.</para>
                 </listitem>
 
@@ -26584,23 +26657,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   works with the new <quote>markup output</quote> type as
                   well. Like <literal>someMarkup + somePlainText</literal>
                   will result in markup where <literal>somePlainText</literal>
-                  is included properly escaped.</para>
+                  is escaped automatically before it's appended to the
+                  markup.</para>
                 </listitem>
 
                 <listitem>
                   <para>The <literal>has_content</literal> built-in now
-                  supports markup output values, considering 0 length markup
-                  as empty.</para>
+                  supports <quote>markup output</quote> values, considering 0
+                  length markup as empty.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>There can be now user defined number and
-              date/time/datetime formatters, defined by the programmers when
-              configuring FreeMarker, which can be referred with strings
-              starting with <literal>"@"</literal>, like in
-              <literal>&lt;#setting number_format='@foo'&gt;</literal>, or
+              <para>You can now define custom number and date/time/datetime
+              formatters. These are defined by the programmers (and thus can
+              implement any kind of exotic formatting rules) when configuring
+              FreeMarker, and can be referred with strings starting with
+              <literal>"@"</literal>, like in <literal>&lt;#setting
+              number_format='@foo'&gt;</literal>, or
               <literal>${n?string.@foo_params}</literal>,
               <literal>&lt;#setting number_format='@foo params'&gt;</literal>,
               or <literal>${n?string.@foo}</literal>,
@@ -26619,7 +26694,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               it's possible to specify options like rounding mode or the
               symbols used, with a FreeMarker-specific <link
               linkend="topic.extendedJavaDecimalFormat">extension to the
-              pattern syntax</link>.</para>
+              <literal>DecimalFormat</literal> pattern syntax</link>.</para>
             </listitem>
 
             <listitem>
@@ -26665,8 +26740,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>[<replaceable>index</replaceable>]</literal> operator,
               but not <literal>?size</literal>, which causes
               <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
-              to fail among others. (They shouldn't implement either, but this
-              is historical heritage.)</para>
+              to fail, among others.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -26677,7 +26751,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para><emphasis role="strong">Attention!</emphasis> FreeMarker
-              now requires at least 1.5 (aka. Java 5). 2.3.24 has only
+              now requires at least Java 1.5 (aka. Java 5). 2.3.24 has only
               required Java 1.4. (Reason: Without this, new public API-s
               couldn't use generics, which affect negatively the majority of
               users, while old installations that are still using 1.4 are
@@ -26709,6 +26783,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
+                  <para>As FTL has now a new type, <quote>markup
+                  output</quote>, there's also a corresponding new model
+                  interface, <literal>TemplateMarkupOutputModel</literal>.
+                  This also means that you can prevent the auto-escaping of
+                  values coming from the data-model by returning a
+                  <literal>TemplateMarkupOutputModel</literal> instead of a
+                  <literal>String</literal>. Like the template author can just
+                  write <literal>${messages.foo}</literal>, and it will be
+                  auto-escaped or not depending on if the message is known to
+                  be markup or not.</para>
+                </listitem>
+
+                <listitem>
                   <para>Added new configuration setting:
                   <literal>recognize_standard_file_extensions</literal>. When
                   <literal>true</literal>, templates whose source name ends
@@ -26720,20 +26807,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   linkend="pgui_config_incompatible_improvements_how_to_set">the
                   <literal>incompatible_improvements</literal> setting</link>
                   is set to 2.3.24 (or higher) then this setting defaults to
-                  <literal>true</literal>. Otherwise it's
+                  <literal>true</literal>. Otherwise it's default is
                   <literal>false</literal>, but enabling it is highly
                   recommended.</para>
                 </listitem>
 
                 <listitem>
                   <para>Added new configuration setting:
-                  <literal>output_format</literal>. This specifies the name of
-                  the <link
+                  <literal>output_format</literal>. This specifies the <link
                   linkend="dgui_misc_autoescaping_outputformat">output
-                  format</link> (such as <literal>HTML</literal>,
-                  <literal>XML</literal>, <literal>plainText</literal>, etc.)
-                  that governs auto-escaping. The output format can be
-                  different for different templates, using the
+                  format</link> object to use (such as
+                  <literal>HTMLOutputFormat.INSTANCE</literal>,
+                  <literal>XMLOutputFormat.INSTANCE</literal>, etc.) that
+                  governs auto-escaping. The output format can be different
+                  for different templates, using the
                   <literal>template_configurations</literal> setting (<link
                   linkend="pgui_config_outputformatsautoesc">see here
                   how...</link>).</para>
@@ -26768,12 +26855,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateDateFormat</literal>,
                   <literal>TemplateDateFormatFactory</literal>, also the
                   exceptions these can throw. These allow implementing any
-                  kind of formatting rules that are doable in Java (they
+                  kind of formatting rule that's doable in Java (i.e., they
                   aren't restricted to any <literal>java.text</literal>
                   formatters). Furthermore these formatters get the
                   <literal>TemplateModel</literal> instead of a the bare
                   <literal>java.lang.Number</literal> or
-                  <literal>java.util.Date</literal>, which let you use the
+                  <literal>java.util.Date</literal>, which lets you use the
                   extra application-specific meta information that you may
                   pack into the <literal>TemplateModel</literal>-s, such as
                   physical unit, preferred precision, and so on.</para>
@@ -26786,25 +26873,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   TemplateNumberFormatFactory&gt;)</literal> and
                   <literal>Configurable.setCustomDateFormats(Map&lt;String,
                   TemplateDateFormatFactory&gt;)</literal>) with which you can
-                  register your own formats. <emphasis>If you <link
-                  linkend="pgui_config_incompatible_improvements_how_to_set">set
-                  <literal>incompatible_improvements</literal></link> to
-                  2.3.24, and only then</emphasis>, these formats can be
-                  referred from everywhere where you can use a string to
-                  define a format (often as a pattern), with a format string
-                  like <literal>"@foo"</literal> or <literal>"@foo
-                  params"</literal>, where <literal>"foo"</literal> is the key
-                  in the <literal>Map&lt;String, ...&gt;</literal> parameter
-                  of the earlier shown methods, and the parameters (if any)
-                  are interpreted by the
-                  <literal>Template<replaceable>Xxx</replaceable>FormatFactory</literal>.
-                  Like, you can do <literal>cfg.setNumberFormat("@foo
-                  params")</literal>, or <literal>&lt;#setting
-                  number_format='@foo params'&gt;</literal>, or
-                  <literal>${n?string.@foo_params}</literal>. For backward
-                  compatibility, the initial <literal>@</literal> only has
-                  this special meaning if either you have any custom formats
-                  or <link linkend="pgui_config_incompatible_improvements">the
+                  register your own formats. These formats can be referred
+                  from everywhere where you can use a string to define a
+                  format, with a format string like <literal>"@foo"</literal>
+                  or <literal>"@foo params"</literal>, where
+                  <literal>"foo"</literal> is the key in the
+                  <literal>Map&lt;String, ...&gt;</literal> parameter of the
+                  earlier shown methods, and the parameters (if any) are
+                  interpreted by the
+                  <literal>Template<replaceable>Xxx</replaceable>FormatFactory</literal>
+                  implementation that you provide. Like, you can issue
+                  <literal>cfg.setNumberFormat("@foo params")</literal>, or
+                  <literal>&lt;#setting number_format='@foo
+                  params'&gt;</literal>, or
+                  <literal>${n?string.@foo_params}</literal>, similarly as you
+                  can issue <literal>cfg.setNumberFormat("0.##")</literal>,
+                  etc. For backward compatibility, the initial
+                  <literal>@</literal> only has this special meaning if either
+                  you have any custom formats or <link
+                  linkend="pgui_config_incompatible_improvements">the
                   <literal>incompatible_improvements</literal> setting</link>
                   is at least 2.3.24. Note that the
                   <literal>custom_number_formats</literal> and
@@ -26819,11 +26906,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Added new <literal>Environment</literal> methods
                   returning <literal>TemplateNumberFormat</literal> and
-                  <literal>TemplateDateFormat</literal> objects. See
+                  <literal>TemplateDateFormat</literal> objects. See the
                   <literal>getTemplateNumberFormat(<replaceable>...</replaceable>)</literal>
                   and
                   <literal>getTemplateDateFormat(<replaceable>...</replaceable>)</literal>
-                  variations.</para>
+                  variations in the API.</para>
                 </listitem>
 
                 <listitem>
@@ -26849,17 +26936,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   number and date/time/datetime formatting results, like
                   <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which
                   won't be accidentally auto-escaped, as FreeMarker knows that
-                  it's already HTML. (See [TODO] as an example.) Note that no
-                  out-of-the-box format formats to markup (at the moment), but
-                  you could write such custom format.</para>
+                  it's already HTML. This is done by returning a
+                  <literal>TemplateMarkupOutputModel</literal> instead of a
+                  <literal>String</literal>; see the new auto-escaping
+                  mechanism earlier. Note that no out-of-the-box format
+                  utilizes this (at the moment), but you could write such
+                  custom format.</para>
                 </listitem>
 
                 <listitem>
                   <para>The internal format object caching architecture has
-                  been reworked, so that it can handle custom formats too. But
-                  this reworking also fixes some bottlenecks under highly
-                  concurrent load, and some (otherwise unlikely) memory
-                  leaking possibilities.</para>
+                  been reworked, so that it can handle custom formats too.
+                  This reworking also fixes some bottlenecks under highly
+                  concurrent load, and some (otherwise unlikely) memory leak
+                  possibilities.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -26897,9 +26987,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para><literal>OverrideResponseLocale</literal>: Specifies
-                  if should we override the <literal>contentType</literal>
-                  that's already set (i.e., non-<literal>null</literal>) in
-                  the <literal>HttpServletResponse</literal>. Earlier, we have
+                  if we should override the <literal>locale</literal> that's
+                  already set (i.e., non-<literal>null</literal>) in the
+                  <literal>HttpServletResponse</literal>. Earlier, we have
                   always set it, but now this behavior can be changed so that
                   we only set it if it wasn't already set.</para>
                 </listitem>
@@ -26907,11 +26997,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para><literal>ResponseCharacterEncoding</literal>:
                   Deprecates the old (and quirky) logic of specifying the
-                  output charset, which was putting it into the
+                  output charset, which is putting it into the
                   <literal>ContentType</literal> init-param after the MIME
-                  type, otherwise falling back to using the template file
-                  charset. The possible values are <literal>legacy</literal>
-                  (the default for backward compatibility),
+                  type, otherwise falling back to the template file charset.
+                  The possible values are <literal>legacy</literal> (the
+                  default for backward compatibility),
                   <literal>fromTemplate</literal> (which is
                   <literal>legacy</literal> without quirks, and is aware of
                   the <literal>outputEncoding</literal> setting),
@@ -26946,15 +27036,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Fixes and improvements in the <quote>object
               builder</quote> mini-language used for configuring FreeMarker
               from <literal>java.util.Properties</literal> or other
-              string-only sources (not used in templates). This is not to be
-              confused with the template language syntax, which has nothing to
-              do with the <quote>object builder</quote> syntax we are writing
-              about here. The improvements are:</para>
+              string-only sources (not used in templates). This is
+              <emphasis>not to be confused with the template language
+              syntax</emphasis>, which has nothing to do with the
+              <quote>object builder</quote> syntax we are writing about here.
+              The improvements are:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>For nested builder expressions, the top-level result
-                  class restriction were applied accidentally.</para>
+                  <para>Bug fixed: For nested builder expressions, the
+                  top-level result class restriction were applied
+                  accidentally.</para>
                 </listitem>
 
                 <listitem>
@@ -26993,17 +27085,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Number without decimal point will now be parsed to
+                  <para>A number without decimal point will now be parsed to
                   <literal>Integer</literal>, <literal>Long</literal>, or
-                  <literal>BigInteger</literal>, depending in the size of the
-                  number. Earlier all number were
-                  <literal>BigDecimal</literal>-s, but it had little
-                  importance as number types are converted to the constructor
-                  parameter type anyway.</para>
+                  <literal>BigInteger</literal>, depending on the size of the
+                  number. Earlier all numbers were parsed to
+                  <literal>BigDecimal</literal>-s, but that had little
+                  importance before lists and maps were added, as the number
+                  was converted to the constructor or setter parameter type
+                  anyway.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Number literals can have Java type specified postfixes
+                  <para>Number literals can have Java type suffixes
                   (<literal>f</literal>, <literal>d</literal>,
                   <literal>l</literal>), plus <literal>bd</literal> for
                   <literal>BigDecimal</literal> and <literal>bi</literal> for
@@ -27022,6 +27115,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Decreased the stack usage of template execution, which can
               have importance if you have very very deeply nested
               templates.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>MultiTemplateLoader.setSticky(boolean)</literal> and
+              <literal>MultiTemplateLoader.isSticky()</literal>, with which
+              you can disable the default behavior, where once a template was
+              found in a child <literal>TemplateLoader</literal>, it will be
+              searched there first next time (typically, when the template
+              update delay is expired). With the <literal>sticky</literal>
+              property set to <literal>false</literal>, the child
+              <literal>TemplateLoader</literal>-s will be always searched in
+              the order as they were added to the
+              <literal>MultiTemplateLoader</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>StringTemplateLoader.removeTemplate(String)</literal>
+              method.</para>
             </listitem>
 
             <listitem>
@@ -27063,11 +27176,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para><literal>DefaultObjectWrapper</literal> (fix is always
                   active): Operations on the <literal>Iterator</literal> that
                   only check if it's empty without reading an element from it,
-                  such as <literal>?has_content</literal>, won't cause the a
-                  later iteration (or further emptiness check) to fail
-                  anymore. Earlier, in certain situations, the second
-                  operation has failed saying that the iterator <quote>can be
-                  listed only once</quote>.</para>
+                  such as <literal>?has_content</literal>, won't cause a later
+                  iteration (or further emptiness check) to fail anymore.
+                  Earlier, in certain situations, the second operation has
+                  failed saying that the iterator <quote>can be listed only
+                  once</quote>.</para>
                 </listitem>
 
                 <listitem>
@@ -27157,11 +27270,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Internal code cleanup: Mostly for consistent source code
-              formatting, also many parser construction/setup cleanup</para>
-            </listitem>
-
-            <listitem>
               <para>JSP TLD loading now quotes the location of
               <literal>jar</literal>-s (and other <literal>zip</literal>-s)
               which can't be loaded due to zip format errors in the error
@@ -27203,6 +27311,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Due to the above change again, the return type of
+              <literal>freemarker.core.DebugBreak.accept()</literal> and
+              <literal>freemarker.core.TextBlock.accept()</literal> has
+              changed from <literal>void</literal> to
+              <literal>TemplateElement[]</literal>. This again is highly
+              unlikely to affect anyone, and these meant to be internal API-s
+              anyway, but as these two <literal>accept</literal> methods has
+              wider than package visibility for historical reasons, we mention
+              this change.</para>
+            </listitem>
+
+            <listitem>
               <para>The non-public AST API of
               <literal>freemarker.core.StringLiteral</literal>-s has been
               changed. In principle it doesn't mater as it isn't a public API,
@@ -27213,380 +27333,70 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>String</literal>-s and
               <literal>Interpolation</literal>-s.</para>
             </listitem>
+
+            <listitem>
+              <para>Internal code cleanup: Mostly for consistent source code
+              formatting, also many parser construction/setup cleanup</para>
+            </listitem>
+
+            <listitem>
+              <para>Source code changes to conform to Apache source release
+              policy, such as adding copyright headers and getting rid of test
+              <literal>jar</literal>-s committed into the source code. Eclipse
+              project files were also removed, instead the
+              <literal>README</literal> describes how to set up the
+              project.</para>
+            </listitem>
+
+            <listitem>
+              <para>Build script and distribution artifact changes to conform
+              to Apache release policy, most notably it produces separate
+              source and binary releases.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
         <section>
-          <title>Changes compared to 2.3.24 Preview 1</title>
+          <title>Changes compared to 2.3.24 Release Candidate 1</title>
 
           <itemizedlist>
             <listitem>
-              <para><literal>Environment</literal> now has public
-              <literal>TemplateDateFormat</literal> returning methods.</para>
-            </listitem>
-
-            <listitem>
-              <para>The various
-              <literal>Template<replaceable>Xxx</replaceable>Format</literal>
-              and
-              <literal>Template<replaceable>Xxx</replaceable>FormatFacotry</literal>
-              exceptions were united under a common abstract superclass,
-              <literal>TemplateValueFormatException</literal>, which is now
-              what the methods of said classes throw (mostly).</para>
+              <para>Added
+              <literal>MultiTemplateLoader.setSticky(boolean)</literal> and
+              <literal>MultiTemplateLoader.isSticky()</literal>, with which
+              you can disable the default behavior, where once a template was
+              found in a child <literal>TemplateLoader</literal>, it will be
+              searched there first next time (typically, when the template
+              update delay is expired). With the <literal>sticky</literal>
+              property set to <literal>false</literal>, the child
+              <literal>TemplateLoader</literal>-s will be always searched in
+              the order as they were added to the
+              <literal>MultiTemplateLoader</literal>.</para>
             </listitem>
 
             <listitem>
               <para>Added
-              <literal>freemarker.core.AliasTemplateNumberFormatFactory</literal>
-              and <literal>AliasTemplateDateFormatFactory</literal>, which can
-              be used to create custom formats that are aliases to other
-              formats. For example, instead of writing
-              <literal>${n?string["0.00"]}</literal> again and again, you can
-              define the custom format <literal>"price"</literal> as the alias
-              to the format string <literal>"0.00"</literal> in the
-              configuration, and then use
-              <literal>${n?string.@price}</literal>. Thus, you can control at
-              a central place how prices look. Furthermore, the alias can
-              chose a different target format string depending on the current
-              locale; this is especially useful for dates, where conventions
-              can significantly differ in different countries.</para>
+              <literal>StringTemplateLoader.removeTemplate(String)</literal>
+              method.</para>
             </listitem>
 
             <listitem>
-              <para>Everywhere where Java <literal>DecimalFormat</literal>
-              patterns are used (like in the <literal>number_format</literal>
-              configuration setting, or in
-              <literal>?string('0.##')</literal>), now it's possible to
-              specify options like rounding mode or the symbols used, with a
-              FreeMarker-specific <link
-              linkend="topic.extendedJavaDecimalFormat">extension to the
-              pattern syntax</link>.</para>
-            </listitem>
-
-            <listitem>
-              <para>In number/date/time/datetime format strings, initial
-              <literal>@</literal> can be used to refer to custom formats even
-              if <literal>incompatible_improvements</literal> is less than
-              2.3.24, as far as there's any custom format defined. As custom
-              formats is also a 2.3.24 feature, it's backward compatible this
-              way.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>@@</literal> can't be used to escape
-              <literal>@</literal> at the beginning of format strings anymore,
-              because it was confusing on Android, where
-              <literal>DecimalFormat</literal> supports patterns like
-              <literal>"@@@@@@"</literal>. If a pattern has to output a
-              literal <literal>@</literal> as the first character, you can
-              simply use quoting as defined by
-              <literal>DecimalFormat</literal> and
-              <literal>SimpleDateFormat</literal> (for example,
-              <literal>"'@'0.##"</literal>).</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>?date</literal>, <literal>?time</literal> and
-              <literal>?datetime</literal> now can be called as 0 argument
-              method, like <literal>?date()</literal>, etc., which returns the
-              exact object that <literal>TemplateDateFormat.parse</literal>
-              returns, instead of the tricky multi-type object that just using
-              <literal>?date</literal> returns. Because custom
-              <literal>TemplateDateFormat</literal> implementations may return
-              custom <literal>TemplateDateModel</literal> implementations,
-              keeping the exact class can be important in some
-              applications.</para>
-            </listitem>
-
-            <listitem>
-              <para>The <literal>TemplateDateFormat.parse</literal> has been
-              worked out (earlier it was a but different and was marked as
-              draft). <literal>TemplateNumberFormat</literal> has also have a
-              parse method now, though it's just a <literal>final</literal>
-              placeholder now.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>TemplateNumberFormat.format</literal>/<literal>TemplateDateFormat.format</literal>
-              overloads were changed to <literal>formatToPlainText</literal>
-              and <literal>format</literal>, the last returning either String
-              or a <literal>TemplateMarkupOutputModel</literal>. Also,
-              formatting to markup is now actually used by FreeMarker. Thus,
-              it's now possible to have HTML or other markup in number and
-              date/time/datetime formatting results, like
-              <literal>1.23*10&lt;sup&gt;6&lt;/sup&gt;</literal>, which won't
-              be accidentally auto-escaped, as FreeMarker knows that it's
-              already HTML. (See [TODO] as an example.) Note that no
-              out-of-the-box format formats to markup (at the moment), but you
-              could write such custom format.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>${<replaceable>...</replaceable>}</literal>
-              inside string literals is equivalent to using the
-              <literal>+</literal> operator again. This rule was broken by
-              <literal>+</literal> supporting markup operands, while
-              <literal>${<replaceable>...</replaceable>}</literal> inside
-              string literals didn't. Now similarly as <literal>"foo " +
-              someMarkup</literal> works and gives a markup result,
-              <literal>"foo ${someMarkup}"</literal> does too.</para>
-            </listitem>
-
-            <listitem>
-              <para>The extended decimal format options don't use
-              abbreviations anymore. Like instead of
-              <literal>rnd=hu</literal>, now there's
-              <literal>roundingMode=halfUp</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Added <literal>XHTMLOutputFormat</literal> and
-              <literal>TemplateXHTMLOutputModel</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>XMLOutputFormat</literal> now uses
-              application/xml MIME type instead of text/xml MIME type</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>RTFOutputFormat</literal> now uses
-              application/rtf MIME type instead of text/rtf</para>
-            </listitem>
-
-            <listitem>
-              <para>Added non-escaping formats (just for the MIME type):
-              <literal>JavaScriptOutputFormat</literal>,
-              <literal>JSONOutputFormat</literal>,
-              <literal>CSSOutputFormat</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Added JavaScriptOutput</para>
-            </listitem>
-
-            <listitem>
-              <para>Added new built-in: <literal>is_markup_output</literal>,
-              returns <literal>true</literal> if the value is of type
-              <quote>markup output</quote>.</para>
-            </listitem>
-
-            <listitem>
-              <para>New <literal>FreemarkerServlet</literal> init-params (see
-              <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
-              <literal>FreemarkerSerlvet</literal> API documentation</link>
-              for details):</para>
+              <para>Source code changes to conform to Apache release policy
+              and recommendations:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>OverrideResponseContentType</literal>:
-                  Specifies when should we override the
-                  <literal>contentType</literal> that's already set (i.e.,
-                  non-<literal>null</literal>) in the
-                  <literal>HttpServletResponse</literal>. Earlier, we have
-                  always set it, and that's still the default behavior. But
-                  now that this init-param exists, you can change that
-                  behavior, so that the <literal>contentType</literal> you
-                  have specified before forwarding to
-                  <literal>FreemarkerServlet</literal> matters.</para>
+                  <para>No more binary test <literal>jar</literal>-s committed
+                  into the source code (instead, they are generated
+                  on-the-fly)</para>
                 </listitem>
 
                 <listitem>
-                  <para><literal>OverrideResponseLocale</literal>: Specifies
-                  if should we override the <literal>contentType</literal>
-                  that's already set (i.e., non-<literal>null</literal>) in
-                  the <literal>HttpServletResponse</literal>. Earlier, we have
-                  always set it, but now this behavior can be changed so that
-                  we only set it if it wasn't already set.</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>ResponseCharacterEncoding</literal>:
-                  Deprecates the old (and quirky) logic of specifying the
-                  output charset, which was putting it into the
-                  <literal>ContentType</literal> init-param after the MIME
-                  type, otherwise falling back to using the template file
-                  charset. The possible values are <literal>legacy</literal>
-                  (the default for backward compatibility),
-                  <literal>fromTemplate</literal> (which is
-                  <literal>legacy</literal> without quirks, and is aware of
-                  the <literal>outputEncoding</literal> setting),
-                  <literal>doNotSet</literal> (keeps what the caller has
-                  already set in the <literal>ServletRespone</literal>) and
-                  any valid charset name (forces a specific output
-                  charset).</para>
+                  <para>Eclipse project files were removed, instead, the
+                  <literal>README</literal> describes how to set up the
+                  project.</para>
                 </listitem>
               </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>The new <literal>TemplateConfigurer</literal> class was
-              renamed to <literal>TemplateConfiguration</literal>, and the
-              related configuration setting from
-              <literal>template_configurers</literal> to
-              <literal>template_configurations</literal>. Also, the
-              <literal>TemplateConfigurer.configure</literal> method was
-              renamed to
-              <literal>TemplateConfiguration.apply</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed: It wasn't well defined when a Java
-              <literal>Iterator</literal> counts as empty. Depending on what
-              <literal>ObjectWrapper</literal> you are using, one of these
-              fixes apply:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>DefaultObjectWrapper</literal> (fix is always
-                  active): Operations on the <literal>Iterator</literal> that
-                  only check if it's empty without reading an element from it,
-                  such as <literal>?has_content</literal>, won't cause the a
-                  later iteration (or further emptiness check) to fail
-                  anymore. Earlier, in certain situations, the second
-                  operation has failed saying that the iterator <quote>can be
-                  listed only once</quote>.</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>BeansWrapper</literal> (when it's not
-                  extended by <literal>DefaultObjectWrapper</literal>), if
-                  it's <literal>incompatibleImprovements</literal> property is
-                  set to 2.3.24 (or higher): <literal>Iterator</literal>-s
-                  were always said to be non-empty when using
-                  <literal>?has_content</literal> and such (i.e., operators
-                  that check emptiness without reading any elements). Now an
-                  <literal>Iterator</literal> counts as empty exactly if it
-                  has no elements left. (Note that this bug has never affected
-                  basic functionality, like <literal>&lt;#list
-                  ...&gt;</literal>.)</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Fixes and improvements in the <quote>object
-              builder</quote> syntax used for configuring FreeMarker from
-              <literal>java.util.Properties</literal> (or other string-only
-              sources). This is not to be confused with the template language
-              syntax, which has nothing to do with the <quote>object
-              builder</quote> syntax we are writing about here. The
-              improvements are:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Number literals can have Java type specified postfixes
-                  (<literal>f</literal>, <literal>d</literal>,
-                  <literal>l</literal>), plus <literal>bd</literal> for
-                  <literal>BigDecimal</literal> and <literal>bi</literal> for
-                  <literal>BigInteger</literal>.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Public static fields can be referred, like
-                  <literal>com.example.MyClass.MY_CONSTANT</literal> or
-                  <literal>Configuration.AUTO_DETECT_TAG_SYNTAX</literal>.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>The parser used by <literal>?interpet</literal> and
-              <literal>?eval</literal> inherits not only the
-              <literal>output_format</literal> of its surrounding lexical
-              context, but also the auto-escaping policy of it (basically, if
-              auto-escapig is on or off).</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed, with
-              <literal>incompatible_improvements</literal> set to 2.3.24
-              (<link linkend="topic.defaultObjectWrapperIcI">see how
-              here...</link>): The <literal>#import</literal> directive meant
-              to copy the library variable into a global variable if it's
-              executed in the main namespace, but that haven't happened when
-              the imported template was already imported earlier in another
-              namespace.</para>
-            </listitem>
-
-            <listitem>
-              <para>Fixes in the XML processing feature
-              (<literal>freemarker.ext.dom</literal>):</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Bug fixed: XPath queries that has only contained
-                  characters that are valid in XML element names and has also
-                  contained <literal>::</literal> (which is valid in names in
-                  namespace-unware documents), like
-                  <literal>e['following-sibling::foo']</literal>, were
-                  interpreted as literal element names (giving 0 hits) rather
-                  than as XPath expressions. Note that there were no such
-                  problem with <literal>e['following-sibling::*']</literal>
-                  for example, as it's not a valid XML element name according
-                  the XML specification. This fix can actually break
-                  applications that has processed namespace unaware XML that
-                  use <literal>::</literal> as part of element or attribute
-                  names, but such an application is highly unlikely, unlike
-                  running into the fixed problem. (Unfortunately, using
-                  <literal>incompatible_improvements</literal> wasn't
-                  technically possible here.)</para>
-                </listitem>
-
-                <listitem>
-                  <para>Bug fixed: The <literal>@@qname</literal> of elements
-                  that belong to the XML namespace declared as the default via
-                  <literal>&lt;#ftl ns_prefixes={'D':'...', ...
-                  }&gt;</literal> no longer starts with <literal>D:</literal>,
-                  instead they just start with no name space prefix.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Bug fixed: In the markup returned by the
-                  <literal>@@markup</literal> key, when there were multiple
-                  namespaces for which there was no prefix associated with via
-                  <literal>&lt;#ftl
-                  ns_prefixes=<replaceable>...</replaceable>&gt;</literal>,
-                  all those namespaces were assigned to the same
-                  auto-generated <literal>xmlns</literal> prefix (usually
-                  <quote>a</quote>). Now they will get <quote>a</quote>,
-                  <quote>b</quote>, <quote>c</quote>, etc. prefixes.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed: With
-              <literal>incompatible_improvements</literal> set to 2.3.24
-              (<link linkend="topic.defaultObjectWrapperIcI">see how
-              here...</link>),
-              <literal><replaceable>m</replaceable>?is_sequence</literal>
-              doesn't return <literal>true</literal> for Java methods wrapped
-              by <literal>BeansWrapper</literal> and its subclasses (most
-              notably <literal>DefaultObjectWrapper</literal>) anymore, as
-              they only implement the
-              <literal>[<replaceable>index</replaceable>]</literal> operator,
-              but not <literal>?size</literal>, which causes
-              <literal>&lt;#list <replaceable>...</replaceable>&gt;</literal>
-              to fail among others. (They shouldn't implement either, but this
-              is historical heritage.)</para>
-            </listitem>
-
-            <listitem>
-              <para>Added an overload to
-              <literal>Configuration.getSupportedBuiltInNames</literal> and
-              <literal>Configuration.getSupportedBuiltInDirectiveNames</literal>
-              that has a <literal>namingConvention</literal> parameter. This
-              is useful for tooling as since 2.3.23 we support both camel case
-              naming convention (like
-              <literal><replaceable>s</replaceable>?upperCase</literal>) and
-              the legacy one (like
-              <literal><replaceable>s</replaceable>?upper_case</literal>).
-              Furthermore the old 0 argument overload will now utilize
-              <literal>Configuration.getNamingConvention()</literal> to only
-              return the relevant names if it's not
-              <literal>AUTO_DETECT_NAMING_CONVENTION</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>

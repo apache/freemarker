@@ -21,25 +21,24 @@ package freemarker.cache;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A {@link TemplateLoader} that uses a set of other loaders to load the templates. On every request, loaders are
- * queried in the order of their appearance in the array of loaders provided to the constructor. However, if a request
- * for some template name was already satisfied in the past by one of the loaders, that Loader is queried first (a soft
- * affinity).
+ * queried in the order of their appearance in the array of loaders provided to the constructor. However, by default, if
+ * a request for some template name was already satisfied in the past by one of the loaders, that loader is queried
+ * first (stickiness). This behavior can be disabled with {@link #setSticky(boolean)}, then the loaders are always
+ * queried in the order of their appearance in the array.
  * 
- * <p>
- * This class is <em>not</em> thread-safe. If it's accessed from multiple threads concurrently, proper synchronization
- * must be provided by the callers. Note that {@link TemplateCache}, the natural user of this class, provides the
- * necessary synchronizations when it uses this class, so then you don't have to worry this.
+ * <p>This class is thread-safe.
  */
 public class MultiTemplateLoader implements StatefulTemplateLoader {
 
     private final TemplateLoader[] loaders;
-    private final Map lastLoaderForName = Collections.synchronizedMap(new HashMap());
+    private final Map<String, TemplateLoader> lastLoaderForName = new ConcurrentHashMap<String, TemplateLoader>();
+    
+    private boolean sticky = true;
 
     /**
      * Creates a new multi template Loader that will use the specified loaders.
@@ -53,13 +52,15 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
 
     public Object findTemplateSource(String name)
             throws IOException {
-        // Use soft affinity - give the loader that last found this
-        // resource a chance to find it again first.
-        TemplateLoader lastLoader = (TemplateLoader) lastLoaderForName.get(name);
-        if (lastLoader != null) {
-            Object source = lastLoader.findTemplateSource(name);
-            if (source != null) {
-                return new MultiSource(source, lastLoader);
+        if (sticky) {
+            // Use soft affinity - give the loader that last found this
+            // resource a chance to find it again first.
+            TemplateLoader lastLoader = lastLoaderForName.get(name);
+            if (lastLoader != null) {
+                Object source = lastLoader.findTemplateSource(name);
+                if (source != null) {
+                    return new MultiSource(source, lastLoader);
+                }
             }
         }
 
@@ -71,12 +72,16 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
             TemplateLoader loader = loaders[i];
             Object source = loader.findTemplateSource(name);
             if (source != null) {
-                lastLoaderForName.put(name, loader);
+                if (sticky) {
+                    lastLoaderForName.put(name, loader);
+                }
                 return new MultiSource(source, loader);
             }
         }
 
-        lastLoaderForName.remove(name);
+        if (sticky) {
+            lastLoaderForName.remove(name);
+        }
         // Resource not found
         return null;
     }
@@ -100,6 +105,9 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
         ((MultiSource) templateSource).close();
     }
 
+    /**
+     * Clears the soft affinity memory, also resets all enclosed {@link StatefulTemplateLoader}-s.
+     */
     public void resetState() {
         lastLoaderForName.clear();
         for (int i = 0; i < loaders.length; i++) {
@@ -199,5 +207,20 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
     public TemplateLoader getTemplateLoader(int index) {
         return loaders[index];
     }
+
+    /**
+     * @since 2.3.24
+     */
+    public boolean isSticky() {
+        return sticky;
+    }
+
+    /**
+     * @since 2.3.24
+     */
+    public void setSticky(boolean sticky) {
+        this.sticky = sticky;
+    }
+
 
 }

@@ -1394,12 +1394,20 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets the file system directory from which to load templates.
-     * This is equivalent to {@code setTemplateLoader(new FileTemplateLoader(dir))},
-     * so see {@link FileTemplateLoader#FileTemplateLoader(File)} for more details.
+     * Sets the file system directory from which to load templates. This is equivalent to
+     * {@code setTemplateLoader(new FileTemplateLoader(dir))}, so see
+     * {@link FileTemplateLoader#FileTemplateLoader(File)} for more details.
      * 
-     * Note that FreeMarker can load templates from non-file-system sources too. 
-     * See {@link #setTemplateLoader(TemplateLoader)} from more details.
+     * <p>
+     * Note that FreeMarker can load templates from non-file-system sources too. See
+     * {@link #setTemplateLoader(TemplateLoader)} from more details.
+     * 
+     * <p>
+     * Note that this shouldn't be used for loading templates that are coming from a WAR; use
+     * {@link #setServletContextForTemplateLoading(Object, String)} then. Servlet containers might not unpack the WAR
+     * file, in which case you clearly can't access the contained files via {@link File}. Even if the WAR is unpacked,
+     * the servlet container might not expose the location as a {@link File}.
+     * {@link #setServletContextForTemplateLoading(Object, String)} on the other hand will work in all these cases.
      */
     public void setDirectoryForTemplateLoading(File dir) throws IOException {
         TemplateLoader tl = getTemplateLoader();
@@ -1766,8 +1774,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets when auto-escaping should be enabled depending on the current output format; default is
-     * {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}. Note that the default output format,
+     * Sets when auto-escaping should be enabled depending on the current {@linkplain OutputFormat output format};
+     * default is {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}. Note that the default output format,
      * {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping will be off.
      * Note that the templates can turn auto-escaping on/off locally with directives like {@code <#ftl auto_esc=...>},
      * which will ignore the policy.
@@ -1833,7 +1841,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Sets the default output format. Usually, you should leave this on its default, which is
      * {@link UndefinedOutputFormat#INSTANCE}, and then use standard file extensions like "ftlh" (for HTML) or "ftlx"
      * (for XML) and ensure that {@link #setRecognizeStandardFileExtensions(boolean)} is {@code true} (see more there).
-     * Where you can't use standard the file extensions, templates still can be associated to output formats with
+     * Where you can't use the standard extensions, templates still can be associated to output formats with
      * patterns matching their name (their path) using {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
      * But if all templates will have the same output format, you may use {@link #setOutputFormat(OutputFormat)} after
      * all, to set a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note
