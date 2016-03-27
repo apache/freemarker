@@ -38,6 +38,8 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
 /**
+ * Adapts a {@link SimpleTag}-based custom JSP tag to be a value that's callable in templates as an user-defined
+ * directive. For {@link Tag}-based custom JSP tags {@link TagTransformModel} is used instead.
  */
 class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirectiveModel {
     protected SimpleTagDirectiveModel(String tagName, Class tagClass) throws IntrospectionException {
