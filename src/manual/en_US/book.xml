@@ -26523,6 +26523,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               overload was added, where you can specify if you want a lazy or
               an eager import.)</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed (FREEMARKER-18): If you had a JSP custom tag and
+              an EL function defined in the same TLD with the same name, the
+              EL function has overwritten the custom tag. This is a bug
+              introduced in 2.3.23, when EL function support was added. JSP
+              allows a custom tag and an EL function in the same TLD to have
+              the same name. In such case now we combine the two into a single
+              value that is both callable as an user defined directive
+              (<literal>&lt;@my.foo...&gt;</literal>) and as a function
+              (<literal>my.f(...)</literal>).</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
