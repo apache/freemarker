@@ -23,10 +23,13 @@ attributes.ftl
 customELFunctions1.ftl
 customELFunctions1.jsp
 customTags1.ftl
+elFunctionsTagNameClash.ftl
+elFunctionsTagNameClash.jsp
 trivial-jstl-@Ignore.ftl
 trivial.ftl
 trivial.jsp
 
+WEB-INF/el-function-tag-name-clash.tld
 WEB-INF/el-functions.tld
 WEB-INF/expected
 WEB-INF/test.tld

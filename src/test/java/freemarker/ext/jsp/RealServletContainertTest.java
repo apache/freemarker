@@ -111,9 +111,15 @@ public class RealServletContainertTest extends WebAppTestCase {
 
     @Test
     public void basicELFunctions() throws Exception {
-        //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.jsp"));
-        //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.ftl"));
         assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=customELFunctions1");
+    }
+
+    // https://issues.apache.org/jira/browse/FREEMARKER-18
+    @Test
+    public void basicELFunctionsTagNameClash() throws Exception {
+        // System.out.println(getResponseContent(WEBAPP_BASIC, "tester?view=elFunctionsTagNameClash.jsp"));
+        // System.out.println(getResponseContent(WEBAPP_BASIC, "tester?view=elFunctionsTagNameClash.ftl"));
+        assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=elFunctionsTagNameClash");
     }
     
     @Test
