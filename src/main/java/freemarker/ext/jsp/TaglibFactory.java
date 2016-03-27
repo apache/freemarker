@@ -37,6 +37,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.acl.Owner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -1618,7 +1619,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         private final BeansWrapper beansWrapper;
 
-        private final Map tagsAndFunctions = new HashMap();
+        private final Map<String, TemplateModel> tagsAndFunctions = new HashMap<String, TemplateModel>();
         private final List listeners = new ArrayList();
 
         private Locator locator;
@@ -1649,7 +1650,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
-        Map getTagsAndFunctions() {
+        Map<String, TemplateModel> getTagsAndFunctions() {
             return tagsAndFunctions;
         }
 
@@ -1710,12 +1711,12 @@ public class TaglibFactory implements TemplateHashModel {
 
                     final Class tagClass = resoveClassFromTLD(tagClassCData, "custom tag", tagNameCData);
 
-                    final TemplateModel impl;
+                    final TemplateModel customTagModel;
                     try {
                         if (Tag.class.isAssignableFrom(tagClass)) {
-                            impl = new TagTransformModel(tagNameCData, tagClass);
+                            customTagModel = new TagTransformModel(tagNameCData, tagClass);
                         } else {
-                            impl = new SimpleTagDirectiveModel(tagNameCData, tagClass);
+                            customTagModel = new SimpleTagDirectiveModel(tagNameCData, tagClass);
                         }
                     } catch (IntrospectionException e) {
                         throw new TldParsingSAXException(
@@ -1724,7 +1725,16 @@ public class TaglibFactory implements TemplateHashModel {
                                 e);
                     }
 
-                    tagsAndFunctions.put(tagNameCData, impl);
+                    TemplateModel replacedTagOrFunction = tagsAndFunctions.put(tagNameCData, customTagModel);
+                    if (replacedTagOrFunction != null) {
+                        if (CustomTagAndELFunctionCombiner.canBeCombinedAsELFunction(replacedTagOrFunction)) {
+                            tagsAndFunctions.put(tagNameCData, CustomTagAndELFunctionCombiner.combine(
+                                    customTagModel, (TemplateMethodModelEx) replacedTagOrFunction));
+                        } else {
+                            LOG.warn("TLD contains multiple tags with name " + StringUtil.jQuote(tagNameCData)
+                                    + "; keeping only the last one.");
+                        }
+                    }
 
                     tagNameCData = null;
                     tagClassCData = null;
@@ -1756,16 +1766,25 @@ public class TaglibFactory implements TemplateHashModel {
                                 locator);
                     }
 
-                    final TemplateMethodModelEx methodModel;
+                    final TemplateMethodModelEx elFunctionModel;
                     try {
-                        methodModel = beansWrapper.wrap(null, functionMethod);
+                        elFunctionModel = beansWrapper.wrap(null, functionMethod);
                     } catch (Exception e) {
                         throw new TldParsingSAXException(
                                 "FreeMarker object wrapping failed on method : " + functionMethod,
                                 locator);
                     }
 
-                    tagsAndFunctions.put(functionNameCData, methodModel);
+                    TemplateModel replacedTagOrFunction = tagsAndFunctions.put(functionNameCData, elFunctionModel);
+                    if (replacedTagOrFunction != null) {
+                        if (CustomTagAndELFunctionCombiner.canBeCombinedAsCustomTag(replacedTagOrFunction)) {
+                            tagsAndFunctions.put(functionNameCData, CustomTagAndELFunctionCombiner.combine(
+                                    replacedTagOrFunction, elFunctionModel));
+                        } else {
+                            LOG.warn("TLD contains multiple functions with name " + StringUtil.jQuote(functionNameCData)
+                                    + "; keeping only the last one.");
+                        }
+                    }
 
                     functionNameCData = null;
                     functionClassCData = null;
