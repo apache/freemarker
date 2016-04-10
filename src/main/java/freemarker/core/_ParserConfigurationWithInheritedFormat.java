@@ -71,4 +71,8 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     public ArithmeticEngine getArithmeticEngine() {
         return wrappedPCfg.getArithmeticEngine();
     }
+
+    public int getTabSize() {
+        return wrappedPCfg.getTabSize();
+    }
 }

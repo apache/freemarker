@@ -67,6 +67,7 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
+import freemarker.core.ParseException;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.TemplateDateFormatFactory;
 import freemarker.core.TemplateNumberFormatFactory;
@@ -1374,6 +1375,59 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getCause().getMessage(), allOf(
                     containsString(EpochMillisTemplateDateFormatFactory.class.getName()),
                     containsString(TemplateNumberFormatFactory.class.getName())));
+        }
+    }
+
+    @Test
+    public void testSetTabSize() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        
+        String ftl = "${\t}";
+        
+        try {
+            new Template(null, ftl, cfg);
+            fail();
+        } catch (ParseException e) {
+            assertEquals(9, e.getColumnNumber());
+        }
+        
+        cfg.setTabSize(1);
+        try {
+            new Template(null, ftl, cfg);
+            fail();
+        } catch (ParseException e) {
+            assertEquals(4, e.getColumnNumber());
+        }
+        
+        try {
+            cfg.setTabSize(0);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+        
+        try {
+            cfg.setTabSize(257);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+    }
+
+    @Test
+    public void testTabSizeSetting() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        assertEquals(8, cfg.getTabSize());
+        cfg.setSetting(Configuration.TAB_SIZE_KEY_CAMEL_CASE, "4");
+        assertEquals(4, cfg.getTabSize());
+        cfg.setSetting(Configuration.TAB_SIZE_KEY_SNAKE_CASE, "1");
+        assertEquals(1, cfg.getTabSize());
+        
+        try {
+            cfg.setSetting(Configuration.TAB_SIZE_KEY_SNAKE_CASE, "x");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getCause(), instanceOf(NumberFormatException.class));
         }
     }
     

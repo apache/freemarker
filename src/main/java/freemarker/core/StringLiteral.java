@@ -46,20 +46,24 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
      *            this to share the {@code namingConvetion} with that.
      */
     void parseValue(FMParserTokenManager parentTkMan, OutputFormat outputFormat) throws ParseException {
-        // The way this work is incorrect (the literal should be parsed without un-escaping),
+        // The way this works is incorrect (the literal should be parsed without un-escaping),
         // but we can't fix this backward compatibly.
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
             
             Template parentTemplate = getTemplate();
+            ParserConfiguration pcfg = parentTemplate.getParserConfiguration();
 
             try {
-                FMParserTokenManager tkMan = new FMParserTokenManager(
-                        new SimpleCharStream(
-                                new StringReader(value),
-                                beginLine, beginColumn + 1,
-                                value.length()));
+                SimpleCharStream simpleCharacterStream = new SimpleCharStream(
+                        new StringReader(value),
+                        beginLine, beginColumn + 1,
+                        value.length());
+                simpleCharacterStream.setTabSize(pcfg.getTabSize());
                 
-                FMParser parser = new FMParser(parentTemplate, false, tkMan, parentTemplate.getParserConfiguration());
+                FMParserTokenManager tkMan = new FMParserTokenManager(
+                        simpleCharacterStream);
+                
+                FMParser parser = new FMParser(parentTemplate, false, tkMan, pcfg);
                 // We continue from the parent parser's current state:
                 parser.setupStringLiteralMode(parentTkMan, outputFormat);
                 try {

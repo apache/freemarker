@@ -176,6 +176,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("autoEscapingPolicy", Configuration.DISABLE_AUTO_ESCAPING_POLICY);
         SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
         SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", true);
+        SETTING_ASSIGNMENTS.put("tabSize", 1);
         
         // Special settings:
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
@@ -586,6 +587,19 @@ public class TemplateConfigurationTest {
                     UndefinedOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE.getName());
             testedProps.add(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE);
         }
+
+        {
+            TemplateConfiguration tc = new TemplateConfiguration();
+            tc.setLogTemplateExceptions(false);
+            tc.setParentConfiguration(new Configuration(new Version(2, 3, 22)));
+            tc.setTabSize(3);
+            assertOutputWithoutAndWithTC(tc,
+                    "<#attempt><@'\\t$\\{1+}'?interpret/><#recover>"
+                    + "${.error?replace('(?s).*?column ([0-9]+).*', '$1', 'r')}"
+                    + "</#attempt>",
+                    "13", "8");
+            testedProps.add(Configuration.TAB_SIZE_KEY_CAMEL_CASE);
+        }
         
         assertEquals("Check that you have tested all parser settings; ", PARSER_PROP_NAMES, testedProps);
     }
@@ -749,8 +763,8 @@ public class TemplateConfigurationTest {
     
     private void assertOutputWithoutAndWithTC(TemplateConfiguration tc, String ftl, String expectedDefaultOutput,
             String expectedConfiguredOutput) throws TemplateException, IOException {
-        assertOutput(tc, ftl, expectedConfiguredOutput);
         assertOutput(null, ftl, expectedDefaultOutput);
+        assertOutput(tc, ftl, expectedConfiguredOutput);
     }
 
     private void assertOutput(TemplateConfiguration tc, String ftl, String expectedConfiguredOutput)

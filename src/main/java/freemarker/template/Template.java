@@ -238,14 +238,16 @@ public class Template extends Configurable {
         this.setEncoding(encoding);
         LineTableBuilder ltbReader;
         try {
+            ParserConfiguration actualParserConfiguration = getParserConfiguration();
+            
             if (!(reader instanceof BufferedReader) && !(reader instanceof StringReader)) {
                 reader = new BufferedReader(reader, 0x1000);
             }
-            ltbReader = new LineTableBuilder(reader);
+            ltbReader = new LineTableBuilder(reader, actualParserConfiguration);
             reader = ltbReader;
             
             try {
-                parser = new FMParser(this, reader, getParserConfiguration());
+                parser = new FMParser(this, reader, actualParserConfiguration);
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -572,8 +574,8 @@ public class Template extends Configurable {
     
     /**
      * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
-     * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfiguration}, or something else. It's
-     * never {@code null}.
+     * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfiguration}, or something else.
+     * It's never {@code null}.
      * 
      * @since 2.3.24
      */
@@ -735,10 +737,16 @@ public class Template extends Configurable {
 
     /**
      * Returns the template source at the location specified by the coordinates given, or {@code null} if unavailable.
+     * A strange legacy in the behavior of this method is that it replaces tab characters with spaces according the
+     * value of {@link Template#getParserConfiguration()}/{@link ParserConfiguration#getTabSize()} (which usually
+     * comes from {@link Configuration#getTabSize()}), because tab characters move the column number with more than
+     * 1 in error messages. However, if you set the tab size to 1, this method leaves the tab characters as is.
+     * 
      * @param beginColumn the first column of the requested source, 1-based
      * @param beginLine the first line of the requested source, 1-based
      * @param endColumn the last column of the requested source, 1-based
      * @param endLine the last line of the requested source, 1-based
+     * 
      * @see freemarker.core.TemplateObject#getSource()
      */
     public String getSource(int beginColumn,
@@ -771,6 +779,7 @@ public class Template extends Configurable {
      */
     private class LineTableBuilder extends FilterReader {
         
+        private final int tabSize;
         private final StringBuilder lineBuf = new StringBuilder();
         int lastChar;
         boolean closed;
@@ -781,8 +790,9 @@ public class Template extends Configurable {
         /**
          * @param r the character stream to wrap
          */
-        LineTableBuilder(Reader r) {
+        LineTableBuilder(Reader r, ParserConfiguration parserConfiguration) {
             super(r);
+            tabSize = parserConfiguration.getTabSize();
         }
         
         public boolean hasFailure() {
@@ -861,8 +871,8 @@ public class Template extends Configurable {
                     lines.add(lineBuf.toString());
                     lineBuf.setLength(0);
                 }
-            } else if (c == '\t') {
-                int numSpaces = 8 - (lineBuf.length() % 8);
+            } else if (c == '\t' && tabSize != 1) {
+                int numSpaces = tabSize - (lineBuf.length() % tabSize);
                 for (int i = 0; i < numSpaces; i++) {
                     lineBuf.append(' ');
                 }

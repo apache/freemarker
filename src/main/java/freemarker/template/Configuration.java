@@ -263,6 +263,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String NAMING_CONVENTION_KEY_CAMEL_CASE = "namingConvention";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String NAMING_CONVENTION_KEY = NAMING_CONVENTION_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
+    public static final String TAB_SIZE_KEY_SNAKE_CASE = "tab_size";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
+    public static final String TAB_SIZE_KEY_CAMEL_CASE = "tabSize";
+    /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.25 */
+    public static final String TAB_SIZE_KEY = TAB_SIZE_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TEMPLATE_LOADER_KEY_SNAKE_CASE = "template_loader";
@@ -322,6 +329,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
+        TAB_SIZE_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
         TEMPLATE_LOADER_KEY_SNAKE_CASE,
@@ -347,6 +355,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
+        TAB_SIZE_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
         TEMPLATE_LOADER_KEY_CAMEL_CASE,
@@ -496,6 +505,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
+    private int tabSize = 8;  // Default from JavaCC 3.x 
 
     private TemplateCache cache;
     
@@ -2237,6 +2247,38 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
+     * Sets the assumed display width of the tab character (ASCII 9), which influences the column number shown in error
+     * messages (or the column number you get through other API-s). So for example if the users edit templates in an
+     * editor where the tab width is set to 4, you should set this to 4 so that the column numbers printed by FreeMarker
+     * will match the column number shown in the editor. This setting doesn't affect the output of templates, as a tab
+     * in the template will remain a tab in the output too.
+     * 
+     * @param tabSize
+     *            At least 1, at most 256.
+     * 
+     * @since 2.3.25
+     */
+    public void setTabSize(int tabSize) {
+        if (tabSize < 1) {
+           throw new IllegalArgumentException("\"tabSize\" must be at least 1, but was " + tabSize);
+        }
+        // To avoid integer overflows:
+        if (tabSize > 256) {
+            throw new IllegalArgumentException("\"tabSize\" can be more than 256, but was " + tabSize);
+        }
+        this.tabSize = tabSize;
+    }
+
+    /**
+     * The getter pair of {@link #setTabSize(int)}.
+     * 
+     * @since 2.3.25
+     */
+    public int getTabSize() {
+        return tabSize;
+    }
+    
+    /**
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
      * missing/staled.
      * 
@@ -2928,6 +2970,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
+            } else if (TAB_SIZE_KEY_SNAKE_CASE.equals(name) || TAB_SIZE_KEY_CAMEL_CASE.equals(name)) {
+                setTabSize(Integer.parseInt(value));
             } else if (INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE.equals(name)
                     || INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE.equals(name)) {
                 setIncompatibleImprovements(new Version(value));

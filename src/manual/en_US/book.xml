@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.24</productname>
+    <productname>Freemarker 2.3.25</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -26525,6 +26525,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>New <literal>Configuration</literal> (and
+              <literal>TemplateConfiguration</literal>) setting,
+              <literal>tab_size</literal>. This only influences how the column
+              number reported in error messages is calculated (and the column
+              number available with other API-s). It doesn't influence the
+              output of the templates. Defaults to 8.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed (FREEMARKER-18): If you had a JSP custom tag and
               an EL function defined in the same TLD with the same name, the
               EL function has overwritten the custom tag. This is a bug
@@ -26534,6 +26543,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               value that is both callable as an user defined directive
               (<literal>&lt;@my.foo...&gt;</literal>) and as a function
               (<literal>my.f(...)</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-19">FREEMARKER-19</link>):
+              The column numbers calculated by the parser has assumed tab size
+              1 since 2.3.25 (an unwanted side effect of updating JavaCC),
+              while before it has assume tab size 8. The default was restored
+              to 8. This bug has affected the column numbers in error
+              messages. It also broke the output of some rarely used AIP-s,
+              namely <literal>Template.getSource(beginCol, beginLine, endCol,
+              endLine)</literal>,
+              <literal>TemplateObject.getSource()</literal> and through that
+              <literal>TemplateObject.toString()</literal>, if the first or
+              last line has contain tab characters.</para>
             </listitem>
           </itemizedlist>
         </section>

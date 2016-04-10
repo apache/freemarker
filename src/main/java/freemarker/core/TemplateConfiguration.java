@@ -83,6 +83,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
     private String encoding;
+    private Integer tabSize;
 
     /**
      * Creates a new instance. The parent will be {@link Configuration#getDefaultConfiguration()} initially, but it will
@@ -238,15 +239,22 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isWhitespaceStrippingSet()) {
             setWhitespaceStripping(tc.getWhitespaceStripping());
         }
+        if (tc.isTabSizeSet()) {
+            setTabSize(tc.getTabSize());
+        }
         
         tc.copyDirectCustomAttributes(this, true);
     }
 
     /**
-     * Sets the settings of the {@link Template} which are not yet set in the {@link Template} and are set in this
+     * Sets those settings of the {@link Template} which aren't yet set in the {@link Template} and are set in this
      * {@link TemplateConfiguration}, leaves the other settings as is. A setting is said to be set in a
      * {@link TemplateConfiguration} or {@link Template} if it was explicitly set via a setter method on that object, as
      * opposed to be inherited from the {@link Configuration}.
+     * 
+     * <p>
+     * Note that this method doesn't deal with settings that influence the parser, as those are already baked in at this
+     * point via the {@link ParserConfiguration}. 
      * 
      * <p>
      * Note that the {@code encoding} setting of the {@link Template} counts as unset if it's {@code null},
@@ -520,6 +528,34 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     public boolean isEncodingSet() {
         return encoding != null;
     }
+    
+    /**
+     * See {@link Configuration#setTabSize(int)}. 
+     * 
+     * @since 2.3.25
+     */
+    public void setTabSize(int tabSize) {
+        this.tabSize = Integer.valueOf(tabSize);
+    }
+
+    /**
+     * Getter pair of {@link #setTabSize(int)}.
+     * 
+     * @since 2.3.25
+     */
+    public int getTabSize() {
+        return tabSize != null ? tabSize.intValue()
+                : getParentConfiguration().getTabSize();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * 
+     * @since 2.3.25
+     */
+    public boolean isTabSizeSet() {
+        return tabSize != null;
+    }    
     
     /**
      * Returns {@link Configuration#getIncompatibleImprovements()} from the parent {@link Configuration}. This mostly

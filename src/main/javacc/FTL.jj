@@ -154,6 +154,8 @@ public class FMParser {
                                 : null,
                         template != null ? template.getParserConfiguration().getRecognizeStandardFileExtensions()
                                 : null,
+                        template != null ? template.getParserConfiguration().getTabSize()
+                                : null,
                         new Version(incompatibleImprovements),
                         template != null ? template.getArithmeticEngine() : null));
     }
@@ -164,11 +166,13 @@ public class FMParser {
      * @since 2.3.24
      */
     public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
-        this(template, true, readerToTokenManager(reader), pCfg);
+        this(template, true, readerToTokenManager(reader, pCfg), pCfg);
     }
 
-    private static FMParserTokenManager readerToTokenManager(Reader reader) {
-        return new FMParserTokenManager(new SimpleCharStream(reader, 1, 1));
+    private static FMParserTokenManager readerToTokenManager(Reader reader, ParserConfiguration pCfg) {
+        SimpleCharStream simpleCharStream = new SimpleCharStream(reader, 1, 1);
+        simpleCharStream.setTabSize(pCfg.getTabSize());
+        return new FMParserTokenManager(simpleCharStream);
     }
 
     /**
@@ -193,6 +197,8 @@ public class FMParser {
             lpCfg.setOutputFormatIfNotSet(template.getOutputFormat());
             lpCfg.setRecognizeStandardFileExtensionsIfNotSet(
                     template.getParserConfiguration().getRecognizeStandardFileExtensions());
+            lpCfg.setTabSizeIfNotSet(
+                    template.getParserConfiguration().getTabSize());
         }
 
         int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
