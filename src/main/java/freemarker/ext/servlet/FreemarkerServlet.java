@@ -511,24 +511,24 @@ public class FreemarkerServlet extends HttpServlet {
     @Deprecated
     protected boolean debug;
     
-    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
+    // @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Configuration config;
-    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
+    // @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ObjectWrapper wrapper;
     private ContentType contentType;
     private OverrideResponseContentType overrideResponseContentType = initParamValueToEnum(
             getDefaultOverrideResponseContentType(), OverrideResponseContentType.values());
     private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
-    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
+    // @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Charset forcedResponseCharacterEncoding;
     private OverrideResponseLocale overrideResponseLocale = OverrideResponseLocale.ALWAYS;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
 
     private Object lazyInitFieldsLock = new Object();
-    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
+    // @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ServletContextHashModel servletContextModel;
-    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
+    // @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private TaglibFactory taglibFactory;
     
     private boolean objectWrapperMismatchWarnLogged;
@@ -956,7 +956,7 @@ public class FreemarkerServlet extends HttpServlet {
         throw e;
     }
     
-    @SuppressFBWarnings(value={ "MSF_MUTABLE_SERVLET_FIELD", "DC_DOUBLECHECK" }, justification="Performance trick")
+    // @SuppressFBWarnings(value={ "MSF_MUTABLE_SERVLET_FIELD", "DC_DOUBLECHECK" }, justification="Performance trick")
     private void logWarnOnObjectWrapperMismatch() {
         // Deliberately uses double check locking.
         if (wrapper != config.getObjectWrapper() && !objectWrapperMismatchWarnLogged && LOG.isWarnEnabled()) {

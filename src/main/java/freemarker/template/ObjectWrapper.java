@@ -39,7 +39,7 @@ import freemarker.ext.util.WrapperTemplateModel;
  * 
  * @see Configuration#setObjectWrapper(ObjectWrapper)
  */
-@SuppressFBWarnings(value="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION", justification="BC")
+// @SuppressFBWarnings(value="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION", justification="BC")
 public interface ObjectWrapper {
     
     /**

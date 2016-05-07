@@ -133,8 +133,8 @@ abstract class OverloadedMethodsSubset {
         return unwrappingHintsByParamCount;
     }
     
-    @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER",
-            justification="Locks for member descriptor creation only")
+    // @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER",
+    //         justification="Locks for member descriptor creation only")
     final MaybeEmptyCallableMemberDescriptor getMemberDescriptorForArgs(Object[] args, boolean varArg) {
         ArgumentTypes argTypes = new ArgumentTypes(args, bugfixed);
         MaybeEmptyCallableMemberDescriptor memberDesc

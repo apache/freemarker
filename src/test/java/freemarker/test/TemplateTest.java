@@ -81,7 +81,7 @@ public abstract class TemplateTest {
         assertOutput(getConfiguration().getTemplate(name), expectedOut, false);
     }
 
-    @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
+    // @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
     protected void assertOutputForNamed(String name) throws IOException, TemplateException {
         String expectedOut;
         {

@@ -26559,6 +26559,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>TemplateObject.toString()</literal>, if the first or
               last line has contain tab characters.</para>
             </listitem>
+
+            <listitem>
+              <para>Removed FindBugs <literal>@SuppressFBWarnings</literal>
+              annotations as they have caused warnings when compiling
+              dependant code with Gradle.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

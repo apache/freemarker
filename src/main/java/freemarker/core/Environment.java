@@ -250,7 +250,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.23
      */
-    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
+    // @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public Template getCurrentTemplate() {
         int ln = instructionStackSize;
         return ln == 0 ? getMainTemplate() : instructionStack[ln - 1].getTemplate();
@@ -264,7 +264,7 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.22
      */
-    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
+    // @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
         int ln = instructionStackSize;
         if (ln == 0) return null;
@@ -377,7 +377,7 @@ public final class Environment extends Configurable {
         }
     }
 
-    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
+    // @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
     private TemplateElement replaceTopElement(TemplateElement element) {
         return instructionStack[instructionStackSize - 1] = element;
     }

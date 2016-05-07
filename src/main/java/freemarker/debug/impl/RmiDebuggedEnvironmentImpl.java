@@ -106,7 +106,7 @@ implements
     }
 
     // TODO See in SuppressFBWarnings
-    @SuppressFBWarnings(value="NN_NAKED_NOTIFY", justification="Will have to be re-desigend; postponed.")
+    // @SuppressFBWarnings(value="NN_NAKED_NOTIFY", justification="Will have to be re-desigend; postponed.")
     public void resume() {
         synchronized (this) {
             notify();

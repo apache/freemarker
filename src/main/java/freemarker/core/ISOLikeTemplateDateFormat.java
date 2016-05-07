@@ -198,8 +198,8 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
             DateToISO8601CalendarFactory calendarFactory);
 
     @Override
-    @SuppressFBWarnings(value = "RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN",
-            justification = "Known to use the singleton Boolean-s only")
+    // @SuppressFBWarnings(value = "RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN",
+    //         justification = "Known to use the singleton Boolean-s only")
     public final Date parse(String s, int dateType) throws UnparsableValueException {
         CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator(env);
         TimeZone tz = forceUTC != Boolean.FALSE ? DateUtil.UTC : timeZone;

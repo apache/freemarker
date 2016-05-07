@@ -249,7 +249,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return res;
     }
 
-    @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
+    // @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
     public Object getOrCreateCustomData(Object providerIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException {
         // We are using double-checked locking, utilizing Java memory model "final" trick.
