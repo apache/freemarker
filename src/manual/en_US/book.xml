@@ -19420,7 +19420,7 @@ ${avg(10, 20)}</programlisting>
           <programlisting role="template">&lt;#function avg nums...&gt;
   &lt;#local sum = 0&gt;
   &lt;#list nums as num&gt;
-    &lt;#local sum = sum + num&gt;
+    &lt;#local sum += num&gt;
   &lt;/#list&gt;
   &lt;#if nums?size != 0&gt;
     &lt;#return sum / nums?size&gt;
