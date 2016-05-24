@@ -93,8 +93,7 @@ extends
 
     // TODO See in SuppressFBWarnings
     @Override
-    // @SuppressFBWarnings(value={ "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" },
-    //     justification="Will have to be re-desigend; postponed.")
+    @SuppressFBWarnings(value={ "UW_UNCOND_WAIT", "WA_NOT_IN_LOOP" }, justification="Will have to be re-desigend; postponed.")
     boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
     throws RemoteException {
         RmiDebuggedEnvironmentImpl denv = 

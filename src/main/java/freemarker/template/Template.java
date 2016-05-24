@@ -215,7 +215,7 @@ public class Template extends Configurable {
      *            {@code null}. This is useful as the {@link Configuration} is normally a singleton shared by all
      *            templates, and so it's not good for specifying template-specific settings. (While {@link Template}
      *            itself has methods to specify settings just for that template, those don't influence the parsing, and
-     *            you only have opportunity to call them after the parsing anyway.) This object is often a
+     *            you only have opportunity to call them after the parsing anyway.) This objects is often a
      *            {@link TemplateConfiguration} whose parent is the {@link Configuration} parameter, and then it
      *            practically just overrides some of the parser settings, as the others are inherited from the
      *            {@link Configuration}. Note that if this is a {@link TemplateConfiguration}, you will also want to

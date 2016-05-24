@@ -261,7 +261,7 @@ public class WebAppTestCase {
         }
     }
 
-    // @SuppressFBWarnings(value = "UI_INHERITANCE_UNSAFE_GETRESOURCE", justification = "By design relative to subclass")
+    @SuppressFBWarnings(value = "UI_INHERITANCE_UNSAFE_GETRESOURCE", justification = "By design relative to subclass")
     private String createWebAppDirAndGetURI(String webAppName) throws IOException {
         ClassPathResource resourceDir = findWebAppDirectoryResource(webAppName);
         File temporaryDir = ResourcesExtractor.extract(

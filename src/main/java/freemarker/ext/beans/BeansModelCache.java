@@ -45,8 +45,7 @@ public class BeansModelCache extends ModelCache {
     }
     
     @Override
-    // @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER",
-    //     justification="Locks for factory creation only")
+    @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER", justification="Locks for factory creation only")
     protected TemplateModel create(Object object) {
         Class clazz = object.getClass();
         

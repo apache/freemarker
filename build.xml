@@ -212,8 +212,27 @@
       -->Java 6: ${boot.classpath.j2se1.6}<!--
     --></echo>
 
-    <mkdir dir="build/classes" />
+    <!-- Comment out @SuppressFBWarnings, as it causes compilation warnings in dependent Gradle projects -->    
+    <delete dir="build/src-main-java-filtered" />
+    <mkdir dir="build/src-main-java-filtered" />
+    <copy toDir="build/src-main-java-filtered">
+      <fileset dir="src/main/java" />
+    </copy>
+    <replaceregexp
+        flags="gs" encoding="utf-8"
+        match='(@SuppressFBWarnings\(.+?"\s*\))' replace="/*\1*/"
+    >
+      <fileset dir="build/src-main-java-filtered" includes="**/*.java" />
+    </replaceregexp>
+    <replaceregexp
+        flags="gs" encoding="utf-8"
+        match='(import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;)' replace="// \1"
+    >
+      <fileset dir="build/src-main-java-filtered" includes="**/*.java" />
+    </replaceregexp>
     
+    <mkdir dir="build/classes" />
+
     <!-- Note: the "build.base" conf doesn't include optional FreeMarker dependencies. -->
     <ivy:cachepath conf="build.base" pathid="ivy.dep" />
     <javac destdir="build/classes" deprecation="off" 
@@ -232,13 +251,13 @@
         freemarker/ext/ant/**"
     >
       <src>
-        <pathelement location="src/main/java" />
+        <pathelement location="build/src-main-java-filtered" />
         <pathelement location="build/generated-sources" />
       </src>
     </javac>
 
     <ivy:cachepath conf="build.base" pathid="ivy.dep" />
-    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep"
@@ -253,7 +272,7 @@
     />
 
     <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
-    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.0"
@@ -271,7 +290,7 @@
     <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
     
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
-    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
@@ -283,7 +302,7 @@
     />
 
     <ivy:cachepath conf="build.jython2.0" pathid="ivy.dep.jython2.0" />
-    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.0"
@@ -298,7 +317,7 @@
     />
     
     <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
-    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.2"
@@ -308,7 +327,7 @@
     />
     
     <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
-    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jython2.5"
@@ -318,7 +337,7 @@
     />
     
     <rmic base="build/classes" classpathref="ivy.dep"
-      includes="src/main/java/freemarker/debug/impl/Rmi*Impl.class"
+      includes="build/src-main-java-filtered/freemarker/debug/impl/Rmi*Impl.class"
       verify="yes" stubversion="1.2"
     />
     

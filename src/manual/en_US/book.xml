@@ -26562,8 +26562,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Removed FindBugs <literal>@SuppressFBWarnings</literal>
-              annotations as they have caused warnings when compiling
-              dependant code with Gradle.</para>
+              annotations from the binary (<literal>freemarker.jar</literal>),
+              as they have caused warnings like this when compiling dependant
+              project with Gradle: <quote>warning: Cannot find annotation
+              method 'value()' in type 'SuppressFBWarnings'</quote></para>
             </listitem>
           </itemizedlist>
         </section>

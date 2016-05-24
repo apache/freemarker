@@ -1183,7 +1183,7 @@ public class ConfigurationTest extends TestCase {
         assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
     }
 
-    // @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Expected to fail")
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Expected to fail")
     private void setTimeZoneToNull(Environment env2) {
         env2.setTimeZone(null);
     }
@@ -1306,7 +1306,7 @@ public class ConfigurationTest extends TestCase {
     }
     
     @Test
-    // @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS ", justification = "Testing wrong args")
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS ", justification = "Testing wrong args")
     public void testSetCustomNumberFormat() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         
@@ -1431,7 +1431,7 @@ public class ConfigurationTest extends TestCase {
         }
     }
     
-    // @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
     @Test
     public void testSetCustomDateFormat() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);

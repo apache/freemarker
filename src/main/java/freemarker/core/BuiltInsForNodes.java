@@ -104,8 +104,8 @@ class BuiltInsForNodes {
 
     static class AncestorSequence extends SimpleSequence implements TemplateMethodModel {
         
-        // @SuppressFBWarnings(value="SE_BAD_FIELD",
-        //         justification="Can't make this Serializable, and not extneding SimpleSequence would be non-BC.")
+        @SuppressFBWarnings(value="SE_BAD_FIELD",
+                justification="Can't make this Serializable, and not extneding SimpleSequence would be non-BC.")
         private Environment env;
         
         AncestorSequence(Environment env) {
