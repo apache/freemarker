@@ -63,6 +63,6 @@ public interface TemplateDirectiveModel extends TemplateModel {
      *          output.
      * @throws IOException When writing the template output fails.
      */
-   public void execute(Environment env, Map params, TemplateModel[] loopVars, 
+   public void execute(Environment env, Map<String, TemplateModel> params, TemplateModel[] loopVars,
             TemplateDirectiveBody body) throws TemplateException, IOException;
 }

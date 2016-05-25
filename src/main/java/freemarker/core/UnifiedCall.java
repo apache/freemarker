@@ -22,13 +22,13 @@ package freemarker.core;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import freemarker.template.EmptyMap;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -42,7 +42,7 @@ import freemarker.template.utility.StringUtil;
 final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     private Expression nameExp;
-    private Map namedArgs;
+    private Map<String, Expression> namedArgs;
     private List positionalArgs, bodyParameterNames;
     boolean legacySyntax;
     private transient volatile SoftReference/*List<Map.Entry<String,Expression>>*/ sortedNamedArgsCache;
@@ -85,18 +85,18 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         } else {
             boolean isDirectiveModel = tm instanceof TemplateDirectiveModel; 
             if (isDirectiveModel || tm instanceof TemplateTransformModel) {
-                Map args;
+                Map<String, TemplateModel> args;
                 if (namedArgs != null && !namedArgs.isEmpty()) {
-                    args = new HashMap();
-                    for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
-                        Map.Entry entry = (Map.Entry) it.next();
-                        String key = (String) entry.getKey();
-                        Expression valueExp = (Expression) entry.getValue();
+                    args = new HashMap<String, TemplateModel>();
+                    for (Iterator<Map.Entry<String, Expression>> it = namedArgs.entrySet().iterator(); it.hasNext(); ) {
+                        Map.Entry<String, Expression> entry = it.next();
+                        String key = entry.getKey();
+                        Expression valueExp = entry.getValue();
                         TemplateModel value = valueExp.eval(env);
                         args.put(key, value);
                     }
                 } else {
-                    args = EmptyMap.instance;
+                    args = Collections.emptyMap();
                 }
                 if (isDirectiveModel) {
                     env.visit(getChildBuffer(), (TemplateDirectiveModel) tm, args, bodyParameterNames);
