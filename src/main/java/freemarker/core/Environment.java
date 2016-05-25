@@ -391,13 +391,13 @@ public final class Environment extends Configurable {
      */
     @Deprecated
     public void visit(final TemplateElement element,
-            TemplateDirectiveModel directiveModel, Map args,
+            TemplateDirectiveModel directiveModel, Map<String, TemplateModel> args,
             final List bodyParameterNames) throws TemplateException, IOException {
         visit(new TemplateElement[] { element }, directiveModel, args, bodyParameterNames);
     }
     
     void visit(final TemplateElement[] childBuffer,
-            TemplateDirectiveModel directiveModel, Map args,
+            TemplateDirectiveModel directiveModel, Map<String, TemplateModel> args,
             final List bodyParameterNames) throws TemplateException, IOException {
         TemplateDirectiveBody nested;
         if (childBuffer == null) {
