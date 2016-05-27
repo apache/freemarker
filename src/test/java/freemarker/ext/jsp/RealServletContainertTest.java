@@ -44,6 +44,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
@@ -62,6 +63,7 @@ import freemarker.test.servlet.WebAppTestCase;
  * Tests {@link FreemarkerServlet} on a real (embedded) Servlet container.
  */
 @SuppressWarnings("boxing")
+@SuppressFBWarnings(value="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", justification="Hack needed for testing only")
 public class RealServletContainertTest extends WebAppTestCase {
 
     private static final String WEBAPP_BASIC = "basic";
