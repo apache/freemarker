@@ -43,11 +43,13 @@ import freemarker.log.Logger;
  * {@link Configuration#Configuration(Version) incompatibleImprovements} 2.3.22 (or higher).
  * 
  * <p>
- * If you still need to create an instance, that should be done with an {@link DefaultObjectWrapperBuilder}, not with
+ * If you still need to create an instance, that should be done with an {@link DefaultObjectWrapperBuilder} (or
+ * with {@link Configuration#setSetting(String, String)} with {@code "object_wrapper"} key), not with
  * its constructor, as that allows FreeMarker to reuse singletons. For new projects, it's recommended to set
  * {@link DefaultObjectWrapperBuilder#setForceLegacyNonListCollections(boolean) forceLegacyNonListCollections} to
- * {@code false} - something that setting {@code incompatibleImprovements} to 2.3.22 won't do.
- * 
+ * {@code false}, and {@link DefaultObjectWrapperBuilder#setIterableSupport(boolean) iterableSupport} to {@code true};
+ * setting {@code incompatibleImprovements} to 2.3.22 won't do these, as they could break legacy templates too easily.
+ *
  * <p>
  * This class is only thread-safe after you have finished calling its setter methods, and then safely published it (see
  * JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that was safely
@@ -65,6 +67,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     private boolean useAdaptersForContainers;
     private boolean forceLegacyNonListCollections;
+    private boolean iterableSupport;
     
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
@@ -115,6 +118,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 : new DefaultObjectWrapperConfiguration(bwCfg.getIncompatibleImprovements()) { }; 
         useAdaptersForContainers = dowDowCfg.getUseAdaptersForContainers();
         forceLegacyNonListCollections = dowDowCfg.getForceLegacyNonListCollections();
+        iterableSupport = dowDowCfg.getIterableSupport();
         finalizeConstruction(writeProtected);
     }
 
@@ -221,6 +225,9 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             return useAdaptersForContainers
                     ? (TemplateModel) DefaultIteratorAdapter.adapt((Iterator) obj, this)
                     : (TemplateModel) new SimpleCollection((Iterator) obj, this);
+        }
+        if (iterableSupport && obj instanceof Iterable) {
+            return DefaultIterableAdapter.adapt((Iterable<?>) obj, this);
         }
         return handleUnknownType(obj);
     }
@@ -331,6 +338,31 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
+     * Getter pair of {@link #setIterableSupport(boolean)}; see there.
+     * 
+     * @since 2.3.25
+     */
+    public boolean getIterableSupport() {
+        return iterableSupport;
+    }
+
+    /**
+     * Specifies whether {@link Iterable}-s (not to be confused with {@link Iterator}-s) that don't implement any other
+     * recognized Java interfaces (most notably {@link Collection}) will be recognized as listable objects
+     * ({@link TemplateCollectionModel}-s), or they will be just seen as generic objects (JavaBean-s). Defaults to
+     * {@code false} for backward compatibility, but in new projects you should set this to {@code true}. Before setting
+     * this to {@code true} in older projects, check if you have called {@code myIterable.iterator()} directly from any
+     * templates, because the Java API is only exposed to the templates if the {@link Iterable} is wrapped as generic
+     * object.
+     * 
+     * @since 2.3.25
+     */
+    public void setIterableSupport(boolean iterableSupport) {
+        checkModifiable();
+        this.iterableSupport = iterableSupport;
+    }
+
+    /**
      * Returns the lowest version number that is equivalent with the parameter version.
      * 
      * @since 2.3.22
@@ -359,7 +391,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         }
         
         return "useAdaptersForContainers=" + useAdaptersForContainers + ", forceLegacyNonListCollections="
-                + forceLegacyNonListCollections + ", " + bwProps;
+                + forceLegacyNonListCollections + ", iterableSupport=" + iterableSupport + bwProps;
     }
     
 }

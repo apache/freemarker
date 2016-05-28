@@ -27,7 +27,9 @@ import freemarker.ext.util.WrapperTemplateModel;
 
 /**
  * Adapts an {@link Iterator} to the corresponding {@link TemplateModel} interface(s), most importantly to
- * {@link TemplateCollectionModel}. The resulting {@link TemplateCollectionModel} can only be iterated once.
+ * {@link TemplateCollectionModel}. The resulting {@link TemplateCollectionModel} can only be listed (iterated) once.
+ * If the user tries list the variable for a second time, an exception will be thrown instead of silently gettig an
+ * empty (or partial) listing.
  * 
  * <p>
  * Thread safety: A {@link DefaultListAdapter} is as thread-safe as the array that it wraps is. Normally you only

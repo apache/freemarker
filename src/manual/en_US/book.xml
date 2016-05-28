@@ -26534,15 +26534,36 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed (FREEMARKER-18): If you had a JSP custom tag and
-              an EL function defined in the same TLD with the same name, the
-              EL function has overwritten the custom tag. This is a bug
-              introduced in 2.3.23, when EL function support was added. JSP
-              allows a custom tag and an EL function in the same TLD to have
-              the same name. In such case now we combine the two into a single
-              value that is both callable as an user defined directive
-              (<literal>&lt;@my.foo...&gt;</literal>) and as a function
-              (<literal>my.f(...)</literal>).</para>
+              <para>Added new setting to
+              <literal>DefaultObjectWrapper</literal> (and to
+              <literal>DefaultObjectWrapperBuilder</literal>):
+              <literal>interableSupport</literal>. This is to fix the issue
+              when you couldn't use <literal>#list</literal> (or
+              <literal>?has_next</literal>, etc.) on a value that only
+              implements Java 5 <literal>java.lang.Iterable</literal> (not to
+              be confused with <literal>Iterator</literal>), but not
+              <literal>Collection</literal>. This is not enabled by default as
+              it's not compatible with some existing templates, most often
+              because they have used
+              <literal>someIterable.iterator()</literal> in the template as a
+              workaround. When this is enabled, the
+              <literal>Iterable</literal> object won't be seen as a generic
+              Java object by FreeMarker anymore, and thus just like with
+              <literal>Collection</literal>-s, its API won't be exposed to the
+              templates.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-18">FREEMARKER-18</link>):
+              If you had a JSP custom tag and an EL function defined in the
+              same TLD with the same name, the EL function has overwritten the
+              custom tag. This is a bug introduced in 2.3.23, when EL function
+              support was added. JSP allows a custom tag and an EL function in
+              the same TLD to have the same name. In such case now we combine
+              the two into a single value that is both callable as an user
+              defined directive (<literal>&lt;@my.foo...&gt;</literal>) and as
+              a function (<literal>my.f(...)</literal>).</para>
             </listitem>
 
             <listitem>
