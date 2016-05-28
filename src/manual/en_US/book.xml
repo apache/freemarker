@@ -26537,7 +26537,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Added new setting to
               <literal>DefaultObjectWrapper</literal> (and to
               <literal>DefaultObjectWrapperBuilder</literal>):
-              <literal>interableSupport</literal>. This is to fix the issue
+              <literal>iterableSupport</literal>. This is to fix the issue
               when you couldn't use <literal>#list</literal> (or
               <literal>?has_next</literal>, etc.) on a value that only
               implements Java 5 <literal>java.lang.Iterable</literal> (not to
