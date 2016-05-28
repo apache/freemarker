@@ -366,6 +366,8 @@
     <copy toDir="build/classes/META-INF">
       <fileset dir="src/dist/jar/META-INF" includes="*" />
     </copy>
+    
+    <delete dir="build/src-main-java-filtered" />
   </target>
 
   <target name="compileTest" depends="compile">
