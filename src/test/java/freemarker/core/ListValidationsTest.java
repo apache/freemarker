@@ -107,5 +107,19 @@ public class ListValidationsTest extends TemplateTest {
                 + "</@></#list>",
                 "?index", "foo" , "user defined directive");
     }
+
+    @Test
+    public void testKeyValueSameName() {
+        assertErrorContains("<#list {} as foo, foo></#list>",
+                "key", "value", "both" , "foo");
+    }
+
+    @Test
+    public void testCollectionVersusHash() {
+        assertErrorContains("<#list {} as i></#list>",
+                "as k, v");
+        assertErrorContains("<#list [] as k, v></#list>",
+                "only one loop variable");
+    }
     
 }

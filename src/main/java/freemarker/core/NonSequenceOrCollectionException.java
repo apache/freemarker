@@ -73,8 +73,7 @@ public class NonSequenceOrCollectionException extends UnexpectedTypeException {
     }
     
     private static Object[] extendTipsIfIterable(TemplateModel model, Object[] tips) {
-        if (model instanceof WrapperTemplateModel
-                && ((WrapperTemplateModel) model).getWrappedObject() instanceof Iterable) {
+        if (isWrappedIterable(model)) {
             final int tipsLen = tips != null ? tips.length : 0;
             Object[] extendedTips = new Object[tipsLen + 1];
             for (int i = 0; i < tipsLen; i++) {
@@ -85,6 +84,11 @@ public class NonSequenceOrCollectionException extends UnexpectedTypeException {
         } else {
             return tips;
         }
+    }
+
+    public static boolean isWrappedIterable(TemplateModel model) {
+        return model instanceof WrapperTemplateModel
+                && ((WrapperTemplateModel) model).getWrappedObject() instanceof Iterable;
     }
 
 }

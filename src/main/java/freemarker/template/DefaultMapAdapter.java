@@ -45,7 +45,7 @@ import freemarker.template.utility.ObjectWrapperWithAPISupport;
  * @since 2.3.22
  */
 public class DefaultMapAdapter extends WrappingTemplateModel
-        implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport,
+        implements TemplateHashModelEx2, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport,
         Serializable {
 
     private final Map map;
@@ -132,6 +132,10 @@ public class DefaultMapAdapter extends WrappingTemplateModel
 
     public TemplateCollectionModel values() {
         return new SimpleCollection(map.values(), getObjectWrapper());
+    }
+
+    public KeyValuePairIterator keyValuePairIterator() {
+        return new MapKeyValuePairIterator(map, getObjectWrapper());
     }
 
     public Object getAdaptedObject(Class hint) {

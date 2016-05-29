@@ -29,9 +29,16 @@ import freemarker.template.TemplateException;
 class Items extends TemplateElement {
 
     private final String loopVarName;
+    private final String loopVar2Name;
 
-    Items(String loopVariableName, TemplateElements children) {
-        this.loopVarName = loopVariableName;
+    /**
+     * @param loopVar2Name
+     *            For non-hash listings always {@code null}, for hash listings {@code loopVarName} and
+     *            {@code loopVarName2} holds the key- and value loop variable names.
+     */
+    Items(String loopVarName, String loopVar2Name, TemplateElements children) {
+        this.loopVarName = loopVarName;
+        this.loopVar2Name = loopVar2Name;
         setChildren(children);
     }
 
@@ -44,7 +51,7 @@ class Items extends TemplateElement {
                     getNodeTypeSymbol(), " without iteration in context");
         }
         
-        iterCtx.loopForItemsElement(env, getChildBuffer(), loopVarName);
+        iterCtx.loopForItemsElement(env, getChildBuffer(), loopVarName, loopVar2Name);
         return null;
     }
 
@@ -59,7 +66,11 @@ class Items extends TemplateElement {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(" as ");
-        sb.append(loopVarName);
+        sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVarName));
+        if (loopVar2Name != null) {
+            sb.append(", ");
+            sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVar2Name));
+        }
         if (canonical) {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
@@ -77,19 +88,33 @@ class Items extends TemplateElement {
 
     @Override
     int getParameterCount() {
-        return 1;
+        return loopVar2Name != null ? 2 : 1;
     }
 
     @Override
     Object getParameterValue(int idx) {
-        return loopVarName;
+        switch (idx) {
+        case 0:
+            if (loopVarName == null) throw new IndexOutOfBoundsException();
+            return loopVarName;
+        case 1:
+            if (loopVar2Name == null) throw new IndexOutOfBoundsException();
+            return loopVar2Name;
+        default: throw new IndexOutOfBoundsException();
+        }
     }
 
     @Override
     ParameterRole getParameterRole(int idx) {
-        if (idx == 0) return ParameterRole.TARGET_LOOP_VARIABLE;
-        else
-            throw new IndexOutOfBoundsException();
+        switch (idx) {
+        case 0:
+            if (loopVarName == null) throw new IndexOutOfBoundsException();
+            return ParameterRole.TARGET_LOOP_VARIABLE;
+        case 1:
+            if (loopVar2Name == null) throw new IndexOutOfBoundsException();
+            return ParameterRole.TARGET_LOOP_VARIABLE;
+        default: throw new IndexOutOfBoundsException();
+        }
     }
 
 }

@@ -16795,17 +16795,19 @@ Sorted by name.last:
             <primary>keys built-in</primary>
           </indexterm>
 
-          <para>A sequence that contains all the lookup keys in the hash. Note
-          that not all hashes support this (ask the programmer if a certain
-          hash allows this or not).</para>
+          <para>A sequence that contains all the lookup keys in the
+          hash.</para>
 
-          <programlisting role="template">&lt;#assign h = {"name":"mouse", "price":50}&gt;
-&lt;#assign keys = h?keys&gt;
-&lt;#list keys as key&gt;${key} = ${h[key]}; &lt;/#list&gt;</programlisting>
+          <programlisting role="template">&lt;#assign myHash = { "name": "mouse", "price": 50 }&gt;
+&lt;#list myHash?keys as k&gt;
+  ${k}
+&lt;/#list&gt;</programlisting>
 
-          <para>Output:</para>
+          <programlisting role="output">  name
+  price</programlisting>
 
-          <programlisting role="output">name = mouse; price = 50;</programlisting>
+          <para>Note that not all hashes support this (ask the programmer if a
+          certain hash allows this or not).</para>
 
           <para>Since hashes do not define an order for their sub variables in
           general, the order in which key names are returned can be arbitrary.
@@ -16814,6 +16816,14 @@ Sorted by name.last:
           with the above <literal>{<replaceable>...</replaceable>}</literal>
           syntax preserve the same order as you have specified the sub
           variables.</para>
+
+          <note>
+            <para>To list both the keys and the values, you can use
+            <literal>&lt;#list attrs as key,
+            value&gt;...&lt;#list&gt;</literal>; see the <link
+            linkend="ref.directive.list"><literal>list</literal>
+            directive</link>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_values">
@@ -16823,13 +16833,33 @@ Sorted by name.last:
             <primary>values built-in</primary>
           </indexterm>
 
-          <para>A sequence that contains all the variables in the hash. Note
-          that not all hashes support this (ask the programmer if a certain
-          hash allows this or not).</para>
+          <para>A sequence that contains all the variables (the values in the
+          key-value pairs) in the hash.</para>
+
+          <programlisting role="template">&lt;#assign myHash = { "name": "mouse", "price": 50 }&gt;
+&lt;#list myHash?values as v&gt;
+  ${v}
+&lt;/#list&gt;</programlisting>
+
+          <programlisting role="output">  mouse
+  50</programlisting>
+
+          <para>Note that not all hashes support this (ask the programmer if a
+          certain hash allows this or not).</para>
 
           <para>As of the order in which the values are returned, the same
-          applies as with the <literal>keys</literal> built-in; see
-          there.</para>
+          applies as with the <literal>keys</literal> built-in; see there.
+          Furthermore, it's not guaranteed that the order of the values
+          corresponds to the order of the keys returned by the
+          <literal>keys</literal> build-in.</para>
+
+          <note>
+            <para>To list both the keys and the values, you can use
+            <literal>&lt;#list attrs as key,
+            value&gt;...&lt;#list&gt;</literal>; see the <link
+            linkend="ref.directive.list"><literal>list</literal>
+            directive</link>.</para>
+          </note>
         </section>
       </section>
 
@@ -20159,7 +20189,29 @@ All rights reserved.</emphasis></programlisting>
         <section>
           <title>Synopsis</title>
 
-          <para>Form 1:</para>
+          <para>The simplest form for listing a sequence (or collection)
+          is:</para>
+
+          <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable> as <replaceable>item</replaceable>&gt;
+    <replaceable>Part repeated for each item</replaceable>
+&lt;/#list&gt;</literal></programlisting>
+
+          <para>and to list the key-value pairs of a hash (since
+          2.3.25):</para>
+
+          <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>hash</replaceable> as <replaceable>key</replaceable>, <replaceable>value</replaceable>&gt;
+    <replaceable>Part repeated for each key-value pair</replaceable>
+&lt;/#list&gt;</literal></programlisting>
+
+          <para>But these are just cases of the generic forms, which are shown
+          below. Note that for simplicity we only show the generic forms for
+          sequence listing; simply replace <quote><literal>as
+          <replaceable>item</replaceable></literal></quote> with
+          <quote><literal>as <replaceable>key</replaceable>,
+          <replaceable>value</replaceable></literal></quote> to get the
+          generic form for hash listing.</para>
+
+          <para>Generic form 1:</para>
 
           <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable> as <replaceable>item</replaceable>&gt;
     <replaceable>Part repeated for each item</replaceable>
@@ -20194,7 +20246,7 @@ All rights reserved.</emphasis></programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Form 2 (since FreeMarker 2.3.23):</para>
+          <para>Generic form 2 (since FreeMarker 2.3.23):</para>
 
           <programlisting role="metaTemplate"><literal>&lt;#list <replaceable>sequence</replaceable>&gt;
     <replaceable>Part executed once if we have more than 0 items</replaceable>
@@ -20206,8 +20258,9 @@ All rights reserved.</emphasis></programlisting>
     <replaceable>Part executed when there are 0 items</replaceable>
 &lt;/#list&gt;</literal></programlisting>
 
-          <para>Where: Same as the <quote>Where</quote> section of Form 1
-          above.</para>
+          <para>Where: see the <quote>Where</quote> section of Form 1 above
+          (and thus the <literal>else</literal> part is optional here
+          too).</para>
         </section>
 
         <section>
@@ -20239,6 +20292,25 @@ All rights reserved.</emphasis></programlisting>
             inside the <literal>list</literal> body. Also, macros/functions
             called from within the loop won't see it (as if it were a local
             variable).</para>
+
+            <para>Listing hashes is very similar, but you need to provide two
+            variable names after the <literal>as</literal>; one for the hash
+            key, and another for the associated value. Assuming
+            <literal>products</literal> is <literal>{ "apple": 5, "banana":
+            10, "kiwi": 15 }</literal>:</para>
+
+            <programlisting role="template">&lt;#list products as name, price&gt;
+  &lt;p&gt;${name}: ${price}
+&lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">  &lt;p&gt;apple: 5
+  &lt;p&gt;banan: 10
+  &lt;p&gt;kiwi: 15</programlisting>
+
+            <para>Note that not all hash variables can be listed, because some
+            of them isn't able to enumerate its keys. It's practically safe to
+            assume though that hashes that stand for Java
+            <literal>Map</literal> objects can be listed.</para>
           </section>
 
           <section>
@@ -26497,7 +26569,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>[TODO]</para>
+              <para>Added the <literal>TemplateModelHashEx2</literal>
+              interface which extends <literal>TemplateModelHashEx</literal>
+              with a method for listing the content of the key-value pairs of
+              the hash. (This is utilized by the new hash listing capability
+              of the <link
+              linkend="ref.directive.list"><literal>list</literal>
+              directive</link>, but it's not required by it if all keys are
+              strings.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -26506,6 +26585,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Extended the <link
+              linkend="ref.directive.list"><literal>list</literal>
+              directive</link> to support listing hashes (such as
+              <literal>Map</literal>-s), like <literal>&lt;#list map as k,
+              v&gt;${k}: ${v}&lt;/#list&gt;</literal>, where
+              <literal>k</literal> and <literal>v</literal> is key-value
+              pair.</para>
+            </listitem>
+
             <listitem>
               <para>Lazy imports: With the new boolean
               <literal>Configuration</literal>-level settings,
