@@ -1,0 +1,183 @@
+
+Non-empty maps:
+
+    Map:
+    
+    [
+      k1 = v1
+      2 = v2
+      k3 = v3
+      null = v4
+      Y = v5
+      N = null
+    ]
+  
+    [
+      k1 = v1; // @0=@0; odd=odd; Y=Y
+      2 = v2; // @1=@1; even=even; Y=Y
+      k3 = v3; // @2=@2; odd=odd; Y=Y
+      null = v4; // @3=@3; even=even; Y=Y
+      Y = v5; // @4=@4; odd=odd; Y=Y
+      N = null // @5=@5; even=even; N=N
+    ]
+  
+    {
+      [
+        k1 = v1; // @0=@0; odd=odd; Y=Y
+        2 = v2; // @1=@1; even=even; Y=Y
+        k3 = v3; // @2=@2; odd=odd; Y=Y
+        null = v4; // @3=@3; even=even; Y=Y
+        Y = v5; // @4=@4; odd=odd; Y=Y
+        N = null // @5=@5; even=even; N=N
+      ]
+    }
+
+    Map:
+    
+    [
+      k1 = v1
+      2 = v2
+      k3 = v3
+      null = v4
+      Y = v5
+      N = null
+    ]
+  
+    [
+      k1 = v1; // @0=@0; odd=odd; Y=Y
+      2 = v2; // @1=@1; even=even; Y=Y
+      k3 = v3; // @2=@2; odd=odd; Y=Y
+      null = v4; // @3=@3; even=even; Y=Y
+      Y = v5; // @4=@4; odd=odd; Y=Y
+      N = null // @5=@5; even=even; N=N
+    ]
+  
+    {
+      [
+        k1 = v1; // @0=@0; odd=odd; Y=Y
+        2 = v2; // @1=@1; even=even; Y=Y
+        k3 = v3; // @2=@2; odd=odd; Y=Y
+        null = v4; // @3=@3; even=even; Y=Y
+        Y = v5; // @4=@4; odd=odd; Y=Y
+        N = null // @5=@5; even=even; N=N
+      ]
+    }
+
+    Map:
+    
+    [
+      k1 = v1
+      2 = v2
+      k3 = v3
+      null = v4
+      Y = v5
+      N = null
+    ]
+  
+    [
+      k1 = v1; // @0=@0; odd=odd; Y=Y
+      2 = v2; // @1=@1; even=even; Y=Y
+      k3 = v3; // @2=@2; odd=odd; Y=Y
+      null = v4; // @3=@3; even=even; Y=Y
+      Y = v5; // @4=@4; odd=odd; Y=Y
+      N = null // @5=@5; even=even; N=N
+    ]
+  
+    {
+      [
+        k1 = v1; // @0=@0; odd=odd; Y=Y
+        2 = v2; // @1=@1; even=even; Y=Y
+        k3 = v3; // @2=@2; odd=odd; Y=Y
+        null = v4; // @3=@3; even=even; Y=Y
+        Y = v5; // @4=@4; odd=odd; Y=Y
+        N = null // @5=@5; even=even; N=N
+      ]
+    }
+
+    Map:
+    
+    [
+      k1 = 11
+      k2 = 22
+    ]
+  
+    [
+      k1 = 11; // @0=@0; odd=odd; Y=Y
+      k2 = 22 // @1=@1; even=even; N=N
+    ]
+  
+    {
+      [
+        k1 = 11; // @0=@0; odd=odd; Y=Y
+        k2 = 22 // @1=@1; even=even; N=N
+      ]
+    }
+
+
+Empty maps:
+
+    Map:
+    
+    [
+    ]
+  
+    [
+      Empty
+    ]
+  
+    {
+      Empty
+    }
+
+    Map:
+    
+    [
+    ]
+  
+    [
+      Empty
+    ]
+  
+    {
+      Empty
+    }
+
+    Map:
+    
+    [
+    ]
+  
+    [
+      Empty
+    ]
+  
+    {
+      Empty
+    }
+
+    Map:
+    
+    [
+    ]
+  
+    [
+      Empty
+    ]
+  
+    {
+      Empty
+    }
+
+
+  a @ 0, 1
+    aa = 11  @ 0 // inside a @ 0, 1
+  a @ 0, 1
+  --
+  b @ 1, 2
+    ba = 21  @ 0 // inside b @ 1, 2
+    bb = 22  @ 1 // inside b @ 1, 2
+  b @ 1, 2
+  --
+  c @ 2, 0
+  c @ 2, 0
+  --

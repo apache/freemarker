@@ -18,13 +18,43 @@
  */
 package freemarker.test.templatesuite.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeSet;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.AdapterTemplateModel;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultMapAdapter;
+import freemarker.template.DefaultObjectWrapperBuilder;
+import freemarker.template.MapKeyValuePairIterator;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleCollection;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelWithAPISupport;
+import freemarker.template.WrappingTemplateModel;
+import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
+import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 @SuppressWarnings("boxing")
 public class Listables {
@@ -92,6 +122,80 @@ public class Listables {
 
     public Iterator<Integer> getEmptyIterator() {
         return Collections.<Integer>emptySet().iterator();
+    }
+    
+    public List<TemplateHashModelEx2> getHashEx2s() throws TemplateModelException {
+        Map<Object, Object> map;
+        map = new LinkedHashMap<Object, Object>();
+        map.put("k1", "v1");
+        map.put(2, "v2");
+        map.put("k3", "v3");
+        map.put(null, "v4");
+        map.put(true, "v5");
+        map.put(false, null);
+        
+        return getMapsWrappedAsEx2(map);
+    }
+
+    public List<? extends TemplateHashModelEx> getEmptyHashes() throws TemplateModelException {
+        List<TemplateHashModelEx> emptyMaps = new ArrayList<TemplateHashModelEx>();
+        emptyMaps.addAll(getMapsWrappedAsEx2(Collections.emptyMap()));
+        emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build()
+                .wrap(Collections.emptyMap()));
+        return emptyMaps;
+    }
+    
+    /**
+     * Returns the map wrapped on various ways.
+     */
+    private List<TemplateHashModelEx2> getMapsWrappedAsEx2(Map<?, ?> map) throws TemplateModelException {
+        List<TemplateHashModelEx2> maps = new ArrayList<TemplateHashModelEx2>();
+        
+        maps.add((SimpleHash) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).build().wrap(map));
+        
+        maps.add((DefaultMapAdapter) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build().wrap(map));
+        
+        BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_2_3_24);
+        bwb.setSimpleMapWrapper(true);
+        maps.add((TemplateHashModelEx2) bwb.build().wrap(map));
+
+        return maps;
+    }
+    
+    public TemplateHashModelEx getHashNonEx2() {
+        return new NonEx2MapAdapter(ImmutableMap.of("k1", 11, "k2", 22),
+                new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build());
+    }
+    
+    public static class NonEx2MapAdapter extends WrappingTemplateModel implements TemplateHashModelEx {
+
+        private final Map<?, ?> map;
+        
+        public NonEx2MapAdapter(Map<?, ?> map, ObjectWrapper wrapper) {
+            super(wrapper);
+            this.map = map;
+        }
+        
+        public TemplateModel get(String key) throws TemplateModelException {
+            return wrap(map.get(key));
+        }
+        
+        public boolean isEmpty() {
+            return map.isEmpty();
+        }
+        
+        public int size() {
+            return map.size();
+        }
+        
+        public TemplateCollectionModel keys() {
+            return new SimpleCollection(map.keySet(), getObjectWrapper());
+        }
+        
+        public TemplateCollectionModel values() {
+            return new SimpleCollection(map.values(), getObjectWrapper());
+        }
+        
     }
     
 }
