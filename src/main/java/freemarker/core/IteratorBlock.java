@@ -273,6 +273,81 @@ final class IteratorBlock extends TemplateElement {
                     : executedNestedContentForHashListing(env, childBuffer);
         }
 
+        private boolean executedNestedContentForCollOrSeqListing(Environment env, TemplateElement[] childBuffer)
+                throws TemplateModelException, IOException, TemplateException,
+                NonSequenceOrCollectionException, InvalidReferenceException {
+            final boolean listNotEmpty;
+            if (listedValue instanceof TemplateCollectionModel) {
+                final TemplateCollectionModel collModel = (TemplateCollectionModel) listedValue;
+                final TemplateModelIterator iterModel
+                        = openedIterator == null ? collModel.iterator()
+                                : ((TemplateModelIterator) openedIterator);
+                listNotEmpty = iterModel.hasNext();
+                if (listNotEmpty) {
+                    if (loopVarName != null) {
+                        try {
+                            do {
+                                loopVar = iterModel.next();
+                                hasNext = iterModel.hasNext();
+                                env.visit(childBuffer);
+                                index++;
+                            } while (hasNext);
+                        } catch (BreakInstruction.Break br) {
+                            // Silently exit loop
+                        }
+                        openedIterator = null;
+                    } else {
+                        // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
+                        // allow one iterator() call.
+                        openedIterator = iterModel;
+                        env.visit(childBuffer);
+                    }
+                }
+            } else if (listedValue instanceof TemplateSequenceModel) {
+                final TemplateSequenceModel seqModel = (TemplateSequenceModel) listedValue;
+                final int size = seqModel.size();
+                listNotEmpty = size != 0;
+                if (listNotEmpty) {
+                    if (loopVarName != null) {
+                        try {
+                            for (index = 0; index < size; index++) {
+                                loopVar = seqModel.get(index);
+                                hasNext = (size > index + 1);
+                                env.visit(childBuffer);
+                            }
+                        } catch (BreakInstruction.Break br) {
+                            // Silently exit loop
+                        }
+                    } else {
+                        env.visit(childBuffer);
+                    }
+                }
+            } else if (env.isClassicCompatible()) {
+                listNotEmpty = true;
+                if (loopVarName != null) {
+                    loopVar = listedValue;
+                    hasNext = false;
+                }
+                try {
+                    env.visit(childBuffer);
+                } catch (BreakInstruction.Break br) {
+                    // Silently exit "loop"
+                }
+            } else if (listedValue instanceof TemplateHashModelEx
+                    && !NonSequenceOrCollectionException.isWrappedIterable(listedValue)) {
+                throw new NonSequenceOrCollectionException(env,
+                        new _ErrorDescriptionBuilder("The value you try to list is ",
+                                new _DelayedAOrAn(new _DelayedFTLTypeDescription(listedValue)),
+                                ", thus you must specify two loop variables after the \"as\"; one for the key, and "
+                                + "another for the value, like ", "<#... as k, v>", ")."
+                                ));
+            } else {
+                throw new NonSequenceOrCollectionException(
+                        listedExp, listedValue, env);
+            }
+            return listNotEmpty;
+        }
+
         private boolean executedNestedContentForHashListing(Environment env, TemplateElement[] childBuffer)
                 throws TemplateModelException, IOException, TemplateException {
             final boolean hashNotEmpty;
@@ -351,81 +426,6 @@ final class IteratorBlock extends TemplateElement {
                         listedExp, listedValue, env);
             }
             return hashNotEmpty;
-        }
-
-        private boolean executedNestedContentForCollOrSeqListing(Environment env, TemplateElement[] childBuffer)
-                throws TemplateModelException, IOException, TemplateException,
-                NonSequenceOrCollectionException, InvalidReferenceException {
-            final boolean listNotEmpty;
-            if (listedValue instanceof TemplateCollectionModel) {
-                final TemplateCollectionModel collModel = (TemplateCollectionModel) listedValue;
-                final TemplateModelIterator iterModel
-                        = openedIterator == null ? collModel.iterator()
-                                : ((TemplateModelIterator) openedIterator);
-                listNotEmpty = iterModel.hasNext();
-                if (listNotEmpty) {
-                    if (loopVarName != null) {
-                        try {
-                            do {
-                                loopVar = iterModel.next();
-                                hasNext = iterModel.hasNext();
-                                env.visit(childBuffer);
-                                index++;
-                            } while (hasNext);
-                        } catch (BreakInstruction.Break br) {
-                            // Silently exit loop
-                        }
-                        openedIterator = null;
-                    } else {
-                        // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
-                        // allow one iterator() call.
-                        openedIterator = iterModel;
-                        env.visit(childBuffer);
-                    }
-                }
-            } else if (listedValue instanceof TemplateSequenceModel) {
-                final TemplateSequenceModel seqModel = (TemplateSequenceModel) listedValue;
-                final int size = seqModel.size();
-                listNotEmpty = size != 0;
-                if (listNotEmpty) {
-                    if (loopVarName != null) {
-                        try {
-                            for (index = 0; index < size; index++) {
-                                loopVar = seqModel.get(index);
-                                hasNext = (size > index + 1);
-                                env.visit(childBuffer);
-                            }
-                        } catch (BreakInstruction.Break br) {
-                            // Silently exit loop
-                        }
-                    } else {
-                        env.visit(childBuffer);
-                    }
-                }
-            } else if (env.isClassicCompatible()) {
-                listNotEmpty = true;
-                if (loopVarName != null) {
-                    loopVar = listedValue;
-                    hasNext = false;
-                }
-                try {
-                    env.visit(childBuffer);
-                } catch (BreakInstruction.Break br) {
-                    // Silently exit "loop"
-                }
-            } else if (listedValue instanceof TemplateHashModelEx
-                    && !NonSequenceOrCollectionException.isWrappedIterable(listedValue)) {
-                throw new NonSequenceOrCollectionException(env,
-                        new _ErrorDescriptionBuilder("The value you try to list is ",
-                                new _DelayedAOrAn(new _DelayedFTLTypeDescription(listedValue)),
-                                ", thus you must specify two loop variables after the \"as\"; one for the key, and "
-                                + "another for the value, like ", "<#... as k, v>", ")."
-                                ));
-            } else {
-                throw new NonSequenceOrCollectionException(
-                        listedExp, listedValue, env);
-            }
-            return listNotEmpty;
         }
 
         String getLoopVariableName() {
