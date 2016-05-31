@@ -218,7 +218,7 @@ final class IteratorBlock extends TemplateElement {
         private static final String LOOP_STATE_HAS_NEXT = "_has_next"; // lenght: 9
         private static final String LOOP_STATE_INDEX = "_index"; // length 6
         
-        private TemplateModelIterator openedIteratorModel;
+        private Object openedIterator;
         private boolean hasNext;
         private TemplateModel loopVar;
         private TemplateModel loopVar2;
@@ -269,7 +269,7 @@ final class IteratorBlock extends TemplateElement {
                 throws TemplateModelException, TemplateException, IOException, NonSequenceOrCollectionException,
                 InvalidReferenceException {
             return !hashListing
-                    ? executedNestedContentForNonHashListing(env, childBuffer)
+                    ? executedNestedContentForCollOrSeqListing(env, childBuffer)
                     : executedNestedContentForHashListing(env, childBuffer);
         }
 
@@ -279,7 +279,9 @@ final class IteratorBlock extends TemplateElement {
             if (listedValue instanceof TemplateHashModelEx) {
                 TemplateHashModelEx listedHash = (TemplateHashModelEx) listedValue; 
                 if (listedHash instanceof TemplateHashModelEx2) {
-                    KeyValuePairIterator kvpIter = ((TemplateHashModelEx2) listedHash).keyValuePairIterator();
+                    KeyValuePairIterator kvpIter
+                            = openedIterator == null ? ((TemplateHashModelEx2) listedHash).keyValuePairIterator()
+                                    : (KeyValuePairIterator) openedIterator;
                     hashNotEmpty = kvpIter.hasNext();
                     if (hashNotEmpty) {
                         if (loopVarName != null) {
@@ -295,7 +297,10 @@ final class IteratorBlock extends TemplateElement {
                             } catch (BreakInstruction.Break br) {
                                 // Silently exit loop
                             }
+                            openedIterator = null;
                         } else {
+                            // We will reuse this at the #iterms
+                            openedIterator = kvpIter;
                             env.visit(childBuffer);
                         }
                     }
@@ -348,14 +353,15 @@ final class IteratorBlock extends TemplateElement {
             return hashNotEmpty;
         }
 
-        private boolean executedNestedContentForNonHashListing(Environment env, TemplateElement[] childBuffer)
+        private boolean executedNestedContentForCollOrSeqListing(Environment env, TemplateElement[] childBuffer)
                 throws TemplateModelException, IOException, TemplateException,
                 NonSequenceOrCollectionException, InvalidReferenceException {
             final boolean listNotEmpty;
             if (listedValue instanceof TemplateCollectionModel) {
                 final TemplateCollectionModel collModel = (TemplateCollectionModel) listedValue;
                 final TemplateModelIterator iterModel
-                        = openedIteratorModel == null ? collModel.iterator() : openedIteratorModel;
+                        = openedIterator == null ? collModel.iterator()
+                                : ((TemplateModelIterator) openedIterator);
                 listNotEmpty = iterModel.hasNext();
                 if (listNotEmpty) {
                     if (loopVarName != null) {
@@ -369,11 +375,11 @@ final class IteratorBlock extends TemplateElement {
                         } catch (BreakInstruction.Break br) {
                             // Silently exit loop
                         }
-                        openedIteratorModel = null;
+                        openedIterator = null;
                     } else {
                         // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
                         // allow one iterator() call.
-                        openedIteratorModel = iterModel;
+                        openedIterator = iterModel;
                         env.visit(childBuffer);
                     }
                 }
