@@ -17761,7 +17761,7 @@ Sorted by name.last:
           date, time and date-time values to get the value as
           <literal>java.util.Date.getTime()</literal> would return. This is
           useful if you have to call a Java methods that expect a timestamp as
-          a <literal>long</literal>. This conversion is not automatic.</para>
+          a <literal>long</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_eval">
@@ -18208,7 +18208,7 @@ Sorted by name.last:
           passed since the epoch. The number can be anything and of any type
           as far as its value fits into a <literal>long</literal>. If the
           number isn't a whole number, it will be rounded to whole with
-          half-up rule. This conversion is not automatic.</para>
+          half-up rule.</para>
 
           <para>Example:</para>
 
