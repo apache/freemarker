@@ -28,7 +28,10 @@ import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 import freemarker.template._TemplateAPI;
 
 final class HashLiteral extends Expression {
@@ -103,7 +106,7 @@ final class HashLiteral extends Expression {
     	return new HashLiteral(clonedKeys, clonedValues);
     }
 
-    private class SequenceHash implements TemplateHashModelEx {
+    private class SequenceHash implements TemplateHashModelEx2 {
 
         private HashMap map; // maps keys to integer offset
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
@@ -175,6 +178,34 @@ final class HashLiteral extends Expression {
         @Override
         public String toString() {
             return getCanonicalForm();
+        }
+
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
+            return new KeyValuePairIterator() {
+                private final TemplateModelIterator keyIterator = keys().iterator();
+                private final TemplateModelIterator valueIterator = values().iterator();
+
+                public boolean hasNext() throws TemplateModelException {
+                    return keyIterator.hasNext();
+                }
+
+                public KeyValuePair next() throws TemplateModelException {
+                    return new KeyValuePair() {
+                        private final TemplateModel key = keyIterator.next();
+                        private final TemplateModel value = valueIterator.next();
+
+                        public TemplateModel getKey() throws TemplateModelException {
+                            return key;
+                        }
+
+                        public TemplateModel getValue() throws TemplateModelException {
+                            return value;
+                        }
+                        
+                    };
+                }
+                
+            };
         }
         
     }
