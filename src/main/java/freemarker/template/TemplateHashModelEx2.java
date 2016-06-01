@@ -34,7 +34,7 @@ public interface TemplateHashModelEx2 extends TemplateHashModelEx {
     /**
      * @return The iterator that walks through the key-value pairs in the hash. Not {@code null}. 
      */
-    KeyValuePairIterator keyValuePairIterator();
+    KeyValuePairIterator keyValuePairIterator() throws TemplateModelException;
     
     /**
      * A key-value pair in a hash; used for {@link KeyValuePairIterator}.
