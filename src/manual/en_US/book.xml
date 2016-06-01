@@ -20961,10 +20961,10 @@ or
           parameters:</para>
 
           <programlisting role="template">&lt;#macro img src extra...&gt;
-  &lt;img src="/context${src?html}" 
-  &lt;#list extra?keys as attr&gt;
-    ${attr}="${extra[attr]?html}"
-  &lt;/#list&gt;
+  &lt;img src="/myapp${src?ensure_starts_with('/')}" 
+    &lt;#list extra as attrName, attrVal&gt;
+      ${attrName}="${attrVal}"
+    &lt;/#list&gt;
   &gt;
 &lt;/#macro&gt;
 &lt;@img src="/images/test.png" width=100 height=50 alt="Test"/&gt;</programlisting>
@@ -20977,9 +20977,9 @@ or
     width="100"
   &gt;</programlisting>
 
-          <para>Example: A macro with that supports a variable number of
-          positional parameters, regardless if it uses named or positional
-          parameter passing:</para>
+          <para>Example: A macro that supports a variable number of positional
+          parameters, regardless if it uses named or positional parameter
+          passing:</para>
 
           <programlisting role="template">&lt;#macro m a b ext...&gt;
   a = ${a}
@@ -20989,8 +20989,8 @@ or
       ${e?index} = ${e}
     &lt;/#list&gt;
   &lt;#else&gt;
-    &lt;#list ext?keys as k&gt;
-      ${k} = ${ext[k]}
+    &lt;#list ext as k, v&gt;
+      ${k} = ${v}
     &lt;/#list&gt;
   &lt;/#if&gt;
 &lt;/#macro&gt;
@@ -24542,7 +24542,7 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para>Variables do <emphasis>not</emphasis> support
+            <para>These variables do <emphasis>not</emphasis> support
             <literal>?keys</literal> and <literal>?values</literal>.</para>
           </listitem>
 
@@ -26012,17 +26012,21 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>Certainly you are using <literal>BeansWrapper</literal> as
-            your object wrapper, or a custom subclass of it, and the
-            <literal>simpleMapWrapper</literal> property of that is left to
-            <literal>false</literal>. Unfortunately, it's the default (for
-            backward compatibility), so you have to explicitly set it to
-            <literal>true</literal> where you create the object wrapper. Also,
-            at least since 2.3.22, applications should just use
+            <para>Certainly you are using pure <literal>BeansWrapper</literal>
+            as your object wrapper (instead of the default,
+            <literal>DefaultObjectWrapper</literal>), or a custom subclass of
+            it, and the <literal>simpleMapWrapper</literal> property of that
+            is left to <literal>false</literal>. Unfortunately, that's the
+            default of <literal>BeansWrapper</literal> (for backward
+            compatibility), so you have to explicitly set it to
+            <literal>true</literal> where you instantiate it. Also, at least
+            since 2.3.22, applications should just use
             <literal>DefaultObjectWrapper</literal> (with <link
             linkend="topic.defaultObjectWrapperIcI">its
-            <literal>incompatibleImprovements</literal> set to 2.3.22</link> -
-            that's important), which never had this problem.</para>
+            <literal>incompatibleImprovements</literal> set to at least
+            2.3.22</link> - that's especially important if you are switching
+            from pure <literal>BeansWrapper</literal>), which never had this
+            problem.</para>
           </answer>
         </qandaentry>
 
