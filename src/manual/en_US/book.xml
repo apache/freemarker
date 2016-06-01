@@ -17591,19 +17591,24 @@ Sorted by name.last:
           <para><literal><replaceable>value</replaceable>?api</literal>
           provides access to the API (usually, the Java API) of
           <literal><replaceable>value</replaceable></literal>, like
-          <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>,
-          if the value itself supports this extra feature. This meant to be
-          used rarely, when you need to call a Java method of an object, but
-          the simplistic view of the value that FreeMarker exposes to the
-          templates hides that, and there's no equivalent built-in either. For
-          example, when you have <literal>Map</literal> that you put into the
+          <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>
+          or
+          <literal><replaceable>value</replaceable>?api.<replaceable>someBeanProperty</replaceable></literal>,
+          if the value itself supports exposing its API. This meant to be used
+          rarely, when you need to call a Java method of an object, but the
+          by-design simplistic view of the value that FreeMarker exposes to
+          the templates hides that, and there's no equivalent built-in either.
+          For example, when you put a <literal>Map</literal> into the
           data-model (and you are using the default object wrapper),
           <literal>myMap.myMethod()</literal> in a template basically
           translates to <literal>((Method)
           myMap.get("myMethod")).invoke(...)</literal> in Java, thus you can't
           call <literal>myMethod</literal>. If, however, you write
           <literal>myMap?api.myMethod()</literal> instead, that means
-          <literal>myMap.myMethod()</literal> in Java.</para>
+          <literal>myMap.myMethod()</literal> in Java. Similarly,
+          <literal>myMap?api.myProperty</literal> translates to
+          <literal>myMap.getMyProperty()</literal> in Java, instead of to
+          <literal>myMap.get("myProperty")</literal>.</para>
 
           <para><emphasis>You should avoid using <literal>api</literal>, and
           rely on the capabilities of the FTL types and the related built-ins
@@ -17613,7 +17618,7 @@ Sorted by name.last:
           <literal>?api</literal> is more verbose, slower, more easily breaks
           when FreeMarker configuration settings are changed, and most
           importantly, more prone to break as the technical details of the
-          data-model changes. For example, if <literal>users</literal> is
+          data-model change. For example, if <literal>users</literal> is
           changed from a <literal>List</literal> to an array,
           <literal>users?size</literal> will keep working, while
           <literal>users?api.size()</literal> will break.</para>
@@ -17653,16 +17658,18 @@ Sorted by name.last:
                   <literal>DefaultObjectWrapper</literal> with its
                   <literal>incompatibleImprovements</literal> set to 2.3.22 or
                   higher (<link linkend="topic.defaultObjectWrapperIcI">see
-                  how to set it here</link>) (actually, what matters is that
-                  its <literal>useAdaptersForContainer</literal> property is
-                  set to <literal>true</literal>, but that's the default with
-                  said <literal>incompatibleImprovements</literal>), FTL
-                  values made from <literal>Map</literal>-s and
-                  <literal>List</literal>-s support <literal>?api</literal>.
-                  Other <literal>java.util.Collections</literal> also, if
+                  how to set it here</link>), FTL values made from
+                  <literal>Map</literal>-s and <literal>List</literal>-s
+                  support <literal>?api</literal>. (Actually, what matters is
+                  that its <literal>useAdaptersForContainer</literal> property
+                  is set to <literal>true</literal>, but that's the default
+                  with said <literal>incompatibleImprovements</literal>.)
+                  Other <literal>java.util.Collections</literal> (such as
+                  <literal>Set</literal>-s) only support
+                  <literal>?api</literal> if
                   <literal>DefaultObjectWrapper</literal>'s
                   <literal>forceLegacyNonListCollections</literal> property is
-                  set to <literal>false</literal> (default is
+                  set to <literal>false</literal> (the default is
                   <literal>true</literal> for better out-of-the-box backward
                   compatibility).</para>
                 </listitem>
@@ -17670,8 +17677,7 @@ Sorted by name.last:
                 <listitem>
                   <para>When wrapped with pure
                   <literal>BeansWrapper</literal>, all values support
-                  <literal>?api</literal>. But again, avoid using it if
-                  there's another solution.</para>
+                  <literal>?api</literal>.</para>
                 </listitem>
 
                 <listitem>
@@ -27955,19 +27961,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal><replaceable>value</replaceable>?api</literal> provides
               access to the API (usually, the Java API) of
               <literal><replaceable>value</replaceable></literal>, like
-              <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>,
-              if the value itself supports this extra feature. This meant to
-              be used rarely, when you need to call a Java method of an
-              object, but the by-design simplistic view of the value that
-              FreeMarker exposes to the templates hides that, and there's no
-              equivalent built-in either. For example, when you put a
+              <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>
+              or
+              <literal><replaceable>value</replaceable>?api.<replaceable>someBeanProperty</replaceable></literal>),
+              if the value itself supports exposing its API. This meant to be
+              used rarely, when you need to call a Java method of an object,
+              but the by-design simplistic view of the value that FreeMarker
+              exposes to the templates hides that, and there's no equivalent
+              built-in either. For example, when you put a
               <literal>Map</literal> into the data-model (and you are using
               the default object wrapper), <literal>myMap.myMethod()</literal>
               in a template basically translates to <literal>((Method)
               myMap.get("myMethod")).invoke(...)</literal> in Java, thus you
               can't call <literal>myMethod</literal>. If, however, you write
               <literal>myMap?api.myMethod()</literal> instead, that means
-              <literal>myMap.myMethod()</literal> in Java.</para>
+              <literal>myMap.myMethod()</literal> in Java. Similarly,
+              <literal>myMap?api.myProperty</literal> translates to
+              <literal>myMap.getMyProperty()</literal> in Java, instead of to
+              <literal>myMap.get("myProperty")</literal>.</para>
 
               <para><emphasis>If you can, rely on the capabilities of the FTL
               types and the related built-ins as far as possible. Using
