@@ -26579,14 +26579,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Added the <literal>TemplateModelHashEx2</literal>
-              interface which extends <literal>TemplateModelHashEx</literal>
-              with a method for listing the content of the key-value pairs of
-              the hash. (This is utilized by the new hash listing capability
-              of the <link
+              <para>Extended the <link
               linkend="ref.directive.list"><literal>list</literal>
-              directive</link>, but it's not required by it if all keys are
-              strings.)</para>
+              directive</link> to support listing hashes (such as
+              <literal>Map</literal>-s), like <literal>&lt;#list map as k,
+              v&gt;${k}: ${v}&lt;/#list&gt;</literal>, where
+              <literal>k</literal> and <literal>v</literal> is key-value
+              pair.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -26596,13 +26595,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Extended the <link
+              <para>Added the <literal>TemplateModelHashEx2</literal>
+              interface which extends <literal>TemplateModelHashEx</literal>
+              with a method for listing the content of the key-value pairs of
+              the hash. (This is utilized by the new hash listing capability
+              of the <link
               linkend="ref.directive.list"><literal>list</literal>
-              directive</link> to support listing hashes (such as
-              <literal>Map</literal>-s), like <literal>&lt;#list map as k,
-              v&gt;${k}: ${v}&lt;/#list&gt;</literal>, where
-              <literal>k</literal> and <literal>v</literal> is key-value
-              pair.</para>
+              directive</link>, but it's not required by it if all keys are
+              strings.)</para>
             </listitem>
 
             <listitem>
