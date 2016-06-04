@@ -4804,73 +4804,82 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <primary>temporary variable</primary>
         </indexterm>
 
-        <para>As we have described, a template can use the variables defined
-        in the data-model. A template can also define variables outside the
-        data-model for its own use. These temporary variables can be created
-        and replaced using FTL directives. Note that each <link
-        linkend="gloss.templateProcessingJob">template processing job</link>
-        has its own private set of these variables that exists while the given
-        page is rendered. This variable set is initially empty, and will be
-        thrown away when the template processing job has been finished.</para>
+        <para>Most of the variables that a typical template works with comes
+        from the data-model. But templates can also define variables
+        themselves, usually to hold loops variables, temporary results,
+        macros, etc. Such variables are outside the data-model; modifying the
+        data-model from templates is by design unsupported. Note that each
+        <link linkend="gloss.templateProcessingJob">template processing
+        job</link> has its own private set of these variables, which will be
+        thrown away when the template processing job is finished.</para>
 
-        <para>You access a variable that you have defined in the template
-        exactly as if it were a variable in the data-model root. The variable
-        has precedence over any variable of the same name defined in the
-        data-model. That is, if you define a variable called ``foo'' and
-        coincidentally, there is a ``foo'' in the data-model as well, then the
-        variable created in the template will hide (not overwrite!) the
-        variable in the data-model root. For example,
-        <literal>${foo}</literal> will print the value of the variable created
-        in the template.</para>
+        <para>You access variables defined in the template the same way as you
+        access variables defined in the data-model root. For example, if you
+        create a variable called <quote>foo</quote> in the template, you can
+        print its value with <literal>${foo}</literal>. If, coincidently,
+        there's a variable called <quote>foo</quote> in the data-model too,
+        the variable created in the template will hide (not overwrite!)
+        it.</para>
 
-        <para>There are 3 kind of variables that are defined in a
+        <para>There are these kinds of variables that are defined in a
         template:</para>
 
         <itemizedlist>
           <listitem>
-            <para><emphasis role="term">``plain'' variables</emphasis>: They
-            are accessible from everywhere in the template, or from the
-            templates inserted with <literal>include</literal> directive. You
-            can create and replace these variables with the <link
-            linkend="ref.directive.assign"><literal>assign</literal></link>.
-            Also, because macros and functions are just variable, the <link
+            <para><emphasis role="term"><quote>plain</quote>
+            variables</emphasis>: They are accessible from everywhere in the
+            template, or from another templates that was inserted with the
+            <link linkend="ref.directive.include"><literal>include</literal>
+            directive</link>. You can create and replace these variables with
+            the <link linkend="ref.directive.assign"><link
+            linkend="ref.directive.assign"><literal>assign</literal></link>
+            directive</link>, or, because macros and functions are just
+            variables, with the <link
             linkend="ref.directive.macro"><literal>macro</literal>
             directives</link> and <link
             linkend="ref.directive.function"><literal>function</literal>
-            directives</link> also set variables like
-            <literal>assign</literal> does.</para>
+            directives</link>.</para>
           </listitem>
 
           <listitem>
             <para><emphasis role="term">Local variables</emphasis>: They can
             only be set inside a <link
-            linkend="gloss.macroDefinitionBody">macro definition body</link>,
-            and are only visible from there. A local variable only exists for
-            the duration of a macro call. You can create and replace local
-            variables inside macro definition bodies with the <link
-            linkend="ref.directive.local"><literal>local</literal>
-            directive</link>.</para>
+            linkend="gloss.macroDefinitionBody">macro definition body</link>
+            or <link linkend="gloss.functionDefinitionBody">function
+            definition body</link>, and are only visible from there, not from
+            other macros or functions called from there. A local variable only
+            exists for the duration of a macro or function call. You can
+            create and replace local variables inside the definition body with
+            the <link linkend="ref.directive.local"><literal>local</literal>
+            directive</link>. <link linkend="ref.directive.macro">Macro</link>
+            and <link linkend="ref.directive.function">function</link>
+            parameters are also local variables.</para>
           </listitem>
 
           <listitem>
             <para><emphasis role="term">Loop variables</emphasis>: Loop
             variables are created automatically by directives like <link
-            linkend="ref.directive.list"><literal>list</literal></link>, and
+            linkend="ref.directive.list"><literal>list</literal></link> (like
+            <literal>x</literal> in <literal>&lt;#list xs as
+            x&gt;<replaceable>...</replaceable>&lt;/#list&gt;</literal>), and
             they only exist between the start-tag and end-tag of the
-            directive. <link linkend="ref.directive.macro">Macro</link>
-            parameters are local variables, not loop variables.</para>
+            directive. They are only visible directly between these tags, not
+            from macros or functions called from there. As such, they are
+            quite similar to local variables, but they can't be assigned to
+            directly.</para>
           </listitem>
 
           <listitem>
-            <para><emphasis role="term">Global variables</emphasis>: This is
-            an advanced topic, and this kind of variables should be seldom
-            used. Global variables are shared by all templates, even if they
-            belong to different name spaces because they were <link
-            linkend="ref.directive.import"><literal>import</literal>-ed</link>
-            as opposed to <literal>include</literal>-d. Thus, their visibility
-            is like that of data-model variables.They are set via the <link
+            <para><emphasis role="term">Global variables</emphasis>: These
+            should be seldom used. Global variables are shared by all
+            templates, even if they belong to different name spaces because of
+            <link
+            linkend="ref.directive.import"><literal>import</literal>-ing</link>.
+            Thus, their visibility is similar to data-model variables. They
+            are set via the <link
             linkend="ref.directive.global"><literal>global</literal>
-            directive</link>.</para>
+            directive</link>. Global variables hide (but don't overwrite) the
+            data-model variables of the same name.</para>
           </listitem>
         </itemizedlist>
 
@@ -4879,17 +4888,19 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
 
         <programlisting role="template">&lt;#assign x = 1&gt;  &lt;#-- create variable x --&gt;
 ${x}
-&lt;#assign x = x + 3&gt; &lt;#-- replace variable x --&gt;
+&lt;#assign x = 2&gt; &lt;#-- replace variable x --&gt;
+${x}
+&lt;#assign x += 1&gt; &lt;#-- replace variable x --&gt;
 ${x}</programlisting>
 
-        <para>Output:</para>
-
         <programlisting role="output">1
-4</programlisting>
+2
+3</programlisting>
 
-        <para>Local variables hide (not overwrite) ``plain'' variables of the
-        same name. Loop variables hide (not overwrite) local and ``plain''
-        variables of the same name. For example:</para>
+        <para>In the next example we demonstrate that local variables hide
+        (not overwrite) <quote>plain</quote> variables of the same name, and
+        that loop variables hide (not overwrite) local and
+        <quote>plain</quote> variables of the same name:</para>
 
         <programlisting role="template">&lt;#assign x = "plain"&gt;
 1. ${x}  &lt;#-- we see the plain var. here --&gt;
@@ -4897,10 +4908,10 @@ ${x}</programlisting>
 6. ${x}  &lt;#-- the value of plain var. was not changed --&gt;
 &lt;#list ["loop"] as x&gt;
     7. ${x}  &lt;#-- now the loop var. hides the plain var. --&gt;
-    &lt;#assign x = "plain2"&gt; &lt;#-- replace the plain var, hiding does not mater here --&gt;
+    &lt;#assign x = "plain2"&gt; &lt;#-- replaces the plain var, not the loop var. --&gt;
     8. ${x}  &lt;#-- it still hides the plain var. --&gt;
 &lt;/#list&gt;
-9. ${x}  &lt;#-- the new value of plain var. --&gt;
+9. ${x}  &lt;#-- now the new value of plain var. becomse visible --&gt;
 
 &lt;#macro test&gt;
   2. ${x}  &lt;#-- we still see the plain var. here --&gt;
@@ -4912,8 +4923,6 @@ ${x}</programlisting>
   5. ${x}  &lt;#-- now we see the local var. again --&gt;
 &lt;/#macro&gt;</programlisting>
 
-        <para>the output:</para>
-
         <programlisting role="output">1. plain
   2. plain
   3. local
@@ -4922,10 +4931,11 @@ ${x}</programlisting>
 6. plain
     7. loop
     8. loop
-9. plain2
- </programlisting>
+9. plain2 </programlisting>
 
-        <para>An inner loop variable can hide an outer loop variable:</para>
+        <para>In the next example we demonstrate that an inner loop variable
+        can hide (not overwrite) an outer loop variable of the same
+        name:</para>
 
         <programlisting role="template">&lt;#list ["loop 1"] as x&gt;
   ${x}
@@ -4939,43 +4949,33 @@ ${x}</programlisting>
   ${x}
 &lt;/#list&gt;</programlisting>
 
-        <para>the output:</para>
-
         <programlisting role="output">  loop 1
     loop 2
       loop 3
     loop 2
   loop 1</programlisting>
 
-        <para>Note that the value of a loop variable is set by the directive
-        invocation that has created it (the <literal>&lt;list
-        <replaceable>...</replaceable>&gt;</literal> tags in this case). There
-        is no other way to change the value of a loop variable (say, you can't
-        change its value with some kind of assignment directive). You can hide
-        temporarily a loop variable with another loop variable though, as you
-        have seen above.</para>
-
-        <para>Sometimes it happens that a variable hides the variable in the
-        data-model with the same name, but you want to read the variable of
-        the data-model. In this case you can use the <link
+        <para>When a variable hides the variable from the data-model, you can
+        still read that variable from the data-model using <link
         linkend="dgui_template_exp_var_special">special variable</link>
         <literal>globals</literal>. For example, assume we have a variable
-        called <literal>user</literal> in the data-model with value ``Big
-        Joe'':</para>
+        called <literal>user</literal> in the data-model with value <quote>Big
+        Joe</quote>:</para>
 
-        <programlisting role="template">&lt;#assign user = "Joe Hider"&gt;
+        <programlisting role="template">${user}          &lt;#-- prints: Big Joe --&gt;
+&lt;#assign user = "Joe Hider"&gt;
 ${user}          &lt;#-- prints: Joe Hider --&gt;
 ${.globals.user} &lt;#-- prints: Big Joe --&gt;</programlisting>
 
-        <para>Variables set via the <link
-        linkend="ref.directive.global"><literal>global</literal>
-        directive</link> hide data-model variables with the same name. Often,
-        global variables are set exactly for this purpose. But when not, you
-        can still access the data-model variable like
-        <literal>.data_model.user</literal>.</para>
+        <para>You could also write <literal>.data_model.user</literal>
+        instead, and then not even a <literal>&lt;#global user =
+        "<replaceable>...</replaceable>"&gt;</literal> can hide the value in
+        the data-model. However, global variables are often purposely set to
+        override the value coming from the data-model, so using
+        <literal>globals</literal> is a better practice usually.</para>
 
-        <para>For information about syntax of variables please read: <xref
-        linkend="dgui_template_exp"/></para>
+        <para>For information about syntax of variables (allowed characters
+        and such) please read: <xref linkend="dgui_template_exp"/></para>
       </section>
 
       <section xml:id="dgui_misc_namespace">
@@ -4989,133 +4989,127 @@ ${.globals.user} &lt;#-- prints: Big Joe --&gt;</programlisting>
           <primary>libraries</primary>
         </indexterm>
 
-        <para>When you run FTL templates, you have a (possibly empty) set of
+        <para>When you run templates, you have a (possibly empty) set of
         variables that you have created with <literal>assign</literal> and
-        <literal>macro</literal> directives, as can be seen from the <link
-        linkend="dgui_misc_var">previous chapter</link>. A set of variables
-        like this is called a <emphasis role="term">namespace</emphasis>. In
-        simple cases you use only one namespace, the so-called <emphasis
-        role="term">main namespace</emphasis>. You don't realize this, since
-        normally you use only this namespace.</para>
+        <literal>macro</literal> and <literal>function</literal> directives
+        (see in the <link linkend="dgui_misc_var">previous chapter</link>). A
+        set of template-made variables like that is called a <emphasis
+        role="term">namespace</emphasis>. In simple cases you use only one
+        namespace, the <emphasis role="term">main namespace</emphasis>.
+        Whenever you define a variable in the main template (macros and
+        functions are also variables, mind you), or in templates <link
+        linkend="ref.directive.include"><literal>include</literal>-d</link> in
+        it, that's where the variable are created. The key property of a
+        namespace is that the variable name uniquely identifies a value in it
+        (i.e, you can't have multiple variables in it with the same name in
+        the same namespace).</para>
 
-        <para>But if you want to build reusable collection of macros,
-        functions and other variables -- usually referred as <emphasis
-        role="term">library</emphasis> by lingo -- the usage of multiple
-        namespaces becomes inevitable. Just consider if you have a big
-        collection of macros, that you use in several projects, or even you
-        want to share it with other people. It becomes impossible to be sure
-        that the library does not have a macro (or other variable) with the
-        same name as the name of a variable in the data-model, or with the
-        same name as a the name of a variable in another library used in the
-        template. In general, variables can clobber each other because of the
-        name clashes. So you should use a separate namespace for the variables
-        of each library.</para>
+        <para>Sometimes you want to build reusable collection of macros,
+        functions, and other variables, which we call a <emphasis
+        role="term">library</emphasis>. It's important that a library can use
+        its own namespace, to avoid accidental name clashes. Consider, you may
+        have many names in that library, and you intend to use the library in
+        many templates, maybe even reuse it in several projects. It becomes
+        impractical to keep track of where the library used in another
+        template accidentally hides variables from the data-model, or what
+        names you shouldn't assign to in the template to avoid overwriting the
+        variables of the library. If you have multiple libraries used in the
+        same template, this becomes even harder to track. So you should use a
+        separate namespace for the variables of each library.</para>
 
         <section>
           <title>Creating a library</title>
 
-          <para>Let's create a simple library. Assume you commonly need the
-          variables <literal>copyright</literal> and <literal>mail</literal>
-          (before you ask, macros <emphasis>are</emphasis> variables):</para>
+          <para>Here's a simple library, which contains a
+          <literal>copyright</literal> macro and a <literal>mail</literal>
+          string:</para>
 
           <programlisting role="template">&lt;#macro copyright date&gt;
-  &lt;p&gt;Copyright (C) ${date} Julia Smith. All rights reserved.&lt;/p&gt;
+  &lt;p&gt;Copyright (C) ${date} Someone. All rights reserved.&lt;/p&gt;
 &lt;/#macro&gt;
 
-&lt;#assign mail = "jsmith@acme.com"&gt;</programlisting>
+&lt;#assign mail = "user@example.com"&gt;</programlisting>
 
-          <para>Store the above in the file <literal>lib/my_test.ftl</literal>
-          (in the directory where you store the templates). Assume you want to
-          use this in <literal>aWebPage.ftl</literal>. If you use
-          <literal>&lt;#include "/lib/my_test.ftl"&gt;</literal> in the
-          <literal>aWebPage.ftl</literal>, then it will create the two
-          variables in the main namespace, and it is not good now, since you
-          want them to be in a namespace that is used exclusively by the ``My
-          Test Library''. Instead of <literal>include</literal> you have to
-          use <link linkend="ref.directive.import"><literal>import</literal>
-          directive</link>. This directive is, at the first glance, similar to
-          <literal>include</literal>, but it will create an empty namespace
-          for <literal>lib/my_test.ftl</literal> and will execute that there.
-          <literal>lib/my_test.ftl</literal> will find itself in an clean new
-          world, where only the variables of data-model are present (since
-          they are visible from everywhere), and will create the two variables
-          in this new world. That's fine for now, but you want to access the
-          two variables from <literal>aWebPage.ftl</literal>, and that uses
-          the main namespace, so it can't see the variables of the other
-          namespace. The solution is that the <literal>import</literal>
-          directive not only creates the new namespace, but a new hash
-          variable in the namespace used by the caller of
-          <literal>import</literal> (the main namespace in this case), that
-          will act as a gate into the newly created namespace. So this is how
-          <literal>aWebPage.ftl</literal> will look like:</para>
+          <para>Save this into the <literal>lib/example.ftl</literal> file
+          (inside the directory where you store the templates). Then create a
+          template, let's say, <literal>some_web_page.ftl</literal>, and use
+          the library in it:</para>
 
-          <programlisting role="template">&lt;#import "/lib/my_test.ftl" as <emphasis>my</emphasis>&gt; &lt;#-- the hash called "my" will be the "gate" --&gt;
-&lt;@<emphasis>my</emphasis>.copyright date="1999-2002"/&gt;
-${<emphasis>my</emphasis>.mail}</programlisting>
+          <programlisting role="template">&lt;#<emphasis>import</emphasis> "/lib/example.ftl" as <emphasis>e</emphasis>&gt;
 
-          <para>Note how it accesses the variables in the namespace created
-          for <literal>/lib/my_test.ftl</literal> using the newly created
-          namespace accessing hash, <literal>my</literal>. This will
-          print:</para>
+Some Web page...
+&lt;@<emphasis>e</emphasis>.copyright date="1999-2002"/&gt;
+${<emphasis>e</emphasis>.mail}</programlisting>
 
-          <programlisting role="output">  &lt;p&gt;Copyright (C) 1999-2002 Julia Smith. All rights reserved.&lt;/p&gt;
-jsmith@acme.com</programlisting>
+          <programlisting role="output">Some Web page...
+  &lt;p&gt;Copyright (C) 1999-2002 Someone. All rights reserved.&lt;/p&gt;
+user@example.com</programlisting>
 
-          <para>If you would have a variable called <literal>mail</literal> or
-          <literal>copyright</literal> in the main namespace, that would not
-          cause any confusion, since the two templates use separated
-          namespaces. For example, modify the <literal>copyright</literal>
-          macro in <literal>lib/my_test.ftl</literal> to this:</para>
+          <para>Note the <link
+          linkend="ref.directive.import"><literal>import</literal>
+          directive</link> above, and the subsequent usage of the
+          <quote><literal>e</literal></quote> variable.
+          <literal>import</literal> is similar to the perhaps already familiar
+          <link linkend="ref.directive.include"><literal>include</literal>
+          directive</link>, but it will create an empty namespace and will run
+          <literal>lib/example.ftl</literal> in that namespace. So
+          <literal>lib/example.ftl</literal> will find itself in a clean
+          world, where only the variables of the data-models are visible (and
+          the globals), and will create its two variables
+          (<literal>copyright</literal> and <literal>mail</literal>) in this
+          clean namespace. But you will need to access those two variables
+          from another namespace (the main namespace), thus, the
+          <literal>import</literal> directive creates a hash variable
+          (<literal>e</literal> in this case) to access the namespace it has
+          created . That variable is in the namespace that the
+          <literal>import</literal>-ing template uses, and acts as a window to
+          the namespace of the imported library.</para>
 
-          <programlisting role="template">&lt;#macro copyright date&gt;
-  &lt;p&gt;Copyright (C) ${date} Julia Smith. All rights reserved.
-  &lt;br&gt;Email: <emphasis>${mail}</emphasis>&lt;/p&gt;
-&lt;/#macro&gt;</programlisting>
-
-          <para>and then replace <literal>aWebPage.ftl</literal> with
+          <para>To demonstrate that the two namespaces are separate, consider
+          the example below. Replace <literal>lib/example.ftl</literal> with
           this:</para>
 
-          <programlisting role="template">&lt;#import "/lib/my_test.ftl" as my&gt;
-<emphasis>&lt;#assign mail="fred@acme.com"&gt;</emphasis>
-&lt;@my.copyright date="1999-2002"/&gt;
-${my.mail}
+          <programlisting role="template">&lt;#macro copyright date&gt;
+  &lt;p&gt;Copyright (C) ${date} Someone. All rights reserved.
+  &lt;br&gt;Email: <emphasis>${mail}</emphasis>&lt;/p&gt;
+&lt;/#macro&gt;
+
+&lt;#assign mail = "user@example.com"&gt;</programlisting>
+
+          <para>and <literal>some_web_page.ftl</literal> with this:</para>
+
+          <programlisting role="template">&lt;#import "/lib/example.ftl" as e&gt;
+<emphasis>&lt;#assign mail="other@example.com"&gt;</emphasis>
+&lt;@e.copyright date="1999-2002"/&gt;
+${e.mail}
 ${mail}</programlisting>
 
-          <para>and the output will be this:</para>
+          <programlisting role="output">  &lt;p&gt;Copyright (C) 1999-2002 Someone. All rights reserved.
+  &lt;br&gt;Email: <emphasis>user@example.com</emphasis>&lt;/p&gt;
+user@example.com
+other@example.com</programlisting>
 
-          <programlisting role="output">  &lt;p&gt;Copyright (C) 1999-2002 Julia Smith. All rights reserved.
-  &lt;br&gt;Email: <emphasis>jsmith@acme.com</emphasis>&lt;/p&gt;
-jsmith@acme.com
-fred@acme.com</programlisting>
-
-          <para>This is like that because when you have called the
-          <literal>copyright</literal> macro, FreeMarker has temporarily
-          switch to the namespace that was created by the
-          <literal>import</literal> directive for
-          <literal>/lib/my_test.ftl</literal>. Thus, the
-          <literal>copyright</literal> macro always sees the
-          <literal>mail</literal> variable that exists there, and not the
-          other <literal>mail</literal> that exists in the main
-          namespace.</para>
+          <para>As you can see, the <literal>mail</literal> variable assigned
+          in <literal>some_web_page.ftl</literal> is separate from the
+          <literal>mail</literal> variable assigned in the imported
+          library.</para>
         </section>
 
         <section>
           <title>Writing the variables of imported namespaces</title>
 
-          <para>Occasionally you may want to create or replace a variable in
-          an imported namespace. You can do this with the
-          <literal>assign</literal> directive, if you use its
-          <literal>namespace</literal> parameter. For example, this:</para>
+          <para>Sometimes you want to create or replace a variable in an
+          imported namespace. You can do that with the
+          <literal>assign</literal> directive and its
+          <literal>namespace</literal> parameter:</para>
 
-          <programlisting role="template">&lt;#import "/lib/my_test.ftl" as my&gt;
+          <programlisting role="template">&lt;#import "/lib/example.ftl" as e&gt;
 ${my.mail}
-&lt;#assign mail="jsmith@other.com" <emphasis>in my</emphasis>&gt;
+&lt;#assign mail="other@example.com" <emphasis>in e</emphasis>&gt;
 ${my.mail}</programlisting>
 
-          <para>will output this:</para>
-
-          <programlisting role="output">jsmith@acme.com
-jsmith@other.com</programlisting>
+          <programlisting role="output">user@example.com
+other@example.com</programlisting>
         </section>
 
         <section>
@@ -5123,131 +5117,106 @@ jsmith@other.com</programlisting>
 
           <para>The variables of the data-model are visible from everywhere.
           For example, if you have a variable called <literal>user</literal>
-          in the data-model, <literal>lib/my_test.ftl</literal> will access
-          that, exactly as <literal>aWebPage.ftl</literal> does:</para>
+          in the data-model, <literal>lib/example.ftl</literal> will access
+          that, exactly like <literal>some_web_page.ftl</literal> does:</para>
 
           <programlisting role="template">&lt;#macro copyright date&gt;
   &lt;p&gt;Copyright (C) ${date} <emphasis>${user}</emphasis>. All rights reserved.&lt;/p&gt;
-&lt;/#macro&gt;
+&lt;/#macro&gt;</programlisting>
 
-&lt;#assign mail = "<emphasis>${user}</emphasis>@acme.com"&gt;</programlisting>
-
-          <para>If <literal>user</literal> is ``Fred'', then the usual
-          example:</para>
+          <para>Assuming <literal>user</literal> is <quote>John
+          Doe</quote>:</para>
 
           <programlisting role="template">&lt;#import "/lib/my_test.ftl" as my&gt;
+User is: ${user}
 &lt;@my.copyright date="1999-2002"/&gt;
-${my.mail}</programlisting>
+</programlisting>
 
-          <para>will print this:</para>
-
-          <programlisting role="output">  &lt;p&gt;Copyright (C) 1999-2002 Fred. All rights reserved.&lt;/p&gt;
-Fred@acme.com</programlisting>
+          <programlisting role="output">User is: John Doe
+  &lt;p&gt;Copyright (C) 1999-2002 John Doe. All rights reserved.&lt;/p&gt;
+</programlisting>
 
           <para>Don't forget that the variables in the namespace (the
-          variables you create with <literal>assign</literal> or
-          <literal>macro</literal> directives) have precedence over the
-          variables of the data-model when you are in that namespace. Thus,
-          the contents of data-model does not interfere with the variables
-          created by the library.</para>
+          variables you create with <literal>assign</literal>,
+          <literal>macro</literal>, and <literal>function</literal>
+          directives) have precedence over the variables of the data-model
+          when you are in that namespace. So generally, if a library is
+          interested in a data-model variable, it doesn't assign to the same
+          name.</para>
 
           <note>
             <para>In some unusual applications you want to create variables in
-            the template those are visible from all namespaces, exactly like
-            the variables of the data-model. But you can't change the
-            data-model with templates. Still, it is possible to achieve
-            similar result with the <literal>global</literal> directive; read
-            the <link linkend="ref.directive.global">reference</link> for more
-            details.</para>
+            the template that are visible from all namespaces, exactly like
+            the variables of the data-model. While templates can't change the
+            data-model, it's possible to achieve similar effect with the
+            <literal>global</literal> directive; see the <link
+            linkend="ref.directive.global">reference</link>.</para>
           </note>
         </section>
 
         <section>
           <title>The life-cycle of namespaces</title>
 
-          <para>A namespace is identified by the path that was used with the
-          <literal>import</literal> directive. If you try to
-          <literal>import</literal> with the same path for multiple times, it
-          will create the namespace and run the template specified by the path
-          for the very first invocation of <literal>import</literal> only. The
-          later <literal>import</literal>s with the same path will just create
-          a ``gate'' hash to the same namespace. For example, let this be the
-          <literal>aWebPage.ftl</literal>:</para>
+          <para>A namespace is identified by the path used in the
+          <literal>import</literal> directive (after it was normalized to an
+          absolute path). If you try to <literal>import</literal> with
+          equivalent paths for multiple times, it will create the namespace
+          and run the template for only the first invocation of
+          <literal>import</literal>. The later <literal>import</literal>-s
+          with equivalent paths will just assign the same namespace to the
+          variable specified after the <literal>as</literal> keyword. For
+          example:</para>
 
-          <programlisting role="template">&lt;#import "/lib/my_test.ftl" as my&gt;
-&lt;#import "/lib/my_test.ftl" as foo&gt;
-&lt;#import "/lib/my_test.ftl" as bar&gt;
-${my.mail}, ${foo.mail}, ${bar.mail}
-&lt;#assign mail="jsmith@other.com" in my&gt;
-${my.mail}, ${foo.mail}, ${bar.mail}</programlisting>
+          <programlisting role="template">&lt;#import "/lib/example.ftl" as e&gt;
+&lt;#import "/lib/example.ftl" as e2&gt;
+&lt;#import "/lib/example.ftl" as e3&gt;
+${e.mail}, ${e2.mail}, ${e3.mail}
+&lt;#assign mail="other@example.com" in my&gt;
+${e.mail}, ${e2.mail}, ${e3.mail}</programlisting>
 
-          <para>The output will be:</para>
+          <programlisting role="output">user@example.com, user@example.com, user@example.com
+other@example.com, other@example.com, other@example.com</programlisting>
 
-          <programlisting role="output">jsmith@acme.com, jsmith@acme.com, jsmith@acme.com
-jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
+          <para>As you access the same namespace through <literal>e</literal>,
+          <literal>e2</literal>, and <literal>e3</literal>, the
+          <literal>email</literal> has changed in all of them at once. The
+          practical importance of this is that when you import the same
+          library in multiple templates, only one namespace will be
+          initialized and created for the library, which will be shared by all
+          the importing templates.</para>
 
-          <para>since you see the same namespace through
-          <literal>my</literal>, <literal>foo</literal> and
-          <literal>bar</literal>.</para>
-
-          <para>Note that namespaces are not hierarchical, they exist
-          independently of each other. That is, if you
-          <literal>import</literal> namespace N2 while you are in name space
-          N1, N2 will not be inside N1. N1 just gets a hash by which it can
-          access N2. This is the same N2 namespace that you would access if,
-          say, you <literal>import</literal> N2 when you are in the main
+          <para>Note that namespaces are not hierarchical; it doesn't mater
+          what namespace are you in when <literal>import</literal> creates
+          another namespace. For example, when you <literal>import</literal>
+          namespace N2 while you are in name space N1, N2 will not be inside
+          N1. N1 just gets the same N2 that you get if you
+          <literal>import</literal> N2 when you are in the main
           namespace.</para>
 
           <para>Each <link linkend="gloss.templateProcessingJob">template
           processing job</link> has its own private set of namespaces. Each
-          template-processing job is a separated cosmos that exists only for
-          the short period of time while the given page is rendered, and then
-          it vanishes with all its populated namespaces. Thus, whenever we say
-          that ``<literal>import</literal> is called for the first time'' and
-          such, we are always talking in the context of a single template
-          processing job.</para>
+          template processing job is a separate universe that exists only for
+          the short period while the main template is rendered, and then it
+          vanishes with all its populated namespaces. Thus, whenever we say
+          that <quote><literal>import</literal> is called for the first
+          time</quote>, we always mean the first time within the lifespan of a
+          single template processing job.</para>
         </section>
 
         <section>
-          <title>Writing libraries for other people</title>
+          <title>Auto-importing</title>
 
-          <indexterm>
-            <primary>library path</primary>
-          </indexterm>
-
-          <para>If you have written a good quality library that can be useful
-          for other people, you may want to make it available on the Internet
-          (like on <link
-          xlink:href="http://freemarker.org/libraries.html">http://freemarker.org/libraries.html</link>).
-          To prevent clashes with the names of libraries used by other
-          authors, and to make it easy to write libraries that import other
-          published libraries, there is a de-facto standard that specifies the
-          format of library paths. The standard is that the library must be
-          available (importable) for templates and other libraries with a path
-          like this:</para>
-
-          <para><literal>/lib/<replaceable>yourcompany.com</replaceable>/<replaceable>your_library</replaceable>.ftl</literal></para>
-
-          <para>For example if you work for Example Inc. that owns the
-          www.example.com homepage, and you develop a widget library, then the
-          path of the FTL file to import should be:</para>
-
-          <para><literal>/lib/example.com/widget.ftl</literal></para>
-
-          <para>Note that the www is omitted. The part after the 3rd slash can
-          contain subdirectories such as:</para>
-
-          <para><literal>/lib/example.com/commons/string.ftl</literal></para>
-
-          <para>An important rule is that the path should not contain
-          upper-case letters. To separate words, use <literal>_</literal>, as
-          in <literal>wml_form</literal> (not
-          <literal>wmlForm</literal>).</para>
-
-          <para>Note that if you do not develop the library for a company or
-          organization, you should use the URL of the project homepage, such
-          as <literal>/lib/example.sourceforge.net/example.ftl</literal>, or
-          <literal>/lib/geocities.com/jsmith/example.ftl</literal>.</para>
+          <para>When you have to import the same libraries again and again in
+          many templates, know that the Java programmers (or whoever is
+          responsible for configuring FreeMarker) can specify auto-imports,
+          which are imports that are automatically done in all templates. Auto
+          imports can also be configured to be <quote>lazy</quote> (since
+          FreeMarker 2.3.25), which means that they are only done when the
+          imported library is actually used in the template. See the Java API
+          documentation for more details: <link
+          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setAutoImports-java.util.Map-">Configuration.setAutoImports</link>,
+          <link
+          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setLazyAutoImports-java.lang.Boolean-">Configuration.setLazyAutoImports</link>.</para>
         </section>
       </section>
 
@@ -5463,11 +5432,10 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
           the output format is <literal>undefined</literal> (you can check
           that with <literal>${.output_format}</literal>), and so no automatic
           escaping is happening. In other cases, a common output format (like
-          HTML) is set for all templates, but a few templates needs a
-          different output format. In any case, the output format of a
-          template can be enforced in the <link
-          linkend="ref_directive_ftl">the <literal>ftl</literal>
-          header</link>:</para>
+          HTML) is set for all templates, but a few templates need a different
+          output format. In any case, the output format of a template can be
+          enforced in the <link linkend="ref_directive_ftl">the
+          <literal>ftl</literal> header</link>:</para>
 
           <programlisting role="template">&lt;#ftl output_format="XML"&gt;
 ${"'"}  &lt;#-- Prints: &amp;apos; --&gt;</programlisting>
@@ -38059,6 +38027,18 @@ Apache Software Foundation.</programlisting>
       </glossdef>
     </glossentry>
 
+    <glossentry xml:id="gloss.functionDefinitionBody">
+      <glossterm>Function definition body</glossterm>
+
+      <glossdef>
+        <para>The template fragment between the <literal>&lt;#function
+        <replaceable>...</replaceable>&gt;</literal> and
+        <literal>&lt;/#function&gt;</literal>. This template fragment will be
+        executed when you call the function (for example as
+        <literal>myFuction(1, 2)</literal>).</para>
+      </glossdef>
+    </glossentry>
+
     <glossentry xml:id="gloss.hashVariable">
       <glossterm>Hash</glossterm>
 
@@ -38309,17 +38289,17 @@ Apache Software Foundation.</programlisting>
       <glossterm>Template processing job</glossterm>
 
       <glossdef>
-        <para>A template processing job is the act when FreeMarker merges a
-        template with a data-model to produce the output for a visitor. Note
-        that this may includes the execution of multiple template files
-        because the template file used for the Web page may invokes other
-        templates with <literal>include</literal> and
-        <literal>import</literal> directives. Each template-processing job is
-        a separated cosmos that exists only for the short period of time while
-        the given page is being rendered for the visitor, and then it vanishes
-        with all the variables created in the templates (for example,
-        variables created with <literal>assign</literal>,
-        <literal>macro</literal> or <literal>global</literal>
+        <para>A template processing job is the process during which FreeMarker
+        merges the main (top-level) template with a data-model to produce the
+        output. Because templates can <literal>include</literal> and
+        <literal>import</literal> other templates, this may involves the
+        processing of multiple templates, but those will all belong to the
+        same template processing job, which was started with the processing of
+        the main template. A template-processing job only exists for the short
+        time period until the processing of the main template is finished, and
+        then it vanishes with all the variables created during the process
+        (variables created with <literal>assign</literal>,
+        <literal>macro</literal>, <literal>global</literal>, etc.
         directives).</para>
       </glossdef>
     </glossentry>
