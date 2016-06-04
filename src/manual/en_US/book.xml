@@ -4782,6 +4782,22 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <para>Also, you may interested in namespaces: <xref
           linkend="dgui_misc_namespace"/>. Namespaces help you to organize and
           reuse your commonly used macros.</para>
+
+          <para>Java programmers might want to know that directives (macros
+          are directives) and methods (function-like things) can also be
+          written in Java language, by<link
+          linkend="pgui_datamodel_directive"> implementing the
+          <literal>TemplateDirectiveModel</literal></link> or
+          <literal>TemplateMethodModelEx</literal> interfaces, respectively.
+          Then you can pull in the Java implementations into the template like
+          <literal>&lt;#assign foo =
+          "com.example.FooDirective"?new()&gt;</literal> or
+          <literal>&lt;#assign foo =
+          "com.example.FooMethod"?new()&gt;</literal> on the same place where
+          you would have <literal>&lt;#macro foo
+          <replaceable>...</replaceable>&gt;</literal> or
+          <literal>&lt;#function foo
+          <replaceable>...</replaceable>&gt;</literal> otherwise.</para>
         </section>
       </section>
 
