@@ -533,7 +533,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private LinkedHashMap<String, String> autoImports = new LinkedHashMap<String, String>(0);
     private ArrayList<String> autoIncludes = new ArrayList<String>(0);
     private boolean lazyImpots;
-    private Boolean lazyAutoImport;
+    private Boolean lazyAutoImports;
 
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
@@ -3216,8 +3216,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.25
      */
-    public void setLazyImports(boolean importsLazy) {
-        this.lazyImpots = importsLazy;
+    public void setLazyImports(boolean lazyImports) {
+        this.lazyImpots = lazyImports;
     }
 
     /**
@@ -3226,7 +3226,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.25
      */
     public Boolean getLazyAutoImports() {
-        return lazyAutoImport;
+        return lazyAutoImports;
     }
 
     /**
@@ -3238,7 +3238,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.25
      */
     public void setLazyAutoImports(Boolean autoImportsLazy) {
-        this.lazyAutoImport = autoImportsLazy;
+        this.lazyAutoImports = autoImportsLazy;
     }
 
     /**
