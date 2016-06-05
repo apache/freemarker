@@ -19,7 +19,9 @@
 package freemarker.core;
 
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import freemarker.cache.TemplateCache;
@@ -32,8 +34,8 @@ import freemarker.template.utility.NullArgumentException;
 /**
  * Used for customizing the configuration settings for individual {@link Template}-s (or rather groups of templates),
  * relatively to the common setting values coming from the {@link Configuration}. This was designed with the standard
- * template loading mechanism of FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}
- * ), though can also be reused for custom template loading and caching solutions.
+ * template loading mechanism of FreeMarker in mind ({@link Configuration#getTemplate(String)}
+ * and {@link TemplateCache}), though can also be reused for custom template loading and caching solutions.
  * 
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism (
@@ -242,6 +244,12 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isTabSizeSet()) {
             setTabSize(tc.getTabSize());
         }
+        if (tc.isAutoImportsSet()) {
+            setAutoImports(mergeMaps(getAutoImports(), tc.getAutoImports()));
+        }
+        if (tc.isAutoIncludesSet()) {
+            setAutoIncludes(mergeLists(getAutoIncludes(), tc.getAutoIncludes()));
+        }
         
         tc.copyDirectCustomAttributes(this, true);
     }
@@ -337,6 +345,16 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isURLEscapingCharsetSet() && !template.isURLEscapingCharsetSet()) {
             template.setURLEscapingCharset(getURLEscapingCharset());
+        }
+        if (isAutoImportsSet()) {
+            // Regarding the order of the maps in the merge:
+            // - Existing template-level imports have precedence over those coming from the TC (just as with the others
+            //   apply()-ed settings), thus for clashing import prefixes they must win.
+            // - Template-level imports count as more specific, and so come after the more generic ones from TC.
+            template.setAutoImports(mergeMaps(getAutoImports(), template.getAutoImportsWithoutFallback()));
+        }
+        if (isAutoIncludesSet()) {
+            template.setAutoIncludes(mergeLists(getAutoIncludes(), template.getAutoIncludesWithoutFallback()));
         }
         
         copyDirectCustomAttributes(template, false);
@@ -555,7 +573,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     public boolean isTabSizeSet() {
         return tabSize != null;
-    }    
+    }
     
     /**
      * Returns {@link Configuration#getIncompatibleImprovements()} from the parent {@link Configuration}. This mostly
@@ -580,6 +598,8 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 isAPIBuiltinEnabledSet()
                 || isArithmeticEngineSet()
                 || isAutoFlushSet()
+                || isAutoImportsSet()
+                || isAutoIncludesSet()
                 || isBooleanFormatSet()
                 || isClassicCompatibleSet()
                 || isCustomDateFormatsSet()
@@ -603,12 +623,25 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private Map mergeMaps(Map m1, Map m2) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;
-        if (m1.isEmpty()) return m2;
-        if (m2.isEmpty()) return m1;
+        if (m1.isEmpty()) return m2 != null ? m2 : m1;
+        if (m2.isEmpty()) return m1 != null ? m1 : m2;
         
-        LinkedHashMap mergedM = new LinkedHashMap(m1);
+        LinkedHashMap mergedM = new LinkedHashMap((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
+        mergedM.putAll(m1);
         mergedM.putAll(m2);
         return mergedM;
+    }
+
+    private List<String> mergeLists(List<String> list1, List<String> list2) {
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        if (list1.isEmpty()) return list2 != null ? list2 : list1;
+        if (list2.isEmpty()) return list1 != null ? list1 : list2;
+        
+        ArrayList<String> mergedList = new ArrayList<String>(list1.size() + list2.size());
+        mergedList.addAll(list1);
+        mergedList.addAll(list2);
+        return mergedList;
     }
     
 }

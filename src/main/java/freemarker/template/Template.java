@@ -73,7 +73,7 @@ import freemarker.debug.impl.DebuggerService;
  * changing FreeMarker settings. Those must not be used while the template is being processed, or if the template object
  * is already accessible from multiple threads. If some templates need different settings that those coming from the
  * shared {@link Configuration}, and you are using {@link Configuration#getTemplate(String)} (or its overloads), then
- * see {@link Configuration#setTemplateConfigurations(freemarker.cache.TemplateConfigurationFactory)}.
+ * use {@link Configuration#setTemplateConfigurations(freemarker.cache.TemplateConfigurationFactory)} to achieve that.
  */
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
@@ -700,7 +700,7 @@ public class Template extends Configurable {
     void setAutoEscaping(boolean autoEscaping) {
         this.autoEscaping = autoEscaping;
     }
-
+    
     /**
      * Dump the raw template in canonical form.
      */

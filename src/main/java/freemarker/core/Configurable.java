@@ -237,6 +237,20 @@ public class Configurable {
     public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE = "logTemplateExceptions";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
     public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
+    public static final String AUTO_IMPORT_KEY_SNAKE_CASE = "auto_import";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
+    public static final String AUTO_IMPORT_KEY_CAMEL_CASE = "autoImport";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String AUTO_IMPORT_KEY = AUTO_IMPORT_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
+    public static final String AUTO_INCLUDE_KEY_SNAKE_CASE = "auto_include";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
+    public static final String AUTO_INCLUDE_KEY_CAMEL_CASE = "autoInclude";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
     
     /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
     @Deprecated
@@ -247,6 +261,8 @@ public class Configurable {
         API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
         ARITHMETIC_ENGINE_KEY_SNAKE_CASE,
         AUTO_FLUSH_KEY_SNAKE_CASE,
+        AUTO_IMPORT_KEY_SNAKE_CASE,
+        AUTO_INCLUDE_KEY_SNAKE_CASE,
         BOOLEAN_FORMAT_KEY_SNAKE_CASE,
         CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
         CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
@@ -273,6 +289,8 @@ public class Configurable {
         API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
         ARITHMETIC_ENGINE_KEY_CAMEL_CASE,
         AUTO_FLUSH_KEY_CAMEL_CASE,
+        AUTO_IMPORT_KEY_CAMEL_CASE,
+        AUTO_INCLUDE_KEY_CAMEL_CASE,
         BOOLEAN_FORMAT_KEY_CAMEL_CASE,
         CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
         CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
@@ -324,6 +342,8 @@ public class Configurable {
     private Boolean logTemplateExceptions;
     private Map<String, ? extends TemplateDateFormatFactory> customDateFormats;
     private Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats;
+    private LinkedHashMap<String, String> autoImports;
+    private ArrayList<String> autoIncludes;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -426,6 +446,12 @@ public class Configurable {
         Configurable copy = (Configurable) super.clone();
         copy.properties = new Properties(properties);
         copy.customAttributes = (HashMap) customAttributes.clone();
+        if (autoImports != null) {
+            copy.autoImports = (LinkedHashMap<String, String>) autoImports.clone();
+        }
+        if (autoIncludes != null) {
+            copy.autoIncludes = (ArrayList<String>) autoIncludes.clone();
+        }
         return copy;
     }
     
@@ -1530,6 +1556,260 @@ public class Configurable {
         return logTemplateExceptions != null;
     }
     
+    /**
+     * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of the
+     * main template (that's the top-level template that wasn't included/imported from another template). While it only
+     * affects the main template directly, as the imports will create a global variable there, the imports will be
+     * visible from the further imported templates too (note that {@link Configuration#getIncompatibleImprovements()}
+     * set to 2.3.24 fixes a rarely surfacing bug with that).
+     * 
+     * <p>
+     * It's recommended to set the {@code auto_impots_lazy} setting ({@link Configuration#setLazyAutoImports(Boolean)})
+     * to {@code true} when using this, so that auto-imports that are unused in a template won't degrade performance by
+     * unnecessary loading and initializing the imported library.
+     * 
+     * <p>
+     * If the imports aren't lazy, the order of the imports will be the same as the order in which they were added with
+     * this method. (Calling this method with an already added {@code namespaceVarName} will move that to the end
+     * of the auto-import order.)
+     * 
+     * <p>
+     * The auto-import is added directly to the {@link Configurable} on which this method is called (not to the parents
+     * or children), but when the main template is processed, the auto-imports are collected from all the
+     * {@link Configurable} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
+     * template), {@link Environment}. If the same {@code namespaceVarName} occurs on multiple levels, the one on the
+     * child level is used, and the clashing import from the parent level is skipped.
+     * 
+     * <p>If there are also auto-includes (see {@link #addAutoInclude(String)}), those will be executed after
+     * the auto-imports.
+     * 
+     * @see #setAutoImports(Map)
+     */
+    public void addAutoImport(String namespaceVarName, String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            if (autoImports == null) {
+                autoImports = new LinkedHashMap<String, String>(4);
+            } else {
+                // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
+                autoImports.remove(namespaceVarName);
+            }
+            autoImports.put(namespaceVarName, templateName);
+        }
+    }
+    
+    /**
+     * Removes an auto-import from this {@link Configurable} level (not from the parents or children);
+     * see {@link #addAutoImport(String, String)}. Does nothing if the auto-import doesn't exist.
+     */
+    public void removeAutoImport(String namespaceVarName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            if (autoImports != null) {
+                autoImports.remove(namespaceVarName);
+            }
+        }
+    }
+    
+    /**
+     * Removes all auto-imports, then calls {@link #addAutoImport(String, String)} for each {@link Map}-entry (the entry
+     * key is the {@code namespaceVarName}). The order of the auto-imports will be the same as {@link Map#keySet()}
+     * returns the keys (but the order of imports doesn't mater for properly designed libraries anyway).
+     * 
+     * @param map Maps the namepsace variable names to the template names; not {@code null}
+     */
+    public void setAutoImports(Map map) {
+        NullArgumentException.check("map", map);
+        
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            if (autoImports != null) {
+                autoImports.clear();
+            }
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) map).entrySet()) {
+                Object key = entry.getKey();
+                if (!(key instanceof String)) {
+                    throw new IllegalArgumentException(
+                            "Key in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                }
+                
+                Object value = entry.getValue();
+                if (!(value instanceof String)) {
+                    throw new IllegalArgumentException(
+                            "Value in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                }
+                
+                addAutoImport((String) key, (String) value);
+            }
+        }
+    }
+    
+    /**
+     * Getter pair of {@link #setAutoImports(Map)}; do not modify the returned {@link Map}! To be consistent with other
+     * setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns that
+     * value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value doesn't
+     * reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting. The
+     * returned value is not the same {@link Map} object that was set with {@link #setAutoImports(Map)}, only its
+     * content is the same. The returned value isn't a snapshot; it may or may not shows the changes later made to this
+     * setting on this {@link Configurable} level (but usually it's well defined if until what point settings are
+     * possibly modified).
+     * 
+     * <p>
+     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
+     * {@link Map}.
+     * 
+     * @see #getAutoImportsWithoutFallback()
+     * 
+     * @since 2.3.25
+     */
+    public Map<String, String> getAutoImports() {
+        return autoImports != null ? autoImports
+                : parent != null ? parent.getAutoImports()
+                : Collections.<String, String>emptyMap();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * 
+     * @since 2.3.25
+     */
+    public boolean isAutoImportsSet() {
+        return autoImports != null;
+    }
+
+    /**
+     * Like {@link #getAutoImports()}, but doesn't fall back to the parent {@link Configurable}, nor does it provide
+     * a non-{@code null} default when called as the method of a {@link Configuration}.
+     *  
+     * @since 2.3.25
+     */
+    public Map<String, String> getAutoImportsWithoutFallback() {
+        return autoImports;
+    }
+    
+    /**
+     * Adds an invisible <code>#include <i>templateName</i></code> at the beginning of the main template (that's the
+     * top-level template that wasn't included/imported from another template).
+     * 
+     * <p>
+     * The order of the inclusions will be the same as the order in which they were added with this method.
+     * 
+     * <p>
+     * The auto-include is added directly to the {@link Configurable} on which this method is called (not to the parents
+     * or children), but when the main template is processed, the auto-includes are collected from all the
+     * {@link Configurable} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
+     * template), {@link Environment}.
+     * 
+     * <p>
+     * If there are also auto-imports ({@link #addAutoImport(String, String)}), those imports will be executed before
+     * the auto-includes, hence the namespace variables are accessible for the auto-included templates.
+     * 
+     * <p>
+     * You should avoid adding the same auto-include for multiple times, as you can easily end up including the same
+     * template for multiple times. Calling {@link #addAutoInclude(String)} with an already added template name will
+     * just move that to the end of the auto-include list, but the same won't happen when using
+     * {@link #setAutoIncludes(List)}, nor when the same string occurs on a different {@link Configurable} level.
+     * 
+     * @see #setAutoIncludes(List)
+     */
+    public void addAutoInclude(String templateName) {
+        addAutoInclude(templateName, true);
+    }
+
+    /**
+     * @param removeDuplicate
+     *            Used for emulating legacy glitch, where duplicates weren't removed if the inclusion was added via
+     *            {@link #setAutoIncludes(List)}, but were if it was added via {@link #addAutoInclude(String)}.
+     */
+    private void addAutoInclude(String templateName, boolean removeDuplicate) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            if (autoIncludes == null) {
+                autoIncludes = new ArrayList<String>(4);
+            } else {
+                if (removeDuplicate) {
+                    autoIncludes.remove(templateName);
+                }
+            }
+            autoIncludes.add(templateName);
+        }
+    }
+    
+    /**
+     * Removes all auto-includes, then calls {@link #addAutoInclude(String)} for each {@link List} items.
+     */
+    public void setAutoIncludes(List templateNames) {
+        NullArgumentException.check("templateNames", templateNames);
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            if (autoIncludes != null) {
+                autoIncludes.clear();
+            }
+            for (Object templateName : templateNames) {
+                if (!(templateName instanceof String)) {
+                    throw new IllegalArgumentException("List items must be String-s.");
+                }
+                addAutoInclude((String) templateName, false);
+            }
+        }
+    }
+    
+    /**
+     * Getter pair of {@link #setAutoIncludes(List)}; do not modify the returned {@link List}! To be consistent with other
+     * setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns that
+     * value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value doesn't
+     * reflect the {@link List} concatenation logic that FreeMarker actually uses for this setting. The
+     * returned value is not the same {@link List} object that was set with {@link #setAutoIncludes(List)}, only its
+     * content is the same (except that duplicate are removed). The returned value isn't a snapshot; it may or may not shows the changes later made to this
+     * setting on this {@link Configurable} level (but usually it's well defined if until what point settings are
+     * possibly modified).
+     * 
+     * <p>
+     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
+     * {@link List}.
+     * 
+     * @see #getAutoIncludesWithoutFallback()
+     * 
+     * @since 2.3.25
+     */
+    public List<String> getAutoIncludes() {
+        return autoIncludes != null ? autoIncludes
+                : parent != null ? parent.getAutoIncludes()
+                : Collections.<String>emptyList();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * 
+     * @since 2.3.25
+     */
+    public boolean isAutoIncludesSet() {
+        return autoIncludes != null;
+    }
+    
+    /**
+     * Like {@link #getAutoIncludes()}, but doesn't fall back to the parent {@link Configurable}, nor does it provide
+     * a non-{@code null} default when called as the method of a {@link Configuration}.
+     *  
+     * @since 2.3.25
+     */
+    public List<String> getAutoIncludesWithoutFallback() {
+        return autoIncludes;
+    }
+    
+    /**
+     * Removes the auto-include from this {@link Configurable} level (not from the parents or children); see
+     * {@link #addAutoInclude(String)}. Does nothing if the template is not there.
+     */
+    public void removeAutoInclude(String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            if (autoIncludes != null) {
+                autoIncludes.remove(templateName);
+            }
+        }
+    }
+    
     private static final String ALLOWED_CLASSES = "allowed_classes";
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
@@ -2097,6 +2377,11 @@ public class Configurable {
             } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
                     || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
                 setLogTemplateExceptions(StringUtil.getYesNo(value));
+            } else if (AUTO_INCLUDE_KEY_SNAKE_CASE.equals(name)
+                    || AUTO_INCLUDE_KEY_CAMEL_CASE.equals(name)) {
+                setAutoIncludes(parseAsList(value));
+            } else if (AUTO_IMPORT_KEY_SNAKE_CASE.equals(name) || AUTO_IMPORT_KEY_CAMEL_CASE.equals(name)) {
+                setAutoImports(parseAsImportList(value));
             } else {
                 unknown = true;
             }
@@ -2405,6 +2690,10 @@ public class Configurable {
         return retval;
     }
     
+    /**
+     * Executes the auto-imports and auto-includes for the main template of this environment.
+     * This is not meant to be called or overridden by code outside of FreeMarker. 
+     */
     protected void doAutoImportsAndIncludes(Environment env)
     throws TemplateException, IOException {
         if (parent != null) parent.doAutoImportsAndIncludes(env);

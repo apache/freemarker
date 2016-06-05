@@ -35,16 +35,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
@@ -97,6 +101,13 @@ public class TemplateConfigurationTest {
     private static final Version ICI = Configuration.VERSION_2_3_22;
 
     private static final Configuration DEFAULT_CFG = new Configuration(ICI);
+    static {
+        StringTemplateLoader stl = new StringTemplateLoader();
+        stl.putTemplate("t1.ftl", "<#global loaded = (loaded!) + 't1;'>In t1;");
+        stl.putTemplate("t2.ftl", "<#global loaded = (loaded!) + 't2;'>In t2;");
+        stl.putTemplate("t3.ftl", "<#global loaded = (loaded!) + 't3;'>In t3;");
+        DEFAULT_CFG.setTemplateLoader(stl);
+    }
 
     private static final TimeZone NON_DEFAULT_TZ;
     static {
@@ -180,6 +191,8 @@ public class TemplateConfigurationTest {
         
         // Special settings:
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
+        SETTING_ASSIGNMENTS.put("autoImports", ImmutableMap.of("a", "/lib/a.ftl"));
+        SETTING_ASSIGNMENTS.put("autoIncludes", ImmutableList.of("/lib/b.ftl"));
     }
     
     public static String getIsSetMethodName(String readMethodName) {
@@ -294,11 +307,13 @@ public class TemplateConfigurationTest {
                 propDesc2.getWriteMethod().invoke(tc2, value2);
 
                 tc1.merge(tc2);
-                Object mValue1 = propDesc1.getReadMethod().invoke(tc1);
-                Object mValue2 = propDesc2.getReadMethod().invoke(tc1);
-
-                assertEquals("For " + propDesc1.getName(), value1, mValue1);
-                assertEquals("For " + propDesc2.getName(), value2, mValue2);
+                if (propDesc1.getName().equals(propDesc2.getName()) && value1 instanceof List) {
+                    assertEquals("For " + propDesc1.getName(),
+                            ListUtils.union((List) value1, (List) value1), propDesc1.getReadMethod().invoke(tc1));
+                } else { // Values of the same setting merged
+                    assertEquals("For " + propDesc1.getName(), value1, propDesc1.getReadMethod().invoke(tc1));
+                    assertEquals("For " + propDesc2.getName(), value2, propDesc2.getReadMethod().invoke(tc1));
+                }
             }
         }
     }
@@ -312,6 +327,7 @@ public class TemplateConfigurationTest {
         tc1.setCustomNumberFormats(ImmutableMap.of(
                 "hex", HexTemplateNumberFormatFactory.INSTANCE,
                 "x", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
+        tc1.setAutoImports(ImmutableMap.of("a", "a1.ftl", "b", "b1.ftl"));
         
         TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomDateFormats(ImmutableMap.of(
@@ -320,6 +336,7 @@ public class TemplateConfigurationTest {
         tc2.setCustomNumberFormats(ImmutableMap.of(
                 "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE,
                 "x", BaseNTemplateNumberFormatFactory.INSTANCE));
+        tc2.setAutoImports(ImmutableMap.of("b", "b2.ftl", "c", "c2.ftl"));
         
         tc1.merge(tc2);
         
@@ -332,6 +349,11 @@ public class TemplateConfigurationTest {
         assertEquals(HexTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("hex"));
         assertEquals(LocaleSensitiveTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("loc"));
         assertEquals(BaseNTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("x"));
+
+        Map<String, String> mergedAutoImports = tc1.getAutoImports();
+        assertEquals("a1.ftl", mergedAutoImports.get("a"));
+        assertEquals("b2.ftl", mergedAutoImports.get("b"));
+        assertEquals("c2.ftl", mergedAutoImports.get("c"));
         
         // Empty map merging optimization:
         tc1.merge(new TemplateConfiguration());
@@ -343,6 +365,19 @@ public class TemplateConfigurationTest {
         tc3.merge(tc1);
         assertSame(mergedCustomDateFormats, tc3.getCustomDateFormats());
         assertSame(mergedCustomNumberFormats, tc3.getCustomNumberFormats());
+    }
+    
+    @Test
+    public void testMergeListSettings() throws Exception {
+        TemplateConfiguration tc1 = new TemplateConfiguration();
+        tc1.setAutoIncludes(ImmutableList.of("a.ftl", "b.ftl"));
+        
+        TemplateConfiguration tc2 = new TemplateConfiguration();
+        tc2.setAutoIncludes(ImmutableList.of("c.ftl", "d.ftl"));
+        
+        tc1.merge(tc2);
+        
+        assertEquals(ImmutableList.of("a.ftl", "b.ftl", "c.ftl", "d.ftl"), tc1.getAutoIncludes());
     }
     
     @Test
@@ -578,7 +613,6 @@ public class TemplateConfigurationTest {
             testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
         }
 
-
         {
             TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
@@ -652,6 +686,22 @@ public class TemplateConfigurationTest {
         assertEquals(DEFAULT_CFG.getArithmeticEngine(), t.getArithmeticEngine());
     }
 
+    @Test
+    public void testAutoImport() throws TemplateException, IOException {
+        TemplateConfiguration tc = new TemplateConfiguration();
+        tc.setAutoImports(ImmutableMap.of("t1", "t1.ftl", "t2", "t2.ftl"));
+        tc.setParent(DEFAULT_CFG);
+        assertOutputWithoutAndWithTC(tc, "<#import 't3.ftl' as t3>${loaded}", "t3;", "t1;t2;t3;");
+    }
+
+    @Test
+    public void testAutoIncludes() throws TemplateException, IOException {
+        TemplateConfiguration tc = new TemplateConfiguration();
+        tc.setAutoIncludes(ImmutableList.of("t1.ftl", "t2.ftl"));
+        tc.setParent(DEFAULT_CFG);
+        assertOutputWithoutAndWithTC(tc, "<#include 't3.ftl'>", "In t3;", "In t1;In t2;In t3;");
+    }
+    
     @Test
     public void testStringInterpolate() throws TemplateException, IOException {
         TemplateConfiguration tc = new TemplateConfiguration();

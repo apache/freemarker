@@ -26608,6 +26608,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>It's now possible to set the
+              <literal>auto_imports</literal> and
+              <literal>auto_includes</literal> settings on a per template
+              basis (like templates with a certain name pattern has different
+              auto-imports). This is now possible as these settings were moved
+              from the <literal>Configuration</literal> level down to the more
+              generic <literal>Configurable</literal> level, and so are
+              inherited by <literal>TemplateConfigurer</literal> and
+              <literal>Environment</literal> too. </para>
+            </listitem>
+
+            <listitem>
               <para>New <literal>Configuration</literal> (and
               <literal>TemplateConfiguration</literal>) setting,
               <literal>tab_size</literal>. This only influences how the column
@@ -26662,6 +26674,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>TemplateObject.getSource()</literal> and through that
               <literal>TemplateObject.toString()</literal>, if the first or
               last line has contain tab characters.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: There was a regression with 2.3.24, where
+              <literal>Configuration.setAutoImports()</literal> haven't
+              removed auto-imports added earlier. (Though it's unlikely that
+              an application uses that method and also adds auto-imports
+              earlier.)</para>
             </listitem>
 
             <listitem>
