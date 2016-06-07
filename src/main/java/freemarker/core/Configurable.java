@@ -791,12 +791,34 @@ public class Configurable {
     }
     
     /**
-     * Getter pair of {@link #setCustomNumberFormats(Map)};  do not modify the returned {@link Map}!
+     * Getter pair of {@link #setCustomNumberFormats(Map)}; do not modify the returned {@link Map}! To be consistent
+     * with other setting getters, if this setting was set directly on this {@link Configurable} object, this simply
+     * returns that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned
+     * value doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this
+     * setting (for that, use {@link #getCustomNumberFormat(String)}). The returned value isn't a snapshot; it may or
+     * may not shows the changes later made to this setting on this {@link Configurable} level (but usually it's well
+     * defined if until what point settings are possibly modified).
+     * 
+     * <p>
+     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
+     * {@link Map}.
+     * 
+     * @see #getCustomNumberFormatsWithoutFallback()
      * 
      * @since 2.3.24
      */
     public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats() {
         return customNumberFormats == null ? parent.getCustomNumberFormats() : customNumberFormats;
+    }
+
+    /**
+     * Like {@link #getCustomNumberFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
+     * provide a non-{@code null} default when called as the method of a {@link Configuration}.
+     * 
+     * @since 2.3.25
+     */
+    public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormatsWithoutFallback() {
+        return customNumberFormats;
     }
     
     /**
@@ -843,6 +865,8 @@ public class Configurable {
     }
 
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
      * @since 2.3.24
      */
     public boolean isCustomNumberFormatsSet() {
@@ -1166,7 +1190,19 @@ public class Configurable {
     }
     
     /**
-     * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}!
+     * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}! To be consistent with
+     * other setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns
+     * that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value
+     * doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting
+     * (for that, use {@link #getCustomDateFormat(String)}). The returned value isn't a snapshot; it may or may not
+     * shows the changes later made to this setting on this {@link Configurable} level (but usually it's well defined if
+     * until what point settings are possibly modified).
+     * 
+     * <p>
+     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
+     * {@link Map}.
+     * 
+     * @see #getCustomDateFormatsWithoutFallback()
      * 
      * @since 2.3.24
      */
@@ -1174,6 +1210,16 @@ public class Configurable {
         return customDateFormats == null ? parent.getCustomDateFormats() : customDateFormats;
     }
 
+    /**
+     * Like {@link #getCustomDateFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
+     * provide a non-{@code null} default when called as the method of a {@link Configuration}.
+     * 
+     * @since 2.3.25
+     */
+    public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormatsWithoutFallback() {
+        return customDateFormats;
+    }
+    
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
      * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
@@ -1196,6 +1242,8 @@ public class Configurable {
     }
     
     /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * 
      * @since 2.3.24
      */
     public boolean isCustomDateFormatsSet() {
@@ -1620,7 +1668,8 @@ public class Configurable {
      * key is the {@code namespaceVarName}). The order of the auto-imports will be the same as {@link Map#keySet()}
      * returns the keys (but the order of imports doesn't mater for properly designed libraries anyway).
      * 
-     * @param map Maps the namepsace variable names to the template names; not {@code null}
+     * @param map
+     *            Maps the namespace variable names to the template names; not {@code null}
      */
     public void setAutoImports(Map map) {
         NullArgumentException.check("map", map);

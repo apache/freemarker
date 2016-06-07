@@ -26649,6 +26649,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>Configurable.getCustomNumberFormatsWithoutFallback</literal>
+              and
+              <literal>Configurable.getCustomDateFormatsWithoutFallback</literal>
+              methods to make it easier for custom code to investigate the
+              <literal>Map</literal> hierarchy.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-18">FREEMARKER-18</link>):
               If you had a JSP custom tag and an EL function defined in the
