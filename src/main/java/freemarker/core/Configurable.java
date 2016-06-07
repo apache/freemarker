@@ -444,8 +444,12 @@ public class Configurable {
     @Override
     protected Object clone() throws CloneNotSupportedException {
         Configurable copy = (Configurable) super.clone();
-        copy.properties = new Properties(properties);
-        copy.customAttributes = (HashMap) customAttributes.clone();
+        if (properties != null) {
+            copy.properties = new Properties(properties);
+        }
+        if (customAttributes != null) {
+            copy.customAttributes = (HashMap) customAttributes.clone();
+        }
         if (autoImports != null) {
             copy.autoImports = (LinkedHashMap<String, String>) autoImports.clone();
         }
