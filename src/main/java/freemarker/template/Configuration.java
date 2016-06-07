@@ -3067,17 +3067,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private void doAutoImports(Environment env, Template t) throws IOException, TemplateException {
         Map<String, String> envAutoImports = env.getAutoImportsWithoutFallback();
         Map<String, String> tAutoImports = t.getAutoImportsWithoutFallback();
-        Map<String, String> cfgAutoImports = getAutoImportsWithoutFallback();
         
         boolean lazyAutoImports = getLazyAutoImports() != null ? getLazyAutoImports().booleanValue() : getLazyImports();
         
-        if (cfgAutoImports != null) {
-            for (Map.Entry<String, String> autoImport : cfgAutoImports.entrySet()) {
-                String nsVarName = autoImport.getKey();
-                if ((tAutoImports == null || !tAutoImports.containsKey(nsVarName))
-                        && (envAutoImports == null || !envAutoImports.containsKey(nsVarName))) {
-                    env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
-                }
+        for (Map.Entry<String, String> autoImport : getAutoImportsWithoutFallback().entrySet()) {
+            String nsVarName = autoImport.getKey();
+            if ((tAutoImports == null || !tAutoImports.containsKey(nsVarName))
+                    && (envAutoImports == null || !envAutoImports.containsKey(nsVarName))) {
+                env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
             }
         }
         if (tAutoImports != null) {
@@ -3098,11 +3095,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private void doAutoIncludes(Environment env, Template t) throws TemplateException, IOException,
             TemplateNotFoundException, MalformedTemplateNameException, ParseException {
-        List<String> cfgAutoIncludes = getAutoIncludesWithoutFallback();
-        if (cfgAutoIncludes != null) {
-            for (String templateName : cfgAutoIncludes) {
-                env.include(getTemplate(templateName, env.getLocale()));
-            }
+        for (String templateName : getAutoIncludesWithoutFallback()) {
+            env.include(getTemplate(templateName, env.getLocale()));
         }
         
         List<String> tAutoIncludes = t.getAutoIncludesWithoutFallback();

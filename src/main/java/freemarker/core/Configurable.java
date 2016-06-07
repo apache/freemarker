@@ -425,6 +425,9 @@ public class Configurable {
         
         customDateFormats = Collections.emptyMap();
         customNumberFormats = Collections.emptyMap();
+        
+        initAutoImportsMap();
+        initAutoIncludesList();
     }
 
     /**
@@ -1641,13 +1644,17 @@ public class Configurable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (autoImports == null) {
-                autoImports = new LinkedHashMap<String, String>(4);
+                initAutoImportsMap();
             } else {
                 // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
                 autoImports.remove(namespaceVarName);
             }
             autoImports.put(namespaceVarName, templateName);
         }
+    }
+
+    private void initAutoImportsMap() {
+        autoImports = new LinkedHashMap<String, String>(4);
     }
     
     /**
@@ -1716,9 +1723,7 @@ public class Configurable {
      * @since 2.3.25
      */
     public Map<String, String> getAutoImports() {
-        return autoImports != null ? autoImports
-                : parent != null ? parent.getAutoImports()
-                : Collections.<String, String>emptyMap();
+        return autoImports != null ? autoImports : parent.getAutoImports();
     }
     
     /**
@@ -1731,8 +1736,8 @@ public class Configurable {
     }
 
     /**
-     * Like {@link #getAutoImports()}, but doesn't fall back to the parent {@link Configurable}, nor does it provide
-     * a non-{@code null} default when called as the method of a {@link Configuration}.
+     * Like {@link #getAutoImports()}, but doesn't fall back to the parent {@link Configurable} (and so it can be
+     * {@code null}).
      *  
      * @since 2.3.25
      */
@@ -1778,7 +1783,7 @@ public class Configurable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (autoIncludes == null) {
-                autoIncludes = new ArrayList<String>(4);
+                initAutoIncludesList();
             } else {
                 if (removeDuplicate) {
                     autoIncludes.remove(templateName);
@@ -1786,6 +1791,10 @@ public class Configurable {
             }
             autoIncludes.add(templateName);
         }
+    }
+
+    private void initAutoIncludesList() {
+        autoIncludes = new ArrayList<String>(4);
     }
     
     /**
@@ -1808,14 +1817,14 @@ public class Configurable {
     }
     
     /**
-     * Getter pair of {@link #setAutoIncludes(List)}; do not modify the returned {@link List}! To be consistent with other
-     * setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns that
-     * value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value doesn't
-     * reflect the {@link List} concatenation logic that FreeMarker actually uses for this setting. The
-     * returned value is not the same {@link List} object that was set with {@link #setAutoIncludes(List)}, only its
-     * content is the same (except that duplicate are removed). The returned value isn't a snapshot; it may or may not shows the changes later made to this
-     * setting on this {@link Configurable} level (but usually it's well defined if until what point settings are
-     * possibly modified).
+     * Getter pair of {@link #setAutoIncludes(List)}; do not modify the returned {@link List}! To be consistent with
+     * other setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns
+     * that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value
+     * doesn't reflect the {@link List} concatenation logic that FreeMarker actually uses for this setting. The returned
+     * value is not the same {@link List} object that was set with {@link #setAutoIncludes(List)}, only its content is
+     * the same (except that duplicate are removed). The returned value isn't a snapshot; it may or may not shows the
+     * changes later made to this setting on this {@link Configurable} level (but usually it's well defined if until
+     * what point settings are possibly modified).
      * 
      * <p>
      * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
@@ -1826,9 +1835,7 @@ public class Configurable {
      * @since 2.3.25
      */
     public List<String> getAutoIncludes() {
-        return autoIncludes != null ? autoIncludes
-                : parent != null ? parent.getAutoIncludes()
-                : Collections.<String>emptyList();
+        return autoIncludes != null ? autoIncludes : parent.getAutoIncludes();
     }
     
     /**
@@ -1841,8 +1848,8 @@ public class Configurable {
     }
     
     /**
-     * Like {@link #getAutoIncludes()}, but doesn't fall back to the parent {@link Configurable}, nor does it provide
-     * a non-{@code null} default when called as the method of a {@link Configuration}.
+     * Like {@link #getAutoIncludes()}, but doesn't fall back to the parent {@link Configurable} (and so it can be
+     * {@code null}).
      *  
      * @since 2.3.25
      */
