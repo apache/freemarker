@@ -1763,29 +1763,29 @@ public class Configurable {
      * the auto-includes, hence the namespace variables are accessible for the auto-included templates.
      * 
      * <p>
-     * You should avoid adding the same auto-include for multiple times, as you can easily end up including the same
-     * template for multiple times. Calling {@link #addAutoInclude(String)} with an already added template name will
-     * just move that to the end of the auto-include list, but the same won't happen when using
-     * {@link #setAutoIncludes(List)}, nor when the same string occurs on a different {@link Configurable} level.
+     * Calling {@link #addAutoInclude(String)} with an already added template name will just move that to the end of the
+     * auto-include list (within the same {@link Configurable} level). This works even if the same template name appears
+     * on different {@link Configurable} levels, in which case only the inclusion on the lowest (child) level will be
+     * executed.
      * 
      * @see #setAutoIncludes(List)
      */
     public void addAutoInclude(String templateName) {
-        addAutoInclude(templateName, true);
+        addAutoInclude(templateName, false);
     }
 
     /**
-     * @param removeDuplicate
+     * @param keepDuplicate
      *            Used for emulating legacy glitch, where duplicates weren't removed if the inclusion was added via
-     *            {@link #setAutoIncludes(List)}, but were if it was added via {@link #addAutoInclude(String)}.
+     *            {@link #setAutoIncludes(List)}.
      */
-    private void addAutoInclude(String templateName, boolean removeDuplicate) {
+    private void addAutoInclude(String templateName, boolean keepDuplicate) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (autoIncludes == null) {
                 initAutoIncludesList();
             } else {
-                if (removeDuplicate) {
+                if (!keepDuplicate) {
                     autoIncludes.remove(templateName);
                 }
             }
@@ -1799,6 +1799,9 @@ public class Configurable {
     
     /**
      * Removes all auto-includes, then calls {@link #addAutoInclude(String)} for each {@link List} items.
+     * 
+     * <p>Before {@linkplain Configuration#Configuration(Version) incompatible improvements} 2.3.25 it doesn't filter
+     * out duplicates from the list if this method was called on a {@link Configuration} instance.
      */
     public void setAutoIncludes(List templateNames) {
         NullArgumentException.check("templateNames", templateNames);
@@ -1811,7 +1814,8 @@ public class Configurable {
                 if (!(templateName instanceof String)) {
                     throw new IllegalArgumentException("List items must be String-s.");
                 }
-                addAutoInclude((String) templateName, false);
+                addAutoInclude((String) templateName, this instanceof Configuration && ((Configuration) this)
+                        .getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_25);
             }
         }
     }

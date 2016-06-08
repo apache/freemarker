@@ -160,9 +160,9 @@ public class AutoImportAndIncludeTest extends TemplateTest {
             assertEquals("T2;T3;In main: t2;t3;", sw.toString());
         }
     }
-    
+
     @Test
-    public void test3LayerIncludesNoClashes2() throws Exception {
+    public void test3LayerIncludeClashes() throws Exception {
         Configuration cfg = getConfiguration();
         cfg.addAutoInclude("t1.ftl");
         cfg.addAutoInclude("t2.ftl");
@@ -180,17 +180,44 @@ public class AutoImportAndIncludeTest extends TemplateTest {
             env.addAutoInclude("t3.ftl");
     
             env.process();
-            assertEquals("T1;T2;T3;T2;T3;In main: t1;t2;t3;t2;t3;", sw.toString());
+            assertEquals("T1;T2;T3;In main: t1;t2;t3;", sw.toString());
+        }
+        
+        {
+            Template t = cfg.getTemplate("main2.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+            env.addAutoInclude("t3.ftl");
+    
+            env.process();
+            assertEquals("T1;T2;T3;In main2: t1;t2;t3;", sw.toString());
+        }
+        
+        {
+            Template t = cfg.getTemplate("main.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+    
+            env.process();
+            assertEquals("T1;T3;T2;In main: t1;t3;t2;", sw.toString());
+        }
+        
+        {
+            Template t = cfg.getTemplate("main.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+            env.addAutoInclude("t1.ftl");
+    
+            env.process();
+            assertEquals("T3;T2;T1;In main: t3;t2;t1;", sw.toString());
         }
     }
-
+    
     @Test
-    public void test3LayerIncludesClashes() throws Exception {
+    public void test3LayerIncludesClashes2() throws Exception {
         Configuration cfg = getConfiguration();
         cfg.addAutoInclude("t1.ftl");
-        cfg.addAutoInclude("t3.ftl");
-        cfg.addAutoInclude("t2.ftl");
-        cfg.addAutoInclude("t3.ftl");
+        cfg.addAutoInclude("t1.ftl");
 
         TemplateConfiguration tc = new TemplateConfiguration();
         tc.addAutoInclude("t2.ftl");
@@ -204,9 +231,11 @@ public class AutoImportAndIncludeTest extends TemplateTest {
             Environment env = t.createProcessingEnvironment(null, sw);
             env.addAutoInclude("t3.ftl");
             env.addAutoInclude("t3.ftl");
+            env.addAutoInclude("t1.ftl");
+            env.addAutoInclude("t1.ftl");
     
             env.process();
-            assertEquals("T1;T2;T3;T2;T3;In main: t1;t2;t3;t2;t3;", sw.toString());
+            assertEquals("T2;T3;T1;In main: t2;t3;t1;", sw.toString());
         }
     }
     

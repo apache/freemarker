@@ -307,7 +307,8 @@ public class TemplateConfigurationTest {
                 propDesc2.getWriteMethod().invoke(tc2, value2);
 
                 tc1.merge(tc2);
-                if (propDesc1.getName().equals(propDesc2.getName()) && value1 instanceof List) {
+                if (propDesc1.getName().equals(propDesc2.getName()) && value1 instanceof List
+                        && !propDesc1.getName().equals("autoIncludes")) {
                     assertEquals("For " + propDesc1.getName(),
                             ListUtils.union((List) value1, (List) value1), propDesc1.getReadMethod().invoke(tc1));
                 } else { // Values of the same setting merged

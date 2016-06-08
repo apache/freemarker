@@ -426,6 +426,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** FreeMarker version 2.3.24 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_24 = new Version(2, 3, 24);
 
+    /** FreeMarker version 2.3.25 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_25 = new Version(2, 3, 25);
+    
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -818,6 +821,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          its subclasses (most notably {@link DefaultObjectWrapper}) anymore, as they only implement the
      *          {@code [index]} operator, but not {@code ?size}, which causes {@code <#list ...>} to fail among others.
      *          (They shouldn't implement either, but this is historical heritage.)
+     *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.25 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          When calling {@link Configurable#setAutoIncludes(List)} on a {@link Configuration}, it filters out
+     *          duplicates from the list, similarly as repeatedly calling {@link Configurable#addAutoInclude(String)}
+     *          would, hence avoiding repeated inclusions. Calling {@link Configurable#setAutoIncludes(List)} on other
+     *          {@link Configurable}-s always do this filtering regardless of the incompatible improvements setting. 
      *     </ul>
      *   </li>
      * </ul>
@@ -3095,18 +3108,28 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private void doAutoIncludes(Environment env, Template t) throws TemplateException, IOException,
             TemplateNotFoundException, MalformedTemplateNameException, ParseException {
-        for (String templateName : getAutoIncludesWithoutFallback()) {
-            env.include(getTemplate(templateName, env.getLocale()));
-        }
+        // We can't store autoIncludes in LinkedHashSet-s because setAutoIncludes(List) allows duplicates,
+        // unfortunately. Yet we have to prevent duplicates among Configuration levels, with the lowest levels having
+        // priority. So we build some Set-s to do that, but we avoid the most common cases where they aren't needed.
         
         List<String> tAutoIncludes = t.getAutoIncludesWithoutFallback();
-        if (tAutoIncludes != null) {
-            for (String templateName : tAutoIncludes) {
+        List<String> envAutoIncludes = env.getAutoIncludesWithoutFallback();
+        
+        for (String templateName : getAutoIncludesWithoutFallback()) {
+            if ((tAutoIncludes == null || !tAutoIncludes.contains(templateName))
+                    && (envAutoIncludes == null || !envAutoIncludes.contains(templateName))) {
                 env.include(getTemplate(templateName, env.getLocale()));
             }
         }
         
-        List<String> envAutoIncludes = env.getAutoIncludesWithoutFallback();
+        if (tAutoIncludes != null) {
+            for (String templateName : tAutoIncludes) {
+                if (envAutoIncludes == null || !envAutoIncludes.contains(templateName)) {
+                    env.include(getTemplate(templateName, env.getLocale()));
+                }
+            }
+        }
+        
         if (envAutoIncludes != null) {
             for (String templateName : envAutoIncludes) {
                 env.include(getTemplate(templateName, env.getLocale()));
