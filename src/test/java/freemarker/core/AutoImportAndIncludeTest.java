@@ -109,6 +109,107 @@ public class AutoImportAndIncludeTest extends TemplateTest {
         }
     }
 
+    @Test
+    public void test3LayerIncludesNoClashes() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.addAutoInclude("t1.ftl");
+
+        TemplateConfiguration tc = new TemplateConfiguration();
+        tc.addAutoInclude("t2.ftl");
+        cfg.setTemplateConfigurations(
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+
+        {
+            Template t = cfg.getTemplate("main.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+            env.addAutoInclude("t3.ftl");
+    
+            env.process();
+            assertEquals("T1;T2;T3;In main: t1;t2;t3;", sw.toString());
+        }
+
+        {
+            Template t = cfg.getTemplate("main.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+    
+            env.process();
+            assertEquals("T1;T2;In main: t1;t2;", sw.toString());
+        }
+        
+        {
+            Template t = cfg.getTemplate("main2.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+            env.addAutoInclude("t3.ftl");
+    
+            env.process();
+            assertEquals("T1;T3;In main2: t1;t3;", sw.toString());
+        }
+        
+        cfg.removeAutoInclude("t1.ftl");
+        
+        {
+            Template t = cfg.getTemplate("main.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+            env.addAutoInclude("t3.ftl");
+    
+            env.process();
+            assertEquals("T2;T3;In main: t2;t3;", sw.toString());
+        }
+    }
+    
+    @Test
+    public void test3LayerIncludesNoClashes2() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.addAutoInclude("t1.ftl");
+        cfg.addAutoInclude("t2.ftl");
+        cfg.addAutoInclude("t3.ftl");
+
+        TemplateConfiguration tc = new TemplateConfiguration();
+        tc.addAutoInclude("t2.ftl");
+        cfg.setTemplateConfigurations(
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+
+        {
+            Template t = cfg.getTemplate("main.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+            env.addAutoInclude("t3.ftl");
+    
+            env.process();
+            assertEquals("T1;T2;T3;T2;T3;In main: t1;t2;t3;t2;t3;", sw.toString());
+        }
+    }
+
+    @Test
+    public void test3LayerIncludesClashes() throws Exception {
+        Configuration cfg = getConfiguration();
+        cfg.addAutoInclude("t1.ftl");
+        cfg.addAutoInclude("t3.ftl");
+        cfg.addAutoInclude("t2.ftl");
+        cfg.addAutoInclude("t3.ftl");
+
+        TemplateConfiguration tc = new TemplateConfiguration();
+        tc.addAutoInclude("t2.ftl");
+        tc.addAutoInclude("t2.ftl");
+        cfg.setTemplateConfigurations(
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+
+        {
+            Template t = cfg.getTemplate("main.ftl");
+            StringWriter sw = new StringWriter();
+            Environment env = t.createProcessingEnvironment(null, sw);
+            env.addAutoInclude("t3.ftl");
+            env.addAutoInclude("t3.ftl");
+    
+            env.process();
+            assertEquals("T1;T2;T3;T2;T3;In main: t1;t2;t3;t2;t3;", sw.toString());
+        }
+    }
+    
     @Override
     protected Configuration createConfiguration() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
