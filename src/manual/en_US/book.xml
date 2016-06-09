@@ -26556,7 +26556,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_25">
-        <title>2.3.25</title>
+        <title>2.3.25 (incubating)</title>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -26691,6 +26691,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               removed auto-imports added earlier. (Though it's unlikely that
               an application uses that method and also adds auto-imports
               earlier.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed:
+              <literal>TemplateConfiguration.apply(Template)</literal> didn't
+              merge the <literal>customDateFormats</literal> and
+              <literal>customNumberFormats</literal> <literal>Map</literal>-s
+              when they were set both in the <literal>Template</literal> and
+              in the applied <literal>TemplateConfiguration</literal>, instead
+              it just kept the value in the <literal>Template</literal> (just
+              like with atomic setting values). Note that it was unlikely to
+              run into this bug, as usually you (or FreeMarker) create a
+              single merged <literal>TemplateConfiguration</literal> with
+              <literal>TemplateConfiguration.merge(TemplateConfiguration)</literal>
+              and then apply it on a fresh template.</para>
             </listitem>
 
             <listitem>

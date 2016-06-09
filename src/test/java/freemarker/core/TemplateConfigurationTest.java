@@ -496,6 +496,9 @@ public class TemplateConfigurationTest {
             tc.setBooleanFormat("Y,N");
             tc.setAutoImports(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"));
             tc.setAutoIncludes(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"));
+            tc.setCustomNumberFormats(ImmutableMap.of(
+                    "a", HexTemplateNumberFormatFactory.INSTANCE,
+                    "b", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
             
             tc.apply(t);
         }
@@ -510,6 +513,9 @@ public class TemplateConfigurationTest {
             tc.setBooleanFormat("J,N");
             tc.setAutoImports(ImmutableMap.of("b", "b2.ftl", "d", "d.ftl"));
             tc.setAutoIncludes(ImmutableList.of("i2.ftl", "i4.ftl"));
+            tc.setCustomNumberFormats(ImmutableMap.of(
+                    "b", BaseNTemplateNumberFormatFactory.INSTANCE,
+                    "c", BaseNTemplateNumberFormatFactory.INSTANCE));
             
             tc.apply(t);
         }
@@ -517,6 +523,11 @@ public class TemplateConfigurationTest {
         assertEquals(ImmutableMap.of("d", "d.ftl", "a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
         assertEquals(ImmutableList.of("d", "a", "b", "c"), new ArrayList<String>(t.getAutoImports().keySet()));
         assertEquals(ImmutableList.of("i4.ftl", "i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
+        assertEquals(ImmutableMap.of( //
+                "b", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE, //
+                "c", BaseNTemplateNumberFormatFactory.INSTANCE, //
+                "a", HexTemplateNumberFormatFactory.INSTANCE), //
+                t.getCustomNumberFormats());
     }
 
     @Test

@@ -295,11 +295,13 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (isClassicCompatibleSet() && !template.isClassicCompatibleSet()) {
             template.setClassicCompatibleAsInt(getClassicCompatibleAsInt());
         }
-        if (isCustomDateFormatsSet() && !template.isCustomDateFormatsSet()) {
-            template.setCustomDateFormats(getCustomDateFormats());
+        if (isCustomDateFormatsSet()) {
+            template.setCustomDateFormats(
+                    mergeMaps(getCustomDateFormats(), template.getCustomDateFormatsWithoutFallback(), false));
         }
-        if (isCustomNumberFormatsSet() && !template.isCustomNumberFormatsSet()) {
-            template.setCustomNumberFormats(getCustomNumberFormats());
+        if (isCustomNumberFormatsSet()) {
+            template.setCustomNumberFormats(
+                    mergeMaps(getCustomNumberFormats(), template.getCustomNumberFormatsWithoutFallback(), false));
         }
         if (isDateFormatSet() && !template.isDateFormatSet()) {
             template.setDateFormat(getDateFormat());
@@ -620,7 +622,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isURLEscapingCharsetSet();
     }
     
-    private Map mergeMaps(Map m1, Map m2, boolean overwriteOverwritesOrder) {
+    private Map mergeMaps(Map m1, Map m2, boolean overwriteUpdatesOrder) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;
         if (m1.isEmpty()) return m2 != null ? m2 : m1;
