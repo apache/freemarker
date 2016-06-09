@@ -173,10 +173,10 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             setClassicCompatibleAsInt(tc.getClassicCompatibleAsInt());
         }
         if (tc.isCustomDateFormatsSet()) {
-            setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats()));
+            setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats(), false));
         }
         if (tc.isCustomNumberFormatsSet()) {
-            setCustomNumberFormats(mergeMaps(getCustomNumberFormats(), tc.getCustomNumberFormats()));
+            setCustomNumberFormats(mergeMaps(getCustomNumberFormats(), tc.getCustomNumberFormats(), false));
         }
         if (tc.isDateFormatSet()) {
             setDateFormat(tc.getDateFormat());
@@ -245,7 +245,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             setTabSize(tc.getTabSize());
         }
         if (tc.isAutoImportsSet()) {
-            setAutoImports(mergeMaps(getAutoImports(), tc.getAutoImports()));
+            setAutoImports(mergeMaps(getAutoImports(), tc.getAutoImports(), true));
         }
         if (tc.isAutoIncludesSet()) {
             setAutoIncludes(mergeLists(getAutoIncludes(), tc.getAutoIncludes()));
@@ -351,7 +351,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             // - Existing template-level imports have precedence over those coming from the TC (just as with the others
             //   apply()-ed settings), thus for clashing import prefixes they must win.
             // - Template-level imports count as more specific, and so come after the more generic ones from TC.
-            template.setAutoImports(mergeMaps(getAutoImports(), template.getAutoImportsWithoutFallback()));
+            template.setAutoImports(mergeMaps(getAutoImports(), template.getAutoImportsWithoutFallback(), true));
         }
         if (isAutoIncludesSet()) {
             template.setAutoIncludes(mergeLists(getAutoIncludes(), template.getAutoIncludesWithoutFallback()));
@@ -620,7 +620,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isURLEscapingCharsetSet();
     }
     
-    private Map mergeMaps(Map m1, Map m2) {
+    private Map mergeMaps(Map m1, Map m2, boolean overwriteOverwritesOrder) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;
         if (m1.isEmpty()) return m2 != null ? m2 : m1;
@@ -628,6 +628,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         
         LinkedHashMap mergedM = new LinkedHashMap((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
         mergedM.putAll(m1);
+        for (Object m2Key : m2.keySet()) {
+            mergedM.remove(m2Key); // So that duplicate keys are moved after m1 keys
+        }
         mergedM.putAll(m2);
         return mergedM;
     }

@@ -371,14 +371,14 @@ public class TemplateConfigurationTest {
     @Test
     public void testMergeListSettings() throws Exception {
         TemplateConfiguration tc1 = new TemplateConfiguration();
-        tc1.setAutoIncludes(ImmutableList.of("a.ftl", "b.ftl"));
+        tc1.setAutoIncludes(ImmutableList.of("a.ftl", "x.ftl", "b.ftl"));
         
         TemplateConfiguration tc2 = new TemplateConfiguration();
-        tc2.setAutoIncludes(ImmutableList.of("c.ftl", "d.ftl"));
+        tc2.setAutoIncludes(ImmutableList.of("c.ftl", "x.ftl", "d.ftl"));
         
         tc1.merge(tc2);
         
-        assertEquals(ImmutableList.of("a.ftl", "b.ftl", "c.ftl", "d.ftl"), tc1.getAutoIncludes());
+        assertEquals(ImmutableList.of("a.ftl", "b.ftl", "c.ftl", "x.ftl", "d.ftl"), tc1.getAutoIncludes());
     }
     
     @Test
@@ -483,6 +483,40 @@ public class TemplateConfigurationTest {
         assertEquals("V4", CA1.get(tc1));
         assertNull(CA2.get(tc1));
         assertNull(CA3.get(tc1));
+    }
+    
+    @Test
+    public void applyOrder() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+        Template t = new Template(null, "", cfg);
+        
+        {
+            TemplateConfiguration  tc = new TemplateConfiguration();
+            tc.setParentConfiguration(cfg);
+            tc.setBooleanFormat("Y,N");
+            tc.setAutoImports(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"));
+            tc.setAutoIncludes(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"));
+            
+            tc.apply(t);
+        }
+        assertEquals("Y,N", t.getBooleanFormat());
+        assertEquals(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
+        assertEquals(ImmutableList.of("a", "b", "c"), new ArrayList<String>(t.getAutoImports().keySet()));
+        assertEquals(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
+        
+        {
+            TemplateConfiguration  tc = new TemplateConfiguration();
+            tc.setParentConfiguration(cfg);
+            tc.setBooleanFormat("J,N");
+            tc.setAutoImports(ImmutableMap.of("b", "b2.ftl", "d", "d.ftl"));
+            tc.setAutoIncludes(ImmutableList.of("i2.ftl", "i4.ftl"));
+            
+            tc.apply(t);
+        }
+        assertEquals("Y,N", t.getBooleanFormat());
+        assertEquals(ImmutableMap.of("d", "d.ftl", "a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
+        assertEquals(ImmutableList.of("d", "a", "b", "c"), new ArrayList<String>(t.getAutoImports().keySet()));
+        assertEquals(ImmutableList.of("i4.ftl", "i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
     }
 
     @Test
