@@ -4906,7 +4906,7 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
 ${x}
 &lt;#assign x = 2&gt; &lt;#-- replace variable x --&gt;
 ${x}
-&lt;#assign x += 1&gt; &lt;#-- replace variable x --&gt;
+&lt;#assign x++&gt; &lt;#-- replace variable x --&gt;
 ${x}</programlisting>
 
         <programlisting role="output">1
