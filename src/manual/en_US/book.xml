@@ -26555,7 +26555,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_25">
-        <title>2.3.25 (incubating)</title>
+        <title>2.3.25 (incubating at Apache)</title>
+
+        <para>This is a sable, final release. The <quote>incubating</quote>
+        suffix is required by the Apache Software Foundation until the project
+        becomes a fully accepted (graduated) Apache project.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -26719,7 +26723,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       </section>
 
       <section xml:id="versions_2_3_24">
-        <title>2.3.24 (incubating)</title>
+        <title>2.3.24 (incubating at Apache)</title>
 
         <para>Release date: 2016-03-28</para>
 
