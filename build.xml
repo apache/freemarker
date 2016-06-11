@@ -880,6 +880,8 @@
     <jar destfile="build/maven-source-attachment.jar">
       <fileset dir="${dist.src.dir}/src/main/java" />
       <fileset dir="${dist.src.dir}/src/main/resources" />
+      <fileset dir="${dist.src.dir}/src/main/javacc/" />
+      <fileset dir="build/generated-sources/java/" includes="**/*.java" />
       <metainf dir="${dist.src.dir}" includes="LICENSE, NOTICE, DISCLAIMER" />
     </jar>
 
