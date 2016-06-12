@@ -1090,7 +1090,7 @@ Proceed? </input>
     <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
   </target>
   
-  <target name="rat">
+  <target name="rat" description="Generates Apache RAT report">
     <ivy:cachepath conf="rat" pathid="ivy.dep" />
     <taskdef
       uri="antlib:org.apache.rat.anttasks"
