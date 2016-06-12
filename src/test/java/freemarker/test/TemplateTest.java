@@ -57,6 +57,7 @@ public abstract class TemplateTest {
         if (configuration == null) {
             try {
                 configuration = createConfiguration();
+                addCommonTemplates();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to set up configuration for the test", e);
             }
@@ -68,6 +69,10 @@ public abstract class TemplateTest {
         this.configuration = configuration;
     }
 
+    protected final void dropConfiguration() {
+        configuration = null;
+    }
+    
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
         assertOutput(createTemplate(ftl), expectedOut, false);
     }
@@ -127,6 +132,10 @@ public abstract class TemplateTest {
     
     protected Configuration createConfiguration() throws Exception {
         return new Configuration(Configuration.VERSION_2_3_0);
+    }
+    
+    protected void addCommonTemplates() {
+        //
     }
 
     protected Object getDataModel() {

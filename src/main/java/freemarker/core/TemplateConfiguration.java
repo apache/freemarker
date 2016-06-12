@@ -19,7 +19,9 @@
 package freemarker.core;
 
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import freemarker.cache.TemplateCache;
@@ -32,8 +34,8 @@ import freemarker.template.utility.NullArgumentException;
 /**
  * Used for customizing the configuration settings for individual {@link Template}-s (or rather groups of templates),
  * relatively to the common setting values coming from the {@link Configuration}. This was designed with the standard
- * template loading mechanism of FreeMarker in mind ({@link Configuration#getTemplate(String)} and {@link TemplateCache}
- * ), though can also be reused for custom template loading and caching solutions.
+ * template loading mechanism of FreeMarker in mind ({@link Configuration#getTemplate(String)}
+ * and {@link TemplateCache}), though can also be reused for custom template loading and caching solutions.
  * 
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism (
@@ -83,6 +85,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
     private String encoding;
+    private Integer tabSize;
 
     /**
      * Creates a new instance. The parent will be {@link Configuration#getDefaultConfiguration()} initially, but it will
@@ -170,10 +173,10 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             setClassicCompatibleAsInt(tc.getClassicCompatibleAsInt());
         }
         if (tc.isCustomDateFormatsSet()) {
-            setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats()));
+            setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats(), false));
         }
         if (tc.isCustomNumberFormatsSet()) {
-            setCustomNumberFormats(mergeMaps(getCustomNumberFormats(), tc.getCustomNumberFormats()));
+            setCustomNumberFormats(mergeMaps(getCustomNumberFormats(), tc.getCustomNumberFormats(), false));
         }
         if (tc.isDateFormatSet()) {
             setDateFormat(tc.getDateFormat());
@@ -238,15 +241,34 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isWhitespaceStrippingSet()) {
             setWhitespaceStripping(tc.getWhitespaceStripping());
         }
+        if (tc.isTabSizeSet()) {
+            setTabSize(tc.getTabSize());
+        }
+        if (tc.isLazyImportsSet()) {
+            setLazyImports(tc.getLazyImports());
+        }
+        if (tc.isLazyAutoImportsSet()) {
+            setLazyAutoImports(tc.getLazyAutoImports());
+        }
+        if (tc.isAutoImportsSet()) {
+            setAutoImports(mergeMaps(getAutoImports(), tc.getAutoImports(), true));
+        }
+        if (tc.isAutoIncludesSet()) {
+            setAutoIncludes(mergeLists(getAutoIncludes(), tc.getAutoIncludes()));
+        }
         
         tc.copyDirectCustomAttributes(this, true);
     }
 
     /**
-     * Sets the settings of the {@link Template} which are not yet set in the {@link Template} and are set in this
+     * Sets those settings of the {@link Template} which aren't yet set in the {@link Template} and are set in this
      * {@link TemplateConfiguration}, leaves the other settings as is. A setting is said to be set in a
      * {@link TemplateConfiguration} or {@link Template} if it was explicitly set via a setter method on that object, as
      * opposed to be inherited from the {@link Configuration}.
+     * 
+     * <p>
+     * Note that this method doesn't deal with settings that influence the parser, as those are already baked in at this
+     * point via the {@link ParserConfiguration}. 
      * 
      * <p>
      * Note that the {@code encoding} setting of the {@link Template} counts as unset if it's {@code null},
@@ -279,11 +301,13 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (isClassicCompatibleSet() && !template.isClassicCompatibleSet()) {
             template.setClassicCompatibleAsInt(getClassicCompatibleAsInt());
         }
-        if (isCustomDateFormatsSet() && !template.isCustomDateFormatsSet()) {
-            template.setCustomDateFormats(getCustomDateFormats());
+        if (isCustomDateFormatsSet()) {
+            template.setCustomDateFormats(
+                    mergeMaps(getCustomDateFormats(), template.getCustomDateFormatsWithoutFallback(), false));
         }
-        if (isCustomNumberFormatsSet() && !template.isCustomNumberFormatsSet()) {
-            template.setCustomNumberFormats(getCustomNumberFormats());
+        if (isCustomNumberFormatsSet()) {
+            template.setCustomNumberFormats(
+                    mergeMaps(getCustomNumberFormats(), template.getCustomNumberFormatsWithoutFallback(), false));
         }
         if (isDateFormatSet() && !template.isDateFormatSet()) {
             template.setDateFormat(getDateFormat());
@@ -329,6 +353,22 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isURLEscapingCharsetSet() && !template.isURLEscapingCharsetSet()) {
             template.setURLEscapingCharset(getURLEscapingCharset());
+        }
+        if (isLazyImportsSet() && !template.isLazyImportsSet()) {
+            template.setLazyImports(getLazyImports());
+        }
+        if (isLazyAutoImportsSet() && !template.isLazyAutoImportsSet()) {
+            template.setLazyAutoImports(getLazyAutoImports());
+        }
+        if (isAutoImportsSet()) {
+            // Regarding the order of the maps in the merge:
+            // - Existing template-level imports have precedence over those coming from the TC (just as with the others
+            //   apply()-ed settings), thus for clashing import prefixes they must win.
+            // - Template-level imports count as more specific, and so come after the more generic ones from TC.
+            template.setAutoImports(mergeMaps(getAutoImports(), template.getAutoImportsWithoutFallback(), true));
+        }
+        if (isAutoIncludesSet()) {
+            template.setAutoIncludes(mergeLists(getAutoIncludes(), template.getAutoIncludesWithoutFallback()));
         }
         
         copyDirectCustomAttributes(template, false);
@@ -522,6 +562,34 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     }
     
     /**
+     * See {@link Configuration#setTabSize(int)}. 
+     * 
+     * @since 2.3.25
+     */
+    public void setTabSize(int tabSize) {
+        this.tabSize = Integer.valueOf(tabSize);
+    }
+
+    /**
+     * Getter pair of {@link #setTabSize(int)}.
+     * 
+     * @since 2.3.25
+     */
+    public int getTabSize() {
+        return tabSize != null ? tabSize.intValue()
+                : getParentConfiguration().getTabSize();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * 
+     * @since 2.3.25
+     */
+    public boolean isTabSizeSet() {
+        return tabSize != null;
+    }
+    
+    /**
      * Returns {@link Configuration#getIncompatibleImprovements()} from the parent {@link Configuration}. This mostly
      * just exist to satisfy the {@link ParserConfiguration} interface.
      * 
@@ -544,12 +612,16 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 isAPIBuiltinEnabledSet()
                 || isArithmeticEngineSet()
                 || isAutoFlushSet()
+                || isAutoImportsSet()
+                || isAutoIncludesSet()
                 || isBooleanFormatSet()
                 || isClassicCompatibleSet()
                 || isCustomDateFormatsSet()
                 || isCustomNumberFormatsSet()
                 || isDateFormatSet()
                 || isDateTimeFormatSet()
+                || isLazyImportsSet()
+                || isLazyAutoImportsSet()
                 || isLocaleSet()
                 || isLogTemplateExceptionsSet()
                 || isNewBuiltinClassResolverSet()
@@ -564,15 +636,31 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isURLEscapingCharsetSet();
     }
     
-    private Map mergeMaps(Map m1, Map m2) {
+    private Map mergeMaps(Map m1, Map m2, boolean overwriteUpdatesOrder) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;
-        if (m1.isEmpty()) return m2;
-        if (m2.isEmpty()) return m1;
+        if (m1.isEmpty()) return m2 != null ? m2 : m1;
+        if (m2.isEmpty()) return m1 != null ? m1 : m2;
         
-        LinkedHashMap mergedM = new LinkedHashMap(m1);
+        LinkedHashMap mergedM = new LinkedHashMap((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
+        mergedM.putAll(m1);
+        for (Object m2Key : m2.keySet()) {
+            mergedM.remove(m2Key); // So that duplicate keys are moved after m1 keys
+        }
         mergedM.putAll(m2);
         return mergedM;
+    }
+
+    private List<String> mergeLists(List<String> list1, List<String> list2) {
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        if (list1.isEmpty()) return list2 != null ? list2 : list1;
+        if (list2.isEmpty()) return list1 != null ? list1 : list2;
+        
+        ArrayList<String> mergedList = new ArrayList<String>(list1.size() + list2.size());
+        mergedList.addAll(list1);
+        mergedList.addAll(list2);
+        return mergedList;
     }
     
 }

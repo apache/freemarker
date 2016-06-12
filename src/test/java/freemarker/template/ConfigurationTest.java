@@ -67,6 +67,7 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
+import freemarker.core.ParseException;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.TemplateDateFormatFactory;
 import freemarker.core.TemplateNumberFormatFactory;
@@ -1376,6 +1377,59 @@ public class ConfigurationTest extends TestCase {
                     containsString(TemplateNumberFormatFactory.class.getName())));
         }
     }
+
+    @Test
+    public void testSetTabSize() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        
+        String ftl = "${\t}";
+        
+        try {
+            new Template(null, ftl, cfg);
+            fail();
+        } catch (ParseException e) {
+            assertEquals(9, e.getColumnNumber());
+        }
+        
+        cfg.setTabSize(1);
+        try {
+            new Template(null, ftl, cfg);
+            fail();
+        } catch (ParseException e) {
+            assertEquals(4, e.getColumnNumber());
+        }
+        
+        try {
+            cfg.setTabSize(0);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+        
+        try {
+            cfg.setTabSize(257);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+    }
+
+    @Test
+    public void testTabSizeSetting() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        assertEquals(8, cfg.getTabSize());
+        cfg.setSetting(Configuration.TAB_SIZE_KEY_CAMEL_CASE, "4");
+        assertEquals(4, cfg.getTabSize());
+        cfg.setSetting(Configuration.TAB_SIZE_KEY_SNAKE_CASE, "1");
+        assertEquals(1, cfg.getTabSize());
+        
+        try {
+            cfg.setSetting(Configuration.TAB_SIZE_KEY_SNAKE_CASE, "x");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getCause(), instanceOf(NumberFormatException.class));
+        }
+    }
     
     @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
     @Test
@@ -1534,6 +1588,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 
         assertFalse(cfg.getLazyImports());
+        assertTrue(cfg.isLazyImportsSet());
         cfg.setSetting("lazy_imports", "true");
         assertTrue(cfg.getLazyImports());
         cfg.setSetting("lazyImports", "false");
@@ -1544,12 +1599,15 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 
         assertNull(cfg.getLazyAutoImports());
+        assertTrue(cfg.isLazyAutoImportsSet());
         cfg.setSetting("lazy_auto_imports", "true");
         assertEquals(Boolean.TRUE, cfg.getLazyAutoImports());
+        assertTrue(cfg.isLazyAutoImportsSet());
         cfg.setSetting("lazyAutoImports", "false");
         assertEquals(Boolean.FALSE, cfg.getLazyAutoImports());
         cfg.setSetting("lazyAutoImports", "null");
         assertNull(cfg.getLazyAutoImports());
+        assertTrue(cfg.isLazyAutoImportsSet());
     }
     
     @Test

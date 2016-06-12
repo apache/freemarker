@@ -277,8 +277,9 @@ public class TemplateTestCase extends FileTestCase {
             });
             dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
-        } else if (templateName.equals("list.ftl")
-                || templateName.equals("list2.ftl") || templateName.equals("list3.ftl")) {
+        } else if (
+                templateName.equals("list.ftl") || templateName.equals("list2.ftl") || templateName.equals("list3.ftl")
+                || simpleTestName.equals("listhash")) {
             dataModel.put("listables", new Listables());
         } else if (simpleTestName.startsWith("number-format")) {
             dataModel.put("int", new SimpleNumber(Integer.valueOf(1)));

@@ -34,12 +34,13 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private ArithmeticEngine arithmeticEngine;
     private Integer autoEscapingPolicy; 
     private OutputFormat outputFormat;
-    private Boolean recognizeStandardFileExtensions; 
+    private Boolean recognizeStandardFileExtensions;
+    private Integer tabSize;
     private final Version incompatibleImprovements;
 
     public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
             int namingConvention, Integer autoEscaping, OutputFormat outputFormat,
-            Boolean recognizeStandardFileExtensions,
+            Boolean recognizeStandardFileExtensions, Integer tabSize,
             Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
         this.namingConvention = namingConvention;
@@ -48,6 +49,7 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         this.autoEscapingPolicy = autoEscaping;
         this.outputFormat = outputFormat;
         this.recognizeStandardFileExtensions = recognizeStandardFileExtensions;
+        this.tabSize = tabSize;
         this.incompatibleImprovements = incompatibleImprovements;
         this.arithmeticEngine = arithmeticEngine;
     }
@@ -124,4 +126,17 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
         }
     }
 
+    public int getTabSize() {
+        if (tabSize == null) {
+            throw new IllegalStateException();
+        }
+        return tabSize.intValue();
+    }
+    
+    void setTabSizeIfNotSet(int tabSize) {
+        if (this.tabSize == null) {
+            this.tabSize = Integer.valueOf(tabSize);
+        }
+    }
+    
 }

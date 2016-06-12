@@ -74,5 +74,12 @@ public interface ParserConfiguration {
      * See {@link Configuration#getIncompatibleImprovements()}.
      */
     Version getIncompatibleImprovements();
+    
+    /**
+     * See {@link Configuration#getTabSize()}.
+     * 
+     * @since 2.3.25
+     */
+    int getTabSize();
 
 }

@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -54,6 +55,7 @@ import com.google.common.collect.ImmutableMap;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.HashAdapter;
 import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.test.templatesuite.models.Listables;
 
 public class DefaultObjectWrapperTest {
 
@@ -68,11 +70,16 @@ public class DefaultObjectWrapperTest {
         OW22NM.setNullModel(NullModel.INSTANCE);
     }
 
-    private final static DefaultObjectWrapper OW22_FUTURE = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
+    private final static DefaultObjectWrapper OW22CA = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
     static {
-        OW22_FUTURE.setForceLegacyNonListCollections(false);
+        OW22CA.setForceLegacyNonListCollections(false);
     }
 
+    private final static DefaultObjectWrapper OW22IS = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
+    static {
+        OW22IS.setIterableSupport(true);
+    }
+    
     @Test
     public void testIncompatibleImprovementsVersionBreakPoints() throws Exception {
         List<Version> expected = new ArrayList<Version>();
@@ -83,6 +90,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_22);
         expected.add(Configuration.VERSION_2_3_22); // no non-BC change in 2.3.23
         expected.add(Configuration.VERSION_2_3_24);
+        expected.add(Configuration.VERSION_2_3_24); // no non-BC change in 2.3.25
 
         List<Version> actual = new ArrayList<Version>();
         for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
@@ -283,6 +291,24 @@ public class DefaultObjectWrapperTest {
             assertTrue(bw.wrap(new ArrayList()) instanceof DefaultListAdapter);
             assertTrue(bw.wrap(new String[] {}) instanceof DefaultArrayAdapter);
             assertTrue(bw.wrap(new HashSet()) instanceof DefaultNonListCollectionAdapter);
+        }
+        
+        {
+            DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.getVersion());
+            DefaultObjectWrapper bw = builder.build();
+            assertSame(bw, builder.build());
+            assertFalse(bw.getIterableSupport());
+
+            assertFalse(bw.wrap(new PureIterable()) instanceof DefaultIterableAdapter);
+        }
+        {
+            DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.getVersion());
+            builder.setIterableSupport(true);
+            DefaultObjectWrapper bw = builder.build();
+            assertSame(bw, builder.build());
+            assertTrue(bw.getIterableSupport());
+
+            assertTrue(bw.wrap(new PureIterable()) instanceof DefaultIterableAdapter);
         }
     }
     
@@ -700,25 +726,25 @@ public class DefaultObjectWrapperTest {
             set.add("a");
             set.add("b");
             set.add("c");
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22_FUTURE.wrap(set);
+            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22CA.wrap(set);
             assertTrue(coll instanceof DefaultNonListCollectionAdapter);
             assertEquals(3, coll.size());
             assertFalse(coll.isEmpty());
             assertCollectionTMEquals(coll, "a", "b", "c");
 
-            assertTrue(coll.contains(OW22_FUTURE.wrap("a")));
-            assertTrue(coll.contains(OW22_FUTURE.wrap("b")));
-            assertTrue(coll.contains(OW22_FUTURE.wrap("c")));
-            assertTrue(coll.contains(OW22_FUTURE.wrap("c")));
-            assertFalse(coll.contains(OW22_FUTURE.wrap("d")));
+            assertTrue(coll.contains(OW22CA.wrap("a")));
+            assertTrue(coll.contains(OW22CA.wrap("b")));
+            assertTrue(coll.contains(OW22CA.wrap("c")));
+            assertTrue(coll.contains(OW22CA.wrap("c")));
+            assertFalse(coll.contains(OW22CA.wrap("d")));
             try {
-                assertFalse(coll.contains(OW22_FUTURE.wrap(1)));
+                assertFalse(coll.contains(OW22CA.wrap(1)));
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), containsString("Integer"));
             }
 
-            assertRoundtrip(OW22_FUTURE, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
+            assertRoundtrip(OW22CA, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
             
             assertSizeThroughAPIModel(3, coll);
         }
@@ -728,24 +754,24 @@ public class DefaultObjectWrapperTest {
             final List<String> list = Collections.singletonList("b");
             set.add(list);
             set.add(null);
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22_FUTURE.wrap(set);
+            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22CA.wrap(set);
             TemplateModelIterator it = coll.iterator();
             final TemplateModel tm1 = it.next();
-            Object obj1 = OW22_FUTURE.unwrap(tm1);
+            Object obj1 = OW22CA.unwrap(tm1);
             final TemplateModel tm2 = it.next();
-            Object obj2 = OW22_FUTURE.unwrap(tm2);
+            Object obj2 = OW22CA.unwrap(tm2);
             assertTrue(obj1 == null || obj2 == null);
             assertTrue(obj1 != null && obj1.equals(list) || obj2 != null && obj2.equals(list));
             assertTrue(tm1 instanceof DefaultListAdapter || tm2 instanceof DefaultListAdapter);
 
             List similarList = new ArrayList();
             similarList.add("b");
-            assertTrue(coll.contains(OW22_FUTURE.wrap(similarList)));
-            assertTrue(coll.contains(OW22_FUTURE.wrap(null)));
-            assertFalse(coll.contains(OW22_FUTURE.wrap("a")));
-            assertFalse(coll.contains(OW22_FUTURE.wrap(1)));
+            assertTrue(coll.contains(OW22CA.wrap(similarList)));
+            assertTrue(coll.contains(OW22CA.wrap(null)));
+            assertFalse(coll.contains(OW22CA.wrap("a")));
+            assertFalse(coll.contains(OW22CA.wrap(1)));
 
-            assertRoundtrip(OW22_FUTURE, set, DefaultNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
+            assertRoundtrip(OW22CA, set, DefaultNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
                     + obj2 + "]");
         }
     }
@@ -755,14 +781,14 @@ public class DefaultObjectWrapperTest {
     public void testCollectionAdapterOutOfBounds() throws TemplateModelException {
         Set set = Collections.singleton(123);
 
-        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22_FUTURE.wrap(set);
+        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22CA.wrap(set);
         TemplateModelIterator it = coll.iterator();
 
         for (int i = 0; i < 3; i++) {
             assertTrue(it.hasNext());
         }
 
-        assertEquals(123, OW22_FUTURE.unwrap(it.next()));
+        assertEquals(123, OW22CA.unwrap(it.next()));
 
         for (int i = 0; i < 3; i++) {
             assertFalse(it.hasNext());
@@ -894,6 +920,50 @@ public class DefaultObjectWrapperTest {
     }
     
     @Test
+    public void testIterableSupport() throws TemplateException, IOException {
+        Iterable<String> iterable = new PureIterable();
+        
+        String listingFTL = "<#list value as x>${x}<#sep>, </#list>";
+        
+        {
+            DefaultObjectWrapper ow = OW22;
+            TemplateModel tm = ow.wrap(iterable);
+            assertThat(tm, instanceOf(TemplateHashModel.class));
+            assertThat(tm, not(instanceOf(TemplateCollectionModel.class)));
+            assertThat(tm, not(instanceOf(TemplateSequenceModel.class)));
+            assertNotNull(((TemplateHashModel) tm).get("iterator"));
+            
+            assertTemplateFails(ow, iterable, listingFTL, "iterableSupport");
+        }
+        
+        {
+            DefaultObjectWrapper ow = OW22IS;
+            TemplateModel tm = ow.wrap(iterable);
+            assertThat(tm, instanceOf(TemplateCollectionModel.class));
+            TemplateCollectionModel iterableTM = (TemplateCollectionModel) tm;
+            
+            for (int i = 0; i < 2; i++) {
+                TemplateModelIterator iteratorTM = iterableTM.iterator();
+                assertTrue(iteratorTM.hasNext());
+                assertEquals("a", ow.unwrap(iteratorTM.next()));
+                assertTrue(iteratorTM.hasNext());
+                assertEquals("b", ow.unwrap(iteratorTM.next()));
+                assertTrue(iteratorTM.hasNext());
+                assertEquals("c", ow.unwrap(iteratorTM.next()));
+                assertFalse(iteratorTM.hasNext());
+                try {
+                    iteratorTM.next();
+                    fail();
+                } catch (TemplateModelException e) {
+                    assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
+                }
+            }
+            
+            assertTemplateOutput(OW22IS, iterable, listingFTL, "a, b, c");
+        }
+    }
+    
+    @Test
     public void assertCanWrapDOM() throws SAXException, IOException, ParserConfigurationException,
             TemplateModelException {
         DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -911,6 +981,37 @@ public class DefaultObjectWrapperTest {
         TemplateMethodModelEx sizeMethod = (TemplateMethodModelEx) apiModel.get("size");
         TemplateNumberModel r = (TemplateNumberModel) sizeMethod.exec(Collections.emptyList());
         assertEquals(expectedSize, r.getAsNumber().intValue());
+    }
+
+    private void assertTemplateOutput(ObjectWrapper objectWrapper, Object value, String ftl, String expectedOutput)
+            throws TemplateException, IOException {
+        assertEquals(expectedOutput, processTemplate(objectWrapper, value, ftl));
+    }
+
+    private void assertTemplateFails(ObjectWrapper objectWrapper, Object value, String ftl, String expectedMessagePart)
+            throws TemplateException, IOException {
+        try {
+            processTemplate(objectWrapper, value, ftl);
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString(expectedMessagePart));
+        }
+    }
+    
+    private String processTemplate(ObjectWrapper objectWrapper, Object value, String ftl)
+            throws TemplateException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
+        cfg.setLogTemplateExceptions(false);
+        cfg.setObjectWrapper(objectWrapper);
+        StringWriter out = new StringWriter();
+        new Template(null, ftl, cfg).process(ImmutableMap.of("value", value), out);
+        return out.toString();
+    }
+
+    private static final class PureIterable implements Iterable<String> {
+        public Iterator<String> iterator() {
+            return ImmutableList.of("a", "b", "c").iterator();
+        }
     }
 
     public static class RoundtripTesterBean {

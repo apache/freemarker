@@ -26,10 +26,12 @@ import freemarker.core.CollectionAndSequence;
 import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.MapKeyValuePairIterator;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -44,7 +46,7 @@ import freemarker.template.utility.RichObjectWrapper;
  * and a method interface to non-string keys.
  */
 public class SimpleMapModel extends WrappingTemplateModel 
-implements TemplateHashModelEx, TemplateMethodModelEx, AdapterTemplateModel, 
+implements TemplateHashModelEx2, TemplateMethodModelEx, AdapterTemplateModel, 
 WrapperTemplateModel, TemplateModelWithAPISupport {
     static final ModelFactory FACTORY =
         new ModelFactory()
@@ -103,6 +105,10 @@ WrapperTemplateModel, TemplateModelWithAPISupport {
         return new CollectionAndSequence(new SimpleSequence(map.values(), getObjectWrapper()));
     }
     
+    public KeyValuePairIterator keyValuePairIterator() {
+        return new MapKeyValuePairIterator(map, getObjectWrapper());
+    }
+
     public Object getAdaptedObject(Class hint) {
         return map;
     }

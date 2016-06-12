@@ -62,14 +62,17 @@ class BuiltInsForStringsMisc {
             Expression exp = null;
             try {
                 try {
+                    ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
+                    
+                    SimpleCharStream simpleCharStream = new SimpleCharStream(
+                            new StringReader("(" + s + ")"),
+                            RUNTIME_EVAL_LINE_DISPLACEMENT, 1,
+                            s.length() + 2);
+                    simpleCharStream.setTabSize(pCfg.getTabSize());
                     FMParserTokenManager tkMan = new FMParserTokenManager(
-                            new SimpleCharStream(
-                                    new StringReader("(" + s + ")"),
-                                    RUNTIME_EVAL_LINE_DISPLACEMENT, 1,
-                                    s.length() + 2));
+                            simpleCharStream);
                     tkMan.SwitchTo(FMParserConstants.FM_EXPRESSION);
 
-                    ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
                     // pCfg.outputFormat is exceptional: it's inherited from the lexical context
                     if (pCfg.getOutputFormat() != outputFormat) {
                         pCfg = new _ParserConfigurationWithInheritedFormat(

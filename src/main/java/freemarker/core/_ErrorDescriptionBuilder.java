@@ -306,6 +306,10 @@ public class _ErrorDescriptionBuilder {
     }
     
     private _ErrorDescriptionBuilder tip(Object tip) {
+        if (tip == null) {
+            return this;
+        }
+        
         if (this.tip == null) {
             this.tip = tip;
         } else {
@@ -326,6 +330,10 @@ public class _ErrorDescriptionBuilder {
     }
     
     public _ErrorDescriptionBuilder tips(Object... tips) {
+        if (tips == null || tips.length == 0) {
+            return this;
+        }
+        
         if (this.tips == null) {
             this.tips = tips;
         } else {

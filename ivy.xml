@@ -132,7 +132,8 @@
     
     <dependency org="org.zeroturnaround" name="javarebel-sdk" rev="1.2.2" conf="build.base->default" />
 
-    <dependency org="com.google.code.findbugs" name="annotations" rev="3.0.0" conf="build.base->default" />
+    <!-- Not for build.base, as @SuppressFBWarnings causes compilation warnings in dependent Gradle projects -->
+    <dependency org="com.google.code.findbugs" name="annotations" rev="3.0.0" conf="IDE->default; test->default" />
     
     <!--dependency org="javax.script" name="script-api" rev="1.0" conf="build.base->default" /-->
     <!--dependency org="org.visigoths" name="cavalry" rev="1.0" conf="build.base->default" /-->

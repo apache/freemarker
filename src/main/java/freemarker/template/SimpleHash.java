@@ -71,7 +71,7 @@ import freemarker.ext.beans.BeansWrapper;
  * @see DefaultMapAdapter
  * @see TemplateHashModelEx
  */
-public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx, Serializable {
+public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx2, Serializable {
 
     private final Map map;
     private boolean putFailed;
@@ -341,6 +341,10 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
         return new SimpleCollection(map.values(), getObjectWrapper());
     }
 
+    public KeyValuePairIterator keyValuePairIterator() {
+        return new MapKeyValuePairIterator(map, getObjectWrapper());
+    }
+
     public SimpleHash synchronizedWrapper() {
         return new SynchronizedHash();
     }
@@ -393,6 +397,13 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
         public TemplateCollectionModel values() {
             synchronized (SimpleHash.this) {
                 return SimpleHash.this.values();
+            }
+        }
+
+        @Override
+        public KeyValuePairIterator keyValuePairIterator() {
+            synchronized (SimpleHash.this) {
+                return SimpleHash.this.keyValuePairIterator();
             }
         }
         

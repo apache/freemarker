@@ -23,10 +23,14 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableMap;
+
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
+import freemarker.test.templatesuite.models.Listables;
 
-public class ListValidationsTest extends TemplateTest {
+public class ListErrorsTest extends TemplateTest {
     
     @Test
     public void testValid() throws IOException, TemplateException {
@@ -106,6 +110,28 @@ public class ListValidationsTest extends TemplateTest {
                 + "<#list foos as foo><@m; foo>${foo?index}</@></#list>"
                 + "</@></#list>",
                 "?index", "foo" , "user defined directive");
+    }
+
+    @Test
+    public void testKeyValueSameName() {
+        assertErrorContains("<#list {} as foo, foo></#list>",
+                "key", "value", "both" , "foo");
+    }
+
+    @Test
+    public void testCollectionVersusHash() {
+        assertErrorContains("<#list {} as i></#list>",
+                "as k, v");
+        assertErrorContains("<#list [] as k, v></#list>",
+                "only one loop variable");
+    }
+
+    @Test
+    public void testNonEx2NonStringKey() throws IOException, TemplateException {
+        addToDataModel("m", new Listables.NonEx2MapAdapter(ImmutableMap.of("k1", "v1", 2, "v2"), new DefaultObjectWrapper()));
+        assertOutput("<#list m?keys as k>${k};</#list>", "k1;2;");
+        assertErrorContains("<#list m as k, v></#list>",
+                "string", "number", ".TemplateHashModelEx2");
     }
     
 }

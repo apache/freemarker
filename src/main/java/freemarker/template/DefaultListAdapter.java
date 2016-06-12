@@ -21,9 +21,7 @@ package freemarker.template;
 
 import java.io.Serializable;
 import java.util.AbstractSequentialList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.utility.ObjectWrapperWithAPISupport;
@@ -98,31 +96,7 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
         }
 
         public TemplateModelIterator iterator() throws TemplateModelException {
-            return new IteratorAdapter(list.iterator(), getObjectWrapper());
-        }
-
-    }
-
-    private static class IteratorAdapter implements TemplateModelIterator {
-
-        private final Iterator it;
-        private final ObjectWrapper wrapper;
-
-        private IteratorAdapter(Iterator it, ObjectWrapper wrapper) {
-            this.it = it;
-            this.wrapper = wrapper;
-        }
-
-        public TemplateModel next() throws TemplateModelException {
-            try {
-                return wrapper.wrap(it.next());
-            } catch (NoSuchElementException e) {
-                throw new TemplateModelException("The collection has no more items.", e);
-            }
-        }
-
-        public boolean hasNext() throws TemplateModelException {
-            return it.hasNext();
+            return new DefaultUnassignableIteratorAdapter(list.iterator(), getObjectWrapper());
         }
 
     }

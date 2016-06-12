@@ -222,11 +222,20 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TEMPLATE_UPDATE_DELAY_KEY = TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE;
     
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    /**
+     * Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23
+     * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
+     */
     public static final String AUTO_IMPORT_KEY_SNAKE_CASE = "auto_import";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    /**
+     * Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23
+     * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_CAMEL_CASE} instead.
+     */
     public static final String AUTO_IMPORT_KEY_CAMEL_CASE = "autoImport";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    /**
+     * Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints.
+     * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
+     */
     public static final String AUTO_IMPORT_KEY = AUTO_IMPORT_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
@@ -236,20 +245,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
 
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_IMPORTS_KEY_SNAKE_CASE = "lazy_imports";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_IMPORTS_KEY_CAMEL_CASE = "lazyImports";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LAZY_IMPORTS_KEY = LAZY_IMPORTS_KEY_SNAKE_CASE;
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE = "lazy_auto_imports";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE = "lazyAutoImports";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LAZY_AUTO_IMPORTS_KEY = LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE;
-    
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TAG_SYNTAX_KEY_SNAKE_CASE = "tag_syntax";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -263,6 +258,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String NAMING_CONVENTION_KEY_CAMEL_CASE = "namingConvention";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String NAMING_CONVENTION_KEY = NAMING_CONVENTION_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
+    public static final String TAB_SIZE_KEY_SNAKE_CASE = "tab_size";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
+    public static final String TAB_SIZE_KEY_CAMEL_CASE = "tabSize";
+    /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.25 */
+    public static final String TAB_SIZE_KEY = TAB_SIZE_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TEMPLATE_LOADER_KEY_SNAKE_CASE = "template_loader";
@@ -309,19 +311,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
         // Must be sorted alphabetically!
         AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
-        AUTO_IMPORT_KEY_SNAKE_CASE,
-        AUTO_INCLUDE_KEY_SNAKE_CASE,
         CACHE_STORAGE_KEY_SNAKE_CASE,
         DEFAULT_ENCODING_KEY_SNAKE_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
-        LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE,
-        LAZY_IMPORTS_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
         STRICT_SYNTAX_KEY_SNAKE_CASE,
+        TAB_SIZE_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
         TEMPLATE_LOADER_KEY_SNAKE_CASE,
@@ -334,19 +333,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
         // Must be sorted alphabetically!
         AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
-        AUTO_IMPORT_KEY_CAMEL_CASE,
-        AUTO_INCLUDE_KEY_CAMEL_CASE,
         CACHE_STORAGE_KEY_CAMEL_CASE,
         DEFAULT_ENCODING_KEY_CAMEL_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
-        LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE,
-        LAZY_IMPORTS_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
         STRICT_SYNTAX_KEY_CAMEL_CASE,
+        TAB_SIZE_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
         TEMPLATE_LOADER_KEY_CAMEL_CASE,
@@ -412,6 +408,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** FreeMarker version 2.3.24 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_24 = new Version(2, 3, 24);
 
+    /** FreeMarker version 2.3.25 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_25 = new Version(2, 3, 25);
+    
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -496,6 +495,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
+    private int tabSize = 8;  // Default from JavaCC 3.x 
 
     private TemplateCache cache;
     
@@ -520,11 +520,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
-    private LinkedHashMap<String, String> autoImports = new LinkedHashMap<String, String>(0);
-    private ArrayList<String> autoIncludes = new ArrayList<String>(0);
-    private boolean lazyImpots;
-    private Boolean lazyAutoImport;
-
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
      *     {@link Configuration#setIncompatibleImprovements(Version)} (or
@@ -807,6 +802,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          (They shouldn't implement either, but this is historical heritage.)
      *     </ul>
      *   </li>
+     *   <li><p>
+     *     2.3.25 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          When calling {@link Configurable#setAutoIncludes(List)} on a {@link Configuration}, it filters out
+     *          duplicates from the list, similarly as repeatedly calling {@link Configurable#addAutoInclude(String)}
+     *          would, hence avoiding repeated inclusions. Calling {@link Configurable#setAutoIncludes(List)} on other
+     *          {@link Configurable}-s always do this filtering regardless of the incompatible improvements setting. 
+     *     </ul>
+     *   </li>
      * </ul>
      * 
      * @throws IllegalArgumentException
@@ -965,8 +970,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             Configuration copy = (Configuration) super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
             copy.localeToCharsetMap = new ConcurrentHashMap(localeToCharsetMap);
-            copy.autoImports = (LinkedHashMap<String, String>) autoImports.clone();
-            copy.autoIncludes = (ArrayList<String>) autoIncludes.clone();
             copy.recreateTemplateCacheWith(
                     cache.getTemplateLoader(), cache.getCacheStorage(),
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
@@ -2237,6 +2240,38 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
+     * Sets the assumed display width of the tab character (ASCII 9), which influences the column number shown in error
+     * messages (or the column number you get through other API-s). So for example if the users edit templates in an
+     * editor where the tab width is set to 4, you should set this to 4 so that the column numbers printed by FreeMarker
+     * will match the column number shown in the editor. This setting doesn't affect the output of templates, as a tab
+     * in the template will remain a tab in the output too.
+     * 
+     * @param tabSize
+     *            At least 1, at most 256.
+     * 
+     * @since 2.3.25
+     */
+    public void setTabSize(int tabSize) {
+        if (tabSize < 1) {
+           throw new IllegalArgumentException("\"tabSize\" must be at least 1, but was " + tabSize);
+        }
+        // To avoid integer overflows:
+        if (tabSize > 256) {
+            throw new IllegalArgumentException("\"tabSize\" can be more than 256, but was " + tabSize);
+        }
+        this.tabSize = tabSize;
+    }
+
+    /**
+     * The getter pair of {@link #setTabSize(int)}.
+     * 
+     * @since 2.3.25
+     */
+    public int getTabSize() {
+        return tabSize;
+    }
+    
+    /**
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
      * missing/staled.
      * 
@@ -2899,15 +2934,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     valueWithoutUnit = value;
                 }
                 setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multipier);
-            } else if (AUTO_INCLUDE_KEY_SNAKE_CASE.equals(name)
-                    || AUTO_INCLUDE_KEY_CAMEL_CASE.equals(name)) {
-                setAutoIncludes(parseAsList(value));
-            } else if (AUTO_IMPORT_KEY_SNAKE_CASE.equals(name) || AUTO_IMPORT_KEY_CAMEL_CASE.equals(name)) {
-                setAutoImports(parseAsImportList(value));
-            } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
-                setLazyAutoImports(value.equals(NULL) ? null : Boolean.valueOf(StringUtil.getYesNo(value)));
-            } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
-                setLazyImports(StringUtil.getYesNo(value));
             } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);
@@ -2928,6 +2954,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
+            } else if (TAB_SIZE_KEY_SNAKE_CASE.equals(name) || TAB_SIZE_KEY_CAMEL_CASE.equals(name)) {
+                setTabSize(Integer.parseInt(value));
             } else if (INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE.equals(name)
                     || INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE.equals(name)) {
                 setIncompatibleImprovements(new Version(value));
@@ -3017,184 +3045,72 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return super.getCorrectedNameForUnknownSetting(name);
     }
     
-    /**
-     * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
-     * top-level templates (that is, to all templates that weren't included/imported from another template). While it
-     * only affects the top-level (main) template directly, as the imports there will create a global variable, the
-     * imports will be visible from the further imported templates too (though note that
-     * {@link #getIncompatibleImprovements()} set to 2.3.24 fixes a rarely surfacing bug here).
-     * 
-     * <p>It's recommended to set the {@code auto_impots_lazy} setting ({@link #setLazyAutoImports(Boolean)}) to
-     * {@code true} when using this, so that auto-imports that are unused in a template won't degrade performance by
-     * unnecessary loading and initializing the imported library.
-     * 
-     * <p>
-     * The order of the imports will be the same as the order in which they were added with this method. Note that if
-     * there are also auto-includes ({@link #addAutoInclude(String)}), those inclusions will be executed after the
-     * auto-includes.
-     * 
-     * @see #setAutoImports(Map)
-     */
-    public void addAutoImport(String namespaceVarName, String templateName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
-            autoImports.remove(namespaceVarName);
-            autoImports.put(namespaceVarName, templateName);
-        }
-    }
-    
-    /**
-     * Removes an auto-import; see {@link #addAutoImport(String, String)}. Does nothing if the auto-import doesn't
-     * exist.
-     */
-    public void removeAutoImport(String namespaceVarName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            autoImports.remove(namespaceVarName);
-        }
-    }
-    
-    /**
-     * Removes all auto-imports, then calls {@link #addAutoImport(String, String)} for each {@link Map}-entry (the entry
-     * key is the {@code namespaceVarName}). The order of the auto-imports will be the same as {@link Map#keySet()}
-     * returns the keys (but the order of imports doesn't mater for properly designed libraries anyway).
-     */
-    public void setAutoImports(Map map) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            for (Map.Entry entry : ((Map<?, ?>) map).entrySet()) {
-                Object key = entry.getKey();
-                if (!(key instanceof String)) {
-                    throw new IllegalArgumentException(
-                            "Key in map wasn't a String, but a(n) " + key.getClass().getName() + ".");
-                }
-                Object value = entry.getValue();
-                if (!(value instanceof String)) {
-                    throw new IllegalArgumentException(
-                            "Value in map wasn't a String, but a(n) " + key.getClass().getName() + ".");
-                }
-                addAutoImport((String) key, (String) value);
-            }
-        }
-    }
-    
     @Override
-    protected void doAutoImportsAndIncludes(Environment env)
-    throws TemplateException, IOException {
-        for (Map.Entry<String, String> autoImport : autoImports.entrySet()) {
-            Boolean autoImportsLazy = getLazyAutoImports();
-            env.importLib(
-                    autoImport.getValue(), autoImport.getKey(),
-                    autoImportsLazy != null ? autoImportsLazy.booleanValue() : getLazyImports());
-        }
-        for (int i = 0; i < autoIncludes.size(); i++) {
-            String templateName = autoIncludes.get(i);
-            Template template = getTemplate(templateName, env.getLocale());
-            env.include(template);
-        }
-    }
-    
-    /**
-     * Adds an invisible <code>#include <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
-     * top-level templates (that is, to all templates that weren't included/imported from another template).
-     * 
-     * <p>
-     * The order of the inclusions will be the same as the order in which they were added with this method. Note that if
-     * there are also auto-imports ({@link #addAutoImport(String, String)}), those imports will be executed before the
-     * auto-includes, hence the library variables are accessible for the auto-includes.
-     * 
-     * @see #setAutoIncludes(List)
-     */
-    public void addAutoInclude(String templateName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            autoIncludes.remove(templateName);
-            autoIncludes.add(templateName);
-        }
+    protected void doAutoImportsAndIncludes(Environment env) throws TemplateException, IOException {
+        Template t = env.getMainTemplate();
+        doAutoImports(env, t);
+        doAutoIncludes(env, t);
     }
 
-    /**
-     * Removes all auto-includes, then calls {@link #addAutoInclude(String)} for each {@link List} items.
-     */
-    public void setAutoIncludes(List templateNames) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            autoIncludes.clear();
-            for (Object templateName : templateNames) {
-                if (!(templateName instanceof String)) {
-                    throw new IllegalArgumentException("List items must be String-s.");
+    private void doAutoImports(Environment env, Template t) throws IOException, TemplateException {
+        Map<String, String> envAutoImports = env.getAutoImportsWithoutFallback();
+        Map<String, String> tAutoImports = t.getAutoImportsWithoutFallback();
+        
+        boolean lazyAutoImports = env.getLazyAutoImports() != null ? env.getLazyAutoImports().booleanValue()
+                : env.getLazyImports();
+        
+        for (Map.Entry<String, String> autoImport : getAutoImportsWithoutFallback().entrySet()) {
+            String nsVarName = autoImport.getKey();
+            if ((tAutoImports == null || !tAutoImports.containsKey(nsVarName))
+                    && (envAutoImports == null || !envAutoImports.containsKey(nsVarName))) {
+                env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
+            }
+        }
+        if (tAutoImports != null) {
+            for (Map.Entry<String, String> autoImport : tAutoImports.entrySet()) {
+                String nsVarName = autoImport.getKey();
+                if (envAutoImports == null || !envAutoImports.containsKey(nsVarName)) {
+                    env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
                 }
-                autoIncludes.add((String) templateName);
+            }
+        }
+        if (envAutoImports != null) {
+            for (Map.Entry<String, String> autoImport : envAutoImports.entrySet()) {
+                String nsVarName = autoImport.getKey();
+                env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
             }
         }
     }
     
-    /**
-     * Removes a template from the auto-include list; see {@link #addAutoInclude(String)}. Does nothing if the template
-     * is not there.
-     */
-    public void removeAutoInclude(String templateName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            autoIncludes.remove(templateName);
+    private void doAutoIncludes(Environment env, Template t) throws TemplateException, IOException,
+            TemplateNotFoundException, MalformedTemplateNameException, ParseException {
+        // We can't store autoIncludes in LinkedHashSet-s because setAutoIncludes(List) allows duplicates,
+        // unfortunately. Yet we have to prevent duplicates among Configuration levels, with the lowest levels having
+        // priority. So we build some Set-s to do that, but we avoid the most common cases where they aren't needed.
+        
+        List<String> tAutoIncludes = t.getAutoIncludesWithoutFallback();
+        List<String> envAutoIncludes = env.getAutoIncludesWithoutFallback();
+        
+        for (String templateName : getAutoIncludesWithoutFallback()) {
+            if ((tAutoIncludes == null || !tAutoIncludes.contains(templateName))
+                    && (envAutoIncludes == null || !envAutoIncludes.contains(templateName))) {
+                env.include(getTemplate(templateName, env.getLocale()));
+            }
         }
-    }
-    
-    /**
-     * The getter pair of {@link #setLazyImports(boolean)}.
-     * 
-     * @since 2.3.25
-     */
-    public boolean getLazyImports() {
-        return lazyImpots;
-    }
-
-    /**
-     * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
-     * and processing of the imported templates until the content of the imported namespace is actually accessed. This
-     * makes the overhead of <em>unused</em> imports negligible. A drawback is that importing a missing or otherwise
-     * broken template will be successful, and the problem will remain hidden until (and if) the namespace content is
-     * actually used. Also, you lose the strict control over when the namespace initializing code in the imported
-     * template will be executed, though it shouldn't mater for well written imported templates anyway. Note that the
-     * namespace initializing code will run with the same {@linkplain Configurable#getLocale() locale} as it was at the
-     * point of the {@code <#import ...>} call (other settings won't be handled specially like that).
-     * 
-     * <p>
-     * The default is {@code false} (and thus imports are eager) for backward compatibility, which can cause
-     * perceivable overhead if you have many imports and only a few of them is used.
-     * 
-     * <p>
-     * This setting also affects {@linkplain #setAutoImports(Map) auto-imports}, unless you have set a non-{@code null}
-     * value just for that via {@link #setLazyAutoImports(Boolean)}.
-     * 
-     * @see #setLazyAutoImports(Boolean)
-     * 
-     * @since 2.3.25
-     */
-    public void setLazyImports(boolean importsLazy) {
-        this.lazyImpots = importsLazy;
-    }
-
-    /**
-     * The getter pair of {@link #setLazyAutoImports(Boolean)}.
-     * 
-     * @since 2.3.25
-     */
-    public Boolean getLazyAutoImports() {
-        return lazyAutoImport;
-    }
-
-    /**
-     * Specifies if {@linkplain #setAutoImports(Map) auto-imports} will be
-     * {@link #setLazyImports(boolean) lazy imports}. This is useful to make the overhead of <em>unused</em>
-     * auto-imports negligible. If this is set to {@code null}, {@link #getLazyImports()} specifies the behavior of
-     * auto-imports too. The default value is {@code null}.
-     * 
-     * @since 2.3.25
-     */
-    public void setLazyAutoImports(Boolean autoImportsLazy) {
-        this.lazyAutoImport = autoImportsLazy;
+        
+        if (tAutoIncludes != null) {
+            for (String templateName : tAutoIncludes) {
+                if (envAutoIncludes == null || !envAutoIncludes.contains(templateName)) {
+                    env.include(getTemplate(templateName, env.getLocale()));
+                }
+            }
+        }
+        
+        if (envAutoIncludes != null) {
+            for (String templateName : envAutoIncludes) {
+                env.include(getTemplate(templateName, env.getLocale()));
+            }
+        }
     }
 
     /**

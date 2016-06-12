@@ -25,7 +25,7 @@ import freemarker.ext.beans.BeansWrapperConfiguration;
  * Holds {@link DefaultObjectWrapper} configuration settings and defines their defaults.
  * You will not use this abstract class directly, but concrete subclasses like {@link DefaultObjectWrapperBuilder}.
  * Unless, you are developing a builder for a custom {@link DefaultObjectWrapper} subclass. In that case, note that
- * overriding the {@link #equals} and {@link #hashCode} is important, as these object are used as {@link ObjectWrapper}
+ * overriding the {@link #equals} and {@link #hashCode} is important, as these objects are used as {@link ObjectWrapper}
  * singleton lookup keys.
  * 
  * @since 2.3.22
@@ -34,6 +34,7 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
     
     private boolean useAdaptersForContainers;
     private boolean forceLegacyNonListCollections;
+    private boolean iterableSupport;
 
     protected DefaultObjectWrapperConfiguration(Version incompatibleImprovements) {
         super(DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements), true);
@@ -60,6 +61,24 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
     public void setForceLegacyNonListCollections(boolean legacyNonListCollectionWrapping) {
         this.forceLegacyNonListCollections = legacyNonListCollectionWrapping;
     }
+
+    /**
+     * See {@link DefaultObjectWrapper#getIterableSupport()}.
+     * 
+     * @since 2.3.25 
+     */
+    public boolean getIterableSupport() {
+        return iterableSupport;
+    }
+
+    /**
+     * See {@link DefaultObjectWrapper#setIterableSupport(boolean)}.
+     * 
+     * @since 2.3.25 
+     */
+    public void setIterableSupport(boolean iterableSupport) {
+        this.iterableSupport = iterableSupport;
+    }
     
     @Override
     public int hashCode() {
@@ -67,6 +86,7 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
         final int prime = 31;
         result = result * prime + (useAdaptersForContainers ? 1231 : 1237);
         result = result * prime + (forceLegacyNonListCollections ? 1231 : 1237);
+        result = result * prime + (iterableSupport ? 1231 : 1237);
         return result;
     }
 
@@ -75,7 +95,8 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
         if (!super.equals(that)) return false;
         final DefaultObjectWrapperConfiguration thatDowCfg = (DefaultObjectWrapperConfiguration) that;
         return useAdaptersForContainers == thatDowCfg.getUseAdaptersForContainers()
-                && forceLegacyNonListCollections == thatDowCfg.forceLegacyNonListCollections;
+                && forceLegacyNonListCollections == thatDowCfg.forceLegacyNonListCollections
+                && iterableSupport == thatDowCfg.iterableSupport;
     }
 
 }

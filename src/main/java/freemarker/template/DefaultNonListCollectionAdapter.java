@@ -75,7 +75,7 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
     }
 
     public TemplateModelIterator iterator() throws TemplateModelException {
-        return new IteratorAdapter(collection.iterator());
+        return new DefaultUnassignableIteratorAdapter(collection.iterator(), getObjectWrapper());
     }
 
     public int size() {
@@ -92,28 +92,6 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
 
     public Object getAdaptedObject(Class hint) {
         return getWrappedObject();
-    }
-
-    private class IteratorAdapter implements TemplateModelIterator {
-
-        private final Iterator iterator;
-
-        IteratorAdapter(Iterator iterator) {
-            this.iterator = iterator;
-        }
-
-        public TemplateModel next() throws TemplateModelException {
-            if (!iterator.hasNext()) {
-                throw new TemplateModelException("The collection has no more items.");
-            }
-
-            Object value = iterator.next();
-            return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
-        }
-
-        public boolean hasNext() throws TemplateModelException {
-            return iterator.hasNext();
-        }
     }
 
     public boolean contains(TemplateModel item) throws TemplateModelException {

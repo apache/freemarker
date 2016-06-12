@@ -133,6 +133,13 @@
    <testCase name="list-bis[#endTN]-collectionAdapter" expected="list-bis.txt">
       <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
    </testCase>
+   <testCase name="listhash" />
+   <testCase name="listhashliteral[#endTN]-ici-2.3.20">
+      <setting incompatible_improvements="min, 2.3.20" /> 
+   </testCase>
+   <testCase name="listhashliteral[#endTN]-ici-2.3.21">
+      <setting incompatible_improvements="2.3.21, max" /> 
+   </testCase>
    <testCase name="listliteral" />
    <testCase name="localization" >
       <setting locale="en_AU"/>
