@@ -26557,9 +26557,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_25">
         <title>2.3.25 (incubating at Apache)</title>
 
-        <para>Release date: 2016-06-12 + voting process (around 2 week)</para>
+        <para>Release date: 2016-06-14 + voting process (around 2
+        weeks)</para>
 
-        <para>This is a sable, final release. The <quote>incubating</quote>
+        <para>This is a stable, final release. The <quote>incubating</quote>
         suffix is required by the Apache Software Foundation until the project
         becomes a fully accepted (graduated) Apache project.</para>
 
@@ -26573,8 +26574,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               directive</link> to support listing hashes (such as
               <literal>Map</literal>-s), like <literal>&lt;#list map as k,
               v&gt;${k}: ${v}&lt;/#list&gt;</literal>, where
-              <literal>k</literal> and <literal>v</literal> is key-value
-              pair.</para>
+              <literal>k</literal> and <literal>v</literal> is the key and
+              value in the key-value pairs of the hash.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -26585,7 +26586,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>Added the <literal>TemplateModelHashEx2</literal>
-              interface which extends <literal>TemplateModelHashEx</literal>
+              interface that extends <literal>TemplateModelHashEx</literal>
               with a method for listing the content of the key-value pairs of
               the hash. (This is utilized by the new hash listing capability
               of the <link
@@ -26617,9 +26618,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>It's now possible to set the
-              <literal>auto_imports</literal> and
-              <literal>auto_includes</literal> settings on a per template
-              basis (like templates with a certain name pattern has different
+              <literal>auto_import</literal> and
+              <literal>auto_include</literal> settings on a per template basis
+              (like templates with a certain name pattern has different
               auto-imports). This is now possible as these settings were moved
               from the <literal>Configuration</literal> level down to the more
               generic <literal>Configurable</literal> level, and so are
@@ -26640,8 +26641,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Added new setting to
               <literal>DefaultObjectWrapper</literal> (and to
               <literal>DefaultObjectWrapperBuilder</literal>):
-              <literal>iterableSupport</literal>. This is to fix the issue
-              when you couldn't use <literal>#list</literal> (or
+              <literal>iterableSupport</literal>. This fixes the issue when
+              you couldn't use <literal>#list</literal> (or
               <literal>?has_next</literal>, etc.) on a value that only
               implements Java 5 <literal>java.lang.Iterable</literal> (not to
               be confused with <literal>Iterator</literal>), but not
@@ -26653,7 +26654,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Iterable</literal> object won't be seen as a generic
               Java object by FreeMarker anymore, and thus just like with
               <literal>Collection</literal>-s, its API won't be exposed to the
-              templates.</para>
+              templates (except through <literal>?api</literal>, of
+              course).</para>
             </listitem>
 
             <listitem>
@@ -26662,7 +26664,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               and
               <literal>Configurable.getCustomDateFormatsWithoutFallback</literal>
               methods to make it easier for custom code to investigate the
-              <literal>Map</literal> hierarchy.</para>
+              custom formal setting <literal>Map</literal> hierarchy.</para>
             </listitem>
 
             <listitem>
@@ -26732,7 +26734,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Release date: 2016-03-28</para>
 
-        <para>This is a sable, final release. The <quote>incubating</quote>
+        <para>This is a stable, final release. The <quote>incubating</quote>
         suffix is required by the Apache Software Foundation until the project
         becomes a fully accepted (graduated) Apache project. See disclaimer
         below.</para>
