@@ -688,7 +688,7 @@
     
     <mkdir dir="${dist.src.dir}" />
 
-    <!-- Copy txt-s -->
+    <!-- Copy extensionless files: -->
     <copy todir="${dist.src.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <include name="README" />
