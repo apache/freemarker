@@ -188,11 +188,13 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
         SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", true);
         SETTING_ASSIGNMENTS.put("tabSize", 1);
+        SETTING_ASSIGNMENTS.put("lazyImports", Boolean.TRUE);
+        SETTING_ASSIGNMENTS.put("lazyAutoImports", Boolean.FALSE);
+        SETTING_ASSIGNMENTS.put("autoImports", ImmutableMap.of("a", "/lib/a.ftl"));
+        SETTING_ASSIGNMENTS.put("autoIncludes", ImmutableList.of("/lib/b.ftl"));
         
         // Special settings:
         SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
-        SETTING_ASSIGNMENTS.put("autoImports", ImmutableMap.of("a", "/lib/a.ftl"));
-        SETTING_ASSIGNMENTS.put("autoIncludes", ImmutableList.of("/lib/b.ftl"));
     }
     
     public static String getIsSetMethodName(String readMethodName) {

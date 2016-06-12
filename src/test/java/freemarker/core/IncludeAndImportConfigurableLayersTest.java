@@ -13,7 +13,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.test.TemplateTest;
 
-public class AutoImportAndIncludeTest extends TemplateTest {
+public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
 
     @Test
     public void test3LayerImportNoClashes() throws Exception {
@@ -236,6 +236,64 @@ public class AutoImportAndIncludeTest extends TemplateTest {
     
             env.process();
             assertEquals("T2;T3;T1;In main: t2;t3;t1;", sw.toString());
+        }
+    }
+    
+    @Test
+    public void test3LayerLazyness() throws Exception {
+        for (Class<?> layer : new Class<?>[] { Configuration.class, Template.class, Environment.class }) {
+            test3LayerLazyness(layer, null, null, false, "t1;t2;");
+            test3LayerLazyness(layer, null, null, true, "t1;t2;");
+            test3LayerLazyness(layer, null, false, true, "t1;t2;");
+            test3LayerLazyness(layer, null, true, true, "t2;");
+            
+            test3LayerLazyness(layer, false, null, false, "t1;t2;");
+            test3LayerLazyness(layer, false, null, true, "t1;t2;");
+            test3LayerLazyness(layer, false, false, true, "t1;t2;");
+            test3LayerLazyness(layer, false, true, true, "t2;");
+
+            test3LayerLazyness(layer, true, null, false, "");
+            test3LayerLazyness(layer, true, null, true, "");
+            test3LayerLazyness(layer, true, false, true, "t1;");
+            test3LayerLazyness(layer, true, true, true, "");
+        }
+    }
+    
+    private void test3LayerLazyness(
+            Class<?> layer,
+            Boolean lazyImports,
+            Boolean lazyAutoImports, boolean setLazyAutoImports,
+            String expectedOutput)
+            throws Exception {
+        dropConfiguration();
+        Configuration cfg = getConfiguration();
+        cfg.addAutoImport("t1", "t1.ftl");
+        Template t = new Template(null, "<#import 't2.ftl' as t2>${loaded!}", cfg);
+
+        StringWriter sw = new StringWriter();
+        Environment env = t.createProcessingEnvironment(null, sw);
+        
+        if (layer == Configuration.class) {
+            setLazynessOfConfigurable(cfg, lazyImports, lazyAutoImports, setLazyAutoImports);
+        } else if (layer == Template.class) {
+            setLazynessOfConfigurable(t, lazyImports, lazyAutoImports, setLazyAutoImports);
+        } else if (layer == Environment.class) {
+            setLazynessOfConfigurable(env, lazyImports, lazyAutoImports, setLazyAutoImports);
+        } else {
+            throw new IllegalArgumentException();
+        }
+        
+        env.process();
+        assertEquals(expectedOutput, sw.toString());
+    }
+
+    private void setLazynessOfConfigurable(Configurable cfg, Boolean lazyImports, Boolean lazyAutoImports,
+            boolean setLazyAutoImports) {
+        if (lazyImports != null) {
+            cfg.setLazyImports(lazyImports);
+        }
+        if (setLazyAutoImports) {
+            cfg.setLazyAutoImports(lazyAutoImports);
         }
     }
     

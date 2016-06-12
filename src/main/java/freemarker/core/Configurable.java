@@ -80,6 +80,7 @@ import freemarker.template.utility.StringUtil;
 public class Configurable {
     static final String C_TRUE_FALSE = "true,false";
     
+    private static final String NULL = "null";
     private static final String DEFAULT = "default";
     private static final String DEFAULT_2_3_0 = "default_2_3_0";
     private static final String JVM_DEFAULT = "JVM default";
@@ -239,6 +240,20 @@ public class Configurable {
     public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE;
 
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
+    public static final String LAZY_IMPORTS_KEY_SNAKE_CASE = "lazy_imports";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
+    public static final String LAZY_IMPORTS_KEY_CAMEL_CASE = "lazyImports";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String LAZY_IMPORTS_KEY = LAZY_IMPORTS_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
+    public static final String LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE = "lazy_auto_imports";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
+    public static final String LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE = "lazyAutoImports";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String LAZY_AUTO_IMPORTS_KEY = LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
     public static final String AUTO_IMPORT_KEY_SNAKE_CASE = "auto_import";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
     public static final String AUTO_IMPORT_KEY_CAMEL_CASE = "autoImport";
@@ -269,6 +284,8 @@ public class Configurable {
         CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
         DATE_FORMAT_KEY_SNAKE_CASE,
         DATETIME_FORMAT_KEY_SNAKE_CASE,
+        LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE,
+        LAZY_IMPORTS_KEY_SNAKE_CASE,
         LOCALE_KEY_SNAKE_CASE,
         LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
@@ -297,6 +314,8 @@ public class Configurable {
         CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
         DATE_FORMAT_KEY_CAMEL_CASE,
         DATETIME_FORMAT_KEY_CAMEL_CASE,
+        LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE,
+        LAZY_IMPORTS_KEY_CAMEL_CASE,
         LOCALE_KEY_CAMEL_CASE,
         LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
@@ -344,6 +363,9 @@ public class Configurable {
     private Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats;
     private LinkedHashMap<String, String> autoImports;
     private ArrayList<String> autoIncludes;
+    private Boolean lazyImports;
+    private Boolean lazyAutoImports;
+    private boolean lazyAutoImportsSet;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -425,6 +447,9 @@ public class Configurable {
         
         customDateFormats = Collections.emptyMap();
         customNumberFormats = Collections.emptyMap();
+        
+        lazyImports = false;
+        lazyAutoImportsSet = true;
         
         initAutoImportsMap();
         initAutoIncludesList();
@@ -1612,6 +1637,81 @@ public class Configurable {
     }
     
     /**
+     * The getter pair of {@link #setLazyImports(boolean)}.
+     * 
+     * @since 2.3.25
+     */
+    public boolean getLazyImports() {
+        return lazyImports != null ? lazyImports.booleanValue() : parent.getLazyImports();
+    }
+    
+    /**
+     * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
+     * and processing of the imported templates until the content of the imported namespace is actually accessed. This
+     * makes the overhead of <em>unused</em> imports negligible. A drawback is that importing a missing or otherwise
+     * broken template will be successful, and the problem will remain hidden until (and if) the namespace content is
+     * actually used. Also, you lose the strict control over when the namespace initializing code in the imported
+     * template will be executed, though it shouldn't mater for well written imported templates anyway. Note that the
+     * namespace initializing code will run with the same {@linkplain Configurable#getLocale() locale} as it was at the
+     * point of the {@code <#import ...>} call (other settings won't be handled specially like that).
+     * 
+     * <p>
+     * The default is {@code false} (and thus imports are eager) for backward compatibility, which can cause
+     * perceivable overhead if you have many imports and only a few of them is used.
+     * 
+     * <p>
+     * This setting also affects {@linkplain #setAutoImports(Map) auto-imports}, unless you have set a non-{@code null}
+     * value with {@link #setLazyAutoImports(Boolean)}.
+     * 
+     * @see #setLazyAutoImports(Boolean)
+     * 
+     * @since 2.3.25
+     */
+    public void setLazyImports(boolean lazyImports) {
+        this.lazyImports = Boolean.valueOf(lazyImports);
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.25
+     */
+    public boolean isLazyImportsSet() {
+        return lazyImports != null;
+    }
+    
+    /**
+     * The getter pair of {@link #setLazyAutoImports(Boolean)}.
+     * 
+     * @since 2.3.25
+     */
+    public Boolean getLazyAutoImports() {
+        return lazyAutoImportsSet ? lazyAutoImports : parent.getLazyAutoImports();
+    }
+
+    /**
+     * Specifies if {@linkplain #setAutoImports(Map) auto-imports} will be
+     * {@link #setLazyImports(boolean) lazy imports}. This is useful to make the overhead of <em>unused</em>
+     * auto-imports negligible. If this is set to {@code null}, {@link #getLazyImports()} specifies the behavior of
+     * auto-imports too. The default value is {@code null}.
+     * 
+     * @since 2.3.25
+     */
+    public void setLazyAutoImports(Boolean lazyAutoImports) {
+        this.lazyAutoImports = lazyAutoImports;
+        lazyAutoImportsSet = true;
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.25
+     */
+    public boolean isLazyAutoImportsSet() {
+        return lazyAutoImportsSet;
+    }
+    
+    /**
      * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of the
      * main template (that's the top-level template that wasn't included/imported from another template). While it only
      * affects the main template directly, as the imports will create a global variable there, the imports will be
@@ -1981,6 +2081,26 @@ public class Configurable {
      *       Since 2.3.17.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
      *       
+     *   <li><p>{@code "auto_import"}:
+     *       See {@link Configuration#setAutoImports(Map)}
+     *       <br>String value is something like:
+     *       <br>{@code /lib/form.ftl as f, /lib/widget as w, "/lib/odd name.ftl" as odd}
+     *       
+     *   <li><p>{@code "auto_include"}: Sets the list of auto-includes.
+     *       See {@link Configuration#setAutoIncludes(List)}
+     *       <br>String value is something like:
+     *       <br>{@code /include/common.ftl, "/include/evil name.ftl"}
+     *       
+     *   <li><p>{@code "lazy_auto_imports"}:
+     *       See {@link Configuration#setLazyAutoImports(Boolean)}.
+     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
+     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive. Also can be {@code "null"}.
+
+     *   <li><p>{@code "lazy_imports"}:
+     *       See {@link Configuration#setLazyImports(boolean)}.
+     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
+     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive.
+     *       
      *   <li><p>{@code "new_builtin_class_resolver"}:
      *       See {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
      *       Since 2.3.17.
@@ -2057,26 +2177,6 @@ public class Configurable {
      *       {@code "enable_if_supported"} or {@code "enableIfSupported"} for
      *       {@link Configuration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}
      *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING_POLICY}.
-     *       
-     *   <li><p>{@code "auto_import"}:
-     *       See {@link Configuration#setAutoImports(Map)}
-     *       <br>String value is something like:
-     *       <br>{@code /lib/form.ftl as f, /lib/widget as w, "/lib/odd name.ftl" as odd}
-     *       
-     *   <li><p>{@code "auto_include"}: Sets the list of auto-includes.
-     *       See {@link Configuration#setAutoIncludes(List)}
-     *       <br>String value is something like:
-     *       <br>{@code /include/common.ftl, "/include/evil name.ftl"}
-     *       
-     *   <li><p>{@code "lazy_auto_imports"}:
-     *       See {@link Configuration#setLazyAutoImports(Boolean)}.
-     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
-     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive. Also can be {@code "null"}.
-
-     *   <li><p>{@code "lazy_imports"}:
-     *       See {@link Configuration#setLazyImports(boolean)}.
-     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
-     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive.
      *       
      *   <li><p>{@code "default_encoding"}:
      *       See {@link Configuration#setDefaultEncoding(String)}.
@@ -2441,6 +2541,10 @@ public class Configurable {
             } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
                     || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
                 setLogTemplateExceptions(StringUtil.getYesNo(value));
+            } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
+                setLazyAutoImports(value.equals(NULL) ? null : Boolean.valueOf(StringUtil.getYesNo(value)));
+            } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
+                setLazyImports(StringUtil.getYesNo(value));
             } else if (AUTO_INCLUDE_KEY_SNAKE_CASE.equals(name)
                     || AUTO_INCLUDE_KEY_CAMEL_CASE.equals(name)) {
                 setAutoIncludes(parseAsList(value));

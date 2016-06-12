@@ -244,6 +244,12 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isTabSizeSet()) {
             setTabSize(tc.getTabSize());
         }
+        if (tc.isLazyImportsSet()) {
+            setLazyImports(tc.getLazyImports());
+        }
+        if (tc.isLazyAutoImportsSet()) {
+            setLazyAutoImports(tc.getLazyAutoImports());
+        }
         if (tc.isAutoImportsSet()) {
             setAutoImports(mergeMaps(getAutoImports(), tc.getAutoImports(), true));
         }
@@ -347,6 +353,12 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isURLEscapingCharsetSet() && !template.isURLEscapingCharsetSet()) {
             template.setURLEscapingCharset(getURLEscapingCharset());
+        }
+        if (isLazyImportsSet() && !template.isLazyImportsSet()) {
+            template.setLazyImports(getLazyImports());
+        }
+        if (isLazyAutoImportsSet() && !template.isLazyAutoImportsSet()) {
+            template.setLazyAutoImports(getLazyAutoImports());
         }
         if (isAutoImportsSet()) {
             // Regarding the order of the maps in the merge:
@@ -608,6 +620,8 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isCustomNumberFormatsSet()
                 || isDateFormatSet()
                 || isDateTimeFormatSet()
+                || isLazyImportsSet()
+                || isLazyAutoImportsSet()
                 || isLocaleSet()
                 || isLogTemplateExceptionsSet()
                 || isNewBuiltinClassResolverSet()

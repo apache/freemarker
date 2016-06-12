@@ -69,6 +69,10 @@ public abstract class TemplateTest {
         this.configuration = configuration;
     }
 
+    protected final void dropConfiguration() {
+        configuration = null;
+    }
+    
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
         assertOutput(createTemplate(ftl), expectedOut, false);
     }

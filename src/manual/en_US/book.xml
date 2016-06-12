@@ -26593,21 +26593,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Lazy imports: With the new boolean
-              <literal>Configuration</literal>-level settings,
+              <para>Lazy imports: With the new boolean settings,
               <literal>lazy_imports</literal> and
-              <literal>lazy_auto_imports</literal>, you can request imports
-              (as in <literal>&lt;#import "lib/utils.ftl" as u&gt;</literal>)
+              <literal>lazy_auto_imports</literal>, you can make imports (as
+              in <literal>&lt;#import "lib/utils.ftl" as u&gt;</literal>)
               and/or auto-imports to be lazy. When the import is lazy, the
               namespace variable (<literal>u</literal> in this example) will
-              be created immediately, just like before, but the template will
-              be imported and processed only when (and if ever) the content of
-              the imported namespace is accessed. The main application of this
-              is with auto-imports, where you don't want the overhead of
-              importing templates that aren't actually used in a template.
-              (Also, a new <literal>Environment.importLib</literal> method
-              overload was added, where you can specify if you want a lazy or
-              an eager import.)</para>
+              be created immediately, just like before, but the imported
+              template will be loaded and processed only when (and if ever)
+              the content of the imported namespace is accessed. The main
+              application of this is with auto-imports, where you don't want
+              the overhead of importing templates that aren't actually used in
+              a template. (Also, a new
+              <literal>Environment.importLib</literal> method overload was
+              added, where you can specify if you want a lazy or an eager
+              import.) These new settings can be set on
+              <literal>Configuration</literal>, <literal>Template</literal>
+              (<literal>TemplateConfiguration</literal>) and
+              <literal>Environment</literal> level.</para>
             </listitem>
 
             <listitem>
@@ -26618,7 +26621,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               auto-imports). This is now possible as these settings were moved
               from the <literal>Configuration</literal> level down to the more
               generic <literal>Configurable</literal> level, and so are
-              inherited by <literal>TemplateConfigurer</literal> and
+              inherited by <literal>TemplateConfiguration</literal> and
               <literal>Environment</literal> too.</para>
             </listitem>
 

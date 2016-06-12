@@ -245,20 +245,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
 
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_IMPORTS_KEY_SNAKE_CASE = "lazy_imports";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_IMPORTS_KEY_CAMEL_CASE = "lazyImports";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LAZY_IMPORTS_KEY = LAZY_IMPORTS_KEY_SNAKE_CASE;
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE = "lazy_auto_imports";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
-    public static final String LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE = "lazyAutoImports";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LAZY_AUTO_IMPORTS_KEY = LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE;
-    
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TAG_SYNTAX_KEY_SNAKE_CASE = "tag_syntax";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -328,8 +314,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         CACHE_STORAGE_KEY_SNAKE_CASE,
         DEFAULT_ENCODING_KEY_SNAKE_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
-        LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE,
-        LAZY_IMPORTS_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
@@ -352,8 +336,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         CACHE_STORAGE_KEY_CAMEL_CASE,
         DEFAULT_ENCODING_KEY_CAMEL_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
-        LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE,
-        LAZY_IMPORTS_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
@@ -538,9 +520,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
-    private boolean lazyImpots;
-    private Boolean lazyAutoImports;
-
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
      *     {@link Configuration#setIncompatibleImprovements(Version)} (or
@@ -2955,10 +2934,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     valueWithoutUnit = value;
                 }
                 setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multipier);
-            } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
-                setLazyAutoImports(value.equals(NULL) ? null : Boolean.valueOf(StringUtil.getYesNo(value)));
-            } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
-                setLazyImports(StringUtil.getYesNo(value));
             } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);
@@ -3081,7 +3056,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         Map<String, String> envAutoImports = env.getAutoImportsWithoutFallback();
         Map<String, String> tAutoImports = t.getAutoImportsWithoutFallback();
         
-        boolean lazyAutoImports = getLazyAutoImports() != null ? getLazyAutoImports().booleanValue() : getLazyImports();
+        boolean lazyAutoImports = env.getLazyAutoImports() != null ? env.getLazyAutoImports().booleanValue()
+                : env.getLazyImports();
         
         for (Map.Entry<String, String> autoImport : getAutoImportsWithoutFallback().entrySet()) {
             String nsVarName = autoImport.getKey();
@@ -3135,62 +3111,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 env.include(getTemplate(templateName, env.getLocale()));
             }
         }
-    }
-
-    /**
-     * The getter pair of {@link #setLazyImports(boolean)}.
-     * 
-     * @since 2.3.25
-     */
-    public boolean getLazyImports() {
-        return lazyImpots;
-    }
-
-    /**
-     * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
-     * and processing of the imported templates until the content of the imported namespace is actually accessed. This
-     * makes the overhead of <em>unused</em> imports negligible. A drawback is that importing a missing or otherwise
-     * broken template will be successful, and the problem will remain hidden until (and if) the namespace content is
-     * actually used. Also, you lose the strict control over when the namespace initializing code in the imported
-     * template will be executed, though it shouldn't mater for well written imported templates anyway. Note that the
-     * namespace initializing code will run with the same {@linkplain Configurable#getLocale() locale} as it was at the
-     * point of the {@code <#import ...>} call (other settings won't be handled specially like that).
-     * 
-     * <p>
-     * The default is {@code false} (and thus imports are eager) for backward compatibility, which can cause
-     * perceivable overhead if you have many imports and only a few of them is used.
-     * 
-     * <p>
-     * This setting also affects {@linkplain #setAutoImports(Map) auto-imports}, unless you have set a non-{@code null}
-     * value just for that via {@link #setLazyAutoImports(Boolean)}.
-     * 
-     * @see #setLazyAutoImports(Boolean)
-     * 
-     * @since 2.3.25
-     */
-    public void setLazyImports(boolean lazyImports) {
-        this.lazyImpots = lazyImports;
-    }
-
-    /**
-     * The getter pair of {@link #setLazyAutoImports(Boolean)}.
-     * 
-     * @since 2.3.25
-     */
-    public Boolean getLazyAutoImports() {
-        return lazyAutoImports;
-    }
-
-    /**
-     * Specifies if {@linkplain #setAutoImports(Map) auto-imports} will be
-     * {@link #setLazyImports(boolean) lazy imports}. This is useful to make the overhead of <em>unused</em>
-     * auto-imports negligible. If this is set to {@code null}, {@link #getLazyImports()} specifies the behavior of
-     * auto-imports too. The default value is {@code null}.
-     * 
-     * @since 2.3.25
-     */
-    public void setLazyAutoImports(Boolean autoImportsLazy) {
-        this.lazyAutoImports = autoImportsLazy;
     }
 
     /**

@@ -1588,6 +1588,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 
         assertFalse(cfg.getLazyImports());
+        assertTrue(cfg.isLazyImportsSet());
         cfg.setSetting("lazy_imports", "true");
         assertTrue(cfg.getLazyImports());
         cfg.setSetting("lazyImports", "false");
@@ -1598,12 +1599,15 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 
         assertNull(cfg.getLazyAutoImports());
+        assertTrue(cfg.isLazyAutoImportsSet());
         cfg.setSetting("lazy_auto_imports", "true");
         assertEquals(Boolean.TRUE, cfg.getLazyAutoImports());
+        assertTrue(cfg.isLazyAutoImportsSet());
         cfg.setSetting("lazyAutoImports", "false");
         assertEquals(Boolean.FALSE, cfg.getLazyAutoImports());
         cfg.setSetting("lazyAutoImports", "null");
         assertNull(cfg.getLazyAutoImports());
+        assertTrue(cfg.isLazyAutoImportsSet());
     }
     
     @Test

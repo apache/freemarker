@@ -2525,7 +2525,7 @@ public final class Environment extends Configurable {
      * more intelligent error handling.
      * 
      * <p>
-     * If it will be a lazy or an eager import is decided by the value of {@link Configuration#getLazyImports()}. You
+     * If it will be a lazy or an eager import is decided by the value of {@link #getLazyImports()}. You
      * can also directly control that aspect by using {@link #importLib(String, String, boolean)} instead.
      *
      * @return Not {@code null}. This is possibly a lazily self-initializing namespace, which means that it will only
@@ -2537,7 +2537,7 @@ public final class Environment extends Configurable {
      */
     public Namespace importLib(String templateName, String targetNsVarName)
             throws IOException, TemplateException {
-        return importLib(templateName, targetNsVarName, configuration.getLazyImports());
+        return importLib(templateName, targetNsVarName, getLazyImports());
     }
 
     /**
@@ -2559,7 +2559,7 @@ public final class Environment extends Configurable {
 
     /**
      * Like {@link #importLib(String, String)}, but you can specify if you want a
-     * {@linkplain Configuration#setLazyImports(boolean) lazy import} or not.
+     * {@linkplain #setLazyImports(boolean) lazy import} or not.
      * 
      * @return Not {@code null}. This is possibly a lazily self-initializing namespace, which mean that it will only try
      *         to get and process the imported template when you access its content.
