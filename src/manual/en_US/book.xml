@@ -26574,7 +26574,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               directive</link> to support listing hashes (such as
               <literal>Map</literal>-s), like <literal>&lt;#list map as k,
               v&gt;${k}: ${v}&lt;/#list&gt;</literal>, where
-              <literal>k</literal> and <literal>v</literal> is the key and
+              <literal>k</literal> and <literal>v</literal> are the key and
               value in the key-value pairs of the hash.</para>
             </listitem>
           </itemizedlist>
@@ -26685,7 +26685,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-19">FREEMARKER-19</link>):
               The column numbers calculated by the parser has assumed tab size
               1 since 2.3.25 (an unwanted side effect of updating JavaCC),
-              while before it has assume tab size 8. The default was restored
+              while before it has assumed tab size 8. The default was restored
               to 8. This bug has affected the column numbers in error
               messages. It also broke the output of some rarely used AIP-s,
               namely <literal>Template.getSource(beginCol, beginLine, endCol,
