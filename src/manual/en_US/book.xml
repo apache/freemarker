@@ -26557,7 +26557,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_25">
         <title>2.3.25 (incubating at Apache)</title>
 
-        <para>Release date: 2016-06-14 + voting process (around 2
+        <para>Release date: 2016-06-14 + voting process (usually around 2
         weeks)</para>
 
         <para>This is a stable, final release. The <quote>incubating</quote>
@@ -26724,6 +26724,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               as they have caused warnings like this when compiling dependant
               project with Gradle: <quote>warning: Cannot find annotation
               method 'value()' in type 'SuppressFBWarnings'</quote></para>
+            </listitem>
+
+            <listitem>
+              <para>The Maven source artifact now contains the JavaCC
+              generated java files and <literal>FTL.jj</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>
