@@ -36,7 +36,7 @@ public class CommandLine {
         Version ver = Configuration.getVersion();
         
         System.out.println();
-        System.out.print("FreeMarker version ");
+        System.out.print("Apache FreeMarker version ");
         System.out.print(ver);
         
         /* If the version number doesn't already contain the build date and it's known, print it: */
@@ -56,13 +56,5 @@ public class CommandLine {
             System.out.print("Google App Engine complian variant: ");
             System.out.println(ver.isGAECompliant().booleanValue() ? "Yes" : "No");
         }
-        
-        System.out.println();
-        System.out.println("Copyright 2015 The Apache Software Foundation.");
-        System.out.println("Licensed under the Apache License, Version 2.0");
-        System.out.println();
-        System.out.println("For more information and for updates visit our Web site:");
-        System.out.println("http://freemarker.org/");
-        System.out.println();
     }
 }

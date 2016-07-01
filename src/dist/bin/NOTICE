@@ -36,11 +36,11 @@ The name, license, and attribution of each icon sets (fonts) used follows:
 
 ===========================================================================
 
-FreeMarker, both in its source code and binary form (freemarker.jar)
-includes files that were developed outside the FreeMarker project, and
-are licensed by the Apache Software Foundation under the Apache License,
-Version 2.0. This is the same license as the license of FreeMaker. These
-files in the binary distribution are:
+Apache FreeMarker, both in its source code and binary form (freemarker.jar)
+includes files that were developed outside the Apache FreeMarker project,
+and are licensed by the Apache Software Foundation under the Apache
+License, Version 2.0. This is the same license as the license of Apache
+FreeMarker. These files in the binary distribution are:
   
     freemarker.jar/freemarker/ext/jsp/web-app_2_2.dtd
     freemarker.jar/freemarker/ext/jsp/web-app_2_3.dtd
