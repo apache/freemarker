@@ -26558,8 +26558,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_25">
         <title>2.3.25 (incubating at Apache)</title>
 
-        <para>Release date: 2016-06-14 + voting process (usually around 2
-        weeks)</para>
+        <para>Release date: 2016-06-26</para>
 
         <para>This is a stable, final release. The <quote>incubating</quote>
         suffix is required by the Apache Software Foundation until the project
