@@ -5332,6 +5332,7 @@ other@example.com, other@example.com, other@example.com</programlisting>
                 <literal>&amp;</literal>, <literal>"</literal>,
                 <literal>'</literal> as <literal>&amp;lt;</literal>,
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;quot;</literal>,
                 <literal>&amp;#39;</literal></td>
 
                 <td><literal>text/html</literal></td>
@@ -5346,6 +5347,7 @@ other@example.com, other@example.com, other@example.com</programlisting>
                 <literal>&amp;</literal>, <literal>"</literal>,
                 <literal>'</literal> as <literal>&amp;lt;</literal>,
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;quot;</literal>,
                 <literal>&amp;#39;</literal></td>
 
                 <td><literal>application/xhtml+xml</literal></td>
@@ -5362,6 +5364,7 @@ other@example.com, other@example.com, other@example.com</programlisting>
                 <literal>&amp;</literal>, <literal>"</literal>,
                 <literal>'</literal> as <literal>&amp;lt;</literal>,
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;quot;</literal>,
                 <literal>&amp;apos;</literal></td>
 
                 <td><literal>application/xml</literal></td>
