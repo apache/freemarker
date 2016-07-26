@@ -7,9 +7,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -44,7 +44,7 @@
 
     <para>Templates are written in the FreeMarker Template Language (FTL).
     It's a simple, specialized language, <emphasis>not</emphasis> a full-blown
-    programming language like PHP. You meant to prepare the data to display in
+    programming language like PHP. You are meant to prepare the data to display in
     a real programming language, like issue database queries and do business
     calculations, and then the template displays that already prepared data.
     In the template you are focusing on how to present the data, and outside
@@ -220,21 +220,21 @@
   +- animals
   |   |
   |   +- mouse
-  |   |   |   
+  |   |   |
   |   |   +- size = "small"
-  |   |   |   
+  |   |   |
   |   |   +- price = 50
   |   |
   |   +- elephant
-  |   |   |   
+  |   |   |
   |   |   +- size = "large"
-  |   |   |   
+  |   |   |
   |   |   +- price = 5000
   |   |
   |   +- python
-  |       |   
+  |       |
   |       +- size = "medium"
-  |       |   
+  |       |
   |       +- price = 4999
   |
   +- message = "It is a test"
@@ -5867,7 +5867,7 @@ To prove that "s" didn't contain the value in escaped form:
 <phrase role="markedInvisibleText">[BR]</phrase>
   <phrase role="markedInvisibleText">[BR]</phrase>
 <phrase role="markedInvisibleText">[BR]</phrase>
-  <phrase role="markedInvisibleText">[BR]</phrase>  
+  <phrase role="markedInvisibleText">[BR]</phrase>
   &lt;li&gt;</phrase>Julia<phrase role="markedText"><phrase
               role="markedInvisibleText">[BR]</phrase>
   <phrase role="markedInvisibleText">[BR]</phrase>
@@ -6508,10 +6508,10 @@ import java.io.*;
 public class Test {
 
     public static void main(String[] args) throws Exception {
-        
-        /* ------------------------------------------------------------------------ */    
-        /* You should do this ONLY ONCE in the whole application life-cycle:        */    
-    
+
+        /* ------------------------------------------------------------------------ */
+        /* You should do this ONLY ONCE in the whole application life-cycle:        */
+
         /* Create and adjust the configuration singleton */
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
@@ -6519,8 +6519,8 @@ public class Test {
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
 
-        /* ------------------------------------------------------------------------ */    
-        /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
+        /* ------------------------------------------------------------------------ */
+        /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
 
         /* Create a data-model */
         Map root = new HashMap();
@@ -6966,7 +6966,7 @@ public class Product {
         the second string doesn't contains the first.</para>
 
         <programlisting role="unspecified">public class IndexOfMethod implements TemplateMethodModel {
-    
+
     public TemplateModel exec(List args) throws TemplateModelException {
         if (args.size() != 2) {
             throw new TemplateModelException("Wrong arguments");
@@ -7060,16 +7060,16 @@ import freemarker.template.TemplateModelException;
 /**
  *  FreeMarker user-defined directive that progressively transforms
  *  the output of its nested content to upper-case.
- *  
- *  
+ *
+ *
  *  &lt;p&gt;&lt;b&gt;Directive info&lt;/b&gt;&lt;/p&gt;
- * 
+ *
  *  &lt;p&gt;Directive parameters: None
  *  &lt;p&gt;Loop variables: None
  *  &lt;p&gt;Directive nested content: Yes
  */
 public class UpperDirective implements TemplateDirectiveModel {
-    
+
     public void execute(Environment env,
             Map params, TemplateModel[] loopVars,
             TemplateDirectiveBody body)
@@ -7083,7 +7083,7 @@ public class UpperDirective implements TemplateDirectiveModel {
                 throw new TemplateModelException(
                     "This directive doesn't allow loop variables.");
         }
-        
+
         // If there is non-empty nested content:
         if (body != null) {
             // Executes the nested body. Same as &lt;#nested&gt; in FTL, except
@@ -7093,15 +7093,15 @@ public class UpperDirective implements TemplateDirectiveModel {
             throw new RuntimeException("missing body");
         }
     }
-    
+
     /**
      * A {@link Writer} that transforms the character stream to upper case
      * and forwards it to another {@link Writer}.
-     */ 
+     */
     private static class UpperCaseFilterWriter extends Writer {
-       
+
         private final Writer out;
-           
+
         UpperCaseFilterWriter (Writer out) {
             this.out = out;
         }
@@ -7218,47 +7218,47 @@ import freemarker.template.TemplateNumberModel;
  * optionally with separating the output of the repetations with
  * &lt;tt&gt;&amp;lt;hr&gt;&lt;/tt&gt;-s.
  *
- * 
+ *
  * &lt;p&gt;&lt;b&gt;Directive info&lt;/b&gt;&lt;/p&gt;
- * 
+ *
  * &lt;p&gt;Parameters:
  * &lt;ul&gt;
  *   &lt;li&gt;&lt;code&gt;count&lt;/code&gt;: The number of repetations. Required!
  *       Must be a non-negative number. If it is not a whole number then it will
  *       be rounded &lt;em&gt;down&lt;/em&gt;.
  *   &lt;li&gt;&lt;code&gt;hr&lt;/code&gt;: Tells if a HTML "hr" element could be printed between
- *       repetations. Boolean. Optional, defaults to &lt;code&gt;false&lt;/code&gt;. 
+ *       repetations. Boolean. Optional, defaults to &lt;code&gt;false&lt;/code&gt;.
  * &lt;/ul&gt;
  *
  * &lt;p&gt;Loop variables: One, optional. It gives the number of the current
  *    repetation, starting from 1.
- * 
+ *
  * &lt;p&gt;Nested content: Yes
  */
 public class RepeatDirective implements TemplateDirectiveModel {
-    
+
     private static final String PARAM_NAME_COUNT = "count";
     private static final String PARAM_NAME_HR = "hr";
-    
+
     public void execute(Environment env,
             Map params, TemplateModel[] loopVars,
             TemplateDirectiveBody body)
             throws TemplateException, IOException {
-        
+
         // ---------------------------------------------------------------------
         // Processing the parameters:
-        
+
         int countParam = 0;
         boolean countParamSet = false;
         boolean hrParam = false;
-        
+
         Iterator paramIter = params.entrySet().iterator();
         while (paramIter.hasNext()) {
             Map.Entry ent = (Map.Entry) paramIter.next();
-            
+
             String paramName = (String) ent.getKey();
             TemplateModel paramValue = (TemplateModel) ent.getValue();
-            
+
             if (paramName.equals(PARAM_NAME_COUNT)) {
                 if (!(paramValue instanceof TemplateNumberModel)) {
                     throw new TemplateModelException(
@@ -7291,17 +7291,17 @@ public class RepeatDirective implements TemplateDirectiveModel {
                         "The required \"" + PARAM_NAME_COUNT + "\" paramter"
                         + "is missing.");
         }
-        
+
         if (loopVars.length &gt; 1) {
                 throw new TemplateModelException(
                         "At most one loop variable is allowed.");
         }
-        
+
         // Yeah, it was long and boring...
-        
+
         // ---------------------------------------------------------------------
         // Do the actual directive execution:
-        
+
         Writer out = env.getOut();
         if (body != null) {
             for (int i = 0; i &lt; countParam; i++) {
@@ -7310,12 +7310,12 @@ public class RepeatDirective implements TemplateDirectiveModel {
                 if (hrParam &amp;&amp; i != 0) {
                     out.write("&lt;hr&gt;");
                 }
-                
+
                 // Set the loop variable, if there is one:
                 if (loopVars.length &gt; 0) {
                     loopVars[0] = new SimpleNumber(i + 1);
                 }
-                
+
                 // Executes the nested body (same as &lt;#nested&gt; in FTL). In this
                 // case we don't provide a special writer as the parameter:
                 body.render(env.getOut());
@@ -7724,9 +7724,9 @@ public class Tupple&lt;E1, E2&gt; {
 
 public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
         AdapterTemplateModel {
-    
+
     private final Tupple&lt;?, ?&gt; tupple;
-    
+
     public TuppleAdapter(Tupple&lt;?, ?&gt; tupple, ObjectWrapper ow) {
         super(ow);  // coming from WrappingTemplateModel
         this.tupple = tupple;
@@ -7736,7 +7736,7 @@ public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequ
     public int size() throws TemplateModelException {
         return 2;
     }
-    
+
     @Override  // coming from TemplateSequenceModel
     public TemplateModel get(int index) throws TemplateModelException {
         switch (index) {
@@ -7750,7 +7750,7 @@ public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequ
     public Object getAdaptedObject(Class hint) {
         return tupple;
     }
-    
+
 }</programlisting>
 
           <para>Regarding the classes and interfaces:</para>
@@ -7792,16 +7792,16 @@ public class MyAppObjectWrapper extends DefaultObjectWrapper {
     public MyAppObjectWrapper(Version incompatibleImprovements) {
         super(incompatibleImprovements);
     }
-    
+
     @Override
     protected TemplateModel handleUnknownType(final Object obj) throws TemplateModelException {
         if (obj instanceof Tupple) {
             return new TuppleAdapter((Tupple&lt;?, ?&gt;) obj, this);
         }
-        
+
         return super.handleUnknownType(obj);
     }
-    
+
 }</programlisting>
 
           <para>and then where you configure FreeMarker (<link
@@ -8694,7 +8694,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
           <literal>TemplateExceptionHandler</literal> by implementing that
           interface, which contains this method:</para>
 
-          <programlisting role="unspecified">void handleTemplateException(TemplateException te, Environment env, Writer out) 
+          <programlisting role="unspecified">void handleTemplateException(TemplateException te, Environment env, Writer out)
         throws TemplateException;</programlisting>
 
           <para>Whenever a <literal>TemplateException</literal> occurs, this
@@ -9390,11 +9390,11 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
 
     public static final HexTemplateNumberFormatFactory INSTANCE
             = new HexTemplateNumberFormatFactory();
-    
+
     private HexTemplateNumberFormatFactory() {
         // Defined to decrease visibility
     }
-    
+
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
@@ -9405,9 +9405,9 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
     private static class HexTemplateNumberFormat extends TemplateNumberFormat {
 
         private static final HexTemplateNumberFormat INSTANCE = new HexTemplateNumberFormat();
-        
+
         private HexTemplateNumberFormat() { }
-        
+
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
@@ -9428,7 +9428,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         public String getDescription() {
             return "hexadecimal int";
         }
-        
+
     }
 
 }</programlisting>
@@ -9479,11 +9479,11 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
 
     public static final BaseNTemplateNumberFormatFactory INSTANCE
             = new BaseNTemplateNumberFormatFactory();
-    
+
     private BaseNTemplateNumberFormatFactory() {
         // Defined to decrease visibility
     }
-    
+
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
@@ -9505,7 +9505,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
                 fallbackFormat = null;
             }
         }
-        
+
         int base;
         try {
             base = Integer.parseInt(params);
@@ -9528,12 +9528,12 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
 
         private final int base;
         private final TemplateNumberFormat fallbackFormat;
-        
+
         private BaseNTemplateNumberFormat(int base, TemplateNumberFormat fallbackFormat) {
             this.base = base;
             this.fallbackFormat = fallbackFormat;
         }
-        
+
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
                 throws TemplateModelException, TemplateValueFormatException {
@@ -9560,7 +9560,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         public String getDescription() {
             return "base " + base;
         }
-        
+
     }
 
 }</programlisting>
@@ -9622,11 +9622,11 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
 
     public static final EpochMillisTemplateDateFormatFactory INSTANCE
             = new EpochMillisTemplateDateFormatFactory();
-    
+
     private EpochMillisTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
-    
+
     @Override
     public TemplateDateFormat get(String params, int dateType,
             Locale locale, TimeZone timeZone, boolean zonelessInput,
@@ -9640,9 +9640,9 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
 
         private static final EpochMillisTemplateDateFormat INSTANCE
                 = new EpochMillisTemplateDateFormat();
-        
+
         private EpochMillisTemplateDateFormat() { }
-        
+
         @Override
         public String formatToPlainText(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
@@ -9672,7 +9672,7 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         public String getDescription() {
             return "millis since the epoch";
         }
-        
+
     }
 
 }</programlisting>
@@ -9766,7 +9766,7 @@ public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
 
     private final Number value;
     private final String unit;
-    
+
     public UnitAwareTemplateNumberModel(Number value, String unit) {
         this.value = value;
         this.unit = unit;
@@ -11146,12 +11146,12 @@ TemplateHashModel roundingModeEnums =
           <programlisting role="unspecified">&lt;servlet&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   &lt;servlet-class&gt;<emphasis>freemarker.ext.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
-  
+
   &lt;!--
     Init-param documentation:
     <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
   --&gt;
-    
+
   &lt;!-- FreemarkerServlet settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;TemplatePath&lt;/param-name&gt;
@@ -11719,7 +11719,7 @@ ${bar?trim}</programlisting>
         your security policy file for
         <literal>freemarker.jar</literal>:</para>
 
-        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar" 
+        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar"
 {
   permission java.util.PropertyPermission "file.encoding", "read";
   permission java.util.PropertyPermission "freemarker.*", "read";
@@ -11729,7 +11729,7 @@ ${bar?trim}</programlisting>
         need to give FreeMarker permissions to read files from that directory
         using the following permission:</para>
 
-        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar" 
+        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar"
 {
   ...
   permission java.io.FilePermission "/path/to/templates/-", "read";
@@ -11743,7 +11743,7 @@ ${bar?trim}</programlisting>
         template)</para>
 
         <programlisting role="unspecified">
-grant codeBase "file:/path/to/freemarker.jar" 
+grant codeBase "file:/path/to/freemarker.jar"
 {
   ...
   permission java.util.PropertyPermission "user.dir", "read";
@@ -15130,16 +15130,16 @@ rif: foo XYr baar</programlisting>
 
           <para>Prints:</para>
 
-          <programlisting role="output">    0 ?floor=0 ?ceiling=0 ?round=0            
-    1 ?floor=1 ?ceiling=1 ?round=1        
-    -1 ?floor=-1 ?ceiling=-1 ?round=-1      
-    0.5 ?floor=0 ?ceiling=1 ?round=1      
-    1.5 ?floor=1 ?ceiling=2 ?round=2      
-    -0.5 ?floor=-1 ?ceiling=0 ?round=0     
-    -1.5 ?floor=-2 ?ceiling=-1 ?round=-1    
-    0.25 ?floor=0 ?ceiling=1 ?round=0     
-    -0.25 ?floor=-1 ?ceiling=0 ?round=0    
-    1.75 ?floor=1 ?ceiling=2 ?round=2     
+          <programlisting role="output">    0 ?floor=0 ?ceiling=0 ?round=0
+    1 ?floor=1 ?ceiling=1 ?round=1
+    -1 ?floor=-1 ?ceiling=-1 ?round=-1
+    0.5 ?floor=0 ?ceiling=1 ?round=1
+    1.5 ?floor=1 ?ceiling=2 ?round=2
+    -0.5 ?floor=-1 ?ceiling=0 ?round=0
+    -1.5 ?floor=-2 ?ceiling=-1 ?round=-1
+    0.25 ?floor=0 ?ceiling=1 ?round=0
+    -0.25 ?floor=-1 ?ceiling=0 ?round=0
+    1.75 ?floor=1 ?ceiling=2 ?round=2
     -1.75 ?floor=-2 ?ceiling=-1 ?round=-2</programlisting>
 
           <para>These built-ins may be useful in pagination operations and
@@ -16345,13 +16345,13 @@ N
           <para>The output will be:</para>
 
           <programlisting role="output">
-  a b c d 
-  e f g h 
-  i j 
+  a b c d
+  e f g h
+  i j
 
-  a b c d 
-  e f g h 
-  i j - - 
+  a b c d
+  e f g h
+  i j - -
  </programlisting>
 
           <para>This built in is mostly for outputting sequnces in
@@ -16752,14 +16752,14 @@ Order by weight:
     {"name": {"first": "Joe", "last": "Smith"}, "age": 40},
     {"name": {"first": "Fred", "last": "Crooger"}, "age": 35},
     {"name": {"first": "Amanda", "last": "Fox"}, "age": 25}]&gt;
-Sorted by name.last: 
+Sorted by name.last:
 &lt;#list members?sort_by(['name', 'last']) as m&gt;
 - ${m.name.last}, ${m.name.first}: ${m.age} years old
 &lt;/#list&gt;</programlisting>
 
           <para>will print (with US locale at least):</para>
 
-          <programlisting role="output">Sorted by name.last: 
+          <programlisting role="output">Sorted by name.last:
 - Crooger, Fred: 35 years old
 - Fox, Amanda: 25 years old
 - Smith, Joe: 40 years old</programlisting>
@@ -20948,7 +20948,7 @@ or
           parameters:</para>
 
           <programlisting role="template">&lt;#macro img src extra...&gt;
-  &lt;img src="/myapp${src?ensure_starts_with('/')}" 
+  &lt;img src="/myapp${src?ensure_starts_with('/')}"
     &lt;#list extra as attrName, attrVal&gt;
       ${attrName}="${attrVal}"
     &lt;/#list&gt;
@@ -22183,7 +22183,7 @@ or
 
           <programlisting role="metaTemplate">
 <literal>&lt;@<replaceable>user_def_dir_exp</replaceable> <replaceable>param1</replaceable>=<replaceable>val1</replaceable> <replaceable>param2</replaceable>=<replaceable>val2</replaceable> <replaceable>...</replaceable> <replaceable>paramN</replaceable>=<replaceable>valN</replaceable>/&gt;</literal>
-(Note the XML-style <literal>/</literal> before the <literal>&gt;</literal>)  
+(Note the XML-style <literal>/</literal> before the <literal>&gt;</literal>)
 or if you need loop variables (<link
               linkend="ref_directive_userDefined_loopVar">more details...</link>)
 <literal>&lt;@<replaceable>user_def_dir_exp</replaceable> <replaceable>param1</replaceable>=<replaceable>val1</replaceable> <replaceable>param2</replaceable>=<replaceable>val2</replaceable> <replaceable>...</replaceable> <replaceable>paramN</replaceable>=<replaceable>valN</replaceable> ; <replaceable>lv1</replaceable>, <replaceable>lv2</replaceable>, <replaceable>...</replaceable>, <replaceable>lvN</replaceable>/&gt;</literal>
@@ -22290,7 +22290,7 @@ Or all above but with positional parameter passing (<link
       &lt;li&gt;Elephant
       &lt;li&gt;Python
   &lt;/ul&gt;
-  
+
 <replaceable>...</replaceable></programlisting>
 
           <section xml:id="ref_directive_userDefined_entTag">
@@ -22615,7 +22615,7 @@ There was no specific handler for node ${node?node_name}
             <para>This would print:</para>
 
             <programlisting role="output">Handling node x
-  
+
 There was no specific handler for node y
 
  </programlisting>
@@ -23198,7 +23198,7 @@ There was no specific handler for node y
           <programlisting role="metaTemplate"><literal>&lt;#macro <replaceable>name</replaceable>(<replaceable>argName1</replaceable>, <replaceable>argName2</replaceable>, <replaceable>... argNameN</replaceable>)&gt;
   ...
 &lt;/#macro&gt;</literal>
- 
+
 <literal>&lt;#call <replaceable>name</replaceable>(<replaceable>argValue1</replaceable>, <replaceable>argValue2</replaceable>, <replaceable>... argValueN</replaceable>)&gt;</literal></programlisting>
 
           <para>Where:</para>
@@ -23705,19 +23705,19 @@ or
      |   |
      |   +- text "\n    "
      |   |
-     |   +- element para     
+     |   +- element para
      |   |   |
      |   |   +- text "p1.1"
      |   |
      |   +- text "\n    "
      |   |
-     |   +- element para     
+     |   +- element para
      |   |   |
      |   |   +- text "p1.2"
      |   |
      |   +- text "\n    "
      |   |
-     |   +- element para     
+     |   +- element para
      |      |
      |      +- text "p1.3"
      |
@@ -23731,13 +23731,13 @@ or
          |
          +- text "\n    "
          |
-         +- element para     
+         +- element para
          |   |
          |   +- text "p2.1"
          |
          +- text "\n    "
          |
-         +- element para     
+         +- element para
              |
              +- text "p2.2"</programlisting>
 
@@ -24957,25 +24957,25 @@ End book</programlisting>
     &lt;body&gt;
       &lt;h1&gt;Test Book&lt;/h1&gt;
 
-  
+
     &lt;h2&gt;Ch1&lt;/h2&gt;
 
-    
+
       &lt;p&gt;p1.1
 
       &lt;p&gt;p1.2
 
       &lt;p&gt;p1.3
 
-  
+
     &lt;h2&gt;Ch2&lt;/h2&gt;
 
-    
+
       &lt;p&gt;p2.1
 
       &lt;p&gt;p2.2
 
-  
+
     &lt;/body&gt;
   &lt;/html&gt;
 
@@ -26260,7 +26260,7 @@ End book</programlisting>
 
             <para>Example: Here I use UTF-8 charset in a servlet:</para>
 
-            <programlisting role="unspecified">...        
+            <programlisting role="unspecified">...
 resp.setContentType("text/html; charset=utf-8");
 Writer out = resp.getWriter();
 ...
@@ -37854,7 +37854,7 @@ FreeMarker, both in its source code and binary form (freemarker.jar)
 includes a number of files that are licensed by the Apache Software
 Foundation under the Apache License, Version 2.0. This is the same
 license as the license of FreeMaker. These files are:
-  
+
     freemarker/ext/jsp/web-app_2_2.dtd
     freemarker/ext/jsp/web-app_2_3.dtd
     freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
