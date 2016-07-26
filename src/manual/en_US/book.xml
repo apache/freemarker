@@ -419,8 +419,8 @@
         </itemizedlist>
 
         <para>Anything not an FTL tag or an interpolation or comment is
-        considered as static text, and will not be interpreted by FreeMarker;
-        it is just printed to the output as is.</para>
+        considered static text and will not be interpreted by FreeMarker;
+        it is just printed to the output as-is.</para>
 
         <para>With FTL tags you refer to so-called <emphasis
         role="term">directives</emphasis>. This is the same kind of
@@ -428,8 +428,8 @@
         <literal>&lt;table&gt;</literal> and
         <literal>&lt;/table&gt;</literal>) and HTML elements (e.g., the
         <literal>table</literal> element) to which you refer to with the HTML
-        tags. (If you don't feel this difference then just take "FTL tag" and
-        "directive" as synonyms.)</para>
+        tags. (If you don't understand this difference then consider "FTL tag" and
+        "directive" synonyms.)</para>
 
         <note>
           <para>You can easily try writing templates on <link
@@ -498,8 +498,8 @@
             <para>Similarly as earlier when a string was specified directly,
             here a number is specified directly (<literal>0</literal>). Note
             that the number is <emphasis>not</emphasis> quoted. If you quoted
-            it (<literal>"0"</literal>), FreeMarker were misinterpret it as a
-            string literal, and because the price to compare it to is number,
+            it (<literal>"0"</literal>), FreeMarker would misinterpret it as a
+            string literal, and because the price to compare it to is a number,
             you get an error.</para>
 
             <para>This will print "Pythons are not free today!" if their price
@@ -594,7 +594,7 @@
             <literal>&lt;/#list&gt;</literal> tags.</para>
 
             <para>The <literal><replaceable>sequence</replaceable></literal>
-            can be any kind of expression, like we could list the fruits of
+            can be any kind of expression. For example we could list the fruits of
             the example data model like this:</para>
 
             <programlisting role="template">&lt;ul&gt;
@@ -630,7 +630,7 @@
             case.</para>
 
             <para>Another frequent listing-related task: let's list the fruits
-            separating them with something, like comma:</para>
+            separating them with something, like a comma:</para>
 
             <programlisting role="template">&lt;p&gt;Fruits: &lt;#list misc.fruits as fruit&gt;${fruit}<emphasis>&lt;#sep&gt;, </emphasis>&lt;/#list&gt;</programlisting>
 
@@ -643,7 +643,7 @@
             there will be a next item. Hence there's no comma after the last
             fruit.</para>
 
-            <para>Here again, what's if we have 0 fruits? Just printing
+            <para>Here again, what if we have 0 fruits? Just printing
             <quote>Fruits:</quote> and then nothing is awkward. A
             <literal>list</literal>, just like an <literal>if</literal>, can
             have an <literal>else</literal>, which is executed if there were 0
