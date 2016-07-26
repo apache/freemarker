@@ -759,18 +759,18 @@ All Rights Reserved.
 
           <para>Note that since FreeMarker does not interpret text outside FTL
           tags, interpolations and FTL comments, above you could use the FTL
-          tags inside a HTML attributes without problem.</para>
+          tags inside HTML attributes without problem.</para>
         </section>
 
         <section>
           <title>Using built-ins</title>
 
-          <para>The so called built-ins are like subvariables (or rather like
-          methods, if you know that Java term) that aren't coming coming from
-          the data-model, but added by FreeMarker to the values. To make it
-          unambiguous where the subvarable comes from, to access them you have
+          <para>The so-called built-ins are like subvariables (or rather like
+          methods, if you know that Java term) that aren't coming from
+          the data-model, but added by FreeMarker to the values. In order to make it
+          clear where subvariables comes from, you have
           to use <literal>?</literal> (question mark) instead of
-          <literal>.</literal> (dot). <anchor
+          <literal>.</literal> (dot) to access them. <anchor
           xml:id="topic.commonlyUsedBuiltIns"/>Examples with some of the most
           commonly used built-ins:</para>
 
@@ -875,17 +875,17 @@ All Rights Reserved.
 
           <para>The data-model often has variables that are optional (i.e.,
           sometimes missing). To spot some typical human mistakes, FreeMarker
-          doesn't tolerate the referring to missing variables, unless you tell
+          doesn't tolerate references to missing variables unless you tell
           explicitly what to do if the variable is missing. Here we will show
           the two most typical ways of doing that.</para>
 
           <para><phrase role="forProgrammers">Note for programmers: A
           non-existent variable and a variable with <literal>null</literal>
-          value is the same for FreeMarker, so the "missing" term used here
+          value is the same for FreeMarker. The "missing" term used here
           covers both cases.</phrase></para>
 
           <para>Wherever you refer to a variable, you can specify a default
-          value for the case the variable is missing, by following the
+          value for the case the variable is missing by following the
           variable name with a <literal>!</literal> and the default value.
           Like in the following example, when <literal>user</literal> is
           missing from data model, the template will behave like if
