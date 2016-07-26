@@ -58,15 +58,15 @@
 
     <para>This approach is often referred to as the <link
     linkend="gloss.MVC">MVC (Model View Controller) pattern</link>, and is
-    particularly popular for dynamic Web pages. It helps in separating the Web
-    page designers (HTML authors) from the developers (Java programmers
+    particularly popular for dynamic web pages. It helps in separating web
+    page designers (HTML authors) from developers (Java programmers
     usually). Designers won't face complicated logic in templates, and can
     change the appearance of a page without programmers having to change or
     recompile code.</para>
 
     <para>While FreeMarker was originally created for generating HTML pages in
     MVC web application frameworks, it isn't bound to servlets or HTML or
-    anything Web-related. It's used in non-web application environments as
+    anything web-related. It's used in non-web application environments as
     well.</para>
 
     <para>FreeMarker is <link
@@ -100,7 +100,7 @@
       <section xml:id="dgui_quickstart_basics">
         <title>Template + data-model = output</title>
 
-        <para>Let's assume that you need a HTML page in a Web shop, similar to
+        <para>Let's assume that you need a HTML page on a website, similar to
         this:</para>
 
         <programlisting role="output">&lt;html&gt;
@@ -114,10 +114,9 @@
 &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
-        <para>But the user name ("John Doe" above) should depend on who the
-        logged in Web page visitor is, and the latest product should come from
-        a database and thus it potentially changes too. Thus you can't enter
-        these into the HTML directly, you can't use static HTML. Instead, you
+        <para>But the user's name ("John Doe" above) depends on who the
+        logged-in user is, and the latest product information should come from
+        a database. Because this data changes, you cannot you cannot use static HTML. Instead, you
         can use a <emphasis role="term">template</emphasis> of the desired
         output. The template is the same as the static HTML would be, except
         that it contains some instructions to FreeMarker that makes it
