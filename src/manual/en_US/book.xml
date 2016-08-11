@@ -8083,7 +8083,11 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 
             <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_25);
 myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-myCfg.setDefaultEncoding("UTF-8");</programlisting>
+myCfg.setDefaultEncoding("UTF-8");
+DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_25);
+owb.setForceLegacyNonListCollections(false);
+owb.setDefaultDateType(TemplateDateModel.DATETIME);
+myCfg.setObjectWrapper(owb.build());</programlisting>
 
             <para>You do this before you start to actually use the
             <literal>Configuration</literal> object (typically, when you
@@ -8109,14 +8113,35 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
       &lt;prop key="incompatible_improvements"&gt;2.3.25&lt;/prop&gt;
       &lt;prop key="template_exception_handler"&gt;rethrow&lt;/prop&gt;
       &lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
+      &lt;prop key="object_wrapper"&gt;
+        DefaultObjectWrapper(
+                2.3.25,
+                forceLegacyNonListCollections = false,
+                defaultDateType = freemarker.template.TemplateDateModel.DATETIME)
+      &lt;/prop&gt;
     &lt;/props&gt;
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
-            <para>Note that this kind of configuring
-            (<literal>String</literal> key-value pairs) is somewhat limited
-            compared to directly using Java API, so in some cases you have to
-            find a way to do this in Java.</para>
+            <para>Here's the same when configuring FreeMarker for Struts,
+            which looks for a <literal>freemarker.properties</literal> in the
+            classpath:</para>
+
+            <programlisting role="unspecified">incompatible_improvements=2.3.25
+template_exception_handler=rethrow
+default_encoding=UTF-8
+object_wrapper=DefaultObjectWrapper( \
+        2.3.25, \
+        forceLegacyNonListCollections = false, \
+        defaultDateType = freemarker.template.TemplateDateModel.DATETIME)</programlisting>
+
+            <para>As demonstrated above with
+            <literal>object_wrapper</literal>, some settings can accept quite
+            complex values, which can be used to instantiate objects of
+            arbitrary classes and set their properties. Still, configuring
+            with <literal>String</literal> key-value pairs is limited compared
+            to directly using the Java API, so in some cases you have to find
+            a way to do this in Java.</para>
           </listitem>
 
           <listitem>
@@ -8153,7 +8178,7 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
               should set <link
               linkend="pgui_config_incompatible_improvements">the
               <literal>incompatible_improvements</literal> setting</link> to
-              2.3.22 or higher, to avoid soe confusing legacy bugs.</para>
+              2.3.22 or higher, to avoid some confusing legacy bugs.</para>
             </note>
           </listitem>
 
