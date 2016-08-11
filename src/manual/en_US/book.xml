@@ -9145,7 +9145,7 @@ cfg.setTemplateConfigurations(
         <para>The output format associated to a template decides if and what
         kind of auto-escaping is used in that template (unless the template
         <link linkend="dgui_misc_autoescaping_overrideoformat">overrides that
-        with directives</link>). By default, templates has
+        with directives</link>). By default, templates have
         <quote>undefined</quote> output format associated, which does no
         escaping, and in general gives the behavior that you would expect from
         a template engine that doesn't care about output formats and escaping.
