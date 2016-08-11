@@ -26587,9 +26587,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Release date: 2016-06-26</para>
 
-        <para>This is a stable, final release. The <quote>incubating</quote>
-        suffix is required by the Apache Software Foundation until the project
-        becomes a fully accepted (graduated) Apache project.</para>
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -26766,10 +26767,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Release date: 2016-03-28</para>
 
-        <para>This is a stable, final release. The <quote>incubating</quote>
-        suffix is required by the Apache Software Foundation until the project
-        becomes a fully accepted (graduated) Apache project. See disclaimer
-        below.</para>
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project. See disclaimer below.</para>
 
         <section>
           <title>Legal changes</title>
