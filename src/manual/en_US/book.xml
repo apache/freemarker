@@ -44,11 +44,12 @@
 
     <para>Templates are written in the FreeMarker Template Language (FTL).
     It's a simple, specialized language, <emphasis>not</emphasis> a full-blown
-    programming language like PHP. You are meant to prepare the data to display in
-    a real programming language, like issue database queries and do business
-    calculations, and then the template displays that already prepared data.
-    In the template you are focusing on how to present the data, and outside
-    the template you are focusing on what data to present.</para>
+    programming language like PHP. You are meant to prepare the data to
+    display in a real programming language, like issue database queries and do
+    business calculations, and then the template displays that already
+    prepared data. In the template you are focusing on how to present the
+    data, and outside the template you are focusing on what data to
+    present.</para>
 
     <mediaobject>
       <imageobject>
@@ -59,10 +60,10 @@
     <para>This approach is often referred to as the <link
     linkend="gloss.MVC">MVC (Model View Controller) pattern</link>, and is
     particularly popular for dynamic web pages. It helps in separating web
-    page designers (HTML authors) from developers (Java programmers
-    usually). Designers won't face complicated logic in templates, and can
-    change the appearance of a page without programmers having to change or
-    recompile code.</para>
+    page designers (HTML authors) from developers (Java programmers usually).
+    Designers won't face complicated logic in templates, and can change the
+    appearance of a page without programmers having to change or recompile
+    code.</para>
 
     <para>While FreeMarker was originally created for generating HTML pages in
     MVC web application frameworks, it isn't bound to servlets or HTML or
@@ -116,11 +117,11 @@
 
         <para>But the user's name ("John Doe" above) depends on who the
         logged-in user is, and the latest product information should come from
-        a database. Because this data changes, you cannot you cannot use static HTML. Instead, you
-        can use a <emphasis role="term">template</emphasis> of the desired
-        output. The template is the same as the static HTML would be, except
-        that it contains some instructions to FreeMarker that makes it
-        dynamic:</para>
+        a database. Because this data changes, you cannot you cannot use
+        static HTML. Instead, you can use a <emphasis
+        role="term">template</emphasis> of the desired output. The template is
+        the same as the static HTML would be, except that it contains some
+        instructions to FreeMarker that makes it dynamic:</para>
 
         <programlisting role="template" xml:id="example.first">&lt;html&gt;
 &lt;head&gt;
@@ -419,8 +420,8 @@
         </itemizedlist>
 
         <para>Anything not an FTL tag or an interpolation or comment is
-        considered static text and will not be interpreted by FreeMarker;
-        it is just printed to the output as-is.</para>
+        considered static text and will not be interpreted by FreeMarker; it
+        is just printed to the output as-is.</para>
 
         <para>With FTL tags you refer to so-called <emphasis
         role="term">directives</emphasis>. This is the same kind of
@@ -428,8 +429,8 @@
         <literal>&lt;table&gt;</literal> and
         <literal>&lt;/table&gt;</literal>) and HTML elements (e.g., the
         <literal>table</literal> element) to which you refer to with the HTML
-        tags. (If you don't understand this difference then consider "FTL tag" and
-        "directive" synonyms.)</para>
+        tags. (If you don't understand this difference then consider "FTL tag"
+        and "directive" synonyms.)</para>
 
         <note>
           <para>You can easily try writing templates on <link
@@ -499,8 +500,8 @@
             here a number is specified directly (<literal>0</literal>). Note
             that the number is <emphasis>not</emphasis> quoted. If you quoted
             it (<literal>"0"</literal>), FreeMarker would misinterpret it as a
-            string literal, and because the price to compare it to is a number,
-            you get an error.</para>
+            string literal, and because the price to compare it to is a
+            number, you get an error.</para>
 
             <para>This will print "Pythons are not free today!" if their price
             is not 0:</para>
@@ -594,8 +595,8 @@
             <literal>&lt;/#list&gt;</literal> tags.</para>
 
             <para>The <literal><replaceable>sequence</replaceable></literal>
-            can be any kind of expression. For example we could list the fruits of
-            the example data model like this:</para>
+            can be any kind of expression. For example we could list the
+            fruits of the example data model like this:</para>
 
             <programlisting role="template">&lt;ul&gt;
 <emphasis>&lt;#list misc.fruits as fruit&gt;</emphasis>
@@ -766,11 +767,11 @@ All Rights Reserved.
           <title>Using built-ins</title>
 
           <para>The so-called built-ins are like subvariables (or rather like
-          methods, if you know that Java term) that aren't coming from
-          the data-model, but added by FreeMarker to the values. In order to make it
-          clear where subvariables comes from, you have
-          to use <literal>?</literal> (question mark) instead of
-          <literal>.</literal> (dot) to access them. <anchor
+          methods, if you know that Java term) that aren't coming from the
+          data-model, but added by FreeMarker to the values. In order to make
+          it clear where subvariables comes from, you have to use
+          <literal>?</literal> (question mark) instead of <literal>.</literal>
+          (dot) to access them. <anchor
           xml:id="topic.commonlyUsedBuiltIns"/>Examples with some of the most
           commonly used built-ins:</para>
 
@@ -885,14 +886,13 @@ All Rights Reserved.
           covers both cases.</phrase></para>
 
           <para>Wherever you refer to a variable, you can specify a default
-          value for the case the variable is missing by following the
-          variable name with a <literal>!</literal> and the default value.
-          Like in the following example, when <literal>user</literal> is
-          missing from data model, the template will behave like if
-          <literal>user</literal>'s value were the string
-          <literal>"visitor"</literal>. (When <literal>user</literal> isn't
-          missing, this template behaves exactly like with
-          <literal>${user}</literal>):</para>
+          value for the case the variable is missing by following the variable
+          name with a <literal>!</literal> and the default value. Like in the
+          following example, when <literal>user</literal> is missing from data
+          model, the template will behave like if <literal>user</literal>'s
+          value were the string <literal>"visitor"</literal>. (When
+          <literal>user</literal> isn't missing, this template behaves exactly
+          like with <literal>${user}</literal>):</para>
 
           <programlisting role="template">&lt;h1&gt;Welcome ${user<emphasis>!"visitor"</emphasis>}!&lt;/h1&gt;</programlisting>
 
