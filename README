@@ -152,7 +152,7 @@ apply it to your development environment:
     This profile uses space-only indentation policy and 120 character line
     width, and formatting rules that are pretty much standard in modern Java.
   - Java -> Installed JRE-s:
-    Ensure that you have JDK 6 installed, and that it was added to Eclipse.
+    Ensure that you have JDK 8 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
 - Create new "Java Project" in Eclipse:
   - In the first window popping up:
@@ -168,7 +168,7 @@ apply it to your development environment:
         src/test/resources
     - On the "Libraries" tab:
       - Delete everyhing from there, except the "JRE System Library [...]"
-      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.6"
+      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.8"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
     - On the "Order and Export" tab find dom4j-*.jar, and send it to the
