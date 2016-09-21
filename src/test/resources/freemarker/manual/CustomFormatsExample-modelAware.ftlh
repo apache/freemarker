@@ -16,5 +16,6 @@
   specific language governing permissions and limitations
   under the License.
 -->
+<#setting locale="en_us">
 ${10.12356}
 ${weight}

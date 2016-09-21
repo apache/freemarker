@@ -16,6 +16,8 @@
   specific language governing permissions and limitations
   under the License.
 -->
+<#setting locale="en_us">
+<#setting time_zone="GMT+1">
 ${p?string.@price}
 ${w?string.@weight}
 ${fd?string.@fileDate}

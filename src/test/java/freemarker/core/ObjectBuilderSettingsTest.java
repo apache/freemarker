@@ -48,7 +48,7 @@ import freemarker.cache.MruCacheStorage;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.subpkg.PublicWithMixedConstructors;
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.jython.JythonWrapper;
+
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
@@ -382,13 +382,7 @@ public class ObjectBuilderSettingsTest {
         assertFalse(bw.isExposeFields());
     }
 
-    @Test
-    public void jythonWrapperTest() throws Exception {
-        JythonWrapper jw = (JythonWrapper) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.ext.jython.JythonWrapper()",
-                ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
-        assertSame(JythonWrapper.INSTANCE, jw);
-    }
+
 
     @Test
     public void configurationPropertiesTest() throws TemplateException {
