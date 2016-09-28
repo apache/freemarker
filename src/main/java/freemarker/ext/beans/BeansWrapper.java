@@ -1732,7 +1732,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     /**
-     * <b>Experimental class; subject to change!</b>
      * Used for
      * {@link MethodAppearanceFineTuner#process}
      * to store the results; see there.
@@ -1775,7 +1774,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /**
-     * <b>Experimental class; subject to change!</b>
      * Used for
      * {@link MethodAppearanceFineTuner#process}
      * as input parameter; see there.
