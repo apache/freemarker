@@ -3286,7 +3286,8 @@ Slicing with right-unlimited ranges:
             </listitem>
 
             <listitem>
-              <para>Modulus (remainder): <literal>%</literal></para>
+              <para>Modulus (remainder) of integer operands:
+              <literal>%</literal></para>
             </listitem>
           </itemizedlist>
 
@@ -3323,8 +3324,6 @@ ${12 % 10}</programlisting>
 
           <programlisting role="template">${3 + "5"}</programlisting>
 
-          <para>will output this:</para>
-
           <programlisting role="output">35</programlisting>
 
           <para>Generally, FreeMarker never converts a string to a number
@@ -3353,6 +3352,26 @@ ${-1.999?int}</programlisting>
 1
 -1
 -1</programlisting>
+
+          <para>Due to historical reasons, the <literal>%</literal> operator
+          works by first truncating the operands to an integer number, and
+          then returning the remainder of the division:</para>
+
+          <programlisting role="template">${12 % 5}   &lt;#-- Prints 2 --&gt;
+${12.9 % 5} &lt;#-- Prints 2 --&gt;
+${12.1 % 5} &lt;#-- Prints 2 --&gt;
+
+${12 % 6}   &lt;#-- Prints 0 --&gt;
+${12 % 6.9} &lt;#-- Prints 0 --&gt;</programlisting>
+
+          <para>The sign of the result of <literal>%</literal> is the same as
+          the sign of the left hand operand, and its absolute value is the
+          same as if both operands where positive:</para>
+
+          <programlisting role="template">${-12 % -5} &lt;#-- Prints -2 --&gt;
+${-12 % 5} &lt;#-- Prints -2 --&gt;
+${12 % -5} &lt;#-- Prints 2 --&gt;
+</programlisting>
         </section>
 
         <section xml:id="dgui_template_exp_comparison">
