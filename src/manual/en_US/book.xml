@@ -21355,8 +21355,10 @@ ${"&amp;"}</programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Camel case name variant:
-          <literal>outputFormat</literal></para>
+          <para>Camel case name variant: <literal>outputFormat</literal><note>
+              <para><literal>outputformat</literal> exists since FreeMarker
+              2.3.24.</para>
+            </note></para>
         </section>
 
         <section>
