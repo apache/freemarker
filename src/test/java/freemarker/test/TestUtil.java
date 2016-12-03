@@ -18,6 +18,9 @@
  */
 package freemarker.test;
 
+import freemarker.template.Configuration;
+import freemarker.template.Version;
+
 public final class TestUtil {
     
     private TestUtil() {
@@ -110,6 +113,14 @@ public final class TestUtil {
         }
             
         return ftl.substring(0, commentFirstIdx) + ftl.substring(commentLastIdx + afterCommentNLChars + 1);
+    }
+
+    /**
+     * Returns the closes FreeMarker version number that doesn't exit yet (so it's illegal).
+     */
+    public static Version getClosestFutureVersion() {
+        Version v = Configuration.getVersion();
+        return new Version(v.getMajor(), v.getMinor(), v.getMicro() + 1);
     }
 
 }
