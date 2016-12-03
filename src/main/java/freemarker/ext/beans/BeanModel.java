@@ -143,8 +143,8 @@ implements
      */
     public TemplateModel get(String key)
         throws TemplateModelException {
-        Class clazz = object.getClass();
-        Map classInfo = wrapper.getClassIntrospector().get(clazz);
+        Class<?> clazz = object.getClass();
+        Map<Object, Object> classInfo = wrapper.getClassIntrospector().get(clazz);
         TemplateModel retval = null;
         
         try {
@@ -206,7 +206,7 @@ implements
         return wrapper.getClassIntrospector().get(object.getClass()).get(ClassIntrospector.GENERIC_GET_KEY) != null;
     }
     
-    private TemplateModel invokeThroughDescriptor(Object desc, Map classInfo)
+    private TemplateModel invokeThroughDescriptor(Object desc, Map<Object, Object> classInfo)
         throws IllegalAccessException,
         InvocationTargetException,
         TemplateModelException {

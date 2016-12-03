@@ -21,6 +21,7 @@ package freemarker.core;
 
 import java.util.List;
 
+import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
@@ -35,8 +36,7 @@ import freemarker.template.TemplateModelException;
  */
 class NewBI extends BuiltIn {
     
-    static final Class BEAN_MODEL_CLASS = freemarker.ext.beans.BeanModel.class;
-    static Class JYTHON_MODEL_CLASS;
+    static Class<?> JYTHON_MODEL_CLASS;
     static {
         try {
             JYTHON_MODEL_CLASS = Class.forName("freemarker.ext.jython.JythonModel");
@@ -53,7 +53,7 @@ class NewBI extends BuiltIn {
 
     class ConstructorFunction implements TemplateMethodModelEx {
 
-        private final Class cl;
+        private final Class<?> cl;
         private final Environment env;
         
         public ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
@@ -63,7 +63,7 @@ class NewBI extends BuiltIn {
                 throw new _MiscTemplateException(NewBI.this, env,
                         "Class ", cl.getName(), " does not implement freemarker.template.TemplateModel");
             }
-            if (BEAN_MODEL_CLASS.isAssignableFrom(cl)) {
+            if (BeanModel.class.isAssignableFrom(cl)) {
                 throw new _MiscTemplateException(NewBI.this, env,
                         "Bean Models cannot be instantiated using the ?", key, " built-in");
             }

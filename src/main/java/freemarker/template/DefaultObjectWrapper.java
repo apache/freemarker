@@ -61,7 +61,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     @Deprecated
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
     
-    static final private Class JYTHON_OBJ_CLASS;
+    static final private Class<?> JYTHON_OBJ_CLASS;
     
     static final private ObjectWrapper JYTHON_WRAPPER;
     
@@ -133,7 +133,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     static {
-        Class cl;
+        Class<?> cl;
         ObjectWrapper ow;
         try {
             cl = Class.forName("org.python.core.PyObject");
@@ -191,7 +191,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             }
             return new SimpleDate((java.util.Date) obj, getDefaultDateType());
         }
-        final Class objClass = obj.getClass();
+        final Class<?> objClass = obj.getClass();
         if (objClass.isArray()) {
             if (useAdaptersForContainers) {
                 return DefaultArrayAdapter.adapt(obj, this);
@@ -203,28 +203,28 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         if (obj instanceof Collection) {
             if (useAdaptersForContainers) {
                 if (obj instanceof List) {
-                    return DefaultListAdapter.adapt((List) obj, this);
+                    return DefaultListAdapter.adapt((List<?>) obj, this);
                 } else {
                     return forceLegacyNonListCollections
-                            ? (TemplateModel) new SimpleSequence((Collection) obj, this)
-                            : (TemplateModel) DefaultNonListCollectionAdapter.adapt((Collection) obj, this);
+                            ? (TemplateModel) new SimpleSequence((Collection<?>) obj, this)
+                            : (TemplateModel) DefaultNonListCollectionAdapter.adapt((Collection<?>) obj, this);
                 }
             } else {
-                return new SimpleSequence((Collection) obj, this);
+                return new SimpleSequence((Collection<?>) obj, this);
             }
         }
         if (obj instanceof Map) {
             return useAdaptersForContainers
-                    ? (TemplateModel) DefaultMapAdapter.adapt((Map) obj, this)
-                    : (TemplateModel) new SimpleHash((Map) obj, this);
+                    ? (TemplateModel) DefaultMapAdapter.adapt((Map<?, ?>) obj, this)
+                    : (TemplateModel) new SimpleHash((Map<?, ?>) obj, this);
         }
         if (obj instanceof Boolean) {
             return obj.equals(Boolean.TRUE) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
         if (obj instanceof Iterator) {
             return useAdaptersForContainers
-                    ? (TemplateModel) DefaultIteratorAdapter.adapt((Iterator) obj, this)
-                    : (TemplateModel) new SimpleCollection((Iterator) obj, this);
+                    ? (TemplateModel) DefaultIteratorAdapter.adapt((Iterator<?>) obj, this)
+                    : (TemplateModel) new SimpleCollection((Iterator<?>) obj, this);
         }
         if (iterableSupport && obj instanceof Iterable) {
             return DefaultIterableAdapter.adapt((Iterable<?>) obj, this);
@@ -261,6 +261,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * Converts an array to a java.util.List.
      */
     protected Object convertArray(Object arr) {
+        // FM 2.4: Use Arrays.asList instead
         final int size = Array.getLength(arr);
         ArrayList list = new ArrayList(size);
         for (int i = 0; i < size; i++) {

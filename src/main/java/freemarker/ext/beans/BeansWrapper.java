@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,6 @@ import freemarker.core.BugException;
 import freemarker.core._DelayedFTLTypeDescription;
 import freemarker.core._DelayedShortClassName;
 import freemarker.core._TemplateModelException;
-import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -94,9 +94,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     @Deprecated
     static final Object CAN_NOT_UNWRAP = ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
     
-    private static final Class ITERABLE_CLASS;
+    private static final Class<?> ITERABLE_CLASS;
     static {
-        Class iterable;
+        Class<?> iterable;
         try {
             iterable = Class.forName("java.lang.Iterable");
         } catch (ClassNotFoundException e) {
@@ -106,7 +106,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         ITERABLE_CLASS = iterable;
     }
     
-    private static final Constructor ENUMS_MODEL_CTOR = enumsModelCtor();
+    private static final Constructor<?> ENUMS_MODEL_CTOR = enumsModelCtor();
     
     /**
      * At this level of exposure, all methods and properties of the
@@ -296,7 +296,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean writeProtected, boolean finalizeConstruction) {
         // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
         if (bwConf.getMethodAppearanceFineTuner() == null) {
-            Class thisClass = this.getClass();
+            Class<?> thisClass = this.getClass();
             boolean overridden = false;
             boolean testFailed = false;
             try {
@@ -306,7 +306,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                         && thisClass != SimpleObjectWrapper.class) {
                     try {
                         thisClass.getDeclaredMethod("finetuneMethodAppearance",
-                                new Class[] { Class.class, Method.class, MethodAppearanceDecision.class });
+                                new Class<?>[] { Class.class, Method.class, MethodAppearanceDecision.class });
                         overridden = true;
                     } catch (NoSuchMethodException e) {
                         thisClass = thisClass.getSuperclass();
@@ -912,17 +912,17 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
 
     private static final ModelFactory ITERATOR_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new IteratorModel((Iterator) object, (BeansWrapper) wrapper); 
+            return new IteratorModel((Iterator<?>) object, (BeansWrapper) wrapper); 
         }
     };
 
     private static final ModelFactory ENUMERATION_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new EnumerationModel((Enumeration) object, (BeansWrapper) wrapper); 
+            return new EnumerationModel((Enumeration<?>) object, (BeansWrapper) wrapper); 
         }
     };
 
-    protected ModelFactory getModelFactory(Class clazz) {
+    protected ModelFactory getModelFactory(Class<?> clazz) {
         if (Map.class.isAssignableFrom(clazz)) {
             return simpleMapWrapper ? SimpleMapModel.FACTORY : MapModel.FACTORY;
         }
@@ -983,7 +983,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * 
      * @see #tryUnwrapTo(TemplateModel, Class)
      */
-    public Object unwrap(TemplateModel model, Class targetClass) 
+    public Object unwrap(TemplateModel model, Class<?> targetClass) 
     throws TemplateModelException {
         final Object obj = tryUnwrapTo(model, targetClass);
         if (obj == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
@@ -996,7 +996,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.22
      */
-    public Object tryUnwrapTo(TemplateModel model, Class targetClass) throws TemplateModelException {
+    public Object tryUnwrapTo(TemplateModel model, Class<?> targetClass) throws TemplateModelException {
         return tryUnwrapTo(model, targetClass, 0);
     }
     
@@ -1007,7 +1007,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *            {@link #is2321Bugfixed()} is {@code false}.
      * @return {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} or the unwrapped object.
      */
-    Object tryUnwrapTo(TemplateModel model, Class targetClass, int typeFlags) 
+    Object tryUnwrapTo(TemplateModel model, Class<?> targetClass, int typeFlags) 
     throws TemplateModelException {
         Object res = tryUnwrapTo(model, targetClass, typeFlags, null);
         if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
@@ -1021,7 +1021,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * See {@try #tryUnwrap(TemplateModel, Class, int, boolean)}.
      */
-    private Object tryUnwrapTo(final TemplateModel model, Class targetClass, final int typeFlags, final Map recursionStops) 
+    private Object tryUnwrapTo(final TemplateModel model, Class<?> targetClass, final int typeFlags,
+            final Map<Object, Object> recursionStops) 
     throws TemplateModelException {
         if (model == null || model == nullModel) {
             return null;
@@ -1249,7 +1250,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *            {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} instead of throwing a
      *            {@link TemplateModelException}.
      */
-    Object unwrapSequenceToArray(TemplateSequenceModel seq, Class arrayClass, boolean tryOnly, Map recursionStops)
+    Object unwrapSequenceToArray(
+            TemplateSequenceModel seq, Class<?> arrayClass, boolean tryOnly, Map<Object, Object> recursionStops)
             throws TemplateModelException {
         if (recursionStops != null) {
             Object retval = recursionStops.get(seq);
@@ -1257,9 +1259,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 return retval;
             }
         } else {
-            recursionStops = new IdentityHashMap();
+            recursionStops = new IdentityHashMap<Object, Object>();
         }
-        Class componentType = arrayClass.getComponentType();
+        Class<?> componentType = arrayClass.getComponentType();
         Object array = Array.newInstance(componentType, seq.size());
         recursionStops.put(seq, array);
         try {
@@ -1287,7 +1289,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         return array;
     }
     
-    Object listToArray(List list, Class arrayClass, Map recursionStops)
+    Object listToArray(List<?> list, Class<?> arrayClass, Map<Object, Object> recursionStops)
             throws TemplateModelException {
         if (list instanceof SequenceAdapter) {
             return unwrapSequenceToArray(
@@ -1302,9 +1304,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 return retval;
             }
         } else {
-            recursionStops = new IdentityHashMap();
+            recursionStops = new IdentityHashMap<Object, Object>();
         }
-        Class componentType = arrayClass.getComponentType();
+        Class<?> componentType = arrayClass.getComponentType();
         Object array = Array.newInstance(componentType, list.size());
         recursionStops.put(list, array);
         try {
@@ -1312,7 +1314,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             boolean isComponentTypeNumerical = false;  // will be filled on demand
             boolean isComponentTypeList = false;  // will be filled on demand
             int i = 0;
-            for (Iterator it = list.iterator(); it.hasNext(); ) {
+            for (Iterator<?> it = list.iterator(); it.hasNext(); ) {
                 Object listItem = it.next();
                 if (listItem != null && !componentType.isInstance(listItem)) {
                     // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
@@ -1333,7 +1335,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                         }
                     } else if (componentType.isArray()) {
                         if (listItem instanceof List) {
-                            listItem = listToArray((List) listItem, componentType, recursionStops);
+                            listItem = listToArray((List<?>) listItem, componentType, recursionStops);
                         } else if (listItem instanceof TemplateSequenceModel) {
                             listItem = unwrapSequenceToArray((TemplateSequenceModel) listItem, componentType, false, recursionStops);
                         }
@@ -1361,7 +1363,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @param array Must be an array (of either a reference or primitive type)
      */
-    List arrayToList(Object array) throws TemplateModelException {
+    List<?> arrayToList(Object array) throws TemplateModelException {
         if (array instanceof Object[]) {
             // Array of any non-primitive type.
             // Note that an array of non-primitive type is always instanceof Object[].
@@ -1378,7 +1380,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @param n Non-{@code null}
      * @return {@code null} if the conversion has failed.
      */
-    static Number forceUnwrappedNumberToType(final Number n, final Class targetType, final boolean bugfixed) {
+    static Number forceUnwrappedNumberToType(final Number n, final Class<?> targetType, final boolean bugfixed) {
         // We try to order the conditions by decreasing probability.
         if (targetType == n.getClass()) {
             return n;
@@ -1516,7 +1518,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @param arguments The list of {@link TemplateModel}-s to pass to the constructor after unwrapping them
      * @return The instance created; it's not wrapped into {@link TemplateModel}.
      */
-    public Object newInstance(Class clazz, List/*<TemplateModel>*/ arguments)
+    public Object newInstance(Class<?> clazz, List/*<? extends TemplateModel>*/ arguments)
     throws TemplateModelException {
         try {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
@@ -1524,11 +1526,11 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 throw new TemplateModelException("Class " + clazz.getName() + 
                         " has no public constructors.");
             }
-            Constructor ctor = null;
+            Constructor<?> ctor = null;
             Object[] objargs;
             if (ctors instanceof SimpleMethod) {
                 SimpleMethod sm = (SimpleMethod) ctors;
-                ctor = (Constructor) sm.getMember();
+                ctor = (Constructor<?>) sm.getMember();
                 objargs = sm.unwrapArguments(arguments, this);
                 try {
                     return ctor.newInstance(objargs);
@@ -1565,7 +1567,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * 
      * @since 2.3.20
      */
-    public void removeFromClassIntrospectionCache(Class clazz) {
+    public void removeFromClassIntrospectionCache(Class<?> clazz) {
         classIntrospector.remove(clazz);
     }
     
@@ -1596,7 +1598,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     @Deprecated
     protected void finetuneMethodAppearance(
-            Class clazz, Method m, MethodAppearanceDecision decision) {
+            Class<?> clazz, Method m, MethodAppearanceDecision decision) {
         // left everything on its default; do nothing
     }
     
@@ -1606,7 +1608,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     // Unused?
     public static void coerceBigDecimals(AccessibleObject callable, Object[] args) {
-        Class[] formalTypes = null;
+        Class<?>[] formalTypes = null;
         for (int i = 0; i < args.length; ++i) {
             Object arg = args[i];
             if (arg instanceof BigDecimal) {
@@ -1614,7 +1616,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                     if (callable instanceof Method) {
                         formalTypes = ((Method) callable).getParameterTypes();
                     } else if (callable instanceof Constructor) {
-                        formalTypes = ((Constructor) callable).getParameterTypes();
+                        formalTypes = ((Constructor<?>) callable).getParameterTypes();
                     } else {
                         throw new IllegalArgumentException("Expected method or "
                                 + " constructor; callable is " + 
@@ -1627,10 +1629,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /**
-     * Converts any {@link BigDecimal}s in the passed array to the type of
-     * the corresponding formal argument of the method.
+     * Converts any {@link BigDecimal}-s in the passed array to the type of
+     * the corresponding formal argument of the method via {@link #coerceBigDecimal(BigDecimal, Class)}.
      */
-    public static void coerceBigDecimals(Class[] formalTypes, Object[] args) {
+    public static void coerceBigDecimals(Class<?>[] formalTypes, Object[] args) {
         int typeLen = formalTypes.length;
         int argsLen = args.length;
         int min = Math.min(typeLen, argsLen);
@@ -1641,7 +1643,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             }
         }
         if (argsLen > typeLen) {
-            Class varArgType = formalTypes[typeLen - 1];
+            Class<?> varArgType = formalTypes[typeLen - 1];
             for (int i = typeLen; i < argsLen; ++i) {
                 Object arg = args[i];
                 if (arg instanceof BigDecimal) {
@@ -1651,7 +1653,12 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         }
     }
 
-    public static Object coerceBigDecimal(BigDecimal bd, Class formalType) {
+    /**
+     * Converts {@link BigDecimal} to the class given in the {@code formalType} argument if that's a known numerical
+     * type, returns the {@link BigDecimal} as is otherwise. Overflow and precision loss are possible, similarly as
+     * with casting in Java.
+     */
+    public static Object coerceBigDecimal(BigDecimal bd, Class<?> formalType) {
         // int is expected in most situations, so we check it first
         if (formalType == int.class || formalType == Integer.class) {
             return Integer.valueOf(bd.intValue());
@@ -1774,19 +1781,17 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /**
-     * Used for
-     * {@link MethodAppearanceFineTuner#process}
-     * as input parameter; see there.
+     * Used for {@link MethodAppearanceFineTuner#process} as input parameter; see there.
      */
     static public final class MethodAppearanceDecisionInput {
         private Method method;
-        private Class containingClass;
+        private Class<?> containingClass;
         
         void setMethod(Method method) {
             this.method = method;
         }
         
-        void setContainingClass(Class containingClass) {
+        void setContainingClass(Class<?> containingClass) {
             this.containingClass = containingClass;
         }
 
@@ -1794,7 +1799,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             return method;
         }
 
-        public Class getContainingClass() {
+        public Class/*<?>*/ getContainingClass() {
             return containingClass;
         }
         

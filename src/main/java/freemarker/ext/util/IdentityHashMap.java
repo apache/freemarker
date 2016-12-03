@@ -30,11 +30,12 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * A variant of {@link java.util.HashMap} that uses
- * {@link System#identityHashCode(Object)} for hashing, and reference comparison
- * instead of {@link Object#equals(Object)}. Note that this applies only to keys,
- * and not to values, i.e. {@link #containsValue(Object)} still uses {@link Object#equals(Object)}.
+ * Was used instead of {@link java.util.IdentityHashMap} before that was added to Java itself in Java 1.4. 
+ * 
+ * @deprecated Use {@link java.util.IdentityHashMap} instead.
  */
+@SuppressWarnings("rawtypes")
+@Deprecated
 public class IdentityHashMap
     extends AbstractMap
     implements Map, Cloneable, java.io.Serializable {

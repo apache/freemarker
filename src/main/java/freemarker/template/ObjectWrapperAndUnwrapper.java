@@ -87,6 +87,6 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      * 
      * @since 2.3.22
      */
-    Object tryUnwrapTo(TemplateModel tm, Class targetClass) throws TemplateModelException;
+    Object tryUnwrapTo(TemplateModel tm, Class<?> targetClass) throws TemplateModelException;
 
 }
