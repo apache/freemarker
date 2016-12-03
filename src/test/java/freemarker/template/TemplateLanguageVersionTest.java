@@ -27,7 +27,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import freemarker.cache.StringTemplateLoader;
-import freemarker.test.TestUtil;
+import freemarker.test.utility.TestUtil;
 public class TemplateLanguageVersionTest {
 
     @Test

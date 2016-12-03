@@ -39,7 +39,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
-import freemarker.test.TestUtil;
+import freemarker.test.utility.TestUtil;
 import junit.framework.TestCase;
 
 public class BeansWrapperSingletonsTest extends TestCase {

@@ -42,6 +42,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.templatesuite.TemplateTestSuite;
+import freemarker.test.utility.TestUtil;
 
 /**
  * Superclass of JUnit tests that process templates but aren't practical to implement via {@link TemplateTestSuite}. 
