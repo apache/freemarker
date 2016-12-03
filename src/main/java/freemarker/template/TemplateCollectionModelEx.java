@@ -47,7 +47,7 @@ public interface TemplateCollectionModelEx extends TemplateCollectionModel {
     boolean isEmpty() throws TemplateModelException;
 
     /**
-     * Tells if a given value occurs in the collection, accodring the rules of the wrapped collection. As of 2.3.22,
+     * Tells if a given value occurs in the collection, according the rules of the wrapped collection. As of 2.3.22,
      * this interface is not yet utilized by FTL, and certainly it won't be earlier than 2.4.0. The usefulness of this
      * method is questionable, as the equality rules of Java differs from that of FTL, hence, calling this won't be
      * equivalent with {@code ?seq_contains(e)}.
