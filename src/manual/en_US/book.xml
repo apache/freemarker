@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.25</productname>
+    <productname>Freemarker 2.3.26</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -16416,8 +16416,19 @@ N
             <primary>first built-in</primary>
           </indexterm>
 
-          <para>The first subvariable of the sequence. Template processing
-          will die with error if the sequence is empty.</para>
+          <para>Returns the first item of the sequence. Thus
+          <literal><replaceable>value</replaceable>?first</literal> is the
+          same as <literal><replaceable>value</replaceable>[0]</literal>,
+          except that, since FreeMarker 2.3.26,
+          <literal><replaceable>value</replaceable>?first</literal> also works
+          if <literal><replaceable>value</replaceable></literal> doesn't
+          support getting items with numerical index, but still supports to be
+          listed (i.e., with FTL collection values).</para>
+
+          <para>If the sequence or collection is empty, the result will be a
+          missing value (as in
+          <literal><replaceable>empty</replaceable>?first!'No item was
+          found'</literal>).</para>
         </section>
 
         <section xml:id="ref_builtin_join">
@@ -26602,6 +26613,46 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_26">
+        <title>2.3.26 (incubating at Apache)</title>
+
+        <para>Release date: FIXME</para>
+
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-42">FREEMARKER-42</link>):
+              <literal>?first</literal> now works with FTL collections (things
+              that can be listed but doesn't support getting items by index),
+              not only with sequences. The practical importance of this is
+              that <literal>?first</literal> now always works on Java
+              <literal>Set</literal>-s (which is useful for
+              <literal>Set</literal>-s with well defined ordering), while
+              earlier it has failed depending on the
+              <literal>object_wrapper</literal> configuration setting.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>FIXME</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_25">
         <title>2.3.25 (incubating at Apache)</title>

@@ -377,6 +377,7 @@ public class TemplateTestCase extends FileTestCase {
             abcSet.add("b");
             abcSet.add("c");
             dataModel.put("abcSet", abcSet);
+            dataModel.put("abcSetNonSeq", DefaultNonListCollectionAdapter.adapt(abcSet, beansWrapper));
             
             List<String> listWithNull = new ArrayList<String>();
             listWithNull.add("a");
