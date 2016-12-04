@@ -80,10 +80,9 @@ implements
             }
         };
 
-    // Cached template models that implement member properties and methods for this
-    // instance. Keys are FeatureDescriptor instances (from classCache values),
-    // values are either ReflectionMethodModels/ReflectionScalarModels
-    private HashMap memberMap;
+    // I've tried to use a volatile ConcurrentHashMap field instead of HashMap + synchronized(this), but oddly it was
+    // a bit slower, at least on Java 8 u66. 
+    private HashMap<Object, TemplateModel> memberCache;
 
     /**
      * Creates a new model that wraps the specified object. Note that there are
@@ -192,7 +191,7 @@ implements
         }
     }
 
-    private void logNoSuchKey(String key, Map keyMap) {
+    private void logNoSuchKey(String key, Map<?, ?> keyMap) {
         LOG.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
             object.getClass().getName() + ". Introspection information for " +
             "the class is: " + keyMap);
@@ -207,71 +206,64 @@ implements
     }
     
     private TemplateModel invokeThroughDescriptor(Object desc, Map<Object, Object> classInfo)
-        throws IllegalAccessException,
-        InvocationTargetException,
-        TemplateModelException {
-        // See if this particular instance has a cached implementation
-        // for the requested feature descriptor
-        TemplateModel member;
+            throws IllegalAccessException, InvocationTargetException, TemplateModelException {
+        // See if this particular instance has a cached implementation for the requested feature descriptor
+        TemplateModel cachedModel;
         synchronized (this) {
-            if (memberMap != null) {
-                member = (TemplateModel) memberMap.get(desc);
-            } else {
-                member = null;
-            }
+            cachedModel = memberCache != null ? memberCache.get(desc) : null;
         }
 
-        if (member != null)
-            return member;
+        if (cachedModel != null) {
+            return cachedModel;
+        }
 
-        TemplateModel retval = UNKNOWN;
+        TemplateModel resultModel = UNKNOWN;
         if (desc instanceof IndexedPropertyDescriptor) {
-            Method readMethod = 
-                ((IndexedPropertyDescriptor) desc).getIndexedReadMethod(); 
-            retval = member = 
+            Method readMethod = ((IndexedPropertyDescriptor) desc).getIndexedReadMethod(); 
+            resultModel = cachedModel = 
                 new SimpleMethodModel(object, readMethod, 
                         ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
         } else if (desc instanceof PropertyDescriptor) {
             PropertyDescriptor pd = (PropertyDescriptor) desc;
-            retval = wrapper.invokeMethod(object, pd.getReadMethod(), null);
-            // (member == null) condition remains, as we don't cache these
+            resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
+            // cachedModel remains null, as we don't cache these
         } else if (desc instanceof Field) {
-            retval = wrapper.wrap(((Field) desc).get(object));
-            // (member == null) condition remains, as we don't cache these
+            resultModel = wrapper.wrap(((Field) desc).get(object));
+            // cachedModel remains null, as we don't cache these
         } else if (desc instanceof Method) {
             Method method = (Method) desc;
-            retval = member = new SimpleMethodModel(object, method, 
-                    ClassIntrospector.getArgTypes(classInfo, method), wrapper);
+            resultModel = cachedModel = new SimpleMethodModel(
+                    object, method, ClassIntrospector.getArgTypes(classInfo, method), wrapper);
         } else if (desc instanceof OverloadedMethods) {
-            retval = member = 
-                new OverloadedMethodsModel(object, (OverloadedMethods) desc, wrapper);
+            resultModel = cachedModel = new OverloadedMethodsModel(
+                    object, (OverloadedMethods) desc, wrapper);
         }
         
-        // If new cacheable member was created, cache it
-        if (member != null) {
+        // If new cachedModel was created, cache it
+        if (cachedModel != null) {
             synchronized (this) {
-                if (memberMap == null) {
-                    memberMap = new HashMap();
+                if (memberCache == null) {
+                    memberCache = new HashMap<Object, TemplateModel>();
                 }
-                memberMap.put(desc, member);
+                memberCache.put(desc, cachedModel);
             }
         }
-        return retval;
+        return resultModel;
     }
     
     void clearMemberCache() {
         synchronized (this) {
-            memberMap = null;
+            memberCache = null;
         }
     }
 
-    protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
-    throws IllegalAccessException,
-        InvocationTargetException,
+    protected TemplateModel invokeGenericGet(Map/*<Object, Object>*/ classInfo, Class<?> clazz, String key)
+            throws IllegalAccessException, InvocationTargetException,
         TemplateModelException {
-        Method genericGet = (Method) keyMap.get(ClassIntrospector.GENERIC_GET_KEY);
-        if (genericGet == null)
+        Method genericGet = (Method) classInfo.get(ClassIntrospector.GENERIC_GET_KEY);
+        if (genericGet == null) {
             return UNKNOWN;
+        }
 
         return wrapper.invokeMethod(object, genericGet, new Object[] { key });
     }
@@ -295,13 +287,13 @@ implements
             return ((String) object).length() == 0;
         }
         if (object instanceof Collection) {
-            return ((Collection) object).isEmpty();
+            return ((Collection<?>) object).isEmpty();
         }
         if (object instanceof Iterator && wrapper.is2324Bugfixed()) {
-            return !((Iterator) object).hasNext();
+            return !((Iterator<?>) object).hasNext();
         }
         if (object instanceof Map) {
-            return ((Map) object).isEmpty();
+            return ((Map<?,?>) object).isEmpty();
         }
         return object == null || Boolean.FALSE.equals(object);
     }
@@ -310,7 +302,7 @@ implements
      * Returns the same as {@link #getWrappedObject()}; to ensure that, this method will be final starting from 2.4.
      * This behavior of {@link BeanModel} is assumed by some FreeMarker code. 
      */
-    public Object getAdaptedObject(Class hint) {
+    public Object getAdaptedObject(Class<?> hint) {
         return object;  // return getWrappedObject(); starting from 2.4
     }
 
@@ -327,7 +319,7 @@ implements
     }
 
     public TemplateCollectionModel values() throws TemplateModelException {
-        List values = new ArrayList(size());
+        List<Object> values = new ArrayList<Object>(size());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
             String key = ((TemplateScalarModel) it.next()).getAsString();
@@ -363,7 +355,7 @@ implements
      * interface. Subclasses that override <tt>invokeGenericGet</tt> to
      * provide additional hash keys should also override this method.
      */
-    protected Set keySet() {
+    protected Set/*<Object>*/ keySet() {
         return wrapper.getClassIntrospector().keySet(object.getClass());
     }
 
