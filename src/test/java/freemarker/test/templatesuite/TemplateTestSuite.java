@@ -82,7 +82,7 @@ public class TemplateTestSuite extends TestSuite {
     public static final String INCOMPATIBLE_IMPROVEMENTS_PROPERTY_NAME
             = "freemareker.templateTestSuite.incompatibleImprovements";
     
-    private final Map<String, String> testSuiteSettings = new LinkedHashMap();
+    private final Map<String, String> testSuiteSettings = new LinkedHashMap<String, String>();
 
     private final ArrayList<Version> testSuiteIcis;
 
