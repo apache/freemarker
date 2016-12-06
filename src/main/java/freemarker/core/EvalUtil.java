@@ -27,6 +27,7 @@ import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
@@ -349,8 +350,21 @@ class EvalUtil {
      *            Tip to display if the value type is not coercable, but it's sequence or collection.
      * 
      * @return Never {@code null}
+     * @throws TemplateException 
      */
     static Object coerceModelToStringOrMarkup(TemplateModel tm, Expression exp, String seqTip, Environment env)
+            throws TemplateException {
+        return coerceModelToStringOrMarkup(tm, exp, false, seqTip, env);
+    }
+    
+    /**
+     * @return {@code null} if the {@code returnNullOnNonCoercableType} parameter is {@code true}, and the coercion is
+     *         not possible, because of the type is not right for it.
+     * 
+     * @see #coerceModelToStringOrMarkup(TemplateModel, Expression, String, Environment)
+     */
+    static Object coerceModelToStringOrMarkup(
+            TemplateModel tm, Expression exp, boolean returnNullOnNonCoercableType, String seqTip, Environment env)
             throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
             TemplateNumberModel tnm = (TemplateNumberModel) tm; 
@@ -371,7 +385,7 @@ class EvalUtil {
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
         } else { 
-            return coerceModelToTextualCommon(tm, exp, seqTip, true, env);
+            return coerceModelToTextualCommon(tm, exp, seqTip, true, returnNullOnNonCoercableType, env);
         }
     }
 
@@ -404,7 +418,7 @@ class EvalUtil {
                 throw MessageUtil.newCantFormatDateException(format, exp, e, false);
             }
         } else { 
-            return coerceModelToTextualCommon(tm, exp, seqTip, false, env);
+            return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
         }
     }
 
@@ -424,7 +438,7 @@ class EvalUtil {
         } else if (tm instanceof TemplateDateModel) {
             return assertFormatResultNotNull(env.formatDateToPlainText((TemplateDateModel) tm, exp, false));
         } else {
-            return coerceModelToTextualCommon(tm, exp, seqTip, false, env);
+            return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
         }
     }
 
@@ -438,7 +452,8 @@ class EvalUtil {
      * @return Never {@code null}
      */
     private static String coerceModelToTextualCommon(
-            TemplateModel tm, Expression exp, String seqHint, boolean supportsTOM, Environment env)
+            TemplateModel tm, Expression exp, String seqHint, boolean supportsTOM, boolean returnNullOnNonCoercableType,
+            Environment env)
             throws TemplateModelException, InvalidReferenceException, TemplateException,
                     NonStringOrTemplateOutputException, NonStringException {
         if (tm instanceof TemplateScalarModel) {
@@ -480,6 +495,9 @@ class EvalUtil {
         } else {
             if (env.isClassicCompatible() && tm instanceof BeanModel) {
                 return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
+            }
+            if (returnNullOnNonCoercableType) {
+                return null;
             }
             if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
                 if (supportsTOM) {

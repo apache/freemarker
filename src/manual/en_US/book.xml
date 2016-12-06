@@ -26648,7 +26648,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>FIXME</para>
+              <para>Made <literal>+</literal> operator when adding two hashes
+              significantly faster (be removing the overhead caused be
+              throwing and then catching an exception).</para>
             </listitem>
           </itemizedlist>
         </section>
