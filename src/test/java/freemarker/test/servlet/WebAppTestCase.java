@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.test.ResourcesExtractor;
-import freemarker.test.TestUtil;
+import freemarker.test.utility.TestUtil;
 
 public class WebAppTestCase {
 

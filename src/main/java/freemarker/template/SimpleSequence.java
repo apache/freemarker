@@ -161,7 +161,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * using {@link DefaultListAdapter} instead.
      * 
      * @param collection
-     *            The collection containing the initial items of this sequence. A shalow copy of this collection is made
+     *            The collection containing the initial items of the sequence. A shallow copy of this collection is made
      *            immediately for internal use (thus, later modification on the parameter collection won't be visible in
      *            the resulting sequence). The items however, will be only wrapped with the {@link ObjectWrapper}
      *            lazily, when first needed.

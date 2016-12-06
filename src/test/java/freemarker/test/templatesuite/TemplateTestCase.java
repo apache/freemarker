@@ -52,6 +52,7 @@ import com.google.common.collect.ImmutableSet;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.core.ASTPrinter;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.Java7MembersOnlyBeansWrapper;
 import freemarker.ext.beans.ResourceBundleModel;
@@ -117,7 +118,7 @@ public class TemplateTestCase extends FileTestCase {
     private final boolean noOutput;
     
     private final Configuration conf;
-    private final HashMap dataModel = new HashMap();
+    private final HashMap<String, Object> dataModel = new HashMap<String, Object>();
     
     public TemplateTestCase(String testName, String simpleTestName, String templateName, String expectedFileName, boolean noOutput,
             Version incompatibleImprovements) {
@@ -181,6 +182,8 @@ public class TemplateTestCase extends FileTestCase {
         conf.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
                 new FileTemplateLoader(new File(getTestClassDirectory(), "templates"))));
         
+        BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build();
+        
         dataModel.put(ASSERT_VAR_NAME, AssertDirective.INSTANCE);
         dataModel.put(ASSERT_EQUALS_VAR_NAME, AssertEqualsDirective.INSTANCE);
         dataModel.put(ASSERT_FAILS_VAR_NAME, AssertFailsDirective.INSTANCE);
@@ -239,7 +242,7 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.equals("beans")) {
             dataModel.put("array", new String[] { "array-0", "array-1"});
             dataModel.put("list", Arrays.asList(new String[] { "list-0", "list-1", "list-2"}));
-            Map tmap = new HashMap();
+            Map<Object, Object> tmap = new HashMap<Object, Object>();
             tmap.put("key", "value");
             Object objKey = new Object();
             tmap.put(objKey, "objValue");
@@ -248,8 +251,8 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("obj", new freemarker.test.templatesuite.models.BeanTestClass());
             dataModel.put("resourceBundle", new ResourceBundleModel(ResourceBundle.getBundle("freemarker.test.templatesuite.models.BeansTestResources"), BeansWrapper.getDefaultInstance()));
             dataModel.put("date", new GregorianCalendar(1974, 10, 14).getTime());
-            dataModel.put("statics", BeansWrapper.getDefaultInstance().getStaticModels());
-            dataModel.put("enums", BeansWrapper.getDefaultInstance().getEnumModels());
+            dataModel.put("statics", beansWrapper.getStaticModels());
+            dataModel.put("enums", beansWrapper.getEnumModels());
         } else if (simpleTestName.equals("boolean")) {
             dataModel.put( "boolean1", TemplateBooleanModel.FALSE);
             dataModel.put( "boolean2", TemplateBooleanModel.TRUE);
@@ -290,23 +293,23 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bigDecimal", new SimpleNumber(java.math.BigDecimal.valueOf(1)));
             dataModel.put("bigDecimal2", new SimpleNumber(java.math.BigDecimal.valueOf(1, 16)));
         } else if (simpleTestName.equals("simplehash-char-key")) {
-            HashMap mStringC = new HashMap();
+            HashMap<String, String> mStringC = new HashMap<String, String>();
             mStringC.put("c", "string");
             dataModel.put("mStringC", mStringC);
             
-            HashMap mStringCNull = new HashMap();
+            HashMap<String, String> mStringCNull = new HashMap<String, String>();
             mStringCNull.put("c", null);
             dataModel.put("mStringCNull", mStringCNull);
             
-            HashMap mCharC = new HashMap();
+            HashMap<Character, String> mCharC = new HashMap<Character, String>();
             mCharC.put(Character.valueOf('c'), "char");
             dataModel.put("mCharC", mCharC);
             
-            HashMap mCharCNull = new HashMap();
+            HashMap<String, String> mCharCNull = new HashMap<String, String>();
             mCharCNull.put("c", null);
             dataModel.put("mCharCNull", mCharCNull);
             
-            HashMap mMixed = new HashMap();
+            HashMap<Object, String> mMixed = new HashMap<Object, String>();
             mMixed.put(Character.valueOf('c'), "char");
             mMixed.put("s", "string");
             mMixed.put("s2", "string2");
@@ -326,8 +329,8 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.startsWith("type-builtins")) {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
-            dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
-            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet(), null));
+            dataModel.put("testcollection", new SimpleCollection(new ArrayList<Object>()));
+            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet<Object>(), null));
             dataModel.put("bean", new TestBean());
         } else if (simpleTestName.equals("date-type-builtins")) {
             GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
@@ -369,19 +372,20 @@ public class TemplateTestCase extends FileTestCase {
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.startsWith("sequence-builtins")) {
-            Set abcSet = new TreeSet();
+            Set<String> abcSet = new TreeSet<String>();
             abcSet.add("a");
             abcSet.add("b");
             abcSet.add("c");
             dataModel.put("abcSet", abcSet);
+            dataModel.put("abcSetNonSeq", DefaultNonListCollectionAdapter.adapt(abcSet, beansWrapper));
             
-            List listWithNull = new ArrayList();
+            List<String> listWithNull = new ArrayList<String>();
             listWithNull.add("a");
             listWithNull.add(null);
             listWithNull.add("c");
             dataModel.put("listWithNull", listWithNull);
             
-            List listWithNullsOnly = new ArrayList();
+            List<String> listWithNullsOnly = new ArrayList<String>();
             listWithNull.add(null);
             listWithNull.add(null);
             listWithNull.add(null);
@@ -389,7 +393,7 @@ public class TemplateTestCase extends FileTestCase {
             
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
             
-            Set set = new HashSet();
+            Set<String> set = new HashSet<String>();
             set.add("a");
             set.add("b");
             set.add("c");
@@ -430,9 +434,9 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bdp", BigDecimal.valueOf(0.05));
           } else if (simpleTestName.startsWith("classic-compatible")) {
             dataModel.put("array", new String[] { "a", "b", "c" });
-            dataModel.put("beansArray", new BeansWrapper().wrap(new String[] { "a", "b", "c" }));
-            dataModel.put("beanTrue", new BeansWrapper().wrap(Boolean.TRUE));
-            dataModel.put("beanFalse", new BeansWrapper().wrap(Boolean.FALSE));
+            dataModel.put("beansArray", beansWrapper.wrap(new String[] { "a", "b", "c" }));
+            dataModel.put("beanTrue", beansWrapper.wrap(Boolean.TRUE));
+            dataModel.put("beanFalse", beansWrapper.wrap(Boolean.FALSE));
         } else if (simpleTestName.startsWith("overloaded-methods-2-")) {
             dataModel.put("obj", new OverloadedMethods2());
             final boolean dow = conf.getObjectWrapper() instanceof DefaultObjectWrapper;
@@ -499,7 +503,7 @@ public class TemplateTestCase extends FileTestCase {
     }
     
     static class TestMethod implements TemplateMethodModel {
-      public Object exec(java.util.List arguments) {
+      public Object exec(List arguments) {
           return "x";
       }
     }
@@ -528,14 +532,14 @@ public class TemplateTestCase extends FileTestCase {
     }
 
    public Object getTestMapBean() {
-        Map testBean = new TestMapBean();
+        Map<String, Object> testBean = new TestMapBean();
         testBean.put("name", "Chris");
         testBean.put("location", "San Francisco");
         testBean.put("age", Integer.valueOf(27));
         return testBean;
     }
 
-    public static class TestMapBean extends HashMap {
+    public static class TestMapBean extends HashMap<String, Object> {
         public String getName() {
             return "Christopher";
         }

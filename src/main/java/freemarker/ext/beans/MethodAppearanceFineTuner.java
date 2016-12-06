@@ -35,12 +35,11 @@ import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 public interface MethodAppearanceFineTuner {
 
     /**
-     * <b>Experimental method; subject to change!</b>
      * Implement this to tweak certain aspects of how methods appear in the
      * data-model. {@link BeansWrapper} will pass in all Java methods here that
      * it intends to expose in the data-model as methods (so you can do
      * <tt>obj.foo()</tt> in the template).
-     * With this method it you can do the following tweaks:
+     * With this method you can do the following tweaks:
      * <ul>
      *   <li>Hide a method that would be otherwise shown by calling
      *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}

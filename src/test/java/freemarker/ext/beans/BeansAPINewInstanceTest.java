@@ -21,7 +21,7 @@ package freemarker.ext.beans;
 
 import junit.framework.TestCase;
 import freemarker.template.Configuration;
-import freemarker.test.utility.Helpers;
+import freemarker.test.utility.TestUtil;
 
 public class BeansAPINewInstanceTest extends TestCase {
 
@@ -110,8 +110,8 @@ public class BeansAPINewInstanceTest extends TestCase {
         public Constructors(Integer x, Integer y) { s = "Integer " + x + ", Integer " + y; }
         public Constructors(Object x, Object y) { s = "Object " + x + ", Object " + y; }
 
-        public Constructors(int... xs) { s = "int... " + Helpers.arrayToString(xs); }
-        public Constructors(Object x, int... ys) { s = "Object " + x + ", int... " + Helpers.arrayToString(ys); }
+        public Constructors(int... xs) { s = "int... " + TestUtil.arrayToString(xs); }
+        public Constructors(Object x, int... ys) { s = "Object " + x + ", int... " + TestUtil.arrayToString(ys); }
         
         @Override
         public String toString() {

@@ -49,7 +49,7 @@ public class _BeansAPI {
         return bm.getAsClassicCompatibleString();
     }
     
-    public static Object newInstance(Class pClass, Object[] args, BeansWrapper bw)
+    public static Object newInstance(Class<?> pClass, Object[] args, BeansWrapper bw)
             throws NoSuchMethodException, IllegalArgumentException, InstantiationException,
             IllegalAccessException, InvocationTargetException, TemplateModelException {
         return newInstance(getConstructorDescriptor(pClass, args), args, bw);
@@ -60,15 +60,18 @@ public class _BeansAPI {
      * than what the Java reflection API provides in that it can handle overloaded constructors. This re-uses the
      * overloaded method selection logic of {@link BeansWrapper}.
      */
-    private static CallableMemberDescriptor getConstructorDescriptor(Class pClass, Object[] args) throws NoSuchMethodException {
+    private static CallableMemberDescriptor getConstructorDescriptor(Class<?> pClass, Object[] args)
+            throws NoSuchMethodException {
         if (args == null) args = CollectionUtils.EMPTY_OBJECT_ARRAY;
         
         final ArgumentTypes argTypes = new ArgumentTypes(args, true);
-        final List fixedArgMemberDescs = new ArrayList();
-        final List varArgsMemberDescs = new ArrayList();
-        final Constructor[] constrs = pClass.getConstructors();
+        final List<ReflectionCallableMemberDescriptor> fixedArgMemberDescs
+                = new ArrayList<ReflectionCallableMemberDescriptor>();
+        final List<ReflectionCallableMemberDescriptor> varArgsMemberDescs
+                = new ArrayList<ReflectionCallableMemberDescriptor>();
+        final Constructor<?>[] constrs = pClass.getConstructors();
         for (int i = 0; i < constrs.length; i++) {
-            Constructor constr = constrs[i];
+            Constructor<?> constr = constrs[i];
             ReflectionCallableMemberDescriptor memberDesc = new ReflectionCallableMemberDescriptor(constr, constr.getParameterTypes());
             if (!_MethodUtil.isVarargs(constr)) {
                 fixedArgMemberDescs.add(memberDesc);
@@ -108,7 +111,7 @@ public class _BeansAPI {
         if (constrDesc.isVarargs()) {
             // We have to put all the varargs arguments into a single array argument.
 
-            final Class[] paramTypes = constrDesc.getParamTypes();
+            final Class<?>[] paramTypes = constrDesc.getParamTypes();
             final int fixedArgCnt = paramTypes.length - 1;
             
             packedArgs = new Object[fixedArgCnt + 1]; 
@@ -116,7 +119,7 @@ public class _BeansAPI {
                 packedArgs[i] = args[i];
             }
             
-            final Class compType = paramTypes[fixedArgCnt].getComponentType();
+            final Class<?> compType = paramTypes[fixedArgCnt].getComponentType();
             final int varArgCnt = args.length - fixedArgCnt;
             final Object varArgsArray = Array.newInstance(compType, varArgCnt);
             for (int i = 0; i < varArgCnt; i++) {
@@ -136,47 +139,47 @@ public class _BeansAPI {
      * @param beansWrapperSubclassFactory Creates a <em>new</em> read-only object wrapper of the desired
      *     {@link BeansWrapper} subclass. 
      */
-    public static BeansWrapper getBeansWrapperSubclassSingleton(
-            BeansWrapperConfiguration settings,
-            Map instanceCache,
-            ReferenceQueue instanceCacheRefQue,
-            _BeansWrapperSubclassFactory beansWrapperSubclassFactory) {
+    public static <BW extends BeansWrapper, BWC extends BeansWrapperConfiguration> BW getBeansWrapperSubclassSingleton(
+            BWC settings,
+            Map<ClassLoader, Map<BWC, WeakReference<BW>>> instanceCache,
+            ReferenceQueue<BW> instanceCacheRefQue,
+            _BeansWrapperSubclassFactory<BW, BWC> beansWrapperSubclassFactory) {
         // BeansWrapper can't be cached across different Thread Context Class Loaders (TCCL), because the result of
         // a class name (String) to Class mappings depends on it, and the staticModels and enumModels need that.
         // (The ClassIntrospector doesn't have to consider the TCCL, as it only works with Class-es, not class
         // names.)
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         
-        Reference instanceRef;
-        Map/*<PropertyAssignments, WeakReference<BeansWrapper>>*/ tcclScopedCache;
+        Reference<BW> instanceRef;
+        Map<BWC, WeakReference<BW>> tcclScopedCache;
         synchronized (instanceCache) {
-            tcclScopedCache = (Map) instanceCache.get(tccl);
+            tcclScopedCache = instanceCache.get(tccl);
             if (tcclScopedCache == null) {
-                tcclScopedCache = new HashMap();
+                tcclScopedCache = new HashMap<BWC, WeakReference<BW>>();
                 instanceCache.put(tccl, tcclScopedCache);
                 instanceRef = null;
             } else {
-                instanceRef = (Reference) tcclScopedCache.get(settings);
+                instanceRef = tcclScopedCache.get(settings);
             }
         }
 
-        BeansWrapper instance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
+        BW instance = instanceRef != null ? instanceRef.get() : null;
         if (instance != null) {  // cache hit
             return instance;
         }
         // cache miss
         
-        settings = (BeansWrapperConfiguration) settings.clone(true);  // prevent any aliasing issues 
+        settings = clone(settings);  // prevent any aliasing issues 
         instance = beansWrapperSubclassFactory.create(settings);
         if (!instance.isWriteProtected()) {
             throw new BugException();
         }
         
         synchronized (instanceCache) {
-            instanceRef = (Reference) tcclScopedCache.get(settings);
-            BeansWrapper concurrentInstance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
+            instanceRef = tcclScopedCache.get(settings);
+            BW concurrentInstance = instanceRef != null ? instanceRef.get() : null;
             if (concurrentInstance == null) {
-                tcclScopedCache.put(settings, new WeakReference(instance, instanceCacheRefQue));
+                tcclScopedCache.put(settings, new WeakReference<BW>(instance, instanceCacheRefQue));
             } else {
                 instance = concurrentInstance;
             }
@@ -186,14 +189,21 @@ public class _BeansAPI {
         
         return instance;
     }
+
+    @SuppressWarnings("unchecked")
+    private static <BWC extends BeansWrapperConfiguration> BWC clone(BWC settings) {
+        return (BWC) settings.clone(true);
+    }
     
-    private static void removeClearedReferencesFromCache(Map instanceCache, ReferenceQueue instanceCacheRefQue) {
-        Reference clearedRef;
+    private static <BW extends BeansWrapper, BWC extends BeansWrapperConfiguration>
+            void removeClearedReferencesFromCache(
+                    Map<ClassLoader, Map<BWC, WeakReference<BW>>> instanceCache,
+                    ReferenceQueue<BW> instanceCacheRefQue) {
+        Reference<? extends BW> clearedRef;
         while ((clearedRef = instanceCacheRefQue.poll()) != null) {
             synchronized (instanceCache) {
-                findClearedRef: for (Iterator it1 = instanceCache.values().iterator(); it1.hasNext(); ) {
-                    Map tcclScopedCache = (Map) it1.next();
-                    for (Iterator it2 = tcclScopedCache.values().iterator(); it2.hasNext(); ) {
+                findClearedRef: for (Map<BWC, WeakReference<BW>> tcclScopedCache : instanceCache.values()) {
+                    for (Iterator<WeakReference<BW>> it2 = tcclScopedCache.values().iterator(); it2.hasNext(); ) {
                         if (it2.next() == clearedRef) {
                             it2.remove();
                             break findClearedRef;
@@ -207,10 +217,10 @@ public class _BeansAPI {
     /**
      * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
      */
-    public interface _BeansWrapperSubclassFactory {
+    public interface _BeansWrapperSubclassFactory<BW extends BeansWrapper, BWC extends BeansWrapperConfiguration> {
         
         /** Creates a new read-only {@link BeansWrapper}; used for {@link BeansWrapperBuilder} and such. */
-        BeansWrapper create(BeansWrapperConfiguration sa);
+        BW create(BWC sa);
     }
     
 }

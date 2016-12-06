@@ -138,15 +138,40 @@ class BuiltInsForSequences {
         
     }
     
-    static class firstBI extends BuiltInForSequence {
+    static class firstBI extends BuiltIn {
+        
         @Override
-        TemplateModel calculateResult(TemplateSequenceModel tsm)
+        TemplateModel _eval(Environment env)
+                throws TemplateException {
+            TemplateModel model = target.eval(env);
+            // In 2.3.x only, we prefer TemplateSequenceModel for
+            // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
+            if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
+                return calculateResultForSequence((TemplateSequenceModel) model);
+            } else if (model instanceof TemplateCollectionModel) {
+                return calculateResultForColletion((TemplateCollectionModel) model);
+            } else {
+                throw new NonSequenceOrCollectionException(target, model, env);
+            }
+        }        
+        
+        private TemplateModel calculateResultForSequence(TemplateSequenceModel seq)
         throws TemplateModelException {
-            if (tsm.size() == 0) {
+            if (seq.size() == 0) {
                 return null;
             }
-            return tsm.get(0);
+            return seq.get(0);
         }
+        
+        private TemplateModel calculateResultForColletion(TemplateCollectionModel coll)
+        throws TemplateModelException {
+            TemplateModelIterator iter = coll.iterator();
+            if (!iter.hasNext()) {
+                return null;
+            }
+            return iter.next();
+        }
+        
     }
 
     static class joinBI extends BuiltIn {

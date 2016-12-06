@@ -25,6 +25,7 @@ import java.io.StringReader;
 import org.apache.commons.io.IOUtils;
 
 import freemarker.cache.TemplateLoader;
+import freemarker.test.utility.TestUtil;
 
 public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
 

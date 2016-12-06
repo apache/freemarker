@@ -54,7 +54,7 @@ final class ArgumentTypes {
     /**
      * The types of the arguments; for varags this contains the exploded list (not the array). 
      */
-    private final Class[] types;
+    private final Class<?>[] types;
     
     private final boolean bugfixed;
     
@@ -65,7 +65,7 @@ final class ArgumentTypes {
      */
     ArgumentTypes(Object[] args, boolean bugfixed) {
         int ln = args.length;
-        Class[] typesTmp = new Class[ln];
+        Class<?>[] typesTmp = new Class[ln];
         for (int i = 0; i < ln; ++i) {
             Object arg = args[i];
             typesTmp[i] = arg == null
@@ -109,22 +109,21 @@ final class ArgumentTypes {
      *         {@link EmptyCallableMemberDescriptor#AMBIGUOUS_METHOD}. 
      */
     MaybeEmptyCallableMemberDescriptor getMostSpecific(
-            List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg) {
-        LinkedList/*<ReflectionCallableMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
+            List<ReflectionCallableMemberDescriptor> memberDescs, boolean varArg) {
+        LinkedList<CallableMemberDescriptor> applicables = getApplicables(memberDescs, varArg);
         if (applicables.isEmpty()) {
             return EmptyCallableMemberDescriptor.NO_SUCH_METHOD;
         }
         if (applicables.size() == 1) {
-            return (CallableMemberDescriptor) applicables.getFirst();
+            return applicables.getFirst();
         }
         
-        LinkedList/*<CallableMemberDescriptor>*/ maximals = new LinkedList();
-        for (Iterator applicablesIter = applicables.iterator(); applicablesIter.hasNext(); ) {
-            CallableMemberDescriptor applicable = (CallableMemberDescriptor) applicablesIter.next();
+        LinkedList<CallableMemberDescriptor> maximals = new LinkedList<CallableMemberDescriptor>();
+        for (CallableMemberDescriptor applicable : applicables) {
             boolean lessSpecific = false;
-            for (Iterator maximalsIter = maximals.iterator(); 
+            for (Iterator<CallableMemberDescriptor> maximalsIter = maximals.iterator(); 
                 maximalsIter.hasNext(); ) {
-                CallableMemberDescriptor maximal = (CallableMemberDescriptor) maximalsIter.next();
+                CallableMemberDescriptor maximal = maximalsIter.next();
                 final int cmpRes = compareParameterListPreferability(
                         applicable.getParamTypes(), maximal.getParamTypes(), varArg); 
                 if (cmpRes > 0) {
@@ -140,7 +139,7 @@ final class ArgumentTypes {
         if (maximals.size() > 1) {
             return EmptyCallableMemberDescriptor.AMBIGUOUS_METHOD;
         }
-        return (CallableMemberDescriptor) maximals.getFirst();
+        return maximals.getFirst();
     }
 
     /**
@@ -174,7 +173,7 @@ final class ArgumentTypes {
      * @return More than 0 if the first parameter list is preferred, less then 0 if the other is preferred,
      *        0 if there's no decision 
      */
-    int compareParameterListPreferability(Class[] paramTypes1, Class[] paramTypes2, boolean varArg) {
+    int compareParameterListPreferability(Class<?>[] paramTypes1, Class<?>[] paramTypes2, boolean varArg) {
         final int argTypesLen = types.length; 
         final int paramTypes1Len = paramTypes1.length;
         final int paramTypes2Len = paramTypes2.length;
@@ -191,19 +190,19 @@ final class ArgumentTypes {
             int paramList2VeryStrongWinCnt = 0;
             int firstWinerParamList = 0;
             for (int i = 0; i < argTypesLen; i++) {
-                final Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
-                final Class paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
+                final Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
+                final Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
                 
                 final int winerParam;  // 1 => paramType1; -1 => paramType2; 0 => draw
                 if (paramType1 == paramType2) {
                     winerParam = 0;
                 } else {
-                    final Class argType = types[i];
+                    final Class<?> argType = types[i];
                     final boolean argIsNum = Number.class.isAssignableFrom(argType);
                     
                     final int numConvPrice1;
                     if (argIsNum && ClassUtil.isNumerical(paramType1)) {
-                        final Class nonPrimParamType1 = paramType1.isPrimitive()
+                        final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
                                 ? ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1; 
                         numConvPrice1 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType1);
                     } else {
@@ -215,7 +214,7 @@ final class ArgumentTypes {
                     
                     final int numConvPrice2;
                     if (argIsNum && ClassUtil.isNumerical(paramType2)) {
-                        final Class nonPrimParamType2 = paramType2.isPrimitive()
+                        final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
                                 ? ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2; 
                         numConvPrice2 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType2);
                     } else {
@@ -357,8 +356,8 @@ final class ArgumentTypes {
                         // index of the varargs parameter, like if we had a single varargs argument. However, this
                         // time we don't have an argument type, so we can only decide based on type specificity:
                         if (argTypesLen == paramTypes1Len - 1) {
-                            Class paramType1 = getParamType(paramTypes1, paramTypes1Len, argTypesLen, true);
-                            Class paramType2 = getParamType(paramTypes2, paramTypes2Len, argTypesLen, true);
+                            Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, argTypesLen, true);
+                            Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, argTypesLen, true);
                             if (ClassUtil.isNumerical(paramType1) && ClassUtil.isNumerical(paramType2)) {
                                 int r = OverloadedNumberUtil.compareNumberTypeSpecificity(paramType1, paramType2);
                                 if (r != 0) return r;
@@ -380,8 +379,8 @@ final class ArgumentTypes {
             boolean paramTypes1HasAMoreSpecific = false;
             boolean paramTypes2HasAMoreSpecific = false;
             for (int i = 0; i < paramTypes1Len; ++i) {
-                Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
-                Class paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
+                Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
+                Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
                 if (paramType1 != paramType2) {
                     paramTypes1HasAMoreSpecific = 
                         paramTypes1HasAMoreSpecific
@@ -408,12 +407,13 @@ final class ArgumentTypes {
      * @return Less-than-0, 0, or more-than-0 depending on which side is more specific. The absolute value is 1 if
      *     the difference is only in primitive VS non-primitive, more otherwise.
      */
-    private int compareParameterListPreferability_cmpTypeSpecificty(final Class paramType1, final Class paramType2) {
+    private int compareParameterListPreferability_cmpTypeSpecificty(
+            final Class<?> paramType1, final Class<?> paramType2) {
         // The more specific (smaller) type wins.
         
-        final Class nonPrimParamType1 = paramType1.isPrimitive()
+        final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
                 ? ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1; 
-        final Class nonPrimParamType2 = paramType2.isPrimitive()
+        final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
                 ? ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
                 
         if (nonPrimParamType1 == nonPrimParamType2) {
@@ -441,7 +441,7 @@ final class ArgumentTypes {
         }
     }
 
-    private static Class getParamType(Class[] paramTypes, int paramTypesLen, int i, boolean varArg) {
+    private static Class<?> getParamType(Class<?>[] paramTypes, int paramTypesLen, int i, boolean varArg) {
         return varArg && i >= paramTypesLen - 1
                 ? paramTypes[paramTypesLen - 1].getComponentType()
                 : paramTypes[i];
@@ -451,11 +451,10 @@ final class ArgumentTypes {
      * Returns all methods that are applicable to actual
      * parameter types represented by this ArgumentTypes object.
      */
-    LinkedList/*<ReflectionCallableMemberDescriptor>*/ getApplicables(
-            List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg) {
-        LinkedList applicables = new LinkedList();
-        for (Iterator it = memberDescs.iterator(); it.hasNext(); ) {
-            ReflectionCallableMemberDescriptor memberDesc = (ReflectionCallableMemberDescriptor) it.next();
+    LinkedList<CallableMemberDescriptor> getApplicables(
+            List<ReflectionCallableMemberDescriptor> memberDescs, boolean varArg) {
+        LinkedList<CallableMemberDescriptor> applicables = new LinkedList<CallableMemberDescriptor>();
+        for (ReflectionCallableMemberDescriptor memberDesc : memberDescs) {
             int difficulty = isApplicable(memberDesc, varArg);
             if (difficulty != CONVERSION_DIFFICULTY_IMPOSSIBLE) {
                 if (difficulty == CONVERSION_DIFFICULTY_REFLECTION) {
@@ -478,7 +477,7 @@ final class ArgumentTypes {
      * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
      */
     private int isApplicable(ReflectionCallableMemberDescriptor memberDesc, boolean varArg) {
-        final Class[] paramTypes = memberDesc.getParamTypes(); 
+        final Class<?>[] paramTypes = memberDesc.getParamTypes(); 
         final int cl = types.length;
         final int fl = paramTypes.length - (varArg ? 1 : 0);
         if (varArg) {
@@ -502,7 +501,7 @@ final class ArgumentTypes {
             }
         }
         if (varArg) {
-            Class varArgParamType = paramTypes[fl].getComponentType();
+            Class<?> varArgParamType = paramTypes[fl].getComponentType();
             for (int i = fl; i < cl; ++i) {
                 int difficulty = isMethodInvocationConvertible(varArgParamType, types[i]); 
                 if (difficulty == CONVERSION_DIFFICULTY_IMPOSSIBLE) {
@@ -530,12 +529,12 @@ final class ArgumentTypes {
      * 
      * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
      */
-    private int isMethodInvocationConvertible(final Class formal, final Class actual) {
+    private int isMethodInvocationConvertible(final Class<?> formal, final Class<?> actual) {
         // Check for identity or widening reference conversion
         if (formal.isAssignableFrom(actual) && actual != CharacterOrString.class) {
             return CONVERSION_DIFFICULTY_REFLECTION;
         } else if (bugfixed) {
-            final Class formalNP;
+            final Class<?> formalNP;
             if (formal.isPrimitive()) {
                 if (actual == Null.class) {
                     return CONVERSION_DIFFICULTY_IMPOSSIBLE;
@@ -684,7 +683,7 @@ final class ArgumentTypes {
         }
 
         @Override
-        Class[] getParamTypes() {
+        Class<?>[] getParamTypes() {
             return callableMemberDesc.getParamTypes();
         }
         
@@ -694,10 +693,10 @@ final class ArgumentTypes {
         }
 
         private void convertArgsToReflectionCompatible(BeansWrapper bw, Object[] args) throws TemplateModelException {
-            Class[] paramTypes = callableMemberDesc.getParamTypes();
+            Class<?>[] paramTypes = callableMemberDesc.getParamTypes();
             int ln = paramTypes.length;
             for (int i = 0; i < ln; i++) {
-                Class paramType = paramTypes[i];
+                Class<?> paramType = paramTypes[i];
                 final Object arg = args[i];
                 if (arg == null) continue;
                 
@@ -712,7 +711,7 @@ final class ArgumentTypes {
                 // parameter, and that an array argument is applicable to a List parameter, so we end up with this
                 // situation.
                 if (paramType.isArray() && arg instanceof List) {
-                   args[i] = bw.listToArray((List) arg, paramType, null);
+                   args[i] = bw.listToArray((List<?>) arg, paramType, null);
                 }
                 if (arg.getClass().isArray() && paramType.isAssignableFrom(List.class)) {
                     args[i] = bw.arrayToList(arg);

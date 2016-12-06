@@ -39,6 +39,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.test.utility.TestUtil;
 import junit.framework.TestCase;
 
 public class BeansWrapperSingletonsTest extends TestCase {
@@ -58,7 +59,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertEquals(Configuration.VERSION_2_3_21, new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getIncompatibleImprovements());
         assertEquals(Configuration.VERSION_2_3_0, new BeansWrapperBuilder(Configuration.VERSION_2_3_20).getIncompatibleImprovements());
         try {
-            new BeansWrapperBuilder(new Version(2, 3, 26));
+            new BeansWrapperBuilder(TestUtil.getClosestFutureVersion());
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("upgrade"));

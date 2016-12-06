@@ -74,11 +74,26 @@ final class AddConcatExpression extends Expression {
         } else if (leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel) {
             return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
         } else {
+            boolean hashConcatPossible
+                    = leftModel instanceof TemplateHashModel && rightModel instanceof TemplateHashModel;
             try {
+                // We try string addition first. If hash addition is possible, then instead of throwing exception
+                // we return null and do hash addition instead. (We can't simply give hash addition a priority, like
+                // with sequence addition above, as FTL strings are often also FTL hashes.)
                 Object leftOMOrStr = EvalUtil.coerceModelToStringOrMarkup(
-                        leftModel, leftExp, (String) null, env);
+                        leftModel, leftExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, (String) null,
+                        env);
+                if (leftOMOrStr == null) {
+                    return _eval_concatenateHashes(leftModel, rightModel);
+                }
+
+                // Same trick with null return as above.
                 Object rightOMOrStr = EvalUtil.coerceModelToStringOrMarkup(
-                        rightModel, rightExp, (String) null, env);
+                        rightModel, rightExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, (String) null,
+                        env);
+                if (rightOMOrStr == null) {
+                    return _eval_concatenateHashes(leftModel, rightModel);
+                }
 
                 if (leftOMOrStr instanceof String) {
                     if (rightOMOrStr instanceof String) {
@@ -98,29 +113,36 @@ final class AddConcatExpression extends Expression {
                     } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
                         return EvalUtil.concatMarkupOutputs(parent,
                                 leftMO,
-                                (TemplateMarkupOutputModel) rightOMOrStr);
+                                (TemplateMarkupOutputModel<?>) rightOMOrStr);
                     }
                 }
             } catch (NonStringOrTemplateOutputException e) {
-                if (leftModel instanceof TemplateHashModel && rightModel instanceof TemplateHashModel) {
-                    if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
-                        TemplateHashModelEx leftModelEx = (TemplateHashModelEx) leftModel;
-                        TemplateHashModelEx rightModelEx = (TemplateHashModelEx) rightModel;
-                        if (leftModelEx.size() == 0) {
-                            return rightModelEx;
-                        } else if (rightModelEx.size() == 0) {
-                            return leftModelEx;
-                        } else {
-                            return new ConcatenatedHashEx(leftModelEx, rightModelEx);
-                        }
-                    } else {
-                        return new ConcatenatedHash((TemplateHashModel) leftModel,
-                                                    (TemplateHashModel) rightModel);
-                    }
+                // 2.4: Remove this catch; it's for BC, after reworking hash addition so it doesn't rely on this. But
+                // user code might throws this (very unlikely), and then in 2.3.x we did catch that too, incorrectly.
+                if (hashConcatPossible) {
+                    return _eval_concatenateHashes(leftModel, rightModel);
                 } else {
                     throw e;
                 }
             }
+        }
+    }
+
+    private static TemplateModel _eval_concatenateHashes(TemplateModel leftModel, TemplateModel rightModel)
+            throws TemplateModelException {
+        if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
+            TemplateHashModelEx leftModelEx = (TemplateHashModelEx) leftModel;
+            TemplateHashModelEx rightModelEx = (TemplateHashModelEx) rightModel;
+            if (leftModelEx.size() == 0) {
+                return rightModelEx;
+            } else if (rightModelEx.size() == 0) {
+                return leftModelEx;
+            } else {
+                return new ConcatenatedHashEx(leftModelEx, rightModelEx);
+            }
+        } else {
+            return new ConcatenatedHash((TemplateHashModel) leftModel,
+                                        (TemplateHashModel) rightModel);
         }
     }
 

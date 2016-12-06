@@ -68,7 +68,7 @@ olinks: {
   twitter: "https://twitter.com/freemarker"
   sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
   githubProject: "https://github.com/freemarker/freemarker"
-  newBugReport: "https://sourceforge.net/p/freemarker/bugs/new/"
+  newBugReport: "https://issues.apache.org/jira/browse/FREEMARKER/"
   newStackOverflowQuestion: "http://stackoverflow.com/questions/ask?tags=freemarker"
 }
 

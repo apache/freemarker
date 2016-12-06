@@ -27,6 +27,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import freemarker.cache.StringTemplateLoader;
+import freemarker.test.utility.TestUtil;
 public class TemplateLanguageVersionTest {
 
     @Test
@@ -37,7 +38,7 @@ public class TemplateLanguageVersionTest {
         testDefaultWithVersion(Configuration.VERSION_2_3_20, Configuration.VERSION_2_3_20);
         testDefaultWithVersion(Configuration.VERSION_2_3_21, Configuration.VERSION_2_3_21);
         try {
-            testDefaultWithVersion(new Version(2, 3, 26), Configuration.VERSION_2_3_21);
+            testDefaultWithVersion(TestUtil.getClosestFutureVersion(), Configuration.VERSION_2_3_21);
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("version"));

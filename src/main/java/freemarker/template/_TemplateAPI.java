@@ -19,8 +19,6 @@
 
 package freemarker.template;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import freemarker.cache.CacheStorage;
@@ -47,6 +45,7 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_3_23 = Configuration.VERSION_2_3_23.intValue();
     public static final int VERSION_INT_2_3_24 = Configuration.VERSION_2_3_24.intValue();
     public static final int VERSION_INT_2_3_25 = Configuration.VERSION_2_3_25.intValue();
+    public static final int VERSION_INT_2_3_26 = Configuration.VERSION_2_3_26.intValue();
     public static final int VERSION_INT_2_4_0 = Version.intValueFor(2, 4, 0);
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {

@@ -24,8 +24,8 @@ import java.io.IOException;
 
 import freemarker.core.ASTPrinter.Options;
 import freemarker.template.utility.StringUtil;
-import freemarker.test.TestUtil;
 import freemarker.test.utility.FileTestCase;
+import freemarker.test.utility.TestUtil;
 
 public class ASTTest extends FileTestCase {
 

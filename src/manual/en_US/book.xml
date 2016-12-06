@@ -7,9 +7,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
-  
+
     http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.25</productname>
+    <productname>Freemarker 2.3.26</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -44,11 +44,12 @@
 
     <para>Templates are written in the FreeMarker Template Language (FTL).
     It's a simple, specialized language, <emphasis>not</emphasis> a full-blown
-    programming language like PHP. You meant to prepare the data to display in
-    a real programming language, like issue database queries and do business
-    calculations, and then the template displays that already prepared data.
-    In the template you are focusing on how to present the data, and outside
-    the template you are focusing on what data to present.</para>
+    programming language like PHP. You are meant to prepare the data to
+    display in a real programming language, like issue database queries and do
+    business calculations, and then the template displays that already
+    prepared data. In the template you are focusing on how to present the
+    data, and outside the template you are focusing on what data to
+    present.</para>
 
     <mediaobject>
       <imageobject>
@@ -58,15 +59,15 @@
 
     <para>This approach is often referred to as the <link
     linkend="gloss.MVC">MVC (Model View Controller) pattern</link>, and is
-    particularly popular for dynamic Web pages. It helps in separating the Web
-    page designers (HTML authors) from the developers (Java programmers
-    usually). Designers won't face complicated logic in templates, and can
-    change the appearance of a page without programmers having to change or
-    recompile code.</para>
+    particularly popular for dynamic web pages. It helps in separating web
+    page designers (HTML authors) from developers (Java programmers usually).
+    Designers won't face complicated logic in templates, and can change the
+    appearance of a page without programmers having to change or recompile
+    code.</para>
 
     <para>While FreeMarker was originally created for generating HTML pages in
     MVC web application frameworks, it isn't bound to servlets or HTML or
-    anything Web-related. It's used in non-web application environments as
+    anything web-related. It's used in non-web application environments as
     well.</para>
 
     <para>FreeMarker is <link
@@ -100,7 +101,7 @@
       <section xml:id="dgui_quickstart_basics">
         <title>Template + data-model = output</title>
 
-        <para>Let's assume that you need a HTML page in a Web shop, similar to
+        <para>Let's assume that you need a HTML page on a website, similar to
         this:</para>
 
         <programlisting role="output">&lt;html&gt;
@@ -114,14 +115,13 @@
 &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
-        <para>But the user name ("John Doe" above) should depend on who the
-        logged in Web page visitor is, and the latest product should come from
-        a database and thus it potentially changes too. Thus you can't enter
-        these into the HTML directly, you can't use static HTML. Instead, you
-        can use a <emphasis role="term">template</emphasis> of the desired
-        output. The template is the same as the static HTML would be, except
-        that it contains some instructions to FreeMarker that makes it
-        dynamic:</para>
+        <para>But the user's name ("John Doe" above) depends on who the
+        logged-in user is, and the latest product information should come from
+        a database. Because this data changes, you cannot you cannot use
+        static HTML. Instead, you can use a <emphasis
+        role="term">template</emphasis> of the desired output. The template is
+        the same as the static HTML would be, except that it contains some
+        instructions to FreeMarker that makes it dynamic:</para>
 
         <programlisting role="template" xml:id="example.first">&lt;html&gt;
 &lt;head&gt;
@@ -220,21 +220,21 @@
   +- animals
   |   |
   |   +- mouse
-  |   |   |   
+  |   |   |
   |   |   +- size = "small"
-  |   |   |   
+  |   |   |
   |   |   +- price = 50
   |   |
   |   +- elephant
-  |   |   |   
+  |   |   |
   |   |   +- size = "large"
-  |   |   |   
+  |   |   |
   |   |   +- price = 5000
   |   |
   |   +- python
-  |       |   
+  |       |
   |       +- size = "medium"
-  |       |   
+  |       |
   |       +- price = 4999
   |
   +- message = "It is a test"
@@ -420,8 +420,8 @@
         </itemizedlist>
 
         <para>Anything not an FTL tag or an interpolation or comment is
-        considered as static text, and will not be interpreted by FreeMarker;
-        it is just printed to the output as is.</para>
+        considered static text and will not be interpreted by FreeMarker; it
+        is just printed to the output as-is.</para>
 
         <para>With FTL tags you refer to so-called <emphasis
         role="term">directives</emphasis>. This is the same kind of
@@ -429,8 +429,8 @@
         <literal>&lt;table&gt;</literal> and
         <literal>&lt;/table&gt;</literal>) and HTML elements (e.g., the
         <literal>table</literal> element) to which you refer to with the HTML
-        tags. (If you don't feel this difference then just take "FTL tag" and
-        "directive" as synonyms.)</para>
+        tags. (If you don't understand this difference then consider "FTL tag"
+        and "directive" synonyms.)</para>
 
         <note>
           <para>You can easily try writing templates on <link
@@ -499,9 +499,9 @@
             <para>Similarly as earlier when a string was specified directly,
             here a number is specified directly (<literal>0</literal>). Note
             that the number is <emphasis>not</emphasis> quoted. If you quoted
-            it (<literal>"0"</literal>), FreeMarker were misinterpret it as a
-            string literal, and because the price to compare it to is number,
-            you get an error.</para>
+            it (<literal>"0"</literal>), FreeMarker would misinterpret it as a
+            string literal, and because the price to compare it to is a
+            number, you get an error.</para>
 
             <para>This will print "Pythons are not free today!" if their price
             is not 0:</para>
@@ -595,8 +595,8 @@
             <literal>&lt;/#list&gt;</literal> tags.</para>
 
             <para>The <literal><replaceable>sequence</replaceable></literal>
-            can be any kind of expression, like we could list the fruits of
-            the example data model like this:</para>
+            can be any kind of expression. For example we could list the
+            fruits of the example data model like this:</para>
 
             <programlisting role="template">&lt;ul&gt;
 <emphasis>&lt;#list misc.fruits as fruit&gt;</emphasis>
@@ -631,7 +631,7 @@
             case.</para>
 
             <para>Another frequent listing-related task: let's list the fruits
-            separating them with something, like comma:</para>
+            separating them with something, like a comma:</para>
 
             <programlisting role="template">&lt;p&gt;Fruits: &lt;#list misc.fruits as fruit&gt;${fruit}<emphasis>&lt;#sep&gt;, </emphasis>&lt;/#list&gt;</programlisting>
 
@@ -644,7 +644,7 @@
             there will be a next item. Hence there's no comma after the last
             fruit.</para>
 
-            <para>Here again, what's if we have 0 fruits? Just printing
+            <para>Here again, what if we have 0 fruits? Just printing
             <quote>Fruits:</quote> and then nothing is awkward. A
             <literal>list</literal>, just like an <literal>if</literal>, can
             have an <literal>else</literal>, which is executed if there were 0
@@ -760,18 +760,18 @@ All Rights Reserved.
 
           <para>Note that since FreeMarker does not interpret text outside FTL
           tags, interpolations and FTL comments, above you could use the FTL
-          tags inside a HTML attributes without problem.</para>
+          tags inside HTML attributes without problem.</para>
         </section>
 
         <section>
           <title>Using built-ins</title>
 
-          <para>The so called built-ins are like subvariables (or rather like
-          methods, if you know that Java term) that aren't coming coming from
-          the data-model, but added by FreeMarker to the values. To make it
-          unambiguous where the subvarable comes from, to access them you have
-          to use <literal>?</literal> (question mark) instead of
-          <literal>.</literal> (dot). <anchor
+          <para>The so-called built-ins are like subvariables (or rather like
+          methods, if you know that Java term) that aren't coming from the
+          data-model, but added by FreeMarker to the values. In order to make
+          it clear where subvariables comes from, you have to use
+          <literal>?</literal> (question mark) instead of <literal>.</literal>
+          (dot) to access them. <anchor
           xml:id="topic.commonlyUsedBuiltIns"/>Examples with some of the most
           commonly used built-ins:</para>
 
@@ -876,24 +876,23 @@ All Rights Reserved.
 
           <para>The data-model often has variables that are optional (i.e.,
           sometimes missing). To spot some typical human mistakes, FreeMarker
-          doesn't tolerate the referring to missing variables, unless you tell
+          doesn't tolerate references to missing variables unless you tell
           explicitly what to do if the variable is missing. Here we will show
           the two most typical ways of doing that.</para>
 
           <para><phrase role="forProgrammers">Note for programmers: A
           non-existent variable and a variable with <literal>null</literal>
-          value is the same for FreeMarker, so the "missing" term used here
+          value is the same for FreeMarker. The "missing" term used here
           covers both cases.</phrase></para>
 
           <para>Wherever you refer to a variable, you can specify a default
-          value for the case the variable is missing, by following the
-          variable name with a <literal>!</literal> and the default value.
-          Like in the following example, when <literal>user</literal> is
-          missing from data model, the template will behave like if
-          <literal>user</literal>'s value were the string
-          <literal>"visitor"</literal>. (When <literal>user</literal> isn't
-          missing, this template behaves exactly like with
-          <literal>${user}</literal>):</para>
+          value for the case the variable is missing by following the variable
+          name with a <literal>!</literal> and the default value. Like in the
+          following example, when <literal>user</literal> is missing from data
+          model, the template will behave like if <literal>user</literal>'s
+          value were the string <literal>"visitor"</literal>. (When
+          <literal>user</literal> isn't missing, this template behaves exactly
+          like with <literal>${user}</literal>):</para>
 
           <programlisting role="template">&lt;h1&gt;Welcome ${user<emphasis>!"visitor"</emphasis>}!&lt;/h1&gt;</programlisting>
 
@@ -3287,7 +3286,8 @@ Slicing with right-unlimited ranges:
             </listitem>
 
             <listitem>
-              <para>Modulus (remainder): <literal>%</literal></para>
+              <para>Modulus (remainder) of integer operands:
+              <literal>%</literal></para>
             </listitem>
           </itemizedlist>
 
@@ -3324,8 +3324,6 @@ ${12 % 10}</programlisting>
 
           <programlisting role="template">${3 + "5"}</programlisting>
 
-          <para>will output this:</para>
-
           <programlisting role="output">35</programlisting>
 
           <para>Generally, FreeMarker never converts a string to a number
@@ -3354,6 +3352,26 @@ ${-1.999?int}</programlisting>
 1
 -1
 -1</programlisting>
+
+          <para>Due to historical reasons, the <literal>%</literal> operator
+          works by first truncating the operands to an integer number, and
+          then returning the remainder of the division:</para>
+
+          <programlisting role="template">${12 % 5}   &lt;#-- Prints 2 --&gt;
+${12.9 % 5} &lt;#-- Prints 2 --&gt;
+${12.1 % 5} &lt;#-- Prints 2 --&gt;
+
+${12 % 6}   &lt;#-- Prints 0 --&gt;
+${12 % 6.9} &lt;#-- Prints 0 --&gt;</programlisting>
+
+          <para>The sign of the result of <literal>%</literal> is the same as
+          the sign of the left hand operand, and its absolute value is the
+          same as if both operands where positive:</para>
+
+          <programlisting role="template">${-12 % -5} &lt;#-- Prints -2 --&gt;
+${-12 % 5} &lt;#-- Prints -2 --&gt;
+${12 % -5} &lt;#-- Prints 2 --&gt;
+</programlisting>
         </section>
 
         <section xml:id="dgui_template_exp_comparison">
@@ -5332,6 +5350,7 @@ other@example.com, other@example.com, other@example.com</programlisting>
                 <literal>&amp;</literal>, <literal>"</literal>,
                 <literal>'</literal> as <literal>&amp;lt;</literal>,
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;quot;</literal>,
                 <literal>&amp;#39;</literal></td>
 
                 <td><literal>text/html</literal></td>
@@ -5346,6 +5365,7 @@ other@example.com, other@example.com, other@example.com</programlisting>
                 <literal>&amp;</literal>, <literal>"</literal>,
                 <literal>'</literal> as <literal>&amp;lt;</literal>,
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;quot;</literal>,
                 <literal>&amp;#39;</literal></td>
 
                 <td><literal>application/xhtml+xml</literal></td>
@@ -5362,6 +5382,7 @@ other@example.com, other@example.com, other@example.com</programlisting>
                 <literal>&amp;</literal>, <literal>"</literal>,
                 <literal>'</literal> as <literal>&amp;lt;</literal>,
                 <literal>&amp;gt;</literal>, <literal>&amp;amp;</literal>,
+                <literal>&amp;quot;</literal>,
                 <literal>&amp;apos;</literal></td>
 
                 <td><literal>application/xml</literal></td>
@@ -5864,7 +5885,7 @@ To prove that "s" didn't contain the value in escaped form:
 <phrase role="markedInvisibleText">[BR]</phrase>
   <phrase role="markedInvisibleText">[BR]</phrase>
 <phrase role="markedInvisibleText">[BR]</phrase>
-  <phrase role="markedInvisibleText">[BR]</phrase>  
+  <phrase role="markedInvisibleText">[BR]</phrase>
   &lt;li&gt;</phrase>Julia<phrase role="markedText"><phrase
               role="markedInvisibleText">[BR]</phrase>
   <phrase role="markedInvisibleText">[BR]</phrase>
@@ -6505,10 +6526,10 @@ import java.io.*;
 public class Test {
 
     public static void main(String[] args) throws Exception {
-        
-        /* ------------------------------------------------------------------------ */    
-        /* You should do this ONLY ONCE in the whole application life-cycle:        */    
-    
+
+        /* ------------------------------------------------------------------------ */
+        /* You should do this ONLY ONCE in the whole application life-cycle:        */
+
         /* Create and adjust the configuration singleton */
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
@@ -6516,8 +6537,8 @@ public class Test {
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
 
-        /* ------------------------------------------------------------------------ */    
-        /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
+        /* ------------------------------------------------------------------------ */
+        /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
 
         /* Create a data-model */
         Map root = new HashMap();
@@ -6963,7 +6984,7 @@ public class Product {
         the second string doesn't contains the first.</para>
 
         <programlisting role="unspecified">public class IndexOfMethod implements TemplateMethodModel {
-    
+
     public TemplateModel exec(List args) throws TemplateModelException {
         if (args.size() != 2) {
             throw new TemplateModelException("Wrong arguments");
@@ -7057,16 +7078,16 @@ import freemarker.template.TemplateModelException;
 /**
  *  FreeMarker user-defined directive that progressively transforms
  *  the output of its nested content to upper-case.
- *  
- *  
+ *
+ *
  *  &lt;p&gt;&lt;b&gt;Directive info&lt;/b&gt;&lt;/p&gt;
- * 
+ *
  *  &lt;p&gt;Directive parameters: None
  *  &lt;p&gt;Loop variables: None
  *  &lt;p&gt;Directive nested content: Yes
  */
 public class UpperDirective implements TemplateDirectiveModel {
-    
+
     public void execute(Environment env,
             Map params, TemplateModel[] loopVars,
             TemplateDirectiveBody body)
@@ -7080,7 +7101,7 @@ public class UpperDirective implements TemplateDirectiveModel {
                 throw new TemplateModelException(
                     "This directive doesn't allow loop variables.");
         }
-        
+
         // If there is non-empty nested content:
         if (body != null) {
             // Executes the nested body. Same as &lt;#nested&gt; in FTL, except
@@ -7090,15 +7111,15 @@ public class UpperDirective implements TemplateDirectiveModel {
             throw new RuntimeException("missing body");
         }
     }
-    
+
     /**
      * A {@link Writer} that transforms the character stream to upper case
      * and forwards it to another {@link Writer}.
-     */ 
+     */
     private static class UpperCaseFilterWriter extends Writer {
-       
+
         private final Writer out;
-           
+
         UpperCaseFilterWriter (Writer out) {
             this.out = out;
         }
@@ -7215,47 +7236,47 @@ import freemarker.template.TemplateNumberModel;
  * optionally with separating the output of the repetations with
  * &lt;tt&gt;&amp;lt;hr&gt;&lt;/tt&gt;-s.
  *
- * 
+ *
  * &lt;p&gt;&lt;b&gt;Directive info&lt;/b&gt;&lt;/p&gt;
- * 
+ *
  * &lt;p&gt;Parameters:
  * &lt;ul&gt;
  *   &lt;li&gt;&lt;code&gt;count&lt;/code&gt;: The number of repetations. Required!
  *       Must be a non-negative number. If it is not a whole number then it will
  *       be rounded &lt;em&gt;down&lt;/em&gt;.
  *   &lt;li&gt;&lt;code&gt;hr&lt;/code&gt;: Tells if a HTML "hr" element could be printed between
- *       repetations. Boolean. Optional, defaults to &lt;code&gt;false&lt;/code&gt;. 
+ *       repetations. Boolean. Optional, defaults to &lt;code&gt;false&lt;/code&gt;.
  * &lt;/ul&gt;
  *
  * &lt;p&gt;Loop variables: One, optional. It gives the number of the current
  *    repetation, starting from 1.
- * 
+ *
  * &lt;p&gt;Nested content: Yes
  */
 public class RepeatDirective implements TemplateDirectiveModel {
-    
+
     private static final String PARAM_NAME_COUNT = "count";
     private static final String PARAM_NAME_HR = "hr";
-    
+
     public void execute(Environment env,
             Map params, TemplateModel[] loopVars,
             TemplateDirectiveBody body)
             throws TemplateException, IOException {
-        
+
         // ---------------------------------------------------------------------
         // Processing the parameters:
-        
+
         int countParam = 0;
         boolean countParamSet = false;
         boolean hrParam = false;
-        
+
         Iterator paramIter = params.entrySet().iterator();
         while (paramIter.hasNext()) {
             Map.Entry ent = (Map.Entry) paramIter.next();
-            
+
             String paramName = (String) ent.getKey();
             TemplateModel paramValue = (TemplateModel) ent.getValue();
-            
+
             if (paramName.equals(PARAM_NAME_COUNT)) {
                 if (!(paramValue instanceof TemplateNumberModel)) {
                     throw new TemplateModelException(
@@ -7288,17 +7309,17 @@ public class RepeatDirective implements TemplateDirectiveModel {
                         "The required \"" + PARAM_NAME_COUNT + "\" paramter"
                         + "is missing.");
         }
-        
+
         if (loopVars.length &gt; 1) {
                 throw new TemplateModelException(
                         "At most one loop variable is allowed.");
         }
-        
+
         // Yeah, it was long and boring...
-        
+
         // ---------------------------------------------------------------------
         // Do the actual directive execution:
-        
+
         Writer out = env.getOut();
         if (body != null) {
             for (int i = 0; i &lt; countParam; i++) {
@@ -7307,12 +7328,12 @@ public class RepeatDirective implements TemplateDirectiveModel {
                 if (hrParam &amp;&amp; i != 0) {
                     out.write("&lt;hr&gt;");
                 }
-                
+
                 // Set the loop variable, if there is one:
                 if (loopVars.length &gt; 0) {
                     loopVars[0] = new SimpleNumber(i + 1);
                 }
-                
+
                 // Executes the nested body (same as &lt;#nested&gt; in FTL). In this
                 // case we don't provide a special writer as the parameter:
                 body.render(env.getOut());
@@ -7721,9 +7742,9 @@ public class Tupple&lt;E1, E2&gt; {
 
 public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
         AdapterTemplateModel {
-    
+
     private final Tupple&lt;?, ?&gt; tupple;
-    
+
     public TuppleAdapter(Tupple&lt;?, ?&gt; tupple, ObjectWrapper ow) {
         super(ow);  // coming from WrappingTemplateModel
         this.tupple = tupple;
@@ -7733,7 +7754,7 @@ public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequ
     public int size() throws TemplateModelException {
         return 2;
     }
-    
+
     @Override  // coming from TemplateSequenceModel
     public TemplateModel get(int index) throws TemplateModelException {
         switch (index) {
@@ -7747,7 +7768,7 @@ public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequ
     public Object getAdaptedObject(Class hint) {
         return tupple;
     }
-    
+
 }</programlisting>
 
           <para>Regarding the classes and interfaces:</para>
@@ -7789,16 +7810,16 @@ public class MyAppObjectWrapper extends DefaultObjectWrapper {
     public MyAppObjectWrapper(Version incompatibleImprovements) {
         super(incompatibleImprovements);
     }
-    
+
     @Override
     protected TemplateModel handleUnknownType(final Object obj) throws TemplateModelException {
         if (obj instanceof Tupple) {
             return new TuppleAdapter((Tupple&lt;?, ?&gt;) obj, this);
         }
-        
+
         return super.handleUnknownType(obj);
     }
-    
+
 }</programlisting>
 
           <para>and then where you configure FreeMarker (<link
@@ -8081,7 +8102,11 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 
             <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_25);
 myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-myCfg.setDefaultEncoding("UTF-8");</programlisting>
+myCfg.setDefaultEncoding("UTF-8");
+DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_25);
+owb.setForceLegacyNonListCollections(false);
+owb.setDefaultDateType(TemplateDateModel.DATETIME);
+myCfg.setObjectWrapper(owb.build());</programlisting>
 
             <para>You do this before you start to actually use the
             <literal>Configuration</literal> object (typically, when you
@@ -8107,14 +8132,35 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
       &lt;prop key="incompatible_improvements"&gt;2.3.25&lt;/prop&gt;
       &lt;prop key="template_exception_handler"&gt;rethrow&lt;/prop&gt;
       &lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
+      &lt;prop key="object_wrapper"&gt;
+        DefaultObjectWrapper(
+                2.3.25,
+                forceLegacyNonListCollections = false,
+                defaultDateType = freemarker.template.TemplateDateModel.DATETIME)
+      &lt;/prop&gt;
     &lt;/props&gt;
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
-            <para>Note that this kind of configuring
-            (<literal>String</literal> key-value pairs) is somewhat limited
-            compared to directly using Java API, so in some cases you have to
-            find a way to do this in Java.</para>
+            <para>Here's the same when configuring FreeMarker for Struts,
+            which looks for a <literal>freemarker.properties</literal> in the
+            classpath:</para>
+
+            <programlisting role="unspecified">incompatible_improvements=2.3.25
+template_exception_handler=rethrow
+default_encoding=UTF-8
+object_wrapper=DefaultObjectWrapper( \
+        2.3.25, \
+        forceLegacyNonListCollections = false, \
+        defaultDateType = freemarker.template.TemplateDateModel.DATETIME)</programlisting>
+
+            <para>As demonstrated above with
+            <literal>object_wrapper</literal>, some settings can accept quite
+            complex values, which can be used to instantiate objects of
+            arbitrary classes and set their properties. Still, configuring
+            with <literal>String</literal> key-value pairs is limited compared
+            to directly using the Java API, so in some cases you have to find
+            a way to do this in Java.</para>
           </listitem>
 
           <listitem>
@@ -8151,7 +8197,7 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
               should set <link
               linkend="pgui_config_incompatible_improvements">the
               <literal>incompatible_improvements</literal> setting</link> to
-              2.3.22 or higher, to avoid soe confusing legacy bugs.</para>
+              2.3.22 or higher, to avoid some confusing legacy bugs.</para>
             </note>
           </listitem>
 
@@ -8691,7 +8737,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
           <literal>TemplateExceptionHandler</literal> by implementing that
           interface, which contains this method:</para>
 
-          <programlisting role="unspecified">void handleTemplateException(TemplateException te, Environment env, Writer out) 
+          <programlisting role="unspecified">void handleTemplateException(TemplateException te, Environment env, Writer out)
         throws TemplateException;</programlisting>
 
           <para>Whenever a <literal>TemplateException</literal> occurs, this
@@ -9118,7 +9164,7 @@ cfg.setTemplateConfigurations(
         <para>The output format associated to a template decides if and what
         kind of auto-escaping is used in that template (unless the template
         <link linkend="dgui_misc_autoescaping_overrideoformat">overrides that
-        with directives</link>). By default, templates has
+        with directives</link>). By default, templates have
         <quote>undefined</quote> output format associated, which does no
         escaping, and in general gives the behavior that you would expect from
         a template engine that doesn't care about output formats and escaping.
@@ -9387,11 +9433,11 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
 
     public static final HexTemplateNumberFormatFactory INSTANCE
             = new HexTemplateNumberFormatFactory();
-    
+
     private HexTemplateNumberFormatFactory() {
         // Defined to decrease visibility
     }
-    
+
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
@@ -9402,9 +9448,9 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
     private static class HexTemplateNumberFormat extends TemplateNumberFormat {
 
         private static final HexTemplateNumberFormat INSTANCE = new HexTemplateNumberFormat();
-        
+
         private HexTemplateNumberFormat() { }
-        
+
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
@@ -9425,7 +9471,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         public String getDescription() {
             return "hexadecimal int";
         }
-        
+
     }
 
 }</programlisting>
@@ -9476,11 +9522,11 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
 
     public static final BaseNTemplateNumberFormatFactory INSTANCE
             = new BaseNTemplateNumberFormatFactory();
-    
+
     private BaseNTemplateNumberFormatFactory() {
         // Defined to decrease visibility
     }
-    
+
     @Override
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
@@ -9502,7 +9548,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
                 fallbackFormat = null;
             }
         }
-        
+
         int base;
         try {
             base = Integer.parseInt(params);
@@ -9525,12 +9571,12 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
 
         private final int base;
         private final TemplateNumberFormat fallbackFormat;
-        
+
         private BaseNTemplateNumberFormat(int base, TemplateNumberFormat fallbackFormat) {
             this.base = base;
             this.fallbackFormat = fallbackFormat;
         }
-        
+
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
                 throws TemplateModelException, TemplateValueFormatException {
@@ -9557,7 +9603,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         public String getDescription() {
             return "base " + base;
         }
-        
+
     }
 
 }</programlisting>
@@ -9619,11 +9665,11 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
 
     public static final EpochMillisTemplateDateFormatFactory INSTANCE
             = new EpochMillisTemplateDateFormatFactory();
-    
+
     private EpochMillisTemplateDateFormatFactory() {
         // Defined to decrease visibility
     }
-    
+
     @Override
     public TemplateDateFormat get(String params, int dateType,
             Locale locale, TimeZone timeZone, boolean zonelessInput,
@@ -9637,9 +9683,9 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
 
         private static final EpochMillisTemplateDateFormat INSTANCE
                 = new EpochMillisTemplateDateFormat();
-        
+
         private EpochMillisTemplateDateFormat() { }
-        
+
         @Override
         public String formatToPlainText(TemplateDateModel dateModel)
                 throws UnformattableValueException, TemplateModelException {
@@ -9669,7 +9715,7 @@ public class EpochMillisTemplateDateFormatFactory extends TemplateDateFormatFact
         public String getDescription() {
             return "millis since the epoch";
         }
-        
+
     }
 
 }</programlisting>
@@ -9763,7 +9809,7 @@ public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
 
     private final Number value;
     private final String unit;
-    
+
     public UnitAwareTemplateNumberModel(Number value, String unit) {
         this.value = value;
         this.unit = unit;
@@ -11143,12 +11189,12 @@ TemplateHashModel roundingModeEnums =
           <programlisting role="unspecified">&lt;servlet&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   &lt;servlet-class&gt;<emphasis>freemarker.ext.servlet.FreemarkerServlet</emphasis>&lt;/servlet-class&gt;
-  
+
   &lt;!--
     Init-param documentation:
     <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
   --&gt;
-    
+
   &lt;!-- FreemarkerServlet settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;TemplatePath&lt;/param-name&gt;
@@ -11716,7 +11762,7 @@ ${bar?trim}</programlisting>
         your security policy file for
         <literal>freemarker.jar</literal>:</para>
 
-        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar" 
+        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar"
 {
   permission java.util.PropertyPermission "file.encoding", "read";
   permission java.util.PropertyPermission "freemarker.*", "read";
@@ -11726,7 +11772,7 @@ ${bar?trim}</programlisting>
         need to give FreeMarker permissions to read files from that directory
         using the following permission:</para>
 
-        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar" 
+        <programlisting role="unspecified">grant codeBase "file:/path/to/freemarker.jar"
 {
   ...
   permission java.io.FilePermission "/path/to/templates/-", "read";
@@ -11740,7 +11786,7 @@ ${bar?trim}</programlisting>
         template)</para>
 
         <programlisting role="unspecified">
-grant codeBase "file:/path/to/freemarker.jar" 
+grant codeBase "file:/path/to/freemarker.jar"
 {
   ...
   permission java.util.PropertyPermission "user.dir", "read";
@@ -15127,16 +15173,16 @@ rif: foo XYr baar</programlisting>
 
           <para>Prints:</para>
 
-          <programlisting role="output">    0 ?floor=0 ?ceiling=0 ?round=0            
-    1 ?floor=1 ?ceiling=1 ?round=1        
-    -1 ?floor=-1 ?ceiling=-1 ?round=-1      
-    0.5 ?floor=0 ?ceiling=1 ?round=1      
-    1.5 ?floor=1 ?ceiling=2 ?round=2      
-    -0.5 ?floor=-1 ?ceiling=0 ?round=0     
-    -1.5 ?floor=-2 ?ceiling=-1 ?round=-1    
-    0.25 ?floor=0 ?ceiling=1 ?round=0     
-    -0.25 ?floor=-1 ?ceiling=0 ?round=0    
-    1.75 ?floor=1 ?ceiling=2 ?round=2     
+          <programlisting role="output">    0 ?floor=0 ?ceiling=0 ?round=0
+    1 ?floor=1 ?ceiling=1 ?round=1
+    -1 ?floor=-1 ?ceiling=-1 ?round=-1
+    0.5 ?floor=0 ?ceiling=1 ?round=1
+    1.5 ?floor=1 ?ceiling=2 ?round=2
+    -0.5 ?floor=-1 ?ceiling=0 ?round=0
+    -1.5 ?floor=-2 ?ceiling=-1 ?round=-1
+    0.25 ?floor=0 ?ceiling=1 ?round=0
+    -0.25 ?floor=-1 ?ceiling=0 ?round=0
+    1.75 ?floor=1 ?ceiling=2 ?round=2
     -1.75 ?floor=-2 ?ceiling=-1 ?round=-2</programlisting>
 
           <para>These built-ins may be useful in pagination operations and
@@ -16342,13 +16388,13 @@ N
           <para>The output will be:</para>
 
           <programlisting role="output">
-  a b c d 
-  e f g h 
-  i j 
+  a b c d
+  e f g h
+  i j
 
-  a b c d 
-  e f g h 
-  i j - - 
+  a b c d
+  e f g h
+  i j - -
  </programlisting>
 
           <para>This built in is mostly for outputting sequnces in
@@ -16370,8 +16416,19 @@ N
             <primary>first built-in</primary>
           </indexterm>
 
-          <para>The first subvariable of the sequence. Template processing
-          will die with error if the sequence is empty.</para>
+          <para>Returns the first item of the sequence. Thus
+          <literal><replaceable>value</replaceable>?first</literal> is the
+          same as <literal><replaceable>value</replaceable>[0]</literal>,
+          except that, since FreeMarker 2.3.26,
+          <literal><replaceable>value</replaceable>?first</literal> also works
+          if <literal><replaceable>value</replaceable></literal> doesn't
+          support getting items with numerical index, but still supports to be
+          listed (i.e., with FTL collection values).</para>
+
+          <para>If the sequence or collection is empty, the result will be a
+          missing value (as in
+          <literal><replaceable>empty</replaceable>?first!'No item was
+          found'</literal>).</para>
         </section>
 
         <section xml:id="ref_builtin_join">
@@ -16749,14 +16806,14 @@ Order by weight:
     {"name": {"first": "Joe", "last": "Smith"}, "age": 40},
     {"name": {"first": "Fred", "last": "Crooger"}, "age": 35},
     {"name": {"first": "Amanda", "last": "Fox"}, "age": 25}]&gt;
-Sorted by name.last: 
+Sorted by name.last:
 &lt;#list members?sort_by(['name', 'last']) as m&gt;
 - ${m.name.last}, ${m.name.first}: ${m.age} years old
 &lt;/#list&gt;</programlisting>
 
           <para>will print (with US locale at least):</para>
 
-          <programlisting role="output">Sorted by name.last: 
+          <programlisting role="output">Sorted by name.last:
 - Crooger, Fred: 35 years old
 - Fox, Amanda: 25 years old
 - Smith, Joe: 40 years old</programlisting>
@@ -20945,7 +21002,7 @@ or
           parameters:</para>
 
           <programlisting role="template">&lt;#macro img src extra...&gt;
-  &lt;img src="/myapp${src?ensure_starts_with('/')}" 
+  &lt;img src="/myapp${src?ensure_starts_with('/')}"
     &lt;#list extra as attrName, attrVal&gt;
       ${attrName}="${attrVal}"
     &lt;/#list&gt;
@@ -21309,8 +21366,10 @@ ${"&amp;"}</programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Camel case name variant:
-          <literal>outputFormat</literal></para>
+          <para>Camel case name variant: <literal>outputFormat</literal><note>
+              <para><literal>outputformat</literal> exists since FreeMarker
+              2.3.24.</para>
+            </note></para>
         </section>
 
         <section>
@@ -22180,7 +22239,7 @@ or
 
           <programlisting role="metaTemplate">
 <literal>&lt;@<replaceable>user_def_dir_exp</replaceable> <replaceable>param1</replaceable>=<replaceable>val1</replaceable> <replaceable>param2</replaceable>=<replaceable>val2</replaceable> <replaceable>...</replaceable> <replaceable>paramN</replaceable>=<replaceable>valN</replaceable>/&gt;</literal>
-(Note the XML-style <literal>/</literal> before the <literal>&gt;</literal>)  
+(Note the XML-style <literal>/</literal> before the <literal>&gt;</literal>)
 or if you need loop variables (<link
               linkend="ref_directive_userDefined_loopVar">more details...</link>)
 <literal>&lt;@<replaceable>user_def_dir_exp</replaceable> <replaceable>param1</replaceable>=<replaceable>val1</replaceable> <replaceable>param2</replaceable>=<replaceable>val2</replaceable> <replaceable>...</replaceable> <replaceable>paramN</replaceable>=<replaceable>valN</replaceable> ; <replaceable>lv1</replaceable>, <replaceable>lv2</replaceable>, <replaceable>...</replaceable>, <replaceable>lvN</replaceable>/&gt;</literal>
@@ -22287,7 +22346,7 @@ Or all above but with positional parameter passing (<link
       &lt;li&gt;Elephant
       &lt;li&gt;Python
   &lt;/ul&gt;
-  
+
 <replaceable>...</replaceable></programlisting>
 
           <section xml:id="ref_directive_userDefined_entTag">
@@ -22612,7 +22671,7 @@ There was no specific handler for node ${node?node_name}
             <para>This would print:</para>
 
             <programlisting role="output">Handling node x
-  
+
 There was no specific handler for node y
 
  </programlisting>
@@ -23195,7 +23254,7 @@ There was no specific handler for node y
           <programlisting role="metaTemplate"><literal>&lt;#macro <replaceable>name</replaceable>(<replaceable>argName1</replaceable>, <replaceable>argName2</replaceable>, <replaceable>... argNameN</replaceable>)&gt;
   ...
 &lt;/#macro&gt;</literal>
- 
+
 <literal>&lt;#call <replaceable>name</replaceable>(<replaceable>argValue1</replaceable>, <replaceable>argValue2</replaceable>, <replaceable>... argValueN</replaceable>)&gt;</literal></programlisting>
 
           <para>Where:</para>
@@ -23702,19 +23761,19 @@ or
      |   |
      |   +- text "\n    "
      |   |
-     |   +- element para     
+     |   +- element para
      |   |   |
      |   |   +- text "p1.1"
      |   |
      |   +- text "\n    "
      |   |
-     |   +- element para     
+     |   +- element para
      |   |   |
      |   |   +- text "p1.2"
      |   |
      |   +- text "\n    "
      |   |
-     |   +- element para     
+     |   +- element para
      |      |
      |      +- text "p1.3"
      |
@@ -23728,13 +23787,13 @@ or
          |
          +- text "\n    "
          |
-         +- element para     
+         +- element para
          |   |
          |   +- text "p2.1"
          |
          +- text "\n    "
          |
-         +- element para     
+         +- element para
              |
              +- text "p2.2"</programlisting>
 
@@ -24954,25 +25013,25 @@ End book</programlisting>
     &lt;body&gt;
       &lt;h1&gt;Test Book&lt;/h1&gt;
 
-  
+
     &lt;h2&gt;Ch1&lt;/h2&gt;
 
-    
+
       &lt;p&gt;p1.1
 
       &lt;p&gt;p1.2
 
       &lt;p&gt;p1.3
 
-  
+
     &lt;h2&gt;Ch2&lt;/h2&gt;
 
-    
+
       &lt;p&gt;p2.1
 
       &lt;p&gt;p2.2
 
-  
+
     &lt;/body&gt;
   &lt;/html&gt;
 
@@ -26257,7 +26316,7 @@ End book</programlisting>
 
             <para>Example: Here I use UTF-8 charset in a servlet:</para>
 
-            <programlisting role="unspecified">...        
+            <programlisting role="unspecified">...
 resp.setContentType("text/html; charset=utf-8");
 Writer out = resp.getWriter();
 ...
@@ -26555,15 +26614,57 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_26">
+        <title>2.3.26 (incubating at Apache)</title>
+
+        <para>Release date: FIXME</para>
+
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-42">FREEMARKER-42</link>):
+              <literal>?first</literal> now works with FTL collections (things
+              that can be listed but doesn't support getting items by index),
+              not only with sequences. The practical importance of this is
+              that <literal>?first</literal> now always works on Java
+              <literal>Set</literal>-s (which is useful for
+              <literal>Set</literal>-s with well defined ordering), while
+              earlier it has failed depending on the
+              <literal>object_wrapper</literal> configuration setting.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Made <literal>+</literal> operator when adding two hashes
+              significantly faster (be removing the overhead caused be
+              throwing and then catching an exception).</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_25">
         <title>2.3.25 (incubating at Apache)</title>
 
-        <para>Release date: 2016-06-14 + voting process (usually around 2
-        weeks)</para>
+        <para>Release date: 2016-06-26</para>
 
-        <para>This is a stable, final release. The <quote>incubating</quote>
-        suffix is required by the Apache Software Foundation until the project
-        becomes a fully accepted (graduated) Apache project.</para>
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -26740,10 +26841,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Release date: 2016-03-28</para>
 
-        <para>This is a stable, final release. The <quote>incubating</quote>
-        suffix is required by the Apache Software Foundation until the project
-        becomes a fully accepted (graduated) Apache project. See disclaimer
-        below.</para>
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project. See disclaimer below.</para>
 
         <section>
           <title>Legal changes</title>
@@ -37852,7 +37953,7 @@ FreeMarker, both in its source code and binary form (freemarker.jar)
 includes a number of files that are licensed by the Apache Software
 Foundation under the Apache License, Version 2.0. This is the same
 license as the license of FreeMaker. These files are:
-  
+
     freemarker/ext/jsp/web-app_2_2.dtd
     freemarker/ext/jsp/web-app_2_3.dtd
     freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd

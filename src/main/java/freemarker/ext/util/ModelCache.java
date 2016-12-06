@@ -23,6 +23,8 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.util.Map;
 
+import java.util.IdentityHashMap;
+
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelAdapter;
 
@@ -32,8 +34,8 @@ import freemarker.template.TemplateModelAdapter;
  */
 public abstract class ModelCache {
     private boolean useCache = false;
-    private Map modelCache = null;
-    private ReferenceQueue refQueue = null;
+    private Map<Object, ModelReference> modelCache = null;
+    private ReferenceQueue<TemplateModel> refQueue = null;
     
     protected ModelCache() {
     }
@@ -46,8 +48,8 @@ public abstract class ModelCache {
     public synchronized void setUseCache(boolean useCache) {
         this.useCache = useCache;
         if (useCache) {
-            modelCache = new IdentityHashMap();
-            refQueue = new ReferenceQueue();
+            modelCache = new IdentityHashMap<Object, ModelReference>();
+            refQueue = new ReferenceQueue<TemplateModel>();
         } else {
             modelCache = null;
             refQueue = null;
@@ -97,7 +99,7 @@ public abstract class ModelCache {
         // duplicate wrapper creation. However, this has no harmful side-effects and
         // is a lesser performance hit.
         synchronized (modelCache) {
-            ref = (ModelReference) modelCache.get(object);
+            ref = modelCache.get(object);
         }
 
         if (ref != null)
@@ -111,8 +113,9 @@ public abstract class ModelCache {
             // Remove cleared references
             for (; ; ) {
                 ModelReference queuedRef = (ModelReference) refQueue.poll();
-                if (queuedRef == null)
+                if (queuedRef == null) {
                     break;
+                }
                 modelCache.remove(queuedRef.object);
             }
             // Register new reference
@@ -125,10 +128,10 @@ public abstract class ModelCache {
      * When it gets cleared (that is, the model became unreachable)
      * it will remove itself from the model cache.
      */
-    private static final class ModelReference extends SoftReference {
+    private static final class ModelReference extends SoftReference<TemplateModel> {
         Object object;
 
-        ModelReference(TemplateModel ref, Object object, ReferenceQueue refQueue) {
+        ModelReference(TemplateModel ref, Object object, ReferenceQueue<TemplateModel> refQueue) {
             super(ref, refQueue);
             this.object = object;
         }

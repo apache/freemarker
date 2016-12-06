@@ -20,11 +20,11 @@
 package freemarker.template;
 
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.Map;
 import java.util.WeakHashMap;
 
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.beans._BeansAPI;
 
 /**
@@ -38,9 +38,11 @@ import freemarker.ext.beans._BeansAPI;
  */
 public class DefaultObjectWrapperBuilder extends DefaultObjectWrapperConfiguration {
 
-    private final static WeakHashMap/*<ClassLoader, Map<BeansWrapperSettings, WeakReference<DefaultObjectWrapper>>*/
-            INSTANCE_CACHE = new WeakHashMap();
-    private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
+    private final static Map<ClassLoader, Map<DefaultObjectWrapperConfiguration, WeakReference<DefaultObjectWrapper>>>
+            INSTANCE_CACHE = new WeakHashMap<
+                    ClassLoader, Map<DefaultObjectWrapperConfiguration, WeakReference<DefaultObjectWrapper>>>();
+    private final static ReferenceQueue<DefaultObjectWrapper> INSTANCE_CACHE_REF_QUEUE
+            = new ReferenceQueue<DefaultObjectWrapper>();
     
     /**
      * Creates a builder that creates a {@link DefaultObjectWrapper} with the given {@code incompatibleImprovements};
@@ -63,16 +65,16 @@ public class DefaultObjectWrapperBuilder extends DefaultObjectWrapperConfigurati
      * a singleton that is also in use elsewhere. 
      */
     public DefaultObjectWrapper build() {
-        return (DefaultObjectWrapper) _BeansAPI.getBeansWrapperSubclassSingleton(
+        return _BeansAPI.getBeansWrapperSubclassSingleton(
                 this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, DefaultObjectWrapperFactory.INSTANCE);
     }
     
     private static class DefaultObjectWrapperFactory
-        implements _BeansAPI._BeansWrapperSubclassFactory {
+        implements _BeansAPI._BeansWrapperSubclassFactory<DefaultObjectWrapper, DefaultObjectWrapperConfiguration> {
     
         private static final DefaultObjectWrapperFactory INSTANCE = new DefaultObjectWrapperFactory(); 
         
-        public BeansWrapper create(BeansWrapperConfiguration bwConf) {
+        public DefaultObjectWrapper create(DefaultObjectWrapperConfiguration bwConf) {
             return new DefaultObjectWrapper(bwConf, true);
         }
     }

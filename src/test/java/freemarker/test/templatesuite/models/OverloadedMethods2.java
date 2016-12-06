@@ -39,7 +39,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.StringUtil;
-import freemarker.test.utility.Helpers;
+import freemarker.test.utility.TestUtil;
 
 public class OverloadedMethods2 {
 
@@ -321,80 +321,80 @@ public class OverloadedMethods2 {
     }
 
     public String varargs1(String s, int... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs1(String s, double... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", double... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", double... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs1(String s, Object... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", Object... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", Object... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs1(Object s, Object... xs) {
-        return "varargs1(Object s = " + s + ", Object... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs1(Object s = " + s + ", Object... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs2(int... xs) {
-        return "varargs2(int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs2(int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs2(double... xs) {
-        return "varargs2(double... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs2(double... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs3(String... xs) {
-        return "varargs3(String... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs3(String... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs3(Comparable... xs) {
-        return "varargs3(Comparable... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs3(Comparable... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String varargs3(Object... xs) {
-        return "varargs3(Object... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs3(Object... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String varargs4(Integer... xs) {
-        return "varargs4(Integer... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs4(Integer... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs4(int... xs) {
-        return "varargs4(int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs4(int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs5(int... xs) {
-        return "varargs5(int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs5(int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String varargs5(int a1, int... xs) {
-        return "varargs5(int a1 = " + a1 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs5(int a1 = " + a1 + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String varargs5(int a1, int a2, int... xs) {
-        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs5(int a1, int a2, int a3, int... xs) {
         return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int a3 = " + a3
-                + ", int... xs = " + Helpers.arrayToString(xs) + ")";
+                + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs6(String a1, int... xs) {
-        return "varargs6(String a1 = " + a1 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs6(String a1 = " + a1 + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String varargs6(Object a1, int a2, int... xs) {
-        return "varargs6(Object a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs6(Object a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String varargs7(int... xs) {
-        return "varargs7(int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs7(int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String varargs7(short a1, int... xs) {
-        return "varargs7(short a1 = " + a1 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
+        return "varargs7(short a1 = " + a1 + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
     
     public String mNullAmbiguous(String s) {
@@ -430,11 +430,11 @@ public class OverloadedMethods2 {
     }
     
     public String mVarargsIgnoredTail(int i, double... ds) {
-        return "mVarargsIgnoredTail(int i = " + i + ", double... ds = " + Helpers.arrayToString(ds) + ")"; 
+        return "mVarargsIgnoredTail(int i = " + i + ", double... ds = " + TestUtil.arrayToString(ds) + ")"; 
     }
     
     public String mVarargsIgnoredTail(int... is) {
-        return "mVarargsIgnoredTail(int... is = " + Helpers.arrayToString(is) + ")"; 
+        return "mVarargsIgnoredTail(int... is = " + TestUtil.arrayToString(is) + ")"; 
     }
     
     public String mLowRankWins(int x, int y, Object o) {
@@ -473,19 +473,19 @@ public class OverloadedMethods2 {
     }
 
     public String mSeqToArrayNonOverloaded(String[] items, String s) {
-        return "mSeqToArrayNonOverloaded(String[] " + Helpers.arrayToString(items) + ", String " + s + ")";
+        return "mSeqToArrayNonOverloaded(String[] " + TestUtil.arrayToString(items) + ", String " + s + ")";
     }
     
     public String mSeqToArrayGoodHint(String[] items, String s) {
-        return "mSeqToArrayGoodHint(String[] " + Helpers.arrayToString(items) + ", String " + s + ")";
+        return "mSeqToArrayGoodHint(String[] " + TestUtil.arrayToString(items) + ", String " + s + ")";
     }
 
     public String mSeqToArrayGoodHint(String[] items, int i) {
-        return "mSeqToArrayGoodHint(String[] " + Helpers.arrayToString(items) + ", int " + i + ")";
+        return "mSeqToArrayGoodHint(String[] " + TestUtil.arrayToString(items) + ", int " + i + ")";
     }
 
     public String mSeqToArrayGoodHint2(String[] items, String s) {
-        return "mSeqToArrayGoodHint2(String[] " + Helpers.arrayToString(items) + ", String " + s + ")";
+        return "mSeqToArrayGoodHint2(String[] " + TestUtil.arrayToString(items) + ", String " + s + ")";
     }
 
     public String mSeqToArrayGoodHint2(String item) {
@@ -493,7 +493,7 @@ public class OverloadedMethods2 {
     }
     
     public String mSeqToArrayPoorHint(String[] items, String s) {
-        return "mSeqToArrayPoorHint(String[] " + Helpers.arrayToString(items) + ", String " + s + ")";
+        return "mSeqToArrayPoorHint(String[] " + TestUtil.arrayToString(items) + ", String " + s + ")";
     }
 
     public String mSeqToArrayPoorHint(String item, int i) {
@@ -501,7 +501,7 @@ public class OverloadedMethods2 {
     }
 
     public String mSeqToArrayPoorHint2(String[] items) {
-        return "mSeqToArrayPoorHint2(String[] " + Helpers.arrayToString(items) + ")";
+        return "mSeqToArrayPoorHint2(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mSeqToArrayPoorHint2(String item) {
@@ -509,43 +509,43 @@ public class OverloadedMethods2 {
     }
     
     public String mSeqToArrayPoorHint3(String[] items) {
-        return "mSeqToArrayPoorHint3(String[] " + Helpers.arrayToString(items) + ")";
+        return "mSeqToArrayPoorHint3(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mSeqToArrayPoorHint3(int[] items) {
-        return "mSeqToArrayPoorHint3(int[] " + Helpers.arrayToString(items) + ")";
+        return "mSeqToArrayPoorHint3(int[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVsListPreference(String[] items) {
-        return "mStringArrayVsListPreference(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVsListPreference(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVsListPreference(List items) {
-        return "mStringArrayVsListPreference(List " + Helpers.listToString(items) + ")";
+        return "mStringArrayVsListPreference(List " + TestUtil.listToString(items) + ")";
     }
 
     public String mStringArrayVsObjectArrayPreference(String[] items) {
-        return "mStringArrayVsObjectArrayPreference(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVsObjectArrayPreference(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVsObjectArrayPreference(Object[] items) {
-        return "mStringArrayVsObjectArrayPreference(Object[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVsObjectArrayPreference(Object[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mIntArrayVsIntegerArrayPreference(int[] items) {
-        return "mIntArrayVsIntegerArrayPreference(int[] " + Helpers.arrayToString(items) + ")";
+        return "mIntArrayVsIntegerArrayPreference(int[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mIntArrayVsIntegerArrayPreference(Integer[] items) {
-        return "mIntArrayVsIntegerArrayPreference(Integer[] " + Helpers.arrayToString(items) + ")";
+        return "mIntArrayVsIntegerArrayPreference(Integer[] " + TestUtil.arrayToString(items) + ")";
     }
     
     public String mIntArrayNonOverloaded(int[] items) {
-        return "mIntArrayNonOverloaded(int[] " + Helpers.arrayToString(items) + ")";
+        return "mIntArrayNonOverloaded(int[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mIntegerArrayNonOverloaded(Integer[] items) {
-        return "mIntegerArrayNonOverloaded(Integer[] " + Helpers.arrayToString(items) + ")";
+        return "mIntegerArrayNonOverloaded(Integer[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mIntegerListNonOverloaded(List<Integer> items) {
@@ -557,7 +557,7 @@ public class OverloadedMethods2 {
     }
 
     public String mStringArrayNonOverloaded(String[] items) {
-        return "mStringArrayNonOverloaded(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayNonOverloaded(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mObjectListNonOverloaded(List<Object> items) {
@@ -565,11 +565,11 @@ public class OverloadedMethods2 {
     }
 
     public String mObjectArrayNonOverloaded(Object[] items) {
-        return "mObjectArrayNonOverloaded(Object[] " + Helpers.arrayToString(items) + ")";
+        return "mObjectArrayNonOverloaded(Object[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mIntegerArrayOverloaded(Integer[] items, int i) {
-        return "mIntegerArrayOverloaded(Integer[] " + Helpers.arrayToString(items) + ", int " + i + ")";
+        return "mIntegerArrayOverloaded(Integer[] " + TestUtil.arrayToString(items) + ", int " + i + ")";
     }
 
     public String mIntegerArrayOverloaded(Object obj, boolean b) {
@@ -577,7 +577,7 @@ public class OverloadedMethods2 {
     }
 
     public String mStringArrayOverloaded(String[] items, int i) {
-        return "mStringArrayOverloaded(String[] " + Helpers.arrayToString(items) + ", int " + i + ")";
+        return "mStringArrayOverloaded(String[] " + TestUtil.arrayToString(items) + ", int " + i + ")";
     }
 
     public String mStringArrayOverloaded(Object obj, boolean b) {
@@ -585,11 +585,11 @@ public class OverloadedMethods2 {
     }
 
     public String mCharArrayOverloaded(char[] items, int i) {
-        return "mCharArrayOverloaded(char[] " + Helpers.arrayToString(items) + ", int " + i + ")";
+        return "mCharArrayOverloaded(char[] " + TestUtil.arrayToString(items) + ", int " + i + ")";
     }
 
     public String mCharArrayOverloaded(Character[] items, String s) {
-        return "mCharArrayOverloaded(Character[] " + Helpers.arrayToString(items) + ", String " + s + ")";
+        return "mCharArrayOverloaded(Character[] " + TestUtil.arrayToString(items) + ", String " + s + ")";
     }
     
     public String mCharArrayOverloaded(Object obj, boolean b) {
@@ -597,7 +597,7 @@ public class OverloadedMethods2 {
     }
 
     public String mStringArrayArrayOverloaded(String[][] arrayArray, int i) {
-        return "mStringArrayArrayOverloaded(String[][] " + Helpers.arrayToString(arrayArray) + ", int " + i + ")";
+        return "mStringArrayArrayOverloaded(String[][] " + TestUtil.arrayToString(arrayArray) + ", int " + i + ")";
     }
     
     public String mStringArrayArrayOverloaded(Object obj, boolean b) {
@@ -605,7 +605,7 @@ public class OverloadedMethods2 {
     }
     
     public String mIntArrayArrayOverloaded(int[][] xss) {
-        return "mIntArrayArrayOverloaded(" + Helpers.arrayToString(xss) + ")";
+        return "mIntArrayArrayOverloaded(" + TestUtil.arrayToString(xss) + ")";
     }
 
     public String mIntArrayArrayOverloaded(String s) {
@@ -613,7 +613,7 @@ public class OverloadedMethods2 {
     }
     
     public String mArrayOfListsOverloaded(List[] xss) {
-        return "mArrayOfListsOverloaded(" + Helpers.arrayToString(xss) + ")";
+        return "mArrayOfListsOverloaded(" + TestUtil.arrayToString(xss) + ")";
     }
 
     public String mArrayOfListsOverloaded(String x) {
@@ -621,31 +621,31 @@ public class OverloadedMethods2 {
     }
     
     public String mIntArrayArrayNonOverloaded(int[][] xss) {
-        return "mIntArrayArrayNonOverloaded(" + Helpers.arrayToString(xss) + ")";
+        return "mIntArrayArrayNonOverloaded(" + TestUtil.arrayToString(xss) + ")";
     }
 
     public String mArrayOfListsNonOverloaded(List[] xss) {
-        return "mArrayOfListsNonOverloaded(" + Helpers.arrayToString(xss) + ")";
+        return "mArrayOfListsNonOverloaded(" + TestUtil.arrayToString(xss) + ")";
     }
     
     public String mStringArrayVarargsNonOverloaded(String... items) {
-        return "mStringArrayVarargsNonOverloaded(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVarargsNonOverloaded(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVarargsOverloaded(String... items) {
-        return "mStringArrayVarargsNonOverloaded(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVarargsNonOverloaded(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVarargsOverloaded1(String... items) {
-        return "mStringArrayVarargsOverloaded1(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVarargsOverloaded1(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVarargsOverloaded1(List<String> items) {
-        return "mStringArrayVarargsOverloaded1(List " + Helpers.listToString(items) + ")";
+        return "mStringArrayVarargsOverloaded1(List " + TestUtil.listToString(items) + ")";
     }
 
     public String mStringArrayVarargsOverloaded2(String... items) {
-        return "mStringArrayVarargsOverloaded2(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVarargsOverloaded2(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVarargsOverloaded2(String item) {
@@ -653,7 +653,7 @@ public class OverloadedMethods2 {
     }
     
     public String mStringArrayVarargsOverloaded3(String... items) {
-        return "mStringArrayVarargsOverloaded3(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVarargsOverloaded3(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVarargsOverloaded3(String item1, String item2) {
@@ -661,15 +661,15 @@ public class OverloadedMethods2 {
     }
     
     public String mStringArrayVarargsOverloaded4(String... items) {
-        return "mStringArrayVarargsOverloaded4(String[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVarargsOverloaded4(String[] " + TestUtil.arrayToString(items) + ")";
     }
 
     public String mStringArrayVarargsOverloaded4(List... items) {
-        return "mStringArrayVarargsOverloaded4(List[] " + Helpers.arrayToString(items) + ")";
+        return "mStringArrayVarargsOverloaded4(List[] " + TestUtil.arrayToString(items) + ")";
     }
     
     public String mListOrString(List<String> items) {
-        return "mListOrString(List " + Helpers.listToString(items) + ")";
+        return "mListOrString(List " + TestUtil.listToString(items) + ")";
     }
 
     public String mListOrString(String item) {
@@ -677,7 +677,7 @@ public class OverloadedMethods2 {
     }
 
     public String mListListOrString(List<List<Object>> items) {
-        return "mListListOrString(List " + Helpers.listToString(items) + ")";
+        return "mListListOrString(List " + TestUtil.listToString(items) + ")";
     }
 
     public String mListListOrString(String item) {
@@ -693,11 +693,11 @@ public class OverloadedMethods2 {
     }
 
     public String mMapOrBooleanVarargs(Map... v) {
-        return "mMapOrBooleanVarargs(Map... " + Helpers.arrayToString(v) + ")";
+        return "mMapOrBooleanVarargs(Map... " + TestUtil.arrayToString(v) + ")";
     }
 
     public String mMapOrBooleanVarargs(boolean... v) {
-        return "mMapOrBooleanVarargs(boolean... " + Helpers.arrayToString(v) + ")";
+        return "mMapOrBooleanVarargs(boolean... " + TestUtil.arrayToString(v) + ")";
     }
 
     public String mMapOrBooleanFixedAndVarargs(Map v) {
@@ -709,11 +709,11 @@ public class OverloadedMethods2 {
     }
 
     public String mMapOrBooleanFixedAndVarargs(Map... v) {
-        return "mMapOrBooleanFixedAndVarargs(Map... " + Helpers.arrayToString(v) + ")";
+        return "mMapOrBooleanFixedAndVarargs(Map... " + TestUtil.arrayToString(v) + ")";
     }
 
     public String mMapOrBooleanFixedAndVarargs(boolean... v) {
-        return "mMapOrBooleanFixedAndVarargs(boolean... " + Helpers.arrayToString(v) + ")";
+        return "mMapOrBooleanFixedAndVarargs(boolean... " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mNumberOrArray(Number v) {
@@ -721,7 +721,7 @@ public class OverloadedMethods2 {
     }
 
     public String mNumberOrArray(Object[] v) {
-        return "mNumberOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mNumberOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mIntOrArray(int v) {
@@ -729,7 +729,7 @@ public class OverloadedMethods2 {
     }
 
     public String mIntOrArray(Object[] v) {
-        return "mIntOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mIntOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
 
     public String mDateOrArray(Date v) {
@@ -737,7 +737,7 @@ public class OverloadedMethods2 {
     }
 
     public String mDateOrArray(Object[] v) {
-        return "mDateOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mDateOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mStringOrArray(String v) {
@@ -745,7 +745,7 @@ public class OverloadedMethods2 {
     }
 
     public String mStringOrArray(Object[] v) {
-        return "mStringOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mStringOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mBooleanOrArray(boolean v) {
@@ -753,7 +753,7 @@ public class OverloadedMethods2 {
     }
 
     public String mBooleanOrArray(Object[] v) {
-        return "mBooleanOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mBooleanOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mMapOrArray(Map v) {
@@ -761,7 +761,7 @@ public class OverloadedMethods2 {
     }
 
     public String mMapOrArray(Object[] v) {
-        return "mMapOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mMapOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mListOrArray(List v) {
@@ -769,7 +769,7 @@ public class OverloadedMethods2 {
     }
 
     public String mListOrArray(Object[] v) {
-        return "mListOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mListOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mSetOrArray(Set v) {
@@ -777,7 +777,7 @@ public class OverloadedMethods2 {
     }
 
     public String mSetOrArray(Object[] v) {
-        return "mSetOrArray(Object[] " + Helpers.arrayToString(v) + ")";
+        return "mSetOrArray(Object[] " + TestUtil.arrayToString(v) + ")";
     }
     
     public String mCharNonOverloaded(char c) {
@@ -1010,7 +1010,7 @@ public class OverloadedMethods2 {
     }
 
     public String bugReport363(Object... fields) {
-        return "Executed: testMethod(Object... fields) on input: fields=" + Helpers.arrayToString(fields);
+        return "Executed: testMethod(Object... fields) on input: fields=" + TestUtil.arrayToString(fields);
     }
     
     private static class MyAdapterNumberModel implements TemplateNumberModel, AdapterTemplateModel {

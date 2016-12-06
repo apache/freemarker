@@ -352,3 +352,9 @@ Join
 - ${abcSet?join(", ", "(empty)", ".")}
 - ${abcCollection?join(", ", "(empty)", ".")}
 <@assertFails message="index 1">${['a', [], 'c']?join(", ", "(empty)", ".")}</@>
+
+Misc
+----
+
+First of set 1: ${abcSet?first}
+First of set 2: ${abcSetNonSeq?first}
