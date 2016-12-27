@@ -105,6 +105,7 @@
   
   <target name="clean" description="get rid of all generated files">
     <delete dir="build" />
+    <delete dir="META-INF" />
   </target>
 
   <target name="clean-classes" description="get rid of compiled classes">
