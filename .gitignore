@@ -4,6 +4,7 @@
 /build.properties
 /archive/
 /ide-dependencies/
+/META-INF
 
 /out/
 /bin/
