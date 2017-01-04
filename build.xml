@@ -1069,14 +1069,22 @@ Proceed? </input>
     </delete>    
     <ivy:retrieve conf="IDE" pattern="ide-dependencies/[artifact]-[revision].[ext]" />
 
-    <!-- Extract META-INF folder with files like MANIFEST.MF from freemarker.jar and put it in base directory for eclipse 
-    (this is needed if you want to reference freemarker-source code in the context of OSGI development with Eclipse) -->
+    <!--
+      Extract META-INF/MANITSET.MF from freemarker.jar and put it into the project directory for Eclipse (this is
+      needed if you want to reference freemarker source code in the context of OSGI development with Eclipse)
+    -->
     <unzip src="build/freemarker.jar" dest=".">
       <patternset>
         <include name="META-INF/*"/>
+        <exclude name="META-INF/LICENSE"/>
+        <exclude name="META-INF/DISCLAIMER"/>
+        <exclude name="META-INF/NOTICE"/>
       </patternset>
     </unzip>
-
+    <echo file="META-INF/DO-NOT-EDIT.txt"><!--
+      -->Do not edit the files in this directory! They are extracted from freemarker.jar as part of&#x0a;<!--
+      -->the ide-dependencies Ant task, because Eclipse OSGi support expects them to be here.<!--
+    --></echo>
   </target>
   
   <!--
