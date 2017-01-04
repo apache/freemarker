@@ -138,8 +138,8 @@ different version or an entierly different IDE, still read this, and try to
 apply it to your development environment:
 
 - Install Ant and Ivy, if you haven't yet; see earlier.
-- From the command line, run `ant clean javacc ide-dependencies`. (Note that
-  now the "ide-dependencies" and  "build/generated-sources" was created.)
+- From the command line, run `ant clean jar ide-dependencies`. (Note that
+  now the folders "ide-dependencies", "build/generated-sources" and "META-INF" were created.)
 - Start Eclipse
 - You may prefer to start a new workspace (File -> "Switch workspace"), but
   it's optional.

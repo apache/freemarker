@@ -105,6 +105,7 @@
   
   <target name="clean" description="get rid of all generated files">
     <delete dir="build" />
+    <delete dir="META-INF" />
   </target>
 
   <target name="clean-classes" description="get rid of compiled classes">
@@ -1067,6 +1068,15 @@ Proceed? </input>
       </fileset>  
     </delete>    
     <ivy:retrieve conf="IDE" pattern="ide-dependencies/[artifact]-[revision].[ext]" />
+
+    <!-- Extract META-INF folder with files like MANIFEST.MF from freemarker.jar and put it in base directory for eclipse 
+    (this is needed if you want to reference freemarker-source code in the context of OSGI development with Eclipse) -->
+    <unzip src="build/freemarker.jar" dest=".">
+      <patternset>
+        <include name="META-INF/*"/>
+      </patternset>
+    </unzip>
+
   </target>
   
   <!--
