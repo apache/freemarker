@@ -122,3 +122,9 @@ Technical
     then it's deduced from the titles.
 
 - The "book" element must have this attribute: conformance="docgen"
+
+- It sometimes happens that you want to change some content that you see in
+  the generated output, which you can't find in the DocBook XML. In such case,
+  check the contents docgen.cjson, which should be in the same directory as
+  the XML. If it's not there either, it's perhaps hard-wired into the
+  templates in docgen.
