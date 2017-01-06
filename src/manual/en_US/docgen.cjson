@@ -34,6 +34,7 @@ generateEclipseTOC
 removeNodesWhenOnline: [ "preface" ]
 
 copyrightHolder: "The Apache Software Foundation"
+copyrightSuffix: "Apache FreeMarker, FreeMarker, Apache Incubator, Apache, the Apache FreeMarker logo are trademarks of The Apache Software Foundation."
 copyrightStartYear: 1999
 copyrightCommentFile: "docgen-misc/copyrightComment.txt"
 
