@@ -27,9 +27,9 @@
 
 .gradle
 
-.DS_Store
+.DS_Store*
 .AppleDouble
 .LSOverride
 
 .directory
-.Trash-*
+.Trash*
