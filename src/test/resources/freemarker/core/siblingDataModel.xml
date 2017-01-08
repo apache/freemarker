@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<person>
+    <gender>male</gender>
+    <name>pradeep</name>
+    <dob>12th August</dob><address>Chennai, India</address>
+    <!--This is a comment Node -->
+    <?xml-stylesheet type="text/css" href="style.css"?>
+    <profession>Software Engineer</profession>
+    <![CDATA[    ]]>
+    <hobby>gardening</hobby>
+    <![CDATA[this is a valid cdata]]>
+    <phone>12345678</phone>
+</person>
