@@ -1,21 +1,3 @@
-package freemarker.core;
-
-import freemarker.ext.dom.NodeModel;
-import freemarker.template.TemplateException;
-import freemarker.test.TemplateTest;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,9 +6,9 @@ import java.util.Map;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,52 +16,53 @@ import java.util.Map;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package freemarker.core;
+
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import freemarker.ext.dom.NodeModel;
+import freemarker.template.TemplateException;
+import freemarker.test.TemplateTest;
+
 public class SiblingTest extends TemplateTest {
 
     @Before
-    public void setUp() {
-        try {
-            InputSource is = new InputSource(getClass().getResourceAsStream("siblingDataModel.xml"));
-            addToDataModel("doc", NodeModel.parse(is) );
-        } catch (Exception e) {
-            System.out.println("Exception while parsing the dataModel xml");
-            e.printStackTrace();
-        }
+    public void setUp() throws SAXException, IOException, ParserConfigurationException {
+        InputSource is = new InputSource(getClass().getResourceAsStream("siblingDataModel.xml"));
+        addToDataModel("doc", NodeModel.parse(is));
     }
 
     @Test
-    public void testEmptyPreviousSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.name?previousSibling}";
-        assertOutput(ftl, "\n    ");
+    public void testBlankPreviousSibling() throws IOException, TemplateException {
+        assertOutput("${doc.person.name?previousSibling}", "\n    ");
     }
 
     @Test
-    public void testNonEmptyPreviousSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.address?previousSibling}";
-        assertOutput(ftl, "12th August");
+    public void testNonBlankPreviousSibling() throws IOException, TemplateException {
+        assertOutput("${doc.person.address?previousSibling}", "12th August");
     }
 
     @Test
-    public void testEmptyNextSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.name?nextSibling}";
-        assertOutput(ftl, "\n    ");
+    public void testBlankNextSibling() throws IOException, TemplateException {
+        assertOutput("${doc.person.name?nextSibling}", "\n    ");
     }
 
     @Test
-    public void testNonEmptyNextSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.dob?nextSibling}";
-        assertOutput(ftl, "Chennai, India");
+    public void testNonBlankNextSibling() throws IOException, TemplateException {
+        assertOutput("${doc.person.dob?nextSibling}", "Chennai, India");
     }
-
 
     @Test
     public void testNullPreviousSibling() throws IOException, TemplateException {
-        String ftl = "<#if doc.person?previousSibling??> " +
-                        "previous is not null" +
-                      "<#else>" +
-                         "previous is null" +
-                    "</#if>";
-        assertOutput(ftl, "previous is null");
+        assertOutput("${doc.person?previousSibling?? ?c}", "false");
     }
 
     @Test
@@ -97,30 +80,22 @@ public class SiblingTest extends TemplateTest {
 
     @Test
     public void testNullSignificantPreviousSibling() throws IOException, TemplateException {
-        String ftl = "<#if doc.person.phone.@@next_significant?size == 0>" +
-                "Next is null" +
-                "<#else>" +
-                "Next is not null" +
-                "</#if>";
-        assertOutput(ftl, "Next is null");
+        assertOutput("${doc.person.phone.@@next_significant?size}", "0");
 
     }
 
     @Test
     public void testSkippingCommentNode() throws IOException, TemplateException {
-        String ftl = "${doc.person.profession.@@previous_significant}";
-        assertOutput(ftl, "Chennai, India");
+        assertOutput("${doc.person.profession.@@previous_significant}", "Chennai, India");
     }
 
     @Test
-    public void testSkippingEmptyCdataNode() throws IOException, TemplateException {
-        String ftl = "${doc.person.hobby.@@previous_significant}";
-        assertOutput(ftl, "Software Engineer");
+    public void testSkippingEmptyCDataNode() throws IOException, TemplateException {
+        assertOutput("${doc.person.hobby.@@previous_significant}", "Software Engineer");
     }
 
     @Test
-    public void testValidCdataNode() throws IOException, TemplateException {
-        String ftl = "${doc.person.phone.@@previous_significant}";
-        assertOutput(ftl, "\n    this is a valid cdata\n    ");
+    public void testValidCDataNode() throws IOException, TemplateException {
+        assertOutput("${doc.person.phone.@@previous_significant}", "\n    this is a valid cdata\n    ");
     }
 }

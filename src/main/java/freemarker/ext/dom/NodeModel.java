@@ -76,7 +76,7 @@ import freemarker.template.TemplateSequenceModel;
  * then), but should be used to represent a node set of exactly 1 node.
  */
 abstract public class NodeModel
-implements TemplateNodeModel, TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
+implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel {
 
     static private final Logger LOG = Logger.getLogger("freemarker.dom");
@@ -311,7 +311,7 @@ implements TemplateNodeModel, TemplateNodeModelEx, TemplateHashModel, TemplateSe
         return parent;
     }
 
-    public TemplateNodeModel getPreviousSibling() throws TemplateModelException {
+    public TemplateNodeModelEx getPreviousSibling() throws TemplateModelException {
         if (previousSibling == null) {
             Node previous = node.getPreviousSibling();
             previousSibling = wrap(previous);
@@ -319,7 +319,7 @@ implements TemplateNodeModel, TemplateNodeModelEx, TemplateHashModel, TemplateSe
         return previousSibling;
     }
 
-    public TemplateNodeModel getNextSibling() throws TemplateModelException {
+    public TemplateNodeModelEx getNextSibling() throws TemplateModelException {
         if (nextSibling == null) {
             Node next = node.getNextSibling();
             nextSibling = wrap(next);

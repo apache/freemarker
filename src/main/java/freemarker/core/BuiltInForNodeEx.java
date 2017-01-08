@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,13 +22,12 @@ import freemarker.template.*;
 
 public abstract class BuiltInForNodeEx extends BuiltIn {
     @Override
-    TemplateModel _eval(Environment env)
-            throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel model = target.eval(env);
         if (model instanceof TemplateNodeModelEx) {
             return calculateResult((TemplateNodeModelEx) model, env);
         } else {
-            throw new NonNodeException(target, model, env);
+            throw new NonExtendedNodeException(target, model, env);
         }
     }
     abstract TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env)

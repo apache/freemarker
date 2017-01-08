@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,15 +19,22 @@
 
 package freemarker.template;
 
+import freemarker.ext.dom.NodeModel;
+
+/**
+ * A {@link NodeModel} that supports navigating to the previous and next sibling nodes.
+ * 
+ * @since 2.3.26
+ */
 public interface TemplateNodeModelEx extends TemplateNodeModel {
 
     /**
-     * @return the immediate Previous Sibling of this node
+     * @return The immediate previous sibling of this node, or {@code null} if there's no such node.
      */
-    TemplateNodeModel getPreviousSibling() throws TemplateModelException;
+    TemplateNodeModelEx getPreviousSibling() throws TemplateModelException;
 
     /**
-     * @return the immediate next Sibling of this node
+     * @return The immediate next sibling of this node, or {@code null} if there's no such node.
      */
-    TemplateNodeModel getNextSibling() throws TemplateModelException;
+    TemplateNodeModelEx getNextSibling() throws TemplateModelException;
 }

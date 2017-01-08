@@ -34,9 +34,10 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 class ElementModel extends NodeModel implements TemplateScalarModel {
-    private final static ArrayList EMPTY_ARRAYLIST = new ArrayList();
+
     public ElementModel(Element element) {
         super(element);
     }
@@ -97,7 +98,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     previousSibling = previousSibling.getPreviousSibling();
                 }
                 if(previousSibling == null) {
-                    return new NodeListModel(EMPTY_ARRAYLIST, null);
+                    return new NodeListModel(Collections.emptyList(), null);
                 } else {
                     return wrap(previousSibling);
                 }
@@ -108,7 +109,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     nextSibling = nextSibling.getNextSibling();
                 }
                 if(nextSibling == null) {
-                    return new NodeListModel(EMPTY_ARRAYLIST, null);
+                    return new NodeListModel(Collections.emptyList(), null);
                 }
                 else {
                     return wrap(nextSibling);

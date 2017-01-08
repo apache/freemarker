@@ -50,6 +50,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNodeModelEx;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
@@ -190,7 +191,9 @@ public class ClassUtil {
     private static void appendTemplateModelTypeName(StringBuilder sb, Set typeNamesAppended, Class cl) {
         int initalLength = sb.length();
         
-        if (TemplateNodeModel.class.isAssignableFrom(cl)) {
+        if (TemplateNodeModelEx.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "extended node");
+        } else if (TemplateNodeModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "node");
         }
         
