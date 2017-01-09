@@ -26157,10 +26157,25 @@ End book</programlisting>
             anyway.</para>
 
             <para>Now, if you still say you need to modify sequences/hashes
-            directly with the FreeMarker template, here are two solutions, but
-            please read the warning after them:</para>
+            directly with the FreeMarker template, here are some solutions,
+            but please read the warning after them:</para>
 
             <itemizedlist>
+              <listitem>
+                <para>You can access the Java API of a
+                <literal>java.util.Map</literal> with the help of the
+                <literal>api</literal> built-in, like
+                <literal>myMap?api.put(11, "eleven")</literal>. You will need
+                to get a <literal>Map</literal> from somewhere though (an FTL
+                hash literal like <literal>{}</literal> won't suffice, as it's
+                read only and doesn't support <literal>api</literal> either).
+                For example, you could expose a Java method or
+                <literal>TemplateMethodModelEx</literal> to the template that
+                returns a <literal>new LinkeHashMap()</literal>, so you can do
+                <literal>&lt;#assign myMap =
+                utils.newLinkedHashMap()&gt;</literal>.</para>
+              </listitem>
+
               <listitem>
                 <para>You can write a <literal>TemplateMethodModelEx</literal>
                 and <literal>TemplateDirectiveModel</literal> implementation
@@ -26186,13 +26201,8 @@ End book</programlisting>
 
               <listitem>
                 <para>A sequence can have some methods/directives if you use a
-                customized wrapper (so you can <literal>&lt;@myList.append foo
-                /&gt;</literal>). (Also, if you use
-                <literal>BeansWrapper</literal> and configure it so it exposes
-                the public methods, you can use the Java API for variables
-                that are for <literal>java.util.Map</literal>-s and
-                <literal>java.util.List-s</literal>. Just like with Apache
-                Velocity.)</para>
+                customized wrapper (so you can write something like
+                <literal>&lt;@myList.append foo /&gt;</literal>).</para>
               </listitem>
             </itemizedlist>
 
