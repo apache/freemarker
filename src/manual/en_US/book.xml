@@ -7,9 +7,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
-
+  
     http://www.apache.org/licenses/LICENSE-2.0
-
+  
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26661,6 +26661,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Made <literal>+</literal> operator when adding two hashes
               significantly faster (be removing the overhead caused be
               throwing and then catching an exception).</para>
+            </listitem>
+
+            <listitem>
+              <para>Better error messages when someone tries to get an invalid
+              <literal>@@<replaceable>...</replaceable></literal> subvariable
+              of an XML DOM node. (Now it's not issued by the XPath
+              implementation, which just sees it as a syntactical
+              error.)</para>
             </listitem>
           </itemizedlist>
         </section>

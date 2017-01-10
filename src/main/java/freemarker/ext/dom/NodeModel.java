@@ -72,8 +72,8 @@ import freemarker.template.TemplateSequenceModel;
  * apply {@link NodeModel#simplify(Node)} on them.
  * 
  * <p>
- * Note that this class shouldn't be used to represent a result set of 0 or multiple nodes (we use {@link NodeListModel}
- * then), but should be used to represent a node set of exactly 1 node.
+ * Note that this class can't be used to represent a result set of 0 or multiple nodes (we use {@link NodeListModel}
+ * for that), but should be used to represent a node set of exactly 1 node instead of {@link NodeListModel}.
  */
 abstract public class NodeModel
 implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
@@ -257,44 +257,48 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     
     public TemplateModel get(String key) throws TemplateModelException {
         if (key.startsWith("@@")) {
-            if (key.equals("@@text")) {
+            if (key.equals(AtAtKey.TEXT.getKey())) {
                 return new SimpleScalar(getText(node));
-            }
-            if (key.equals("@@namespace")) {
+            } else if (key.equals(AtAtKey.NAMESPACE.getKey())) {
                 String nsURI = node.getNamespaceURI();
                 return nsURI == null ? null : new SimpleScalar(nsURI);
-            }
-            if (key.equals("@@local_name")) {
+            } else if (key.equals(AtAtKey.LOCAL_NAME.getKey())) {
                 String localName = node.getLocalName();
                 if (localName == null) {
                     localName = getNodeName();
                 }
                 return new SimpleScalar(localName);
-            }
-            if (key.equals("@@markup")) {
+            } else if (key.equals(AtAtKey.MARKUP.getKey())) {
                 StringBuilder buf = new StringBuilder();
                 NodeOutputter nu = new NodeOutputter(node);
                 nu.outputContent(node, buf);
                 return new SimpleScalar(buf.toString());
-            }
-            if (key.equals("@@nested_markup")) {
+            } else if (key.equals(AtAtKey.NESTED_MARKUP.getKey())) {
                 StringBuilder buf = new StringBuilder();
                 NodeOutputter nu = new NodeOutputter(node);
                 nu.outputContent(node.getChildNodes(), buf);
                 return new SimpleScalar(buf.toString());
-            }
-            if (key.equals("@@qname")) {
+            } else if (key.equals(AtAtKey.QNAME.getKey())) {
                 String qname = getQualifiedName();
-                return qname == null ? null : new SimpleScalar(qname);
+                return qname != null ? new SimpleScalar(qname) : null;
+            } else {
+                // As @@... would cause exception in the XPath engine, we throw a nicer exception now. 
+                if (AtAtKey.containsKey(key)) {
+                    throw new TemplateModelException(
+                            "\"" + key + "\" is not supported for an XML node of type \"" + getNodeType() + "\".");
+                } else {
+                    throw new TemplateModelException("Unsupported @@ key: " + key);
+                }
             }
-        }
-        XPathSupport xps = getXPathSupport();
-        if (xps != null) {
-            return xps.executeQuery(node, key);
         } else {
-            throw new TemplateModelException(
-                    "Can't try to resolve the XML query key, because no XPath support is available. "
-                    + "It's either malformed or an XPath expression: " + key);
+            XPathSupport xps = getXPathSupport();
+            if (xps != null) {
+                return xps.executeQuery(node, key);
+            } else {
+                throw new TemplateModelException(
+                        "Can't try to resolve the XML query key, because no XPath support is available. "
+                        + "This is either malformed or an XPath expression: " + key);
+            }
         }
     }
     

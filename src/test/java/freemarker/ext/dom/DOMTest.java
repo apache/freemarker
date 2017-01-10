@@ -107,4 +107,16 @@ public class DOMTest extends TemplateTest {
         addToDataModel("doc", doc);
     }
 
+    @Test
+    public void testInvalidAtAtKeyErrors() throws Exception {
+        addDocToDataModel("<r><multipleMatches /><multipleMatches /></r>");
+        assertErrorContains("${doc.r.@@invalid_key}", "Unsupported @@ key", "@invalid_key");
+        assertErrorContains("${doc.@@start_tag}", "@@start_tag", "not supported", "document");
+        assertErrorContains("${doc.@@}", "\"@@\"", "not supported", "document");
+        assertErrorContains("${doc.r.noMatch.@@invalid_key}", "Unsupported @@ key", "@invalid_key");
+        assertErrorContains("${doc.r.multipleMatches.@@invalid_key}", "Unsupported @@ key", "@invalid_key");
+        assertErrorContains("${doc.r.noMatch.@@attributes_markup}", "single XML node", "@@attributes_markup");
+        assertErrorContains("${doc.r.multipleMatches.@@attributes_markup}", "single XML node", "@@attributes_markup");
+    }
+    
 }

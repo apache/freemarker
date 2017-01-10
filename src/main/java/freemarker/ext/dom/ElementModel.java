@@ -19,6 +19,8 @@
  
 package freemarker.ext.dom;
 
+import java.util.Collections;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,9 +34,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 class ElementModel extends NodeModel implements TemplateScalarModel {
 
@@ -69,68 +68,69 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                 }
             }
             return ns;
-        }
-        if (key.equals("**")) {
-            Element elem = (Element) node;
-            return new NodeListModel(elem.getElementsByTagName("*"), this);    
-        }
-        if (key.startsWith("@")) {
-            if (key.equals("@@") || key.equals("@*")) {
-                return new NodeListModel(node.getAttributes(), this);
-            }
-            if (key.equals("@@start_tag")) {
-                NodeOutputter nodeOutputter = new NodeOutputter(node);
-                return new SimpleScalar(nodeOutputter.getOpeningTag((Element) node));
-            }
-            if (key.equals("@@end_tag")) {
-                NodeOutputter nodeOutputter = new NodeOutputter(node);
-                return new SimpleScalar(nodeOutputter.getClosingTag((Element) node));
-            }
-            if (key.equals("@@attributes_markup")) {
-                StringBuilder buf = new StringBuilder();
-                NodeOutputter nu = new NodeOutputter(node);
-                nu.outputContent(node.getAttributes(), buf);
-                return new SimpleScalar(buf.toString().trim());
-            }
-            if (key.equals("@@previous_significant")) {
-                Node previousSibling = node.getPreviousSibling();
-                while(previousSibling != null && !this.isSignificantNode(previousSibling)) {
-                    previousSibling = previousSibling.getPreviousSibling();
-                }
-                if(previousSibling == null) {
-                    return new NodeListModel(Collections.emptyList(), null);
+        } else if (key.equals("**")) {
+            return new NodeListModel(((Element) node).getElementsByTagName("*"), this);    
+        } else if (key.startsWith("@")) {
+            if (key.startsWith("@@")) {
+                if (key.equals(AtAtKey.ATTRIBUTES.getKey())) {
+                    return new NodeListModel(node.getAttributes(), this);
+                } else if (key.equals(AtAtKey.START_TAG.getKey())) {
+                    NodeOutputter nodeOutputter = new NodeOutputter(node);
+                    return new SimpleScalar(nodeOutputter.getOpeningTag((Element) node));
+                } else if (key.equals(AtAtKey.END_TAG.getKey())) {
+                    NodeOutputter nodeOutputter = new NodeOutputter(node);
+                    return new SimpleScalar(nodeOutputter.getClosingTag((Element) node));
+                } else if (key.equals(AtAtKey.ATTRIBUTES_MARKUP.getKey())) {
+                    StringBuilder buf = new StringBuilder();
+                    NodeOutputter nu = new NodeOutputter(node);
+                    nu.outputContent(node.getAttributes(), buf);
+                    return new SimpleScalar(buf.toString().trim());
+                } else if (key.equals(AtAtKey.PREVIOUS_SIGNIFICANT.getKey())) {
+                    Node previousSibling = node.getPreviousSibling();
+                    while(previousSibling != null && !this.isSignificantNode(previousSibling)) {
+                        previousSibling = previousSibling.getPreviousSibling();
+                    }
+                    if(previousSibling == null) {
+                        return new NodeListModel(Collections.emptyList(), null);
+                    } else {
+                        return wrap(previousSibling);
+                    }
+                } else if (key.equals(AtAtKey.NEXT_SIGNIFICANT.getKey())) {
+                    Node nextSibling = node.getNextSibling();
+                    while(nextSibling != null && !this.isSignificantNode(nextSibling)) {
+                        nextSibling = nextSibling.getNextSibling();
+                    }
+                    if(nextSibling == null) {
+                        return new NodeListModel(Collections.emptyList(), null);
+                    } else {
+                        return wrap(nextSibling);
+                    }
                 } else {
-                    return wrap(previousSibling);
+                    // We don't anything like this that's element-specific; fall back 
+                    return super.get(key);
+                }
+            } else { // Starts with "@", but not with "@@"
+                if (DomStringUtil.isXMLID(key, 1)) {
+                    Attr att = getAttribute(key.substring(1));
+                    if (att == null) { 
+                        return new NodeListModel(this);
+                    }
+                    return wrap(att);
+                } else if (key.equals("@*")) {
+                    return new NodeListModel(node.getAttributes(), this);
+                } else {
+                    // We don't anything like this that's element-specific; fall back 
+                    return super.get(key);
                 }
             }
-            if (key.equals("@@next_significant")) {
-                Node nextSibling = node.getNextSibling();
-                while(nextSibling != null && !this.isSignificantNode(nextSibling)) {
-                    nextSibling = nextSibling.getNextSibling();
-                }
-                if(nextSibling == null) {
-                    return new NodeListModel(Collections.emptyList(), null);
-                }
-                else {
-                    return wrap(nextSibling);
-                }
-            }
-            if (StringUtil.isXMLID(key.substring(1))) {
-                Attr att = getAttribute(key.substring(1));
-                if (att == null) { 
-                    return new NodeListModel(this);
-                }
-                return wrap(att);
-            }
-        }
-        if (StringUtil.isXMLID(key)) {
+        } else if (DomStringUtil.isXMLID(key)) {
+            // We interpret key as an element name
             NodeListModel result = ((NodeListModel) getChildNodes()).filterByName(key);
-            if (result.size() == 1) {
-                return result.get(0);
-            }
-            return result;
+            return result.size() != 1 ? result : result.get(0);
+        } else {
+            // We don't anything like this that's element-specific; fall back 
+            return super.get(key);
         }
-        return super.get(key);
     }
 
     public boolean isSignificantNode(Node node) throws TemplateModelException {
@@ -219,6 +219,6 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     }
     
     boolean matchesName(String name, Environment env) {
-        return StringUtil.matchesName(name, getNodeName(), getNodeNamespace(), env);
+        return DomStringUtil.matchesName(name, getNodeName(), getNodeNamespace(), env);
     }
 }

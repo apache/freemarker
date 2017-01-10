@@ -22,6 +22,7 @@ package freemarker.core;
 import java.util.List;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.ext.dom._ExtDomApi;
 import freemarker.template.*;
 import freemarker.template.utility.StringUtil;
 
@@ -135,7 +136,7 @@ class BuiltInsForNodes {
                     }
                 } else {
                     for (int j = 0; j < names.size(); j++) {
-                        if (StringUtil.matchesName((String) names.get(j), nodeName, nsURI, env)) {
+                        if (_ExtDomApi.matchesName((String) names.get(j), nodeName, nsURI, env)) {
                             result.add(tnm);
                             break;
                         }
