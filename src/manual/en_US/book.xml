@@ -12647,6 +12647,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_next_sibling">next_sibling</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_no_esc">no_esc</link></para>
           </listitem>
 
@@ -12676,6 +12681,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_parent">parent</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_previous_sibling">previous_sibling</link></para>
           </listitem>
 
           <listitem>
@@ -16979,6 +16989,42 @@ Sorted by name.last:
           node.</para>
         </section>
 
+        <section xml:id="ref_builtin_next_sibling">
+          <title>next_sibling</title>
+
+          <indexterm>
+            <primary>next_sibling built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is only available since 2.3.26</para>
+          </note>
+
+          <para>Returns the following sibling node of the node. (Two nodes in
+          a tree are said to be siblings if they are on the same level and are
+          directly next to each other.) If there's no such node, the
+          expression
+          <literal><replaceable>node</replaceable>?next_sibling??</literal>
+          evaluates to <literal>false</literal>.</para>
+
+          <para>XML: Note that the value returned by this built-in is also a
+          sequence of length 1 (same as the result of some XPath expressions),
+          however if there's no next sibling, the result is a missing value
+          (null) instead of an empty sequence. Also note that for XML element
+          nodes you can also use
+          <literal><replaceable>node</replaceable>.@@next_sibling_element</literal>,
+          which is practical if you want to ignore the whitespace that
+          separates two apparently sibling elements; see more <link
+          linkend="xgui_imperative_formal">here...</link></para>
+
+          <note>
+            <para>For custom node implementations this built-in is only
+            supported if that implements the
+            <literal>freemarker.template.TemplateNodeModelEx</literal>
+            interface.</para>
+          </note>
+        </section>
+
         <section xml:id="ref_builtin_node_namespace">
           <title>node_namespace</title>
 
@@ -17009,10 +17055,10 @@ Sorted by name.last:
             <primary>node_type built-in</primary>
           </indexterm>
 
-          <para>A string that describes the type of node this is. FreeMarker
-          does not define the exact meaning of node type; it depends on what
-          your variables are modeling. It's possible that a node doesn't
-          support node type at all. In this case, the built-in evaluates to an
+          <para>A string that describes the type of the node. FreeMarker does
+          not define the exact meaning of node type; it depends on what your
+          variables are modeling. It's possible that a node doesn't support
+          node type at all. In this case, the built-in evaluates to an
           undefined value, so you can't use the returned value. (You can still
           check if a node supports the type property with
           <literal><replaceable>node</replaceable>?node_type??</literal>.)</para>
@@ -17035,18 +17081,44 @@ Sorted by name.last:
             <primary>parent built-in</primary>
           </indexterm>
 
-          <para>The node that is this node's immediate parent in the node
-          tree. The root node has no parent node, so for the root node, the
-          expression
+          <para>Returns the node that is this node's immediate parent in the
+          node tree. The root node has no parent node, so for the root node,
+          the expression
           <literal><replaceable>node</replaceable>?parent??</literal>
           evaluates to <literal>false</literal>.</para>
 
           <para>XML: Note that the value returned by this built-in is also a
           sequence (same as the result of XPath expression
           <literal>..</literal>, when you write
-          <literal>someNode[".."]</literal>). Also note that for attribute
-          nodes, it returns the element the attribute belongs to, despite that
-          attribute nodes are not counted as children of the element.</para>
+          <literal>someNode[".."]</literal>), however if there's no parent,
+          the result is a missing value (null) instead of an empty sequence.
+          Also note that for attribute nodes, it returns the element the
+          attribute belongs to, despite that attribute nodes are not counted
+          as children of the element.</para>
+        </section>
+
+        <section xml:id="ref_builtin_previous_sibling">
+          <title>previous_sibling</title>
+
+          <indexterm>
+            <primary>previous_sibling built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is only available since 2.3.26</para>
+          </note>
+
+          <para>Returns the previous sibling node of the node. Apart from the
+          direction, this is the same as <literal>next_sibling</literal>, so
+          see more details <link
+          linkend="ref_builtin_next_sibling">there...</link></para>
+
+          <note>
+            <para>For custom node implementations this built-in is only
+            supported if that implements the
+            <literal>freemarker.template.TemplateNodeModelEx</literal>
+            interface.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_root">
@@ -24474,12 +24546,12 @@ Test Book</programlisting>
               <td>No string value. (Error when you try to use it as
               string.)</td>
 
-              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <td><literal><replaceable>elementName</replaceable></literal>,
               <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
-              <literal>"*"</literal>, <literal>"**"</literal>,
-              <literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <literal>*</literal>, <literal>**</literal>,
+              <literal>@@markup</literal>, <literal>@@nested_markup</literal>,
+              <literal>@@text</literal>, <literal>@@local_name</literal>,
+              <literal>@@qname</literal>, <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24493,18 +24565,19 @@ Test Book</programlisting>
               children concatenated together. Error otherwise, when you try to
               use it as string.</td>
 
-              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <td><literal><replaceable>elementName</replaceable></literal>,
               <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
-              <literal>"*"</literal>, <literal>"**"</literal>,
-              <literal>"@<replaceable>attrName</replaceable>"</literal>,
+              <literal>*</literal>, <literal>**</literal>,
+              <literal>@<replaceable>attrName</replaceable></literal>,
               <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>,
-              <literal>"@@"</literal>, <literal>"@*"</literal>,
-              <literal>"@@start_tag"</literal>,
-              <literal>"@@end_tag"</literal>,
-              <literal>"@@attributes_markup"</literal>,
-              <literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
+              <literal>@@</literal>, <literal>"@*"</literal>,
+              <literal>@@start_tag</literal>, <literal>@@end_tag</literal>,
+              <literal>@@attributes_markup</literal>,
+              <literal>@@next_sibling_element</literal>,
+              <literal>@@previous_sibling_element</literal>,
+              <literal>@@markup</literal>, <literal>@@nested_markup</literal>,
+              <literal>@@text</literal>, <literal>@@local_name</literal>,
+              <literal>@@qname</literal>, <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24514,9 +24587,10 @@ Test Book</programlisting>
 
               <td>The text itself.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24527,9 +24601,10 @@ Test Book</programlisting>
               <td>The part between the target name and the
               <literal>?&gt;</literal>.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24540,9 +24615,10 @@ Test Book</programlisting>
               <td>The text of the comment, without the delimiters
               <literal>&lt;!--</literal> and <literal>--&gt;</literal>.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24554,9 +24630,10 @@ Test Book</programlisting>
 
               <td>The value of the attribute.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@qname</literal>, <literal>@@local_name</literal>,
+              <literal>@@qname</literal>, <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24569,9 +24646,10 @@ Test Book</programlisting>
               <td>No string value. (Error when you try to use it as
               string.)</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
           </tbody>
         </informaltable>
@@ -24622,7 +24700,7 @@ Test Book</programlisting>
 
         <itemizedlist>
           <listitem>
-            <para><literal>"<replaceable>elementName</replaceable>"</literal>,
+            <para><literal><replaceable>elementName</replaceable></literal>,
             <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>:
             Returns the sequence of child nodes that are elements of name
             <literal><replaceable>elementName</replaceable></literal>. (Note
@@ -24643,8 +24721,8 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"*"</literal>: Returns the sequence of all child
-            (direct descedant) <emphasis>element</emphasis> nodes. The
+            <para><literal>*</literal>: Returns the sequence of all child
+            (direct descendant) <emphasis>element</emphasis> nodes. The
             sequence will contain the elements in the ``document order'', that
             is, in the order in which the first character of the XML
             representation of each node occurs (after expansion of general
@@ -24652,13 +24730,13 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"**"</literal>: Returns the sequence of all
+            <para><literal>**</literal>: Returns the sequence of all
             descendant <emphasis>element</emphasis> nodes. The sequence will
             contain the elements in the document order.</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@<replaceable>attName</replaceable>"</literal>,
+            <para><literal>@<replaceable>attName</replaceable></literal>,
             <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>:
             Returns the attribute
             <literal><replaceable>attName</replaceable></literal> of the
@@ -24686,32 +24764,41 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@"</literal> or <literal>"@*"</literal>: Returns
+            <para><literal>@@</literal> or <literal>"@*"</literal>: Returns
             the sequence of attribute nodes belonging to the parent element.
             This is the same as XPath <literal>@*</literal>.</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@@qname"</literal>: Returns the full-qualified
-            name of the element (such as <literal>e:book</literal>, in
-            contrast to the local name returned by
-            <literal>?node_name</literal> that is <literal>book</literal>) .
-            The prefix used (as <literal>e</literal>) is chosen based on the
-            prefix registered in the current namespace with the
-            <literal>ns_prefixes</literal> parameter of the
-            <literal>ftl</literal> directive, and not influenced by the prefix
-            used in the source XML document. If you have set a default XML
-            namespace, then for nodes that use that, prefix
-            <literal>D</literal> will be used. For nodes that does not belong
-            to an XML namespace, no prefix is used (even if you have set a
-            default namespace). If there is no prefix registered for the
+            <para><literal>@@qname</literal>: Returns the full-qualified name
+            of the element (such as <literal>e:book</literal>, in contrast to
+            the local name returned by <literal>?node_name</literal> that is
+            <literal>book</literal>) . The prefix used (as
+            <literal>e</literal>) is chosen based on the prefix registered in
+            the current namespace with the <literal>ns_prefixes</literal>
+            parameter of the <literal>ftl</literal> directive, and not
+            influenced by the prefix used in the source XML document. If you
+            have set a default XML namespace, then for nodes that use that,
+            prefix <literal>D</literal> will be used. For nodes that does not
+            belong to an XML namespace, no prefix is used (even if you have
+            set a default namespace). If there is no prefix registered for the
             namespace of the node, the result is a non-existent variable
             (<literal>node.@@qname??</literal> is
             <literal>false</literal>).</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@@markup"</literal>: This returns the full XML
+            <para><literal>@@local_mame</literal>: The name of the node
+            without the namespace prefix.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@namespace</literal>: The namespace URL (not the
+            namespace prefix) of the node.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@markup</literal>: This returns the full XML
             markup of a node, as a string. (Full XML markup means that it also
             contains the markup of the child nodes, and the markup of the
             children of the child nodes, and so on.) The markup you get is not
@@ -24735,20 +24822,20 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@nested_markup"</literal>: This is similar to
-            <literal>"@@markup"</literal>, but it returns the XML markup of an
+            <para><literal>@@nested_markup</literal>: This is similar to
+            <literal>@@markup</literal>, but it returns the XML markup of an
             element without its opening and closing tags. For the document
-            node, it returns the same as <literal>"@@markup"</literal>. For
+            node, it returns the same as <literal>@@markup</literal>. For
             other node types (text, processing instruction, etc.), it returns
-            an empty string. Unlike with <literal>"@@markup"</literal>, no
+            an empty string. Unlike with <literal>@@markup</literal>, no
             <literal>xmlns:<replaceable>prefix</replaceable></literal>
-            attributes will be placed into the ouput, but regarding the
+            attributes will be placed into the output, but regarding the
             prefixes used in element and attribute names the rules are the
             same.</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@@text"</literal>: This returns the value of all
+            <para><literal>@@text</literal>: This returns the value of all
             text nodes that occur within the node (all descendant text nodes,
             not just direct children), concatenated together into a single
             string. If the node has no text node children, then the result is
@@ -24756,7 +24843,7 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@start_tag"</literal>: Returns the markup of the
+            <para><literal>@@start_tag</literal>: Returns the markup of the
             <link linkend="gloss.startTag">start-tag</link> of the element
             node. As with <literal>@@markup</literal>, the output is not
             necessary the same as in the original XML document, but it is
@@ -24767,7 +24854,7 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@end_tag"</literal>: Returns the markup of the
+            <para><literal>@@end_tag</literal>: Returns the markup of the
             <link linkend="gloss.endTag">end-tag</link> of the element node.
             As with <literal>@@markup</literal>, the output is not necessary
             the same as in the original XML document, but it is semantically
@@ -24780,6 +24867,26 @@ Test Book</programlisting>
             element node. As with <literal>@@markup</literal>, the output is
             not necessary the same as in the original XML document, but it is
             semantically equivalent with that.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@next_sibling_element</literal> (since 2.3.26):
+            The following sibling element of an element node or an empty node
+            sequence if there's no such element. An element counts as a
+            sibling of another element if they are on the same hierarchical
+            level, and there's no other element or non-whitespace character
+            data (text or CDATA) between the two elements. For example in
+            <literal>&lt;a/&gt;&lt;!-- comment
+            --&gt;#&amp;x20;&lt;b/&gt;</literal> the two elements are
+            siblings, but not in <literal>&lt;a/&gt;text&lt;b/&gt;</literal>
+            or <literal>&lt;a/&gt;&lt;x/&gt;&lt;b/&gt;</literal>.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@previous_sibling_element</literal> (since
+            2.3.26): The previous sibling element of an element node or an
+            empty node sequence if there's no such element. See the last point
+            for the meaning of sibling.</para>
           </listitem>
         </itemizedlist>
 
@@ -24816,30 +24923,30 @@ Test Book</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <para><literal><replaceable>elementName</replaceable></literal>,
               <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@<replaceable>attrName</replaceable>"</literal>,
+              <para><literal>@<replaceable>attrName</replaceable></literal>,
               <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal></para>
+              <para><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@@text"</literal></para>
+              <para><literal>@@text</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"*"</literal>, <literal>"**"</literal></para>
+              <para><literal>*</literal>, <literal>**</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@@"</literal>, <literal>"@*"</literal></para>
+              <para><literal>@@</literal>, <literal>"@*"</literal></para>
             </listitem>
           </itemizedlist>
 
@@ -26627,7 +26734,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_26">
         <title>2.3.26 (incubating at Apache)</title>
 
-        <para>Release date: FIXME</para>
+        <para>Release date: 2017-FIXME</para>
 
         <para><emphasis role="bold">This is a stable, final
         release.</emphasis> The <quote>incubating</quote> suffix is required
@@ -26650,6 +26757,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               earlier it has failed depending on the
               <literal>object_wrapper</literal> configuration setting.</para>
             </listitem>
+
+            <listitem>
+              <para>Added
+              <literal><replaceable>node</replaceable>?next_sibling</literal>
+              and
+              <literal><replaceable>node</replaceable>?previous_sibling</literal>
+              to move sideways in a node trees (<link
+              linkend="ref_builtin_next_sibling">see reference...</link>).
+              This works with XML DOM nodes, or with any custom
+              <literal>TemplateNodeModelEx</literal> implementations.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added new <literal>@@</literal> keys to XML DOM models:
+              <literal>@@next_sibling_element</literal>,
+              <literal>@@previous_sibling_element</literal>. These get the
+              sibling node if that's an element, with the extra that they
+              silently skip any whitespace text and comment and processing
+              instruction between them. (See more about <literal>@@</literal>
+              keys <link
+              linkend="xgui_imperative_formal">here...</link>)</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -26657,6 +26786,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added the
+              <literal>freemarker.template.TemplateNodeModelEx</literal>
+              interface which extends the <literal>TemplateNodeModel</literal>
+              instance with two methods, <literal>TemplateNodeModelEx
+              getNextSibling()</literal> and <literal>TemplateNodeModelEx
+              getPreviousSibling()</literal> methods. This is required by
+              <literal><replaceable>node</replaceable>?next_sibling</literal>
+              and
+              <literal><replaceable>node</replaceable>?previous_sibling</literal>
+              in the templates. This new interface is already implemented by
+              the standard W3C DOM node wrapper of FreeMarker.</para>
+            </listitem>
+
             <listitem>
               <para>Made <literal>+</literal> operator when adding two hashes
               significantly faster (be removing the overhead caused be
