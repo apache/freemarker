@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package freemarker.core;
+package freemarker.ext.dom;
 
 import java.io.IOException;
 
@@ -28,21 +28,21 @@ import org.junit.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import freemarker.ext.dom.NodeModel;
 import freemarker.template.TemplateException;
 import freemarker.test.TemplateTest;
 
-public class SiblingTest extends TemplateTest {
+public class DOMSiblingTest extends TemplateTest {
 
     @Before
     public void setUp() throws SAXException, IOException, ParserConfigurationException {
-        InputSource is = new InputSource(getClass().getResourceAsStream("siblingDataModel.xml"));
+        InputSource is = new InputSource(getClass().getResourceAsStream("DOMSiblingTest.xml"));
         addToDataModel("doc", NodeModel.parse(is));
     }
 
     @Test
     public void testBlankPreviousSibling() throws IOException, TemplateException {
         assertOutput("${doc.person.name?previousSibling}", "\n    ");
+        assertOutput("${doc.person.name?previous_sibling}", "\n    ");
     }
 
     @Test
@@ -53,6 +53,7 @@ public class SiblingTest extends TemplateTest {
     @Test
     public void testBlankNextSibling() throws IOException, TemplateException {
         assertOutput("${doc.person.name?nextSibling}", "\n    ");
+        assertOutput("${doc.person.name?next_sibling}", "\n    ");
     }
 
     @Test
@@ -67,14 +68,12 @@ public class SiblingTest extends TemplateTest {
 
     @Test
     public void testSignificantPreviousSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.name.@@previous_sibling_element}";
-        assertOutput(ftl, "male");
+        assertOutput("${doc.person.name.@@previous_sibling_element}", "male");
     }
 
     @Test
     public void testSignificantNextSibling() throws IOException, TemplateException {
-        String ftl = "${doc.person.name.@@next_sibling_element}";
-        assertOutput(ftl, "12th August");
+        assertOutput("${doc.person.name.@@next_sibling_element}", "12th August");
     }
 
     @Test
@@ -96,4 +95,5 @@ public class SiblingTest extends TemplateTest {
     public void testValidCDataNode() throws IOException, TemplateException {
         assertOutput("${doc.person.phone.@@previous_sibling_element?size}", "0");
     }
+    
 }
