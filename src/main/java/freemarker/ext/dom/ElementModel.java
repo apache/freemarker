@@ -106,11 +106,11 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                         return wrap(nextSibling);
                     }
                 } else {
-                    // We don't anything like this that's element-specific; fall back 
+                    // We don't know anything like this that's element-specific; fall back 
                     return super.get(key);
                 }
             } else { // Starts with "@", but not with "@@"
-                if (DomStringUtil.isXMLID(key, 1)) {
+                if (DomStringUtil.isXMLNameLike(key, 1)) {
                     Attr att = getAttribute(key.substring(1));
                     if (att == null) { 
                         return new NodeListModel(this);
@@ -119,11 +119,11 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                 } else if (key.equals("@*")) {
                     return new NodeListModel(node.getAttributes(), this);
                 } else {
-                    // We don't anything like this that's element-specific; fall back 
+                    // We don't know anything like this that's element-specific; fall back 
                     return super.get(key);
                 }
             }
-        } else if (DomStringUtil.isXMLID(key)) {
+        } else if (DomStringUtil.isXMLNameLike(key)) {
             // We interpret key as an element name
             NodeListModel result = ((NodeListModel) getChildNodes()).filterByName(key);
             return result.size() != 1 ? result : result.get(0);

@@ -32,8 +32,8 @@ public final class _ExtDomApi {
         // Not meant to be called
     }
     
-    static public boolean isXMLID(String name) {
-        return DomStringUtil.isXMLID(name);
+    static public boolean isXMLNameLike(String name) {
+        return DomStringUtil.isXMLNameLike(name);
     }
     
     static public boolean matchesName(String qname, String nodeName, String nsURI, Environment env) {

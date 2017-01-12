@@ -33,19 +33,19 @@ final class DomStringUtil {
         // Not meant to be instantiated
     }
 
-    static boolean isXMLID(String name) {
-        return isXMLID(name, 0);
+    static boolean isXMLNameLike(String name) {
+        return isXMLNameLike(name, 0);
     }
     
     /**
-     * Check if the subvariable name is just an element name, or a more complex XPath expression.
+     * Check if the name looks like an XML element name.
      * 
      * @param firstCharIdx The index of the character in the string parameter that we treat as the beginning of the
      *      string to check. This is to spare substringing that has become more expensive in Java 7.  
      * 
      * @return whether the name is a valid XML element name. (This routine might only be 99% accurate. REVISIT)
      */
-    static boolean isXMLID(String name, int firstCharIdx) {
+    static boolean isXMLNameLike(String name, int firstCharIdx) {
         int ln = name.length();
         for (int i = firstCharIdx; i < ln; i++) {
             char c = name.charAt(i);

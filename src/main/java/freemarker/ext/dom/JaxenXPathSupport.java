@@ -65,32 +65,34 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 class JaxenXPathSupport implements XPathSupport {
     
-    private static final CustomAttribute cache = 
+    private static final CustomAttribute XPATH_CACHE_ATTR = 
         new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE) {
             @Override
             protected Object create() {
-                return new HashMap();
+                return new HashMap<String, BaseXPath>();
             }
         };
 
+        // [2.4] Can't we just use Collections.emptyList()? 
     private final static ArrayList EMPTY_ARRAYLIST = new ArrayList();
 
     public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
         try {
             BaseXPath xpath;
-            Map xpathCache = (Map) cache.get();
+            Map<String, BaseXPath> xpathCache = (Map<String, BaseXPath>) XPATH_CACHE_ATTR.get();
             synchronized (xpathCache) {
-                xpath = (BaseXPath) xpathCache.get(xpathQuery);
+                xpath = xpathCache.get(xpathQuery);
                 if (xpath == null) {
-                    xpath = new BaseXPath(xpathQuery, fmDomNavigator);
+                    xpath = new BaseXPath(xpathQuery, FM_DOM_NAVIGATOR);
                     xpath.setNamespaceContext(customNamespaceContext);
-                    xpath.setFunctionContext(fmFunctionContext);
-                    xpath.setVariableContext(fmVariableContext);
+                    xpath.setFunctionContext(FM_FUNCTION_CONTEXT);
+                    xpath.setVariableContext(FM_VARIABLE_CONTEXT);
                     xpathCache.put(xpathQuery, xpath);
                 }
             }
             List result = xpath.selectNodes(context != null ? context : EMPTY_ARRAYLIST);
             if (result.size() == 1) {
+                // [2.4] Use the proper object wrapper (argument in 2.4) 
                 return ObjectWrapper.DEFAULT_WRAPPER.wrap(result.get(0));
             }
             NodeListModel nlm = new NodeListModel(result, null);
@@ -117,13 +119,13 @@ class JaxenXPathSupport implements XPathSupport {
         }
     };
 
-    private static final VariableContext fmVariableContext = new VariableContext() {
+    private static final VariableContext FM_VARIABLE_CONTEXT = new VariableContext() {
         public Object getVariableValue(String namespaceURI, String prefix, String localName)
         throws UnresolvableException {
             try {
                 TemplateModel model = Environment.getCurrentEnvironment().getVariable(localName);
                 if (model == null) {
-                    throw new UnresolvableException("Variable " + localName + " not found.");
+                    throw new UnresolvableException("Variable \"" + localName + "\" not found.");
                 }
                 if (model instanceof TemplateScalarModel) {
                     return ((TemplateScalarModel) model).getAsString();
@@ -140,11 +142,12 @@ class JaxenXPathSupport implements XPathSupport {
             } catch (TemplateModelException e) {
                 throw new UndeclaredThrowableException(e);
             }
-            throw new UnresolvableException("Variable " + localName + " is not a string, number, date, or boolean");
+            throw new UnresolvableException(
+                    "Variable \"" + localName + "\" exists, but it's not a string, number, date, or boolean");
         }
     };
      
-    private static final FunctionContext fmFunctionContext = new XPathFunctionContext() {
+    private static final FunctionContext FM_FUNCTION_CONTEXT = new XPathFunctionContext() {
         @Override
         public Function getFunction(String namespaceURI, String prefix, String localName)
         throws UnresolvableException {
@@ -156,14 +159,18 @@ class JaxenXPathSupport implements XPathSupport {
         }
     };
     
-    private static final CustomAttribute cachedTree = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
+    /**
+     * Stores the the template parsed as {@link Document} in the template itself.
+     */
+    private static final CustomAttribute FM_DOM_NAVIAGOTOR_CACHED_DOM
+            = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
      
-    private static final Navigator fmDomNavigator = new DocumentNavigator() {
+    private static final Navigator FM_DOM_NAVIGATOR = new DocumentNavigator() {
         @Override
         public Object getDocument(String uri) throws FunctionCallException {
             try {
                 Template raw = getTemplate(uri);
-                Document doc = (Document) cachedTree.get(raw);
+                Document doc = (Document) FM_DOM_NAVIAGOTOR_CACHED_DOM.get(raw);
                 if (doc == null) {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     factory.setNamespaceAware(true);
@@ -174,7 +181,7 @@ class JaxenXPathSupport implements XPathSupport {
                     // If the entity resolver got called 0 times, the document
                     // is standalone, so we can safely cache it
                     if (er.getCallCount() == 0) {
-                        cachedTree.set(doc, raw);
+                        FM_DOM_NAVIAGOTOR_CACHED_DOM.set(doc, raw);
                     }
                 }
                 return doc;

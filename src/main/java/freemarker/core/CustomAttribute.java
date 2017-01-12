@@ -40,6 +40,7 @@ import freemarker.template.Template;
  *     myAttrValue = MY_ATTR.get(cfg);
  * </pre>
  */
+// [2.4] Use generics; type parameter used for the type of the stored value 
 public class CustomAttribute {
     
     /**

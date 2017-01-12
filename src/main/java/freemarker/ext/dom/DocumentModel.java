@@ -52,7 +52,7 @@ class DocumentModel extends NodeModel implements TemplateHashModel {
         } else if (key.equals("**")) {
             NodeList nl = ((Document) node).getElementsByTagName("*");
             return new NodeListModel(nl, this);
-        } else if (DomStringUtil.isXMLID(key)) {
+        } else if (DomStringUtil.isXMLNameLike(key)) {
             ElementModel em = (ElementModel) NodeModel.wrap(((Document) node).getDocumentElement());
             if (em.matchesName(key, Environment.getCurrentEnvironment())) {
                 return em;

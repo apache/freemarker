@@ -23,5 +23,8 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 public interface XPathSupport {
+    
+    // [2.4] Add argument to pass down the ObjectWrapper to use 
     TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException;
+    
 }

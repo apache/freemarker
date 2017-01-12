@@ -40,7 +40,6 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.StringUtil;
 
 /**
  * Used when the result set contains 0 or multiple nodes; shouldn't be used when you have exactly 1 node. For exactly 1
@@ -49,6 +48,7 @@ import freemarker.template.utility.StringUtil;
  */
 class NodeListModel extends SimpleSequence implements TemplateHashModel, _UnexpectedTypeErrorExplainerTemplateModel {
     
+    // [2.4] make these private
     NodeModel contextNode;
     XPathSupport xpathSupport;
     
@@ -61,8 +61,8 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         }
     };
     
-    NodeListModel(Node node) {
-        this(NodeModel.wrap(node));
+    NodeListModel(Node contextNode) {
+        this(NodeModel.wrap(contextNode));
     }
     
     NodeListModel(NodeModel contextNode) {
@@ -142,9 +142,9 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                 }
             }
         }
-        if (DomStringUtil.isXMLID(key) 
+        if (DomStringUtil.isXMLNameLike(key) 
                 || ((key.startsWith("@")
-                        && (DomStringUtil.isXMLID(key, 1)  || key.equals("@@") || key.equals("@*"))))
+                        && (DomStringUtil.isXMLNameLike(key, 1)  || key.equals("@@") || key.equals("@*"))))
                 || key.equals("*") || key.equals("**")) {
             NodeListModel result = new NodeListModel(contextNode);
             for (int i = 0; i < size(); i++) {

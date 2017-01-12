@@ -1663,7 +1663,7 @@ public class StringUtil {
      */
     @Deprecated
     static public boolean isXMLID(String name) {
-        return _ExtDomApi.isXMLID(name);
+        return _ExtDomApi.isXMLNameLike(name);
     }
     
     /**
