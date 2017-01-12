@@ -101,6 +101,10 @@ public class DOMTest extends TemplateTest {
         addToDataModel("doc", NodeModel.parse(new InputSource(new StringReader(xml))));
     }
 
+    private void addDocToDataModelNoSimplification(String xml) throws SAXException, IOException, ParserConfigurationException {
+        addToDataModel("doc", NodeModel.parse(new InputSource(new StringReader(xml)), false, false));
+    }
+    
     private void addNSUnawareDocToDataModel(String xml) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory newFactory = DocumentBuilderFactory.newInstance();
         newFactory.setNamespaceAware(false);
@@ -119,6 +123,39 @@ public class DOMTest extends TemplateTest {
         assertErrorContains("${doc.r.multipleMatches.@@invalid_key}", "Unsupported @@ key", "@invalid_key");
         assertErrorContains("${doc.r.noMatch.@@attributes_markup}", "single XML node", "@@attributes_markup");
         assertErrorContains("${doc.r.multipleMatches.@@attributes_markup}", "single XML node", "@@attributes_markup");
+    }
+    
+    @Test
+    public void testAtAtSiblingElement() throws Exception {
+        addDocToDataModel("<r><a/><b/></r>");
+        assertOutput("${doc.r.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.r.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.r.a.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.r.a.@@next_sibling_element.@@qname}", "b");
+        assertOutput("${doc.r.b.@@previous_sibling_element.@@qname}", "a");
+        assertOutput("${doc.r.b.@@next_sibling_element?size}", "0");
+        
+        addDocToDataModel("<r>\r\n\t <a/>\r\n\t <b/>\r\n\t </r>");
+        assertOutput("${doc.r.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.r.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.r.a.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.r.a.@@next_sibling_element.@@qname}", "b");
+        assertOutput("${doc.r.b.@@previous_sibling_element.@@qname}", "a");
+        assertOutput("${doc.r.b.@@next_sibling_element?size}", "0");
+        
+        addDocToDataModel("<r>t<a/>t<b/>t</r>");
+        assertOutput("${doc.r.a.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.r.a.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.r.b.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.r.b.@@next_sibling_element?size}", "0");
+        
+        addDocToDataModelNoSimplification("<r><a/> <!-- --><?pi?>&#x20;<b/></r>");
+        assertOutput("${doc.r.a.@@next_sibling_element.@@qname}", "b");
+        assertOutput("${doc.r.b.@@previous_sibling_element.@@qname}", "a");
+        
+        addDocToDataModelNoSimplification("<r><a/> <!-- -->t<!-- --> <b/></r>");
+        assertOutput("${doc.r.a.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.r.b.@@previous_sibling_element?size}", "0");
     }
     
 }
