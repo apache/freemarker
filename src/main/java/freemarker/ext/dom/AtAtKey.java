@@ -33,8 +33,8 @@ enum AtAtKey {
     NAMESPACE("@@namespace"),
     LOCAL_NAME("@@local_name"),
     ATTRIBUTES("@@"),
-    PREVIOUS_SIGNIFICANT("@@previous_significant"),
-    NEXT_SIGNIFICANT("@@next_significant");
+    PREVIOUS_SIBLING_ELEMENT("@@previous_sibling_element"),
+    NEXT_SIBLING_ELEMENT("@@next_sibling_element");
 
     private final String key;
 

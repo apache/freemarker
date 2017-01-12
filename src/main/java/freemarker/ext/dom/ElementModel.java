@@ -33,7 +33,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.StringUtil;
 
 class ElementModel extends NodeModel implements TemplateScalarModel {
 
@@ -85,26 +84,20 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     NodeOutputter nu = new NodeOutputter(node);
                     nu.outputContent(node.getAttributes(), buf);
                     return new SimpleScalar(buf.toString().trim());
-                } else if (key.equals(AtAtKey.PREVIOUS_SIGNIFICANT.getKey())) {
+                } else if (key.equals(AtAtKey.PREVIOUS_SIBLING_ELEMENT.getKey())) {
                     Node previousSibling = node.getPreviousSibling();
-                    while(previousSibling != null && !this.isSignificantNode(previousSibling)) {
+                    while (previousSibling != null && !this.isSignificantNode(previousSibling)) {
                         previousSibling = previousSibling.getPreviousSibling();
                     }
-                    if(previousSibling == null) {
-                        return new NodeListModel(Collections.emptyList(), null);
-                    } else {
-                        return wrap(previousSibling);
-                    }
-                } else if (key.equals(AtAtKey.NEXT_SIGNIFICANT.getKey())) {
+                    return previousSibling != null && previousSibling.getNodeType() == Node.ELEMENT_NODE
+                            ? wrap(previousSibling) : new NodeListModel(Collections.emptyList(), null);  
+                } else if (key.equals(AtAtKey.NEXT_SIBLING_ELEMENT.getKey())) {
                     Node nextSibling = node.getNextSibling();
-                    while(nextSibling != null && !this.isSignificantNode(nextSibling)) {
+                    while (nextSibling != null && !this.isSignificantNode(nextSibling)) {
                         nextSibling = nextSibling.getNextSibling();
                     }
-                    if(nextSibling == null) {
-                        return new NodeListModel(Collections.emptyList(), null);
-                    } else {
-                        return wrap(nextSibling);
-                    }
+                    return nextSibling != null && nextSibling.getNodeType() == Node.ELEMENT_NODE
+                            ? wrap(nextSibling) : new NodeListModel(Collections.emptyList(), null);  
                 } else {
                     // We don't know anything like this that's element-specific; fall back 
                     return super.get(key);
@@ -131,17 +124,6 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
             // We don't anything like this that's element-specific; fall back 
             return super.get(key);
         }
-    }
-
-    public boolean isSignificantNode(Node node) throws TemplateModelException {
-        boolean significantNode = false;
-        if(node != null) {
-            boolean isEmpty = StringUtil.isTrimmableToEmpty(node.getTextContent().toCharArray());
-            boolean isPINode = node.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE;
-            boolean isCommentNode = node.getNodeType() == Node.COMMENT_NODE;
-            significantNode = !(isEmpty || isPINode || isCommentNode);
-        }
-        return significantNode;
     }
 
     public String getAsString() throws TemplateModelException {
@@ -218,6 +200,31 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         return result;
     }
     
+    private boolean isSignificantNode(Node node) throws TemplateModelException {
+        return (node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE)
+                ? !isBlankXMLText(node.getTextContent())
+                : node.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE && node.getNodeType() != Node.COMMENT_NODE;
+    }
+    
+    private boolean isBlankXMLText(String s) {
+        if (s == null) {
+            return true;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (!isXMLWhiteSpace(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * White space according the XML spec. 
+     */
+    private boolean isXMLWhiteSpace(char c) {
+        return c == ' ' || c == '\t' || c == '\n' | c == '\r';
+    }
+
     boolean matchesName(String name, Environment env) {
         return DomStringUtil.matchesName(name, getNodeName(), getNodeNamespace(), env);
     }

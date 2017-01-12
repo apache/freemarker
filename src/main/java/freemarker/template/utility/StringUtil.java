@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.ext.dom._ExtDomApi;
-import freemarker.template.Template;
 import freemarker.template.Version;
 
 /**
