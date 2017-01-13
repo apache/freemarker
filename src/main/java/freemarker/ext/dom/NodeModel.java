@@ -110,8 +110,6 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     final Node node;
     private TemplateSequenceModel children;
     private NodeModel parent;
-    private NodeModel previousSibling;
-    private NodeModel nextSibling;
     
     /**
      * Sets the DOM Parser implementation to be used when building NodeModel
@@ -316,19 +314,11 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
 
     public TemplateNodeModelEx getPreviousSibling() throws TemplateModelException {
-        if (previousSibling == null) {
-            Node previous = node.getPreviousSibling();
-            previousSibling = wrap(previous);
-        }
-        return previousSibling;
+        return wrap(node.getPreviousSibling());
     }
 
     public TemplateNodeModelEx getNextSibling() throws TemplateModelException {
-        if (nextSibling == null) {
-            Node next = node.getNextSibling();
-            nextSibling = wrap(next);
-        }
-        return nextSibling;
+        return wrap(node.getNextSibling());
     }
 
     public TemplateSequenceModel getChildNodes() {
