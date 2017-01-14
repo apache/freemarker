@@ -37,7 +37,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.security.acl.Owner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -873,7 +872,7 @@ public class TaglibFactory implements TemplateHashModel {
         
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(false);
-        factory.setValidating(false);
+        factory.setValidating(false); // Especially as we use dummy empty DTD-s
         XMLReader reader;
         try {
             reader = factory.newSAXParser().getXMLReader();
@@ -881,7 +880,7 @@ public class TaglibFactory implements TemplateHashModel {
             // Not expected
             throw new RuntimeException("XML parser setup failed", e);
         }
-        reader.setEntityResolver(new LocalDtdEntityResolver());
+        reader.setEntityResolver(new EmptyContentEntityResolver()); // To deal with referred DTD-s
         reader.setContentHandler(handler);
         reader.setErrorHandler(handler);
         
@@ -1862,38 +1861,13 @@ public class TaglibFactory implements TemplateHashModel {
 
     }
 
-    private static final class LocalDtdEntityResolver implements EntityResolver {
-        
-        private static final Map DTDS = new HashMap();
-        static
-        {
-            // JSP taglib 1.2
-            DTDS.put("-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN", "web-jsptaglibrary_1_2.dtd");
-            DTDS.put("http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd", "web-jsptaglibrary_1_2.dtd");
-            // JSP taglib 1.1
-            DTDS.put("-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN", "web-jsptaglibrary_1_1.dtd");
-            DTDS.put("http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd", "web-jsptaglibrary_1_1.dtd");
-            // Servlet 2.3
-            DTDS.put("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN", "web-app_2_3.dtd");
-            DTDS.put("http://java.sun.com/dtd/web-app_2_3.dtd", "web-app_2_3.dtd");
-            // Servlet 2.2
-            DTDS.put("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN", "web-app_2_2.dtd");
-            DTDS.put("http://java.sun.com/j2ee/dtds/web-app_2_2.dtd", "web-app_2_2.dtd");
-        }
+    /**
+     * Dummy resolver that returns 0 length content for all requests.
+     */
+    private static final class EmptyContentEntityResolver implements EntityResolver {
         
         public InputSource resolveEntity(String publicId, String systemId) {
-            String resourceName = (String) DTDS.get(publicId);
-            if (resourceName == null) {
-                resourceName = (String) DTDS.get(systemId);
-            }
-            InputStream resourceStream;
-            if (resourceName != null) {
-                resourceStream = getClass().getResourceAsStream(resourceName);
-            } else {
-                // Fake an empty stream for unknown DTDs
-                resourceStream = new ByteArrayInputStream(new byte[0]);
-            }
-            InputSource is = new InputSource(resourceStream);
+            InputSource is = new InputSource(new ByteArrayInputStream(new byte[0]));
             is.setPublicId(publicId);
             is.setSystemId(systemId);
             return is;

@@ -38107,20 +38107,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 END LICENSE
 
 
-Files developed outside the FreeMarker project
-----------------------------------------------
-
-FreeMarker, both in its source code and binary form (freemarker.jar)
-includes a number of files that are licensed by the Apache Software
-Foundation under the Apache License, Version 2.0. This is the same
-license as the license of FreeMaker. These files are:
-
-    freemarker/ext/jsp/web-app_2_2.dtd
-    freemarker/ext/jsp/web-app_2_3.dtd
-    freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
-    freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
-
-
 Historical notes
 ----------------
 

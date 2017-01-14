@@ -7,17 +7,3 @@ This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
 ===========================================================================
-
-Apache FreeMarker, both in its source code and binary form (freemarker.jar)
-includes files that were developed outside the Apache FreeMarker project,
-and are licensed by the Apache Software Foundation under the Apache
-License, Version 2.0. This is the same license as the license of Apache
-FreeMarker. These files in the Apache FreeMarker binary (inside the jar
-file) are:
-  
-    freemarker/ext/jsp/web-app_2_2.dtd
-    freemarker/ext/jsp/web-app_2_3.dtd
-    freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
-    freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
-
-===========================================================================
