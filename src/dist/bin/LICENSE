@@ -203,12 +203,30 @@
 
 =========================================================================
 
-The Apache FreeMarker (incubating) source code contains the following
-binaries, which were created at the Apache FreeMarker (incubating)
-project, and hence are covered by the same license as the other source
-files of it:
+The documentation includes a selection of icons from various icon sets
+(fonts), stored together inside these files, which were geneated with
+https://icomoon.io/app/:
 
-    src/main/misc/overloadedNumberRules/prices.ods
-    src/manual/en_US/docgen-originals/figures/overview.odg
+    documentation/_html/docgen-resources/fonts/icomoon.eot
+    documentation/_html/docgen-resources/fonts/icomoon.svg
+    documentation/_html/docgen-resources/fonts/icomoon.ttf
+    documentation/_html/docgen-resources/fonts/icomoon.woff
+    
+The name, license, and attribution of each icon sets (fonts) used follows:
+    
+- The documentation includes icons from Entypo pictograms, version 2.0,
+  by Daniel Bruce (http://www.entypo.com/, http://www.danielbruce.se/),
+  licensed under Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0)
+  (http://creativecommons.org/licenses/by-sa/3.0/legalcode) and under SIL
+  Open Font License 1.1 (http://scripts.sil.org/OFL).
+
+- The documentation includes icons from Font Awesome by Dave Gandy
+  (http://fontawesome.io), licensed under SIL Open Font License 1.1
+  (http://scripts.sil.org/OFL).
+
+- The documentation includes icons from Material Design icons by Google
+  (http://google.github.io/material-design-icons/), licensed under
+  Creative Common Attribution 4.0 International License (CC-BY 4.0)
+  (https://creativecommons.org/licenses/by/4.0/).
 
 =========================================================================

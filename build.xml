@@ -644,8 +644,8 @@
     <copy todir="${dist.bin.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <include name="README" />
-        <include name="LICENSE" />
-        <!-- NOTICE is binary-distribution-specific, and is copied later. -->
+        <!-- LICENSE is binary-distribution-specific, and is copied later. -->
+        <include name="NOTICE" />
         <include name="DISCLAIMER" />
         <include name="RELEASE-NOTES" />
       </fileset>
@@ -888,9 +888,11 @@
 
     <mkdir dir="build/javadoc-attachment-metainf"/>
     <copy todir="build/javadoc-attachment-metainf">
-      <fileset dir="${dist.bin.dir}" includes="LICENSE, DISCLAIMER" />
+      <fileset dir="${dist.bin.dir}" includes="DISCLAIMER, NOTICE" />
     </copy>
-    <copy file="src/dist/javadoc/META-INF/NOTICE" todir="build/javadoc-attachment-metainf" />
+    <copy todir="build/javadoc-attachment-metainf">
+      <fileset dir="src/dist/javadoc/META-INF/" />
+    </copy>
     <jar destfile="build/maven-javadoc-attachment.jar">
       <fileset dir="${dist.bin.dir}/documentation/_html/api" />
       <metainf dir="build/javadoc-attachment-metainf" includes="**/*" />

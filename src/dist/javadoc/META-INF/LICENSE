@@ -200,15 +200,3 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
-=========================================================================
-
-The Apache FreeMarker (incubating) source code contains the following
-binaries, which were created at the Apache FreeMarker (incubating)
-project, and hence are covered by the same license as the other source
-files of it:
-
-    src/main/misc/overloadedNumberRules/prices.ods
-    src/manual/en_US/docgen-originals/figures/overview.odg
-
-=========================================================================

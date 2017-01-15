@@ -26815,6 +26815,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
           </itemizedlist>
         </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-17">FREEMARKER-17</link>:
+              Removed the Servlet- and JSP-related <literal>*.dtd</literal>
+              files to simplify licensing. We can operate without them as
+              before, as validation with them was disabled earlier too. At
+              this point, everything in the source code of the FreeMarker
+              engine, and everything in the produced
+              <literal>freemarker.jar</literal> was created inside the
+              FreeMarker project.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-27">FREEMARKER-27</link>:
+              Moved some content from the <literal>NOTICES</literal> files
+              over to the <literal>LICENSE</literal> file, to follow the
+              Apache Incubator guidelines closer.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
       </section>
 
       <section xml:id="versions_2_3_25">
