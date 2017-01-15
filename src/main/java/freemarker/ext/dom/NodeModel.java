@@ -22,6 +22,7 @@ package freemarker.ext.dom;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.util.Collections;
@@ -112,9 +113,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     private NodeModel parent;
     
     /**
-     * Sets the DOM Parser implementation to be used when building NodeModel
-     * objects from XML files.
+     * Sets the DOM parser implementation to be used when building {@link NodeModel} objects from XML files or from
+     * {@link InputStream} with the static convenience methods of {@link NodeModel}. Otherwise FreeMarker itself doesn't
+     * use this.
+     * 
+     * @see #getDocumentBuilderFactory()
+     * 
+     * @deprecated It's a bad practice to change static fields, as if multiple independent components do that in the
+     *             same JVM, they unintentionally affect each other. Therefore it's recommended to leave this static
+     *             value at its default.
      */
+    @Deprecated
     static public void setDocumentBuilderFactory(DocumentBuilderFactory docBuilderFactory) {
         synchronized (STATIC_LOCK) {
             NodeModel.docBuilderFactory = docBuilderFactory;
@@ -122,8 +131,11 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
     
     /**
-     * @return the DOM Parser implementation that is used when 
-     * building NodeModel objects from XML files.
+     * Returns the DOM parser implementation that is used when building {@link NodeModel} objects from XML files or from
+     * {@link InputStream} with the static convenience methods of {@link NodeModel}. Otherwise FreeMarker itself doesn't
+     * use this.
+     * 
+     * @see #setDocumentBuilderFactory(DocumentBuilderFactory)
      */
     static public DocumentBuilderFactory getDocumentBuilderFactory() {
         synchronized (STATIC_LOCK) {
@@ -138,8 +150,15 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
     
     /**
-     * sets the error handler to use when parsing the document.
+     * Sets the error handler to use when parsing the document with the static convenience methods of {@link NodeModel}.
+     * 
+     * @deprecated It's a bad practice to change static fields, as if multiple independent components do that in the
+     *             same JVM, they unintentionally affect each other. Therefore it's recommended to leave this static
+     *             value at its default.
+     *             
+     * @see #getErrorHandler()
      */
+    @Deprecated
     static public void setErrorHandler(ErrorHandler errorHandler) {
         synchronized (STATIC_LOCK) {
             NodeModel.errorHandler = errorHandler;
@@ -147,7 +166,9 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
 
     /**
-     * @since 2.3.20 
+     * @since 2.3.20
+     * 
+     * @see #setErrorHandler(ErrorHandler)
      */
     static public ErrorHandler getErrorHandler() {
         synchronized (STATIC_LOCK) {
@@ -156,12 +177,32 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
     
     /**
-     * Create a NodeModel from a SAX input source. Adjacent text nodes will be merged (and CDATA sections
-     * are considered as text nodes).
-     * @param removeComments whether to remove all comment nodes 
-     * (recursively) from the tree before processing
-     * @param removePIs whether to remove all processing instruction nodes
-     * (recursively from the tree before processing
+     * Convenience method to create a {@link NodeModel} from a SAX {@link InputSource}; please see the security warning
+     * further down. Adjacent text nodes will be merged (and CDATA sections are considered as text nodes) as with
+     * {@link #mergeAdjacentText(Node)}. Further simplifications are applied depending on the parameters. If all
+     * simplifications are turned on, then it applies {@link #simplify(Node)} on the loaded DOM.
+     * 
+     * <p>
+     * Note that {@code parse(...)} is only a convenience method, and FreeMarker itself doesn't use it (except when you
+     * call the other similar static convenience methods, as they may build on each other). In particular, if you want
+     * full control over the {@link DocumentBuilderFactory} used, create the {@link Node} with your own
+     * {@link DocumentBuilderFactory}, apply {@link #simplify(Node)} (or such) on it, then call
+     * {@link NodeModel#wrap(Node)}.
+     * 
+     * <p>
+     * <b>Security warning:</b> If the XML to load is coming from a source that you can't fully trust, you shouldn't use
+     * this method, as the {@link DocumentBuilderFactory} it uses by default supports external entities, and so it
+     * doesn't prevent XML External Entity (XXE) attacks. Note that XXE attacks are not specific to FreeMarker, they
+     * affect all XML parsers in general. If that's a problem in your application, OWASP has a cheat sheet to set up a
+     * {@link DocumentBuilderFactory} that has limited functionality but is immune to XXE attacks. Because it's just a
+     * convenience method, you can just use your own {@link DocumentBuilderFactory} and do a few extra steps instead
+     * (see earlier).
+     * 
+     * @param removeComments
+     *            Whether to remove all comment nodes (recursively); this is like calling {@link #removeComments(Node)}
+     * @param removePIs
+     *            Whether to remove all processing instruction nodes (recursively); this is like calling
+     *            {@link #removePIs(Node)}
      */
     static public NodeModel parse(InputSource is, boolean removeComments, boolean removePIs)
         throws SAXException, IOException, ParserConfigurationException {
@@ -198,46 +239,43 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
     
     /**
-     * Create a NodeModel from an XML input source. By default,
-     * all comments and processing instruction nodes are 
-     * stripped from the tree.
+     * Same as {@link #parse(InputSource, boolean, boolean) parse(is, true, true)}; don't miss the security warnings
+     * documented there.
      */
-    static public NodeModel parse(InputSource is) 
-    throws SAXException, IOException, ParserConfigurationException {
+    static public NodeModel parse(InputSource is) throws SAXException, IOException, ParserConfigurationException {
         return parse(is, true, true);
     }
     
     
     /**
-     * Create a NodeModel from an XML file.
-     * @param removeComments whether to remove all comment nodes 
-     * (recursively) from the tree before processing
-     * @param removePIs whether to remove all processing instruction nodes
-     * (recursively from the tree before processing
+     * Same as {@link #parse(InputSource, boolean, boolean)}, but loads from a {@link File}; don't miss the security
+     * warnings documented there.
      */
     static public NodeModel parse(File f, boolean removeComments, boolean removePIs) 
-        throws SAXException, IOException, ParserConfigurationException {
+    throws SAXException, IOException, ParserConfigurationException {
         DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
         ErrorHandler errorHandler = getErrorHandler();
         if (errorHandler != null) builder.setErrorHandler(errorHandler);
         Document doc = builder.parse(f);
-        if (removeComments) {
-            removeComments(doc);
+        if (removeComments && removePIs) {
+            simplify(doc);
+        } else {
+            if (removeComments) {
+                removeComments(doc);
+            }
+            if (removePIs) {
+                removePIs(doc);
+            }
+            mergeAdjacentText(doc);
         }
-        if (removePIs) {
-            removePIs(doc);
-        }
-        mergeAdjacentText(doc);
         return wrap(doc);
     }
     
     /**
-     * Create a NodeModel from an XML file. By default,
-     * all comments and processing instruction nodes are 
-     * stripped from the tree.
+     * Same as {@link #parse(InputSource, boolean, boolean) parse(source, true, true)}, but loads from a {@link File};
+     * don't miss the security warnings documented there.
      */
-    static public NodeModel parse(File f) 
-    throws SAXException, IOException, ParserConfigurationException {
+    static public NodeModel parse(File f) throws SAXException, IOException, ParserConfigurationException {
         return parse(f, true, true);
     }
     
@@ -411,119 +449,153 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
     
     /**
-     * Recursively removes all comment nodes
-     * from the subtree.
+     * Recursively removes all comment nodes from the subtree.
      *
      * @see #simplify
      */
-    static public void removeComments(Node node) {
-        NodeList children = node.getChildNodes();
-        int i = 0;
-        int len = children.getLength();
-        while (i < len) {
-            Node child = children.item(i);
-            if (child.hasChildNodes()) {
-                removeComments(child);
-                i++;
-            } else {
-                if (child.getNodeType() == Node.COMMENT_NODE) {
-                    node.removeChild(child);
-                    len--;
-                } else {
-                    i++;
-                }
-            }
-        }
-    }
-    
-    /**
-     * Recursively removes all processing instruction nodes
-     * from the subtree.
-     *
-     * @see #simplify
-     */
-    static public void removePIs(Node node) {
-        NodeList children = node.getChildNodes();
-        int i = 0;
-        int len = children.getLength();
-        while (i < len) {
-            Node child = children.item(i);
-            if (child.hasChildNodes()) {
-                removePIs(child);
-                i++;
-            } else {
-                if (child.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE) {
-                    node.removeChild(child);
-                    len--;
-                } else {
-                    i++;
-                }
-            }
-        }
-    }
-    
-    /**
-     * Merges adjacent text/cdata nodes, so that there are no 
-     * adjacent text/cdata nodes. Operates recursively 
-     * on the entire subtree. You thus lose information
-     * about any CDATA sections occurring in the doc.
-     *
-     * @see #simplify
-     */
-    static public void mergeAdjacentText(Node node) {
-        Node child = node.getFirstChild();
+    static public void removeComments(Node parent) {
+        Node child = parent.getFirstChild();
         while (child != null) {
-            if (child instanceof Text || child instanceof CDATASection) {
-                Node next = child.getNextSibling();
-                if (next instanceof Text || next instanceof CDATASection) {
-                    String fullText = child.getNodeValue() + next.getNodeValue();
-                    ((CharacterData) child).setData(fullText);
-                    node.removeChild(next);
-                }
-            } else {
-                mergeAdjacentText(child);
+            Node nextSibling = child.getNextSibling();
+            if (child.getNodeType() == Node.COMMENT_NODE) {
+                parent.removeChild(child);
+            } else if (child.hasChildNodes()) {
+                removeComments(child);
             }
-            child = child.getNextSibling();
+            child = nextSibling;
         }
     }
     
     /**
-     * Removes comments and processing instruction, and then unites adjacent text nodes.
-     * Note that CDATA sections count as text nodes.
+     * Recursively removes all processing instruction nodes from the subtree.
+     *
+     * @see #simplify
+     */
+    static public void removePIs(Node parent) {
+        Node child = parent.getFirstChild();
+        while (child != null) {
+            Node nextSibling = child.getNextSibling();
+            if (child.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE) {
+                parent.removeChild(child);
+            } else if (child.hasChildNodes()) {
+                removePIs(child);
+            }
+            child = nextSibling;
+        }
+    }
+    
+    /**
+     * Merges adjacent text nodes (where CDATA counts as text node too). Operates recursively on the entire subtree.
+     * The merged node will have the type of the first node of the adjacent merged nodes.
+     * 
+     * <p>Because XPath assumes that there are no adjacent text nodes in the tree, not doing this can have
+     * undesirable side effects. Xalan queries like {@code text()} will only return the first of a list of matching
+     * adjacent text nodes instead of all of them, while Jaxen will return all of them as intuitively expected. 
+     *
+     * @see #simplify
+     */
+    static public void mergeAdjacentText(Node parent) {
+        mergeAdjacentText(parent, null);
+    }
+    
+    static private void mergeAdjacentText(Node parent, StringBuilder collectorBuf) {
+        Node child = parent.getFirstChild();
+        while (child != null) {
+            Node next = child.getNextSibling();
+            if (child instanceof Text) {
+                boolean atFirstText = true;
+                while (next instanceof Text) { //
+                    if (atFirstText) {
+                        if (collectorBuf == null) {
+                            collectorBuf = new StringBuilder(
+                                    child.getNodeValue().length() + next.getNodeValue().length());
+                        } else {
+                            collectorBuf.setLength(0);
+                        }
+                        collectorBuf.append(child.getNodeValue());
+                        atFirstText = false;
+                    }
+                    collectorBuf.append(next.getNodeValue());
+                    
+                    parent.removeChild(next);
+                    
+                    next = child.getNextSibling();
+                }
+                if (!atFirstText && collectorBuf.length() != 0) {
+                    ((CharacterData) child).setData(collectorBuf.toString());
+                }
+            } else {
+                mergeAdjacentText(child, collectorBuf);
+            }
+            child = next;
+        }
+    }
+    
+    /**
+     * Removes all comments and processing instruction, and unites adjacent text nodes (here CDATA counts as text as
+     * well). This is similar to applying {@link #removeComments(Node)}, {@link #removePIs(Node)}, and finally
+     * {@link #mergeAdjacentText(Node)}, but it does all that somewhat faster.
      */    
-    static public void simplify(Node node) {
-        NodeList children = node.getChildNodes();
-        int i = 0;
-        int len = children.getLength();
-        Node prevTextChild = null;
-        while (i < len) {
-            Node child = children.item(i);
+    static public void simplify(Node parent) {
+        simplify(parent, null);
+    }
+    
+    static private void simplify(Node parent, StringBuilder collectorTextChildBuff) {
+        Node collectorTextChild = null;
+        Node child = parent.getFirstChild();
+        while (child != null) {
+            Node next = child.getNextSibling();
             if (child.hasChildNodes()) {
-                simplify(child);
-                prevTextChild = null;
-                i++;
+                if (collectorTextChild != null) {
+                    // Commit pending text node merge:
+                    if (collectorTextChildBuff != null && collectorTextChildBuff.length() != 0) {
+                        ((CharacterData) collectorTextChild).setData(collectorTextChildBuff.toString());
+                        collectorTextChildBuff.setLength(0);
+                    }
+                    collectorTextChild = null;
+                }
+                
+                simplify(child, collectorTextChildBuff);
             } else {
                 int type = child.getNodeType();
-                if (type == Node.PROCESSING_INSTRUCTION_NODE) {
-                    node.removeChild(child);
-                    len--;
-                } else if (type == Node.COMMENT_NODE) {
-                    node.removeChild(child);
-                    len--;
-                } else if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE ) {
-                    if (prevTextChild != null) {
-                        CharacterData ptc = (CharacterData) prevTextChild;
-                        ptc.setData(ptc.getNodeValue() + child.getNodeValue());
-                        node.removeChild(child);
-                        len--;
+                if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE ) {
+                    if (collectorTextChild != null) {
+                        if (collectorTextChildBuff == null) {
+                            collectorTextChildBuff = new StringBuilder(
+                                    collectorTextChild.getNodeValue().length() + child.getNodeValue().length());
+                        }
+                        if (collectorTextChildBuff.length() == 0) {
+                            collectorTextChildBuff.append(collectorTextChild.getNodeValue());
+                        }
+                        collectorTextChildBuff.append(child.getNodeValue());
+                        parent.removeChild(child);
                     } else {
-                        prevTextChild = child;
-                        i++;
+                        collectorTextChild = child;
+                        if (collectorTextChildBuff != null) {
+                            collectorTextChildBuff.setLength(0);
+                        }
                     }
-                } else {
-                    prevTextChild = null;
-                    i++;
+                } else if (type == Node.COMMENT_NODE) {
+                    parent.removeChild(child);
+                } else if (type == Node.PROCESSING_INSTRUCTION_NODE) {
+                    parent.removeChild(child);
+                } else if (collectorTextChild != null) {
+                    // Commit pending text node merge:
+                    if (collectorTextChildBuff != null && collectorTextChildBuff.length() != 0) {
+                        ((CharacterData) collectorTextChild).setData(collectorTextChildBuff.toString());
+                        collectorTextChildBuff.setLength(0);
+                    }
+                    collectorTextChild = null;
                 }
+            }
+            child = next;
+        }
+        
+        if (collectorTextChild != null) {
+            // Commit pending text node merge:
+            if (collectorTextChildBuff != null && collectorTextChildBuff.length() != 0) {
+                ((CharacterData) collectorTextChild).setData(collectorTextChildBuff.toString());
+                collectorTextChildBuff.setLength(0);
             }
         }
     }
