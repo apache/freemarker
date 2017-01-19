@@ -23,8 +23,13 @@ import java.util.List;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.dom._ExtDomApi;
-import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
+import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNodeModelEx;
 
 /**
  * A holder for builtins that operate exclusively on (XML-)node left-hand value.

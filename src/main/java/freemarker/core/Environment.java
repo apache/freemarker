@@ -60,7 +60,6 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
-import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;

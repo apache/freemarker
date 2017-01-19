@@ -21,9 +21,8 @@ package freemarker.ext.util;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
-import java.util.Map;
-
 import java.util.IdentityHashMap;
+import java.util.Map;
 
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelAdapter;

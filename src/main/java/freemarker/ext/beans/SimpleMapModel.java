@@ -30,7 +30,6 @@ import freemarker.template.MapKeyValuePairIterator;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
-import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;

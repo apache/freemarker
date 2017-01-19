@@ -20,11 +20,9 @@
 package freemarker.core;
 
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.WrappingTemplateModel;
 import freemarker.template.utility.CollectionUtils;
 
 /**

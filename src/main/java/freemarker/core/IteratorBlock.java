@@ -28,7 +28,6 @@ import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateHashModelEx2.KeyValuePair;

@@ -22,10 +22,7 @@ package freemarker.template;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
-import freemarker.core._DelayedShortClassName;
-import freemarker.core._TemplateModelException;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.utility.ObjectWrapperWithAPISupport;
 

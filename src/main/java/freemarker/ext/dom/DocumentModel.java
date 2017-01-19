@@ -26,7 +26,6 @@ import freemarker.core.Environment;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.StringUtil;
 
 /**
  * A class that wraps the root node of a parsed XML document, using

@@ -27,7 +27,6 @@ import java.util.ListIterator;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;

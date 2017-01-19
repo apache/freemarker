@@ -18,7 +18,10 @@
  */
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNodeModelEx;
 
 public abstract class BuiltInForNodeEx extends BuiltIn {
     @Override
