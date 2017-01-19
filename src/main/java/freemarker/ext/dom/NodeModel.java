@@ -52,6 +52,7 @@ import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
@@ -68,13 +69,18 @@ import freemarker.template.TemplateSequenceModel;
  * A base class for wrapping a single W3C DOM Node as a FreeMarker template model.
  * 
  * <p>
- * Note that {@link DefaultObjectWrapper} automatically wraps W3C DOM {@link Node}-s into this, so you may not need to
- * do that with this class manually. Though, before dropping the {@link Node}-s into the data-model, you may want to
+ * Note that {@link DefaultObjectWrapper} automatically wraps W3C DOM {@link Node}-s into this, so you may need do that
+ * with this class manually. However, before dropping the {@link Node}-s into the data-model, you certainly want to
  * apply {@link NodeModel#simplify(Node)} on them.
  * 
  * <p>
- * Note that this class can't be used to represent a result set of 0 or multiple nodes (we use {@link NodeListModel}
- * for that), but should be used to represent a node set of exactly 1 node instead of {@link NodeListModel}.
+ * This class is not guaranteed to be thread safe, so instances of this shouldn't be used as shared variable (
+ * {@link Configuration#setSharedVariable(String, Object)}).
+ * 
+ * <p>
+ * To represent a node sequence (such as a query result) of exactly 1 nodes, this class should be used instead of
+ * {@link NodeListModel}, as it adds extra capabilities by utilizing that we have exactly 1 node. If you need to wrap a
+ * node sequence of 0 or multiple nodes, you must use {@link NodeListModel}.
  */
 abstract public class NodeModel
 implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
@@ -398,7 +404,12 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return xps.executeQuery(node, query);
     }
     
-    public final int size() {return 1;}
+    /**
+     * Always returns 1.
+     */
+    public final int size() {
+        return 1;
+    }
     
     public final TemplateModel get(int i) {
         return i == 0 ? this : null;
@@ -495,7 +506,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
      * @see #simplify
      */
     static public void mergeAdjacentText(Node parent) {
-        mergeAdjacentText(parent, null);
+        mergeAdjacentText(parent, new StringBuilder(0));
     }
     
     static private void mergeAdjacentText(Node parent, StringBuilder collectorBuf) {
@@ -506,12 +517,8 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
                 boolean atFirstText = true;
                 while (next instanceof Text) { //
                     if (atFirstText) {
-                        if (collectorBuf == null) {
-                            collectorBuf = new StringBuilder(
-                                    child.getNodeValue().length() + next.getNodeValue().length());
-                        } else {
-                            collectorBuf.setLength(0);
-                        }
+                        collectorBuf.setLength(0);
+                        collectorBuf.ensureCapacity(child.getNodeValue().length() + next.getNodeValue().length());
                         collectorBuf.append(child.getNodeValue());
                         atFirstText = false;
                     }
@@ -537,7 +544,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
      * {@link #mergeAdjacentText(Node)}, but it does all that somewhat faster.
      */    
     static public void simplify(Node parent) {
-        simplify(parent, null);
+        simplify(parent, new StringBuilder(0));
     }
     
     static private void simplify(Node parent, StringBuilder collectorTextChildBuff) {
@@ -548,7 +555,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
             if (child.hasChildNodes()) {
                 if (collectorTextChild != null) {
                     // Commit pending text node merge:
-                    if (collectorTextChildBuff != null && collectorTextChildBuff.length() != 0) {
+                    if (collectorTextChildBuff.length() != 0) {
                         ((CharacterData) collectorTextChild).setData(collectorTextChildBuff.toString());
                         collectorTextChildBuff.setLength(0);
                     }
@@ -560,20 +567,16 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
                 int type = child.getNodeType();
                 if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE ) {
                     if (collectorTextChild != null) {
-                        if (collectorTextChildBuff == null) {
-                            collectorTextChildBuff = new StringBuilder(
-                                    collectorTextChild.getNodeValue().length() + child.getNodeValue().length());
-                        }
                         if (collectorTextChildBuff.length() == 0) {
+                            collectorTextChildBuff.ensureCapacity(
+                                    collectorTextChild.getNodeValue().length() + child.getNodeValue().length());
                             collectorTextChildBuff.append(collectorTextChild.getNodeValue());
                         }
                         collectorTextChildBuff.append(child.getNodeValue());
                         parent.removeChild(child);
                     } else {
                         collectorTextChild = child;
-                        if (collectorTextChildBuff != null) {
-                            collectorTextChildBuff.setLength(0);
-                        }
+                        collectorTextChildBuff.setLength(0);
                     }
                 } else if (type == Node.COMMENT_NODE) {
                     parent.removeChild(child);
@@ -581,7 +584,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
                     parent.removeChild(child);
                 } else if (collectorTextChild != null) {
                     // Commit pending text node merge:
-                    if (collectorTextChildBuff != null && collectorTextChildBuff.length() != 0) {
+                    if (collectorTextChildBuff.length() != 0) {
                         ((CharacterData) collectorTextChild).setData(collectorTextChildBuff.toString());
                         collectorTextChildBuff.setLength(0);
                     }
@@ -593,7 +596,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         
         if (collectorTextChild != null) {
             // Commit pending text node merge:
-            if (collectorTextChildBuff != null && collectorTextChildBuff.length() != 0) {
+            if (collectorTextChildBuff.length() != 0) {
                 ((CharacterData) collectorTextChild).setData(collectorTextChildBuff.toString());
                 collectorTextChildBuff.setLength(0);
             }

@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
 
 import freemarker.core.Environment;
 import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
+import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
@@ -45,6 +46,10 @@ import freemarker.template.TemplateSequenceModel;
  * Used when the result set contains 0 or multiple nodes; shouldn't be used when you have exactly 1 node. For exactly 1
  * node, use {@link NodeModel#wrap(Node)}, because {@link NodeModel} subclasses can have extra features building on that
  * restriction, like single elements with text content can be used as FTL string-s.
+ * 
+ * <p>
+ * This class is not guaranteed to be thread safe, so instances of this shouldn't be used as shared variable (
+ * {@link Configuration#setSharedVariable(String, Object)}).
  */
 class NodeListModel extends SimpleSequence implements TemplateHashModel, _UnexpectedTypeErrorExplainerTemplateModel {
     
