@@ -55,7 +55,6 @@ DynamicImport-Package: *
 Bundle-RequiredExecutionEnvironment: J2SE-1.5, J2SE-1.4
 
 # Non-OSGi meta:
-Main-Class: freemarker.core.CommandLine
 Extension-name: FreeMarker
 Specification-Title: FreeMarker
 Specification-Version: ${versionForMf}

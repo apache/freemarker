@@ -6,3 +6,6 @@ the FreeMarer 3 changelog here:
 - Removed JSP 2.0 support (2.1 is the minimum for now, but maybe it will be 2.2 and Servlet 3.0 later).
 - Removed freemarker.ext.log, our log abstraction layer from the old times when there was no clear winner on this field.
   Added org.slf4j:slf4j-api as required dependency instead.
+- Removed all classes with "main" methods that were part of freemarker.jar. Such tools should be separate artifacts,
+  not part of the library, and they are often classified as CWE-489 "Leftover Debug Code". The removed classes are:
+  freemarker.core.CommandLine, freemarker.ext.dom.Transform, freemarker.template.utility.ToCanonical
