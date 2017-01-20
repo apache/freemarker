@@ -1062,7 +1062,8 @@ Proceed? </input>
     <ivy:report todir="build/deps-report" />
   </target>
   
-  <target name="ide-dependencies" description="If your IDE has no Ivy support, this generates ide-lib/*.jar for it">
+  <target name="ide-dependencies" depends="jar"
+    description="If your IDE has no Ivy support, this generates ide-lib/*.jar for it">
     <mkdir dir="ide-dependencies" />
     <delete includeEmptyDirs="true">  
       <fileset dir="ide-dependencies">  
