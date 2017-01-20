@@ -19,9 +19,18 @@
 
 package freemarker.template;
 
-import static freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -55,7 +64,6 @@ import com.google.common.collect.ImmutableMap;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.HashAdapter;
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.test.templatesuite.models.Listables;
 
 public class DefaultObjectWrapperTest {
 
@@ -79,6 +87,8 @@ public class DefaultObjectWrapperTest {
     static {
         OW22IS.setIterableSupport(true);
     }
+
+    private final static Version LAST_2_3_VERSION = Configuration.VERSION_2_3_26;
     
     @Test
     public void testIncompatibleImprovementsVersionBreakPoints() throws Exception {
@@ -92,19 +102,28 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_24);
         expected.add(Configuration.VERSION_2_3_24); // no non-BC change in 2.3.25
         expected.add(Configuration.VERSION_2_3_24); // no non-BC change in 2.3.26
+        expected.add(Configuration.VERSION_3_0_0);
 
         List<Version> actual = new ArrayList<Version>();
-        for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
+        int i = _TemplateAPI.VERSION_INT_2_3_0;
+        while (i <= Configuration.getVersion().intValue()) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;
             int micro = i % 1000;
             final Version version = new Version(major, minor, micro);
+            
             final Version normalizedVersion = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(version);
             actual.add(normalizedVersion);
 
             final DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(version);
             assertEquals(normalizedVersion, builder.getIncompatibleImprovements());
             assertEquals(normalizedVersion, builder.build().getIncompatibleImprovements());
+            
+            if (LAST_2_3_VERSION.equals(version)) {
+                i = Configuration.VERSION_3_0_0.intValue();
+            } else {
+                i++;
+            }
         }
 
         assertEquals(expected, actual);

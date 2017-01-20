@@ -808,6 +808,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     static boolean is2324Bugfixed(Version version) {
         return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
     }
+
+    private static boolean is300Bugfixed(Version incompatibleImprovements) {
+        return incompatibleImprovements.intValue() >= Configuration.VERSION_3_0_0.intValue();
+    }
     
     /** 
      * Returns the lowest version number that is equivalent with the parameter version.
@@ -818,7 +822,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }
-        return is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
+        return is300Bugfixed(incompatibleImprovements) ? Configuration.VERSION_3_0_0 
+                : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
                 : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;
     }

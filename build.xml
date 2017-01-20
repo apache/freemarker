@@ -37,7 +37,7 @@
   <!-- Ivy project coordinates: -->
   <property name="moduleOrg" value="org.freemarker" />
   <property name="moduleName" value="freemarker" />
-  <property name="moduleBranch" value="2.3" />
+  <property name="moduleBranch" value="3" />
 
   <!-- Will be overidden on the Continous Integration server: -->
   <property name="server.ivy.repo.root" value="${basedir}/build/dummy-server-ivy-repo" />
