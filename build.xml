@@ -245,11 +245,7 @@
         freemarker/core/_Java6Impl.java,
         freemarker/ext/jsp/**,
         freemarker/ext/servlet/**,
-        freemarker/cache/WebappTemplateLoader.java,
-        
-        freemarker/ext/jython/**,
-        freemarker/template/utility/JythonRuntime.java,
-        freemarker/ext/ant/**"
+        freemarker/cache/WebappTemplateLoader.java"
     >
       <src>
         <pathelement location="build/src-main-java-filtered" />
@@ -272,24 +268,6 @@
       verify="yes" stubversion="1.2"
     />
 
-    <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
-      includeantruntime="false"
-      classpathref="ivy.dep.jsp2.0"
-      bootclasspath="${boot.classpath.j2se1.5}"
-      includes="
-        freemarker/ext/jsp/**,
-        freemarker/ext/servlet/**,
-        freemarker/cache/WebappTemplateLoader.java"
-      excludes="
-        freemarker/ext/jsp/_FreeMarkerPageContext21.java,
-        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
-        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
-    />
-    
-    <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
-    
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
@@ -297,46 +275,11 @@
       classpathref="ivy.dep.jsp2.1"
       bootclasspath="${boot.classpath.j2se1.5}"
       includes="
-        freemarker/ext/jsp/_FreeMarkerPageContext21.java,
-        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
-        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
+        freemarker/ext/jsp/**,
+        freemarker/ext/servlet/**,
+        freemarker/cache/WebappTemplateLoader.java"
     />
-
-    <ivy:cachepath conf="build.jython2.0" pathid="ivy.dep.jython2.0" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
-      includeantruntime="false"
-      classpathref="ivy.dep.jython2.0"
-      bootclasspath="${boot.classpath.j2se1.5}"
-      includes="
-        freemarker/ext/ant/**,
-        freemarker/template/utility/JythonRuntime.java,
-        freemarker/ext/jython/**"
-      excludes="
-        freemarker/ext/jython/_Jython22VersionAdapter.java,
-        freemarker/ext/jython/_Jython25VersionAdapter.java"
-    />
-    
-    <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
-      includeantruntime="false"
-      classpathref="ivy.dep.jython2.2"
-      bootclasspath="${boot.classpath.j2se1.5}"
-      includes="
-        freemarker/ext/jython/_Jython22VersionAdapter.java"
-    />
-    
-    <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
-    <javac srcdir="build/src-main-java-filtered" destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
-      includeantruntime="false"
-      classpathref="ivy.dep.jython2.5"
-      bootclasspath="${boot.classpath.j2se1.5}"
-      includes="
-        freemarker/ext/jython/_Jython25VersionAdapter.java"
-    />
-    
+        
     <rmic base="build/classes" classpathref="ivy.dep"
       includes="build/src-main-java-filtered/freemarker/debug/impl/Rmi*Impl.class"
       verify="yes" stubversion="1.2"
@@ -711,7 +654,6 @@
         <exclude name="**/*.~*" />
         <exclude name="**/*.*~" />
         <include name="src/**" />
-        <include name="examples/**" />
         <include name="*.xml" />
         <include name="*.sample" />
         <include name="*.txt" />
@@ -1062,7 +1004,8 @@ Proceed? </input>
     <ivy:report todir="build/deps-report" />
   </target>
   
-  <target name="ide-dependencies" description="If your IDE has no Ivy support, this generates ide-lib/*.jar for it">
+  <target name="ide-dependencies" depends="jar"
+    description="If your IDE has no Ivy support, this generates ide-lib/*.jar for it">
     <mkdir dir="ide-dependencies" />
     <delete includeEmptyDirs="true">  
       <fileset dir="ide-dependencies">  

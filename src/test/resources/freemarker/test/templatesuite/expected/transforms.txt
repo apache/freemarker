@@ -64,12 +64,5 @@ A test string containing quotes: "This isn't a test".
 A test string containing amps: Fish & Chips.
 A test string containing tags: &lt;p&gt;Fish &amp; Chips.&lt;/p&gt;
 
-
-I saw the python. It was cool.
-
-4
-5
-2
-
 </body>
 </html>

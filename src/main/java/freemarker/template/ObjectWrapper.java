@@ -45,7 +45,7 @@ public interface ObjectWrapper {
     /**
      * An {@link ObjectWrapper} that exposes the object methods and JavaBeans properties as hash elements, and has
      * custom handling for Java {@link Map}-s, {@link ResourceBundle}-s, etc. It doesn't treat
-     * {@link org.w3c.dom.Node}-s and Jython objects specially, however. As of 2.3.22, using
+     * {@link org.w3c.dom.Node}-s specially, however. As of 2.3.22, using
      * {@link DefaultObjectWrapper} with its {@code incompatibleImprovements} property set to 2.3.22 (or higher) is
      * recommended instead.
      * 

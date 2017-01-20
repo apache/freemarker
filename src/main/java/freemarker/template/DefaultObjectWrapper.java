@@ -32,7 +32,6 @@ import org.w3c.dom.Node;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.dom.NodeModel;
-import freemarker.log.Logger;
 
 /**
  * The default implementation of the {@link ObjectWrapper} interface. Usually, you don't need to create instances of
@@ -60,10 +59,6 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /** @deprecated Use {@link DefaultObjectWrapperBuilder} instead, but mind its performance */
     @Deprecated
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
-    
-    static final private Class<?> JYTHON_OBJ_CLASS;
-    
-    static final private ObjectWrapper JYTHON_WRAPPER;
     
     private boolean useAdaptersForContainers;
     private boolean forceLegacyNonListCollections;
@@ -132,30 +127,6 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         this((BeansWrapperConfiguration) dowCfg, writeProtected);
     }
     
-    static {
-        Class<?> cl;
-        ObjectWrapper ow;
-        try {
-            cl = Class.forName("org.python.core.PyObject");
-            ow = (ObjectWrapper) Class.forName(
-                    "freemarker.ext.jython.JythonWrapper")
-                    .getField("INSTANCE").get(null);
-        } catch (Throwable e) {
-            cl = null;
-            ow = null;
-            if (!(e instanceof ClassNotFoundException)) {
-                try {
-                    Logger.getLogger("freemarker.template.DefaultObjectWrapper")
-                            .error("Failed to init Jython support, so it was disabled.", e);
-                } catch (Throwable e2) {
-                    // ignore
-                }
-            }
-        }
-        JYTHON_OBJ_CLASS = cl;
-        JYTHON_WRAPPER = ow;
-    }
-
     /**
      * Wraps the parameter object to {@link TemplateModel} interface(s). Simple types like numbers, strings, booleans
      * and dates will be wrapped into the corresponding {@code SimpleXxx} classes (like {@link SimpleNumber}).
@@ -235,8 +206,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /**
      * Called for an object that isn't considered to be of a "basic" Java type, like for an application specific type,
      * or for a W3C DOM node. In its default implementation, W3C {@link Node}-s will be wrapped as {@link NodeModel}-s
-     * (allows DOM tree traversal), Jython objects will be delegated to the {@code JythonWrapper}, others will be
-     * wrapped using {@link BeansWrapper#wrap(Object)}.
+     * (allows DOM tree traversal), others will be wrapped using {@link BeansWrapper#wrap(Object)}.
      * 
      * <p>
      * When you override this method, you should first decide if you want to wrap the object in a custom way (and if so
@@ -246,9 +216,6 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
         if (obj instanceof Node) {
             return wrapDomNode(obj);
-        }
-        if (JYTHON_WRAPPER != null  && JYTHON_OBJ_CLASS.isInstance(obj)) {
-            return JYTHON_WRAPPER.wrap(obj);
         }
         return super.wrap(obj); 
     }

@@ -94,18 +94,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     @Deprecated
     static final Object CAN_NOT_UNWRAP = ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
     
-    private static final Class<?> ITERABLE_CLASS;
-    static {
-        Class<?> iterable;
-        try {
-            iterable = Class.forName("java.lang.Iterable");
-        } catch (ClassNotFoundException e) {
-            // We're running on a pre-1.5 JRE
-            iterable = null;
-        }
-        ITERABLE_CLASS = iterable;
-    }
-    
     private static final Constructor<?> ENUMS_MODEL_CTOR = enumsModelCtor();
     
     /**
@@ -1040,12 +1028,11 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         }
         
         // This is for transparent interop with other wrappers (and ourselves)
-        // Passing the targetClass allows i.e. a Jython-aware method that declares a
-        // PyObject as its argument to receive a PyObject from a JythonModel
+        // Passing the targetClass allows e.g. a Jython-aware method that declares a
+        // PyObject as its argument to receive a PyObject from a Jython-aware TemplateModel
         // passed as an argument to TemplateMethodModelEx etc.
         if (model instanceof AdapterTemplateModel) {
-            Object wrapped = ((AdapterTemplateModel) model).getAdaptedObject(
-                    targetClass);
+            Object wrapped = ((AdapterTemplateModel) model).getAdaptedObject(targetClass);
             if (targetClass == Object.class || targetClass.isInstance(wrapped)) {
                 return wrapped;
             }
@@ -1124,7 +1111,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 }
             }
             
-            if (Collection.class == targetClass || ITERABLE_CLASS == targetClass) {
+            if (Collection.class == targetClass || Iterable.class == targetClass) {
                 if (model instanceof TemplateCollectionModel) {
                     return new CollectionAdapter((TemplateCollectionModel) model, 
                             this);

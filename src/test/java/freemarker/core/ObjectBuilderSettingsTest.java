@@ -19,9 +19,17 @@
 
 package freemarker.core;
 
-import static freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -48,7 +56,6 @@ import freemarker.cache.MruCacheStorage;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.subpkg.PublicWithMixedConstructors;
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.jython.JythonWrapper;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
@@ -380,14 +387,6 @@ public class ObjectBuilderSettingsTest {
                 ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
         assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
         assertFalse(bw.isExposeFields());
-    }
-
-    @Test
-    public void jythonWrapperTest() throws Exception {
-        JythonWrapper jw = (JythonWrapper) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.ext.jython.JythonWrapper()",
-                ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
-        assertSame(JythonWrapper.INSTANCE, jw);
     }
 
     @Test

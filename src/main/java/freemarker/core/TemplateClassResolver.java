@@ -57,15 +57,14 @@ public interface TemplateClassResolver {
     
     /**
      * Same as {@link #UNRESTRICTED_RESOLVER}, except that it doesn't allow
-     * resolving {@link ObjectConstructor} and {@link Execute} and {@code freemarker.template.utility.JythonRuntime}.
+     * resolving {@link ObjectConstructor} and {@link Execute}.
      */
     TemplateClassResolver SAFER_RESOLVER =  new TemplateClassResolver() {
 
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
             if (className.equals(ObjectConstructor.class.getName())
-                    || className.equals(Execute.class.getName())
-                    || className.equals("freemarker.template.utility.JythonRuntime")) {
+                    || className.equals(Execute.class.getName())) {
                 throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);
             }
             try {

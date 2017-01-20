@@ -44,7 +44,6 @@ import java.util.TimeZone;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache._CacheAPI;
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
@@ -2730,20 +2729,6 @@ public final class Environment extends Configurable {
      */
     public String getDefaultNS() {
         return currentNamespace.getTemplate().getDefaultNS();
-    }
-
-    /**
-     * A hook that Jython uses.
-     */
-    public Object __getitem__(String key) throws TemplateModelException {
-        return BeansWrapper.getDefaultInstance().unwrap(getVariable(key));
-    }
-
-    /**
-     * A hook that Jython uses.
-     */
-    public void __setitem__(String key, Object o) throws TemplateException {
-        setGlobalVariable(key, getObjectWrapper().wrap(o));
     }
 
     private IdentityHashMap<Object, Object> customStateVariables;

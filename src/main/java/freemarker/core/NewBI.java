@@ -36,15 +36,6 @@ import freemarker.template.TemplateModelException;
  */
 class NewBI extends BuiltIn {
     
-    static Class<?> JYTHON_MODEL_CLASS;
-    static {
-        try {
-            JYTHON_MODEL_CLASS = Class.forName("freemarker.ext.jython.JythonModel");
-        } catch (Throwable e) {
-            JYTHON_MODEL_CLASS = null;
-        }
-    }
-    
     @Override
     TemplateModel _eval(Environment env)
             throws TemplateException {
@@ -66,10 +57,6 @@ class NewBI extends BuiltIn {
             if (BeanModel.class.isAssignableFrom(cl)) {
                 throw new _MiscTemplateException(NewBI.this, env,
                         "Bean Models cannot be instantiated using the ?", key, " built-in");
-            }
-            if (JYTHON_MODEL_CLASS != null && JYTHON_MODEL_CLASS.isAssignableFrom(cl)) {
-                throw new _MiscTemplateException(NewBI.this, env,
-                        "Jython Models cannot be instantiated using the ?", key, " built-in");
             }
         }
 

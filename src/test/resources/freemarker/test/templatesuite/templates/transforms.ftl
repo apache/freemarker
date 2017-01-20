@@ -18,7 +18,6 @@
   under the License.
 -->
 <#assign htmlEscape = "freemarker.template.utility.HtmlEscape"?new(),
-         jython = "freemarker.template.utility.JythonRuntime"?new(),
          utility = "freemarker.test.templatesuite.models.TransformHashWrapper"?new()>
 <html>
 <head>
@@ -97,24 +96,6 @@ A test string containing quotes: "This isn't a test".
 A test string containing amps: Fish & Chips.
 A test string containing tags: <p>Fish &amp; Chips.</p>
 </transform>
-
-<#assign captured_output>
-<compress>
-<assign x=2, y=3, z = "python", adjective="cool">
-<transform jython>
-print 2+2
-# Now we interact with the template environment somewhat.
-print ${x} + ${y} 
-print env['x'] # using a variable from the template
-env["message"] = 'I saw the ${z}. It was ${adjective}.'
-
-</transform>
-</compress>
-</#assign>
-
-${message}
-
-${captured_output}
 
 </body>
 </html>

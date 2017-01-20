@@ -39,8 +39,7 @@ import freemarker.template.utility.ClassUtil;
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  * 
- * Implementation of PageContext that contains JSP 2.0 and JSP 2.1 specific 
- * methods.
+ * Implementation of PageContext that contains all JSP 2.1 methods.
  */
 public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
@@ -67,6 +66,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
         try {
             Class type = ((ClassLoader) AccessController.doPrivileged(
                     new PrivilegedAction() {
+                        @Override
                         public Object run() {
                             return Thread.currentThread().getContextClassLoader();
                         }
@@ -90,6 +90,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
         final PageContext ctx = this;
 
         return new VariableResolver() {
+            @Override
             public Object resolveVariable(String name) throws ELException {
                 return ctx.findAttribute(name);
             }

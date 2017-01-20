@@ -1,0 +1,6 @@
+Because the Manual won't be updated for a good while, I will lead
+the FreeMarer 3 changelog here:
+
+- Increased version number to 3.0.0 (nightly aka. SNAPSHOT)
+- Removed legacy extensions: rhyno, jython, xml (not to be confused with dom), jdom, ant.
+- Removed JSP 2.0 support (2.1 is the minimum for now, but maybe it will be 2.2 and Servlet 3.0 later).

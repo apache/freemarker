@@ -2043,8 +2043,7 @@ public class Configurable {
      *       {@code "default_2_3_0"} (means the deprecated {@link ObjectWrapper#DEFAULT_WRAPPER})
      *       {@code "simple"} (means the deprecated {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means the deprecated {@link BeansWrapper#BEANS_WRAPPER}
-     *       or {@link BeansWrapperBuilder#build()}),
-     *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
+     *       or {@link BeansWrapperBuilder#build()})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
      *   
@@ -2476,11 +2475,6 @@ public class Configurable {
                     setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
                 } else if ("beans".equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
-                } else if ("jython".equalsIgnoreCase(value)) {
-                    Class clazz = Class.forName(
-                            "freemarker.ext.jython.JythonWrapper");
-                    setObjectWrapper(
-                            (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
                                     value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));

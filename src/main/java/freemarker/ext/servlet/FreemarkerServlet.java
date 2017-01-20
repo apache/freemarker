@@ -403,7 +403,6 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_OBJECT_WRAPPER = "ObjectWrapper";
     private static final String DEPR_INITPARAM_WRAPPER_SIMPLE = "simple";
     private static final String DEPR_INITPARAM_WRAPPER_BEANS = "beans";
-    private static final String DEPR_INITPARAM_WRAPPER_JYTHON = "jython";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER = "TemplateExceptionHandler";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW = "rethrow";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG = "debug";
@@ -1292,19 +1291,6 @@ public class FreemarkerServlet extends HttpServlet {
             }
             if (DEPR_INITPARAM_WRAPPER_SIMPLE.equals(wrapper)) {
                 return ObjectWrapper.SIMPLE_WRAPPER;
-            }
-            if (DEPR_INITPARAM_WRAPPER_JYTHON.equals(wrapper)) {
-                // Avoiding compile-time dependency on Jython package
-                try {
-                    return (ObjectWrapper) Class.forName("freemarker.ext.jython.JythonWrapper")
-                            .newInstance();
-                } catch (InstantiationException e) {
-                    throw new InstantiationError(e.getMessage());
-                } catch (IllegalAccessException e) {
-                    throw new IllegalAccessError(e.getMessage());
-                } catch (ClassNotFoundException e) {
-                    throw new NoClassDefFoundError(e.getMessage());
-                }
             }
             return createDefaultObjectWrapper();
         } else {
