@@ -193,6 +193,12 @@ apply it to your development environment:
   Also, close these files if they are open. Now you shouldn't have any errors.
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
   project specific settings", and then select "FreeMarker" as active profile.
+- At Project -> Properties -> Java Editor -> Save Actions, check "Enable project
+  specific settings", then "Perform the selected actions on save", and have
+  only "Organize imports" and "Additional actions" checked (the list for the
+  last should contain "Add missing @Override annotations",
+  "Add missing @Override annotations to implementations of interface methods",
+  "Add missing @Deprecated annotations", and "Remove unnecessary cast").
 - Right click on the project -> Run As -> JUnit Test
   It should run without problems (all green).
 - It's highly recommened to use the Eclipse FindBugs plugin.
