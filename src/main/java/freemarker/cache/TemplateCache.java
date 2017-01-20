@@ -701,7 +701,9 @@ public class TemplateCache {
                     storage.remove(tk);
                 }
             }
-            LOG.debug(debugName + " was removed from the cache, if it was there");
+            if (debug) {
+                LOG.debug(debugName + " was removed from the cache, if it was there");
+            }
         }
     }
 

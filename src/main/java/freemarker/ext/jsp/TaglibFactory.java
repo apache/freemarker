@@ -521,7 +521,7 @@ public class TaglibFactory implements TemplateHashModel {
                             addTldLocationsFromJarDirectoryEntryURL(url);
                         } else {
                             if (LOG.isDebugEnabled()) {
-                                LOG.warn("Can't list entries under this URL; TLD-s won't be discovered here: "
+                                LOG.debug("Can't list entries under this URL; TLD-s won't be discovered here: "
                                         + urlWithEF.getExternalForm());
                             }
                         }
