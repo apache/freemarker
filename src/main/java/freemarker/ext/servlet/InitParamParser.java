@@ -27,6 +27,9 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
@@ -34,7 +37,6 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
-import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
@@ -47,7 +49,7 @@ final class InitParamParser {
     static final String TEMPLATE_PATH_PREFIX_FILE = "file://";
     static final String TEMPLATE_PATH_SETTINGS_BI_NAME = "settings";
     
-    private static final Logger LOG = Logger.getLogger("freemarker.servlet");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.servlet");
     
     private InitParamParser() {
         // Not to be instantiated
@@ -72,8 +74,8 @@ final class InitParamParser {
             
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {
-                LOG.warn("No Thread Context Class Loader was found. Falling back to the class loader of "
-                        + classLoaderClass.getName() + ".");
+                LOG.warn("No Thread Context Class Loader was found. Falling back to the class loader of {}.",
+                        classLoaderClass.getName());
                 classLoader = classLoaderClass.getClassLoader();
             }
             

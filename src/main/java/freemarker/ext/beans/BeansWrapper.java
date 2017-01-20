@@ -38,6 +38,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.core.BugException;
 import freemarker.core._DelayedFTLTypeDescription;
 import freemarker.core._DelayedShortClassName;
@@ -45,7 +48,6 @@ import freemarker.core._TemplateModelException;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -85,7 +87,7 @@ import freemarker.template.utility.WriteProtectable;
  * published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety.
  */
 public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
-    private static final Logger LOG = Logger.getLogger("freemarker.beans");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.beans");
 
     /**
      * @deprecated Use {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} instead. It's not a public field
@@ -302,9 +304,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 }
             } catch (Throwable e) {
                 // The security manager sometimes doesn't allow this
-                LOG.info("Failed to check if finetuneMethodAppearance is overidden in " + thisClass.getName()
+                LOG.info("Failed to check if finetuneMethodAppearance is overidden in {}"
                         + "; acting like if it was, but this way it won't utilize the shared class introspection "
-                        + "cache.",
+                        + "cache.", thisClass.getName(),
                         e);
                 overridden = true;
                 testFailed = true;
@@ -318,6 +320,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 bwConf = (BeansWrapperConfiguration) bwConf.clone(false);
                 bwConf.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
 
+                    @Override
                     public void process(
                             MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
                         BeansWrapper.this.finetuneMethodAppearance(in.getContainingClass(), in.getMethod(), out);
@@ -389,6 +392,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * 
      * @since 2.3.21
      */
+    @Override
     public void writeProtect() {
         writeProtected = true;
     }
@@ -396,6 +400,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.21
      */
+    @Override
     public boolean isWriteProtected() {
         return writeProtected;
     }
@@ -855,6 +860,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * <li>otherwise, returns a generic {@link StringModel} for it.
      * </ul>
      */
+    @Override
     public TemplateModel wrap(Object object) throws TemplateModelException {
         if (object == null) return nullModel;
         return modelCache.getInstance(object);
@@ -881,6 +887,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.22
      */
+    @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
         return new APIModel(obj, this);
     }
@@ -898,18 +905,21 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
+        @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
             return ((Boolean) object).booleanValue() ? trueModel : falseModel; 
         }
     };
 
     private static final ModelFactory ITERATOR_FACTORY = new ModelFactory() {
+        @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
             return new IteratorModel((Iterator<?>) object, (BeansWrapper) wrapper); 
         }
     };
 
     private static final ModelFactory ENUMERATION_FACTORY = new ModelFactory() {
+        @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
             return new EnumerationModel((Enumeration<?>) object, (BeansWrapper) wrapper); 
         }
@@ -959,6 +969,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * returned unchanged.
      * @throws TemplateModelException if an attempted unwrapping fails.
      */
+    @Override
     public Object unwrap(TemplateModel model) throws TemplateModelException {
         return unwrap(model, Object.class);
     }
@@ -989,6 +1000,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.22
      */
+    @Override
     public Object tryUnwrapTo(TemplateModel model, Class<?> targetClass) throws TemplateModelException {
         return tryUnwrapTo(model, targetClass, 0);
     }

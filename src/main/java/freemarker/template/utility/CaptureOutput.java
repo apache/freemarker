@@ -61,6 +61,7 @@ import freemarker.template.TemplateTransformModel;
 @Deprecated
 public class CaptureOutput implements TemplateTransformModel {
 
+    @Override
     public Writer getWriter(final Writer out, final Map args) throws TemplateModelException {
         String errmsg = "Must specify the name of the variable in "
                 + "which to capture the output with the 'var' or 'local' or 'global' parameter.";

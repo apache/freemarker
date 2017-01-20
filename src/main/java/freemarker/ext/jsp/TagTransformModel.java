@@ -36,7 +36,9 @@ import javax.servlet.jsp.tagext.SimpleTag;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
@@ -46,7 +48,7 @@ import freemarker.template.TransformControl;
  * For {@link SimpleTag}-based custom JSP tags {@link SimpleTagDirectiveModel} is used instead.
  */
 class TagTransformModel extends JspTagModelBase implements TemplateTransformModel {
-    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.jsp");
     
     private final boolean isBodyTag;
     private final boolean isIterationTag;
@@ -59,6 +61,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
         isTryCatchFinally = TryCatchFinally.class.isAssignableFrom(tagClass);
     }
     
+    @Override
     public Writer getWriter(Writer out, Map args) throws TemplateModelException {
         try {
             Tag tag = (Tag) getTagInstance();
@@ -313,6 +316,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
             return pageContext;
         }
         
+        @Override
         public int onStart()
         throws TemplateModelException {
             try {
@@ -351,6 +355,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
             }
         }
         
+        @Override
         public int afterBody()
         throws TemplateModelException {
             try {
@@ -379,10 +384,11 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 needPop = false;
             }
             if (tag.doEndTag() == Tag.SKIP_PAGE) {
-                LOG.warn("Tag.SKIP_PAGE was ignored from a " + tag.getClass().getName() + " tag.");
+                LOG.warn("Tag.SKIP_PAGE was ignored from a {} tag.", tag.getClass().getName());
             }
         }
         
+        @Override
         public void onError(Throwable t) throws Throwable {
             if (isTryCatchFinally) {
                 ((TryCatchFinally) tag).doCatch(t);

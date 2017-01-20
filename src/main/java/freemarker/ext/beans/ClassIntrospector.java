@@ -44,11 +44,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.core.BugException;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
-import freemarker.log.Logger;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 
@@ -67,7 +69,7 @@ class ClassIntrospector {
     // these are shared by many object wrappers, and concurrency related glitches due to user errors must remain
     // local to the object wrappers, not corrupting the shared ClassIntrospector.
 
-    private static final Logger LOG = Logger.getLogger("freemarker.beans");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.beans");
 
     private static final String JREBEL_SDK_CLASS_NAME = "org.zeroturnaround.javarebel.ClassEventListener";
     private static final String JREBEL_INTEGRATION_ERROR_MSG
@@ -280,7 +282,7 @@ class ClassIntrospector {
             try {
                 addBeanInfoToClassIntrospectionData(introspData, clazz, accessibleMethods);
             } catch (IntrospectionException e) {
-                LOG.warn("Couldn't properly perform introspection for class " + clazz, e);
+                LOG.warn("Couldn't properly perform introspection for class {}", clazz.getName(), e);
                 introspData.clear(); // FIXME NBC: Don't drop everything here.
             }
         }
@@ -396,10 +398,9 @@ class ClassIntrospector {
                     introspData.put(ipd.getName(), ipd);
                     getArgTypesByMethod(introspData).put(publicReadMethod, publicReadMethod.getParameterTypes());
                 } catch (IntrospectionException e) {
-                    LOG.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() +
-                            " indexed property " + pd.getName() +
-                            ", read method " + publicReadMethod,
+                    LOG.warn("Failed creating a publicly-accessible property descriptor "
+                            + "for {} indexed property {}, read method {}",
+                            clazz.getName(), pd.getName(), publicReadMethod,
                             e);
                 }
             }
@@ -414,10 +415,10 @@ class ClassIntrospector {
                     }
                     introspData.put(pd.getName(), pd);
                 } catch (IntrospectionException e) {
-                    LOG.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() +
-                            " property " + pd.getName() + ", read method " +
-                            publicReadMethod, e);
+                    LOG.warn("Failed creating a publicly-accessible property descriptor "
+                            + "for {} property {}, read method {}",
+                            clazz.getName(), pd.getName(), publicReadMethod,
+                            e);
                 }
             }
         }
@@ -451,7 +452,7 @@ class ClassIntrospector {
                 introspData.put(CONSTRUCTORS_KEY, overloadedCtors);
             }
         } catch (SecurityException e) {
-            LOG.warn("Can't discover constructors for class " + clazz.getName(), e);
+            LOG.warn("Can't discover constructors for class {}", clazz.getName(), e);
         }
     }
 
@@ -494,9 +495,8 @@ class ClassIntrospector {
                 }
                 return;
             } catch (SecurityException e) {
-                LOG.warn("Could not discover accessible methods of class " +
-                        clazz.getName() +
-                        ", attemping superclasses/interfaces.", e);
+                LOG.warn("Could not discover accessible methods of class {}, attemping superclasses/interfaces.",
+                        clazz.getName(), e);
                 // Fall through and attempt to discover superclass/interface methods
             }
         }
@@ -672,12 +672,10 @@ class ClassIntrospector {
         // some classes are often reloaded or multiple versions of the
         // same class is normal (OSGi), this will drop the cache contents
         // too often.
-        if (LOG.isInfoEnabled()) {
-            LOG.info(
-                    "Detected multiple classes with the same name, \"" + className +
-                            "\". Assuming it was a class-reloading. Clearing class introspection " +
-                            "caches to release old data.");
-        }
+        LOG.info(
+                "Detected multiple classes with the same name, \"{}\". "
+                + "Assuming it was a class-reloading. Clearing class introspection caches to release old data.",
+                className);
         forcedClearCache();
     }
 

@@ -23,7 +23,8 @@ import java.text.ParseException;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Deals with {@link TemplateNumberFormat}-s that just wrap a Java {@link NumberFormat}.
@@ -32,7 +33,7 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     
     static final JavaTemplateNumberFormatFactory INSTANCE = new JavaTemplateNumberFormatFactory();
     
-    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.runtime");
 
     private static final ConcurrentHashMap<CacheKey, NumberFormat> GLOBAL_FORMAT_CACHE
             = new ConcurrentHashMap<CacheKey, NumberFormat>();
@@ -75,9 +76,9 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
                     }
                 }
                 if (triggered) {
-                    LOG.warn("Global Java NumberFormat cache has exceeded " + LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE
-                            + " entries => cache flushed. "
-                            + "Typical cause: Some template generates high variety of format pattern strings.");
+                    LOG.warn("Global Java NumberFormat cache has exceeded {} entries => cache flushed. "
+                            + "Typical cause: Some template generates high variety of format pattern strings.",
+                            LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE);
                 }
             }
             

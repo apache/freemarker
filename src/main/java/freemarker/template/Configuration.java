@@ -42,6 +42,9 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.cache.CacheStorage;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -85,7 +88,6 @@ import freemarker.core._SortedArraySet;
 import freemarker.core._UnmodifiableCompositeSet;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.log.Logger;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Constants;
@@ -146,7 +148,7 @@ import freemarker.template.utility.XmlEscape;
  */
 public class Configuration extends Configurable implements Cloneable, ParserConfiguration {
     
-    private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.cache");
     
     private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
     
@@ -225,16 +227,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23
      * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
      */
+    @Deprecated
     public static final String AUTO_IMPORT_KEY_SNAKE_CASE = "auto_import";
     /**
      * Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23
      * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_CAMEL_CASE} instead.
      */
+    @Deprecated
     public static final String AUTO_IMPORT_KEY_CAMEL_CASE = "autoImport";
     /**
      * Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints.
      * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
      */
+    @Deprecated
     public static final String AUTO_IMPORT_KEY = AUTO_IMPORT_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
@@ -895,7 +900,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             try {
                 return new LegacyDefaultFileTemplateLoader();
             } catch (Exception e) {
-                CACHE_LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
+                LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
                         + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
                 return null;
             }
@@ -904,6 +909,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
     }
     
+    // [FM3] Remove
     private static class LegacyDefaultFileTemplateLoader extends FileTemplateLoader {
 
         public LegacyDefaultFileTemplateLoader() throws IOException {
@@ -1665,6 +1671,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * The getter pair of {@link #setStrictSyntaxMode}.
      */
+    @Override
     public boolean getStrictSyntaxMode() {
         return strictSyntax;
     }
@@ -1734,6 +1741,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @return Never {@code null}. 
      * @since 2.3.20
      */
+    @Override
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
     }
@@ -1777,6 +1785,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *
      * @see #setWhitespaceStripping
      */
+    @Override
     public boolean getWhitespaceStripping() {
         return whitespaceStripping;
     }
@@ -1841,6 +1850,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
+    @Override
     public int getAutoEscapingPolicy() {
         return autoEscapingPolicy;
     }
@@ -1886,6 +1896,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
+    @Override
     public OutputFormat getOutputFormat() {
         return outputFormat;
     }
@@ -2138,6 +2149,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.24
      */
+    @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions == null
                 ? incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_24
@@ -2175,6 +2187,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * The getter pair of {@link #setTagSyntax(int)}.
      */
+    @Override
     public int getTagSyntax() {
         return tagSyntax;
     }
@@ -2240,6 +2253,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.23
      */
+    @Override
     public int getNamingConvention() {
         return namingConvention;
     }
@@ -2272,6 +2286,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.25
      */
+    @Override
     public int getTabSize() {
         return tabSize;
     }

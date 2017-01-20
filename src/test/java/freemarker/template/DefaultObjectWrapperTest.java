@@ -1029,6 +1029,7 @@ public class DefaultObjectWrapperTest {
     }
 
     private static final class PureIterable implements Iterable<String> {
+        @Override
         public Iterator<String> iterator() {
             return ImmutableList.of("a", "b", "c").iterator();
         }
@@ -1050,6 +1051,7 @@ public class DefaultObjectWrapperTest {
 
         final static NullModel INSTANCE = new NullModel();
 
+        @Override
         public Object getAdaptedObject(Class hint) {
             return null;
         }
@@ -1145,10 +1147,12 @@ public class DefaultObjectWrapperTest {
             this.tupple = tupple;
         }
 
+        @Override
         public int size() throws TemplateModelException {
             return 2;
         }
         
+        @Override
         public TemplateModel get(int index) throws TemplateModelException {
             switch (index) {
             case 0: return wrap(tupple.getE1());
@@ -1157,6 +1161,7 @@ public class DefaultObjectWrapperTest {
             }
         }
 
+        @Override
         public Object getAdaptedObject(Class hint) {
             return tupple;
         }

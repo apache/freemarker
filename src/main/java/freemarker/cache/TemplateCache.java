@@ -30,11 +30,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.core.TemplateConfiguration;
-import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
@@ -68,7 +70,7 @@ public class TemplateCache {
     private static final char ASTERISK = '*';
     private static final char SLASH = '/';
     private static final String LOCALE_PART_SEPARATOR = "_";
-    private static final Logger LOG = Logger.getLogger("freemarker.cache");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.cache");
 
     /** Maybe {@code null}. */
     private final TemplateLoader templateLoader;
@@ -701,7 +703,9 @@ public class TemplateCache {
                     storage.remove(tk);
                 }
             }
-            LOG.debug(debugName + " was removed from the cache, if it was there");
+            if (debug) {
+                LOG.debug(debugName + " was removed from the cache, if it was there");
+            }
         }
     }
 

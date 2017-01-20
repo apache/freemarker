@@ -26,7 +26,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
@@ -41,7 +43,8 @@ import freemarker.template.TemplateModelException;
  * calls of static methods, similar to that in {@link BeanModel}.
  */
 final class StaticModel implements TemplateHashModelEx {
-    private static final Logger LOG = Logger.getLogger("freemarker.beans");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.beans");
+    
     private final Class clazz;
     private final BeansWrapper wrapper;
     private final Map map = new HashMap();
@@ -56,6 +59,7 @@ final class StaticModel implements TemplateHashModelEx {
      * Returns the field or method named by the <tt>key</tt>
      * parameter.
      */
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         Object model = map.get(key);
         // Simple method, overloaded method or final field -- these have cached 
@@ -80,18 +84,22 @@ final class StaticModel implements TemplateHashModelEx {
      * Returns true if there is at least one public static
      * field or method in the underlying class.
      */
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @Override
     public int size() {
         return map.size();
     }
     
+    @Override
     public TemplateCollectionModel keys() throws TemplateModelException {
         return (TemplateCollectionModel) wrapper.getOuterIdentity().wrap(map.keySet());
     }
     
+    @Override
     public TemplateCollectionModel values() throws TemplateModelException {
         return (TemplateCollectionModel) wrapper.getOuterIdentity().wrap(map.values());
     }

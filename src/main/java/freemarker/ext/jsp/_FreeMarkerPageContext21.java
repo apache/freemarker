@@ -31,7 +31,9 @@ import javax.servlet.jsp.el.ELException;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 
@@ -42,13 +44,13 @@ import freemarker.template.utility.ClassUtil;
  * Implementation of PageContext that contains all JSP 2.1 methods.
  */
 public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
-    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.jsp");
 
     static {
         if (JspFactory.getDefaultFactory() == null) {
             JspFactory.setDefaultFactory(new FreeMarkerJspFactory21());
         }
-        LOG.debug("Using JspFactory implementation class " + 
+        LOG.debug("Using JspFactory implementation class {}", 
                 JspFactory.getDefaultFactory().getClass().getName());
     }
 

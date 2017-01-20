@@ -18,7 +18,8 @@
  */
 package freemarker.core;
 
-import freemarker.log.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.Version;
 import freemarker.template.utility.SecurityUtilities;
 
@@ -62,7 +63,7 @@ public final class _JavaVersions {
                 java6 = (_Java6) Class.forName("freemarker.core._Java6Impl").getField("INSTANCE").get(null);
             } catch (Exception e) {
                 try {
-                    Logger.getLogger("freemarker.runtime").error("Failed to access Java 6 functionality", e);
+                    LoggerFactory.getLogger("freemarker.runtime").error("Failed to access Java 6 functionality", e);
                 } catch (Exception e2) {
                     // Suppressed
                 }

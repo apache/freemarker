@@ -756,7 +756,6 @@
   
   <name>Apache FreeMarker</name>
   <description>
-    Google App Engine compliant variation of FreeMarker.
     FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
   </description>
   <url>http://freemarker.org/</url>
@@ -807,7 +806,11 @@
   </mailingLists>
   
   <dependencies>
-    <!-- no required dependencies -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.22</version>
+    </dependency>
   </dependencies>
 </project>
 ]]></echo>

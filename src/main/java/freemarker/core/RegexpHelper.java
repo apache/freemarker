@@ -22,8 +22,10 @@ package freemarker.core;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.cache.MruCacheStorage;
-import freemarker.log.Logger;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
@@ -32,7 +34,7 @@ import freemarker.template.utility.StringUtil;
  */
 final class RegexpHelper {
 
-    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.runtime");
     
     private static volatile boolean flagWarningsEnabled = LOG.isWarnEnabled();
     private static final int MAX_FLAG_WARNINGS_LOGGED = 25;
@@ -141,6 +143,7 @@ final class RegexpHelper {
                     break;
                 default:
                     if (flagWarningsEnabled) {
+                        // [FM3] Should be an error
                         RegexpHelper.logFlagWarning(
                                 "Unrecognized regular expression flag: "
                                 + StringUtil.jQuote(String.valueOf(c)) + ".");

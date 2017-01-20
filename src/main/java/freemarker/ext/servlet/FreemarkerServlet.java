@@ -40,6 +40,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -55,7 +58,6 @@ import freemarker.ext.jsp.TaglibFactory.ClasspathMetaInfTldSource;
 import freemarker.ext.jsp.TaglibFactory.ClearMetaInfTldSource;
 import freemarker.ext.jsp.TaglibFactory.MetaInfTldSource;
 import freemarker.ext.jsp.TaglibFactory.WebInfPerLibJarMetaInfTldSource;
-import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
@@ -318,8 +320,10 @@ import freemarker.template.utility.StringUtil;
  * </ul>
  */
 public class FreemarkerServlet extends HttpServlet {
-    private static final Logger LOG = Logger.getLogger("freemarker.servlet");
-    private static final Logger LOG_RT = Logger.getLogger("freemarker.runtime");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.servlet");
+    
+    @Deprecated
+    private static final Logger LOG_RT = LoggerFactory.getLogger("freemarker.runtime");
 
     public static final long serialVersionUID = -2440216393145762479L;
 
@@ -575,9 +579,7 @@ public class FreemarkerServlet extends HttpServlet {
         
         // Process object_wrapper init-param out of order: 
         wrapper = createObjectWrapper();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Using object wrapper: " + wrapper);
-        }
+        LOG.debug("Using object wrapper {}", wrapper);
         config.setObjectWrapper(wrapper);
         
         // Process TemplatePath init-param out of order:
@@ -784,7 +786,7 @@ public class FreemarkerServlet extends HttpServlet {
             try {
                 response.setBufferSize(bufferSize.intValue());
             } catch (IllegalStateException e) {
-                LOG.debug("Can't set buffer size any more,", e);
+                LOG.debug("Can't set the response buffer size any more", e);
             }
         }
 
@@ -1621,6 +1623,7 @@ public class FreemarkerServlet extends HttpServlet {
             this.initParamValue = initParamValue;
         }
 
+        @Override
         public String getInitParamValue() {
             return initParamValue;
         }
@@ -1638,6 +1641,7 @@ public class FreemarkerServlet extends HttpServlet {
             this.initParamValue = initParamValue;
         }
 
+        @Override
         public String getInitParamValue() {
             return initParamValue;
         }
@@ -1653,6 +1657,7 @@ public class FreemarkerServlet extends HttpServlet {
             this.initParamValue = initParamValue;
         }
 
+        @Override
         public String getInitParamValue() {
             return initParamValue;
         }

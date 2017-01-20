@@ -32,13 +32,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.core.CollectionAndSequence;
 import freemarker.core._DelayedFTLTypeDescription;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._TemplateModelException;
 import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleScalar;
@@ -65,7 +67,9 @@ import freemarker.template.utility.StringUtil;
 public class BeanModel
 implements
     TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
-    private static final Logger LOG = Logger.getLogger("freemarker.beans");
+    
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.beans");
+    
     protected final Object object;
     protected final BeansWrapper wrapper;
     
@@ -75,6 +79,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new BeanModel(object, (BeansWrapper) wrapper);
             }
@@ -140,6 +145,7 @@ implements
      * @throws TemplateModelException if there was no property nor method nor
      * a generic <tt>get</tt> method to invoke.
      */
+    @Override
     public TemplateModel get(String key)
         throws TemplateModelException {
         Class<?> clazz = object.getClass();
@@ -174,7 +180,7 @@ implements
             if (retval == UNKNOWN) {
                 if (wrapper.isStrict()) {
                     throw new InvalidPropertyException("No such bean property: " + key);
-                } else if (LOG.isDebugEnabled()) {
+                } else {
                     logNoSuchKey(key, classInfo);
                 }
                 retval = wrapper.wrap(null);
@@ -192,9 +198,11 @@ implements
     }
 
     private void logNoSuchKey(String key, Map<?, ?> keyMap) {
-        LOG.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
-            object.getClass().getName() + ". Introspection information for " +
-            "the class is: " + keyMap);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
+                object.getClass().getName() + ". Introspection information for " +
+                "the class is: " + keyMap);
+        }
     }
     
     /**
@@ -282,6 +290,7 @@ implements
      * Tells whether the model is empty. It is empty if either the wrapped 
      * object is null, or it's a Boolean with false value.
      */
+    @Override
     public boolean isEmpty() {
         if (object instanceof String) {
             return ((String) object).length() == 0;
@@ -302,22 +311,27 @@ implements
      * Returns the same as {@link #getWrappedObject()}; to ensure that, this method will be final starting from 2.4.
      * This behavior of {@link BeanModel} is assumed by some FreeMarker code. 
      */
+    @Override
     public Object getAdaptedObject(Class<?> hint) {
         return object;  // return getWrappedObject(); starting from 2.4
     }
 
+    @Override
     public Object getWrappedObject() {
         return object;
     }
     
+    @Override
     public int size() {
         return wrapper.getClassIntrospector().keyCount(object.getClass());
     }
 
+    @Override
     public TemplateCollectionModel keys() {
         return new CollectionAndSequence(new SimpleSequence(keySet(), wrapper));
     }
 
+    @Override
     public TemplateCollectionModel values() throws TemplateModelException {
         List<Object> values = new ArrayList<Object>(size());
         TemplateModelIterator it = keys().iterator();
@@ -359,6 +373,7 @@ implements
         return wrapper.getClassIntrospector().keySet(object.getClass());
     }
 
+    @Override
     public TemplateModel getAPI() throws TemplateModelException {
         return wrapper.wrapAsAPI(object);
     }

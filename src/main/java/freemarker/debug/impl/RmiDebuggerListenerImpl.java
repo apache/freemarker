@@ -24,10 +24,12 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.debug.DebuggerClient;
 import freemarker.debug.DebuggerListener;
 import freemarker.debug.EnvironmentSuspendedEvent;
-import freemarker.log.Logger;
 
 /**
  * Used by the {@link DebuggerClient} to create local 
@@ -37,13 +39,14 @@ extends
     UnicastRemoteObject
 implements
     DebuggerListener, Unreferenced {
-    private static final Logger LOG = Logger.getLogger(
+    private static final Logger LOG = LoggerFactory.getLogger(
             "freemarker.debug.client");
     
     private static final long serialVersionUID = 1L;
 
     private final DebuggerListener listener;
 
+    @Override
     public void unreferenced() {
         try {
             UnicastRemoteObject.unexportObject(this, false);
@@ -57,6 +60,7 @@ implements
         this.listener = listener;
     }
 
+    @Override
     public void environmentSuspended(EnvironmentSuspendedEvent e) 
     throws RemoteException {
         listener.environmentSuspended(e);

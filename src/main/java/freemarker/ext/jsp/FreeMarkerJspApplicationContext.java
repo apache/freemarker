@@ -40,13 +40,15 @@ import javax.servlet.jsp.JspApplicationContext;
 import javax.servlet.jsp.el.ImplicitObjectELResolver;
 import javax.servlet.jsp.el.ScopedAttributeELResolver;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.utility.ClassUtil;
 
 /**
  */
 class FreeMarkerJspApplicationContext implements JspApplicationContext {
-    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.jsp");
     private static final ExpressionFactory expressionFactoryImpl = findExpressionFactoryImplementation();
     
     private final LinkedList listeners = new LinkedList();
@@ -63,6 +65,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
         elResolver.add(new ScopedAttributeELResolver());
     }
     
+    @Override
     public void addELContextListener(ELContextListener listener) {
         synchronized (listeners) {
             listeners.addLast(listener);
@@ -74,8 +77,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
         if (ef == null) {
             ef = tryExpressionFactoryImplementation("org.apache");
             if (ef == null) {
-                LOG.warn("Could not find any implementation for " + 
-                        ExpressionFactory.class.getName());
+                LOG.warn("Could not find any implementation for {}", ExpressionFactory.class.getName());
             }
         }
         return ef;
@@ -86,23 +88,24 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
         try {
             Class cl = ClassUtil.forName(className);
             if (ExpressionFactory.class.isAssignableFrom(cl)) {
-                LOG.info("Using " + className + " as implementation of " + 
-                        ExpressionFactory.class.getName());
+                LOG.info("Using {} as implementation of {}", className, ExpressionFactory.class.getName());
                 return (ExpressionFactory) cl.newInstance();
             }
-            LOG.warn("Class " + className + " does not implement " + 
-                    ExpressionFactory.class.getName());
+            LOG.warn("Class {} does not implement {}", className, ExpressionFactory.class.getName());
         } catch (ClassNotFoundException e) {
+            // skip
         } catch (Exception e) {
-            LOG.error("Failed to instantiate " + className, e);
+            LOG.error("Failed to instantiate {}", className, e);
         }
         return null;
     }
 
+    @Override
     public void addELResolver(ELResolver resolver) {
         additionalResolvers.add(resolver);
     }
 
+    @Override
     public ExpressionFactory getExpressionFactory() {
         return expressionFactoryImpl;
     }

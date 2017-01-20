@@ -31,16 +31,19 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.debug.Debugger;
-import freemarker.log.Logger;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  */
 class DebuggerServer {
-    private static final Logger LOG = Logger.getLogger("freemarker.debug.server");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.debug.server");
     // TODO: Eventually replace with Yarrow    
+    // TODO: Can be extremely slow (on Linux, not enough entropy)
     private static final Random R = new SecureRandom();
     
     private final byte[] password;
@@ -62,6 +65,7 @@ class DebuggerServer {
     public void start() {
         new Thread(new Runnable()
         {
+            @Override
             public void run() {
                 startInternal();
             }
@@ -87,6 +91,7 @@ class DebuggerServer {
             this.s = s;
         }
         
+        @Override
         public void run() {
             try {
                 ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
@@ -105,7 +110,7 @@ class DebuggerServer {
                     out.writeObject(null);
                 }
             } catch (Exception e) {
-                LOG.warn("Connection to " + s.getInetAddress().getHostAddress() + " abruply broke", e);
+                LOG.warn("Connection to {} abruply broke", s.getInetAddress().getHostAddress(), e);
             }
         }
 

@@ -4,3 +4,5 @@ the FreeMarer 3 changelog here:
 - Increased version number to 3.0.0 (nightly aka. SNAPSHOT)
 - Removed legacy extensions: rhyno, jython, xml (not to be confused with dom), jdom, ant.
 - Removed JSP 2.0 support (2.1 is the minimum for now, but maybe it will be 2.2 and Servlet 3.0 later).
+- Removed freemarker.ext.log, our log abstraction layer from the old times when there was no clear winner on this field.
+  Added org.slf4j:slf4j-api as required dependency instead.

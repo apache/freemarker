@@ -58,6 +58,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     XPathSupport xpathSupport;
     
     private static ObjectWrapper nodeWrapper = new ObjectWrapper() {
+        @Override
         public TemplateModel wrap(Object obj) {
             if (obj instanceof NodeModel) {
                 return (NodeModel) obj;
@@ -114,10 +115,12 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         return result;
     }
     
+    @Override
     public boolean isEmpty() {
         return size() == 0;
     }
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         if (size() == 1) {
             NodeModel nm = (NodeModel) get(0);
@@ -200,6 +203,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         return xpathSupport;
     }
 
+    @Override
     public Object[] explainTypeError(Class[] expectedClasses) {
         for (int i = 0; i < expectedClasses.length; i++) {
             Class expectedClass = expectedClasses[i];

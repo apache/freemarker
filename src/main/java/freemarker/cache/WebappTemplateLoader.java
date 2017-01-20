@@ -30,7 +30,9 @@ import java.net.URL;
 
 import javax.servlet.ServletContext;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.Configuration;
 import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.StringUtil;
@@ -41,7 +43,7 @@ import freemarker.template.utility.StringUtil;
  */
 public class WebappTemplateLoader implements TemplateLoader {
 
-    private static final Logger LOG = Logger.getLogger("freemarker.cache");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.cache");
 
     private final ServletContext servletContext;
     private final String subdirPath;
@@ -94,6 +96,7 @@ public class WebappTemplateLoader implements TemplateLoader {
         this.servletContext = servletContext;
     }
 
+    @Override
     public Object findTemplateSource(String name) throws IOException {
         String fullPath = subdirPath + name;
 
@@ -117,13 +120,15 @@ public class WebappTemplateLoader implements TemplateLoader {
         try {
             url = servletContext.getResource(fullPath);
         } catch (MalformedURLException e) {
-            LOG.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath),
-                    e);
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath), e);
+            }
             return null;
         }
         return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
 
+    @Override
     public long getLastModified(Object templateSource) {
         if (templateSource instanceof File) {
             return ((File) templateSource).lastModified();
@@ -132,6 +137,7 @@ public class WebappTemplateLoader implements TemplateLoader {
         }
     }
 
+    @Override
     public Reader getReader(Object templateSource, String encoding)
             throws IOException {
         if (templateSource instanceof File) {
@@ -145,6 +151,7 @@ public class WebappTemplateLoader implements TemplateLoader {
         }
     }
 
+    @Override
     public void closeTemplateSource(Object templateSource) throws IOException {
         if (templateSource instanceof File) {
             // Do nothing.

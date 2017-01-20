@@ -26,14 +26,16 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.TemplateDateModel;
 
 class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
     static final JavaTemplateDateFormatFactory INSTANCE = new JavaTemplateDateFormatFactory(); 
     
-    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.runtime");
 
     private static final ConcurrentHashMap<CacheKey, DateFormat> GLOBAL_FORMAT_CACHE
             = new ConcurrentHashMap<CacheKey, DateFormat>();
@@ -110,9 +112,9 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
                     }
                 }
                 if (triggered) {
-                    LOG.warn("Global Java DateFormat cache has exceeded " + LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE
-                            + " entries => cache flushed. "
-                            + "Typical cause: Some template generates high variety of format pattern strings.");
+                    LOG.warn("Global Java DateFormat cache has exceeded {} entries => cache flushed. "
+                            + "Typical cause: Some template generates high variety of format pattern strings.",
+                            LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE);
                 }
             }
             

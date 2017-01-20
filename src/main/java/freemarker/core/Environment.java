@@ -41,10 +41,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache._CacheAPI;
-import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.ObjectWrapper;
@@ -94,8 +96,8 @@ public final class Environment extends Configurable {
     
     private static final ThreadLocal threadEnv = new ThreadLocal();
 
-    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
-    private static final Logger ATTEMPT_LOGGER = Logger.getLogger("freemarker.runtime.attempt");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.runtime");
+    private static final Logger LOG_ATTEMPT = LoggerFactory.getLogger("freemarker.runtime.attempt");
 
     // Do not use this object directly; clone it first! DecimalFormat isn't
     // thread-safe.
@@ -411,11 +413,13 @@ public final class Environment extends Configurable {
         if (outArgs.length > 0) {
             pushLocalContext(new LocalContext() {
 
+                @Override
                 public TemplateModel getLocalVariable(String name) {
                     int index = bodyParameterNames.indexOf(name);
                     return index != -1 ? outArgs[index] : null;
                 }
 
+                @Override
                 public Collection getLocalVariableNames() {
                     return bodyParameterNames;
                 }
@@ -509,8 +513,8 @@ public final class Environment extends Configurable {
             this.out = prevOut;
         }
         if (thrownException != null) {
-            if (ATTEMPT_LOGGER.isDebugEnabled()) {
-                ATTEMPT_LOGGER.debug("Error in attempt block " +
+            if (LOG_ATTEMPT.isDebugEnabled()) {
+                LOG_ATTEMPT.debug("Error in attempt block " +
                         attemptBlock.getStartLocationQuoted(), thrownException);
             }
             try {
@@ -2207,10 +2211,12 @@ public final class Environment extends Configurable {
     public TemplateHashModel getDataModel() {
         final TemplateHashModel result = new TemplateHashModel() {
 
+            @Override
             public boolean isEmpty() {
                 return false;
             }
 
+            @Override
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel value = rootDataModel.get(key);
                 if (value == null) {
@@ -2223,10 +2229,12 @@ public final class Environment extends Configurable {
         if (rootDataModel instanceof TemplateHashModelEx) {
             return new TemplateHashModelEx() {
 
+                @Override
                 public boolean isEmpty() throws TemplateModelException {
                     return result.isEmpty();
                 }
 
+                @Override
                 public TemplateModel get(String key) throws TemplateModelException {
                     return result.get(key);
                 }
@@ -2234,14 +2242,17 @@ public final class Environment extends Configurable {
                 // NB: The methods below do not take into account
                 // configuration shared variables even though
                 // the hash will return them, if only for BWC reasons
+                @Override
                 public TemplateCollectionModel values() throws TemplateModelException {
                     return ((TemplateHashModelEx) rootDataModel).values();
                 }
 
+                @Override
                 public TemplateCollectionModel keys() throws TemplateModelException {
                     return ((TemplateHashModelEx) rootDataModel).keys();
                 }
 
+                @Override
                 public int size() throws TemplateModelException {
                     return ((TemplateHashModelEx) rootDataModel).size();
                 }
@@ -2258,10 +2269,12 @@ public final class Environment extends Configurable {
     public TemplateHashModel getGlobalVariables() {
         return new TemplateHashModel() {
 
+            @Override
             public boolean isEmpty() {
                 return false;
             }
 
+            @Override
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel result = globalNamespace.get(key);
                 if (result == null) {
@@ -2779,6 +2792,7 @@ public final class Environment extends Configurable {
             this.childBuffer = childBuffer;
         }
 
+        @Override
         public void render(Writer newOut) throws TemplateException, IOException {
             Writer prevOut = out;
             out = newOut;

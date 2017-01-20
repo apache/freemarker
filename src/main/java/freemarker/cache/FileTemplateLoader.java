@@ -30,7 +30,9 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-import freemarker.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import freemarker.template.Configuration;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
@@ -67,7 +69,7 @@ public class FileTemplateLoader implements TemplateLoader {
     private static final int CASE_CHECK_CACHE__SOFT_SIZE = 1000;
     private static final boolean SEP_IS_SLASH = File.separatorChar == '/';
     
-    private static final Logger LOG = Logger.getLogger("freemarker.cache");
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.cache");
     
     public final File baseDir;
     private final String canonicalBasePath;
@@ -120,6 +122,7 @@ public class FileTemplateLoader implements TemplateLoader {
     throws IOException {
         try {
             Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                @Override
                 public Object run() throws IOException {
                     if (!baseDir.exists()) {
                         throw new FileNotFoundException(baseDir + " does not exist.");
@@ -153,10 +156,12 @@ public class FileTemplateLoader implements TemplateLoader {
         }
     }
     
+    @Override
     public Object findTemplateSource(final String name)
     throws IOException {
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                @Override
                 public Object run() throws IOException {
                     File source = new File(baseDir, SEP_IS_SLASH ? name : 
                         name.replace('/', File.separatorChar));
@@ -187,9 +192,11 @@ public class FileTemplateLoader implements TemplateLoader {
         }
     }
     
+    @Override
     public long getLastModified(final Object templateSource) {
         return ((Long) (AccessController.doPrivileged(new PrivilegedAction()
         {
+            @Override
             public Object run() {
                 return Long.valueOf(((File) templateSource).lastModified());
             }
@@ -198,11 +205,13 @@ public class FileTemplateLoader implements TemplateLoader {
         
     }
     
+    @Override
     public Reader getReader(final Object templateSource, final String encoding)
     throws IOException {
         try {
             return (Reader) AccessController.doPrivileged(new PrivilegedExceptionAction()
             {
+                @Override
                 public Object run()
                 throws IOException {
                     if (!(templateSource instanceof File)) {
@@ -255,7 +264,7 @@ public class FileTemplateLoader implements TemplateLoader {
                         if (fileName.equalsIgnoreCase(listingEntry)) {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("Emulating file-not-found because of letter case differences to the "
-                                        + "real file, for: " + sourcePath);
+                                        + "real file, for: {}", sourcePath);
                             }
                             return false;
                         }
@@ -270,6 +279,7 @@ public class FileTemplateLoader implements TemplateLoader {
         return true;
     }
 
+    @Override
     public void closeTemplateSource(Object templateSource) {
         // Do nothing.
     }

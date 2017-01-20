@@ -72,7 +72,7 @@ in the documentation/index.html directory.
 Installing
 ----------
 
-If you are using Maven, just add this dependency:
+If you are using Maven (or Gradle, etc.), just add this dependency:
 
   <!--
   Attention: Be sure nothing pulls in an old dependency with groupId
@@ -90,10 +90,12 @@ application's ClassLoader will find it. For example, if you are using
 FreeMarker in a web application, you probably want to put
 freemarker.jar into the WEB-INF/lib directory of your web application.
 
-FreeMarker has no required dependencies. It has several optional
-dependencies, but usually you don't have to deal with them, because if
-you are using an optional feature that's certainly because your
-application already uses the related library.
+FreeMarker 3 has only one required dependency, slf4j-api. (Of course,
+it will be automatically downloaded by Maven, Gradle, and the like.)
+It has several optional dependencies, but usually you don't have
+to deal with them, because if you are using an optional feature
+that's certainly because your application already uses the related
+library.
 
 
 Change log
@@ -146,6 +148,9 @@ apply it to your development environment:
 - Window -> Preferences
   - General -> Workspace, set the text file encoding
     to "UTF-8". (Or, you can set the same later on project level instead.)
+  - General -> Editors, set:
+    - Insert space for tabs
+    - Show print margin, 120 columns
   - Java -> Code Style -> Formatter -> Import...
     Select src\ide-settings\Eclipse-Mars\Formatter-profile-FreeMarker.xml
     inside the FreeMarker project directory.

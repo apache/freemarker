@@ -34,6 +34,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.CharacterData;
@@ -50,7 +52,6 @@ import org.xml.sax.SAXException;
 
 import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -86,7 +87,7 @@ abstract public class NodeModel
 implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel {
 
-    static private final Logger LOG = Logger.getLogger("freemarker.dom");
+    static private final Logger LOG = LoggerFactory.getLogger("freemarker.dom");
 
     private static final Object STATIC_LOCK = new Object();
     
@@ -297,6 +298,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return node;
     }
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         if (key.startsWith("@@")) {
             if (key.equals(AtAtKey.TEXT.getKey())) {
@@ -344,6 +346,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         }
     }
     
+    @Override
     public TemplateNodeModel getParentNode() {
         if (parent == null) {
             Node parentNode = node.getParentNode();
@@ -357,14 +360,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return parent;
     }
 
+    @Override
     public TemplateNodeModelEx getPreviousSibling() throws TemplateModelException {
         return wrap(node.getPreviousSibling());
     }
 
+    @Override
     public TemplateNodeModelEx getNextSibling() throws TemplateModelException {
         return wrap(node.getNextSibling());
     }
 
+    @Override
     public TemplateSequenceModel getChildNodes() {
         if (children == null) {
             children = new NodeListModel(node.getChildNodes(), this);
@@ -372,6 +378,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return children;
     }
     
+    @Override
     public final String getNodeType() throws TemplateModelException {
         short nodeType = node.getNodeType();
         switch (nodeType) {
@@ -407,14 +414,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     /**
      * Always returns 1.
      */
+    @Override
     public final int size() {
         return 1;
     }
     
+    @Override
     public final TemplateModel get(int i) {
         return i == 0 ? this : null;
     }
     
+    @Override
     public String getNodeNamespace() {
         int nodeType = node.getNodeType();
         if (nodeType != Node.ATTRIBUTE_NODE && nodeType != Node.ELEMENT_NODE) { 
@@ -750,14 +760,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         return getNodeName();
     }
     
+    @Override
     public Object getAdaptedObject(Class hint) {
         return node;
     }
     
+    @Override
     public Object getWrappedObject() {
         return node;
     }
     
+    @Override
     public Object[] explainTypeError(Class[] expectedClasses) {
         for (int i = 0; i < expectedClasses.length; i++) {
             Class expectedClass = expectedClasses[i];
