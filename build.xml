@@ -711,7 +711,6 @@
         <exclude name="**/*.~*" />
         <exclude name="**/*.*~" />
         <include name="src/**" />
-        <include name="examples/**" />
         <include name="*.xml" />
         <include name="*.sample" />
         <include name="*.txt" />
