@@ -12,3 +12,5 @@ the FreeMarer 3 changelog here:
 - Removed classic_compatible (classicCompatible) setting, which was used to emulate some of the FreeMarker 1.x behavior
 - Removed utility TemplateModel-s that can very easily mean a security problem: freemarker.template.utility.Execute and 
   freemarker.template.utility.ObjectConstructor
+- Removed TemplateClassResolver.SAFER_RESOLVER, because the classes it has blocked were removed from FreeMarker, so it's
+  the same as UNRESTRICTED_RESOLVER

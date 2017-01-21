@@ -55,12 +55,6 @@ public interface TemplateClassResolver {
     };
     
     /**
-     * Same as {@link #UNRESTRICTED_RESOLVER} at the moment.
-     */
-    // [FM3] Do something with this. Like, only classes annotated in a certain would be accessible. 
-    TemplateClassResolver SAFER_RESOLVER =  UNRESTRICTED_RESOLVER;
-    
-    /**
      * Doesn't allow resolving any classes.
      */
     TemplateClassResolver ALLOWS_NOTHING_RESOLVER =  new TemplateClassResolver() {

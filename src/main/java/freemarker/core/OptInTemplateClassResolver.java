@@ -50,7 +50,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
      * @param trustedTemplates the {@link List} of {@link String}-s that contains
      *     template names (i.e., template root directory relative paths)
      *     and prefix patterns (like <code>"include/*"</code>) of templates
-     *     for which {@link TemplateClassResolver#SAFER_RESOLVER} will be 
+     *     for which {@link TemplateClassResolver#UNRESTRICTED_RESOLVER} will be 
      *     used (which is not as safe as {@link OptInTemplateClassResolver}).
      *     The list items need not start with <code>"/"</code> (if they are, it
      *     will be removed). List items ending with <code>"*"</code> are treated
@@ -88,6 +88,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
         }
     }
 
+    @Override
     public Class resolve(String className, Environment env, Template template)
     throws TemplateException {
         String templateName = safeGetTemplateName(template);
@@ -95,7 +96,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
         if (templateName != null
                 && (trustedTemplateNames.contains(templateName)
                         || hasMatchingPrefix(templateName))) {
-            return TemplateClassResolver.SAFER_RESOLVER.resolve(className, env, template);
+            return TemplateClassResolver.UNRESTRICTED_RESOLVER.resolve(className, env, template);
         } else {
             if (!allowedClasses.contains(className)) {
                 throw new _MiscTemplateException(env,

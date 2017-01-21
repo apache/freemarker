@@ -1349,10 +1349,9 @@ public class Configurable {
      * a template contains the <code>"com.example.SomeClassName"?new</code>
      * expression, this object will be called to resolve the
      * <code>"com.example.SomeClassName"</code> string to a class. The default
-     * value is {@link TemplateClassResolver#UNRESTRICTED_RESOLVER} in
-     * FreeMarker 2.3.x, and {@link TemplateClassResolver#SAFER_RESOLVER}
-     * starting from FreeMarker 2.4.0. If you allow users to upload templates,
-     * it's important to use a custom restrictive {@link TemplateClassResolver}.
+     * value is {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}. If you allow
+     * users to upload templates, it's important to use a custom restrictive
+     * {@link TemplateClassResolver} or {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}.
      * 
      * @since 2.3.17
      */
@@ -1989,8 +1988,6 @@ public class Configurable {
      *       <ol>
      *         <li><p>{@code "unrestricted"}:
      *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
-     *         <li><p>{@code "safer"}:
-     *             Use {@link TemplateClassResolver#SAFER_RESOLVER}
      *         <li><p>{@code "allows_nothing"}:
      *             Use {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}
      *         <li><p>Something that contains colon will use
@@ -2015,7 +2012,7 @@ public class Configurable {
      *                   {@code lib/foo/bar.ftl}) and template {@code safe.ftl}
      *                   (that does not match {@code foo/safe.ftl}, only
      *                   exactly {@code safe.ftl}) to instantiate anything
-     *                   that {@link TemplateClassResolver#SAFER_RESOLVER} allows.
+     *                   that {@link TemplateClassResolver#UNRESTRICTED_RESOLVER} allows.
      *               <tr>
      *                 <td>
      *                   {@code allowed_classes: com.example.C1, com.example.C2}
@@ -2036,7 +2033,8 @@ public class Configurable {
      *         <li><p>Otherwise if the value contains dot, it's interpreted as an <a href="#fm_obe">object builder
      *             expression</a>.
      *       </ol>
-     *       
+     *       Note that the {@code safer} option was removed in FreeMarker 3.0.0, as it has become equivalent with
+     *       {@code "unrestricted"}, as the classes it has blocked were removed from FreeMarker.
      *   <li><p>{@code "show_error_tips"}:
      *       See {@link #setShowErrorTips(boolean)}.
      *       Since 2.3.21.
@@ -2369,8 +2367,6 @@ public class Configurable {
                     || NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);
-                } else if ("safer".equals(value)) {
-                    setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
                 } else if ("allows_nothing".equals(value) || "allowsNothing".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
                 } else if (value.indexOf(":") != -1) {

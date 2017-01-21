@@ -429,7 +429,7 @@ public class ObjectBuilderSettingsTest {
             props.setProperty(Configuration.CACHE_STORAGE_KEY,
                     "soft: 500, strong: 100");
             props.setProperty(Configurable.NEW_BUILTIN_CLASS_RESOLVER_KEY,
-                    "safer");
+                    "allows_nothing");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
@@ -437,7 +437,7 @@ public class ObjectBuilderSettingsTest {
             assertEquals(1, ((DummyTemplateExceptionHandler) cfg.getTemplateExceptionHandler()).getX());
             assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getSoftSizeLimit());
-            assertEquals(TemplateClassResolver.SAFER_RESOLVER, cfg.getNewBuiltinClassResolver());
+            assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
             assertEquals("utf-8", cfg.getDefaultEncoding());
         }
 
@@ -1139,10 +1139,12 @@ public class ObjectBuilderSettingsTest {
         
         private int x;
 
+        @Override
         public void writeProtect() {
             writeProtected = true;
         }
 
+        @Override
         public boolean isWriteProtected() {
             return writeProtected;
         }
@@ -1455,6 +1457,7 @@ public class ObjectBuilderSettingsTest {
         
         private int x;
 
+        @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
         }
 
@@ -1470,16 +1473,20 @@ public class ObjectBuilderSettingsTest {
     
     public static class DummyCacheStorage implements CacheStorage {
         
+        @Override
         public Object get(Object key) {
             return null;
         }
 
+        @Override
         public void put(Object key, Object value) {
         }
 
+        @Override
         public void remove(Object key) {
         }
 
+        @Override
         public void clear() {
         }
         
@@ -1487,6 +1494,7 @@ public class ObjectBuilderSettingsTest {
     
     public static class DummyNewBuiltinClassResolver implements TemplateClassResolver {
 
+        @Override
         public Class resolve(String className, Environment env, Template template) throws TemplateException {
             return null;
         }
@@ -1495,18 +1503,22 @@ public class ObjectBuilderSettingsTest {
     
     public static class DummyTemplateLoader implements TemplateLoader {
 
+        @Override
         public Object findTemplateSource(String name) throws IOException {
             return null;
         }
 
+        @Override
         public long getLastModified(Object templateSource) {
             return 0;
         }
 
+        @Override
         public Reader getReader(Object templateSource, String encoding) throws IOException {
             return null;
         }
 
+        @Override
         public void closeTemplateSource(Object templateSource) throws IOException {
         }
         

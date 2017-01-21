@@ -243,9 +243,6 @@
    <testCase name="new-unrestricted" template="new-defaultresolver.ftl" expected="new-defaultresolver.txt">
       <setting new_builtin_class_resolver="unrestricted"/>
    </testCase>   
-   <testCase name="new-safer" template="new-defaultresolver.ftl" expected="new-defaultresolver.txt">
-      <setting new_builtin_class_resolver="safer"/>
-   </testCase>   
    <testCase name="new-allowsnothing" template="new-defaultresolver.ftl">
       <setting new_builtin_class_resolver="allows_nothing"/>
    </testCase>   
