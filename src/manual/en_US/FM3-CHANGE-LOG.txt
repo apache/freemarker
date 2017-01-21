@@ -14,3 +14,6 @@ the FreeMarer 3 changelog here:
   freemarker.template.utility.ObjectConstructor
 - Removed TemplateClassResolver.SAFER_RESOLVER, because the classes it has blocked were removed from FreeMarker, so it's
   the same as UNRESTRICTED_RESOLVER
+- Removed the strict_syntax setting, and so also the support for FTL tags without #. This was a FreeMarker 1.x
+  compatibility option.
+- Removed deprecated FMParser contstructors.

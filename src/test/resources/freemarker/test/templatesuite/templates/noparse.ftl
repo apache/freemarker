@@ -1,4 +1,3 @@
-<#ftl strict_syntax=false>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -22,7 +21,7 @@
 <title>FreeMarker: NoParse Test</title>
 </head>
 <body>
-<noparse>
+<#noparse>
 
 A simple test follows:
 
@@ -32,31 +31,31 @@ A more rigorous test, showing that we're not faking it:
 
 ${message@#$%&}
 
-</noparse>
-<if message?exists>
+</#noparse>
+<#if message?exists>
 	<p>Message exists!
-	<noparse>
+	<#noparse>
 		...and even generates output!
-		<if message>
+		<#if message>
 			Nested statements are ok, too.
-		</if>
-	</noparse>
+		</#if>
+	</#noparse>
 	</p>
-</if>
+</#if>
 
 Here's another edge case, this time, trying to output a &lt;noparse&gt;
 inside another &lt;noparse&gt;
 
-<noparse>
+<#noparse>
 
 This is what the noparse instruction looks like:
 
-<nop</noparse><noparse>arse>This part of the template wont be parsed by the 
+<#nop</#noparse><#noparse>arse>This part of the template wont be parsed by the 
 FreeMarker parser. Instead, it will be treated as verbatim text information,
-and output as such.</nop</noparse><noparse>arse>
+and output as such.</#nop</#noparse><#noparse>arse>
 
 The rest of the template appears here.
-</noparse>
+</#noparse>
 
 Simple.
 </body>

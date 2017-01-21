@@ -1,4 +1,3 @@
-<#ftl strict_syntax=false>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -36,66 +35,66 @@
 <P>Now try the Utility package:</p>
 <p>${utility}</p>
 
-<transform utility.htmlEscape>
+<@utility.htmlEscape>
 <p>${utility}</p>
-</transform>
+</@>
 
 <p>Now some nested transforms:</p>
-<transform utility.compress>
-<p    >This tests the compress transformation</p >
-</transform>
 <@utility.compress>
-<transform utility.htmlEscape>
 <p    >This tests the compress transformation</p >
-</transform>
+</@>
+<@utility.compress>
+<@utility.htmlEscape>
+<p    >This tests the compress transformation</p >
+</@>
 </@utility.compress>
 <#assign html_transform = "freemarker.template.utility.HtmlEscape"?new() />
-<transform html_transform><#--Using the transform via an instantiation -->
-<transform utility.compress>
+<@html_transform><#--Using the transform via an instantiation -->
+<@utility.compress>
 <p    >This tests the compress transformation</p >
-</transform>
-</transform>
+</@>
+</@>
 
 <p>Now try method and transform interactions:</p>
-<transform utility.escape( "xml" )>
+<@utility.escape("xml")>
 <p>This isn't a valid XML string.</p>
-</transform>
-<transform utility.escape( "html" )>
+</@>
+<@utility.escape("html")>
 <p>This isn't a valid HTML string.</p>
-</transform>
+</@>
 
 <p>A more advanced interaction involves getting a TemplateMethodModel
 to initialise a TemplateTransformModel, as follow:</p>
 
-<transform utility.special( "This is a comment" )>
+<@utility.special("This is a comment")>
 Comment: *
 
 A test string containing quotes: "This isn't a test".
 A test string containing amps: Fish & Chips.
 A test string containing tags: <p>Fish &amp; Chips.</p>
-</transform>
+</@>
 
-<transform utility.special( "This is a second comment", "quote" )>
+<@utility.special("This is a second comment", "quote")>
 Comment: *
 
 A test string containing quotes: "This isn't a test".
 A test string containing amps: Fish & Chips.
 A test string containing tags: <p>Fish &amp; Chips.</p>
-</transform>
-<transform utility.special( "This is a third comment", "ampersand", "quote" )>
+</@>
+<@utility.special("This is a third comment", "ampersand", "quote")>
 Comment: *
 
 A test string containing quotes: "This isn't a test".
 A test string containing amps: Fish & Chips.
 A test string containing tags: <p>Fish &amp; Chips.</p>
-</transform>
-<transform utility.special( "tag", utility )>
+</@>
+<@utility.special("tag", utility)>
 Comment: *
 
 A test string containing quotes: "This isn't a test".
 A test string containing amps: Fish & Chips.
 A test string containing tags: <p>Fish &amp; Chips.</p>
-</transform>
+</@>
 
 </body>
 </html>

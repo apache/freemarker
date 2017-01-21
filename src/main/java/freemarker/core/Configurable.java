@@ -2080,10 +2080,6 @@ public class Configurable {
      *       {@link OutputFormat}-s.
      *       Example: {@code [com.example.MyOutputFormat(), com.example.MyOtherOutputFormat()]}
      *       
-     *   <li><p>{@code "strict_syntax"}:
-     *       See {@link Configuration#setStrictSyntaxMode}. Deprecated.
-     *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
-     *       
      *   <li><p>{@code "whitespace_stripping"}:
      *       See {@link Configuration#setWhitespaceStripping}.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.

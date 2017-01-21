@@ -1,4 +1,3 @@
-<#ftl strict_syntax=false>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -37,12 +36,12 @@
 
 <p>Ensure that root lookups are unaffected by local variables:</p>
 
-<macro test(message)>
+<#macro test message>
   ${.data_model.message}
   ${message}
-</macro>
+</#macro>
 
-<call test(message + " Part Deux")>
+<@test message + " Part Deux" />
 
 </body>
 </html>

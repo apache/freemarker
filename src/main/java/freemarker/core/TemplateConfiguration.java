@@ -80,7 +80,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private Integer tagSyntax;
     private Integer namingConvention;
     private Boolean whitespaceStripping;
-    private Boolean strictSyntaxMode;
     private Integer autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
@@ -216,9 +215,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (tc.isSQLDateAndTimeTimeZoneSet()) {
             setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
-        }
-        if (tc.isStrictSyntaxModeSet()) {
-            setStrictSyntaxMode(tc.getStrictSyntaxMode());
         }
         if (tc.isTagSyntaxSet()) {
             setTagSyntax(tc.getTagSyntax());
@@ -505,29 +501,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     public boolean isRecognizeStandardFileExtensionsSet() {
         return recognizeStandardFileExtensions != null;
-    }
-    
-    /**
-     * See {@link Configuration#setStrictSyntaxMode(boolean)}.
-     */
-    public void setStrictSyntaxMode(boolean strictSyntaxMode) {
-        this.strictSyntaxMode = Boolean.valueOf(strictSyntaxMode);
-    }
-
-    /**
-     * The getter pair of {@link #setStrictSyntaxMode(boolean)}.
-     */
-    @Override
-    public boolean getStrictSyntaxMode() {
-        return strictSyntaxMode != null ? strictSyntaxMode.booleanValue()
-                : getParentConfiguration().getStrictSyntaxMode();
-    }
-    
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     */
-    public boolean isStrictSyntaxModeSet() {
-        return strictSyntaxMode != null;
     }
 
     @Override

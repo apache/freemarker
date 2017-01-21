@@ -1,4 +1,3 @@
-<#ftl strict_syntax="false">
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -32,21 +31,21 @@
 <#assign urls = {"home" : "/home.html", "about" : "/about.html"}>
 <#assign images = {"home" : "/images/home.png", "about" : "/image/about-us.jpeg"}>
 <#assign preferences = {"showImages" : true}>
-<assign "español" = français><#macro français(url, image, alt)>
-    <local var = "Kilroy">
+<#assign "español" = français><#macro français(url, image, alt)>
+    <#local var = "Kilroy">
     <a href="${url}">
-    <if preferences.showImages>
+    <#if preferences.showImages>
         <img src="${image}" border="0" alt="${alt}">
-    <else>
+    <#else>
         ${alt}
-    </if>
+    </#if>
     </a>
     ${var} was here.
 </#macro>
 
 <p>Function is defined, now let's call it:</p>
 
-   <call español(urls.home, images.home, "Home")><#t>
+   <@español urls.home images.home "Home" /><#t>
 
 <p>Again, but with different parameters:</p>
 
@@ -58,18 +57,18 @@
 
 <#if var?exists>
    Something is wrong here.
-<else>
+<#else>
    Good.
 </#if>
 
 <p>A recursive function call:</p>
 
-<macro recurse(dummy, a=3)>
-    <if (a > 0)>
-        <call recurse(dummy, a - 1)>
-    </if>
+<#macro recurse(dummy, a=3)>
+    <#if (a > 0)>
+        <@recurse dummy  a - 1 />
+    </#if>
     ${a}
-</macro>
+</#macro>
 
 <@recurse urls />
 
@@ -96,7 +95,7 @@ foo=${foo} baz=[<#list bar?keys?sort as key>${key}=${bar[key]}<#if key_has_next>
 <@assertFails message='"c"'><@m c=3 /></@>
 <@assertFails message='3'><@m 9 8 7 /></@>
 
-<call fmt("Hello {0}! Today is {1}.", "World", "Monday")>
+<@fmt "Hello {0}! Today is {1}.", "World", "Monday" />
 
 </body>
 </html>

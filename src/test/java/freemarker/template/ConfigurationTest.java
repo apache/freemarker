@@ -1770,10 +1770,16 @@ public class ConfigurationTest extends TestCase {
     }
     
     @Test
-    public void testClassicCompatibleRemoved() {
+    public void testRemovedSettings() {
         Configuration cfg = new Configuration();
         try {
-            cfg.setSetting("classicCompatible", "true");
+            cfg.setSetting("classic_compatible", "true");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), allOf(containsString("removed"), containsString("3.0.0")));
+        }
+        try {
+            cfg.setSetting("strict_syntax", "true");
             fail();
         } catch (TemplateException e) {
             assertThat(e.getMessage(), allOf(containsString("removed"), containsString("3.0.0")));

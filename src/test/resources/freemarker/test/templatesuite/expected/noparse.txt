@@ -32,9 +32,9 @@ ${message@#$%&}
 
 	<p>Message exists!
 		...and even generates output!
-		<if message>
+		<#if message>
 			Nested statements are ok, too.
-		</if>
+		</#if>
 	</p>
 
 Here's another edge case, this time, trying to output a &lt;noparse&gt;
@@ -43,9 +43,9 @@ inside another &lt;noparse&gt;
 
 This is what the noparse instruction looks like:
 
-<noparse>This part of the template wont be parsed by the 
+<#noparse>This part of the template wont be parsed by the 
 FreeMarker parser. Instead, it will be treated as verbatim text information,
-and output as such.</noparse>
+and output as such.</#noparse>
 
 The rest of the template appears here.
 

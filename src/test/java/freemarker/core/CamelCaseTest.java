@@ -18,7 +18,8 @@
  */
 package freemarker.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -88,7 +89,6 @@ public class CamelCaseTest extends TemplateTest {
                 "<#ftl "
                 + "stripWhitespace=false "
                 + "stripText=true "
-                + "strictSyntax=true "
                 + "outputFormat='" + HTMLOutputFormat.INSTANCE.getName() + "' "
                 + "autoEsc=true "
                 + "nsPrefixes={} "
@@ -99,7 +99,6 @@ public class CamelCaseTest extends TemplateTest {
                 "<#ftl "
                 + "strip_whitespace=false "
                 + "strip_text=true "
-                + "strict_syntax=true "
                 + "output_format='" + HTMLOutputFormat.INSTANCE.getName() + "' "
                 + "auto_esc=true "
                 + "ns_prefixes={} "
@@ -160,7 +159,8 @@ public class CamelCaseTest extends TemplateTest {
     public void specialVarsHasBothNamingStyle() throws IOException, TemplateException {
         assertContainsBothNamingStyles(
                 new HashSet(Arrays.asList(BuiltinVariable.SPEC_VAR_NAMES)),
-                new NamePairAssertion() { public void assertPair(String name1, String name2) { } });
+                new NamePairAssertion() { @Override
+                public void assertPair(String name1, String name2) { } });
     }
     
     @Test
@@ -255,9 +255,10 @@ public class CamelCaseTest extends TemplateTest {
     public void builtInsHasBothNamingStyle() throws IOException, TemplateException {
         assertContainsBothNamingStyles(getConfiguration().getSupportedBuiltInNames(), new NamePairAssertion() {
 
+            @Override
             public void assertPair(String name1, String name2) {
-                BuiltIn bi1  = (BuiltIn) BuiltIn.BUILT_INS_BY_NAME.get(name1);
-                BuiltIn bi2 = (BuiltIn) BuiltIn.BUILT_INS_BY_NAME.get(name2);
+                BuiltIn bi1  = BuiltIn.BUILT_INS_BY_NAME.get(name1);
+                BuiltIn bi2 = BuiltIn.BUILT_INS_BY_NAME.get(name2);
                 assertTrue("\"" + name1 + "\" and \"" + name2 + "\" doesn't belong to the same BI object.",
                         bi1 == bi2);
             }
@@ -288,34 +289,6 @@ public class CamelCaseTest extends TemplateTest {
     
     private String correctIsoBIExceptions(String underscoredName) {
         return underscoredName.replace("_n_z", "_nz").replace("_f_z", "_fz");
-    }
-
-    @Test
-    public void camelCaseDirectivesNonStrict() throws IOException, TemplateException {
-        getConfiguration().setStrictSyntaxMode(false);
-        
-        assertOutput(
-                "<list 1..4 as x><if x == 1>one <elseIf x == 2>two <elseif x == 3>three <else>other </if></list>",
-                "one <elseIf x == 2>two other three other ");
-        assertOutput(
-                "<escape x as x?upper_case>${'a'}<noEscape>${'b'}</noEscape></escape> "
-                + "<escape x as x?upper_case>${'a'}<noescape>${'b'}</noescape></escape>",
-                "A<noEscape>B</noEscape> Ab");
-        assertOutput(
-                "<noParse>${1}</noParse> <noparse>${1}</noparse>",
-                "<noParse>1</noParse> ${1}");
-        assertOutput(
-                "<forEach x in 1..3>${x!'?'}</forEach> <foreach x in 1..3>${x}</foreach>",
-                "<forEach x in 1..3>?</forEach> 123");
-
-        assertOutput("<foreach x in 1..3>${x}</foreach> <#foreach x in 1..3>${x}</#foreach>",
-                "123 123");
-        assertErrorContains("<foreach x in 1..3>${x}</foreach> <#forEach x in 1..3>${x}</#forEach>",
-                "naming convention", "legacy", "#forEach");
-        assertErrorContains("<#forEach x in 1..3>${x}</#forEach> <foreach x in 1..3>${x}</foreach>",
-                "naming convention", "camel", "foreach");
-        
-        camelCaseDirectives();
     }
     
     @Test

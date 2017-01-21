@@ -649,14 +649,6 @@ public class TemplateConfigurationTest {
         
         {
             TemplateConfiguration tc = new TemplateConfiguration();
-            tc.setParentConfiguration(DEFAULT_CFG);
-            tc.setStrictSyntaxMode(false);
-            assertOutputWithoutAndWithTC(tc, "<if true>y</if>", "<if true>y</if>", "y");
-            testedProps.add("strictSyntaxMode");
-        }
-
-        {
-            TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
             assertOutputWithoutAndWithTC(tc, "<#foo>", null, "<#foo>");
             testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);

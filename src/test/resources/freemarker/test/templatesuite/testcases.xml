@@ -40,7 +40,6 @@
             object_wrapper CDATA #IMPLIED
             output_encoding CDATA #IMPLIED
             output_dir CDATA #IMPLIED
-            strict_syntax (Y|N) #IMPLIED
             new_builtin_class_resolver CDATA #IMPLIED
             url_escaping_charset CDATA #IMPLIED
             incompatible_improvements CDATA #IMPLIED
@@ -100,9 +99,6 @@
    <testCase name="escapes" />
    <testCase name="hashliteral">
       <setting incompatible_improvements="min, 2.3.20, 2.3.21, max" /> 
-   </testCase>
-   <testCase name="non-strict-syntax" >
-      <setting strict_syntax="N" />
    </testCase>
    <testCase name="identifier-non-ascii" />
    <testCase name="identifier-escaping" />
@@ -189,9 +185,6 @@
       <setting object_wrapper="freemarker.template.SimpleObjectWrapper"/> 
    </testCase>
    <testCase name="simplehash-char-key" noOutput="true" />
-   <testCase name="strictinheader">
-      <setting strict_syntax="N"/>
-   </testCase>
    <testCase name="existence-operators" noOutput="true" />
    <testCase name="string-builtins1">
       <setting incompatible_improvements="min, 2.3.20, max"/>

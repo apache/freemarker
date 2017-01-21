@@ -167,13 +167,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String LOCALIZED_LOOKUP_KEY = LOCALIZED_LOOKUP_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
-    public static final String STRICT_SYNTAX_KEY_SNAKE_CASE = "strict_syntax";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
-    public static final String STRICT_SYNTAX_KEY_CAMEL_CASE = "strictSyntax";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String STRICT_SYNTAX_KEY = STRICT_SYNTAX_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String WHITESPACE_STRIPPING_KEY_SNAKE_CASE = "whitespace_stripping";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
     public static final String WHITESPACE_STRIPPING_KEY_CAMEL_CASE = "whitespaceStripping";
@@ -323,7 +316,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
-        STRICT_SYNTAX_KEY_SNAKE_CASE,
         TAB_SIZE_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
@@ -345,7 +337,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
-        STRICT_SYNTAX_KEY_CAMEL_CASE,
         TAB_SIZE_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
@@ -494,7 +485,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     private static volatile Configuration defaultConfig;
 
-    private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
     private int autoEscapingPolicy = ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY;
@@ -1550,23 +1540,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return cache.getDelay();
     }
     
-    /**
-     * Sets whether directives such as {@code if}, {@code else}, etc must be written as {@code #if}, {@code #else}, etc.
-     * Defaults to {@code true}.
-     * 
-     * <p>When this is {@code true},
-     * any tag not starting with &lt;# or &lt;/# or &lt;@ or &lt;/@ is considered as plain text
-     * and will go to the output as is. Tag starting with &lt;# or &lt;/# must
-     * be valid FTL tag, or else the template is invalid (i.e. &lt;#noSuchDirective&gt;
-     * is an error).
-     * 
-     * @deprecated Only {@code true} (the default) value will be supported sometimes in the future.
-     */
-    @Deprecated
-    public void setStrictSyntaxMode(boolean b) {
-        strictSyntax = b;
-    }
-
     @Override
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         ObjectWrapper prevObjectWrapper = getObjectWrapper();
@@ -1666,14 +1639,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public boolean isLogTemplateExceptionsExplicitlySet() {
         return logTemplateExceptionsExplicitlySet;
-    }
-
-    /**
-     * The getter pair of {@link #setStrictSyntaxMode}.
-     */
-    @Override
-    public boolean getStrictSyntaxMode() {
-        return strictSyntax;
     }
 
     /**
@@ -2227,12 +2192,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Additionally, when this setting is set to non-{@link #AUTO_DETECT_NAMING_CONVENTION}, the selected naming
      * convention is enforced on all templates. Thus such a setup can be used to enforce an application-wide naming
      * convention.
-     * 
-     * <p>
-     * Non-strict tags (a long deprecated syntax from FreeMarker 1, activated via {@link #setStrictSyntaxMode(boolean)})
-     * are only recognized as FTL tags when they are using the {@link Configuration#LEGACY_NAMING_CONVENTION} syntax,
-     * regardless of this setting. As they aren't exempt from the naming convention consistency enforcement, generally,
-     * you can't use strict {@link Configuration#CAMEL_CASE_NAMING_CONVENTION} tags mixed with non-strict tags.
      * 
      * @param namingConvention
      *            One of the {@link #AUTO_DETECT_NAMING_CONVENTION} or {@link #LEGACY_NAMING_CONVENTION}
@@ -2858,8 +2817,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 setDefaultEncoding(value);
             } else if (LOCALIZED_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                 setLocalizedLookup(StringUtil.getYesNo(value));
-            } else if (STRICT_SYNTAX_KEY_SNAKE_CASE.equals(name) || STRICT_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
-                setStrictSyntaxMode(StringUtil.getYesNo(value));
             } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
                     || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
@@ -3053,6 +3010,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 new _SortedArraySet<String>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE)); 
     }
     
+    @Override
+    protected Version getRemovalVersionForUnknownSetting(String name) {
+        if (name.equals("strictSyntax") || name.equals("strict_syntax")) {
+            return Configuration.VERSION_3_0_0;
+        }
+        return super.getRemovalVersionForUnknownSetting(name);
+    }
+
     @Override
     protected String getCorrectedNameForUnknownSetting(String name) {
         if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {

@@ -51,11 +51,6 @@ public interface ParserConfiguration {
     ArithmeticEngine getArithmeticEngine();
     
     /**
-     * See {@link Configuration#getStrictSyntaxMode()}.
-     */
-    boolean getStrictSyntaxMode();
-    
-    /**
      * See {@link Configuration#getAutoEscapingPolicy()}.
      */
     int getAutoEscapingPolicy();
