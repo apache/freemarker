@@ -21,8 +21,6 @@ package freemarker.core;
 
 import java.util.Date;
 
-import freemarker.ext.beans.BeanModel;
-import freemarker.ext.beans._BeansAPI;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
@@ -50,18 +48,13 @@ class EvalUtil {
     
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
-     * @param env {@code null} is allowed, but may results in lower performance in classic-compatible mode
+     * @param env {@code null} is allowed
      */
     static String modelToString(TemplateScalarModel model, Expression expr, Environment env)
     throws TemplateModelException {
         String value = model.getAsString();
         if (value == null) {
-            if (env == null) env = Environment.getCurrentEnvironment();
-            if (env != null && env.isClassicCompatible()) {
-                return "";
-            } else {
-                throw newModelHasStoredNullException(String.class, model, expr);
-            }
+            throw newModelHasStoredNullException(String.class, model, expr);
         }
         return value;
     }
@@ -186,35 +179,27 @@ class EvalUtil {
             boolean leftNullReturnsFalse, boolean rightNullReturnsFalse,
             Environment env) throws TemplateException {
         if (leftValue == null) {
-            if (env != null && env.isClassicCompatible()) {
-                leftValue = TemplateScalarModel.EMPTY_STRING;
+            if (leftNullReturnsFalse) { 
+                return false;
             } else {
-                if (leftNullReturnsFalse) { 
-                    return false;
+                if (leftExp != null) {
+                    throw InvalidReferenceException.getInstance(leftExp, env);
                 } else {
-                    if (leftExp != null) {
-                        throw InvalidReferenceException.getInstance(leftExp, env);
-                    } else {
-                        throw new _MiscTemplateException(defaultBlamed, env, 
-                                    "The left operand of the comparison was undefined or null.");
-                    }
+                    throw new _MiscTemplateException(defaultBlamed, env, 
+                                "The left operand of the comparison was undefined or null.");
                 }
             }
         }
 
         if (rightValue == null) {
-            if (env != null && env.isClassicCompatible()) {
-                rightValue = TemplateScalarModel.EMPTY_STRING;
+            if (rightNullReturnsFalse) { 
+                return false;
             } else {
-                if (rightNullReturnsFalse) { 
-                    return false;
+                if (rightExp != null) {
+                    throw InvalidReferenceException.getInstance(rightExp, env);
                 } else {
-                    if (rightExp != null) {
-                        throw InvalidReferenceException.getInstance(rightExp, env);
-                    } else {
-                        throw new _MiscTemplateException(defaultBlamed, env,
-                                    "The right operand of the comparison was undefined or null.");
-                    }
+                    throw new _MiscTemplateException(defaultBlamed, env,
+                                "The right operand of the comparison was undefined or null.");
                 }
             }
         }
@@ -285,10 +270,6 @@ class EvalUtil {
             boolean leftBool = ((TemplateBooleanModel) leftValue).getAsBoolean();
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
             cmpResult = (leftBool ? 1 : 0) - (rightBool ? 1 : 0);
-        } else if (env.isClassicCompatible()) {
-            String leftSting = leftExp.evalAndCoerceToPlainText(env);
-            String rightString = rightExp.evalAndCoerceToPlainText(env);
-            cmpResult = env.getCollator().compare(leftSting, rightString);
         } else {
             if (typeMismatchMeansNotEqual) {
                 if (operator == CMP_OP_EQUALS) {
@@ -443,7 +424,7 @@ class EvalUtil {
 
     /**
      * @param tm
-     *            If {@code null} that's an exception, unless we are in classic compatible mode.
+     *            If {@code null} that's an exception
      * 
      * @param supportsTOM
      *            Whether the caller {@code coerceModelTo...} method could handle a {@link TemplateMarkupOutputModel}.
@@ -458,43 +439,19 @@ class EvalUtil {
         if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
         } else if (tm == null) {
-            if (env.isClassicCompatible()) {
-                return "";
+            if (exp != null) {
+                throw InvalidReferenceException.getInstance(exp, env);
             } else {
-                if (exp != null) {
-                    throw InvalidReferenceException.getInstance(exp, env);
-                } else {
-                    throw new InvalidReferenceException(
-                            "Null/missing value (no more informatoin avilable)",
-                            env);
-                }
+                throw new InvalidReferenceException(
+                        "Null/missing value (no more informatoin avilable)",
+                        env);
             }
         } else if (tm instanceof TemplateBooleanModel) {
-            // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
-            // (and before that when classic_compatible was true), so to keep backward compatibility we couldn't insert
-            // this before TemplateScalarModel.
+            // [FM3] This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since
+            // 2.3.20, so to keep backward compatibility we couldn't insert this before TemplateScalarModel.
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
-            int compatMode = env.getClassicCompatibleAsInt();
-            if (compatMode == 0) {
-                return env.formatBoolean(booleanValue, false);
-            } else {
-                if (compatMode == 1) {
-                    return booleanValue ? MiscUtil.C_TRUE : "";
-                } else if (compatMode == 2) {
-                    if (tm instanceof BeanModel) {
-                        // In 2.1, bean-wrapped booleans where strings, so that has overridden the boolean behavior: 
-                        return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
-                    } else {
-                        return booleanValue ? MiscUtil.C_TRUE : "";
-                    }
-                } else {
-                    throw new BugException("Unsupported classic_compatible variation: " + compatMode);
-                }
-            }
+            return env.formatBoolean(booleanValue, false);
         } else {
-            if (env.isClassicCompatible() && tm instanceof BeanModel) {
-                return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
-            }
             if (returnNullOnNonCoercableType) {
                 return null;
             }

@@ -45,10 +45,6 @@ public class _BeansAPI {
 
     private _BeansAPI() { }
     
-    public static String getAsClassicCompatibleString(BeanModel bm) {
-        return bm.getAsClassicCompatibleString();
-    }
-    
     public static Object newInstance(Class<?> pClass, Object[] args, BeansWrapper bw)
             throws NoSuchMethodException, IllegalArgumentException, InstantiationException,
             IllegalAccessException, InvocationTargetException, TemplateModelException {

@@ -118,9 +118,7 @@ final class HashLiteral extends Expression {
                     Expression valExp = (Expression) values.get(i);
                     String key = keyExp.evalAndCoerceToPlainText(env);
                     TemplateModel value = valExp.eval(env);
-                    if (env == null || !env.isClassicCompatible()) {
-                        valExp.assertNonNull(value, env);
-                    }
+                    valExp.assertNonNull(value, env);
                     map.put(key, value);
                 }
             } else {
@@ -134,9 +132,7 @@ final class HashLiteral extends Expression {
                     Expression valExp = (Expression) values.get(i);
                     String key = keyExp.evalAndCoerceToPlainText(env);
                     TemplateModel value = valExp.eval(env);
-                    if (env == null || !env.isClassicCompatible()) {
-                        valExp.assertNonNull(value, env);
-                    }
+                    valExp.assertNonNull(value, env);
                     map.put(key, value);
                     keyList.add(key);
                     valueList.add(value);
@@ -146,10 +142,12 @@ final class HashLiteral extends Expression {
             }
         }
 
+        @Override
         public int size() {
             return size;
         }
 
+        @Override
         public TemplateCollectionModel keys() {
             if (keyCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
@@ -158,6 +156,7 @@ final class HashLiteral extends Expression {
             return keyCollection;
         }
 
+        @Override
         public TemplateCollectionModel values() {
             if (valueCollection == null) {
                 // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
@@ -166,10 +165,12 @@ final class HashLiteral extends Expression {
             return valueCollection;
         }
 
+        @Override
         public TemplateModel get(String key) {
             return (TemplateModel) map.get(key);
         }
 
+        @Override
         public boolean isEmpty() {
             return size == 0;
         }
@@ -179,24 +180,29 @@ final class HashLiteral extends Expression {
             return getCanonicalForm();
         }
 
+        @Override
         public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
             return new KeyValuePairIterator() {
                 private final TemplateModelIterator keyIterator = keys().iterator();
                 private final TemplateModelIterator valueIterator = values().iterator();
 
+                @Override
                 public boolean hasNext() throws TemplateModelException {
                     return keyIterator.hasNext();
                 }
 
+                @Override
                 public KeyValuePair next() throws TemplateModelException {
                     return new KeyValuePair() {
                         private final TemplateModel key = keyIterator.next();
                         private final TemplateModel value = valueIterator.next();
 
+                        @Override
                         public TemplateModel getKey() throws TemplateModelException {
                             return key;
                         }
 
+                        @Override
                         public TemplateModel getValue() throws TemplateModelException {
                             return value;
                         }

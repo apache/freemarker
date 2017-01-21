@@ -169,9 +169,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isBooleanFormatSet()) {
             setBooleanFormat(tc.getBooleanFormat());
         }
-        if (tc.isClassicCompatibleSet()) {
-            setClassicCompatibleAsInt(tc.getClassicCompatibleAsInt());
-        }
         if (tc.isCustomDateFormatsSet()) {
             setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats(), false));
         }
@@ -298,9 +295,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (isBooleanFormatSet() && !template.isBooleanFormatSet()) {
             template.setBooleanFormat(getBooleanFormat());
         }
-        if (isClassicCompatibleSet() && !template.isClassicCompatibleSet()) {
-            template.setClassicCompatibleAsInt(getClassicCompatibleAsInt());
-        }
         if (isCustomDateFormatsSet()) {
             template.setCustomDateFormats(
                     mergeMaps(getCustomDateFormats(), template.getCustomDateFormatsWithoutFallback(), false));
@@ -385,6 +379,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setTagSyntax(int)}.
      */
+    @Override
     public int getTagSyntax() {
         return tagSyntax != null ? tagSyntax.intValue() : getParentConfiguration().getTagSyntax();
     }
@@ -407,6 +402,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setNamingConvention(int)}.
      */
+    @Override
     public int getNamingConvention() {
         return namingConvention != null ? namingConvention.intValue() : getParentConfiguration().getNamingConvention();
     }
@@ -428,6 +424,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #getWhitespaceStripping()}.
      */
+    @Override
     public boolean getWhitespaceStripping() {
         return whitespaceStripping != null ? whitespaceStripping.booleanValue()
                 : getParentConfiguration().getWhitespaceStripping();
@@ -451,6 +448,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setAutoEscapingPolicy(int)}.
      */
+    @Override
     public int getAutoEscapingPolicy() {
         return autoEscapingPolicy != null ? autoEscapingPolicy.intValue()
                 : getParentConfiguration().getAutoEscapingPolicy();
@@ -474,6 +472,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setOutputFormat(OutputFormat)}.
      */
+    @Override
     public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : getParentConfiguration().getOutputFormat();
     }
@@ -495,6 +494,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * Getter pair of {@link #setRecognizeStandardFileExtensions(boolean)}.
      */
+    @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions != null ? recognizeStandardFileExtensions.booleanValue()
                 : getParentConfiguration().getRecognizeStandardFileExtensions();
@@ -517,6 +517,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * The getter pair of {@link #setStrictSyntaxMode(boolean)}.
      */
+    @Override
     public boolean getStrictSyntaxMode() {
         return strictSyntaxMode != null ? strictSyntaxMode.booleanValue()
                 : getParentConfiguration().getStrictSyntaxMode();
@@ -575,6 +576,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * 
      * @since 2.3.25
      */
+    @Override
     public int getTabSize() {
         return tabSize != null ? tabSize.intValue()
                 : getParentConfiguration().getTabSize();
@@ -596,6 +598,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
      */
+    @Override
     public Version getIncompatibleImprovements() {
         checkParentConfigurationSet();
         return getParentConfiguration().getIncompatibleImprovements();
@@ -615,7 +618,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isAutoImportsSet()
                 || isAutoIncludesSet()
                 || isBooleanFormatSet()
-                || isClassicCompatibleSet()
                 || isCustomDateFormatsSet()
                 || isCustomNumberFormatsSet()
                 || isDateFormatSet()

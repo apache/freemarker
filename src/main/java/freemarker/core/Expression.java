@@ -157,8 +157,6 @@ abstract public class Expression extends TemplateObject {
     private boolean modelToBoolean(TemplateModel model, Environment env, Configuration cfg) throws TemplateException {
         if (model instanceof TemplateBooleanModel) {
             return ((TemplateBooleanModel) model).getAsBoolean();
-        } else if (env != null ? env.isClassicCompatible() : cfg.isClassicCompatible()) {
-            return model != null && !isEmpty(model);
         } else {
             throw new NonBooleanException(this, model, env);
         }

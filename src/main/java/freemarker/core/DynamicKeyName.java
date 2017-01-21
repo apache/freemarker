@@ -50,22 +50,10 @@ final class DynamicKeyName extends Expression {
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel targetModel = target.eval(env);
-        if (targetModel == null) {
-            if (env.isClassicCompatible()) {
-                return null;
-            } else {
-                throw InvalidReferenceException.getInstance(target, env);
-            }
-        }
+        target.assertNonNull(targetModel, env);
         
         TemplateModel keyModel = keyExpression.eval(env);
-        if (keyModel == null) {
-            if (env.isClassicCompatible()) {
-                keyModel = TemplateScalarModel.EMPTY_STRING;
-            } else {
-                keyExpression.assertNonNull(null, env);
-            }
-        }
+        keyExpression.assertNonNull(keyModel, env);
         if (keyModel instanceof TemplateNumberModel) {
             int index = keyExpression.modelToNumber(keyModel, env).intValue();
             return dealWithNumericalKey(targetModel, index, env);

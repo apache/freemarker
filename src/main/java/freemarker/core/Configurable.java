@@ -149,13 +149,6 @@ public class Configurable {
     public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY = SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
-    public static final String CLASSIC_COMPATIBLE_KEY_SNAKE_CASE = "classic_compatible";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
-    public static final String CLASSIC_COMPATIBLE_KEY_CAMEL_CASE = "classicCompatible";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String CLASSIC_COMPATIBLE_KEY = CLASSIC_COMPATIBLE_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE = "template_exception_handler";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE = "templateExceptionHandler";
@@ -279,7 +272,6 @@ public class Configurable {
         AUTO_IMPORT_KEY_SNAKE_CASE,
         AUTO_INCLUDE_KEY_SNAKE_CASE,
         BOOLEAN_FORMAT_KEY_SNAKE_CASE,
-        CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
         CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
         CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
         DATE_FORMAT_KEY_SNAKE_CASE,
@@ -309,7 +301,6 @@ public class Configurable {
         AUTO_IMPORT_KEY_CAMEL_CASE,
         AUTO_INCLUDE_KEY_CAMEL_CASE,
         BOOLEAN_FORMAT_KEY_CAMEL_CASE,
-        CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
         CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
         CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
         DATE_FORMAT_KEY_CAMEL_CASE,
@@ -346,7 +337,6 @@ public class Configurable {
     private String booleanFormat;
     private String trueStringValue;  // deduced from booleanFormat
     private String falseStringValue;  // deduced from booleanFormat
-    private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
     private ObjectWrapper objectWrapper;
@@ -409,9 +399,6 @@ public class Configurable {
         dateTimeFormat = "";
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
         
-        classicCompatible = Integer.valueOf(0);
-        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
-        
         templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
                 incompatibleImprovements);
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
@@ -463,7 +450,6 @@ public class Configurable {
         this.parent = parent;
         locale = null;
         numberFormat = null;
-        classicCompatible = null;
         templateExceptionHandler = null;
         properties = new Properties(parent.properties);
         customAttributes = new HashMap(0);
@@ -516,106 +502,6 @@ public class Configurable {
      */
     void setParent(Configurable parent) {
         this.parent = parent;
-    }
-    
-    /**
-     * Toggles the "Classic Compatible" mode. For a comprehensive description
-     * of this mode, see {@link #isClassicCompatible()}.
-     */
-    public void setClassicCompatible(boolean classicCompatibility) {
-        this.classicCompatible = Integer.valueOf(classicCompatibility ? 1 : 0);
-        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatibilityIntToString(classicCompatible));
-    }
-
-    /**
-     * Same as {@link #setClassicCompatible(boolean)}, but allows some extra values. 
-     * 
-     * @param classicCompatibility {@code 0} means {@code false}, {@code 1} means {@code true},
-     *     {@code 2} means {@code true} but with emulating bugs in early 2.x classic-compatibility mode. Currently
-     *     {@code 2} affects how booleans are converted to string; with {@code 1} it's always {@code "true"}/{@code ""},
-     *     but with {@code 2} it's {@code "true"}/{@code "false"} for values wrapped by {@link BeansWrapper} as then
-     *     {@link Boolean#toString()} prevails. Note that {@code someBoolean?string} will always consistently format the
-     *     boolean according the {@code boolean_format} setting, just like in FreeMarker 2.3 and later.
-     */
-    public void setClassicCompatibleAsInt(int classicCompatibility) {
-        if (classicCompatibility < 0 || classicCompatibility > 2) {
-            throw new IllegalArgumentException("Unsupported \"classicCompatibility\": " + classicCompatibility);
-        }
-        this.classicCompatible = Integer.valueOf(classicCompatibility);
-    }
-    
-    private String classicCompatibilityIntToString(Integer i) {
-        if (i == null) return null;
-        else if (i.intValue() == 0) return MiscUtil.C_FALSE;
-        else if (i.intValue() == 1) return MiscUtil.C_TRUE;
-        else return i.toString();
-    }
-    
-    /**
-     * Returns whether the engine runs in the "Classic Compatibile" mode.
-     * When this mode is active, the engine behavior is altered in following
-     * way: (these resemble the behavior of the 1.7.x line of FreeMarker engine,
-     * now named "FreeMarker Classic", hence the name).
-     * <ul>
-     * <li>handle undefined expressions gracefully. Namely when an expression
-     *   "expr" evaluates to null:
-     *   <ul>
-     *     <li>
-     *       in <tt>&lt;assign varname=expr&gt;</tt> directive, 
-     *       or in <tt>${expr}</tt> directive,
-     *       or in <tt>otherexpr == expr</tt>,
-     *       or in <tt>otherexpr != expr</tt>, 
-     *       or in <tt>hash[expr]</tt>,
-     *       or in <tt>expr[keyOrIndex]</tt> (since 2.3.20),
-     *       or in <tt>expr.key</tt> (since 2.3.20),
-     *       then it's treated as empty string.
-     *     </li>
-     *     <li>as argument of <tt>&lt;list expr as item&gt;</tt> or 
-     *       <tt>&lt;foreach item in expr&gt;</tt>, the loop body is not executed
-     *       (as if it were a 0-length list)
-     *     </li>
-     *     <li>as argument of <tt>&lt;if&gt;</tt> directive, or on other places where a
-     *       boolean expression is expected, it's treated as false
-     *     </li>
-     *   </ul>
-     * </li>
-     * <li>Non-boolean models are accepted in <tt>&lt;if&gt;</tt> directive,
-     *   or as operands of logical operators. "Empty" models (zero-length string,
-     * empty sequence or hash) are evaluated as false, all others are evaluated as
-     * true.</li>
-     * <li>When boolean value is treated as a string (i.e. output in 
-     *   <tt>${...}</tt> directive, or concatenated with other string), true 
-     * values are converted to string "true", false values are converted to 
-     * empty string. Except, if the value of the setting is <tt>2</tt>, it will be
-     * formatted according the <tt>boolean_format</tt> setting, just like in
-     * 2.3.20 and later.
-     * </li>
-     * <li>Scalar models supplied to <tt>&lt;list&gt;</tt> and 
-     *   <tt>&lt;foreach&gt;</tt> are treated as a one-element list consisting
-     *   of the passed model.
-     * </li>
-     * <li>Paths parameter of <tt>&lt;include&gt;</tt> will be interpreted as
-     * absolute path.
-     * </li>
-     * </ul>
-     * In all other aspects, the engine is a 2.1 engine even in compatibility
-     * mode - you don't lose any of the new functionality by enabling it.
-     */
-    public boolean isClassicCompatible() {
-        return classicCompatible != null ? classicCompatible.intValue() != 0 : parent.isClassicCompatible();
-    }
-
-    public int getClassicCompatibleAsInt() {
-        return classicCompatible != null ? classicCompatible.intValue() : parent.getClassicCompatibleAsInt();
-    }
-    
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     *  
-     * @since 2.3.24
-     */
-    public boolean isClassicCompatibleSet() {
-        return classicCompatible != null;
     }
     
     /**
@@ -1993,12 +1879,6 @@ public class Configurable {
      *   <li><p>{@code "locale"}:
      *       See {@link #setLocale(Locale)}.
      *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}.
-     *       
-     *   <li><p>{@code "classic_compatible"}:
-     *       See {@link #setClassicCompatible(boolean)} and {@link Configurable#setClassicCompatibleAsInt(int)}.
-     *       <br>String value: {@code "true"}, {@code "false"}, also since 2.3.20 {@code 0} or {@code 1} or {@code 2}.
-     *       (Also accepts {@code "yes"}, {@code "no"}, {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}.)
-     *       Case insensitive.
      *
      *   <li><p>{@code "custom_number_formats"}: See {@link #setCustomNumberFormats(Map)}.
      *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
@@ -2412,19 +2292,6 @@ public class Configurable {
             } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE.equals(name)
                     || SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setSQLDateAndTimeTimeZone(value.equals("null") ? null : parseTimeZoneSettingValue(value));
-            } else if (CLASSIC_COMPATIBLE_KEY_SNAKE_CASE.equals(name)
-                    || CLASSIC_COMPATIBLE_KEY_CAMEL_CASE.equals(name)) {
-                char firstChar;
-                if (value != null && value.length() > 0) {
-                    firstChar =  value.charAt(0);
-                } else {
-                    firstChar = 0;
-                }
-                if (Character.isDigit(firstChar) || firstChar == '+' || firstChar == '-') {
-                    setClassicCompatibleAsInt(Integer.parseInt(value));
-                } else {
-                    setClassicCompatible(value != null ? StringUtil.getYesNo(value) : false);
-                }
             } else if (TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) {
@@ -2632,10 +2499,23 @@ public class Configurable {
      * Creates the exception that should be thrown when a setting name isn't recognized.
      */
     protected TemplateException unknownSettingException(String name) {
-        return new UnknownSettingException(
-                getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
+        Version removalVersion = getRemovalVersionForUnknownSetting(name);
+        return removalVersion != null
+                ? new UnknownSettingException(getEnvironment(), name, removalVersion)
+                : new UnknownSettingException(getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
     }
 
+    /**
+     * If a setting name is unknown because it was removed over time, then returns the version where it was removed,
+     * otherwise returns {@code null}.
+     */
+    protected Version getRemovalVersionForUnknownSetting(String name) {
+        if (name.equals("classic_compatible") || name.equals("classicCompatible")) {
+            return Configuration.VERSION_3_0_0;
+        }
+        return null;
+    }
+    
     /**
      * @param name The wrong name
      * @return The corrected name, or {@code null} if there's no known correction
@@ -2667,6 +2547,13 @@ public class Configurable {
                     "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     correctedName == null
                             ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) });
+        }
+
+        private UnknownSettingException(Environment env, String name, Version removedInVersion) {
+            super(env,
+                    "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
+                    removedInVersion == null
+                            ? (Object) "" : new Object[] { ". This setting was removed in version ", removedInVersion });
         }
         
     }

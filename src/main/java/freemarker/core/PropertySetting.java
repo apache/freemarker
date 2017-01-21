@@ -43,8 +43,6 @@ final class PropertySetting extends TemplateElement {
             // Must be sorted alphabetically!
             Configurable.BOOLEAN_FORMAT_KEY_CAMEL_CASE,
             Configurable.BOOLEAN_FORMAT_KEY_SNAKE_CASE,
-            Configurable.CLASSIC_COMPATIBLE_KEY_CAMEL_CASE,
-            Configurable.CLASSIC_COMPATIBLE_KEY_SNAKE_CASE,
             Configurable.DATE_FORMAT_KEY_CAMEL_CASE,
             Configurable.DATE_FORMAT_KEY_SNAKE_CASE,
             Configurable.DATETIME_FORMAT_KEY_CAMEL_CASE,

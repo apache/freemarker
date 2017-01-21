@@ -9,3 +9,4 @@ the FreeMarer 3 changelog here:
 - Removed all classes with "main" methods that were part of freemarker.jar. Such tools should be separate artifacts,
   not part of the library, and they are often classified as CWE-489 "Leftover Debug Code". The removed classes are:
   freemarker.core.CommandLine, freemarker.ext.dom.Transform, freemarker.template.utility.ToCanonical
+- Removed classic_compatible (classicCompatible) setting, which was used to emulate some of the FreeMarker 1.x behavior

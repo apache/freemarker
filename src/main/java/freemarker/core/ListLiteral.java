@@ -48,9 +48,7 @@ final class ListLiteral extends Expression {
         for (Iterator it = items.iterator(); it.hasNext(); ) {
             Expression exp = (Expression) it.next();
             TemplateModel tm = exp.eval(env);
-            if (env == null || !env.isClassicCompatible()) {            
-                exp.assertNonNull(tm, env);
-            }
+            exp.assertNonNull(tm, env);
             list.add(tm);
         }
         return list;

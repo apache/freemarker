@@ -18,8 +18,15 @@
  */
 package freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -35,7 +42,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -160,7 +166,6 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("URLEscapingCharset", "utf-16");
         SETTING_ASSIGNMENTS.put("autoFlush", false);
         SETTING_ASSIGNMENTS.put("booleanFormat", "J,N");
-        SETTING_ASSIGNMENTS.put("classicCompatibleAsInt", 2);
         SETTING_ASSIGNMENTS.put("dateFormat", "yyyy-#DDD");
         SETTING_ASSIGNMENTS.put("dateTimeFormat", "yyyy-#DDD-@HH:mm");
         SETTING_ASSIGNMENTS.put("locale", NON_DEFAULT_LOCALE);
@@ -198,13 +203,9 @@ public class TemplateConfigurationTest {
     }
     
     public static String getIsSetMethodName(String readMethodName) {
-        String isSetMethodName = (readMethodName.startsWith("get") ? "is" + readMethodName.substring(3)
+        return (readMethodName.startsWith("get") ? "is" + readMethodName.substring(3)
                 : readMethodName)
                 + "Set";
-        if (isSetMethodName.equals("isClassicCompatibleAsIntSet")) {
-            isSetMethodName = "isClassicCompatibleSet";
-        }
-        return isSetMethodName;
     }
 
     public static List<PropertyDescriptor> getTemplateConfigurationSettingPropDescs(
@@ -229,6 +230,7 @@ public class TemplateConfigurationTest {
 
         Collections.sort(settingPropDescs, new Comparator<PropertyDescriptor>() {
 
+            @Override
             public int compare(PropertyDescriptor o1, PropertyDescriptor o2) {
                 return o1.getName().compareToIgnoreCase(o2.getName());
             }
@@ -245,7 +247,6 @@ public class TemplateConfigurationTest {
         IGNORED_PROP_NAMES.add("strictBeanModels");
         IGNORED_PROP_NAMES.add("parentConfiguration");
         IGNORED_PROP_NAMES.add("settings");
-        IGNORED_PROP_NAMES.add("classicCompatible");
     }
 
     private static final Set<String> CONFIGURABLE_PROP_NAMES;

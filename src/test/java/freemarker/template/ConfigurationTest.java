@@ -1769,6 +1769,17 @@ public class ConfigurationTest extends TestCase {
         assertEquals(lNames.size(), cNames.size());
     }
     
+    @Test
+    public void testClassicCompatibleRemoved() {
+        Configuration cfg = new Configuration();
+        try {
+            cfg.setSetting("classicCompatible", "true");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), allOf(containsString("removed"), containsString("3.0.0")));
+        }
+    }
+    
     @SuppressWarnings("boxing")
     private void assertStartsWith(List<String> list, List<String> headList) {
         int index = 0;
@@ -1792,6 +1803,7 @@ public class ConfigurationTest extends TestCase {
     
     private static class MyScalarModel implements TemplateScalarModel {
 
+        @Override
         public String getAsString() throws TemplateModelException {
             return "my";
         }

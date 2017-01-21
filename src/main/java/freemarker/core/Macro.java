@@ -206,7 +206,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                     firstReferenceException = e;
                                 }
                             }
-                        } else if (!env.isClassicCompatible()) {
+                        } else {
                             boolean argWasSpecified = localVars.containsKey(argName);
                             throw new _MiscTemplateException(env,
                                     new _ErrorDescriptionBuilder(
@@ -234,7 +234,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             if (hasUnresolvedArg) {
                 if (firstReferenceException != null) {
                     throw firstReferenceException;
-                } else if (!env.isClassicCompatible()) {
+                } else {
                     throw InvalidReferenceException.getInstance(firstUnresolvedExpression, env);
                 }
             }
@@ -244,6 +244,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
          * @return the local variable of the given name
          * or null if it doesn't exist.
          */ 
+        @Override
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
              return localVars.get(name);
         }
@@ -259,6 +260,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             localVars.put(name, var);
         }
 
+        @Override
         public Collection getLocalVariableNames() throws TemplateModelException {
             HashSet result = new HashSet();
             for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext(); ) {

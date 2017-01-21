@@ -49,9 +49,5 @@
 <#setting url_escaping_charset='UTF-8'>
 <@assertEquals expected='%C3%A1' actual='á'?url />
 
-<@assertFails>${noSuchWar}</@assertFails>
-<#setting classic_compatible=true>
-<@assertEquals expected='[]' actual="[${noSuchWar}]" />
-
 <#setting output_encoding="ISO-8859-2">
 <@assertEquals expected="ISO-8859-2" actual=.output_encoding />

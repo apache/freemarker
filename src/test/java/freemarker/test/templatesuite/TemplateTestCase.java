@@ -432,11 +432,6 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bp", Byte.valueOf((byte) 5));
             dataModel.put("bip", BigInteger.valueOf(5));
             dataModel.put("bdp", BigDecimal.valueOf(0.05));
-          } else if (simpleTestName.startsWith("classic-compatible")) {
-            dataModel.put("array", new String[] { "a", "b", "c" });
-            dataModel.put("beansArray", beansWrapper.wrap(new String[] { "a", "b", "c" }));
-            dataModel.put("beanTrue", beansWrapper.wrap(Boolean.TRUE));
-            dataModel.put("beanFalse", beansWrapper.wrap(Boolean.FALSE));
         } else if (simpleTestName.startsWith("overloaded-methods-2-")) {
             dataModel.put("obj", new OverloadedMethods2());
             final boolean dow = conf.getObjectWrapper() instanceof DefaultObjectWrapper;
@@ -493,40 +488,48 @@ public class TemplateTestCase extends FileTestCase {
     }
 
     static class TestBoolean implements TemplateBooleanModel, TemplateScalarModel {
+        @Override
         public boolean getAsBoolean() {
             return true;
         }
         
+        @Override
         public String getAsString() {
             return "de";
         }
     }
     
     static class TestMethod implements TemplateMethodModel {
-      public Object exec(List arguments) {
+      @Override
+    public Object exec(List arguments) {
           return "x";
       }
     }
     
     static class TestNode implements TemplateNodeModel {
       
-      public String getNodeName() {
+      @Override
+    public String getNodeName() {
           return "name";
       }
                     
-      public TemplateNodeModel getParentNode() {
+      @Override
+    public TemplateNodeModel getParentNode() {
           return null;
       }
     
-      public String getNodeType() {
+      @Override
+    public String getNodeType() {
           return "element";
       }
     
-      public TemplateSequenceModel getChildNodes() {
+      @Override
+    public TemplateSequenceModel getChildNodes() {
           return null;
       }
       
-      public String getNodeNamespace() {
+      @Override
+    public String getNodeNamespace() {
           return null;
       }
     }

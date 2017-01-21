@@ -34,7 +34,6 @@
  <!ELEMENT setting EMPTY>
      <!ATTLIST setting 
             auto_import CDATA #IMPLIED
-            classic_compatible (Y|N|2) #IMPLIED
             clear_encoding_map (Y|N) #IMPLIED
             input_encoding CDATA #IMPLIED
             locale CDATA #IMPLIED
@@ -261,12 +260,6 @@
    </testCase>   
    <testCase name="number-to-date" />
    <testCase name="varargs" />
-   <testCase name="classic-compatible">
-      <setting classic_compatible="Y"/>
-   </testCase>   
-   <testCase name="classic-compatible-mode2" noOutput="true">
-      <setting classic_compatible="2"/>
-   </testCase>   
    <testCase name="boolean-formatting"  />
    <testCase name="number-math-builtins" noOutput="true" />
    <testCase name="string-builtin-coercion" noOutput="true" />

@@ -2699,11 +2699,6 @@ public final class Environment extends Configurable {
      */
     public String toFullTemplateName(String baseName, String targetName)
             throws MalformedTemplateNameException {
-        if (isClassicCompatible()) {
-            // Early FM only had absolute names.
-            return targetName;
-        }
-
         return _CacheAPI.toAbsoluteName(configuration.getTemplateNameFormat(), baseName, targetName);
     }
 

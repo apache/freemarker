@@ -37,7 +37,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.Constants;
 
 /**
  * A #list (or #foreach) element, or pre-#else section of it inside a {@link ListElseContainer}.
@@ -97,11 +96,7 @@ final class IteratorBlock extends TemplateElement {
     boolean acceptWithResult(Environment env) throws TemplateException, IOException {
         TemplateModel listedValue = listedExp.eval(env);
         if (listedValue == null) {
-            if (env.isClassicCompatible()) {
-                listedValue = Constants.EMPTY_SEQUENCE; 
-            } else {
-                listedExp.assertNonNull(null, env);
-            }
+            listedExp.assertNonNull(null, env);
         }
 
         return env.visitIteratorBlock(new IterationContext(listedValue, loopVarName, loopVar2Name));
@@ -321,17 +316,6 @@ final class IteratorBlock extends TemplateElement {
                         env.visit(childBuffer);
                     }
                 }
-            } else if (env.isClassicCompatible()) {
-                listNotEmpty = true;
-                if (loopVarName != null) {
-                    loopVar = listedValue;
-                    hasNext = false;
-                }
-                try {
-                    env.visit(childBuffer);
-                } catch (BreakInstruction.Break br) {
-                    // Silently exit "loop"
-                }
             } else if (listedValue instanceof TemplateHashModelEx
                     && !NonSequenceOrCollectionException.isWrappedIterable(listedValue)) {
                 throw new NonSequenceOrCollectionException(env,
@@ -435,6 +419,7 @@ final class IteratorBlock extends TemplateElement {
             return this.loopVar2Name;
         }
         
+        @Override
         public TemplateModel getLocalVariable(String name) {
             String loopVariableName = this.loopVarName;
             if (loopVariableName != null && name.startsWith(loopVariableName)) {
@@ -461,6 +446,7 @@ final class IteratorBlock extends TemplateElement {
             return null;
         }
         
+        @Override
         public Collection getLocalVariableNames() {
             String loopVariableName = this.loopVarName;
             if (loopVariableName != null) {

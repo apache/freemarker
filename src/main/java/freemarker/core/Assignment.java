@@ -22,7 +22,6 @@ package freemarker.core;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
-import freemarker.template.TemplateScalarModel;
 
 /**
  * An instruction that makes a single assignment, like [#local x=1].
@@ -132,13 +131,7 @@ final class Assignment extends TemplateElement {
         TemplateModel value;
         if (operatorType == OPERATOR_TYPE_EQUALS) {
             value = valueExp.eval(env);
-            if (value == null) {
-                if (env.isClassicCompatible()) {
-                    value = TemplateScalarModel.EMPTY_STRING;
-                } else {
-                    throw InvalidReferenceException.getInstance(valueExp, env);
-                }
-            }
+            valueExp.assertNonNull(value, env);
         } else {
             TemplateModel lhoValue;
             if (namespace == null) {
@@ -149,22 +142,12 @@ final class Assignment extends TemplateElement {
             
             if (operatorType == OPERATOR_TYPE_PLUS_EQUALS) {  // Add or concat operation
                 if (lhoValue == null) {
-                    if (env.isClassicCompatible()) {
-                        lhoValue = TemplateScalarModel.EMPTY_STRING;
-                    } else {
-                        throw InvalidReferenceException.getInstance(
-                                variableName, getOperatorTypeAsString(), env);
-                    }
+                    throw InvalidReferenceException.getInstance(
+                            variableName, getOperatorTypeAsString(), env);
                 }
                 
                 value = valueExp.eval(env);
-                if (value == null) {
-                    if (env.isClassicCompatible()) {
-                        value = TemplateScalarModel.EMPTY_STRING;
-                    } else {
-                        throw InvalidReferenceException.getInstance(valueExp, env);
-                    }
-                }
+                valueExp.assertNonNull(value, env);
                 value = AddConcatExpression._eval(env, namespaceExp, null, lhoValue, valueExp, value);
             } else {  // Numerical operation
                 Number lhoNumber;
