@@ -1367,6 +1367,8 @@ public class Configurable {
      * Retrieves the {@link TemplateClassResolver} used
      * to resolve classes when "SomeClassName"?new is called in a template.
      * 
+     * @see #setNewBuiltinClassResolver(TemplateClassResolver)
+     * 
      * @since 2.3.17
      */
     public TemplateClassResolver getNewBuiltinClassResolver() {

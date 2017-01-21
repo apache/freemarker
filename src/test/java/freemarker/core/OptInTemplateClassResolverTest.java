@@ -24,12 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.utility.ObjectConstructor;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
 public class OptInTemplateClassResolverTest extends TestCase {
 
@@ -63,7 +62,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
             resolver.resolve("java.lang.Long", null, dummyTemp);
             fail();
         } catch (TemplateException e) {
-            // good
+            // Expected
         }
     }
 
@@ -80,13 +79,6 @@ public class OptInTemplateClassResolverTest extends TestCase {
                 Template.getPlainTextTemplate("trusted.ftl", "", dummyCfg)));
         assertEquals(Long.class, resolver.resolve("java.lang.Long", null,
                 Template.getPlainTextTemplate("/trusted.ftl", "", dummyCfg)));
-        try {
-            assertEquals(Long.class, resolver.resolve(ObjectConstructor.class.getName(), null,
-                    Template.getPlainTextTemplate("trusted.ftl", "", dummyCfg)));
-            fail();
-        } catch (TemplateException e) {
-            // good
-        }
     }
 
     public void testCraftedTrusted() throws TemplateException {
@@ -102,19 +94,19 @@ public class OptInTemplateClassResolverTest extends TestCase {
             testTrusted_checkFails("lib/./foo.ftl");
             fail();
         } catch (AssertionFailedError e) {
-            // good
+            // Expected
         }
         try {
             testTrusted_checkFails("lib/foo..ftl");
             fail();
         } catch (AssertionFailedError e) {
-            // good
+            // Expected
         }
         try {
             testTrusted_checkFails("lib/%2e/foo.ftl");
             fail();
         } catch (AssertionFailedError e) {
-            // good
+            // Expected
         }
     }
     
@@ -124,7 +116,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
                     Template.getPlainTextTemplate(templateName, "", dummyCfg));
             fail();
         } catch (TemplateException e) {
-            // good
+            // Expected
         }
     }
     
@@ -143,7 +135,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
                     Template.getPlainTextTemplate("bar.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
-            // good
+            // Expected
         }
 
         cfg.setSetting("new_builtin_class_resolver",
@@ -174,7 +166,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
                     Template.getPlainTextTemplate("x.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
-            // good
+            // Expected
         }
         assertEquals(Long.class, res.resolve("java.lang.Long", null,
                 Template.getPlainTextTemplate("foo.ftl", "", cfg)));
@@ -185,14 +177,14 @@ public class OptInTemplateClassResolverTest extends TestCase {
                     Template.getPlainTextTemplate("x.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
-            // good
+            // Expected
         }
         
         try {
             cfg.setSetting("new_builtin_class_resolver", "wrong: foo");
             fail();
         } catch (TemplateException e) {
-            // good
+            // Expected
         }
         
         cfg.setSetting("new_builtin_class_resolver",
@@ -206,7 +198,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
                     Template.getPlainTextTemplate("x.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
-            // good
+            // Expected
         }
         assertEquals(Long.class, res.resolve("java.lang.Long", null,
                 Template.getPlainTextTemplate("lib:bar.ftl", "", cfg)));

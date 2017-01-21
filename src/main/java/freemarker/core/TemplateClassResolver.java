@@ -22,8 +22,6 @@ package freemarker.core;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Execute;
-import freemarker.template.utility.ObjectConstructor;
 
 /**
  * Used by built-ins and other template language features that get a class
@@ -44,6 +42,7 @@ public interface TemplateClassResolver {
      */
     TemplateClassResolver UNRESTRICTED_RESOLVER = new TemplateClassResolver() {
 
+        @Override
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
             try {
@@ -56,31 +55,17 @@ public interface TemplateClassResolver {
     };
     
     /**
-     * Same as {@link #UNRESTRICTED_RESOLVER}, except that it doesn't allow
-     * resolving {@link ObjectConstructor} and {@link Execute}.
+     * Same as {@link #UNRESTRICTED_RESOLVER} at the moment.
      */
-    TemplateClassResolver SAFER_RESOLVER =  new TemplateClassResolver() {
-
-        public Class resolve(String className, Environment env, Template template)
-        throws TemplateException {
-            if (className.equals(ObjectConstructor.class.getName())
-                    || className.equals(Execute.class.getName())) {
-                throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);
-            }
-            try {
-                return ClassUtil.forName(className);
-            } catch (ClassNotFoundException e) {
-                throw new _MiscTemplateException(e, env);
-            }
-        }
-        
-    };
+    // [FM3] Do something with this. Like, only classes annotated in a certain would be accessible. 
+    TemplateClassResolver SAFER_RESOLVER =  UNRESTRICTED_RESOLVER;
     
     /**
      * Doesn't allow resolving any classes.
      */
     TemplateClassResolver ALLOWS_NOTHING_RESOLVER =  new TemplateClassResolver() {
 
+        @Override
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
             throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);

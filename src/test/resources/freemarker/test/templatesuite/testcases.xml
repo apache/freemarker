@@ -240,13 +240,13 @@
    <testCase name="xml-ns_prefix-scope" template="xml-ns_prefix-scope-main.ftl" />
    <testCase name="hashconcat"/>
    <testCase name="new-defaultresolver" />
-   <testCase name="new-unrestricted">
+   <testCase name="new-unrestricted" template="new-defaultresolver.ftl" expected="new-defaultresolver.txt">
       <setting new_builtin_class_resolver="unrestricted"/>
    </testCase>   
-   <testCase name="new-safer">
+   <testCase name="new-safer" template="new-defaultresolver.ftl" expected="new-defaultresolver.txt">
       <setting new_builtin_class_resolver="safer"/>
    </testCase>   
-   <testCase name="new-allowsnothing">
+   <testCase name="new-allowsnothing" template="new-defaultresolver.ftl">
       <setting new_builtin_class_resolver="allows_nothing"/>
    </testCase>   
    <testCase name="new-optin">

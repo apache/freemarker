@@ -16,9 +16,8 @@
   specific language governing permissions and limitations
   under the License.
 -->
-${"freemarker.test.templatesuite.models.NewTestModel"?new("works")}
 <#attempt>
-${"freemarker.template.utility.ObjectConstructor"?new()("java.lang.String", "works")}
+${"freemarker.test.templatesuite.models.NewTestModel"?new("works")}
 <#recover>
 fails
 </#attempt>
