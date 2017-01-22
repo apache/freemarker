@@ -42,8 +42,9 @@ public abstract class TemplateLookupContext {
      * 
      * @param templateName
      *            Must be a normalized name, like {@code "foo/bar/baaz.ftl"}. A name is not normalized when, among
-     *            others, it starts with {@code /}, or contains {@code .} or {@code ..} paths steps, or it uses
-     *            backslash ({@code \}) instead of {@code /}. A normalized name might contains "*" steps.
+     *            others, it starts with {@code /}, or contains {@code .} or {@code ..} path steps, or it uses
+     *            backslash ({@code \}) instead of {@code /}. A normalized name might contains "*" path steps
+     *            (acquisition).
      * 
      * @return The result of the lookup. Not {@code null}; check {@link TemplateLookupResult#isPositive()} to see if the
      *         lookup has found anything.
