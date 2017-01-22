@@ -94,12 +94,7 @@ public class FMParser {
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
 
-    /**
-     * @Deprecated This is an internal API of FreeMarker; don't call it from outside FreeMarker.
-     * 
-     * @since 2.3.24
-     */
-    public FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
+    FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
         this(template, true, readerToTokenManager(reader, pCfg), pCfg);
     }
 
@@ -109,12 +104,7 @@ public class FMParser {
         return new FMParserTokenManager(simpleCharStream);
     }
 
-    /**
-     * @Deprecated This is an internal API of FreeMarker; don't call it from outside FreeMarker.
-     * 
-     * @since 2.3.24
-     */
-    public FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg) {
+    FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg) {
         this(tkMan);
 
         NullArgumentException.check(pCfg);

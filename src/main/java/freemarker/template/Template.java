@@ -247,7 +247,7 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                parser = new FMParser(this, reader, actualParserConfiguration);
+                parser = _CoreAPI.newFMParser(this, reader, actualParserConfiguration);
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {

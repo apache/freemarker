@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
@@ -212,6 +213,10 @@ public class _CoreAPI {
 
     public static TemplateElement getChildElement(TemplateElement te, int index) {
         return te.getChild(index);
+    }
+    
+    public static FMParser newFMParser(Template template, Reader reader, ParserConfiguration pCfg) {
+        return new FMParser(template, reader, pCfg);
     }
     
 }
