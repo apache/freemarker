@@ -157,6 +157,13 @@ apply it to your development environment:
   - Java -> Installed JRE-s:
     Ensure that you have JDK 6 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
+  - Java -> Compiler -> Javadoc:
+    "Malformed Javadoc comments": Error
+    "Only consider members as visible": Private
+    "Validate tag argunebts": true
+    "Missing tag descriptions": Validate @return tags
+    "Missing Javadoc tags": Ignore
+    "Missing Javadoc comments": Ignore
 - Create new "Java Project" in Eclipse:
   - In the first window popping up:
     - Change the "location" to the directory of the FreeMarker project
