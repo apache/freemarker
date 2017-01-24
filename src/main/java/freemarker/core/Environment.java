@@ -2684,7 +2684,7 @@ public final class Environment extends Configurable {
      *            {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as follows. If you want to specify a base
      *            directory here, it must end with {@code "/"}. If it doesn't end with {@code "/"}, it's parent
      *            directory will be used as the base path. Might starts with a scheme part (like {@code "foo://"}, or
-     *            with {@link TemplateNameFormat#DEFAULT_2_4_0} even just {@code "foo:"}).
+     *            with {@link TemplateNameFormat#DEFAULT_2_4_0} even just with {@code "foo:"}).
      * @param targetName
      *            The name of the template, which is either a relative or absolute name. Assuming
      *            {@link TemplateNameFormat#DEFAULT_2_3_0} or {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as
