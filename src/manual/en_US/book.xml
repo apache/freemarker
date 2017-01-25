@@ -26136,13 +26136,24 @@ End book</programlisting>
             <literal>user["password"]</literal>), and variable names are
             strings.</para>
 
-            <para>So until FTL has a type that supports non-string keys, you
-            will have to turn to the Java API of the <literal>Map</literal>.
-            You can do it like this:
-            <literal>myMap?api.get(nonStringKey)</literal>. However, for
-            <literal>?api</literal> to work, you may need to configure
-            FreeMarker a bit; <link linkend="ref_buitin_api_and_has_api">see
-            more here...</link></para>
+            <para>If you only need to list the key-value pairs of a
+            <literal>Map</literal>, you can just write something like
+            <literal>&lt;#list myMap as k, v&gt;${k}:
+            ${v}&lt;/#list&gt;</literal> (see more about <link
+            linkend="ref.directive.list">the <literal>list directive</literal>
+            here</link>). This enumerates the <literal>Map</literal> entries,
+            and supports non-string keys. This requires FreeMarker 2.3.25 or
+            later. (If for some reason you can't upgrade to 2.3.25, you can
+            use the Java API of <literal>Map</literal> instead, like
+            <literal>&lt;#list myMap?api.entrySet() as kvp&gt;${kvp.key}:
+            ${kvp.value}&lt;/#list&gt;</literal>.)</para>
+
+            <para>If you need to do more than listing, you will have to turn
+            to the Java API of the <literal>Map</literal>. You can do it like
+            this: <literal>myMap?api.get(nonStringKey)</literal>. However, for
+            <literal>?api</literal> to be enabled, you may need to configure
+            FreeMarker a bit (<link linkend="ref_buitin_api_and_has_api">see
+            more here</link>).</para>
 
             <para>Note that as Java's <literal>Map</literal> is particular
             about the exact class of the key, at least for numerical keys
@@ -26153,7 +26164,7 @@ End book</programlisting>
             is because of FTL's deliberately simplified type system has only a
             single numerical type, while Java distinguishes a lot of numerical
             types. Note that the casting is not needed when the key value
-            comes directly from the data-model (i.e. you didn't modified its
+            comes directly from the data-model (i.e., you didn't modified its
             value with arithmetical calculations in the template), including
             the case when it's the return value of a method, and it was of the
             proper class before wrapping, because then the result of the
