@@ -54,12 +54,12 @@ public interface TemplateLoader {
      * template can be loaded from. See the return value for more information.
      *
      * @param name
-     *            The name of the template, already localized and normalized by the
-     *            {@link freemarker.cache.TemplateCache cache}. It is completely up to the loader implementation to
+     *            The name (template root directory relative path) of the template, already localized and normalized by
+     *            the {@link freemarker.cache.TemplateCache cache}. It is completely up to the loader implementation to
      *            interpret the name, however it should expect to receive hierarchical paths where path components are
      *            separated by a slash (not backslash). Backslashes (or any other OS specific separator character) are
      *            not considered as separators by FreeMarker, and thus they will not be replaced with slash before
-     *            passing to this method, so it's up to the template loader to handle them (say, be throwing and
+     *            passing to this method, so it's up to the template loader to handle them (say, by throwing an
      *            exception that tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
      *            typical mistake of Windows users). The passed names are always considered relative to some
      *            loader-defined root location (often referred as the "template root directory"), and will never start
@@ -133,8 +133,7 @@ public interface TemplateLoader {
      * @throws IOException
      *             if an I/O error occurs while accessing the stream.
      */
-    public Reader getReader(Object templateSource, String encoding)
-    throws IOException;
+    public Reader getReader(Object templateSource, String encoding) throws IOException;
     
     /**
      * Closes the template source, releasing any resources held that are only required for reading the template and/or
@@ -145,6 +144,6 @@ public interface TemplateLoader {
      * @param templateSource
      *            the template source that should be closed.
      */
-    public void closeTemplateSource(Object templateSource)
-    throws IOException;
+    public void closeTemplateSource(Object templateSource) throws IOException;
+    
 }
