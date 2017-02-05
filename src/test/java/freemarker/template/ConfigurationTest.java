@@ -640,28 +640,28 @@ public class ConfigurationTest extends TestCase {
         t.process(null, sw);
         assertEquals(expectedContent, sw.toString());
     }
-    
+
     public void testSetTemplateLoaderAndCache() throws Exception {
         Configuration cfg = new Configuration();
         
-        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
-        assertEquals(0, cache.getSize());
+        CacheStorageWithGetSize cacheStorage = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        assertEquals(0, cacheStorage.getSize());
         cfg.setCacheStorage(new StrongCacheStorage());
-        cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
-        assertEquals(0, cache.getSize());
+        cacheStorage = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        assertEquals(0, cacheStorage.getSize());
         
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
-        assertEquals(0, cache.getSize());
+        assertEquals(0, cacheStorage.getSize());
         cfg.getTemplate("toCache1.ftl");
-        assertEquals(1, cache.getSize());
+        assertEquals(1, cacheStorage.getSize());
         cfg.getTemplate("toCache2.ftl");
-        assertEquals(2, cache.getSize());
+        assertEquals(2, cacheStorage.getSize());
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
-        assertEquals(0, cache.getSize());
+        assertEquals(0, cacheStorage.getSize());
         cfg.getTemplate("toCache1.ftl");
-        assertEquals(1, cache.getSize());
+        assertEquals(1, cacheStorage.getSize());
         cfg.setTemplateLoader(cfg.getTemplateLoader());
-        assertEquals(1, cache.getSize());
+        assertEquals(1, cacheStorage.getSize());
     }
 
     public void testChangingLocalizedLookupClearsCache() throws Exception {

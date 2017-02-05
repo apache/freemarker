@@ -19,9 +19,11 @@
 
 package freemarker.cache;
 
-import static freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -241,8 +243,8 @@ public class TemplateNameFormatTest {
                             "foo\\bar_en_US.ftl",
                             "foo\\bar_en.ftl",
                             name),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
         }
 
         try {
@@ -255,8 +257,8 @@ public class TemplateNameFormatTest {
                             "foo\\missing_en_US.ftl",
                             "foo\\missing_en.ftl",
                             "foo\\missing.ftl"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         

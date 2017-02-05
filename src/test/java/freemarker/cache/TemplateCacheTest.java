@@ -19,7 +19,11 @@
 
 package freemarker.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -29,12 +33,19 @@ import java.util.Locale;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateNotFoundException;
 import freemarker.template.Version;
+import freemarker.test.MonitoredTemplateLoader;
+import freemarker.test.MonitoredTemplateLoader.CloseTemplateSourceEvent;
+import freemarker.test.MonitoredTemplateLoader.FindTemplateSourceEvent;
+import freemarker.test.MonitoredTemplateLoader.GetLastModifiedEvent;
+import freemarker.test.MonitoredTemplateLoader.GetReaderEvent;
 
 public class TemplateCacheTest {
 
@@ -269,7 +280,7 @@ public class TemplateCacheTest {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setLocale(Locale.US);
         
-        StringTemplateLoader tl = new StringTemplateLoader();
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Foo");
         tl.putTemplate("utf-8.ftl", "Bar");
         cfg.setTemplateLoader(tl);
@@ -280,17 +291,38 @@ public class TemplateCacheTest {
             assertEquals("utf-8_en.ftl", t.getSourceName());
             assertEquals("Utf-8", t.getEncoding());
             assertEquals("Foo", t.toString());
+            
+            assertEquals(
+                    ImmutableList.of(
+                            new FindTemplateSourceEvent("utf-8_en_US.ftl", false),
+                            new FindTemplateSourceEvent("utf-8_en.ftl", true),
+                            new GetLastModifiedEvent("utf-8_en.ftl"),
+                            new GetReaderEvent("utf-8_en.ftl"), // Attempt 1
+                            new CloseTemplateSourceEvent("utf-8_en.ftl")),                
+                    tl.getEvents());
         }
         
         {
+            tl.clearEvents();
+            
             Template t = cfg.getTemplate("utf-8.ftl", "Utf-16");
             assertEquals("utf-8.ftl", t.getName());
             assertEquals("utf-8_en.ftl", t.getSourceName());
             assertEquals("utf-8", t.getEncoding());
             assertEquals("Foo", t.toString());
+            
+            assertEquals(
+                    ImmutableList.of(
+                            new FindTemplateSourceEvent("utf-8_en_US.ftl", false),
+                            new FindTemplateSourceEvent("utf-8_en.ftl", true),
+                            new GetLastModifiedEvent("utf-8_en.ftl"),
+                            new GetReaderEvent("utf-8_en.ftl"), // Attempt 1
+                            new GetReaderEvent("utf-8_en.ftl"), // Attempt 2
+                            new CloseTemplateSourceEvent("utf-8_en.ftl")),                
+                    tl.getEvents());
         }
     }
-
+    
     @Test
     public void testEncodingSelection() throws IOException {
         Locale hungary = new Locale("hu", "HU"); 
