@@ -2270,7 +2270,7 @@ public class Configurable {
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
-     *       <a href="#fm_obe">object builder expression</a>.
+     *       <a href="#fm_obe">object builder expression</a>. {@code "null"} is also allowed since 2.3.26.
      *       
      *   <li><p>{@code "template_lookup_strategy"}:
      *       See: {@link Configuration#setTemplateLookupStrategy(freemarker.cache.TemplateLookupStrategy)}.

@@ -1142,7 +1142,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateLoader} that is used to look up and load templates;
-     * as a side effect the template cache will be emptied.
+     * as a side effect the template cache will be emptied (unless the new and the old values are the same).
      * By providing your own {@link TemplateLoader} implementation, you can load templates from whatever kind of
      * storages, like from relational databases, NoSQL-storages, etc.
      * 
@@ -2968,7 +2968,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     unsetTemplateLoader();
                 } else {
                     setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateLoader.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateLoader.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE.equals(name)) {

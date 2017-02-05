@@ -26864,6 +26864,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               method encapsulates the call to the platform XML parser, we
               thought it's better to point this risk out.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>Configuration.setSetting(String,
+              String)</literal> and <literal>setSettings</literal> now allows
+              <literal>null</literal> value for
+              <literal>template_loader</literal> (because
+              <literal>Configuration.setTemplateLoader(null)</literal> is also
+              allowed for a while.).</para>
+            </listitem>
           </itemizedlist>
         </section>
 
