@@ -20,29 +20,30 @@
 
 package freemarker.cache;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.Serializable;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.template.Configuration;
 
 /**
  * This is an abstract template loader that can load templates whose
  * location can be described by an URL. Subclasses only need to override
- * the {@link #getURL(String)} method. Both {@link ClassTemplateLoader} and
- * {@link WebappTemplateLoader} are (quite trivial) subclasses of this class.
+ * the {@link #getURL(String)} method.
  */
+// TODO JUnit test
 public abstract class URLTemplateLoader implements TemplateLoader {
     
-    private Boolean urlConnectionUsesCaches;
+    private static final Logger LOG = LoggerFactory.getLogger("freemarker.cache");
     
-    public Object findTemplateSource(String name)
-    throws IOException {
-        URL url = getURL(name);
-        return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
-    }
+    private Boolean urlConnectionUsesCaches = false;
     
     /**
      * Given a template name (plus potential locale decorations) retrieves
@@ -54,22 +55,6 @@ public abstract class URLTemplateLoader implements TemplateLoader {
      */
     protected abstract URL getURL(String name);
     
-    public long getLastModified(Object templateSource) {
-        return ((URLTemplateSource) templateSource).lastModified();
-    }
-    
-    public Reader getReader(Object templateSource, String encoding)
-    throws IOException {
-        return new InputStreamReader(
-                ((URLTemplateSource) templateSource).getInputStream(),
-                encoding);
-    }
-    
-    public void closeTemplateSource(Object templateSource)
-    throws IOException {
-        ((URLTemplateSource) templateSource).close();
-    }
-
     /**
      * Can be used by subclasses to canonicalize URL path prefixes.
      * @param prefix the path prefix to canonicalize
@@ -98,22 +83,94 @@ public abstract class URLTemplateLoader implements TemplateLoader {
 
     /**
      * Sets if {@link URLConnection#setUseCaches(boolean)} will be called, and with what value. By default this is
-     * {@code null}; see the behavior then below. The recommended value is {@code false}, so that FreeMarker can always
-     * reliably detect when a template was changed. The default is {@code null} only for backward compatibility,
-     * and certainly will be changed to {@code false} in 2.4.0. As FreeMarker has its own template cache with its
-     * own update delay setting ({@link Configuration#setTemplateUpdateDelay(int)}), setting this to {@code false}
-     * shouldn't cause performance problems.
-     * 
-     * <p>Regarding {@code null} value: By default then {@link URLConnection#setUseCaches(boolean)} won't be called,
-     * and so the default of the {@link URLConnection} subclass will be in effect (usually {@code true}). That's the
-     * 2.3.0-compatible mode. However, if {@link Configuration#getIncompatibleImprovements()} is at least 2.3.21, then
-     * when {@code Configuration.getTemplate} is used, {@code null} will mean {@code false}. Note that this 2.3.21 trick
-     * only works if the template is loaded through {@code Configuration.getTemplate} (or {@link TemplateCache}). 
-     * 
-     * @since 2.3.21
+     * {@code false}, becase FreeMarker has its own template cache with its own update delay setting
+     * ({@link Configuration#setTemplateUpdateDelay(int)}). If this is set to {@code null},
+     * {@link URLConnection#setUseCaches(boolean)} won't be called.
      */
     public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
         this.urlConnectionUsesCaches = urlConnectionUsesCaches;
+    }
+
+    @Override
+    public TemplateLoaderSession createSession() {
+        return null;
+    }
+
+    @Override
+    public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
+            Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
+        URL url = getURL(name);
+        if (url == null) {
+            return TemplateLoadingResult.NOT_FOUND;             
+        }
+        
+        URLConnection conn = url.openConnection();
+        Boolean urlConnectionUsesCaches = getURLConnectionUsesCaches();
+        if (urlConnectionUsesCaches != null) {
+            conn.setUseCaches(urlConnectionUsesCaches);
+        }
+        
+        // To prevent clustering issues, getLastModified(fallbackToJarLMD=false)
+        long lmd = getLastModified(conn, false);
+        Long version = lmd != -1 ? lmd : null;
+        
+        URLTemplateLoadingSource source = new URLTemplateLoadingSource(url);
+        
+        if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source)
+                && Objects.equals(ifVersionDiffersFrom, version)) {
+            return TemplateLoadingResult.NOT_MODIFIED;
+        }
+        
+        return new TemplateLoadingResult(source, version, conn.getInputStream(), null);
+    }
+
+    @Override
+    public void resetState() {
+        // Do nothing
+    }
+
+    /**
+     * {@link URLConnection#getLastModified()} with JDK bug workarounds. Because of JDK-6956385, for files inside a jar,
+     * it returns the last modification time of the jar itself, rather than the last modification time of the file
+     * inside the jar.
+     * 
+     * @param fallbackToJarLMD
+     *            Tells if the file is in side jar, then we should return the last modification time of the jar itself,
+     *            or -1 (to work around JDK-6956385).
+     */
+    public static long getLastModified(URLConnection conn, boolean fallbackToJarLMD) throws IOException {
+        if (conn instanceof JarURLConnection) {
+            // There is a bug in sun's jar url connection that causes file handle leaks when calling getLastModified()
+            // (see https://bugs.openjdk.java.net/browse/JDK-6956385).
+            // Since the time stamps of jar file contents can't vary independent from the jar file timestamp, just use
+            // the jar file timestamp
+            if (fallbackToJarLMD) {
+                URL jarURL = ((JarURLConnection) conn).getJarFileURL();
+                if (jarURL.getProtocol().equals("file")) {
+                    // Return the last modified time of the underlying file - saves some opening and closing
+                    return new File(jarURL.getFile()).lastModified();
+                } else {
+                    // Use the URL mechanism
+                    URLConnection jarConn = null;
+                    try {
+                        jarConn = jarURL.openConnection();
+                        return jarConn.getLastModified();
+                    } finally {
+                        try {
+                            if (jarConn != null) {
+                                jarConn.getInputStream().close();
+                            }
+                        } catch (IOException e) {
+                            LOG.warn("Failed to close URL connection for: {}", conn, e);
+                        }
+                    }
+                }
+            } else {
+                return -1;
+            }
+        } else {
+          return conn.getLastModified();
+        }
     }
     
 }

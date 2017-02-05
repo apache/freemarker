@@ -39,12 +39,12 @@ public class MergingTemplateConfigurationFactory extends TemplateConfigurationFa
     }
 
     @Override
-    public TemplateConfiguration get(String sourceName, Object templateSource)
+    public TemplateConfiguration get(String sourceName, TemplateLoadingSource templateLoadingSource)
             throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration mergedTC = null;
         TemplateConfiguration resultTC = null;
         for (TemplateConfigurationFactory tcf : templateConfigurationFactories) {
-            TemplateConfiguration tc = tcf.get(sourceName, templateSource);
+            TemplateConfiguration tc = tcf.get(sourceName, templateLoadingSource);
             if (tc != null) {
                 if (resultTC == null) {
                     resultTC = tc;

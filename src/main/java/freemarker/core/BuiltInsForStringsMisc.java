@@ -80,7 +80,7 @@ class BuiltInsForStringsMisc {
                     }
                     
                     FMParser parser = new FMParser(
-                            parentTemplate, false, tkMan, pCfg);
+                            parentTemplate, false, tkMan, pCfg, TemplateSpecifiedEncodingHandler.DEFAULT);
                     
                     exp = parser.Expression();
                 } catch (TokenMgrError e) {

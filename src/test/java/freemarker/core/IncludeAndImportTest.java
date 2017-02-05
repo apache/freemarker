@@ -18,8 +18,11 @@
  */
 package freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -28,7 +31,6 @@ import java.lang.reflect.Modifier;
 import org.junit.Before;
 import org.junit.Test;
 
-import freemarker.cache.StringTemplateLoader;
 import freemarker.core.Environment.LazilyInitializedNamespace;
 import freemarker.core.Environment.Namespace;
 import freemarker.template.Configuration;
@@ -39,13 +41,6 @@ import freemarker.test.TemplateTest;
 
 @SuppressWarnings("boxing")
 public class IncludeAndImportTest extends TemplateTest {
-
-    @Override
-    protected Configuration createConfiguration() throws Exception {
-        Configuration cfg = super.createConfiguration();
-        cfg.setTemplateLoader(new StringTemplateLoader());
-        return cfg;
-    }
 
     @Before
     public void setup() {

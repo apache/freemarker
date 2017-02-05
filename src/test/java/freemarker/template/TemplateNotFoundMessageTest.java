@@ -19,9 +19,12 @@
 
 package freemarker.template;
 
-import static freemarker.test.hamcerst.Matchers.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +39,7 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
-import freemarker.cache.WebappTemplateLoader;
+import freemarker.cache.WebAppTemplateLoader;
 
 public class TemplateNotFoundMessageTest {
 
@@ -59,9 +62,9 @@ public class TemplateNotFoundMessageTest {
 
     @Test
     public void testWebappTemplateLoader() throws IOException {
-        final String errMsg = failWith(new WebappTemplateLoader(new MockServletContext(), "WEB-INF/templates"));
+        final String errMsg = failWith(new WebAppTemplateLoader(new MockServletContext(), "WEB-INF/templates"));
         showErrorMessage(errMsg);
-        assertThat(errMsg, containsString("WebappTemplateLoader"));
+        assertThat(errMsg, containsString("WebAppTemplateLoader"));
         assertThat(errMsg, containsString("MyApp"));
         assertThat(errMsg, containsString("WEB-INF/templates"));
     }
@@ -83,12 +86,12 @@ public class TemplateNotFoundMessageTest {
     @Test
     public void testMultiTemplateLoader() throws IOException {
         final String errMsg = failWith(new MultiTemplateLoader(new TemplateLoader[] {
-                new WebappTemplateLoader(new MockServletContext(), "WEB-INF/templates"),
+                new WebAppTemplateLoader(new MockServletContext(), "WEB-INF/templates"),
                 new ClassTemplateLoader(this.getClass(), "foo/bar")
         }));
         showErrorMessage(errMsg);
         assertThat(errMsg, containsString("MultiTemplateLoader"));
-        assertThat(errMsg, containsString("WebappTemplateLoader"));
+        assertThat(errMsg, containsString("WebAppTemplateLoader"));
         assertThat(errMsg, containsString("MyApp"));
         assertThat(errMsg, containsString("WEB-INF/templates"));
         assertThat(errMsg, containsString("ClassTemplateLoader"));
@@ -97,18 +100,10 @@ public class TemplateNotFoundMessageTest {
 
     @Test
     public void testDefaultTemplateLoader() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
-        {
-            String errMsg = failWith(cfg);
-            showErrorMessage(errMsg);
-            assertThat(errMsg, allOf(containsString("setTemplateLoader"), containsString("dangerous")));
-        }
-        {
-            cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21);
-            String errMsg = failWith(cfg);
-            showErrorMessage(errMsg);
-            assertThat(errMsg, allOf(containsString("setTemplateLoader"), containsString("null")));
-        }
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+        String errMsg = failWith(cfg);
+        showErrorMessage(errMsg);
+        assertThat(errMsg, allOf(containsString("setTemplateLoader"), containsString("null")));
     }
     
     @Test

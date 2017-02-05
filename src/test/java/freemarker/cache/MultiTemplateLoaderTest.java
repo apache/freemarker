@@ -18,9 +18,13 @@
  */
 package freemarker.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -38,10 +42,10 @@ public class MultiTemplateLoaderTest {
         stl2.putTemplate("both.ftl", "both 2");
         
         MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { stl1, stl2 });
-        assertEquals("1", getTemplate(mtl, "1.ftl"));
-        assertEquals("2", getTemplate(mtl, "2.ftl"));
-        assertEquals("both 1", getTemplate(mtl, "both.ftl"));
-        assertNull(getTemplate(mtl, "neither.ftl"));
+        assertEquals("1", getTemplateContent(mtl, "1.ftl"));
+        assertEquals("2", getTemplateContent(mtl, "2.ftl"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
+        assertNull(getTemplateContent(mtl, "neither.ftl"));
     }
 
     @Test
@@ -58,28 +62,37 @@ public class MultiTemplateLoaderTest {
         StringTemplateLoader stl1 = new StringTemplateLoader();
         stl1.putTemplate("both.ftl", "both 1");
         
-        StringTemplateLoader stl2 = new StringTemplateLoader();
-        stl2.putTemplate("both.ftl", "both 2");
+        ByteArrayTemplateLoader stl2 = new ByteArrayTemplateLoader();
+        stl2.putTemplate("both.ftl", "both 2".getBytes(StandardCharsets.UTF_8));
 
         MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { stl1, stl2 });
         mtl.setSticky(sticky);
         
-        assertEquals("both 1", getTemplate(mtl, "both.ftl"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
         assertTrue(stl1.removeTemplate("both.ftl"));
-        assertEquals("both 2", getTemplate(mtl, "both.ftl"));
+        assertEquals("both 2", getTemplateContent(mtl, "both.ftl"));
         stl1.putTemplate("both.ftl", "both 1");
-        assertEquals(sticky ? "both 2" : "both 1", getTemplate(mtl, "both.ftl"));
+        assertEquals(sticky ? "both 2" : "both 1", getTemplateContent(mtl, "both.ftl"));
         assertTrue(stl2.removeTemplate("both.ftl"));
-        assertEquals("both 1", getTemplate(mtl, "both.ftl"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
     }
     
-    private String getTemplate(TemplateLoader tl, String name) throws IOException {
-        Object tSrc = tl.findTemplateSource(name);
-        if (tSrc == null) {
-            return null;
+    private String getTemplateContent(TemplateLoader tl, String name) throws IOException {
+        TemplateLoaderSession ses = tl.createSession();
+        try {
+            TemplateLoadingResult res = tl.load(name, null, null, ses);
+            if (res.getStatus() == TemplateLoadingResultStatus.NOT_FOUND) {
+                return null;
+            }
+            return IOUtils.toString(
+                    res.getReader() != null
+                            ? res.getReader()
+                            : new InputStreamReader(res.getInputStream(), StandardCharsets.UTF_8));
+        } finally {
+            if (ses != null) {
+                ses.close();
+            }
         }
-        
-        return IOUtils.toString(tl.getReader(tSrc, "UTF-8"));
     }
     
 }

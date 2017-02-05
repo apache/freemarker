@@ -20,12 +20,14 @@
 package freemarker.cache;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import freemarker.template.utility.StringUtil;
 
@@ -33,93 +35,79 @@ import freemarker.template.utility.StringUtil;
  * A {@link TemplateLoader} that uses a {@link Map} with {@code byte[]} as its source of templates. This is similar to
  * {@link StringTemplateLoader}, but uses {@code byte[]} instead of {@link String}; see more details there.
  * 
- * @since 2.3.24
+ * <p>Note that {@link ByteArrayTemplateLoader} can't be used with a distributed (cluster-wide) {@link CacheStorage},
+ * as it produces {@link TemplateLoadingSource}-s that deliberately throw exception on serialization (because the
+ * content is only accessible within a single JVM, and is also volatile).
  */
+// TODO JUnit tests
 public class ByteArrayTemplateLoader implements TemplateLoader {
     
-    private final Map<String, ByteArrayTemplateSource> templates = new HashMap<String, ByteArrayTemplateSource>();
+    private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
+    
+    private final long instanceId = INSTANCE_COUNTER.get();
+    private final AtomicLong templatesRevision = new AtomicLong();
+    private final ConcurrentMap<String, ContentHolder> templates = new ConcurrentHashMap<>();
     
     /**
-     * Puts a template into the loader. A call to this method is identical to 
-     * the call to the three-arg {@link #putTemplate(String, byte[], long)} 
-     * passing <tt>System.currentTimeMillis()</tt> as the third argument.
-     * @param name the name of the template.
-     * @param templateSource the source code of the template.
+     * Puts a template into the template loader. The name can contain slashes to denote logical directory structure, but
+     * must not start with a slash. Each template will get an unique revision number, thus replacing a template will
+     * cause the template cache to reload it (when the update delay expires).
+     * 
+     * <p>This method is thread-safe.
+     * 
+     * @param name
+     *            the name of the template.
+     * @param content
+     *            the source code of the template.
      */
-    public void putTemplate(String name, byte[] templateSource) {
-        putTemplate(name, templateSource, System.currentTimeMillis());
+    public void putTemplate(String name, byte[] content) {
+        templates.put(
+                name,
+                new ContentHolder(content, new Source(instanceId, name), templatesRevision.incrementAndGet()));
     }
     
     /**
-     * Puts a template into the loader. The name can contain slashes to denote
-     * logical directory structure, but must not start with a slash. If the 
-     * method is called multiple times for the same name and with different
-     * last modified time, the configuration's template cache will reload the 
-     * template according to its own refresh settings (note that if the refresh 
-     * is disabled in the template cache, the template will not be reloaded).
-     * Also, since the cache uses lastModified to trigger reloads, calling the
-     * method with different source and identical timestamp won't trigger
-     * reloading.
-     * @param name the name of the template.
-     * @param templateSource the source code of the template.
-     * @param lastModified the time of last modification of the template in 
-     * terms of <tt>System.currentTimeMillis()</tt>
-     */
-    public void putTemplate(String name, byte[] templateSource, long lastModified) {
-        templates.put(name, new ByteArrayTemplateSource(name, templateSource, lastModified));
+     * Removes the template with the specified name if it was added earlier.
+     * 
+     * <p>
+     * This method is thread-safe.
+     * 
+     * @param name
+     *            Exactly the key with which the template was added.
+     * 
+     * @return Whether a template was found with the given key (and hence was removed now)
+     */ 
+    public boolean removeTemplate(String name) {
+        return templates.remove(name) != null;
     }
     
-    public void closeTemplateSource(Object templateSource) {
+    @Override
+    public TemplateLoaderSession createSession() {
+        return null;
     }
-    
-    public Object findTemplateSource(String name) {
-        return templates.get(name);
-    }
-    
-    public long getLastModified(Object templateSource) {
-        return ((ByteArrayTemplateSource) templateSource).lastModified;
-    }
-    
-    public Reader getReader(Object templateSource, String encoding) throws UnsupportedEncodingException {
-        return new InputStreamReader(
-                new ByteArrayInputStream(((ByteArrayTemplateSource) templateSource).source),
-                encoding);
-    }
-    
-    private static class ByteArrayTemplateSource {
-        private final String name;
-        private final byte[] source;
-        private final long lastModified;
-        
-        ByteArrayTemplateSource(String name, byte[] source, long lastModified) {
-            if (name == null) {
-                throw new IllegalArgumentException("name == null");
-            }
-            if (source == null) {
-                throw new IllegalArgumentException("source == null");
-            }
-            if (lastModified < -1L) {
-                throw new IllegalArgumentException("lastModified < -1L");
-            }
-            this.name = name;
-            this.source = source;
-            this.lastModified = lastModified;
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof ByteArrayTemplateSource) {
-                return name.equals(((ByteArrayTemplateSource) obj).name);
-            }
-            return false;
-        }
-        
-        @Override
-        public int hashCode() {
-            return name.hashCode();
+
+    @Override
+    public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
+            Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
+        ContentHolder contentHolder = templates.get(name);
+        if (contentHolder == null) {
+            return TemplateLoadingResult.NOT_FOUND;
+        } else if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(contentHolder.source)
+                && Objects.equals(ifVersionDiffersFrom, contentHolder.version)) {
+            return TemplateLoadingResult.NOT_MODIFIED;
+        } else {
+            return new TemplateLoadingResult(
+                    contentHolder.source, contentHolder.version,
+                    new ByteArrayInputStream(contentHolder.content),
+                    null);
         }
     }
-    
+
+    @Override
+    public void resetState() {
+        // Do nothing
+    }
+
     /**
      * Show class name and some details that are useful in template-not-found errors.
      */
@@ -129,7 +117,7 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
         sb.append(TemplateLoaderUtils.getClassNameForToString(this));
         sb.append("(Map { ");
         int cnt = 0;
-        for (Iterator it = templates.keySet().iterator(); it.hasNext(); ) {
+        for (String name : templates.keySet()) {
             cnt++;
             if (cnt != 1) {
                 sb.append(", ");
@@ -138,7 +126,7 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
                 sb.append("...");
                 break;
             }
-            sb.append(StringUtil.jQuote(it.next()));
+            sb.append(StringUtil.jQuote(name));
             sb.append("=...");
         }
         if (cnt != 0) {
@@ -146,6 +134,61 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
         }
         sb.append("})");
         return sb.toString();
+    }
+
+    private static class ContentHolder {
+        private final byte[] content;
+        private final Source source;
+        private final long version;
+        
+        public ContentHolder(byte[] content, Source source, long version) {
+            this.content = content;
+            this.source = source;
+            this.version = version;
+        }
+        
+    }
+    
+    @SuppressWarnings("serial")
+    private static class Source implements TemplateLoadingSource {
+        
+        private final long instanceId;
+        private final String name;
+        
+        public Source(long instanceId, String name) {
+            this.instanceId = instanceId;
+            this.name = name;
+        }
+    
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (int) (instanceId ^ (instanceId >>> 32));
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            return result;
+        }
+    
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            Source other = (Source) obj;
+            if (instanceId != other.instanceId) return false;
+            if (name == null) {
+                if (other.name != null) return false;
+            } else if (!name.equals(other.name)) {
+                return false;
+            }
+            return true;
+        }
+        
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            throw new IOException(ByteArrayTemplateLoader.class.getName()
+                    + " sources can't be serialized, as they don't support clustering.");
+        }
+        
     }
     
 }

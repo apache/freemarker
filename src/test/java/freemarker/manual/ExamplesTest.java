@@ -24,9 +24,9 @@ import java.util.Properties;
 
 import org.junit.Ignore;
 
+import freemarker.cache.ByteArrayTemplateLoader;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.test.TemplateTest;
@@ -54,7 +54,7 @@ public abstract class ExamplesTest extends TemplateTest {
 
     protected void setupTemplateLoaders(Configuration cfg) {
         cfg.setTemplateLoader(new MultiTemplateLoader(
-                new TemplateLoader[] { new StringTemplateLoader(), new ClassTemplateLoader(this.getClass(), "") }));
+                new TemplateLoader[] { new ByteArrayTemplateLoader(), new ClassTemplateLoader(this.getClass(), "") }));
     }
     
 }

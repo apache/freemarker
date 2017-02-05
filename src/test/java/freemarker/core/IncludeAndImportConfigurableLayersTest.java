@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
-import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.test.TemplateTest;
@@ -317,9 +316,7 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
     
     @Override
     protected Configuration createConfiguration() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
-        cfg.setTemplateLoader(new StringTemplateLoader());
-        return cfg;
+        return new Configuration(Configuration.VERSION_2_3_24);
     }
 
     @Override

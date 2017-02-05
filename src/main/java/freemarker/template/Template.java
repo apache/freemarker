@@ -50,10 +50,12 @@ import freemarker.core.ParseException;
 import freemarker.core.ParserConfiguration;
 import freemarker.core.TemplateConfiguration;
 import freemarker.core.TemplateElement;
+import freemarker.core.TemplateSpecifiedEncodingHandler;
 import freemarker.core.TextBlock;
 import freemarker.core.TokenMgrError;
 import freemarker.core._CoreAPI;
 import freemarker.debug.impl.DebuggerService;
+import freemarker.template.utility.NullArgumentException;
 
 /**
  * <p>
@@ -136,11 +138,7 @@ public class Template extends Configurable {
     /**
      * Convenience constructor for {@link #Template(String, String, Reader, Configuration, String) Template(name, null,
      * reader, cfg, encoding)}.
-     * 
-     * @deprecated In most applications, use {@link #Template(String, Reader, Configuration)} instead, which doesn't
-     *             specify the encoding.
      */
-    @Deprecated
     public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
         this(name, null, reader, cfg, encoding);
     }
@@ -168,7 +166,9 @@ public class Template extends Configurable {
      *            See {@link #getSourceName()} for the meaning. Can be {@code null}, in which case
      *            {@link #getSourceName()} will return the same as {@link #getName()}.
      * @param reader
-     *            The character stream to read from. It will always be closed ({@link Reader#close()}) by this method.
+     *            The character stream to read from. The {@link Reader} is <em>not</em> closed by this method (unlike
+     *            in FreeMarker 2.x.x), so be sure that it's closed somewhere. (Except of course, readers like
+     *            {@link StringReader} need not be closed.)
      * @param cfg
      *            The Configuration object that this Template is associated with. If this is {@code null}, the "default"
      *            {@link Configuration} object is used, which is highly discouraged, because it can easily lead to
@@ -186,20 +186,17 @@ public class Template extends Configurable {
      * recommended).
      *
      * @param encoding
-     *            This is the encoding that we are supposed to be using. But it's not really necessary because we have a
-     *            {@link Reader} which is already decoded, but it's kept as meta-info. It also has an impact when
-     *            {@code #include}-ing/{@code #import}-ing another template from this template, as its default encoding
-     *            will be this. But this behavior of said directives is considered to be harmful, and will be probably
-     *            phased out. Until that, it's better to leave this on {@code null}, so that the encoding will come from
-     *            the {@link Configuration}. Note that if this is non-{@code null} and there's an {@code #ftl} header
-     *            with encoding, they must match, or else a {@link WrongEncodingException} is thrown.
-     * 
-     * @deprecated In most applications, use {@link #Template(String, String, Reader, Configuration)} instead, which
-     *             doesn't specify the encoding.
+     *            This is the encoding that we are supposed to be using. At the first glance it's unnecessary because we
+     *            already have a {@link Reader} (so decoding with the charset has already happened), however, if this is
+     *            non-{@code null} and there's an {@code #ftl} header with {@code encoding} parameter, they must match,
+     *            or else a {@link WrongEncodingException} is thrown. Thus, it should be set if to decode the template,
+     *            we were using an encoding (a charset), otherwise it should be {@code null}. It's also kept as
+     *            meta-info (returned by {@link #getEncoding()}). It also has an impact when {@code #include}-ing or
+     *            {@code #import}-ing another template from this template, as its default encoding will be this. But
+     *            this behavior of said directives is considered to be harmful, and will be probably phased out.
      * 
      * @since 2.3.22
      */
-   @Deprecated
    public Template(
            String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
        this(name, sourceName, reader, cfg, null, encoding);
@@ -223,18 +220,35 @@ public class Template extends Configurable {
      *            {@link Configurable} settings will be set too, because this constructor only uses it as a
      *            {@link ParserConfiguration}.
      * @param encoding
-     *            Same as in {@link #Template(String, String, Reader, Configuration, String)}. When it's non-{@code
-     *            null}, it overrides the value coming from the {@link TemplateConfiguration#getEncoding()} method of
-     *            the {@code templateConfiguration} parameter.
+     *            Same as in {@link #Template(String, String, Reader, Configuration, String)}.
      * 
      * @since 2.3.24
      */
-    public Template(
-            String name, String sourceName, Reader reader,
-            Configuration cfg, ParserConfiguration customParserConfiguration,
-            String encoding) throws IOException {
+   public Template(
+           String name, String sourceName, Reader reader,
+           Configuration cfg, ParserConfiguration customParserConfiguration,
+           String encoding) throws IOException {
+       this(name, sourceName, reader, cfg, customParserConfiguration, encoding,
+               TemplateSpecifiedEncodingHandler.DEFAULT);
+    }
+   
+   /**
+    * Same as {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}, but allows
+    * specifying a non-default (non-{@link TemplateSpecifiedEncodingHandler#DEFAULT}) behavior regarding encoding
+    * specified in the template content.
+    *  
+    * @param templateSpecifiedEncodingHandler Not {@code null}.
+    * 
+    * @since 2.3.26
+    */
+   public Template(
+           String name, String sourceName, Reader reader,
+           Configuration cfg, ParserConfiguration customParserConfiguration,
+           String encoding, TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) throws IOException {
         this(name, sourceName, cfg, customParserConfiguration);
-        
+       
+        NullArgumentException.check("templateSpecifiedEncodingHandler", templateSpecifiedEncodingHandler);
+       
         this.setEncoding(encoding);
         LineTableBuilder ltbReader;
         try {
@@ -247,7 +261,8 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                parser = _CoreAPI.newFMParser(this, reader, actualParserConfiguration);
+                parser = _CoreAPI.newFMParser(
+                        this, reader, actualParserConfiguration, templateSpecifiedEncodingHandler);
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -271,8 +286,6 @@ public class Template extends Configurable {
         } catch (ParseException e) {
             e.setTemplateName(getSourceName());
             throw e;
-        } finally {
-            reader.close();
         }
         
         // Throws any exception that JavaCC has silently treated as EOF:
@@ -606,7 +619,8 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns the default character encoding used for reading included files.
+     * Returns the default character encoding used for reading included/imported files; if {@code null}, then
+     * the encoding returned by {@link Configuration#getEncoding(java.util.Locale)} should be used instead.
      */
     public String getEncoding() {
         return this.encoding;

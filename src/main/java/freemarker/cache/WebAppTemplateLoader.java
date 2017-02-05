@@ -22,11 +22,12 @@ package freemarker.cache;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 
@@ -35,20 +36,21 @@ import org.slf4j.LoggerFactory;
 
 import freemarker.template.Configuration;
 import freemarker.template.utility.CollectionUtils;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
 /**
  * A {@link TemplateLoader} that uses streams reachable through {@link ServletContext#getResource(String)} as its source
  * of templates.  
  */
-public class WebappTemplateLoader implements TemplateLoader {
+public class WebAppTemplateLoader implements TemplateLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger("freemarker.cache");
 
     private final ServletContext servletContext;
     private final String subdirPath;
 
-    private Boolean urlConnectionUsesCaches;
+    private Boolean urlConnectionUsesCaches = false;
 
     private boolean attemptFileAccess = true;
 
@@ -61,7 +63,7 @@ public class WebappTemplateLoader implements TemplateLoader {
      *            the servlet context whose {@link ServletContext#getResource(String)} will be used to load the
      *            templates.
      */
-    public WebappTemplateLoader(ServletContext servletContext) {
+    public WebAppTemplateLoader(ServletContext servletContext) {
         this(servletContext, "/");
     }
 
@@ -77,13 +79,9 @@ public class WebappTemplateLoader implements TemplateLoader {
      * @param subdirPath
      *            the base path to template resources.
      */
-    public WebappTemplateLoader(ServletContext servletContext, String subdirPath) {
-        if (servletContext == null) {
-            throw new IllegalArgumentException("servletContext == null");
-        }
-        if (subdirPath == null) {
-            throw new IllegalArgumentException("path == null");
-        }
+    public WebAppTemplateLoader(ServletContext servletContext, String subdirPath) {
+        NullArgumentException.check("servletContext", servletContext);
+        NullArgumentException.check("subdirPath", subdirPath);
 
         subdirPath = subdirPath.replace('\\', '/');
         if (!subdirPath.endsWith("/")) {
@@ -94,70 +92,6 @@ public class WebappTemplateLoader implements TemplateLoader {
         }
         this.subdirPath = subdirPath;
         this.servletContext = servletContext;
-    }
-
-    @Override
-    public Object findTemplateSource(String name) throws IOException {
-        String fullPath = subdirPath + name;
-
-        if (attemptFileAccess) {
-            // First try to open as plain file (to bypass servlet container resource caches).
-            try {
-                String realPath = servletContext.getRealPath(fullPath);
-                if (realPath != null) {
-                    File file = new File(realPath);
-                    if (file.canRead() && file.isFile()) {
-                        return file;
-                    }
-                }
-            } catch (SecurityException e) {
-                ;// ignore
-            }
-        }
-
-        // If it fails, try to open it with servletContext.getResource.
-        URL url = null;
-        try {
-            url = servletContext.getResource(fullPath);
-        } catch (MalformedURLException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath), e);
-            }
-            return null;
-        }
-        return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
-    }
-
-    @Override
-    public long getLastModified(Object templateSource) {
-        if (templateSource instanceof File) {
-            return ((File) templateSource).lastModified();
-        } else {
-            return ((URLTemplateSource) templateSource).lastModified();
-        }
-    }
-
-    @Override
-    public Reader getReader(Object templateSource, String encoding)
-            throws IOException {
-        if (templateSource instanceof File) {
-            return new InputStreamReader(
-                    new FileInputStream((File) templateSource),
-                    encoding);
-        } else {
-            return new InputStreamReader(
-                    ((URLTemplateSource) templateSource).getInputStream(),
-                    encoding);
-        }
-    }
-
-    @Override
-    public void closeTemplateSource(Object templateSource) throws IOException {
-        if (templateSource instanceof File) {
-            // Do nothing.
-        } else {
-            ((URLTemplateSource) templateSource).close();
-        }
     }
 
     /**
@@ -223,6 +157,140 @@ public class WebappTemplateLoader implements TemplateLoader {
      */
     public void setAttemptFileAccess(boolean attemptLoadingFromFile) {
         this.attemptFileAccess = attemptLoadingFromFile;
+    }
+
+    @Override
+    public TemplateLoaderSession createSession() {
+        return null;
+    }
+
+    @Override
+    public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
+            Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
+        WebAppTemplateLoadingSource source = createSource(name);
+        if (source == null) {
+            return TemplateLoadingResult.NOT_FOUND;
+        }
+        
+        if (source.url != null) {
+            URLConnection conn = source.url.openConnection();
+            Boolean urlConnectionUsesCaches = getURLConnectionUsesCaches();
+            if (urlConnectionUsesCaches != null) {
+                conn.setUseCaches(urlConnectionUsesCaches);
+            }
+            
+            // To prevent clustering issues, getLastModified(fallbackToJarLMD=false)
+            long lmd = URLTemplateLoader.getLastModified(conn, false);
+            Long version = lmd != -1 ? lmd : null;
+            
+            if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source)
+                    && Objects.equals(ifVersionDiffersFrom, version)) {
+                return TemplateLoadingResult.NOT_MODIFIED;
+            }
+            
+            return new TemplateLoadingResult(source, version, conn.getInputStream(), null);
+        } else { // source.file != null
+            long lmd = source.file.lastModified();
+            Long version = lmd != -1 ? lmd : null;
+
+            if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source)
+                    && Objects.equals(ifVersionDiffersFrom, version)) {
+                return TemplateLoadingResult.NOT_MODIFIED;
+            }
+            
+            return new TemplateLoadingResult(source, version, new FileInputStream(source.file), null);
+        }
+    }
+    
+    private WebAppTemplateLoadingSource createSource(String name) {
+        String fullPath = subdirPath + name;
+
+        if (attemptFileAccess) {
+            // First try to open as plain file (to bypass servlet container resource caches).
+            try {
+                String realPath = servletContext.getRealPath(fullPath);
+                if (realPath != null) {
+                    File file = new File(realPath);
+                    if (file.canRead() && file.isFile()) {
+                        return new WebAppTemplateLoadingSource(file);
+                    }
+                }
+            } catch (SecurityException e) {
+                ;// ignore
+            }
+        }
+
+        // If it fails, try to open it with servletContext.getResource.
+        URL url = null;
+        try {
+            url = servletContext.getResource(fullPath);
+        } catch (MalformedURLException e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath), e);
+            }
+            return null;
+        }
+        return url == null ? null : new WebAppTemplateLoadingSource(url);
+    }
+
+    @Override
+    public void resetState() {
+        // Do nothing
+    }
+    
+    @SuppressWarnings("serial")
+    private class WebAppTemplateLoadingSource implements TemplateLoadingSource {
+        private final File file;
+        private final URL url;
+        
+        WebAppTemplateLoadingSource(File file) {
+            this.file = file;
+            this.url = null;
+        }
+
+        WebAppTemplateLoadingSource(URL url) {
+            this.file = null;
+            this.url = url;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType().hashCode();
+            result = prime * result + ((file == null) ? 0 : file.hashCode());
+            result = prime * result + ((url == null) ? 0 : url.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            WebAppTemplateLoadingSource other = (WebAppTemplateLoadingSource) obj;
+            if (!getOuterType().equals(other.getOuterType()))
+                return false;
+            if (file == null) {
+                if (other.file != null)
+                    return false;
+            } else if (!file.equals(other.file))
+                return false;
+            if (url == null) {
+                if (other.url != null)
+                    return false;
+            } else if (!url.equals(other.url))
+                return false;
+            return true;
+        }
+
+        private WebAppTemplateLoader getOuterType() {
+            return WebAppTemplateLoader.this;
+        }
+        
     }
 
 }

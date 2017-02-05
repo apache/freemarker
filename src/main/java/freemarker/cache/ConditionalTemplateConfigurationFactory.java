@@ -50,11 +50,11 @@ public class ConditionalTemplateConfigurationFactory extends TemplateConfigurati
     }
 
     @Override
-    public TemplateConfiguration get(String sourceName, Object templateSource)
+    public TemplateConfiguration get(String sourceName, TemplateLoadingSource templateLoadingSource)
             throws IOException, TemplateConfigurationFactoryException {
-        if (matcher.matches(sourceName, templateSource)) {
+        if (matcher.matches(sourceName, templateLoadingSource)) {
             if (templateConfigurationFactory != null) {
-                return templateConfigurationFactory.get(sourceName, templateSource);
+                return templateConfigurationFactory.get(sourceName, templateLoadingSource);
             } else {
                 return templateConfiguration;
             }

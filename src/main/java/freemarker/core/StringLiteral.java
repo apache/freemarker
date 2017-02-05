@@ -63,7 +63,8 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 FMParserTokenManager tkMan = new FMParserTokenManager(
                         simpleCharacterStream);
                 
-                FMParser parser = new FMParser(parentTemplate, false, tkMan, pcfg);
+                FMParser parser = new FMParser(parentTemplate, false, tkMan, pcfg,
+                        TemplateSpecifiedEncodingHandler.DEFAULT);
                 // We continue from the parent parser's current state:
                 parser.setupStringLiteralMode(parentTkMan, outputFormat);
                 try {
@@ -129,6 +130,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         }
     }
 
+    @Override
     public String getAsString() {
         return value;
     }

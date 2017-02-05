@@ -22,7 +22,6 @@ package freemarker.template;
 import java.util.Set;
 
 import freemarker.cache.CacheStorage;
-import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.core.Expression;
@@ -81,10 +80,6 @@ public class _TemplateAPI {
 
     public static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
         return Configuration.getDefaultLogTemplateExceptions(incompatibleImprovements);
-    }
-
-    public static TemplateLoader createDefaultTemplateLoader(Version incompatibleImprovements) {
-        return Configuration.createDefaultTemplateLoader(incompatibleImprovements);
     }
 
     public static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements) {

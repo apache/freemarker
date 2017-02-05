@@ -76,6 +76,8 @@ public class FMParser {
     private int autoEscapingPolicy;
     private boolean autoEscaping;
     private ParserConfiguration pCfg;
+    private TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler;
+    private boolean templateSpecifiedEncodingHandlerInvoked;
 
     /** Keeps track of #list and #foreach nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
@@ -94,8 +96,9 @@ public class FMParser {
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
 
-    FMParser(Template template, Reader reader, ParserConfiguration pCfg) {
-        this(template, true, readerToTokenManager(reader, pCfg), pCfg);
+    FMParser(Template template, Reader reader, ParserConfiguration pCfg,
+    		TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) {
+        this(template, true, readerToTokenManager(reader, pCfg), pCfg, templateSpecifiedEncodingHandler);
     }
 
     private static FMParserTokenManager readerToTokenManager(Reader reader, ParserConfiguration pCfg) {
@@ -104,11 +107,15 @@ public class FMParser {
         return new FMParserTokenManager(simpleCharStream);
     }
 
-    FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg) {
+    FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg,
+    		TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) {
         this(tkMan);
 
         NullArgumentException.check(pCfg);
         this.pCfg = pCfg;
+        
+        NullArgumentException.check(templateSpecifiedEncodingHandler);
+        this.templateSpecifiedEncodingHandler = templateSpecifiedEncodingHandler;
 
         NullArgumentException.check(template);
         this.template = template;
@@ -4049,10 +4056,8 @@ void HeaderElement() :
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
                             }
-                            String encoding = template.getEncoding();
-                            if (encoding != null && !encoding.equalsIgnoreCase(vs)) {
-                                throw new Template.WrongEncodingException(vs, encoding);
-                            }
+                            templateSpecifiedEncodingHandlerInvoked = true;
+                            templateSpecifiedEncodingHandler.handle(vs, template.getEncoding());
                         } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE") || ks.equals("stripWhitespace")) {
                             this.stripWhitespace = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("STRIP_TEXT") || ks.equals("stripText")) {
@@ -4241,6 +4246,13 @@ TemplateElement Root() :
         LOOKAHEAD([<STATIC_TEXT_WS>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
         HeaderElement()
     ]
+    {
+        if (!templateSpecifiedEncodingHandlerInvoked) {
+	        templateSpecifiedEncodingHandlerInvoked = true;
+	        templateSpecifiedEncodingHandler.handle(null, template.getEncoding());
+        }
+    }
+    
     children = MixedContentElements()
     <EOF>
     {

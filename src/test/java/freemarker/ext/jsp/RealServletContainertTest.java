@@ -47,7 +47,7 @@ import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
-import freemarker.cache.WebappTemplateLoader;
+import freemarker.cache.WebAppTemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.servlet.FreemarkerServlet;
@@ -432,7 +432,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             cfg.setLogTemplateExceptions(true);
             cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build());
-            cfg.setTemplateLoader(new WebappTemplateLoader(getServletContext()));
+            cfg.setTemplateLoader(new WebAppTemplateLoader(getServletContext()));
             return cfg;
         }
 
@@ -452,7 +452,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             
             {
                 TemplateLoader tl = cfg.getTemplateLoader();
-                assertTrue(tl instanceof WebappTemplateLoader);
+                assertTrue(tl instanceof WebAppTemplateLoader);
             }
             
         }

@@ -33,6 +33,7 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,8 +50,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.cache.ByteArrayTemplateLoader;
 import freemarker.cache.CacheStorageWithGetSize;
-import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.NullCacheStorage;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.StringTemplateLoader;
@@ -102,7 +103,6 @@ public class ConfigurationTest extends TestCase {
         
         Configuration cfg = new Configuration();
         assertUsesLegacyObjectWrapper(cfg);
-        assertUsesLegacyTemplateLoader(cfg);
         assertEquals(cfg.getIncompatibleImprovements(), Configuration.VERSION_2_3_0);
         
         cfg.setIncompatibleImprovements(newVersion);
@@ -111,10 +111,8 @@ public class ConfigurationTest extends TestCase {
         
         cfg.setIncompatibleImprovements(oldVersion);
         assertUsesLegacyObjectWrapper(cfg);
-        assertUsesLegacyTemplateLoader(cfg);
         cfg.setIncompatibleImprovements(oldVersion);
         assertUsesLegacyObjectWrapper(cfg);
-        assertUsesLegacyTemplateLoader(cfg);
         
         cfg.setIncompatibleImprovements(newVersion);
         assertUsesNewObjectWrapper(cfg);
@@ -126,7 +124,6 @@ public class ConfigurationTest extends TestCase {
         cfg.setObjectWrapper(new SimpleObjectWrapper());
         cfg.setIncompatibleImprovements(oldVersion);
         assertSame(SimpleObjectWrapper.class, cfg.getObjectWrapper().getClass());
-        assertUsesLegacyTemplateLoader(cfg);
         
         cfg.setTemplateLoader(new StringTemplateLoader());
         cfg.setIncompatibleImprovements(newVersion);
@@ -149,7 +146,6 @@ public class ConfigurationTest extends TestCase {
 
         cfg.setIncompatibleImprovements(oldVersion);
         assertUsesLegacyObjectWrapper(cfg);
-        assertUsesLegacyTemplateLoader(cfg);
 
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
         assertUses2322ObjectWrapper(cfg);
@@ -163,7 +159,6 @@ public class ConfigurationTest extends TestCase {
         
         cfg.setIncompatibleImprovements(oldVersion);
         assertUsesLegacyObjectWrapper(cfg);
-        assertUsesLegacyTemplateLoader(cfg);
         
         // ---
         
@@ -222,7 +217,7 @@ public class ConfigurationTest extends TestCase {
         }
         
         assertFalse(cfg.isTemplateLoaderExplicitlySet());
-        assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
+        assertNull(cfg.getTemplateLoader());
         //
         cfg.setTemplateLoader(null);
         assertTrue(cfg.isTemplateLoaderExplicitlySet());
@@ -230,11 +225,11 @@ public class ConfigurationTest extends TestCase {
         //
         for (int i = 0; i < 3; i++) {
             if (i == 2) {
-                cfg.setTemplateLoader(cfg.getTemplateLoader());
+                cfg.setTemplateLoader(new StringTemplateLoader());
             }
             cfg.unsetTemplateLoader();
             assertFalse(cfg.isTemplateLoaderExplicitlySet());
-            assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
+            assertNull(cfg.getTemplateLoader());
         }
         
         assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
@@ -279,22 +274,7 @@ public class ConfigurationTest extends TestCase {
     }
     
     public void testTemplateLoadingErrors() throws Exception {
-        Configuration cfg = new Configuration();
-        try {
-            cfg.getTemplate("missing.ftl");
-            fail();
-        } catch (TemplateNotFoundException e) {
-            assertThat(e.getMessage(), allOf(containsString("wasn't set"), containsString("default")));
-        }
-        
-        cfg = new Configuration(Configuration.VERSION_2_3_21);
-        try {
-            cfg.getTemplate("missing.ftl");
-            fail();
-        } catch (TemplateNotFoundException e) {
-            assertThat(e.getMessage(), allOf(containsString("wasn't set"), not(containsString("default"))));
-        }
-        
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setClassForTemplateLoading(this.getClass(), "nosuchpackage");
         try {
             cfg.getTemplate("missing.ftl");
@@ -316,10 +296,6 @@ public class ConfigurationTest extends TestCase {
     
     private void assertUsesNewTemplateLoader(Configuration cfg) {
         assertNull(cfg.getTemplateLoader());
-    }
-    
-    private void assertUsesLegacyTemplateLoader(Configuration cfg) {
-        assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
     }
     
     public void testVersion() {
@@ -375,10 +351,10 @@ public class ConfigurationTest extends TestCase {
         cfg.setDefaultEncoding(latin1);
         cfg.setEncoding(hu, latin2);
         
-        StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate(tFtl, "${1}");
-        tl.putTemplate(tEnFtl, "${1}");
-        tl.putTemplate(tUtf8Ftl, "<#ftl encoding='utf-8'>");
+        ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
+        tl.putTemplate(tFtl, "${1}".getBytes(StandardCharsets.UTF_8));
+        tl.putTemplate(tEnFtl, "${1}".getBytes(StandardCharsets.UTF_8));
+        tl.putTemplate(tUtf8Ftl, "<#ftl encoding='utf-8'>".getBytes(StandardCharsets.UTF_8));
         cfg.setTemplateLoader(tl);
         
         // 1 args:

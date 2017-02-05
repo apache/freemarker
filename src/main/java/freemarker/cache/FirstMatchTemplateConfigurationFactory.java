@@ -39,10 +39,10 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
     }
 
     @Override
-    public TemplateConfiguration get(String sourceName, Object templateSource)
+    public TemplateConfiguration get(String sourceName, TemplateLoadingSource templateLoadingSource)
             throws IOException, TemplateConfigurationFactoryException {
         for (TemplateConfigurationFactory tcf : templateConfigurationFactories) {
-            TemplateConfiguration tc = tcf.get(sourceName, templateSource); 
+            TemplateConfiguration tc = tcf.get(sourceName, templateLoadingSource); 
             if (tc != null) {
                 return tc;
             }

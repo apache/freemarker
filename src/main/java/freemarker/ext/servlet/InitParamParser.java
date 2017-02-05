@@ -34,7 +34,7 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
-import freemarker.cache.WebappTemplateLoader;
+import freemarker.cache.WebAppTemplateLoader;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.template.Configuration;
@@ -101,7 +101,7 @@ final class InitParamParser {
                 && cfg.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
             throw new TemplatePathParsingException("Template paths starting with \"{\" are reseved for future purposes");
         } else {
-            templateLoader = new WebappTemplateLoader(srvCtx, pureTemplatePath);
+            templateLoader = new WebAppTemplateLoader(srvCtx, pureTemplatePath);
         }
         
         if (settingAssignmentsStart != -1) {

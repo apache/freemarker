@@ -20,153 +20,49 @@
 package freemarker.cache;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import freemarker.template.utility.NullArgumentException;
+
 /**
  * A {@link TemplateLoader} that uses a set of other loaders to load the templates. On every request, loaders are
- * queried in the order of their appearance in the array of loaders provided to the constructor. However, by default, if
+ * queried in the order of their appearance in the array of loaders provided to the constructor. Except, when the
+ * {@linkplain #setSticky(boolean)} sticky} setting is set to {@code true} (default is false {@code false}), if
  * a request for some template name was already satisfied in the past by one of the loaders, that loader is queried
- * first (stickiness). This behavior can be disabled with {@link #setSticky(boolean)}, then the loaders are always
- * queried in the order of their appearance in the array.
+ * first (stickiness).
  * 
  * <p>This class is thread-safe.
  */
-public class MultiTemplateLoader implements StatefulTemplateLoader {
+// TODO JUnit test
+public class MultiTemplateLoader implements TemplateLoader {
 
-    private final TemplateLoader[] loaders;
-    private final Map<String, TemplateLoader> lastLoaderForName = new ConcurrentHashMap<String, TemplateLoader>();
+    private final TemplateLoader[] templateLoaders;
+    private final Map<String, TemplateLoader> lastTemplateLoaderForName = new ConcurrentHashMap<String, TemplateLoader>();
     
-    private boolean sticky = true;
+    private boolean sticky = false;
 
     /**
-     * Creates a new multi template Loader that will use the specified loaders.
+     * Creates a new instance that will use the specified template loaders.
      * 
-     * @param loaders
-     *            the loaders that are used to load templates.
+     * @param templateLoaders
+     *            the template loaders that are used to load templates, in the order as they will be searched
+     *            (except where {@linkplain #setSticky(boolean) stickiness} says otherwise).
      */
-    public MultiTemplateLoader(TemplateLoader[] loaders) {
-        this.loaders = loaders.clone();
-    }
-
-    public Object findTemplateSource(String name)
-            throws IOException {
-        if (sticky) {
-            // Use soft affinity - give the loader that last found this
-            // resource a chance to find it again first.
-            TemplateLoader lastLoader = lastLoaderForName.get(name);
-            if (lastLoader != null) {
-                Object source = lastLoader.findTemplateSource(name);
-                if (source != null) {
-                    return new MultiSource(source, lastLoader);
-                }
-            }
-        }
-
-        // If there is no affine loader, or it could not find the resource
-        // again, try all loaders in order of appearance. If any manages
-        // to find the resource, then associate it as the new affine loader
-        // for this resource.
-        for (int i = 0; i < loaders.length; ++i) {
-            TemplateLoader loader = loaders[i];
-            Object source = loader.findTemplateSource(name);
-            if (source != null) {
-                if (sticky) {
-                    lastLoaderForName.put(name, loader);
-                }
-                return new MultiSource(source, loader);
-            }
-        }
-
-        if (sticky) {
-            lastLoaderForName.remove(name);
-        }
-        // Resource not found
-        return null;
-    }
-
-    private Object modifyForIcI(Object source) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public long getLastModified(Object templateSource) {
-        return ((MultiSource) templateSource).getLastModified();
-    }
-
-    public Reader getReader(Object templateSource, String encoding)
-            throws IOException {
-        return ((MultiSource) templateSource).getReader(encoding);
-    }
-
-    public void closeTemplateSource(Object templateSource)
-            throws IOException {
-        ((MultiSource) templateSource).close();
+    public MultiTemplateLoader(TemplateLoader... templateLoaders) {
+        NullArgumentException.check("templateLoaders", templateLoaders);
+        this.templateLoaders = templateLoaders.clone();
     }
 
     /**
-     * Clears the soft affinity memory, also resets all enclosed {@link StatefulTemplateLoader}-s.
+     * Clears the sickiness memory, also resets the state of all enclosed {@link TemplateLoader}-s.
      */
+    @Override
     public void resetState() {
-        lastLoaderForName.clear();
-        for (int i = 0; i < loaders.length; i++) {
-            TemplateLoader loader = loaders[i];
-            if (loader instanceof StatefulTemplateLoader) {
-                ((StatefulTemplateLoader) loader).resetState();
-            }
-        }
-    }
-
-    /**
-     * Represents a template source bound to a specific template loader. It serves as the complete template source
-     * descriptor used by the MultiTemplateLoader class.
-     */
-    static final class MultiSource {
-
-        private final Object source;
-        private final TemplateLoader loader;
-
-        MultiSource(Object source, TemplateLoader loader) {
-            this.source = source;
-            this.loader = loader;
-        }
-
-        long getLastModified() {
-            return loader.getLastModified(source);
-        }
-
-        Reader getReader(String encoding)
-                throws IOException {
-            return loader.getReader(source, encoding);
-        }
-
-        void close()
-                throws IOException {
-            loader.closeTemplateSource(source);
-        }
-
-        Object getWrappedSource() {
-            return source;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof MultiSource) {
-                MultiSource m = (MultiSource) o;
-                return m.loader.equals(loader) && m.source.equals(source);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return loader.hashCode() + 31 * source.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return source.toString();
+        lastTemplateLoaderForName.clear();
+        for (TemplateLoader templateLoader : templateLoaders) {
+            templateLoader.resetState();
         }
     }
 
@@ -179,11 +75,11 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("MultiTemplateLoader(");
-        for (int i = 0; i < loaders.length; i++) {
+        for (int i = 0; i < templateLoaders.length; i++) {
             if (i != 0) {
                 sb.append(", ");
             }
-            sb.append("loader").append(i + 1).append(" = ").append(loaders[i]);
+            sb.append("loader").append(i + 1).append(" = ").append(templateLoaders[i]);
         }
         sb.append(")");
         return sb.toString();
@@ -195,7 +91,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
      * @since 2.3.23
      */
     public int getTemplateLoaderCount() {
-        return loaders.length;
+        return templateLoaders.length;
     }
 
     /**
@@ -205,22 +101,67 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
      *            Must be below {@link #getTemplateLoaderCount()}.
      */
     public TemplateLoader getTemplateLoader(int index) {
-        return loaders[index];
+        return templateLoaders[index];
     }
 
     /**
-     * @since 2.3.24
+     * Getter pair of {@link #setSticky(boolean)}.
      */
     public boolean isSticky() {
         return sticky;
     }
 
     /**
-     * @since 2.3.24
+     * Sets if for a name that was already loaded earlier the same {@link TemplateLoader} will be tried first, or
+     * we always try the {@link TemplateLoader}-s strictly in the order as it was specified in the constructor.
+     * The default is {@code false}.
      */
     public void setSticky(boolean sticky) {
         this.sticky = sticky;
     }
 
+    @Override
+    public TemplateLoaderSession createSession() {
+        return null;
+    }
+
+    @Override
+    public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
+            Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
+        TemplateLoader lastLoader = null;
+        if (sticky) {
+            // Use soft affinity - give the loader that last found this
+            // resource a chance to find it again first.
+            lastLoader = lastTemplateLoaderForName.get(name);
+            if (lastLoader != null) {
+                TemplateLoadingResult result = lastLoader.load(name, ifSourceDiffersFrom, ifVersionDiffersFrom, session);
+                if (result.getStatus() != TemplateLoadingResultStatus.NOT_FOUND) {
+                    return result;
+                }
+            }
+        }
+
+        // If there is no affine loader, or it could not find the resource
+        // again, try all loaders in order of appearance. If any manages
+        // to find the resource, then associate it as the new affine loader
+        // for this resource.
+        for (TemplateLoader templateLoader : templateLoaders) {
+            if (lastLoader != templateLoader) {
+                TemplateLoadingResult result = templateLoader.load(
+                        name, ifSourceDiffersFrom, ifVersionDiffersFrom, session);
+                if (result.getStatus() != TemplateLoadingResultStatus.NOT_FOUND) {
+                    if (sticky) {
+                        lastTemplateLoaderForName.put(name, templateLoader);
+                    }
+                    return result;
+                }
+            }
+        }
+
+        if (sticky) {
+            lastTemplateLoaderForName.remove(name);
+        }
+        return TemplateLoadingResult.NOT_FOUND;
+    }
 
 }

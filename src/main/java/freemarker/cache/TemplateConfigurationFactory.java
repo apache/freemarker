@@ -37,10 +37,10 @@ public abstract class TemplateConfigurationFactory {
      * Returns (maybe creates) the {@link TemplateConfiguration} for the given template source.
      * 
      * @param sourceName
-     *            The name (path) that was used for {@link TemplateLoader#findTemplateSource(String)}. See
+     *            The name (path) that was used for {@link TemplateLoader#load}. See
      *            {@link Template#getSourceName()} for details.
-     * @param templateSource
-     *            The object returned by {@link TemplateLoader#findTemplateSource(String)}.
+     * @param templateLoadingSource
+     *            The object returned by {@link TemplateLoadingResult#getSource()}.
      * 
      * @return The {@link TemplateConfiguration} to apply, or {@code null} if the there's no {@link TemplateConfiguration} for
      *         this template source.
@@ -51,7 +51,7 @@ public abstract class TemplateConfigurationFactory {
      * @throws TemplateConfigurationFactoryException
      *             If there's a problem that's specific to the factory logic.
      */
-    public abstract TemplateConfiguration get(String sourceName, Object templateSource)
+    public abstract TemplateConfiguration get(String sourceName, TemplateLoadingSource templateLoadingSource)
             throws IOException, TemplateConfigurationFactoryException;
     
     /**

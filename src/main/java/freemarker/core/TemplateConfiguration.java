@@ -49,7 +49,7 @@ import freemarker.template.utility.NullArgumentException;
  * <p>
  * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
  * that setting was already set on this object. Otherwise you will get the value from the parent {@link Configuration},
- * which is {@link Configuration#getDefaultConfiguration()} before this object is associated to a {@link Configuration}.
+ * or an {@link IllegalStateException} before this object is associated to a {@link Configuration}.
  * 
  * <p>
  * If you are using this class for your own template loading and caching solution, rather than with the standard one,
@@ -145,6 +145,11 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     public Configuration getParentConfiguration() {
         return parentConfigurationSet ? (Configuration) getParent() : null;
+    }
+
+    private Configuration getNonNullParentConfiguration() {
+        checkParentConfigurationSet();
+        return (Configuration) getParent();
     }
     
     /**
@@ -271,8 +276,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      *             If the parent configuration wasn't yet set.
      */
     public void apply(Template template) {
-        checkParentConfigurationSet();
-        Configuration cfg = getParentConfiguration();
+        Configuration cfg = getNonNullParentConfiguration();
         if (template.getConfiguration() != cfg) {
             // This is actually not a problem right now, but for future BC we enforce this.
             throw new IllegalArgumentException(
@@ -377,7 +381,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     @Override
     public int getTagSyntax() {
-        return tagSyntax != null ? tagSyntax.intValue() : getParentConfiguration().getTagSyntax();
+        return tagSyntax != null ? tagSyntax.intValue() : getNonNullParentConfiguration().getTagSyntax();
     }
 
     /**
@@ -400,7 +404,8 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     @Override
     public int getNamingConvention() {
-        return namingConvention != null ? namingConvention.intValue() : getParentConfiguration().getNamingConvention();
+        return namingConvention != null ? namingConvention.intValue()
+                : getNonNullParentConfiguration().getNamingConvention();
     }
 
     /**
@@ -423,7 +428,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     @Override
     public boolean getWhitespaceStripping() {
         return whitespaceStripping != null ? whitespaceStripping.booleanValue()
-                : getParentConfiguration().getWhitespaceStripping();
+                : getNonNullParentConfiguration().getWhitespaceStripping();
     }
 
     /**
@@ -447,7 +452,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     @Override
     public int getAutoEscapingPolicy() {
         return autoEscapingPolicy != null ? autoEscapingPolicy.intValue()
-                : getParentConfiguration().getAutoEscapingPolicy();
+                : getNonNullParentConfiguration().getAutoEscapingPolicy();
     }
 
     /**
@@ -470,7 +475,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     @Override
     public OutputFormat getOutputFormat() {
-        return outputFormat != null ? outputFormat : getParentConfiguration().getOutputFormat();
+        return outputFormat != null ? outputFormat : getNonNullParentConfiguration().getOutputFormat();
     }
 
     /**
@@ -493,7 +498,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions != null ? recognizeStandardFileExtensions.booleanValue()
-                : getParentConfiguration().getRecognizeStandardFileExtensions();
+                : getNonNullParentConfiguration().getRecognizeStandardFileExtensions();
     }
     
     /**
@@ -502,7 +507,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     public boolean isRecognizeStandardFileExtensionsSet() {
         return recognizeStandardFileExtensions != null;
     }
-
+    
     @Override
     public void setStrictBeanModels(boolean strict) {
         throw new UnsupportedOperationException(
@@ -510,7 +515,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     }
 
     public String getEncoding() {
-        return encoding != null ? encoding : getParentConfiguration().getDefaultEncoding();
+        return encoding != null ? encoding : getNonNullParentConfiguration().getDefaultEncoding();
     }
 
     /**
@@ -552,7 +557,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     @Override
     public int getTabSize() {
         return tabSize != null ? tabSize.intValue()
-                : getParentConfiguration().getTabSize();
+                : getNonNullParentConfiguration().getTabSize();
     }
     
     /**
@@ -573,8 +578,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     @Override
     public Version getIncompatibleImprovements() {
-        checkParentConfigurationSet();
-        return getParentConfiguration().getIncompatibleImprovements();
+        return getNonNullParentConfiguration().getIncompatibleImprovements();
     }
 
     private void checkParentConfigurationSet() {

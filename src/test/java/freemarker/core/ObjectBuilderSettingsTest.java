@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.Serializable;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -54,6 +54,9 @@ import com.google.common.collect.ImmutableMap;
 import freemarker.cache.CacheStorage;
 import freemarker.cache.MruCacheStorage;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLoaderSession;
+import freemarker.cache.TemplateLoadingResult;
+import freemarker.cache.TemplateLoadingSource;
 import freemarker.core.subpkg.PublicWithMixedConstructors;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.Configuration;
@@ -1504,22 +1507,19 @@ public class ObjectBuilderSettingsTest {
     public static class DummyTemplateLoader implements TemplateLoader {
 
         @Override
-        public Object findTemplateSource(String name) throws IOException {
+        public TemplateLoaderSession createSession() {
             return null;
         }
 
         @Override
-        public long getLastModified(Object templateSource) {
-            return 0;
+        public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
+                Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
+            return TemplateLoadingResult.NOT_FOUND;
         }
 
         @Override
-        public Reader getReader(Object templateSource, String encoding) throws IOException {
-            return null;
-        }
-
-        @Override
-        public void closeTemplateSource(Object templateSource) throws IOException {
+        public void resetState() {
+            // Do nothing
         }
         
     }

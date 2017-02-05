@@ -18,11 +18,22 @@
  */
 package freemarker.ext.servlet;
 
-import static freemarker.ext.servlet.FreemarkerServlet.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_CONTENT_TYPE;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_LOCALE;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_RESPONSE_CHARACTER_ENCODING;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_VALUE_ALWAYS;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_VALUE_NEVER;
+import static freemarker.ext.servlet.FreemarkerServlet.INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 
@@ -38,10 +49,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
+import freemarker.cache.ByteArrayTemplateLoader;
 import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileNameGlobMatcher;
 import freemarker.cache.FirstMatchTemplateConfigurationFactory;
-import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.Environment;
 import freemarker.core.TemplateConfiguration;
@@ -567,23 +578,38 @@ public class FreemarkerServletTest {
         protected TemplateLoader createTemplateLoader(String templatePath) throws IOException {
             // Override default template loader
             if (templatePath.equals("class://")) {
-                StringTemplateLoader tl = new StringTemplateLoader();
+                ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
                 
-                tl.putTemplate(FOO_FTL, "foo");
-                tl.putTemplate(FOO_SRC_UTF8_FTL, "foo");
-                tl.putTemplate(FOO_OUT_UTF8_FTL, "foo");
-                tl.putTemplate(CONTENT_TYPE_ATTR_FTL, "<#ftl attributes={ 'content_type': 'text/plain' }>foo");
-                tl.putTemplate(CONTENT_TYPE_ATTR_WITH_CHARSET_FTL, "<#ftl attributes={ 'content_type': 'text/plain; charset=UTF-8' }>foo");
-                tl.putTemplate(OUTPUT_FORMAT_HEADER_FTL, "<#ftl outputFormat='plainText'>foo");
+                tl.putTemplate(FOO_FTL, "foo"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(FOO_SRC_UTF8_FTL, "foo"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(FOO_OUT_UTF8_FTL, "foo"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(CONTENT_TYPE_ATTR_FTL, "<#ftl attributes={ 'content_type': 'text/plain' }>foo"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(CONTENT_TYPE_ATTR_WITH_CHARSET_FTL,
+                        "<#ftl attributes={ 'content_type': 'text/plain; charset=UTF-8' }>foo"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(OUTPUT_FORMAT_HEADER_FTL, "<#ftl outputFormat='plainText'>foo"
+                        .getBytes(StandardCharsets.UTF_8));
                 
-                tl.putTemplate(STD_OUTPUT_FORMAT_HTML_FTL, "<#ftl outputFormat='HTML'>");
-                tl.putTemplate(STD_OUTPUT_FORMAT_XHTML_FTL, "<#ftl outputFormat='XHTML'>");
-                tl.putTemplate(STD_OUTPUT_FORMAT_XML_FTL, "<#ftl outputFormat='XML'>");
-                tl.putTemplate(STD_OUTPUT_FORMAT_JAVA_SCRIPT_FTL, "<#ftl outputFormat='JavaScript'>");
-                tl.putTemplate(STD_OUTPUT_FORMAT_JSON_FTL, "<#ftl outputFormat='JSON'>");
-                tl.putTemplate(STD_OUTPUT_FORMAT_CSS_FTL, "<#ftl outputFormat='CSS'>");
-                tl.putTemplate(STD_OUTPUT_FORMAT_PLAIN_TEXT_FTL, "<#ftl outputFormat='plainText'>");
-                tl.putTemplate(STD_OUTPUT_FORMAT_RTF_FTL, "<#ftl outputFormat='RTF'>");
+                tl.putTemplate(STD_OUTPUT_FORMAT_HTML_FTL, "<#ftl outputFormat='HTML'>"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(STD_OUTPUT_FORMAT_XHTML_FTL, "<#ftl outputFormat='XHTML'>"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(STD_OUTPUT_FORMAT_XML_FTL, "<#ftl outputFormat='XML'>"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(STD_OUTPUT_FORMAT_JAVA_SCRIPT_FTL, "<#ftl outputFormat='JavaScript'>"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(STD_OUTPUT_FORMAT_JSON_FTL, "<#ftl outputFormat='JSON'>"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(STD_OUTPUT_FORMAT_CSS_FTL, "<#ftl outputFormat='CSS'>"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(STD_OUTPUT_FORMAT_PLAIN_TEXT_FTL, "<#ftl outputFormat='plainText'>"
+                        .getBytes(StandardCharsets.UTF_8));
+                tl.putTemplate(STD_OUTPUT_FORMAT_RTF_FTL, "<#ftl outputFormat='RTF'>"
+                        .getBytes(StandardCharsets.UTF_8));
                 
                 return tl;
             } else {

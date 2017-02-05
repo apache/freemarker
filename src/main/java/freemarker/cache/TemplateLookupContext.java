@@ -20,6 +20,7 @@
 package freemarker.cache;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Locale;
 
 import freemarker.template.Configuration;
@@ -35,18 +36,25 @@ public abstract class TemplateLookupContext {
     private final String templateName;
     private final Locale templateLocale;
     private final Object customLookupCondition;
+    private final TemplateLoadingSource cachedResultSource;
+    private final Serializable cachedResultVersion;
 
     /**
      * Finds the template source based on its <em>normalized</em> name; handles {@code *} steps (so called acquisition),
-     * otherwise it just calls {@link TemplateLoader#findTemplateSource(String)}.
+     * otherwise it just calls {@link TemplateLoader#load(String, TemplateLoadingSource, Serializable,
+     * TemplateLoaderSession)}.
      * 
      * @param templateName
      *            Must be a normalized name, like {@code "foo/bar/baaz.ftl"}. A name is not normalized when, among
-     *            others, it starts with {@code /}, or contains {@code .} or {@code ..} paths steps, or it uses
-     *            backslash ({@code \}) instead of {@code /}. A normalized name might contains "*" steps.
+     *            others, it starts with {@code /}, or contains {@code .} or {@code ..} path steps, or it uses
+     *            backslash ({@code \}) instead of {@code /}. A normalized name might contains "*" path steps
+     *            (acquisition).
      * 
      * @return The result of the lookup. Not {@code null}; check {@link TemplateLookupResult#isPositive()} to see if the
-     *         lookup has found anything.
+     *         lookup has found anything. Note that in a positive result the content of the template is possibly
+     *         also already loaded (this is the case for {@link TemplateLoader}-s when the cached content is stale, but
+     *         not for {@link TemplateLoader}-s). Hence discarding a positive result and looking for another can
+     *         generate substantial extra I/O.
      */
     public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String templateName) throws IOException;
 
@@ -62,10 +70,13 @@ public abstract class TemplateLookupContext {
             Locale templateLocale) throws IOException;
     
     /** Default visibility to prevent extending the class from outside this package. */
-    TemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
+    TemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition,
+            TemplateLoadingSource cachedResultSource, Serializable cachedResultVersion) {
         this.templateName = templateName;
         this.templateLocale = templateLocale;
         this.customLookupCondition = customLookupCondition;
+        this.cachedResultSource = cachedResultSource;
+        this.cachedResultVersion = cachedResultVersion;
     }
 
     /**
@@ -102,6 +113,14 @@ public abstract class TemplateLookupContext {
      */
     public TemplateLookupResult createNegativeLookupResult() {
         return TemplateLookupResult.createNegativeResult();
+    }
+
+    TemplateLoadingSource getCachedResultSource() {
+        return cachedResultSource;
+    }
+
+    Serializable getCachedResultVersion() {
+        return cachedResultVersion;
     }
     
 }

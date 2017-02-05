@@ -845,7 +845,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private void createTemplateCache() {
         cache = new TemplateCache(
-                getDefaultTemplateLoader(),
+                null,
                 getDefaultCacheStorage(),
                 getDefaultTemplateLookupStrategy(),
                 getDefaultTemplateNameFormat(),
@@ -862,7 +862,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         TemplateCache oldCache = cache;
         cache = new TemplateCache(
                 loader, storage, templateLookupStrategy, templateNameFormat, templateConfigurations, this);
-        cache.clear(); // for fully BC behavior
+        cache.clear(false);
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
     }
@@ -871,41 +871,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
                 cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
                 getTemplateConfigurations());
-    }
-    
-    private TemplateLoader getDefaultTemplateLoader() {
-        return createDefaultTemplateLoader(getIncompatibleImprovements(), getTemplateLoader());
-    }
-
-    static TemplateLoader createDefaultTemplateLoader(Version incompatibleImprovements) {
-        return createDefaultTemplateLoader(incompatibleImprovements, null);
-    }
-    
-    private static TemplateLoader createDefaultTemplateLoader(
-            Version incompatibleImprovements, TemplateLoader existingTemplateLoader) {
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
-            if (existingTemplateLoader instanceof LegacyDefaultFileTemplateLoader) {
-                return existingTemplateLoader;
-            }
-            try {
-                return new LegacyDefaultFileTemplateLoader();
-            } catch (Exception e) {
-                LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
-                        + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-    
-    // [FM3] Remove
-    private static class LegacyDefaultFileTemplateLoader extends FileTemplateLoader {
-
-        public LegacyDefaultFileTemplateLoader() throws IOException {
-            super();
-        }
-        
     }
     
     private TemplateLookupStrategy getDefaultTemplateLookupStrategy() {
@@ -1179,7 +1144,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void unsetTemplateLoader() {
         if (templateLoaderExplicitlySet) {
-            setTemplateLoader(getDefaultTemplateLoader());
+            setTemplateLoader(null);
             templateLoaderExplicitlySet = false;
         }
     }
@@ -1425,9 +1390,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Sets the servlet context from which to load templates.
-     * This is equivalent to {@code setTemplateLoader(new WebappTemplateLoader(sctxt, path))}
-     * or {@code setTemplateLoader(new WebappTemplateLoader(sctxt))} if {@code path} was
-     * {@code null}, so see {@code freemarker.cache.WebappTemplateLoader} for more details.
+     * This is equivalent to {@code setTemplateLoader(new WebAppTemplateLoader(sctxt, path))}
+     * or {@code setTemplateLoader(new WebAppTemplateLoader(sctxt))} if {@code path} was
+     * {@code null}, so see {@code freemarker.cache.WebAppTemplateLoader} for more details.
      * 
      * @param servletContext the {@code javax.servlet.ServletContext} object. (The declared type is {@link Object}
      *        to prevent class loading error when using FreeMarker in an environment where
@@ -1439,7 +1404,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void setServletContextForTemplateLoading(Object servletContext, String path) {
         try {
             // Don't introduce linking-time dependency on servlets
-            final Class webappTemplateLoaderClass = ClassUtil.forName("freemarker.cache.WebappTemplateLoader");
+            final Class webappTemplateLoaderClass = ClassUtil.forName("freemarker.cache.WebAppTemplateLoader");
             
             // Don't introduce linking-time dependency on servlets
             final Class servletContextClass = ClassUtil.forName("javax.servlet.ServletContext");
@@ -2943,7 +2908,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     unsetTemplateLoader();
                 } else {
                     setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateLoader.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateLoader.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE.equals(name)) {

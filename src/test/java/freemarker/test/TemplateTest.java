@@ -19,12 +19,15 @@
 
 package freemarker.test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +36,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.cache.ByteArrayTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
@@ -166,33 +169,33 @@ public abstract class TemplateTest {
     protected void addTemplate(String name, String content) {
         Configuration cfg = getConfiguration();
         TemplateLoader tl = cfg.getTemplateLoader();
-        StringTemplateLoader stl;
+        ByteArrayTemplateLoader btl;
         if (tl != null) {
-            stl = extractStringTemplateLoader(tl);
+            btl = extractByteArrayTemplateLoader(tl);
         } else {
-            stl = new StringTemplateLoader();
-            cfg.setTemplateLoader(stl);
+            btl = new ByteArrayTemplateLoader();
+            cfg.setTemplateLoader(btl);
         }
-        stl.putTemplate(name, content);
+        btl.putTemplate(name, content.getBytes(StandardCharsets.UTF_8));
     }
     
-    private StringTemplateLoader extractStringTemplateLoader(TemplateLoader tl) {
+    private ByteArrayTemplateLoader extractByteArrayTemplateLoader(TemplateLoader tl) {
         if (tl instanceof MultiTemplateLoader) {
             MultiTemplateLoader mtl = (MultiTemplateLoader) tl;
             for (int i = 0; i < mtl.getTemplateLoaderCount(); i++) {
                 TemplateLoader tli = mtl.getTemplateLoader(i);
-                if (tli instanceof StringTemplateLoader) {
-                    return (StringTemplateLoader) tli;
+                if (tli instanceof ByteArrayTemplateLoader) {
+                    return (ByteArrayTemplateLoader) tli;
                 }
             }
             throw new IllegalStateException(
-                    "The template loader was a MultiTemplateLoader that didn't contain StringTemplateLoader: "
+                    "The template loader was a MultiTemplateLoader that didn't contain ByteArrayTemplateLoader: "
                             + tl);
-        } else if (tl instanceof StringTemplateLoader) {
-            return (StringTemplateLoader) tl;
+        } else if (tl instanceof ByteArrayTemplateLoader) {
+            return (ByteArrayTemplateLoader) tl;
         } else {
             throw new IllegalStateException(
-                    "The template loader was already set to a non-StringTemplateLoader non-MultiTemplateLoader: "
+                    "The template loader was already set to a non-ByteArrayTemplateLoader non-MultiTemplateLoader: "
                             + tl);
         }
     }

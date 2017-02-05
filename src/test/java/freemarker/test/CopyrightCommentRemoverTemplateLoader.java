@@ -19,14 +19,27 @@
 package freemarker.test;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLoaderSession;
+import freemarker.cache.TemplateLoadingResult;
+import freemarker.cache.TemplateLoadingResultStatus;
+import freemarker.cache.TemplateLoadingSource;
 import freemarker.test.utility.TestUtil;
 
+/**
+ * Removes the Apache copyright boiler plate from the beginning of the template, so that they don't mess up the expected
+ * template output. This can interfere with tests that try to test I/O errors and such low level things, so use with
+ * care. 
+ */
 public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
 
     private final TemplateLoader innerTemplateLoader;
@@ -35,16 +48,38 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
         this.innerTemplateLoader = innerTemplateLoader;
     }
 
-    public Object findTemplateSource(String name) throws IOException {
-        return innerTemplateLoader.findTemplateSource(name);
+    @Override
+    public TemplateLoaderSession createSession() {
+        return null;
     }
 
-    public long getLastModified(Object templateSource) {
-        return innerTemplateLoader.getLastModified(templateSource);
+    @Override
+    public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
+            Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
+        TemplateLoadingResult result = innerTemplateLoader.load(name, ifSourceDiffersFrom, ifVersionDiffersFrom, session);
+        if (result.getStatus() != TemplateLoadingResultStatus.OPENED) {
+            return result;
+        }
+        if (result.getInputStream() != null) {
+            return new TemplateLoadingResult(
+                    result.getSource(), result.getVersion(), getWithoutCopyrightHeader(result.getInputStream()),
+                    result.getTemplateConfiguration());
+        } else {
+            return new TemplateLoadingResult(
+                    result.getSource(), result.getVersion(), getWithoutCopyrightHeader(result.getReader()),
+                    result.getTemplateConfiguration());
+        }
     }
 
-    public Reader getReader(Object templateSource, String encoding) throws IOException {
-        Reader reader = innerTemplateLoader.getReader(templateSource, encoding);
+    @Override
+    public void resetState() {
+        // Do nothing
+    }
+
+    private Reader getWithoutCopyrightHeader(Reader reader) throws IOException {
+        if (reader == null) {
+            return null;
+        }
         try {
             String content = IOUtils.toString(reader);
             return new StringReader(TestUtil.removeFTLCopyrightComment(content));
@@ -53,8 +88,19 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
         }
     }
 
-    public void closeTemplateSource(Object templateSource) throws IOException {
-        innerTemplateLoader.closeTemplateSource(templateSource);
+    private InputStream getWithoutCopyrightHeader(InputStream in) throws IOException {
+        if (in == null) {
+            return null;
+        }
+        try {
+            // Encoding then decosing in ISO-8859-1 is binary loseless
+            String content = IOUtils.toString(in, StandardCharsets.ISO_8859_1.name());
+            return new ReaderInputStream(
+                    new StringReader(TestUtil.removeFTLCopyrightComment(content)),
+                    StandardCharsets.ISO_8859_1);
+        } finally {
+            in.close();
+        }
     }
-
+    
 }

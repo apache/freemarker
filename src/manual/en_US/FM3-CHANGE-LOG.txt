@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ 
 Because the Manual won't be updated for a good while, I will lead
 the FreeMarer 3 changelog here:
 
@@ -18,3 +37,27 @@ the FreeMarer 3 changelog here:
   compatibility option.
 - Removed deprecated FMParser contstructors.
 - Minimum Java version increased to 7, but without try-with-resource as that's unavailable before Android 4.4 KitKat.
+- Totally redesigned TemplateLoader interface. The FM2 TemplateLoader can't be adapted (wrapped) to it, but usually
+  it's fairly trivial to "rearrange" an old custom TemplateLoader for the new interface. The new TemplateLoader comes
+  with several advantages, such as:
+  - It can work more efficiently with sophisticated storage mechanisms like a database, as it's now possible to pack
+    together the existence check, the last modification change check, and reading operations into less storage level
+    operations (like you can do all of them with a single SQL statement).
+  - The new TemplateLoader allows returning the template content either as an InputStream or as a Reader. Almost all
+    TemplateLoader-s should return InputStream, and FreeMarker takes care of charset issues transparently (as a result,
+    TemplateLoader-s don't have to support re-reading a template anymore, as we solve charset detection misses in
+    memory). TemplateLoader-s that are inherently backed by text (String-s), such as templates stored in a varchar or
+    CLOB column, should return a Reader. Note that templates created from a Reader will have template.getEncoding()
+    null (logically, as no charset was involved), which was impossible in FreeMarker 2.
+  - The change detection of the template doesn't have to rely on a millisecond resolution timestamp anymore; you can
+    use what's most appropriate for the storage mechanism, such as a cryptographic hash or a revision number.
+  - Template lookups (where you try multiple names until you find the best template) can now be transactional and/or
+    atomic if the backing storage mechanism supports that, by utilizing the TemplateLoaderSession interface.
+  - TemplateLoader can now return template-level settings like the output format (MIME type basically) of the loaded
+    template, in case the backing storage stores such extra information. This mechanism can be used together with
+    the TemplateConfiguration mechanism (already familiar from FreeMarker 2), and overrides the individual settings
+    coming from there.
+- Template constructors won't close the Reader passed in as agrument anymore (because a Reader should be closed
+  by who has created it). This avoids some surprises from the past, such as the unablility to reset a Reader to a mark
+  after parsing. If you call those constructors, be sure that you close the Reader yourself. (Obviously, it doesn't
+  mater for StringReader-s.)

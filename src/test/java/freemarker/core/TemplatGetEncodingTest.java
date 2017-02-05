@@ -18,13 +18,17 @@
  */
 package freemarker.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
-import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.ByteArrayTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
@@ -38,9 +42,9 @@ public class TemplatGetEncodingTest {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         {
             cfg.setDefaultEncoding("ISO-8859-2");
-            StringTemplateLoader tl = new StringTemplateLoader();
-            tl.putTemplate("t", "test");
-            tl.putTemplate("tnp", "<#test>");
+            ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
+            tl.putTemplate("t", "test".getBytes(StandardCharsets.UTF_8));
+            tl.putTemplate("tnp", "<#test>".getBytes(StandardCharsets.UTF_8));
             cfg.setTemplateLoader(tl);
             cfg.setCacheStorage(new StrongCacheStorage());
         }

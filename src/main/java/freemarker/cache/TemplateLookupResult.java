@@ -37,9 +37,9 @@ public abstract class TemplateLookupResult {
     }
     
     /** Used internally to create the appropriate kind of result from the parameters. */
-    static TemplateLookupResult from(String templateSourceName, Object templateSource) {
-        return templateSource != null
-                ? new PositiveTemplateLookupResult(templateSourceName, templateSource)
+    static TemplateLookupResult from(String templateSourceName, TemplateLoadingResult templateLoaderResult) {
+        return templateLoaderResult.getStatus() != TemplateLoadingResultStatus.NOT_FOUND
+                ? new PositiveTemplateLookupResult(templateSourceName, templateLoaderResult)
                 : createNegativeResult();
     }
     
@@ -59,15 +59,15 @@ public abstract class TemplateLookupResult {
     public abstract boolean isPositive();
 
     /**
-     * Used internally to extract the {@link TemplateLoader} source; {@code null} if
-     * {@link #isPositive()} is {@code false}.
+     * Used internally to extract the {@link TemplateLoadingResult}; {@code null} if {@link #isPositive()} is
+     * {@code false}.
      */
-    abstract Object getTemplateSource();
+    abstract TemplateLoadingResult getTemplateLoaderResult();
 
     private static final class PositiveTemplateLookupResult extends TemplateLookupResult {
 
         private final String templateSourceName;
-        private final Object templateSource;
+        private final TemplateLoadingResult templateLoaderResult;
 
         /**
          * @param templateSourceName
@@ -77,20 +77,16 @@ public abstract class TemplateLookupResult {
          *            {@code "foo_de.ftl"}. Then this parameter must be {@code "foo_de.ftl"}, not {@code "foo.ftl"}. Not
          *            {@code null}.
          * 
-         * @param templateSource
-         *            See {@link TemplateLoader#findTemplateSource(String)} to understand what that means. Not
+         * @param templateLoaderResult
+         *            See {@link TemplateLoader#load} to understand what that means. Not
          *            {@code null}.
          */
-        private PositiveTemplateLookupResult(String templateSourceName, Object templateSource) {
+        private PositiveTemplateLookupResult(String templateSourceName, TemplateLoadingResult templateLoaderResult) {
             NullArgumentException.check("templateName", templateSourceName);
-            NullArgumentException.check("templateSource", templateSource);
-
-            if (templateSource instanceof TemplateLookupResult) {
-                throw new IllegalArgumentException();
-            }
+            NullArgumentException.check("templateLoaderResult", templateLoaderResult);
 
             this.templateSourceName = templateSourceName;
-            this.templateSource = templateSource;
+            this.templateLoaderResult = templateLoaderResult;
         }
 
         @Override
@@ -99,8 +95,8 @@ public abstract class TemplateLookupResult {
         }
 
         @Override
-        Object getTemplateSource() {
-            return templateSource;
+        TemplateLoadingResult getTemplateLoaderResult() {
+            return templateLoaderResult;
         }
 
         @Override
@@ -123,7 +119,7 @@ public abstract class TemplateLookupResult {
         }
 
         @Override
-        Object getTemplateSource() {
+        TemplateLoadingResult getTemplateLoaderResult() {
             return null;
         }
 

@@ -18,8 +18,12 @@
  */
 package freemarker.cache;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -173,7 +177,7 @@ public class TemplateConfigurationFactoryTest {
         tcf.setConfiguration(cfg);
         
         try {
-            tcf.setConfiguration(Configuration.getDefaultConfiguration());
+            tcf.setConfiguration(new Configuration(Configuration.VERSION_3_0_0));
             fail();
         } catch (IllegalStateException e) {
             assertThat(e.getMessage(), containsString("TemplateConfigurationFactory"));
@@ -190,12 +194,12 @@ public class TemplateConfigurationFactoryTest {
 
     private void assertNotApplicable(TemplateConfigurationFactory tcf, String sourceName)
             throws IOException, TemplateConfigurationFactoryException {
-        assertNull(tcf.get(sourceName, "dummy"));
+        assertNull(tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE));
     }
 
     private void assertApplicable(TemplateConfigurationFactory tcf, String sourceName, TemplateConfiguration... expectedTCs)
             throws IOException, TemplateConfigurationFactoryException {
-        TemplateConfiguration mergedTC = tcf.get(sourceName, "dummy");
+        TemplateConfiguration mergedTC = tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE);
         assertNotNull("TC should have its parents Configuration set", mergedTC.getParentConfiguration());
         List<String> mergedTCAttNames = Arrays.asList(mergedTC.getCustomAttributeNames());
 
@@ -225,6 +229,11 @@ public class TemplateConfigurationFactoryTest {
             }
         }
         return false;
+    }
+    
+    @SuppressWarnings("serial")
+    private static class DummyTemplateLoadingSource implements TemplateLoadingSource {
+        private static DummyTemplateLoadingSource INSTANCE = new DummyTemplateLoadingSource();
     }
     
 }

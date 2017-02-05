@@ -215,8 +215,9 @@ public class _CoreAPI {
         return te.getChild(index);
     }
     
-    public static FMParser newFMParser(Template template, Reader reader, ParserConfiguration pCfg) {
-        return new FMParser(template, reader, pCfg);
+    public static FMParser newFMParser(Template template, Reader reader, ParserConfiguration pCfg,
+            TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) {
+        return new FMParser(template, reader, pCfg, templateSpecifiedEncodingHandler);
     }
     
 }

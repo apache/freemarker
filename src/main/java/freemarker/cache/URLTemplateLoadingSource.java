@@ -16,20 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package freemarker.cache;
 
-import freemarker.template.Configuration;
+import java.net.URL;
 
-/**
- * Interface that can be implemented by {@link TemplateLoader}-s that maintain some 
- * sort of internal state (i.e. caches of earlier lookups for performance 
- * optimization purposes etc.) and support resetting of their state. 
- */
-public interface StatefulTemplateLoader extends TemplateLoader {
-    /**
-     * Invoked by {@link Configuration#clearTemplateCache()} to instruct this
-     * template loader to throw away its current state and start afresh. 
-     */
-    public void resetState();
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.template.utility.NullArgumentException;
+
+@SuppressWarnings("serial")
+public class URLTemplateLoadingSource implements TemplateLoadingSource {
+
+    private final URL url;
+
+    public URLTemplateLoadingSource(URL url) {
+        NullArgumentException.check("url", url);
+        this.url = url;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
+
+    @Override
+    public int hashCode() {
+        return url.hashCode();
+    }
+
+    @Override
+    @SuppressFBWarnings("EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS")
+    public boolean equals(Object obj) {
+        return url.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return url.toString();
+    }
+    
 }

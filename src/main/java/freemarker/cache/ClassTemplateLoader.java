@@ -29,46 +29,12 @@ import freemarker.template.utility.StringUtil;
  * anywhere where Java can load classes from. Internally, it uses {@link Class#getResource(String)} or
  * {@link ClassLoader#getResource(String)} to load templates.
  */
+// TODO
 public class ClassTemplateLoader extends URLTemplateLoader {
     
-    private final Class resourceLoaderClass;
+    private final Class<?> resourceLoaderClass;
     private final ClassLoader classLoader;
     private final String basePackagePath;
-
-    /**
-     * Creates a template loader that will use the {@link Class#getResource(String)} method of its own class to load the
-     * resources, and {@code "/"} as base package path. This means that that template paths will be resolved relatively
-     * the root package of the class hierarchy, so you hardly ever should use this constructor, rather do something like
-     * this:<br>
-     * {@link #ClassTemplateLoader(Class, String) new ClassTemplateLoader(com.example.myapplication.SomeClass.class,
-     * "templates")}
-     *
-     * <p>
-     * If you extend this class, then the extending class will be used to load the resources.
-     *
-     * @deprecated It's a confusing constructor, and seldom useful; use {@link #ClassTemplateLoader(Class, String)}
-     *             instead.
-     */
-    @Deprecated
-    public ClassTemplateLoader() {
-        this(null, true, null, "/");
-    }
-
-    /**
-     * Creates a template loader that will use the {@link Class#getResource(String)} method of the specified class to
-     * load the resources, and {@code ""} as base package path. This means that template paths will be resolved
-     * relatively to the class location, that is, relatively to the directory (package) of the class.
-     *
-     * @param resourceLoaderClass
-     *            the class whose {@link Class#getResource(String)} will be used to load the templates.
-     *
-     * @deprecated It's confusing that the base path is {@code ""}; use {@link #ClassTemplateLoader(Class, String)}
-     *             instead.
-     */
-    @Deprecated
-    public ClassTemplateLoader(Class resourceLoaderClass) {
-        this(resourceLoaderClass, "");
-    }
 
     /**
      * Creates a template loader that will use the {@link Class#getResource(String)} method of the specified class to
@@ -96,7 +62,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      * 
      * @see #ClassTemplateLoader(ClassLoader, String)
      */
-    public ClassTemplateLoader(Class resourceLoaderClass, String basePackagePath) {
+    public ClassTemplateLoader(Class<?> resourceLoaderClass, String basePackagePath) {
         this(resourceLoaderClass, false, null, basePackagePath);
     }
 
@@ -105,16 +71,14 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      * {@link ClassLoader#getResource(String)}. Because a {@link ClassLoader} isn't bound to any Java package, it
      * doesn't mater if the {@code basePackagePath} starts with {@code /} or not, it will be always relative to the root
      * of the package hierarchy
-     * 
-     * @since 2.3.22
      */
     public ClassTemplateLoader(ClassLoader classLoader, String basePackagePath) {
         this(null, true, classLoader, basePackagePath);
     }
 
-    private ClassTemplateLoader(Class resourceLoaderClass, boolean allowNullBaseClass, ClassLoader classLoader,
-            String basePackagePath) {
-        if (!allowNullBaseClass) {
+    private ClassTemplateLoader(Class<?> resourceLoaderClass, boolean allowNullResourceLoaderClass,
+            ClassLoader classLoader, String basePackagePath) {
+        if (!allowNullResourceLoaderClass) {
             NullArgumentException.check("resourceLoaderClass", resourceLoaderClass);
         }
         NullArgumentException.check("basePackagePath", basePackagePath);
@@ -167,8 +131,6 @@ public class ClassTemplateLoader extends URLTemplateLoader {
 
     /**
      * Show class name and some details that are useful in template-not-found errors.
-     * 
-     * @since 2.3.21
      */
     @Override
     public String toString() {
@@ -189,18 +151,14 @@ public class ClassTemplateLoader extends URLTemplateLoader {
     /**
      * See the similar parameter of {@link #ClassTemplateLoader(Class, String)}; {@code null} when other mechanism is
      * used to load the resources.
-     * 
-     * @since 2.3.22
      */
-    public Class getResourceLoaderClass() {
+    public Class<?> getResourceLoaderClass() {
         return resourceLoaderClass;
     }
 
     /**
      * See the similar parameter of {@link #ClassTemplateLoader(ClassLoader, String)}; {@code null} when other mechanism
      * is used to load the resources.
-     * 
-     * @since 2.3.22
      */
     public ClassLoader getClassLoader() {
         return classLoader;
@@ -209,8 +167,6 @@ public class ClassTemplateLoader extends URLTemplateLoader {
     /**
      * See the similar parameter of {@link #ClassTemplateLoader(ClassLoader, String)}; note that this is a normalized
      * version of what was actually passed to the constructor.
-     * 
-     * @since 2.3.22
      */
     public String getBasePackagePath() {
         return basePackagePath;

@@ -23,12 +23,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,8 @@ import freemarker.template.utility.StringUtil;
  * A {@link TemplateLoader} that uses files inside a specified directory as the source of templates. By default it does
  * security checks on the <em>canonical</em> path that will prevent it serving templates outside that specified
  * directory. If you want symbolic links that point outside the template directory to work, you need to disable this
- * feature by using {@link #FileTemplateLoader(File, boolean)} with {@code true} second argument, but before that, check
- * the security implications there!
+ * feature by using {@link #FileTemplateLoader(File, boolean)} with {@code true} second argument, but before that,
+ * check the security implications there!
  */
 public class FileTemplateLoader implements TemplateLoader {
     
@@ -77,20 +78,6 @@ public class FileTemplateLoader implements TemplateLoader {
     private MruCacheStorage correctCasePaths;
 
     /**
-     * Creates a new file template cache that will use the current directory (the value of the system property
-     * <code>user.dir</code> as the base directory for loading templates. It will not allow access to template files
-     * that are accessible through symlinks that point outside the base directory.
-     * 
-     * @deprecated Relying on what the current directory is is a bad practice; use
-     *             {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
-     */
-    @Deprecated
-    public FileTemplateLoader()
-    throws IOException {
-        this(new File(SecurityUtilities.getSystemProperty("user.dir")));
-    }
-
-    /**
      * Creates a new file template loader that will use the specified directory
      * as the base directory for loading templates. It will not allow access to
      * template files that are accessible through symlinks that point outside 
@@ -121,9 +108,9 @@ public class FileTemplateLoader implements TemplateLoader {
     public FileTemplateLoader(final File baseDir, final boolean disableCanonicalPathCheck)
     throws IOException {
         try {
-            Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+            Object[] retval = AccessController.doPrivileged(new PrivilegedExceptionAction<Object[]>() {
                 @Override
-                public Object run() throws IOException {
+                public Object[] run() throws IOException {
                     if (!baseDir.exists()) {
                         throw new FileNotFoundException(baseDir + " does not exist.");
                     }
@@ -156,13 +143,11 @@ public class FileTemplateLoader implements TemplateLoader {
         }
     }
     
-    @Override
-    public Object findTemplateSource(final String name)
-    throws IOException {
+    private File getFile(final String name) throws IOException {
         try {
-            return AccessController.doPrivileged(new PrivilegedExceptionAction() {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
                 @Override
-                public Object run() throws IOException {
+                public File run() throws IOException {
                     File source = new File(baseDir, SEP_IS_SLASH ? name : 
                         name.replace('/', File.separatorChar));
                     if (!source.isFile()) {
@@ -192,34 +177,22 @@ public class FileTemplateLoader implements TemplateLoader {
         }
     }
     
-    @Override
-    public long getLastModified(final Object templateSource) {
-        return ((Long) (AccessController.doPrivileged(new PrivilegedAction()
-        {
+    private long getLastModified(final File templateSource) {
+        return (AccessController.<Long>doPrivileged(new PrivilegedAction<Long>() {
             @Override
-            public Object run() {
-                return Long.valueOf(((File) templateSource).lastModified());
+            public Long run() {
+                return Long.valueOf((templateSource).lastModified());
             }
-        }))).longValue();
-        
-        
+        })).longValue();
     }
     
-    @Override
-    public Reader getReader(final Object templateSource, final String encoding)
+    private InputStream getInputStream(final File templateSource)
     throws IOException {
         try {
-            return (Reader) AccessController.doPrivileged(new PrivilegedExceptionAction()
-            {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<InputStream>() {
                 @Override
-                public Object run()
-                throws IOException {
-                    if (!(templateSource instanceof File)) {
-                        throw new IllegalArgumentException(
-                                "templateSource wasn't a File, but a: " + 
-                                templateSource.getClass().getName());
-                    }
-                    return new InputStreamReader(new FileInputStream((File) templateSource), encoding);
+                public InputStream run() throws IOException {
+                    return new FileInputStream(templateSource);
                 }
             });
         } catch (PrivilegedActionException e) {
@@ -228,9 +201,7 @@ public class FileTemplateLoader implements TemplateLoader {
     }
     
     /**
-     * Called by {@link #findTemplateSource(String)} when {@link #getEmulateCaseSensitiveFileSystem()} is {@code true}. Should throw
-     * {@link FileNotFoundException} if there's a mismatch; the error message should contain both the requested and the
-     * correct file name.
+     * Called by {@link #getFile(String)} when {@link #getEmulateCaseSensitiveFileSystem()} is {@code true}.
      */
     private boolean isNameCaseCorrect(File source) throws IOException {
         final String sourcePath = source.getPath();
@@ -277,11 +248,6 @@ public class FileTemplateLoader implements TemplateLoader {
             correctCasePaths.put(sourcePath, Boolean.TRUE);        
         }
         return true;
-    }
-
-    @Override
-    public void closeTemplateSource(Object templateSource) {
-        // Do nothing.
     }
     
     /**
@@ -355,6 +321,61 @@ public class FileTemplateLoader implements TemplateLoader {
                 + (canonicalBasePath != null ? ", canonicalBasePath=\"" + canonicalBasePath + "\"" : "")
                 + (emulateCaseSensitiveFileSystem ? ", emulateCaseSensitiveFileSystem=true" : "")
                 + ")";
+    }
+
+    @Override
+    public TemplateLoaderSession createSession() {
+        return null;
+    }
+
+    @Override
+    public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
+            Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
+        File file = getFile(name);
+        if (file == null) {
+            return TemplateLoadingResult.NOT_FOUND;
+        }
+        
+        FileTemplateLoadingSource source = new FileTemplateLoadingSource(file);
+        
+        long lmd = getLastModified(file);
+        Long version = lmd != -1 ? lmd : null;
+        
+        if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source) 
+                && Objects.equals(ifVersionDiffersFrom, version)) {
+            return TemplateLoadingResult.NOT_MODIFIED;
+        }
+        
+        return new TemplateLoadingResult(source, version, getInputStream(file), null);
+    }
+
+    @Override
+    public void resetState() {
+        // Does nothing
+    }
+    
+    @SuppressWarnings("serial")
+    private static class FileTemplateLoadingSource implements TemplateLoadingSource {
+        
+        private final File file;
+
+        FileTemplateLoadingSource(File file) {
+            this.file = file;
+        }
+
+        @Override
+        public int hashCode() {
+            return file.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            return file.equals(((FileTemplateLoadingSource) obj).file);
+        }
+        
     }
     
 }

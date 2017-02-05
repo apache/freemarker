@@ -18,8 +18,13 @@
  */
 package freemarker.ext.servlet;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -30,7 +35,7 @@ import com.google.common.collect.ImmutableList;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.WebappTemplateLoader;
+import freemarker.cache.WebAppTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.MockServletContext;
 
@@ -64,28 +69,28 @@ public class InitParamParserTest {
 
     @Test
     public void testCreateTemplateLoader() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         {
             ClassTemplateLoader ctl = (ClassTemplateLoader) InitParamParser.createTemplateLoader(
                     "classpath:templates",
                     cfg, this.getClass(), null);
             assertEquals("templates/", ctl.getBasePackagePath());
-            assertNull(ctl.getURLConnectionUsesCaches());
+            assertEquals(Boolean.FALSE, ctl.getURLConnectionUsesCaches());
         }
 
         {
             ClassTemplateLoader ctl = (ClassTemplateLoader) InitParamParser.createTemplateLoader(
-                    "classpath:templates?settings(URLConnectionUsesCaches=false)",
+                    "classpath:templates?settings(URLConnectionUsesCaches=true)",
                     cfg, this.getClass(), null);
             assertEquals("templates/", ctl.getBasePackagePath());
-            assertEquals(Boolean.FALSE, ctl.getURLConnectionUsesCaches());
+            assertEquals(Boolean.TRUE, ctl.getURLConnectionUsesCaches());
         }
 
         {
             MultiTemplateLoader mtl = (MultiTemplateLoader) InitParamParser.createTemplateLoader(
                     "["
-                    + "templates?settings(URLConnectionUsesCaches=false, attemptFileAccess=false), "
+                    + "templates?settings(URLConnectionUsesCaches=null, attemptFileAccess=false), "
                     + "foo/templates?settings(URLConnectionUsesCaches=true), "
                     + "classpath:templates, "
                     + "classpath:foo/templates?settings(URLConnectionUsesCaches=true)"
@@ -94,16 +99,16 @@ public class InitParamParserTest {
 
             assertEquals(4, mtl.getTemplateLoaderCount());
             
-            final WebappTemplateLoader tl1 = (WebappTemplateLoader) mtl.getTemplateLoader(0);
-            assertEquals(Boolean.FALSE, tl1.getURLConnectionUsesCaches());
+            final WebAppTemplateLoader tl1 = (WebAppTemplateLoader) mtl.getTemplateLoader(0);
+            assertNull(tl1.getURLConnectionUsesCaches());
             assertFalse(tl1.getAttemptFileAccess());
             
-            final WebappTemplateLoader tl2 = (WebappTemplateLoader) mtl.getTemplateLoader(1);
+            final WebAppTemplateLoader tl2 = (WebAppTemplateLoader) mtl.getTemplateLoader(1);
             assertEquals(Boolean.TRUE, tl2.getURLConnectionUsesCaches());
             assertTrue(tl2.getAttemptFileAccess());
             
             final ClassTemplateLoader tl3 = (ClassTemplateLoader) mtl.getTemplateLoader(2);
-            assertNull(tl3.getURLConnectionUsesCaches());
+            assertEquals(Boolean.FALSE, tl3.getURLConnectionUsesCaches());
             
             final ClassTemplateLoader tl4 = (ClassTemplateLoader) mtl.getTemplateLoader(3);
             assertEquals(Boolean.TRUE, tl4.getURLConnectionUsesCaches());

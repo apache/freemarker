@@ -19,12 +19,13 @@
 
 package freemarker.cache;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -33,10 +34,11 @@ import java.util.StringTokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
+import freemarker.core.MarkReleaserTemplateSpecifiedEncodingHandler;
 import freemarker.core.TemplateConfiguration;
+import freemarker.core.TemplateSpecifiedEncodingHandler;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
@@ -76,47 +78,18 @@ public class TemplateCache {
     private final TemplateLoader templateLoader;
     
     /** Here we keep our cached templates */
-    private final CacheStorage storage;
+    private final CacheStorage cacheStorage;
     private final TemplateLookupStrategy templateLookupStrategy;
     private final TemplateNameFormat templateNameFormat;
     private final TemplateConfigurationFactory templateConfigurations;
     
-    private final boolean isStorageConcurrent;
+    private final boolean isCacheStorageConcurrent;
     /** {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} */
     private long updateDelay = DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS;
     /** {@link Configuration#setLocalizedLookup(boolean)} */
     private boolean localizedLookup = true;
 
     private Configuration config;
-
-    /**
-     * Returns a template cache that will first try to load a template from
-     * the file system relative to the current user directory (i.e. the value
-     * of the system property <code>user.dir</code>), then from the classpath.
-     * 
-     * @deprecated Use {@link #TemplateCache(TemplateLoader)} instead. The default loader is useless in most
-     *     applications, also it can mean a security risk.
-     */
-    @Deprecated
-    public TemplateCache() {
-        this(_TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0));
-    }
-
-    /**
-     * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
-     */
-    @Deprecated
-    public TemplateCache(TemplateLoader templateLoader) {
-        this(templateLoader, (Configuration) null);
-    }
-
-    /**
-     * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
-     */
-    @Deprecated
-    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage) {
-        this(templateLoader, cacheStorage, null);
-    }
 
     /**
      * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} with a new {@link SoftCacheStorage}
@@ -157,7 +130,8 @@ public class TemplateCache {
 
     /**
      * @param templateLoader
-     *            The {@link TemplateLoader} to use. Can't be {@code null}.
+     *            The {@link TemplateLoader} to use. Can be {@code null}, though than you won't be able to load
+     *            anything.
      * @param cacheStorage
      *            The {@link CacheStorage} to use. Can't be {@code null}.
      * @param templateLookupStrategy
@@ -166,10 +140,10 @@ public class TemplateCache {
      *            The {@link TemplateNameFormat} to use. Can't be {@code null}.
      * @param templateConfigurations
      *            The {@link TemplateConfigurationFactory} to use. Can be {@code null} (then all templates will use the
-     *            settings coming from the {@link Configuration} as is).
+     *            settings coming from the {@link Configuration} as is, except in the very rare case where a
+     *            {@link TemplateLoader} itself specifies a {@link TemplateConfiguration}).
      * @param config
-     *            The {@link Configuration} this cache will be used for. Can be {@code null} for backward compatibility,
-     *            as it can be set with {@link #setConfiguration(Configuration)} later.
+     *            The {@link Configuration} this cache will be used for. Can't be {@code null}.
      * 
      * @since 2.3.24
      */
@@ -180,8 +154,8 @@ public class TemplateCache {
         this.templateLoader = templateLoader;
         
         NullArgumentException.check("cacheStorage", cacheStorage);
-        this.storage = cacheStorage;
-        isStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
+        this.cacheStorage = cacheStorage;
+        isCacheStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
                 ((ConcurrentCacheStorage) cacheStorage).isConcurrent();
         
         NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
@@ -193,28 +167,24 @@ public class TemplateCache {
         // Can be null
         this.templateConfigurations = templateConfigurations;
         
+        NullArgumentException.check("config", config);
         this.config = config;
     }
     
     /**
-     * Sets the configuration object to which this cache belongs. This
-     * method is called by the configuration itself to establish the
-     * relation, and should not be called by users.
-     * 
-     * @deprecated Use the {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} constructor.
+     * Returns the configuration for internal usage.
      */
-    @Deprecated
-    public void setConfiguration(Configuration config) {
-        this.config = config;
-        clear();
+    // [FM3] After setConfiguration was removed, this can be too.
+    Configuration getConfiguration() {
+        return config;
     }
 
     public TemplateLoader getTemplateLoader() {
         return templateLoader;
     }
-    
+
     public CacheStorage getCacheStorage() {
-        return storage;
+        return cacheStorage;
     }
     
     /**
@@ -287,12 +257,12 @@ public class TemplateCache {
         }
         
         if (templateLoader == null) {
-            return new MaybeMissingTemplate(name, "The TemplateLoader was null.");
+            return new MaybeMissingTemplate(name, "The TemplateLoader (and TemplateLoader2) was null.");
         }
         
         Template template = getTemplateInternal(name, locale, customLookupCondition, encoding, parseAsFTL);
         return template != null ? new MaybeMissingTemplate(template) : new MaybeMissingTemplate(name, (String) null);
-    }    
+    }
 
     /**
      * Similar to {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
@@ -310,158 +280,236 @@ public class TemplateCache {
         return getTemplate(name, locale, null, encoding, parseAsFTL).getTemplate();
     }
     
-    /**
-     * Returns the deprecated default template loader of FreeMarker 2.3.0.
-     * 
-     * @deprecated The {@link TemplateLoader} should be always specified by the constructor caller.
-     */
-    @Deprecated
-    protected static TemplateLoader createLegacyDefaultTemplateLoader() {
-        return _TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0);        
-    }
-    
     private Template getTemplateInternal(
             final String name, final Locale locale, final Object customLookupCondition,
             final String encoding, final boolean parseAsFTL)
     throws IOException {
         final boolean debug = LOG.isDebugEnabled();
-        final String debugName = debug
-                ? buildDebugName(name, locale, customLookupCondition, encoding, parseAsFTL)
+        final String debugPrefix = debug
+                ? getDebugPrefix("getTemplate", name, locale, customLookupCondition, encoding, parseAsFTL)
                 : null;
-        final TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parseAsFTL);
+        final CachedResultKey cacheKey = new CachedResultKey(name, locale, customLookupCondition, encoding, parseAsFTL);
         
-        CachedTemplate cachedTemplate;
-        if (isStorageConcurrent) {
-            cachedTemplate = (CachedTemplate) storage.get(tk);
+        CachedResult oldCachedResult;
+        if (isCacheStorageConcurrent) {
+            oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
         } else {
-            synchronized (storage) {
-                cachedTemplate = (CachedTemplate) storage.get(tk);
+            synchronized (cacheStorage) {
+                oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
             }
         }
         
         final long now = System.currentTimeMillis();
         
-        long lastModified = -1L;
-        boolean rethrown = false;
+        boolean rethrownCachedException = false;
+        boolean suppressFinallyException = false;
         TemplateLookupResult newLookupResult = null;
+        CachedResult newCachedResult = null;
+        TemplateLoaderSession session = null;
         try {
-            if (cachedTemplate != null) {
-                // If we're within the refresh delay, return the cached copy
-                if (now - cachedTemplate.lastChecked < updateDelay) {
+            if (oldCachedResult != null) {
+                // If we're within the refresh delay, return the cached result
+                if (now - oldCachedResult.lastChecked < updateDelay) {
                     if (debug) {
-                        LOG.debug(debugName + " cached copy not yet stale; using cached.");
+                        LOG.debug(debugPrefix + "Cached copy not yet stale; using cached.");
                     }
-                    // Can be null, indicating a cached negative lookup
-                    Object t = cachedTemplate.templateOrException;
+                    Object t = oldCachedResult.templateOrException;
+                    // t can be null, indicating a cached negative lookup
                     if (t instanceof Template || t == null) {
                         return (Template) t;
                     } else if (t instanceof RuntimeException) {
-                        throwLoadFailedException((RuntimeException) t);
+                        rethrowCachedException((RuntimeException) t);
                     } else if (t instanceof IOException) {
-                        rethrown = true;
-                        throwLoadFailedException((IOException) t);
+                        rethrownCachedException = true;
+                        rethrowCachedException((IOException) t);
                     }
-                    throw new BugException("t is " + t.getClass().getName());
+                    throw new BugException("Unhandled class for t: " + t.getClass().getName());
+                }
+                // The freshness of the cache result must be checked.
+                
+                // Clone, as the instance in the cache store must not be modified to ensure proper concurrent behavior.
+                newCachedResult = oldCachedResult.clone();
+                newCachedResult.lastChecked = now;
+
+                session = templateLoader.createSession();
+                if (debug && session != null) {
+                    LOG.debug(debugPrefix + "Session created.");
                 }
                 
-                // Clone as the instance bound to the map should be treated as
-                // immutable to ensure proper concurrent semantics
-                cachedTemplate = cachedTemplate.cloneCachedTemplate();
-                // Update the last-checked flag
-                cachedTemplate.lastChecked = now;
+                // Find the template source, load it if it doesn't correspond to the cached result.
+                newLookupResult = lookupAndLoadTemplateIfChanged(
+                        name, locale, customLookupCondition, oldCachedResult.source, oldCachedResult.version, session);
 
-                // Find the template source
-                newLookupResult = lookupTemplate(name, locale, customLookupCondition);
-
-                // Template source was removed
-                if (!newLookupResult.isPositive()) {
+                // Template source was removed (TemplateLoader2ResultStatus.NOT_FOUND, or no TemplateLoader2Result)
+                if (!newLookupResult.isPositive()) { 
                     if (debug) {
-                        LOG.debug(debugName + " no source found.");
+                        LOG.debug(debugPrefix + "No source found.");
                     } 
-                    storeNegativeLookup(tk, cachedTemplate, null);
+                    setToNegativeAndPutIntoCache(cacheKey, newCachedResult, null);
                     return null;
                 }
 
-                // If the source didn't change and its last modified date
-                // also didn't change, return the cached version.
-                final Object newLookupResultSource = newLookupResult.getTemplateSource();
-                lastModified = templateLoader.getLastModified(newLookupResultSource);
-                boolean lastModifiedNotChanged = lastModified == cachedTemplate.lastModified;
-                boolean sourceEquals = newLookupResultSource.equals(cachedTemplate.source);
-                if (lastModifiedNotChanged && sourceEquals) {
+                final TemplateLoadingResult newTemplateLoaderResult = newLookupResult.getTemplateLoaderResult();
+                if (newTemplateLoaderResult.getStatus() == TemplateLoadingResultStatus.NOT_MODIFIED) {
+                    // Return the cached version.
                     if (debug) {
-                        LOG.debug(debugName + ": using cached since " + newLookupResultSource + " hasn't changed.");
+                        LOG.debug(debugPrefix + ": Using cached template "
+                                + "(source: " + newTemplateLoaderResult.getSource() + ")"
+                                + " as it hasn't been changed on the backing store.");
                     }
-                    storeCached(tk, cachedTemplate);
-                    return (Template) cachedTemplate.templateOrException;
-                } else if (debug) {
-                    if (!sourceEquals) {
-                        LOG.debug("Updating source because: " + 
-                            "sourceEquals=" + sourceEquals + 
-                            ", newlyFoundSource=" + StringUtil.jQuoteNoXSS(newLookupResultSource) + 
-                            ", cached.source=" + StringUtil.jQuoteNoXSS(cachedTemplate.source));
-                    } else if (!lastModifiedNotChanged) {
-                        LOG.debug("Updating source because: " + 
-                            "lastModifiedNotChanged=" + lastModifiedNotChanged + 
-                            ", cached.lastModified=" + cachedTemplate.lastModified + 
-                            " != source.lastModified=" + lastModified);
+                    putIntoCache(cacheKey, newCachedResult);
+                    return (Template) newCachedResult.templateOrException;
+                } else {
+                    if (newTemplateLoaderResult.getStatus() != TemplateLoadingResultStatus.OPENED) {
+                        // TemplateLoader2ResultStatus.NOT_FOUND was already handler earlier
+                        throw new BugException("Unxpected status: " + newTemplateLoaderResult.getStatus());
+                    }
+                    if (debug) {
+                        StringBuilder debugMsg = new StringBuilder();
+                        debugMsg.append(debugPrefix)
+                                .append("Reloading template instead of using the cached result because ");
+                        if (newCachedResult.templateOrException instanceof Throwable) {
+                            debugMsg.append("it's a cached error (retrying).");
+                        } else {
+                            Object newSource = newTemplateLoaderResult.getSource();
+                            if (!nullSafeEquals(newSource, oldCachedResult.source)) {
+                                debugMsg.append("the source has been changed: ")
+                                        .append("cached.source=").append(StringUtil.jQuoteNoXSS(oldCachedResult.source))
+                                        .append(", current.source=").append(StringUtil.jQuoteNoXSS(newSource));
+                            } else {
+                                Serializable newVersion = newTemplateLoaderResult.getVersion();
+                                if (!nullSafeEquals(oldCachedResult.version, newVersion)) {
+                                    debugMsg.append("the version has been changed: ")
+                                            .append("cached.version=").append(oldCachedResult.version) 
+                                            .append(", current.version=").append(newVersion);
+                                } else {
+                                    debugMsg.append("??? (unknown reason)");
+                                }
+                            }
+                        }
+                        LOG.debug(debugMsg.toString());
                     }
                 }
-            } else {
+            } else { // if there was no cached result
                 if (debug) {
-                    LOG.debug("Couldn't find template in cache for " + debugName + "; will try to load it.");
+                    LOG.debug(debugPrefix + "No cached result was found; will try to load template.");
                 }
                 
-                // Construct a new CachedTemplate entry. Note we set the
-                // cachedTemplate.lastModified to Long.MIN_VALUE. This is
-                // a flag that signs it has to be explicitly queried later on.
-                cachedTemplate = new CachedTemplate();
-                cachedTemplate.lastChecked = now;
+                newCachedResult = new CachedResult();
+                newCachedResult.lastChecked = now;
+            
+                session = templateLoader.createSession();
+                if (debug && session != null) {
+                    LOG.debug(debugPrefix + "Session created.");
+                } 
                 
-                newLookupResult = lookupTemplate(name, locale, customLookupCondition);
+                newLookupResult = lookupAndLoadTemplateIfChanged(
+                        name, locale, customLookupCondition, null, null, session);
                 
                 if (!newLookupResult.isPositive()) {
-                    storeNegativeLookup(tk, cachedTemplate, null);
+                    setToNegativeAndPutIntoCache(cacheKey, newCachedResult, null);
                     return null;
                 }
-                
-                cachedTemplate.lastModified = lastModified = Long.MIN_VALUE;
             }
+            // We have newCachedResult and newLookupResult initialized at this point.
 
-            Object source = newLookupResult.getTemplateSource();
-            cachedTemplate.source = source;
+            TemplateLoadingResult templateLoaderResult = newLookupResult.getTemplateLoaderResult();
+            newCachedResult.source = templateLoaderResult.getSource();
             
             // If we get here, then we need to (re)load the template
             if (debug) {
-                LOG.debug("Loading template for " + debugName + " from " + StringUtil.jQuoteNoXSS(source));
+                LOG.debug(debugPrefix + "Reading template content (source: "
+                        + StringUtil.jQuoteNoXSS(newCachedResult.source) + ")");
             }
             
-            lastModified = lastModified == Long.MIN_VALUE ? templateLoader.getLastModified(source) : lastModified;            
             Template template = loadTemplate(
-                    templateLoader, source,
+                    templateLoaderResult,
                     name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition,
                     encoding, parseAsFTL);
-            cachedTemplate.templateOrException = template;
-            cachedTemplate.lastModified = lastModified;
-            storeCached(tk, cachedTemplate);
+            if (session != null) {
+                session.close();
+                if (debug) {
+                    LOG.debug(debugPrefix + "Session closed.");
+                } 
+            }
+            newCachedResult.templateOrException = template;
+            newCachedResult.version = templateLoaderResult.getVersion();
+            putIntoCache(cacheKey, newCachedResult);
             return template;
         } catch (RuntimeException e) {
-            if (cachedTemplate != null) {
-                storeNegativeLookup(tk, cachedTemplate, e);
+            if (newCachedResult != null) {
+                setToNegativeAndPutIntoCache(cacheKey, newCachedResult, e);
             }
+            suppressFinallyException = true;
             throw e;
         } catch (IOException e) {
-            if (!rethrown) {
-                storeNegativeLookup(tk, cachedTemplate, e);
+            // Rethrown cached exceptions are wrapped into IOException-s, so we only need this condition here.
+            if (!rethrownCachedException) {
+                setToNegativeAndPutIntoCache(cacheKey, newCachedResult, e);
             }
+            suppressFinallyException = true;
             throw e;
         } finally {
-            if (newLookupResult != null && newLookupResult.isPositive()) {
-                templateLoader.closeTemplateSource(newLookupResult.getTemplateSource());
+            try {
+                // Close streams first:
+                
+                if (newLookupResult != null && newLookupResult.isPositive()) {
+                    TemplateLoadingResult templateLoaderResult = newLookupResult.getTemplateLoaderResult();
+                    Reader reader = templateLoaderResult.getReader();
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException e) { // [FM3] Exception e
+                            if (suppressFinallyException) {
+                                if (LOG.isWarnEnabled()) { 
+                                    LOG.warn("Failed to close template content Reader for: " + name, e);
+                                }
+                            } else {
+                                suppressFinallyException = true;
+                                throw e;
+                            }
+                        }
+                    } else if (templateLoaderResult.getInputStream() != null) {
+                        try {
+                            templateLoaderResult.getInputStream().close();
+                        } catch (IOException e) { // [FM3] Exception e
+                            if (suppressFinallyException) {
+                                if (LOG.isWarnEnabled()) { 
+                                    LOG.warn("Failed to close template content InputStream for: " + name, e);
+                                }
+                            } else {
+                                suppressFinallyException = true;
+                                throw e;
+                            }
+                        }
+                    }
+                }
+            } finally {
+                // Then close streams:
+                
+                if (session != null && !session.isClosed()) {
+                    try {
+                        session.close();
+                        if (debug) {
+                            LOG.debug(debugPrefix + "Session closed.");
+                        } 
+                    } catch (IOException e) { // [FM3] Exception e
+                        if (suppressFinallyException) {
+                            if (LOG.isWarnEnabled()) { 
+                                LOG.warn("Failed to close template loader session for" + name, e);
+                            }
+                        } else {
+                            suppressFinallyException = true;
+                            throw e;
+                        }
+                    }
+                }
             }
         }
     }
 
+    
+    
     private static final Method INIT_CAUSE = getInitCauseMethod();
     
     private static final Method getInitCauseMethod() {
@@ -498,39 +546,59 @@ public class TemplateCache {
         return ioe;
     }
     
-    private void throwLoadFailedException(Throwable e) throws IOException {
+    private void rethrowCachedException(Throwable e) throws IOException {
         throw newIOException("There was an error loading the " +
                 "template on an earlier attempt; see cause exception.", e);
     }
 
-    private void storeNegativeLookup(TemplateKey tk, 
-            CachedTemplate cachedTemplate, Exception e) {
-        cachedTemplate.templateOrException = e;
-        cachedTemplate.source = null;
-        cachedTemplate.lastModified = 0L;
-        storeCached(tk, cachedTemplate);
+    private void setToNegativeAndPutIntoCache(CachedResultKey cacheKey, CachedResult cachedResult, Exception e) {
+        cachedResult.templateOrException = e;
+        cachedResult.source = null;
+        cachedResult.version = null;
+        putIntoCache(cacheKey, cachedResult);
     }
 
-    private void storeCached(TemplateKey tk, CachedTemplate cachedTemplate) {
-        if (isStorageConcurrent) {
-            storage.put(tk, cachedTemplate);
+    private void putIntoCache(CachedResultKey tk, CachedResult cachedTemplate) {
+        if (isCacheStorageConcurrent) {
+            cacheStorage.put(tk, cachedTemplate);
         } else {
-            synchronized (storage) {
-                storage.put(tk, cachedTemplate);
+            synchronized (cacheStorage) {
+                cacheStorage.put(tk, cachedTemplate);
             }
         }
     }
 
+    @SuppressWarnings("deprecation")
     private Template loadTemplate(
-            final TemplateLoader templateLoader, final Object source,
+            TemplateLoadingResult templateLoaderResult,
             final String name, final String sourceName, Locale locale, final Object customLookupCondition,
             String initialEncoding, final boolean parseAsFTL) throws IOException {
-        final TemplateConfiguration tc;
-        try {
-            tc = templateConfigurations != null ? templateConfigurations.get(sourceName, source) : null;
-        } catch (TemplateConfigurationFactoryException e) {
-            throw newIOException("Error while getting TemplateConfiguration; see cause exception.", e);
+        TemplateConfiguration tc;
+        {
+            TemplateConfiguration cfgTC;
+            try {
+                cfgTC = templateConfigurations != null
+                        ? templateConfigurations.get(sourceName, templateLoaderResult.getSource()) : null;
+            } catch (TemplateConfigurationFactoryException e) {
+                throw newIOException("Error while getting TemplateConfiguration; see cause exception.", e);
+            }
+            TemplateConfiguration resultTC = templateLoaderResult.getTemplateConfiguration();
+            if (resultTC != null) {
+                TemplateConfiguration mergedTC = new TemplateConfiguration();
+                if (cfgTC != null) {
+                    mergedTC.merge(cfgTC);
+                }
+                if (resultTC != null) {
+                    mergedTC.merge(resultTC);
+                }
+                mergedTC.setParentConfiguration(config);
+                
+                tc = mergedTC;
+            } else {
+                tc = cfgTC;
+            }
         }
+        
         if (tc != null) {
             // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
             if (tc.isEncodingSet()) {
@@ -543,47 +611,70 @@ public class TemplateCache {
         
         Template template;
         {
-            if (parseAsFTL) {
-                try {
-                    final Reader reader = templateLoader.getReader(source, initialEncoding);
-                    try {
-                        template = new Template(name, sourceName, reader, config, tc, initialEncoding);
-                    } finally {
-                        reader.close();
-                    }
-                } catch (Template.WrongEncodingException wee) {
-                    String actualEncoding = wee.getTemplateSpecifiedEncoding();
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Initial encoding \"" + initialEncoding + "\" was incorrect, re-reading with \""
-                                + actualEncoding + "\". Template: " + sourceName);
-                    }
-                    
-                    final Reader reader = templateLoader.getReader(source, actualEncoding);
-                    try {
-                        template = new Template(name, sourceName, reader, config, tc, actualEncoding);
-                    } finally {
-                        reader.close();
-                    }
+            Reader reader = templateLoaderResult.getReader();
+            InputStream inputStream = templateLoaderResult.getInputStream();
+            TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler;
+            if (reader != null) {
+                if (inputStream != null) {
+                    throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()
+                            + ", both getReader() and getInputStream() has returned non-null.");
                 }
+                initialEncoding = null;  // No charset decoding has happened
+                templateSpecifiedEncodingHandler = TemplateSpecifiedEncodingHandler.DEFAULT; 
+            } else if (inputStream != null) {
+                if (parseAsFTL) {
+                    // We need mark support, to restart if the charset suggested by <#ftl encoding=...> differs
+                    // from that we use initially.
+                    if (!inputStream.markSupported()) {
+                        inputStream = new BufferedInputStream(inputStream);
+                    }
+                    inputStream.mark(Integer.MAX_VALUE); // [FM3] Mark should be released after the 1st FTL tag
+                    templateSpecifiedEncodingHandler = new MarkReleaserTemplateSpecifiedEncodingHandler(
+                            inputStream);
+                } else {
+                    templateSpecifiedEncodingHandler = null; 
+                }
+                reader = new InputStreamReader(inputStream, initialEncoding);
             } else {
-                // Read the contents into a StringWriter, then construct a single-text-block template from it.
-                final StringWriter sw = new StringWriter();
-                final char[] buf = new char[4096];
-                final Reader reader = templateLoader.getReader(source, initialEncoding);
-                try {
-                    fetchChars: while (true) {
-                        int charsRead = reader.read(buf);
-                        if (charsRead > 0) {
-                            sw.write(buf, 0, charsRead);
-                        } else if (charsRead < 0) {
-                            break fetchChars;
+                throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()
+                        + ", both getReader() and getInputStream() has returned null.");
+            }
+            
+            try {
+                if (parseAsFTL) {
+                    try {
+                        template = new Template(name, sourceName, reader, config, tc,
+                                initialEncoding, templateSpecifiedEncodingHandler);
+                    } catch (Template.WrongEncodingException wee) {
+                        final String templateSpecifiedEncoding = wee.getTemplateSpecifiedEncoding();
+                        
+                        if (inputStream != null) {
+                            // We restart InputStream to re-decode it with the new charset.
+                            inputStream.reset();
+                            
+                            // Don't close `reader`; it's an InputStreamReader that would close the wrapped InputStream.
+                            reader = new InputStreamReader(inputStream, templateSpecifiedEncoding);
+                        } else {
+                            // Should be impossible to get here
+                            throw new BugException();
                         }
+                        
+                        template = new Template(name, sourceName, reader, config, tc,
+                                templateSpecifiedEncoding, templateSpecifiedEncodingHandler);
                     }
-                } finally {
-                    reader.close();
+                } else {
+                    // Read the contents into a StringWriter, then construct a single-text-block template from it.
+                    final StringBuilder sb = new StringBuilder();
+                    final char[] buf = new char[4096];
+                    int charsRead;
+                    while ((charsRead = reader.read(buf)) > 0) {
+                        sb.append(buf, 0, charsRead);
+                    }
+                    template = Template.getPlainTextTemplate(name, sourceName, sb.toString(), config);
+                    template.setEncoding(initialEncoding);
                 }
-                template = Template.getPlainTextTemplate(name, sourceName, sw.toString(), config);
-                template.setEncoding(initialEncoding);
+            } finally {
+                reader.close();
             }
         }
 
@@ -644,17 +735,29 @@ public class TemplateCache {
     }
 
     /**
-     * Removes all entries from the cache, forcing reloading of templates
-     * on subsequent {@link #getTemplate(String, Locale, String, boolean)}
-     * calls. If the configured template loader is 
-     * {@link StatefulTemplateLoader stateful}, then its 
-     * {@link StatefulTemplateLoader#resetState()} method is invoked as well.
+     * Removes all entries from the cache, forcing reloading of templates on subsequent
+     * {@link #getTemplate(String, Locale, String, boolean)} calls.
+     * 
+     * @param resetTemplateLoader
+     *            Whether to call {@link TemplateLoader#resetState()}. on the template loader.
+     */
+    public void clear(boolean resetTemplateLoader) {
+        synchronized (cacheStorage) {
+            cacheStorage.clear();
+            if (templateLoader != null && resetTemplateLoader) {
+                templateLoader.resetState();
+            }
+        }
+    }
+    
+    /**
+     * Same as {@link #clear(boolean)} with {@code true} {@code resetTemplateLoader} argument.
      */
     public void clear() {
-        synchronized (storage) {
-            storage.clear();
-            if (templateLoader instanceof StatefulTemplateLoader) {
-                ((StatefulTemplateLoader) templateLoader).resetState();
+        synchronized (cacheStorage) {
+            cacheStorage.clear();
+            if (templateLoader != null) {
+                templateLoader.resetState();
             }
         }
     }
@@ -691,31 +794,32 @@ public class TemplateCache {
         name = templateNameFormat.normalizeAbsoluteName(name);
         if (name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
-            String debugName = debug
-                    ? buildDebugName(name, locale, customLookupCondition, encoding, parse)
+            String debugPrefix = debug
+                    ? getDebugPrefix("removeTemplate", name, locale, customLookupCondition, encoding, parse)
                     : null;
-            TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parse);
+            CachedResultKey tk = new CachedResultKey(name, locale, customLookupCondition, encoding, parse);
             
-            if (isStorageConcurrent) {
-                storage.remove(tk);
+            if (isCacheStorageConcurrent) {
+                cacheStorage.remove(tk);
             } else {
-                synchronized (storage) {
-                    storage.remove(tk);
+                synchronized (cacheStorage) {
+                    cacheStorage.remove(tk);
                 }
             }
             if (debug) {
-                LOG.debug(debugName + " was removed from the cache, if it was there");
+                LOG.debug(debugPrefix + "Template was removed from the cache, if it was there");
             }
         }
     }
 
-    private String buildDebugName(String name, Locale locale, Object customLookupCondition, String encoding,
+    private String getDebugPrefix(String operation, String name, Locale locale, Object customLookupCondition, String encoding,
             boolean parse) {
-        return StringUtil.jQuoteNoXSS(name) + "("
+        return operation + " " + StringUtil.jQuoteNoXSS(name) + "("
                 + StringUtil.jQuoteNoXSS(locale)
                 + (customLookupCondition != null ? ", cond=" + StringUtil.jQuoteNoXSS(customLookupCondition) : "")
                 + ", " + encoding
-                + (parse ? ", parsed)" : ", unparsed]");
+                + (parse ? ", parsed)" : ", unparsed]")
+                + ": ";
     }    
 
     /**
@@ -735,110 +839,55 @@ public class TemplateCache {
         }
     }
 
-    private TemplateLookupResult lookupTemplate(String name, Locale locale, Object customLookupCondition)
-            throws IOException {
+    /**
+     * Looks up according the {@link TemplateLookupStrategy} and then starts reading the template, if it was changed
+     * compared to the cached result, or if there was no cached result yet.
+     */
+    private TemplateLookupResult lookupAndLoadTemplateIfChanged(
+            String name, Locale locale, Object customLookupCondition,
+            TemplateLoadingSource cachedResultSource, Serializable cachedResultVersion,
+            TemplateLoaderSession session) throws IOException {
         final TemplateLookupResult lookupResult = templateLookupStrategy.lookup(
-                new TemplateCacheTemplateLookupContext(name, locale, customLookupCondition));
+                new TemplateCacheTemplateLookupContext(
+                        name, locale, customLookupCondition,
+                        cachedResultSource, cachedResultVersion,
+                        session));
         if (lookupResult == null) {
             throw new NullPointerException("Lookup result shouldn't be null");
         }
         return lookupResult;
     }
 
-    private TemplateLookupResult lookupTemplateWithAcquisitionStrategy(String path) throws IOException {
-        int asterisk = path.indexOf(ASTERISK);
-        // Shortcut in case there is no acquisition
-        if (asterisk == -1) {
-            return TemplateLookupResult.from(path, findTemplateSource(path));
-        }
-        StringTokenizer tok = new StringTokenizer(path, "/");
-        int lastAsterisk = -1;
-        List tokpath = new ArrayList();
-        while (tok.hasMoreTokens()) {
-            String pathToken = tok.nextToken();
-            if (pathToken.equals(ASTERISKSTR)) {
-                if (lastAsterisk != -1) {
-                    tokpath.remove(lastAsterisk);
-                }
-                lastAsterisk = tokpath.size();
-            }
-            tokpath.add(pathToken);
-        }
-        if (lastAsterisk == -1) {  // if there was no real "*" step after all
-            return TemplateLookupResult.from(path, findTemplateSource(path));
-        }
-        String basePath = concatPath(tokpath, 0, lastAsterisk);
-        String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
-        if (resourcePath.endsWith("/")) {
-            resourcePath = resourcePath.substring(0, resourcePath.length() - 1);
-        }
-        StringBuilder buf = new StringBuilder(path.length()).append(basePath);
-        int l = basePath.length();
-        for (; ; ) {
-            String fullPath = buf.append(resourcePath).toString();
-            Object templateSource = findTemplateSource(fullPath);
-            if (templateSource != null) {
-                return TemplateLookupResult.from(fullPath, templateSource);
-            }
-            if (l == 0) {
-                return TemplateLookupResult.createNegativeResult();
-            }
-            l = basePath.lastIndexOf(SLASH, l - 2) + 1;
-            buf.setLength(l);
-        }
-    }
-
-    private Object findTemplateSource(String path) throws IOException {
-        final Object result = templateLoader.findTemplateSource(path);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("TemplateLoader.findTemplateSource(" +  StringUtil.jQuote(path) + "): "
-                    + (result == null ? "Not found" : "Found"));
-        }
-        return modifyForConfIcI(result);
-    }
-
-    /**
-     * If IcI >= 2.3.21, sets {@link URLTemplateSource#setUseCaches(boolean)} to {@code false} for sources that come
-     * from a {@link TemplateLoader} where {@link URLConnection} cache usage wasn't set explicitly.  
-     */
-    private Object modifyForConfIcI(Object templateSource) {
-        if (templateSource == null) return null;
-        
-        if (config.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
-            return templateSource;
-        }
-        
-        if (templateSource instanceof URLTemplateSource) {
-            URLTemplateSource urlTemplateSource = (URLTemplateSource) templateSource;
-            if (urlTemplateSource.getUseCaches() == null) {  // It was left unset
-                urlTemplateSource.setUseCaches(false);
-            }
-        } else if (templateSource instanceof MultiSource) {
-            modifyForConfIcI(((MultiSource) templateSource).getWrappedSource());
-        }
-        return templateSource;
-    }
-
-    private String concatPath(List path, int from, int to) {
+    private String concatPath(List<String> pathSteps, int from, int to) {
         StringBuilder buf = new StringBuilder((to - from) * 16);
         for (int i = from; i < to; ++i) {
-            buf.append(path.get(i)).append('/');
+            buf.append(pathSteps.get(i));
+            if (i < pathSteps.size() - 1) {
+                buf.append('/');
+            }
         }
         return buf.toString();
     }
     
+    // Replace with Objects.equals in Java 7
+    private static boolean nullSafeEquals(Object o1, Object o2) {
+        if (o1 == o2) return true;
+        if (o1 == null || o2 == null) return false;
+        return o1.equals(o2);
+    }
+    
     /**
-     * This class holds a (name, locale) pair and is used as the key in
-     * the cached templates map.
+     * Used as cache key to look up a {@link CachedResult}. 
      */
-    private static final class TemplateKey {
+    @SuppressWarnings("serial")
+    private static final class CachedResultKey implements Serializable {
         private final String name;
         private final Locale locale;
         private final Object customLookupCondition;
         private final String encoding;
         private final boolean parse;
 
-        TemplateKey(String name, Locale locale, Object customLookupCondition, String encoding, boolean parse) {
+        CachedResultKey(String name, Locale locale, Object customLookupCondition, String encoding, boolean parse) {
             this.name = name;
             this.locale = locale;
             this.customLookupCondition = customLookupCondition;
@@ -848,8 +897,8 @@ public class TemplateCache {
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof TemplateKey) {
-                TemplateKey tk = (TemplateKey) o;
+            if (o instanceof CachedResultKey) {
+                CachedResultKey tk = (CachedResultKey) o;
                 return
                     parse == tk.parse &&
                     name.equals(tk.name) &&
@@ -858,12 +907,6 @@ public class TemplateCache {
                     encoding.equals(tk.encoding);
             }
             return false;
-        }
-
-        private boolean nullSafeEquals(Object o1, Object o2) {
-            return o1 != null
-                ? (o2 != null ? o1.equals(o2) : false)
-                : o2 == null;
         }
 
         @Override
@@ -878,24 +921,27 @@ public class TemplateCache {
     }
 
     /**
-     * This class holds the cached template and associated information
-     * (the source object, and the last-checked and last-modified timestamps).
-     * It is used as the value in the cached templates map. Note: this class
-     * is Serializable to allow custom 3rd party CacheStorage implementations 
-     * to serialize/replicate them (see tracker issue #1926150); FreeMarker 
-     * code itself doesn't rely on its serializability.
+     * Hold the a cached {@link #getTemplate(String, Locale, Object, String, boolean)} result and the associated
+     * information needed to check if the cached value is up to date.
+     * 
+     * <p>
+     * Note: this class is Serializable to allow custom 3rd party CacheStorage implementations to serialize/replicate
+     * them; FreeMarker code itself doesn't rely on its serializability.
+     * 
+     * @see CachedResultKey
      */
-    private static final class CachedTemplate implements Cloneable, Serializable {
+    private static final class CachedResult implements Cloneable, Serializable {
         private static final long serialVersionUID = 1L;
 
         Object templateOrException;
-        Object source;
+        TemplateLoadingSource source;
+        Serializable version;
         long lastChecked;
-        long lastModified;
         
-        public CachedTemplate cloneCachedTemplate() {
+        @Override
+        public CachedResult clone() {
             try {
-                return (CachedTemplate) super.clone();
+                return (CachedResult) super.clone();
             } catch (CloneNotSupportedException e) {
                 throw new UndeclaredThrowableException(e);
             }
@@ -904,18 +950,65 @@ public class TemplateCache {
     
     private class TemplateCacheTemplateLookupContext extends TemplateLookupContext {
 
-        TemplateCacheTemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
-            super(templateName, localizedLookup ? templateLocale : null, customLookupCondition);
+        private final TemplateLoaderSession session; 
+        
+        TemplateCacheTemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition,
+                TemplateLoadingSource cachedResultSource, Serializable cachedResultVersion,
+                TemplateLoaderSession session) {
+            super(templateName, localizedLookup ? templateLocale : null, customLookupCondition,
+                    cachedResultSource, cachedResultVersion);
+            this.session = session;
         }
 
         @Override
-        public TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException {
+        public TemplateLookupResult lookupWithAcquisitionStrategy(String path) throws IOException {
             // Only one of the possible ways of making a name non-normalized, but is the easiest mistake to do:
-            if (name.startsWith("/")) {
-                throw new IllegalArgumentException("Non-normalized name, starts with \"/\": " + name);
+            if (path.startsWith("/")) {
+                throw new IllegalArgumentException("Non-normalized name, starts with \"/\": " + path);
             }
             
-            return TemplateCache.this.lookupTemplateWithAcquisitionStrategy(name);
+            int asterisk = path.indexOf(ASTERISK);
+            // Shortcut in case there is no acquisition
+            if (asterisk == -1) {
+                return TemplateLookupResult.from(
+                        path,
+                        templateLoader.load(path, getCachedResultSource(), getCachedResultVersion(), session));
+            }
+            StringTokenizer pathTokenizer = new StringTokenizer(path, "/");
+            int lastAsterisk = -1;
+            List<String> pathSteps = new ArrayList<String>();
+            while (pathTokenizer.hasMoreTokens()) {
+                String pathStep = pathTokenizer.nextToken();
+                if (pathStep.equals(ASTERISKSTR)) {
+                    if (lastAsterisk != -1) {
+                        pathSteps.remove(lastAsterisk);
+                    }
+                    lastAsterisk = pathSteps.size();
+                }
+                pathSteps.add(pathStep);
+            }
+            if (lastAsterisk == -1) {  // if there was no real "*" step after all
+                return TemplateLookupResult.from(
+                        path,
+                        templateLoader.load(path, getCachedResultSource(), getCachedResultVersion(), session));
+            }
+            String basePath = concatPath(pathSteps, 0, lastAsterisk);
+            String postAsteriskPath = concatPath(pathSteps, lastAsterisk + 1, pathSteps.size());
+            StringBuilder buf = new StringBuilder(path.length()).append(basePath);
+            int basePathLen = basePath.length();
+            while (true) {
+                String fullPath = buf.append(postAsteriskPath).toString();
+                TemplateLoadingResult templateLoaderResult = templateLoader.load(
+                        fullPath, getCachedResultSource(), getCachedResultVersion(), session);
+                if (templateLoaderResult.getStatus() == TemplateLoadingResultStatus.OPENED) {
+                    return TemplateLookupResult.from(fullPath, templateLoaderResult);
+                }
+                if (basePathLen == 0) {
+                    return TemplateLookupResult.createNegativeResult();
+                }
+                basePathLen = basePath.lastIndexOf(SLASH, basePathLen - 2) + 1;
+                buf.setLength(basePathLen);
+            }
         }
 
         @Override

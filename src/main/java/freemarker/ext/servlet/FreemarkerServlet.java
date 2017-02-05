@@ -22,6 +22,7 @@ package freemarker.ext.servlet;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
-import freemarker.cache.WebappTemplateLoader;
+import freemarker.cache.WebAppTemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.OutputFormat;
@@ -129,8 +130,8 @@ import freemarker.template.utility.StringUtil;
  * Any of the above can have a {@code ?setting(name=value, ...)} postfix to set the JavaBeans properties of the
  * {@link TemplateLoader} created. For example,
  * {@code /templates?settings(attemptFileAccess=false, URLConnectionUsesCaches=true)} calls
- * {@link WebappTemplateLoader#setAttemptFileAccess(boolean)} and
- * {@link WebappTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebappTemplateLoader}. For
+ * {@link WebAppTemplateLoader#setAttemptFileAccess(boolean)} and
+ * {@link WebAppTemplateLoader#setURLConnectionUsesCaches(Boolean)} to tune the {@link WebAppTemplateLoader}. For
  * backward compatibility (not recommended!), you can use the {@code class://} prefix, like in
  * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
  * defining class loader of this servlet's class. This can cause template-not-found errors, if that class (in
@@ -206,8 +207,9 @@ import freemarker.template.utility.StringUtil;
  * <li>{@value #INIT_PARAM_VALUE_FROM_TEMPLATE}: This should be used in most applications, but it's not the default for
  * backward compatibility. It reads the {@link Configurable#getOutputEncoding()} setting of the template (note that the
  * template usually just inherits that from the {@link Configuration}), and if that's not set, then reads the source
- * charset of the template, just like {@value #INIT_PARAM_VALUE_LEGACY}. Then it passes the charset acquired this way to
- * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. (It
+ * charset of the template, just like {@value #INIT_PARAM_VALUE_LEGACY}, and if that's {@code null} (which happens if
+ * the template was loaded from a non-binary source) then it will be UTF-8. Then it passes the charset acquired this way
+ * to {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. (It
  * doesn't call the legacy {@link HttpServletResponse#setContentType(String)} API to set the charset.) (Note that if the
  * template has a {@code content_type} template attribute (which is deprecated) that specifies a charset, it will be
  * used as the output charset of that template.)
@@ -747,7 +749,7 @@ public class FreemarkerServlet extends HttpServlet {
     /**
      * Create the template loader. The default implementation will create a {@link ClassTemplateLoader} if the template
      * path starts with {@code "class://"}, a {@link FileTemplateLoader} if the template path starts with
-     * {@code "file://"}, and a {@link WebappTemplateLoader} otherwise. Also, if
+     * {@code "file://"}, and a {@link WebAppTemplateLoader} otherwise. Also, if
      * {@link Configuration#Configuration(freemarker.template.Version) incompatible_improvements} is 2.3.22 or higher,
      * it will create a {@link MultiTemplateLoader} if the template path starts with {@code "["}.
      * 
@@ -839,7 +841,7 @@ public class FreemarkerServlet extends HttpServlet {
                 if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY && !contentType.containsCharset) {
                     // In legacy mode we don't call response.setCharacterEncoding, so the charset must be set here:
                     response.setContentType(
-                            contentType.httpHeaderValue + "; charset=" + getTemplateSpecificOutputEncoding(template));
+                            contentType.httpHeaderValue + "; charset=" + getOutputEncodingForTemplate(template));
                 } else {
                     response.setContentType(contentType.httpHeaderValue);
                 }
@@ -851,7 +853,7 @@ public class FreemarkerServlet extends HttpServlet {
             // Using the Servlet 2.4 way of setting character encoding.
             if (responseCharacterEncoding != ResponseCharacterEncoding.FORCE_CHARSET) {
                 if (!tempSpecContentTypeContainsCharset) {
-                    response.setCharacterEncoding(getTemplateSpecificOutputEncoding(template));
+                    response.setCharacterEncoding(getOutputEncodingForTemplate(template));
                 }
             } else {
                 response.setCharacterEncoding(forcedResponseCharacterEncoding.name());
@@ -911,10 +913,13 @@ public class FreemarkerServlet extends HttpServlet {
         env.process();
     }
 
-    private String getTemplateSpecificOutputEncoding(Template template) {
+    private String getOutputEncodingForTemplate(Template template) {
         String outputEncoding = responseCharacterEncoding == ResponseCharacterEncoding.LEGACY ? null
                 : template.getOutputEncoding();
-        return outputEncoding != null ? outputEncoding : template.getEncoding();
+        // [FM3] Don't use template.getEncoding() here; it might can't encode the dynamic values inserted.
+        return outputEncoding != null ? outputEncoding
+                : template.getEncoding() != null ? template.getEncoding()
+                : StandardCharsets.UTF_8.name();
     }
 
     private ContentType getTemplateSpecificContentType(final Template template) {
@@ -928,7 +933,9 @@ public class FreemarkerServlet extends HttpServlet {
         if (outputFormatMimeType != null) {
             if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY) {
                 // In legacy mode we won't call serlvetResponse.setCharacterEncoding(...), so:
-                return new ContentType(outputFormatMimeType + "; charset=" + getTemplateSpecificOutputEncoding(template), true);
+                return new ContentType(
+                        outputFormatMimeType + "; charset=" + getOutputEncodingForTemplate(template),
+                        true);
             } else {
                 return new ContentType(outputFormatMimeType, false);
             }
@@ -1630,6 +1637,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
     
     private enum ResponseCharacterEncoding implements InitParamValueEnum {
+        // [FM3] Get rid of LEGACY
         LEGACY(INIT_PARAM_VALUE_LEGACY),
         FROM_TEMPLATE(INIT_PARAM_VALUE_FROM_TEMPLATE),
         DO_NOT_SET(INIT_PARAM_VALUE_DO_NOT_SET),

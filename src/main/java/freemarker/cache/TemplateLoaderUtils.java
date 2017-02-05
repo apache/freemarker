@@ -28,11 +28,10 @@ final class TemplateLoaderUtils {
     }
 
     public static String getClassNameForToString(TemplateLoader templateLoader) {
-        final Class tlClass = templateLoader.getClass();
+        final Class<? extends TemplateLoader> tlClass = templateLoader.getClass();
         final Package tlPackage = tlClass.getPackage();
         return tlPackage == Configuration.class.getPackage() || tlPackage == TemplateLoader.class.getPackage()
                 ? tlClass.getSimpleName() : tlClass.getName();
     }
-
     
 }
