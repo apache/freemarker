@@ -136,11 +136,7 @@ public class Template extends Configurable {
     /**
      * Convenience constructor for {@link #Template(String, String, Reader, Configuration, String) Template(name, null,
      * reader, cfg, encoding)}.
-     * 
-     * @deprecated In most applications, use {@link #Template(String, Reader, Configuration)} instead, which doesn't
-     *             specify the encoding.
      */
-    @Deprecated
     public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
         this(name, null, reader, cfg, encoding);
     }
@@ -186,20 +182,17 @@ public class Template extends Configurable {
      * recommended).
      *
      * @param encoding
-     *            This is the encoding that we are supposed to be using. But it's not really necessary because we have a
-     *            {@link Reader} which is already decoded, but it's kept as meta-info. It also has an impact when
-     *            {@code #include}-ing/{@code #import}-ing another template from this template, as its default encoding
-     *            will be this. But this behavior of said directives is considered to be harmful, and will be probably
-     *            phased out. Until that, it's better to leave this on {@code null}, so that the encoding will come from
-     *            the {@link Configuration}. Note that if this is non-{@code null} and there's an {@code #ftl} header
-     *            with encoding, they must match, or else a {@link WrongEncodingException} is thrown.
-     * 
-     * @deprecated In most applications, use {@link #Template(String, String, Reader, Configuration)} instead, which
-     *             doesn't specify the encoding.
-     * 
+     *            This is the encoding that we are supposed to be using. At the first glance it's unnecessary because we
+     *            already have a {@link Reader} (so decoding with the charset has already happened), however, if this is
+     *            non-{@code null} and there's an {@code #ftl} header with {@code encoding} parameter, they must match,
+     *            or else a {@link WrongEncodingException} is thrown. Thus, it should be set if to decode the template,
+     *            we were using an encoding (a charset), otherwise it should be {@code null}. It's also kept as
+     *            meta-info (returned by {@link #getEncoding()}). It also has an impact when {@code #include}-ing or
+     *            {@code #import}-ing another template from this template, as its default encoding will be this. But
+     *            this behavior of said directives is considered to be harmful, and will be probably phased out.
+     *             
      * @since 2.3.22
      */
-   @Deprecated
    public Template(
            String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
        this(name, sourceName, reader, cfg, null, encoding);
