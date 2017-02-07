@@ -25,7 +25,6 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import freemarker.template.utility.StringUtil;
 
@@ -37,13 +36,10 @@ import freemarker.template.utility.StringUtil;
  */
 public class ByteArrayTemplateLoader implements TemplateLoader {
 
-    private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
-    
-    private final long instanceId = INSTANCE_COUNTER.incrementAndGet();
     private final Map<String, ByteArrayTemplateSource> templates = new HashMap<String, ByteArrayTemplateSource>();
     
     /**
-     * Adds a template to this template loader; see {@link StringTemplateLoader#putTemplate(String, String)} for mpre.
+     * Adds a template to this template loader; see {@link StringTemplateLoader#putTemplate(String, String)} for more.
      */
     public void putTemplate(String name, byte[] templateSource) {
         putTemplate(name, templateSource, System.currentTimeMillis());
@@ -54,7 +50,7 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
      * more.
      */
     public void putTemplate(String name, byte[] templateSource, long lastModified) {
-        templates.put(name, new ByteArrayTemplateSource(instanceId, name, templateSource, lastModified));
+        templates.put(name, new ByteArrayTemplateSource(name, templateSource, lastModified));
     }
     
     /**
@@ -85,13 +81,11 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
     }
     
     private static class ByteArrayTemplateSource {
-        private final long instanceId;
         private final String name;
         private final byte[] source;
         private final long lastModified;
         
-        ByteArrayTemplateSource(long instanceId, String name, byte[] source, long lastModified) {
-            this.instanceId = instanceId;
+        ByteArrayTemplateSource(String name, byte[] source, long lastModified) {
             if (name == null) {
                 throw new IllegalArgumentException("name == null");
             }
@@ -110,7 +104,6 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (int) (instanceId ^ (instanceId >>> 32));
             result = prime * result + ((name == null) ? 0 : name.hashCode());
             return result;
         }
@@ -124,8 +117,6 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
             if (getClass() != obj.getClass())
                 return false;
             ByteArrayTemplateSource other = (ByteArrayTemplateSource) obj;
-            if (instanceId != other.instanceId)
-                return false;
             if (name == null) {
                 if (other.name != null)
                     return false;

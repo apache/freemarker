@@ -23,7 +23,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import freemarker.template.utility.StringUtil;
 
@@ -62,9 +61,6 @@ import freemarker.template.utility.StringUtil;
  */
 public class StringTemplateLoader implements TemplateLoader {
     
-    private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
-    
-    private final long instanceId = INSTANCE_COUNTER.incrementAndGet();
     private final Map<String, StringTemplateSource> templates = new HashMap<String, StringTemplateSource>();
     
     /**
@@ -102,7 +98,7 @@ public class StringTemplateLoader implements TemplateLoader {
      * terms of <tt>System.currentTimeMillis()</tt>
      */
     public void putTemplate(String name, String templateSource, long lastModified) {
-        templates.put(name, new StringTemplateSource(instanceId, name, templateSource, lastModified));
+        templates.put(name, new StringTemplateSource(name, templateSource, lastModified));
     }
     
     /**
@@ -137,13 +133,11 @@ public class StringTemplateLoader implements TemplateLoader {
     }
     
     private static class StringTemplateSource {
-        private final long instanceId;
         private final String name;
         private final String source;
         private final long lastModified;
         
-        StringTemplateSource(long instanceId, String name, String source, long lastModified) {
-            this.instanceId = instanceId;
+        StringTemplateSource(String name, String source, long lastModified) {
             if (name == null) {
                 throw new IllegalArgumentException("name == null");
             }
@@ -162,7 +156,6 @@ public class StringTemplateLoader implements TemplateLoader {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (int) (instanceId ^ (instanceId >>> 32));
             result = prime * result + ((name == null) ? 0 : name.hashCode());
             return result;
         }
@@ -176,8 +169,6 @@ public class StringTemplateLoader implements TemplateLoader {
             if (getClass() != obj.getClass())
                 return false;
             StringTemplateSource other = (StringTemplateSource) obj;
-            if (instanceId != other.instanceId)
-                return false;
             if (name == null) {
                 if (other.name != null)
                     return false;
@@ -185,6 +176,7 @@ public class StringTemplateLoader implements TemplateLoader {
                 return false;
             return true;
         }
+
 
         @Override
         public String toString() {

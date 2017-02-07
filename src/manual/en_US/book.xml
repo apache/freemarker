@@ -26875,15 +26875,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixed problem in <literal>StringTemplateLoader</literal>
-              and <literal>ByteArrayTemplateLoader</literal>, which, in some
-              fairly unlikely setups, could confuse the template cache if you
-              are using multiple template loaders of the same class (via
-              <literal>MultiTemplateLoader</literal>) with clashing template
-              names.</para>
-            </listitem>
-
-            <listitem>
               <para>Various smaller code cleanups.</para>
             </listitem>
           </itemizedlist>
