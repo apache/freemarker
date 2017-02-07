@@ -2404,7 +2404,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Emulates <code>include</code> directive, except that <code>name</code> must be tempate root relative.
+     * Emulates <code>include</code> directive, except that <code>name</code> must be template root relative.
      *
      * <p>
      * It's the same as <code>include(getTemplateForInclusion(name, encoding, parse))</code>. But, you may want to
