@@ -52,10 +52,11 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
 
     public Object findTemplateSource(String name)
             throws IOException {
+        TemplateLoader lastLoader = null;
         if (sticky) {
             // Use soft affinity - give the loader that last found this
             // resource a chance to find it again first.
-            TemplateLoader lastLoader = lastLoaderForName.get(name);
+            lastLoader = lastLoaderForName.get(name);
             if (lastLoader != null) {
                 Object source = lastLoader.findTemplateSource(name);
                 if (source != null) {
@@ -68,14 +69,15 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
         // again, try all loaders in order of appearance. If any manages
         // to find the resource, then associate it as the new affine loader
         // for this resource.
-        for (int i = 0; i < loaders.length; ++i) {
-            TemplateLoader loader = loaders[i];
-            Object source = loader.findTemplateSource(name);
-            if (source != null) {
-                if (sticky) {
-                    lastLoaderForName.put(name, loader);
+        for (TemplateLoader loader : loaders) {
+            if (lastLoader != loader) {
+                Object source = loader.findTemplateSource(name);
+                if (source != null) {
+                    if (sticky) {
+                        lastLoaderForName.put(name, loader);
+                    }
+                    return new MultiSource(source, loader);
                 }
-                return new MultiSource(source, loader);
             }
         }
 

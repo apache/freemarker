@@ -26834,6 +26834,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>MultiTemplateLoader</literal>, when it's in
+              sticky mode (the default), and the
+              <literal>TemplateLoader</literal> that was successfully used for
+              a given name last time doesn't find the template now (let's call
+              it the sticked <literal>TemplateLoader</literal>), and thus
+              <literal>MultiTemplateLoader</literal> falls back to trying all
+              the <literal>TemplateLoader</literal>-s in order, will now skip
+              the sticked <literal>TemplateLoader</literal>, as that was
+              already attempted in the same
+              <literal>MultiTemplateLoader.findTemplateSource</literal>
+              invocation.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed:
               <literal>NodeModel.mergeAdjacentText(Node)</literal> didn't
               merged all adjacent text nodes, only pairs of adjacent text
