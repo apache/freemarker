@@ -27,7 +27,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Wraps a <code>java.net.URL</code>, and implements methods required for a typical template source.
+ * Wraps a {@link URL}, and implements methods required for a typical template source.
  */
 class URLTemplateSource {
     private final URL url;
@@ -69,6 +69,7 @@ class URLTemplateSource {
     long lastModified() {
         if (conn instanceof JarURLConnection) {
           // There is a bug in sun's jar url connection that causes file handle leaks when calling getLastModified()
+          // (see https://bugs.openjdk.java.net/browse/JDK-6956385).
           // Since the time stamps of jar file contents can't vary independent from the jar file timestamp, just use
           // the jar file timestamp
           URL jarURL = ((JarURLConnection) conn).getJarFileURL();

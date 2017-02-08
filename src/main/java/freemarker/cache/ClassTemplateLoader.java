@@ -31,7 +31,7 @@ import freemarker.template.utility.StringUtil;
  */
 public class ClassTemplateLoader extends URLTemplateLoader {
     
-    private final Class resourceLoaderClass;
+    private final Class<?> resourceLoaderClass;
     private final ClassLoader classLoader;
     private final String basePackagePath;
 
@@ -66,7 +66,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      *             instead.
      */
     @Deprecated
-    public ClassTemplateLoader(Class resourceLoaderClass) {
+    public ClassTemplateLoader(Class<?> resourceLoaderClass) {
         this(resourceLoaderClass, "");
     }
 
@@ -96,7 +96,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      * 
      * @see #ClassTemplateLoader(ClassLoader, String)
      */
-    public ClassTemplateLoader(Class resourceLoaderClass, String basePackagePath) {
+    public ClassTemplateLoader(Class<?> resourceLoaderClass, String basePackagePath) {
         this(resourceLoaderClass, false, null, basePackagePath);
     }
 
@@ -112,9 +112,9 @@ public class ClassTemplateLoader extends URLTemplateLoader {
         this(null, true, classLoader, basePackagePath);
     }
 
-    private ClassTemplateLoader(Class resourceLoaderClass, boolean allowNullBaseClass, ClassLoader classLoader,
-            String basePackagePath) {
-        if (!allowNullBaseClass) {
+    private ClassTemplateLoader(Class<?> resourceLoaderClass, boolean allowNullResourceLoaderClass,
+            ClassLoader classLoader, String basePackagePath) {
+        if (!allowNullResourceLoaderClass) {
             NullArgumentException.check("resourceLoaderClass", resourceLoaderClass);
         }
         NullArgumentException.check("basePackagePath", basePackagePath);

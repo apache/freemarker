@@ -72,10 +72,10 @@ public class StringTemplateLoader implements TemplateLoader {
      * loader.
      * 
      * @param name the name of the template.
-     * @param templateSource the source code of the template.
+     * @param templateContent the source code of the template.
      */
-    public void putTemplate(String name, String templateSource) {
-        putTemplate(name, templateSource, System.currentTimeMillis());
+    public void putTemplate(String name, String templateContent) {
+        putTemplate(name, templateContent, System.currentTimeMillis());
     }
     
     /**
@@ -93,12 +93,12 @@ public class StringTemplateLoader implements TemplateLoader {
      * loader.
      * 
      * @param name the name of the template.
-     * @param templateSource the source code of the template.
+     * @param templateContent the source code of the template.
      * @param lastModified the time of last modification of the template in 
      * terms of <tt>System.currentTimeMillis()</tt>
      */
-    public void putTemplate(String name, String templateSource, long lastModified) {
-        templates.put(name, new StringTemplateSource(name, templateSource, lastModified));
+    public void putTemplate(String name, String templateContent, long lastModified) {
+        templates.put(name, new StringTemplateSource(name, templateContent, lastModified));
     }
     
     /**
@@ -129,26 +129,26 @@ public class StringTemplateLoader implements TemplateLoader {
     }
     
     public Reader getReader(Object templateSource, String encoding) {
-        return new StringReader(((StringTemplateSource) templateSource).source);
+        return new StringReader(((StringTemplateSource) templateSource).templateContent);
     }
     
     private static class StringTemplateSource {
         private final String name;
-        private final String source;
+        private final String templateContent;
         private final long lastModified;
         
-        StringTemplateSource(String name, String source, long lastModified) {
+        StringTemplateSource(String name, String templateContent, long lastModified) {
             if (name == null) {
                 throw new IllegalArgumentException("name == null");
             }
-            if (source == null) {
+            if (templateContent == null) {
                 throw new IllegalArgumentException("source == null");
             }
             if (lastModified < -1L) {
                 throw new IllegalArgumentException("lastModified < -1L");
             }
             this.name = name;
-            this.source = source;
+            this.templateContent = templateContent;
             this.lastModified = lastModified;
         }
         

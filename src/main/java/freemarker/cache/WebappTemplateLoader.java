@@ -33,6 +33,7 @@ import javax.servlet.ServletContext;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.utility.CollectionUtils;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -76,12 +77,8 @@ public class WebappTemplateLoader implements TemplateLoader {
      *            the base path to template resources.
      */
     public WebappTemplateLoader(ServletContext servletContext, String subdirPath) {
-        if (servletContext == null) {
-            throw new IllegalArgumentException("servletContext == null");
-        }
-        if (subdirPath == null) {
-            throw new IllegalArgumentException("path == null");
-        }
+        NullArgumentException.check("servletContext", servletContext);
+        NullArgumentException.check("subdirPath", subdirPath);
 
         subdirPath = subdirPath.replace('\\', '/');
         if (!subdirPath.endsWith("/")) {

@@ -41,16 +41,16 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
     /**
      * Adds a template to this template loader; see {@link StringTemplateLoader#putTemplate(String, String)} for more.
      */
-    public void putTemplate(String name, byte[] templateSource) {
-        putTemplate(name, templateSource, System.currentTimeMillis());
+    public void putTemplate(String name, byte[] templateContent) {
+        putTemplate(name, templateContent, System.currentTimeMillis());
     }
     
     /**
      * Adds a template to this template loader; see {@link StringTemplateLoader#putTemplate(String, String, long)} for
      * more.
      */
-    public void putTemplate(String name, byte[] templateSource, long lastModified) {
-        templates.put(name, new ByteArrayTemplateSource(name, templateSource, lastModified));
+    public void putTemplate(String name, byte[] templateContent, long lastModified) {
+        templates.put(name, new ByteArrayTemplateSource(name, templateContent, lastModified));
     }
     
     /**
@@ -76,27 +76,27 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
     
     public Reader getReader(Object templateSource, String encoding) throws UnsupportedEncodingException {
         return new InputStreamReader(
-                new ByteArrayInputStream(((ByteArrayTemplateSource) templateSource).source),
+                new ByteArrayInputStream(((ByteArrayTemplateSource) templateSource).templateContent),
                 encoding);
     }
     
     private static class ByteArrayTemplateSource {
         private final String name;
-        private final byte[] source;
+        private final byte[] templateContent;
         private final long lastModified;
         
-        ByteArrayTemplateSource(String name, byte[] source, long lastModified) {
+        ByteArrayTemplateSource(String name, byte[] templateContent, long lastModified) {
             if (name == null) {
                 throw new IllegalArgumentException("name == null");
             }
-            if (source == null) {
-                throw new IllegalArgumentException("source == null");
+            if (templateContent == null) {
+                throw new IllegalArgumentException("templateContent == null");
             }
             if (lastModified < -1L) {
                 throw new IllegalArgumentException("lastModified < -1L");
             }
             this.name = name;
-            this.source = source;
+            this.templateContent = templateContent;
             this.lastModified = lastModified;
         }
 
