@@ -157,7 +157,7 @@ apply it to your development environment:
     This profile uses space-only indentation policy and 120 character line
     width, and formatting rules that are pretty much standard in modern Java.
   - Java -> Installed JRE-s:
-    Ensure that you have JDK 6 installed, and that it was added to Eclipse.
+    Ensure that you have JDK 7 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
   - Java -> Compiler -> Javadoc:
     "Malformed Javadoc comments": Error
@@ -180,16 +180,14 @@ apply it to your development environment:
         src/test/resources
     - On the "Libraries" tab:
       - Delete everyhing from there, except the "JRE System Library [...]"
-      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.6"
+      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.7"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
-- Project -> Properties -> Java Compiler
-  - Set "Compiler Compliance Level" to "1.6" (you will have to uncheck
-    "Use compliance from execution environment" for that)
-  - In Errors/Warnings, check in "Enable project specific settings", then set
-    "Forbidden reference (access rules)" from "Error" to "Warning".
+- Project -> Properties -> Java Compiler -> Errors/Warnings:
+  Check in "Enable project specific settings", then set "Forbidden reference
+  (access rules)" from "Error" to "Warning".
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
   project specific settings", and then select "FreeMarker" as active profile.
 - At Project -> Properties -> Java Editor -> Save Actions, check "Enable project

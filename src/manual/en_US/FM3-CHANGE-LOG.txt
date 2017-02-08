@@ -17,3 +17,4 @@ the FreeMarer 3 changelog here:
 - Removed the strict_syntax setting, and so also the support for FTL tags without #. This was a FreeMarker 1.x
   compatibility option.
 - Removed deprecated FMParser contstructors.
+- Minimum Java version increased to 7, but without try-with-resource as that's unavailable before Android 4.4 KitKat.
