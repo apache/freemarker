@@ -80,6 +80,8 @@ import freemarker.template.utility.NullArgumentException;
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
+
+    private static final int READER_BUFFER_SIZE = 8192;
     
     /** This is only non-null during parsing. It's used internally to make some information available through the
      *  Template API-s earlier than the parsing was finished. */
@@ -168,7 +170,8 @@ public class Template extends Configurable {
      * @param reader
      *            The character stream to read from. The {@link Reader} is <em>not</em> closed by this method (unlike
      *            in FreeMarker 2.x.x), so be sure that it's closed somewhere. (Except of course, readers like
-     *            {@link StringReader} need not be closed.)
+     *            {@link StringReader} need not be closed.) The {@link Reader} need not be buffered, because this
+     *            method ensures that it will be read in few kilobyte chunks, not byte by byte.
      * @param cfg
      *            The Configuration object that this Template is associated with. If this is {@code null}, the "default"
      *            {@link Configuration} object is used, which is highly discouraged, because it can easily lead to
@@ -254,9 +257,12 @@ public class Template extends Configurable {
         try {
             ParserConfiguration actualParserConfiguration = getParserConfiguration();
             
+            // Ensure that the parameter Reader is only read in bigger chunks, as we don't know if the it's buffered.
+            // In particular, inside the FreeMarker code, we assume that the stream stages need not be buffered.
             if (!(reader instanceof BufferedReader) && !(reader instanceof StringReader)) {
-                reader = new BufferedReader(reader, 0x1000);
+                reader = new BufferedReader(reader, READER_BUFFER_SIZE);
             }
+            
             ltbReader = new LineTableBuilder(reader, actualParserConfiguration);
             reader = ltbReader;
             

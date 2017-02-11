@@ -628,12 +628,14 @@ public class TemplateCache {
                     if (!inputStream.markSupported()) {
                         inputStream = new BufferedInputStream(inputStream);
                     }
-                    inputStream.mark(Integer.MAX_VALUE); // [FM3] Mark should be released after the 1st FTL tag
-                    templateSpecifiedEncodingHandler = new MarkReleaserTemplateSpecifiedEncodingHandler(
-                            inputStream);
+                    inputStream.mark(Integer.MAX_VALUE); // Mark is released after the 1st FTL tag
+                    templateSpecifiedEncodingHandler = new MarkReleaserTemplateSpecifiedEncodingHandler(inputStream);
                 } else {
                     templateSpecifiedEncodingHandler = null; 
                 }
+                // Regarding buffering worries: On the Reader side we should only read in chunks (like through a
+                // BufferedReader), so there shouldn't be a problem if the InputStream is not buffered. (Also, at least
+                // on Oracle JDK and OpenJDK 7 the InputStreamReader itself has an internal ~8K buffer.)
                 reader = new InputStreamReader(inputStream, initialEncoding);
             } else {
                 throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()

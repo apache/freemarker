@@ -18,6 +18,8 @@
  */
 package freemarker.cache;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
@@ -56,7 +58,8 @@ public final class TemplateLoadingResult {
      *            See {@link #getVersion()} for the meaning of this. Can be {@code null}, but use that only if the
      *            backing storage mechanism doesn't know this information.
      * @param reader
-     *            Gives the content of the template
+     *            Gives the content of the template. It will be read in few thousand character chunks by FreeMarker, so
+     *            generally it need not be a {@link BufferedReader}.
      * @param templateConfiguration
      *            Usually {@code null}, as usually the backing storage mechanism doesn't store such information;
      *            see {@link #getTemplateConfiguration()}.
@@ -85,7 +88,8 @@ public final class TemplateLoadingResult {
      *            See {@link #getVersion()} for the meaning of this. Can be {@code null}, but use that only if the
      *            backing storage mechanism doesn't know this information.
      * @param inputStream
-     *            Gives the content of the template
+     *            Gives the content of the template. It will be read in few thousand byte chunks by FreeMarker, so
+     *            generally it need not be a {@link BufferedInputStream}.
      * @param templateConfiguration
      *            Usually {@code null}, as usually the backing storage mechanism doesn't store such information; see
      *            {@link #getTemplateConfiguration()}. The most probable application is supplying the charset (encoding)
@@ -124,8 +128,8 @@ public final class TemplateLoadingResult {
      * The return value is always the same instance, no mater when and how many times this method is called.
      * 
      * <p>
-     * The return {@code InputStream} should use buffering if that's useful considering the backing storage mechanism.
-     * TODO Is it really needed?
+     * The returned {@code InputStream} will be read in few kilobyte chunks by FreeMarker, so generally it need not
+     * be a {@link BufferedInputStream}. 
      * 
      * @return {@code null} or a {@code InputStream} to read the template content; see method description for more.
      */
@@ -171,6 +175,10 @@ public final class TemplateLoadingResult {
      * {@link #TemplateLoadingResult(TemplateLoadingSource, Serializable, Reader, TemplateConfiguration)}. It's the
      * responsibility of the caller (which is {@link TemplateCache} usually) to {@code close()} the {@link Reader}. The
      * return value is always the same instance, no mater when and how many times this method is called.
+     * 
+     * <p>
+     * The returned {@code Reader} will be read in few thousand character chunks by FreeMarker, so generally it need not
+     * be a {@link BufferedReader}. 
      * 
      * @return {@code null} or a {@code Reader} to read the template content; see method description for more.
      */
