@@ -83,8 +83,7 @@ public class FileTemplateLoader implements TemplateLoader {
      *             {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
      */
     @Deprecated
-    public FileTemplateLoader()
-    throws IOException {
+    public FileTemplateLoader() throws IOException {
         this(new File(SecurityUtilities.getSystemProperty("user.dir")));
     }
 
@@ -95,8 +94,7 @@ public class FileTemplateLoader implements TemplateLoader {
      * the base directory.
      * @param baseDir the base directory for loading templates
      */
-    public FileTemplateLoader(final File baseDir)
-    throws IOException {
+    public FileTemplateLoader(final File baseDir) throws IOException {
         this(baseDir, false);
     }
 
@@ -116,11 +114,10 @@ public class FileTemplateLoader implements TemplateLoader {
      *            outside the {@code baseDir}, set this parameter to {@code true}, but then be very careful with
      *            template paths that are supplied by the visitor or an external system.
      */
-    public FileTemplateLoader(final File baseDir, final boolean disableCanonicalPathCheck)
-    throws IOException {
+    public FileTemplateLoader(final File baseDir, final boolean disableCanonicalPathCheck) throws IOException {
         try {
-            Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            Object[] retval = (Object[]) AccessController.doPrivileged(new PrivilegedExceptionAction<Object[]>() {
+                public Object[] run() throws IOException {
                     if (!baseDir.exists()) {
                         throw new FileNotFoundException(baseDir + " does not exist.");
                     }
@@ -153,11 +150,10 @@ public class FileTemplateLoader implements TemplateLoader {
         }
     }
     
-    public Object findTemplateSource(final String name)
-    throws IOException {
+    public Object findTemplateSource(final String name) throws IOException {
         try {
-            return AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
+                public File run() throws IOException {
                     File source = new File(baseDir, SEP_IS_SLASH ? name : 
                         name.replace('/', File.separatorChar));
                     if (!source.isFile()) {
@@ -170,8 +166,8 @@ public class FileTemplateLoader implements TemplateLoader {
                         String normalized = source.getCanonicalPath();
                         if (!normalized.startsWith(canonicalBasePath)) {
                             throw new SecurityException(source.getAbsolutePath() 
-                                    + " resolves to " + normalized + " which " + 
-                                    " doesn't start with " + canonicalBasePath);
+                                    + " resolves to " + normalized + " which "
+                                    + " doesn't start with " + canonicalBasePath);
                         }
                     }
                     
@@ -188,23 +184,17 @@ public class FileTemplateLoader implements TemplateLoader {
     }
     
     public long getLastModified(final Object templateSource) {
-        return ((Long) (AccessController.doPrivileged(new PrivilegedAction()
-        {
-            public Object run() {
+        return (AccessController.doPrivileged(new PrivilegedAction<Long>() {
+            public Long run() {
                 return Long.valueOf(((File) templateSource).lastModified());
             }
-        }))).longValue();
-        
-        
+        })).longValue();
     }
     
-    public Reader getReader(final Object templateSource, final String encoding)
-    throws IOException {
+    public Reader getReader(final Object templateSource, final String encoding) throws IOException {
         try {
-            return (Reader) AccessController.doPrivileged(new PrivilegedExceptionAction()
-            {
-                public Object run()
-                throws IOException {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<Reader>() {
+                public Reader run() throws IOException {
                     if (!(templateSource instanceof File)) {
                         throw new IllegalArgumentException(
                                 "templateSource wasn't a File, but a: " + 
@@ -219,9 +209,7 @@ public class FileTemplateLoader implements TemplateLoader {
     }
     
     /**
-     * Called by {@link #findTemplateSource(String)} when {@link #getEmulateCaseSensitiveFileSystem()} is {@code true}. Should throw
-     * {@link FileNotFoundException} if there's a mismatch; the error message should contain both the requested and the
-     * correct file name.
+     * Called by {@link #findTemplateSource(String)} when {@link #getEmulateCaseSensitiveFileSystem()} is {@code true}.
      */
     private boolean isNameCaseCorrect(File source) throws IOException {
         final String sourcePath = source.getPath();

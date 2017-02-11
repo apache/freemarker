@@ -78,6 +78,8 @@ import freemarker.debug.impl.DebuggerService;
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
+
+    private static final int READER_BUFFER_SIZE = 4096;
     
     /** This is only non-null during parsing. It's used internally to make some information available through the
      *  Template API-s earlier than the parsing was finished. */
@@ -164,7 +166,10 @@ public class Template extends Configurable {
      *            See {@link #getSourceName()} for the meaning. Can be {@code null}, in which case
      *            {@link #getSourceName()} will return the same as {@link #getName()}.
      * @param reader
-     *            The character stream to read from. It will always be closed ({@link Reader#close()}) by this method.
+     *            The character stream to read from. It will always be closed ({@link Reader#close()}) by
+     *            this method (this is for backward compatibility; later major versions may discontinue this behavior).
+     *            The {@link Reader} need not be buffered, because this method ensures that it will be read in few
+     *            kilobyte chunks, not byte by byte.
      * @param cfg
      *            The Configuration object that this Template is associated with. If this is {@code null}, the "default"
      *            {@link Configuration} object is used, which is highly discouraged, because it can easily lead to
@@ -234,7 +239,7 @@ public class Template extends Configurable {
             ParserConfiguration actualParserConfiguration = getParserConfiguration();
             
             if (!(reader instanceof BufferedReader) && !(reader instanceof StringReader)) {
-                reader = new BufferedReader(reader, 0x1000);
+                reader = new BufferedReader(reader, READER_BUFFER_SIZE);
             }
             ltbReader = new LineTableBuilder(reader, actualParserConfiguration);
             reader = ltbReader;

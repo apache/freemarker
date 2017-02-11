@@ -27,6 +27,11 @@ import org.apache.commons.io.IOUtils;
 import freemarker.cache.TemplateLoader;
 import freemarker.test.utility.TestUtil;
 
+/**
+ * Removes the Apache copyright boiler plate from the beginning of the template, so that they don't mess up the expected
+ * template output. This can interfere with tests that try to test I/O errors and such low level things, so use with
+ * care. 
+ */
 public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
 
     private final TemplateLoader innerTemplateLoader;

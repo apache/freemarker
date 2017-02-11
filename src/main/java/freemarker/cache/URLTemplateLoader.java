@@ -31,8 +31,7 @@ import freemarker.template.Configuration;
 /**
  * This is an abstract template loader that can load templates whose
  * location can be described by an URL. Subclasses only need to override
- * the {@link #getURL(String)} method. Both {@link ClassTemplateLoader} and
- * {@link WebappTemplateLoader} are (quite trivial) subclasses of this class.
+ * the {@link #getURL(String)} method.
  */
 public abstract class URLTemplateLoader implements TemplateLoader {
     
@@ -43,16 +42,6 @@ public abstract class URLTemplateLoader implements TemplateLoader {
         URL url = getURL(name);
         return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
-    
-    /**
-     * Given a template name (plus potential locale decorations) retrieves
-     * an URL that points the template source.
-     * @param name the name of the sought template, including the locale
-     * decorations.
-     * @return an URL that points to the template source, or null if it can
-     * determine that the template source does not exist.
-     */
-    protected abstract URL getURL(String name);
     
     public long getLastModified(Object templateSource) {
         return ((URLTemplateSource) templateSource).lastModified();
@@ -68,23 +57,6 @@ public abstract class URLTemplateLoader implements TemplateLoader {
     public void closeTemplateSource(Object templateSource)
     throws IOException {
         ((URLTemplateSource) templateSource).close();
-    }
-
-    /**
-     * Can be used by subclasses to canonicalize URL path prefixes.
-     * @param prefix the path prefix to canonicalize
-     * @return the canonicalized prefix. All backslashes are replaced with
-     * forward slashes, and a trailing slash is appended if the original
-     * prefix wasn't empty and didn't already end with a slash.
-     */
-    protected static String canonicalizePrefix(String prefix) {
-        // make it foolproof
-        prefix = prefix.replace('\\', '/');
-        // ensure there's a trailing slash
-        if (prefix.length() > 0 && !prefix.endsWith("/")) {
-            prefix += "/";
-        }
-        return prefix;
     }
 
     /**
@@ -114,6 +86,33 @@ public abstract class URLTemplateLoader implements TemplateLoader {
      */
     public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
         this.urlConnectionUsesCaches = urlConnectionUsesCaches;
+    }
+
+    /**
+     * Given a template name (plus potential locale decorations) retrieves
+     * an URL that points the template source.
+     * @param name the name of the sought template, including the locale
+     * decorations.
+     * @return an URL that points to the template source, or null if it can
+     * determine that the template source does not exist.
+     */
+    protected abstract URL getURL(String name);
+    
+    /**
+     * Can be used by subclasses to canonicalize URL path prefixes.
+     * @param prefix the path prefix to canonicalize
+     * @return the canonicalized prefix. All backslashes are replaced with
+     * forward slashes, and a trailing slash is appended if the original
+     * prefix wasn't empty and didn't already end with a slash.
+     */
+    protected static String canonicalizePrefix(String prefix) {
+        // make it foolproof
+        prefix = prefix.replace('\\', '/');
+        // ensure there's a trailing slash
+        if (prefix.length() > 0 && !prefix.endsWith("/")) {
+            prefix += "/";
+        }
+        return prefix;
     }
     
 }

@@ -155,7 +155,8 @@ public class TemplateCache {
 
     /**
      * @param templateLoader
-     *            The {@link TemplateLoader} to use. Can't be {@code null}.
+     *            The {@link TemplateLoader} to use. Can be {@code null}, though then every request will result in
+     *            {@link TemplateNotFoundException}.
      * @param cacheStorage
      *            The {@link CacheStorage} to use. Can't be {@code null}.
      * @param templateLookupStrategy
