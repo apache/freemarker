@@ -17,11 +17,11 @@
  * under the License.
  */
 
-
 package freemarker.cache;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -34,44 +34,17 @@ import org.slf4j.LoggerFactory;
 import freemarker.template.Configuration;
 
 /**
- * This is an abstract template loader that can load templates whose
- * location can be described by an URL. Subclasses only need to override
- * the {@link #getURL(String)} method.
+ * This is an abstract template loader that can load templates whose location can be described by an URL. Subclasses
+ * only need to override the {@link #getURL(String)}, {@link #extractNegativeResult(URLConnection)}, and perhaps the
+ * {@link #prepareConnection(URLConnection)} method.
  */
-// TODO JUnit test
+// TODO JUnit test (including implementing a HTTP-based template loader to test the new protected methods)
 public abstract class URLTemplateLoader implements TemplateLoader {
     
     private static final Logger LOG = LoggerFactory.getLogger("freemarker.cache");
     
     private Boolean urlConnectionUsesCaches = false;
     
-    /**
-     * Given a template name (plus potential locale decorations) retrieves
-     * an URL that points the template source.
-     * @param name the name of the sought template, including the locale
-     * decorations.
-     * @return an URL that points to the template source, or null if it can
-     * determine that the template source does not exist.
-     */
-    protected abstract URL getURL(String name);
-    
-    /**
-     * Can be used by subclasses to canonicalize URL path prefixes.
-     * @param prefix the path prefix to canonicalize
-     * @return the canonicalized prefix. All backslashes are replaced with
-     * forward slashes, and a trailing slash is appended if the original
-     * prefix wasn't empty and didn't already end with a slash.
-     */
-    protected static String canonicalizePrefix(String prefix) {
-        // make it foolproof
-        prefix = prefix.replace('\\', '/');
-        // ensure there's a trailing slash
-        if (prefix.length() > 0 && !prefix.endsWith("/")) {
-            prefix += "/";
-        }
-        return prefix;
-    }
-
     /**
      * Getter pair of {@link #setURLConnectionUsesCaches(Boolean)}.
      * 
@@ -83,7 +56,7 @@ public abstract class URLTemplateLoader implements TemplateLoader {
 
     /**
      * Sets if {@link URLConnection#setUseCaches(boolean)} will be called, and with what value. By default this is
-     * {@code false}, becase FreeMarker has its own template cache with its own update delay setting
+     * {@code false}, because FreeMarker has its own template cache with its own update delay setting
      * ({@link Configuration#setTemplateUpdateDelay(int)}). If this is set to {@code null},
      * {@link URLConnection#setUseCaches(boolean)} won't be called.
      */
@@ -110,18 +83,43 @@ public abstract class URLTemplateLoader implements TemplateLoader {
             conn.setUseCaches(urlConnectionUsesCaches);
         }
         
-        // To prevent clustering issues, getLastModified(fallbackToJarLMD=false)
-        long lmd = getLastModified(conn, false);
-        Long version = lmd != -1 ? lmd : null;
+        prepareConnection(conn);
+        conn.connect();
         
-        URLTemplateLoadingSource source = new URLTemplateLoadingSource(url);
-        
-        if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source)
-                && Objects.equals(ifVersionDiffersFrom, version)) {
-            return TemplateLoadingResult.NOT_MODIFIED;
+        InputStream inputStream = null;
+        Long version;
+        URLTemplateLoadingSource source;
+        try {
+            TemplateLoadingResult negativeResult = extractNegativeResult(conn);
+            if (negativeResult != null) {
+                return negativeResult;
+            }
+            
+            // To prevent clustering issues, getLastModified(fallbackToJarLMD=false)
+            long lmd = getLastModified(conn, false);
+            version = lmd != -1 ? lmd : null;
+            
+            source = new URLTemplateLoadingSource(url);
+            
+            if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source)
+                    && Objects.equals(ifVersionDiffersFrom, version)) {
+                return TemplateLoadingResult.NOT_MODIFIED;
+            }
+            
+            inputStream = conn.getInputStream();
+        } catch (Throwable e) {
+            try {
+                if (inputStream == null) {
+                    // There's no URLConnection.close(), so we do this hack. In case of HttpURLConnection we could call
+                    // disconnect(), but that's perhaps too aggressive.
+                    conn.getInputStream().close();
+                }
+            } catch (IOException e2) {
+                LOG.debug("Failed to close connection inputStream", e2);
+            }
+            throw e;
         }
-        
-        return new TemplateLoadingResult(source, version, conn.getInputStream(), null);
+        return new TemplateLoadingResult(source, version, inputStream, null);
     }
 
     @Override
@@ -171,6 +169,57 @@ public abstract class URLTemplateLoader implements TemplateLoader {
         } else {
           return conn.getLastModified();
         }
+    }
+
+    /**
+     * Given a template name (plus potential locale decorations) retrieves an URL that points the template source.
+     * 
+     * @param name
+     *            the name of the sought template (including the locale decorations, or other decorations the
+     *            {@link TemplateLookupStrategy} uses).
+     *            
+     * @return An URL that points to the template source, or null if it can be determined that the template source does
+     *         not exist. For many implementations the existence of the template can't be decided at this point, and you
+     *         rely on {@link #extractNegativeResult(URLConnection)} instead.
+     */
+    protected abstract URL getURL(String name);
+
+    /**
+     * Called before the resource if read, checks if we can immediately return a {@link TemplateLoadingResult#NOT_FOUND}
+     * or {@link TemplateLoadingResult#NOT_MODIFIED}, or throw an {@link IOException}. For example, for a HTTP-based
+     * storage, the HTTP response status 404 could result in {@link TemplateLoadingResult#NOT_FOUND}, 304 in
+     * {@link TemplateLoadingResult#NOT_MODIFIED}, and some others, like 500 in throwing an {@link IOException}.
+     * 
+     * <p>Some
+     * implementations rely on {@link #getURL(String)} returning {@code null} when a template is missing, in which case
+     * this method is certainly not applicable.
+     */
+    protected abstract TemplateLoadingResult extractNegativeResult(URLConnection conn) throws IOException;
+
+    /**
+     * Called before anything that causes the connection to actually build up. This is where
+     * {@link URLConnection#setIfModifiedSince(long)} and such can be called if someone overrides this.
+     * The default implementation in {@link URLTemplateLoader} does nothing. 
+     */
+    protected void prepareConnection(URLConnection conn) {
+        // Does nothing
+    }
+
+    /**
+     * Can be used by subclasses to canonicalize URL path prefixes.
+     * @param prefix the path prefix to canonicalize
+     * @return the canonicalized prefix. All backslashes are replaced with
+     * forward slashes, and a trailing slash is appended if the original
+     * prefix wasn't empty and didn't already end with a slash.
+     */
+    protected static String canonicalizePrefix(String prefix) {
+        // make it foolproof
+        prefix = prefix.replace('\\', '/');
+        // ensure there's a trailing slash
+        if (prefix.length() > 0 && !prefix.endsWith("/")) {
+            prefix += "/";
+        }
+        return prefix;
     }
     
 }

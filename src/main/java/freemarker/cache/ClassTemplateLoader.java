@@ -19,7 +19,9 @@
 
 package freemarker.cache;
 
+import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -98,19 +100,6 @@ public class ClassTemplateLoader extends URLTemplateLoader {
         this.basePackagePath = canonBasePackagePath;
     }
 
-    @Override
-    protected URL getURL(String name) {
-        String fullPath = basePackagePath + name;
-
-        // Block java.net.URLClassLoader exploits:
-        if (basePackagePath.equals("/") && !isSchemeless(fullPath)) {
-            return null;
-        }
-
-        return resourceLoaderClass != null ? resourceLoaderClass.getResource(fullPath) : classLoader
-                .getResource(fullPath);
-    }
-
     private static boolean isSchemeless(String fullPath) {
         int i = 0;
         int ln = fullPath.length();
@@ -170,6 +159,24 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      */
     public String getBasePackagePath() {
         return basePackagePath;
+    }
+
+    @Override
+    protected URL getURL(String name) {
+        String fullPath = basePackagePath + name;
+    
+        // Block java.net.URLClassLoader exploits:
+        if (basePackagePath.equals("/") && !isSchemeless(fullPath)) {
+            return null;
+        }
+    
+        return resourceLoaderClass != null ? resourceLoaderClass.getResource(fullPath) : classLoader
+                .getResource(fullPath);
+    }
+
+    @Override
+    protected TemplateLoadingResult extractNegativeResult(URLConnection conn) throws IOException {
+        return null;
     }
 
 }
