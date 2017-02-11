@@ -29,9 +29,10 @@ import java.net.URLConnection;
 import freemarker.template.Configuration;
 
 /**
- * This is an abstract template loader that can load templates whose
- * location can be described by an URL. Subclasses only need to override
- * the {@link #getURL(String)} method.
+ * This is an abstract template loader that can load templates whose location can be described by an URL. This
+ * superclass only works for cases where merely getting the URL immediately tells if the resource exists, not for cases
+ * where for example you had to check response headers to know that. The subclasses only need to override the
+ * {@link #getURL(String)} method.
  */
 public abstract class URLTemplateLoader implements TemplateLoader {
     
@@ -93,8 +94,7 @@ public abstract class URLTemplateLoader implements TemplateLoader {
      * an URL that points the template source.
      * @param name the name of the sought template, including the locale
      * decorations.
-     * @return an URL that points to the template source, or null if it can
-     * determine that the template source does not exist.
+     * @return an URL that points to the template source, or {@code null} if the template does not exist.
      */
     protected abstract URL getURL(String name);
     
