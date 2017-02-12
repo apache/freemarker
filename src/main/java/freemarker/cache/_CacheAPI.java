@@ -32,14 +32,14 @@ public final class _CacheAPI {
         // Not meant to be instantiated
     }
     
-    public static String toAbsoluteName(TemplateNameFormat templateNameFormat, String baseName, String targetName)
+    public static String toRootBasedName(TemplateNameFormat templateNameFormat, String baseName, String targetName)
             throws MalformedTemplateNameException {
-        return templateNameFormat.toAbsoluteName(baseName, targetName);
+        return templateNameFormat.toRootBasedName(baseName, targetName);
     }
 
-    public static String normalizeAbsoluteName(TemplateNameFormat templateNameFormat, String name)
+    public static String normalizeRootBasedName(TemplateNameFormat templateNameFormat, String name)
             throws MalformedTemplateNameException {
-        return templateNameFormat.normalizeAbsoluteName(name);
+        return templateNameFormat.normalizeRootBasedName(name);
     }
     
 }
