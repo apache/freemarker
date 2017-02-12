@@ -2622,7 +2622,7 @@ public final class Environment extends Configurable {
             // that (at least in 2.3.x) the name used for eager import namespace key isn't the template.sourceName, but
             // the looked up name (template.name), which we can get quickly:
             TemplateNameFormat tnf = getConfiguration().getTemplateNameFormat();
-            templateName = _CacheAPI.normalizeAbsoluteName(tnf, _CacheAPI.toAbsoluteName(tnf, null, templateName));
+            templateName = _CacheAPI.normalizeRootBasedName(tnf, templateName);
         }
         
         if (loadedLibs == null) {
@@ -2679,8 +2679,9 @@ public final class Environment extends Configurable {
      * template refers to another template.
      * 
      * @param baseName
-     *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null}, which usually
-     *            means that the base is the root "directory". Assuming {@link TemplateNameFormat#DEFAULT_2_3_0} or
+     *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null} (happens when
+     *            resolving names in nameless templates), which means that the base is the root "directory", and so the
+     *            {@code targetName} is returned without change. Assuming {@link TemplateNameFormat#DEFAULT_2_3_0} or
      *            {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as follows. If you want to specify a base
      *            directory here, it must end with {@code "/"}. If it doesn't end with {@code "/"}, it's parent
      *            directory will be used as the base path. Might starts with a scheme part (like {@code "foo://"}, or
@@ -2699,7 +2700,10 @@ public final class Environment extends Configurable {
      */
     public String toFullTemplateName(String baseName, String targetName)
             throws MalformedTemplateNameException {
-        return _CacheAPI.toAbsoluteName(configuration.getTemplateNameFormat(), baseName, targetName);
+        if (baseName == null) {
+            return targetName;
+        }
+        return _CacheAPI.toRootBasedName(configuration.getTemplateNameFormat(), baseName, targetName);
     }
 
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {

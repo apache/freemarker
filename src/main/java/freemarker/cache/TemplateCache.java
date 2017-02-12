@@ -246,7 +246,7 @@ public class TemplateCache {
         NullArgumentException.check("encoding", encoding);
         
         try {
-            name = templateNameFormat.normalizeAbsoluteName(name);
+            name = templateNameFormat.normalizeRootBasedName(name);
         } catch (MalformedTemplateNameException e) {
             // If we don't have to emulate backward compatible behavior, then just rethrow it: 
             if (templateNameFormat != TemplateNameFormat.DEFAULT_2_3_0
@@ -793,7 +793,7 @@ public class TemplateCache {
         if (encoding == null) {
             throw new IllegalArgumentException("Argument \"encoding\" can't be null");
         }
-        name = templateNameFormat.normalizeAbsoluteName(name);
+        name = templateNameFormat.normalizeRootBasedName(name);
         if (name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugPrefix = debug
