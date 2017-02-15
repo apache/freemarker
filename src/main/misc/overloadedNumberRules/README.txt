@@ -18,8 +18,8 @@
  */
 
 This FMPP project is used for generating the source code of some
-`freemarker.ext.beans.OverloadedNumberUtil` methods based on the
-content of `prices.ods` (LibreOffice spreadsheet).
+`OverloadedNumberUtil` methods based on the content of `prices.ods`
+(LibreOffice spreadsheet).
 
 Usage:
 1. Edit `prices.ods`

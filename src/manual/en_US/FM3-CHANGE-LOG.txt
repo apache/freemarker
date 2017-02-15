@@ -61,3 +61,20 @@ the FreeMarer 3 changelog here:
   by who has created it). This avoids some surprises from the past, such as the unablility to reset a Reader to a mark
   after parsing. If you call those constructors, be sure that you close the Reader yourself. (Obviously, it doesn't
   mater for StringReader-s.)
+- Renamed top level java package from freemarker to org.apache.freemarker 
+- Reorganized package structure. We will have a freemarker-core and a freemarker-servlet module later, so
+  we got org.apache.freemarker.core (has nothing to do with the old freemarker.core) and
+  org.apache.freemarker.servlet (this replaced freemarker.ext.servlet and freemarker.ext.jsp).
+  Directly inside org.apache.freemarker.core we have most of the classes that were in
+  freemarker.template and freemarker.core, however, model related classes (and object wrappers)
+  were moved to org.apache.freemarker.core.model, and template loading and caching related classes
+  to org.apache.freemarker.core.templateresolver (because later we will have a class called
+  TemplateResolver, which is the central class of loading and caching and template name rules).
+  freemarker.ext.beans were moved under org.apache.freemarker.core.model.impl.beans for now (but later
+  we only want a DefaultObject wrapper, no BeansWrapper, so this will change) and freemarker.ext.dom
+  was moved to org.apache.freemarker.core.model.impl.dom.
+- Moved the all the static final ObjectWrapper-s to the new _StaticObjectWrappers class, and made them
+  write protected (non-configurable). Also now they come from the pool that ObjectWrapper builders use.
+- WrappingTemplateModel.objectWrapper is now final, and its statically stored default value can't be set anymore.
+- Removed SimpleObjectWrapper deprecated paramerless constructor
+- Removed ResourceBundleLocalizedString and LocalizedString: Hardly anybody has discovered these, and they had no JUnit coverage.

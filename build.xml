@@ -32,8 +32,8 @@
   <!-- ================================================================== -->
 
   <!-- Maven project coordinates: -->
-  <property name="mavenGroupId" value="org.freemarker" />
-  <property name="mavenArtifactId" value="freemarker-gae" />
+  <property name="mavenGroupId" value="org.apache.freemarker" />
+  <property name="mavenArtifactId" value="freemarker" />
   <!-- Ivy project coordinates: -->
   <property name="moduleOrg" value="org.freemarker" />
   <property name="moduleName" value="freemarker" />
@@ -75,7 +75,7 @@
   <mkdir dir="build"/>
   <!-- Copying is needed to substitute the timestamps. -->
   <copy
-      file="src/main/resources/freemarker/version.properties"
+      file="src/main/resources/org/apache/freemarker/core/version.properties"
       tofile="build/version.properties.tmp"
       filtering="true"
       overwrite="true"
@@ -131,7 +131,7 @@
     />
     
     <property name="_javaccOutputDir"
-      value="build/generated-sources/java/freemarker/core/"
+      value="build/generated-sources/java/org/apache/freemarker/core/ast"
     />
 
     <mkdir dir="${_javaccOutputDir}" />
@@ -226,9 +226,7 @@
       classpathref="ivy.dep"
       bootclasspath="${boot.classpath.j2se1.7}"
       excludes="
-        freemarker/ext/jsp/**,
-        freemarker/ext/servlet/**,
-        freemarker/cache/Web?ppTemplateLoader*.java"
+    	org/apache/freemarker/servlet/**"
     >
       <src>
         <pathelement location="build/src-main-java-filtered" />
@@ -237,7 +235,7 @@
     </javac>
     
     <rmic
-      base="build/classes" includes="freemarker/debug/impl/Rmi*Impl.class"
+      base="build/classes" includes="org/apache/freemarker/core/debug/impl/Rmi*Impl.class"
       classpathref="ivy.dep"
       verify="yes" stubversion="1.2"
     />
@@ -249,33 +247,24 @@
       classpathref="ivy.dep.jsp2.1"
       bootclasspath="${boot.classpath.j2se1.7}"
       includes="
-        freemarker/ext/jsp/**,
-        freemarker/ext/servlet/**,
-        freemarker/cache/WebappTemplateLoader.java"
+        org/apache/freemarker/servlet/**"
     />
         
     <rmic base="build/classes" classpathref="ivy.dep"
-      includes="build/src-main-java-filtered/freemarker/debug/impl/Rmi*Impl.class"
+      includes="build/src-main-java-filtered/org/apache/freemarker/core/debug/impl/Rmi*Impl.class"
       verify="yes" stubversion="1.2"
     />
-    
-    <!-- We don't have this file in 2.4.X... yet?
-    <copy
-      file="build/classes/freemarker/core/SecureRendererImpl.class"
-      tofile="build/classes/freemarker/core/SecureRendererImpl.clazz"
-    />
-    -->
     
     <copy toDir="build/classes">
       <fileset dir="src/main/resources"
         excludes="
-          freemarker/version.properties"
+          org/apache/freemarker/core/version.properties"
       />
     </copy>
     <copy toDir="build/classes" filtering="true" overwrite="true">
       <fileset dir="src/main/resources"
         includes="
-          freemarker/version.properties"
+      		org/apache/freemarker/core/version.properties"
       />
     </copy>
     <copy toDir="build/classes/META-INF">
@@ -313,26 +302,10 @@
       classpathref="ivy.dep"
     />
   
-    <!-- Hack: This file should be excluded, but I can't explain that to bnd. -->
-    <!-- We don't have this file in 2.4.X... yet?
-    <move
-        file="build/classes/freemarker/core/SecureRendererImpl.class"
-        tofile="build/SecureRendererImpl.class.tmp"
-        preservelastmodified="true" overwrite="true"
-    />
-    -->
     <bnd:bnd
         files="osgi.bnd" eclipse="false"
         output="build/freemarker.jar"
     />
-    <!-- Revert previous hack... -->
-    <!-- We don't have this file in 2.4.X... yet?
-    <move
-        file="build/SecureRendererImpl.class.tmp"
-        tofile="build/classes/freemarker/core/SecureRendererImpl.class"
-        preservelastmodified="true" overwrite="true"
-    />
-    -->
   </target>
 
   <!-- ================================================================= -->
@@ -403,9 +376,15 @@
       destdir="build/api"
       doctitle="FreeMarker ${version}"
       packagenames="
-        freemarker.debug, freemarker.template.*,
-        freemarker.core.*, freemarker.ext.*,
-        freemarker.cache.*, freemarker.log.*"
+        org.apache.freemarker.core.*,
+    	org.apache.freemarker.core.debug.*,
+    	org.apache.freemarker.core.templateresolver.*,
+        org.apache.freemarker.core.model.*,
+    	org.apache.freemarker.core.model.impl.*,
+    	org.apache.freemarker.core.model.impl.beans.*,
+    	org.apache.freemarker.core.model.impl.dom.*,
+        org.apache.freemarker.servlet.*,
+    	org.apache.freemarker.servlet.jsp.*"
       use="true"
       version="true"
       author="true"
@@ -525,7 +504,7 @@
     <u:manual offline="true" locale="zh_CN" />
   </target>
 
-  <target name="manualFreemarkerOrg_zh_CN" depends="init" description="Build the Manual to be upload to freemarker.org" >
+  <target name="manualFreemarkerOrg_zh_CN" depends="init" description="Build the Manual to be upload to freemarker.org">
     <u:manual offline="false" locale="zh_CN" />
   </target>
   

@@ -27,10 +27,12 @@ options
 
 PARSER_BEGIN(FMParser)
 
-package freemarker.core;
+package org.apache.freemarker.core.ast;
 
-import freemarker.template.*;
-import freemarker.template.utility.*;
+import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.model.*;
+import org.apache.freemarker.core.model.impl.*;
+import org.apache.freemarker.core.util.*;
 import java.io.*;
 import java.util.*;
 

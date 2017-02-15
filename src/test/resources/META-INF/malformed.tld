@@ -25,7 +25,7 @@
   <uri>http://freemarker.org/taglibs/test/MetaInfTldSources-1xx</uri>
   <ta>
     <name>simpletag</name>
-    <tag-class>freemarker.ext.jsp.taglibmembers.TestSimpleTag3</tag-class>
+    <tag-class>org.apache.freemarker.servlet.jsp.taglibmembers.TestSimpleTag3</tag-class>
     <body-content>empty</body-content>
   </tag>
 </taglib>

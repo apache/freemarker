@@ -31,13 +31,13 @@ Bundle-Vendor: freemarker.org
 
 Include-Resource: META-INF=build/classes/META-INF
 
-Export-Package: !freemarker.test.*, freemarker.*;version="${versionForOSGi}"
+Export-Package: !org.apache.freemarker.test.*, org.apache.freemarker.*;version="${versionForOSGi}"
 # Important:
 # Packages that don't match nor the Export-Package nor the
 # Private-Package mainfest header will be excluded from
 # the .jar file!
 
-Import-Package: !freemarker.*, *;resolution:="optional"
+Import-Package: !org.apache.freemarker.*, *;resolution:="optional"
 # The above makes all imports optional (like org.python, etc.),
 # except those that were explicitly listed (or are inside java.*).
 # Thus, even when the Java platfrom includes a package, it won't
@@ -52,13 +52,13 @@ DynamicImport-Package: *
 # The required minimum is 1.4, but we utilize 1.5 if available.
 # See also: http://wiki.eclipse.org/Execution_Environments, "Compiling
 # against more than is required"
-Bundle-RequiredExecutionEnvironment: J2SE-1.5, J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.7
 
 # Non-OSGi meta:
-Extension-name: FreeMarker
-Specification-Title: FreeMarker
+Extension-name: Apache FreeMarker
+Specification-Title: Apache FreeMarker
 Specification-Version: ${versionForMf}
 Specification-Vendor: freemarker.org
-Implementation-Title: FreeMarker
+Implementation-Title: Apache FreeMarker
 Implementation-Version: ${versionForMf}
 Implementation-Vendor: freemarker.org
