@@ -17,12 +17,14 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.util.NullArgumentException;
 import org.apache.freemarker.core.util.StringUtil;
 

@@ -31,14 +31,14 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.templateresolver.ClassTemplateLoader;
-import org.apache.freemarker.core.templateresolver.FileTemplateLoader;
-import org.apache.freemarker.core.templateresolver.MultiTemplateLoader;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
+import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.servlet.WebAppTemplateLoader;
 import org.junit.Test;
 

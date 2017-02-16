@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.apache.freemarker.core.ast.CollectionAndSequence;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.MapKeyValuePairIterator;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
@@ -34,6 +33,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
+import org.apache.freemarker.core.model.impl.MapKeyValuePairIterator;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.core.util.RichObjectWrapper;
 

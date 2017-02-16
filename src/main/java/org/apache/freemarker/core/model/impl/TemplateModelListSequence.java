@@ -17,9 +17,13 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.model;
+package org.apache.freemarker.core.model.impl;
 
 import java.util.List;
+
+import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
  * A sequence that wraps a {@link List} of {@link TemplateModel}-s. It does not copy the original

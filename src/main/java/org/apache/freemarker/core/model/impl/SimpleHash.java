@@ -29,7 +29,6 @@ import java.util.TreeMap;
 
 import org.apache.freemarker.core.ast._DelayedJQuote;
 import org.apache.freemarker.core.ast._TemplateModelException;
-import org.apache.freemarker.core.model.MapKeyValuePairIterator;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;

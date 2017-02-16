@@ -17,9 +17,10 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.templateresolver.TemplateLoader;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!

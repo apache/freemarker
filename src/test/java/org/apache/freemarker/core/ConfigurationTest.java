@@ -75,17 +75,19 @@ import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.apache.freemarker.core.model.impl.beans.StringModel;
-import org.apache.freemarker.core.templateresolver.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
-import org.apache.freemarker.core.templateresolver.NullCacheStorage;
-import org.apache.freemarker.core.templateresolver.SoftCacheStorage;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
-import org.apache.freemarker.core.templateresolver.StrongCacheStorage;
-import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+import org.apache.freemarker.core.templateresolver.impl.NullCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
 import org.apache.freemarker.core.util.DateUtil;
 import org.apache.freemarker.core.util.NullArgumentException;
 import org.apache.freemarker.core.util.NullWriter;
@@ -239,9 +241,9 @@ public class ConfigurationTest extends TestCase {
         }
         
         assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
-        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
+        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
         //
-        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
+        cfg.setTemplateLookupStrategy(DefaultTemplateLookupStrategy.INSTANCE);
         assertTrue(cfg.isTemplateLookupStrategyExplicitlySet());
         //
         for (int i = 0; i < 2; i++) {
@@ -250,16 +252,16 @@ public class ConfigurationTest extends TestCase {
         }
         
         assertFalse(cfg.isTemplateNameFormatExplicitlySet());
-        assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfg.getTemplateNameFormat());
         //
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         assertTrue(cfg.isTemplateNameFormatExplicitlySet());
-        assertSame(TemplateNameFormat.DEFAULT_2_4_0, cfg.getTemplateNameFormat());
+        assertSame(DefaultTemplateNameFormat.INSTANCE, cfg.getTemplateNameFormat());
         //
         for (int i = 0; i < 2; i++) {
             cfg.unsetTemplateNameFormat();
             assertFalse(cfg.isTemplateNameFormatExplicitlySet());
-            assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+            assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfg.getTemplateNameFormat());
         }
         
         assertFalse(cfg.isCacheStorageExplicitlySet());
@@ -682,15 +684,15 @@ public class ConfigurationTest extends TestCase {
         assertEquals(0, cache.getSize());
         cfg.getTemplate("toCache1.ftl");
         assertEquals(1, cache.getSize());
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
         assertEquals(1, cache.getSize());
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         assertEquals(0, cache.getSize());
         cfg.getTemplate("toCache1.ftl");
         assertEquals(1, cache.getSize());
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         assertEquals(1, cache.getSize());
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
         assertEquals(0, cache.getSize());
     }
 
@@ -709,7 +711,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals("In a/b.ftl", template.toString());
         }
         
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         
         {
             final Template template = cfg.getTemplate("a/./../b.ftl");
@@ -721,11 +723,11 @@ public class ConfigurationTest extends TestCase {
 
     public void testTemplateNameFormatSetSetting() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfg.getTemplateNameFormat());
         cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defAult_2_4_0");
-        assertSame(TemplateNameFormat.DEFAULT_2_4_0, cfg.getTemplateNameFormat());
+        assertSame(DefaultTemplateNameFormat.INSTANCE, cfg.getTemplateNameFormat());
         cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defaUlt_2_3_0");
-        assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfg.getTemplateNameFormat());
         assertTrue(cfg.isTemplateNameFormatExplicitlySet());
         cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defauLt");
         assertFalse(cfg.isTemplateNameFormatExplicitlySet());
@@ -770,10 +772,10 @@ public class ConfigurationTest extends TestCase {
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
+        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
         
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
-        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
+        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
         
         CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
@@ -781,7 +783,7 @@ public class ConfigurationTest extends TestCase {
         cfg.getTemplate("toCache1.ftl");
         assertEquals(1, cache.getSize());
         
-        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
+        cfg.setTemplateLookupStrategy(DefaultTemplateLookupStrategy.INSTANCE);
         assertEquals(1, cache.getSize());
         
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
@@ -799,7 +801,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setTemplateLookupStrategy(myStrategy);
         assertEquals(1, cache.getSize());
         
-        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
+        cfg.setTemplateLookupStrategy(DefaultTemplateLookupStrategy.INSTANCE);
         assertEquals(0, cache.getSize());
     }
     

@@ -34,7 +34,7 @@ import org.apache.freemarker.core.ast.InvalidReferenceException;
 import org.apache.freemarker.core.ast.LibraryLoad;
 import org.apache.freemarker.core.ast.Environment.Namespace;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util.NullWriter;
 import org.junit.Test;
 

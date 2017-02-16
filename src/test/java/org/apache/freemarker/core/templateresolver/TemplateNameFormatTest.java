@@ -32,7 +32,8 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class TemplateNameFormatTest {
     public void testToRootBasedName() throws MalformedTemplateNameException {
         // Path that are treated the same both in 2.3 and 2.4 format:
         for (TemplateNameFormat tnf : new TemplateNameFormat[] {
-                TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
+                DefaultTemplateNameFormatFM2.INSTANCE, DefaultTemplateNameFormat.INSTANCE }) {
             // Relative paths:
             // - No scheme:
             assertEquals("a/b", tnf.toRootBasedName("a/", "b"));
@@ -76,7 +77,7 @@ public class TemplateNameFormatTest {
         
         // Scheme names in 2.4 format only:
         {
-            final TemplateNameFormat tnf = TemplateNameFormat.DEFAULT_2_4_0;
+            final TemplateNameFormat tnf = DefaultTemplateNameFormat.INSTANCE;
             assertEquals("s:b", tnf.toRootBasedName("s:f", "b"));
             assertEquals("s:/b", tnf.toRootBasedName("s:/f", "b"));
             assertEquals("s:b", tnf.toRootBasedName("s:f", "/b"));
@@ -91,7 +92,7 @@ public class TemplateNameFormatTest {
         
         // Scheme names in 2.3 format only:
         {
-            final TemplateNameFormat tnf = TemplateNameFormat.DEFAULT_2_3_0;
+            final TemplateNameFormat tnf = DefaultTemplateNameFormatFM2.INSTANCE;
             assertEquals("a/s://b", tnf.toRootBasedName("a/s://f/", "/b"));
         }
     }
@@ -100,7 +101,7 @@ public class TemplateNameFormatTest {
     public void testNormalizeRootBasedName() throws MalformedTemplateNameException {
         // Normalizations that are the same in legacy and modern format:
         for (TemplateNameFormat tnf : new TemplateNameFormat[] {
-                TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
+                DefaultTemplateNameFormatFM2.INSTANCE, DefaultTemplateNameFormat.INSTANCE }) {
             assertEquals("", tnf.normalizeRootBasedName(""));
             for (String lead : new String[] { "", "/" }) {
                 assertEquals("foo", tnf.normalizeRootBasedName(lead + "foo"));
@@ -212,11 +213,11 @@ public class TemplateNameFormatTest {
         
         // New kind of scheme handling:
 
-        assertEquals("s:a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeRootBasedName("s:a/b"));
-        assertEquals("s:a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeRootBasedName("s:/a/b"));
-        assertEquals("s://a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeRootBasedName("s://a/b"));
-        assertEquals("s://a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeRootBasedName("s:///a/b"));
-        assertEquals("s://a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeRootBasedName("s:////a/b"));
+        assertEquals("s:a/b", DefaultTemplateNameFormat.INSTANCE.normalizeRootBasedName("s:a/b"));
+        assertEquals("s:a/b", DefaultTemplateNameFormat.INSTANCE.normalizeRootBasedName("s:/a/b"));
+        assertEquals("s://a/b", DefaultTemplateNameFormat.INSTANCE.normalizeRootBasedName("s://a/b"));
+        assertEquals("s://a/b", DefaultTemplateNameFormat.INSTANCE.normalizeRootBasedName("s:///a/b"));
+        assertEquals("s://a/b", DefaultTemplateNameFormat.INSTANCE.normalizeRootBasedName("s:////a/b"));
         
         // Illegal use a of ":":
         assertNormRBNameThrowsColonExceptionOn24("a/b:c/d");
@@ -276,7 +277,7 @@ public class TemplateNameFormatTest {
     @Test
     public void assertBackslashNotAllowedWith24() throws MalformedTemplateNameException, ParseException, IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         try {
             cfg.getTemplate("././foo\\bar.ftl", Locale.US);
             fail();
@@ -288,14 +289,14 @@ public class TemplateNameFormatTest {
     
     private void assertEqualsOn23AndOn24(String expected23, String expected24, String name)
             throws MalformedTemplateNameException {
-        assertEquals(expected23, TemplateNameFormat.DEFAULT_2_3_0.normalizeRootBasedName(name));
-        assertEquals(expected24, TemplateNameFormat.DEFAULT_2_4_0.normalizeRootBasedName(name));
+        assertEquals(expected23, DefaultTemplateNameFormatFM2.INSTANCE.normalizeRootBasedName(name));
+        assertEquals(expected24, DefaultTemplateNameFormat.INSTANCE.normalizeRootBasedName(name));
     }
 
     private void assertNormRBNameEqualsOn23ButThrowsBackOutExcOn24(final String expected23, final String name)
             throws MalformedTemplateNameException {
-        assertEquals(expected23, TemplateNameFormat.DEFAULT_2_3_0.normalizeRootBasedName(name));
-        assertThrowsWithBackingOutException(name, TemplateNameFormat.DEFAULT_2_4_0);
+        assertEquals(expected23, DefaultTemplateNameFormatFM2.INSTANCE.normalizeRootBasedName(name));
+        assertThrowsWithBackingOutException(name, DefaultTemplateNameFormat.INSTANCE);
     }
 
     private void assertThrowsWithBackingOutException(final String name, final TemplateNameFormat tnf) {
@@ -310,7 +311,7 @@ public class TemplateNameFormatTest {
 
     private void assertNormRBNameThrowsColonExceptionOn24(final String name) throws MalformedTemplateNameException {
         try {
-            TemplateNameFormat.DEFAULT_2_4_0.normalizeRootBasedName(name);
+            DefaultTemplateNameFormat.INSTANCE.normalizeRootBasedName(name);
             fail();
         } catch (MalformedTemplateNameException e) {
             assertEquals(name, e.getTemplateName());

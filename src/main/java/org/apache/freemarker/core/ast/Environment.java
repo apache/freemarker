@@ -69,6 +69,8 @@ import org.apache.freemarker.core.templateresolver.MalformedTemplateNameExceptio
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver._CacheAPI;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.DateUtil;
 import org.apache.freemarker.core.util.DateUtil.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util.NullWriter;
@@ -2676,26 +2678,25 @@ public final class Environment extends Configurable {
     /**
      * Resolves a reference to a template (like the one used in {@code #include} or {@code #import}), assuming a base
      * name. This gives a full (that is, absolute), even if non-normalized template name, that could be used for
-     * {@link Configuration#getTemplate(String)}. This is mostly used when a 
-     * template refers to another template.
+     * {@link Configuration#getTemplate(String)}. This is mostly used when a template refers to another template.
      * 
      * @param baseName
      *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null} (happens when
      *            resolving names in nameless templates), which means that the base is the root "directory", and so the
-     *            {@code targetName} is returned without change. Assuming {@link TemplateNameFormat#DEFAULT_2_3_0} or
-     *            {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as follows. If you want to specify a base
+     *            {@code targetName} is returned without change. Assuming {@link DefaultTemplateNameFormatFM2#INSTANCE}
+     *            or {@link DefaultTemplateNameFormat#INSTANCE}, the rules are as follows. If you want to specify a base
      *            directory here, it must end with {@code "/"}. If it doesn't end with {@code "/"}, it's parent
      *            directory will be used as the base path. Might starts with a scheme part (like {@code "foo://"}, or
-     *            with {@link TemplateNameFormat#DEFAULT_2_4_0} even just with {@code "foo:"}).
+     *            with {@link DefaultTemplateNameFormat#INSTANCE} even just with {@code "foo:"}).
      * @param targetName
      *            The name of the template, which is either a relative or absolute name. Assuming
-     *            {@link TemplateNameFormat#DEFAULT_2_3_0} or {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as
-     *            follows. If it starts with {@code "/"} or contains a scheme part separator ({@code "://"}, also, with
-     *            {@link TemplateNameFormat#DEFAULT_2_4_0} a {@code ":"} with no {@code "/"} anywhere before it) then
-     *            it's an absolute name, otherwise it's a relative path. Relative paths are interpreted relatively to
-     *            the {@code baseName}. Absolute names are simply returned as is, ignoring the {@code baseName}, except,
-     *            when the {@code baseName} has scheme part while the {@code targetName} doesn't have, then the schema
-     *            of the {@code baseName} is prepended to the {@code targetName}.
+     *            {@link DefaultTemplateNameFormatFM2#INSTANCE} or {@link DefaultTemplateNameFormat#INSTANCE}, the rules
+     *            are as follows. If it starts with {@code "/"} or contains a scheme part separator ({@code "://"},
+     *            also, with {@link DefaultTemplateNameFormat#INSTANCE} a {@code ":"} with no {@code "/"} anywhere
+     *            before it) then it's an absolute name, otherwise it's a relative path. Relative paths are interpreted
+     *            relatively to the {@code baseName}. Absolute names are simply returned as is, ignoring the
+     *            {@code baseName}, except, when the {@code baseName} has scheme part while the {@code targetName}
+     *            doesn't have, then the schema of the {@code baseName} is prepended to the {@code targetName}.
      * 
      * @since 2.3.22
      */

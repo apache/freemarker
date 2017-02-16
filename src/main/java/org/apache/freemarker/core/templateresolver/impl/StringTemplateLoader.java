@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -29,6 +29,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.util.StringUtil;
 
 /**

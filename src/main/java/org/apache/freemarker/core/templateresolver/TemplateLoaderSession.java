@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+
 /**
  * Stores shared state between {@link TemplateLoader} operations that are executed close to each other in the same
  * thread. For example, a {@link TemplateLoader} that reads from a database might wants to store the database

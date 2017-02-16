@@ -28,7 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.templateresolver.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

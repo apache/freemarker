@@ -87,20 +87,23 @@ import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.ClassTemplateLoader;
-import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
-import org.apache.freemarker.core.templateresolver.FileTemplateLoader;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.apache.freemarker.core.templateresolver.MruCacheStorage;
-import org.apache.freemarker.core.templateresolver.MultiTemplateLoader;
-import org.apache.freemarker.core.templateresolver.SoftCacheStorage;
 import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.URLTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.URLTemplateLoader;
 import org.apache.freemarker.core.util.CaptureOutput;
 import org.apache.freemarker.core.util.ClassUtil;
 import org.apache.freemarker.core.util.Constants;
@@ -889,7 +892,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     static TemplateLookupStrategy getDefaultTemplateLookupStrategy(Version incompatibleImprovements) {
-        return TemplateLookupStrategy.DEFAULT_2_3_0;
+        return DefaultTemplateLookupStrategy.INSTANCE;
     }
     
     private TemplateNameFormat getDefaultTemplateNameFormat() {
@@ -897,7 +900,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     static TemplateNameFormat getDefaultTemplateNameFormat(Version incompatibleImprovements) {
-        return TemplateNameFormat.DEFAULT_2_3_0;
+        return DefaultTemplateNameFormatFM2.INSTANCE;
     }
     
     private CacheStorage getDefaultCacheStorage() {
@@ -1181,7 +1184,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
-     * effect the template templateResolver will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
+     * effect the template templateResolver will be emptied. The default value is
+     * {@link DefaultTemplateLookupStrategy#INSTANCE}.
      * 
      * @since 2.3.22
      */
@@ -1229,8 +1233,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets the template name format used. The default is {@link TemplateNameFormat#DEFAULT_2_3_0}, while the
-     * recommended value for new projects is {@link TemplateNameFormat#DEFAULT_2_4_0}.
+     * Sets the template name format used. The default is {@link DefaultTemplateNameFormatFM2#INSTANCE}, while the
+     * recommended value for new projects is {@link DefaultTemplateNameFormat#INSTANCE}.
      * 
      * @since 2.3.22
      */
@@ -1318,7 +1322,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
      * objects is significant but most templates are used rarely, using a
      * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
-     * all, use {@link org.apache.freemarker.core.templateresolver.NullCacheStorage} (you can't use {@code null}).
+     * all, use {@link org.apache.freemarker.core.templateresolver.impl.NullCacheStorage} (you can't use {@code null}).
      * 
      * <p>Note that setting the templateResolver storage will re-create the template templateResolver, so
      * all its content will be lost.
@@ -2447,7 +2451,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     private boolean isKnownNonConfusingLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
-        return templateLookupStrategy == TemplateLookupStrategy.DEFAULT_2_3_0;
+        return templateLookupStrategy == DefaultTemplateLookupStrategy.INSTANCE;
     }
 
     private String removeInitialSlash(String name) {
@@ -2935,9 +2939,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetTemplateNameFormat();
                 } else if (value.equalsIgnoreCase("default_2_3_0")) {
-                    setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+                    setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
                 } else if (value.equalsIgnoreCase("default_2_4_0")) {
-                    setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+                    setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
                 } else {
                     throw invalidSettingValueException(name, value);
                 }

@@ -28,8 +28,8 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
-import org.apache.freemarker.core.templateresolver.StrongCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
 import org.junit.Test;
 
 public class TemplateLevelSettings {

@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 

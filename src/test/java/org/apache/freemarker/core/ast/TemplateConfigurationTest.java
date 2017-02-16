@@ -67,7 +67,7 @@ import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.ast.UndefinedOutputFormat;
 import org.apache.freemarker.core.ast.XMLOutputFormat;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util.NullArgumentException;
 import org.junit.Test;
 

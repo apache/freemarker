@@ -25,6 +25,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 
 /**
  * This class was introduced to allow users to fully implement the template lookup, loading and caching logic,
@@ -96,10 +97,10 @@ public abstract class TemplateResolver {
      * <p>
      * This method is thread-safe and can be called while the engine processes templates.
      * 
-     * @throw {@link UnsupportedOperationException} If the {@link TemplateResolver} implementation doesn't support this
+     * @throws UnsupportedOperationException If the {@link TemplateResolver} implementation doesn't support this
      *        operation.
      */
-    public abstract void clearTemplateCache();
+    public abstract void clearTemplateCache() throws UnsupportedOperationException;
 
     /**
      * Removes a template from the template cache, hence forcing the re-loading of it when it's next time requested;
@@ -112,11 +113,11 @@ public abstract class TemplateResolver {
      * <p>
      * This method is thread-safe and can be called while the engine processes templates.
      * 
-     * @throw {@link UnsupportedOperationException} If the {@link TemplateResolver} implementation doesn't support this
+     * @throws UnsupportedOperationException If the {@link TemplateResolver} implementation doesn't support this
      *        operation.
      */
     public abstract void removeTemplateFromCache(String name, Locale locale, String encoding, boolean parse)
-            throws IOException;
+            throws IOException, UnsupportedOperationException;;
 
     /**
      * Converts a name to a template root directory based name, so that it can be used to find a template without

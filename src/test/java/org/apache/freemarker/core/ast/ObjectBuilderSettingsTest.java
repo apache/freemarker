@@ -56,11 +56,11 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.apache.freemarker.core.subpkg.PublicWithMixedConstructors;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
+import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.util.WriteProtectable;
 import org.junit.Test;
 

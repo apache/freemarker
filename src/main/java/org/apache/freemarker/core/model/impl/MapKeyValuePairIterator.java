@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.model;
+package org.apache.freemarker.core.model.impl;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePair;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
 

@@ -26,7 +26,6 @@ import java.util.SortedMap;
 import org.apache.freemarker.core.ast._DelayedJQuote;
 import org.apache.freemarker.core.ast._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.MapKeyValuePairIterator;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;

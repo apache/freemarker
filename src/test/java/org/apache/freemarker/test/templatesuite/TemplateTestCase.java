@@ -66,7 +66,7 @@ import org.apache.freemarker.core.model.impl.beans.BooleanModel;
 import org.apache.freemarker.core.model.impl.beans.Java7MembersOnlyBeansWrapper;
 import org.apache.freemarker.core.model.impl.beans.ResourceBundleModel;
 import org.apache.freemarker.core.model.impl.dom.NodeModel;
-import org.apache.freemarker.core.templateresolver.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.util.NullArgumentException;
 import org.apache.freemarker.core.util.NullWriter;
 import org.apache.freemarker.core.util.StringUtil;

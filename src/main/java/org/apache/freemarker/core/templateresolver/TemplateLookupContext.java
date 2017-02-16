@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 
 /**
  * Used as the parameter of {@link TemplateLookupStrategy#lookup(TemplateLookupContext)}.
@@ -31,13 +32,11 @@ import org.apache.freemarker.core.Configuration;
  * 
  * @since 2.3.22
  */
-public abstract class TemplateLookupContext {
+public abstract class TemplateLookupContext<R extends TemplateLookupResult> {
     
     private final String templateName;
     private final Locale templateLocale;
     private final Object customLookupCondition;
-    private final TemplateLoadingSource cachedResultSource;
-    private final Serializable cachedResultVersion;
 
     /**
      * Finds the template source based on its <em>normalized</em> name; handles {@code *} steps (so called acquisition),
@@ -56,7 +55,7 @@ public abstract class TemplateLookupContext {
      *         not for {@link TemplateLoader}-s). Hence discarding a positive result and looking for another can
      *         generate substantial extra I/O.
      */
-    public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String templateName) throws IOException;
+    public abstract R lookupWithAcquisitionStrategy(String templateName) throws IOException;
 
     /**
      * Finds the template source based on its <em>normalized</em> name; tries localized variations going from most
@@ -64,19 +63,16 @@ public abstract class TemplateLookupContext {
      * If {@code templateLocale} is {@code null} (typically, because {@link Configuration#getLocalizedLookup()} is
      * {@code false})), then it's the same as calling {@link #lookupWithAcquisitionStrategy(String)} directly. This is
      * the default strategy of FreeMarker (at least in 2.3.x), so for more information, see
-     * {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
+     * {@link DefaultTemplateLookupStrategy#INSTANCE}.
      */
-    public abstract TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(String templateName,
+    public abstract R lookupWithLocalizedThenAcquisitionStrategy(String templateName,
             Locale templateLocale) throws IOException;
     
     /** Default visibility to prevent extending the class from outside this package. */
-    TemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition,
-            TemplateLoadingSource cachedResultSource, Serializable cachedResultVersion) {
+    protected TemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
         this.templateName = templateName;
         this.templateLocale = templateLocale;
         this.customLookupCondition = customLookupCondition;
-        this.cachedResultSource = cachedResultSource;
-        this.cachedResultVersion = cachedResultVersion;
     }
 
     /**
@@ -111,16 +107,6 @@ public abstract class TemplateLookupContext {
      * {@link TemplateLookupStrategy#lookup(TemplateLookupContext)}. (In the current implementation it just always
      * returns the same static singleton, but that might need to change in the future.)
      */
-    public TemplateLookupResult createNegativeLookupResult() {
-        return TemplateLookupResult.createNegativeResult();
-    }
-
-    TemplateLoadingSource getCachedResultSource() {
-        return cachedResultSource;
-    }
-
-    Serializable getCachedResultVersion() {
-        return cachedResultVersion;
-    }
+    public abstract R createNegativeLookupResult();
     
 }

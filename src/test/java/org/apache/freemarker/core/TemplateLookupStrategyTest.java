@@ -29,14 +29,11 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Locale;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
 import org.junit.Test;
 
@@ -47,13 +44,13 @@ public class TemplateLookupStrategyTest {
     @Test
     public void testSetSetting() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
+        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
 
         cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, MyTemplateLookupStrategy.class.getName() + "()");
         assertTrue(cfg.getTemplateLookupStrategy() instanceof MyTemplateLookupStrategy);
         
         cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, "dEfault");
-        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
+        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
     }
     
     @Test

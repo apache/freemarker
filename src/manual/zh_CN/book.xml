@@ -21893,7 +21893,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (<literal>Configuration.setTemplateNameFormat(TemplateNameFormat)</literal>)。
 				  它允许指定 FreeMarker 使用的命名规则。现在，不再允许自定义实现了，
 				  仅可以选择在 
-                  <literal>TemplateNameFormat.DEFAULT_2_3_0</literal> (默认的) 和 
+                  <literal>DefaultTemplateNameFormatFM2.INSTANCE</literal> (默认的) 和 
 				  <literal>DEFAULT_2_4_0</literal> (推荐的，至少对新项目选择)之中选择。
 				  <literal>DEFAULT_2_4_0</literal> 有一些优点，但是不能完全向后兼容
                   (可是很多应用程序不会被影响)。 典型的错误是使用反斜杠来代替斜杠，
@@ -21907,7 +21907,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (bugs)，大多数都是和翻译特殊步骤之后的 <literal>..</literal> 相关，
 				  比如 <literal>.</literal> 或 <literal>*</literal>。请在 <link
                   xlink:href="http://freemarker.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0"> 
-                  <literal>TemplateNameFormat.DEFAULT_2_4_0</literal>的 Java API 文档</link> 
+                  <literal>DefaultTemplateNameFormat.INSTANCE</literal>的 Java API 文档</link> 
 				  中参考各种相异之处。</para>
                 </listitem>
 

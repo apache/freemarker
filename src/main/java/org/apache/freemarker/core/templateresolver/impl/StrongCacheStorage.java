@@ -17,10 +17,14 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
+import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
 
 /**
  * Strong cache storage is a cache storage that simply wraps a {@link Map}. It holds a strong reference to all objects

@@ -21,6 +21,9 @@ package org.apache.freemarker.core.templateresolver;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
+
 /**
  * The point of {@link TemplateLoadingSource} is that with their {@link Object#equals(Object)} method we can tell if two
  * cache entries were generated from the same physical resource or not. Comparing the template names isn't enough,

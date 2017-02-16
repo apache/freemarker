@@ -24,7 +24,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.templateresolver.MruCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.util.StringUtil;
 import org.slf4j.Logger;
 

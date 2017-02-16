@@ -30,9 +30,9 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.templateresolver.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.apache.freemarker.core.templateresolver.StrongCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
 import org.junit.Test;
 
 public class TemplatGetEncodingTest {

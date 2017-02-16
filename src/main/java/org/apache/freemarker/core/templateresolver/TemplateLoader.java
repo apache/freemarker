@@ -23,6 +23,7 @@ import java.io.Serializable;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 
 /**
  * FreeMarker loads template "files" through objects that implement this interface, thus the templates need not be real
@@ -61,7 +62,7 @@ public interface TemplateLoader {
      * 
      * @param name
      *            The name (template root directory relative path) of the template, already localized and normalized by
-     *            the {@link org.apache.freemarker.core.templateresolver.DefaultTemplateResolver cache}. It is completely up to the loader implementation to
+     *            the {@link org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver cache}. It is completely up to the loader implementation to
      *            interpret the name, however it should expect to receive hierarchical paths where path components are
      *            separated by a slash (not backslash). Backslashes (or any other OS specific separator character) are
      *            not considered as separators by FreeMarker, and thus they will not be replaced with slash before

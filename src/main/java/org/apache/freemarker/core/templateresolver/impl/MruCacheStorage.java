@@ -17,12 +17,15 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 
 /**
  * A cache storage that implements a two-level Most Recently Used cache. In the

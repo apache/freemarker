@@ -27,7 +27,7 @@ import org.apache.freemarker.core.util.StringUtil;
 /**
  * A TemplateElement representing a block of plain text.
  * 
- * @deprected This is an internal API; don't use it.
+ * @deprecated This is an internal API; don't use it.
  */
 public final class TextBlock extends TemplateElement {
     
@@ -59,7 +59,7 @@ public final class TextBlock extends TemplateElement {
     /**
      * Simply outputs the text.
      * 
-     * @deprected This is an internal API; don't call or override it.
+     * @deprecated This is an internal API; don't call or override it.
      */
     @Override
     public TemplateElement[] accept(Environment env)

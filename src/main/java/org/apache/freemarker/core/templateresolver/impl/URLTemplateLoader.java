@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +30,11 @@ import java.util.Objects;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core._CoreLogs;
+import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
+import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.slf4j.Logger;
 
 /**

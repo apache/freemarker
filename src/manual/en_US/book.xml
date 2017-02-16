@@ -29115,7 +29115,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   This allows specifying the naming rules used by FreeMarker.
                   For now, custom implementations aren't allowed, and you can
                   only chose between
-                  <literal>TemplateNameFormat.DEFAULT_2_3_0</literal> (the
+                  <literal>DefaultTemplateNameFormatFM2.INSTANCE</literal> (the
                   default) and <literal>DEFAULT_2_4_0</literal> (recommended,
                   at least for new projects). <literal>DEFAULT_2_4_0</literal>
                   has several advantages, but isn't fully backward compatible
@@ -29134,7 +29134,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   list of differences in the <link
                   xlink:href="http://freemarker.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0">Java
                   API documentation of
-                  <literal>TemplateNameFormat.DEFAULT_2_4_0</literal></link>.</para>
+                  <literal>DefaultTemplateNameFormat.INSTANCE</literal></link>.</para>
                 </listitem>
 
                 <listitem>

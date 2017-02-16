@@ -23,18 +23,21 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.StringUtil;
 
 /**
  * Indicates that the template name given was malformed according the {@link TemplateNameFormat} in use. Note that for
- * backward compatibility, {@link TemplateNameFormat#DEFAULT_2_3_0} doesn't throw this exception,
- * {@link TemplateNameFormat#DEFAULT_2_4_0} does. This exception extends {@link IOException} for backward compatibility.
+ * backward compatibility, {@link DefaultTemplateNameFormatFM2} doesn't throw this exception,
+ * {@link DefaultTemplateNameFormat} does. This exception extends {@link IOException} for backward compatibility.
  * 
  * @since 2.3.22
  * 
  * @see TemplateNotFoundException
  * @see Configuration#getTemplate(String)
  */
+@SuppressWarnings("serial")
 public class MalformedTemplateNameException extends IOException {
     
     private final String templateName;

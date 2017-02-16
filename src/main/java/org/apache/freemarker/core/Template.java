@@ -57,9 +57,9 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util.NullArgumentException;
 
 /**

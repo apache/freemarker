@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -40,6 +40,20 @@ import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.ast.MarkReleaserTemplateSpecifiedEncodingHandler;
 import org.apache.freemarker.core.ast.TemplateConfiguration;
 import org.apache.freemarker.core.ast.TemplateSpecifiedEncodingHandler;
+import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
+import org.apache.freemarker.core.templateresolver.GetTemplateResult;
+import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
+import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactoryException;
+import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingResultStatus;
+import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
+import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
+import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.util.NullArgumentException;
 import org.apache.freemarker.core.util.StringUtil;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
@@ -101,7 +115,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
     /**
      * Same as
      * {@link #DefaultTemplateResolver(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat, Configuration)}
-     * with {@link TemplateLookupStrategy#DEFAULT_2_3_0} and {@link TemplateNameFormat#DEFAULT_2_3_0}.
+     * with {@link DefaultTemplateLookupStrategy#INSTANCE} and {@link DefaultTemplateNameFormatFM2#INSTANCE}.
      * 
      * @since 2.3.21
      */
@@ -225,7 +239,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
      * 
      * @throws MalformedTemplateNameException
      *             If the {@code name} was malformed according the current {@link TemplateNameFormat}. However, if the
-     *             {@link TemplateNameFormat} is {@link TemplateNameFormat#DEFAULT_2_3_0} and
+     *             {@link TemplateNameFormat} is {@link DefaultTemplateNameFormatFM2#INSTANCE} and
      *             {@link Configuration#getIncompatibleImprovements()} is less than 2.4.0, then instead of throwing this
      *             exception, a {@link GetTemplateResult} will be returned, similarly as if the template were missing
      *             (the {@link GetTemplateResult#getMissingTemplateReason()} will describe the real error).
@@ -249,7 +263,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             name = templateNameFormat.normalizeRootBasedName(name);
         } catch (MalformedTemplateNameException e) {
             // If we don't have to emulate backward compatible behavior, then just rethrow it: 
-            if (templateNameFormat != TemplateNameFormat.DEFAULT_2_3_0
+            if (templateNameFormat != DefaultTemplateNameFormatFM2.INSTANCE
                     || config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_4_0) {
                 throw e;
             }
@@ -262,6 +276,16 @@ public class DefaultTemplateResolver extends TemplateResolver {
         
         Template template = getTemplateInternal(name, locale, customLookupCondition, encoding, parseAsFTL);
         return template != null ? new GetTemplateResult(template) : new GetTemplateResult(name, (String) null);
+    }
+
+    @Override
+    public String toRootBasedName(String baseName, String targetName) throws MalformedTemplateNameException {
+        return templateNameFormat.toRootBasedName(baseName, targetName);
+    }
+
+    @Override
+    public String normalizeRootBasedName(String name) throws MalformedTemplateNameException {
+        return templateNameFormat.normalizeRootBasedName(name);
     }
 
     private Template getTemplateInternal(
@@ -287,7 +311,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         
         boolean rethrownCachedException = false;
         boolean suppressFinallyException = false;
-        TemplateLookupResult newLookupResult = null;
+        TemplateLoaderBasedTemplateLookupResult newLookupResult = null;
         CachedResult newCachedResult = null;
         TemplateLoaderSession session = null;
         try {
@@ -814,11 +838,11 @@ public class DefaultTemplateResolver extends TemplateResolver {
      * Looks up according the {@link TemplateLookupStrategy} and then starts reading the template, if it was changed
      * compared to the cached result, or if there was no cached result yet.
      */
-    private TemplateLookupResult lookupAndLoadTemplateIfChanged(
+    private TemplateLoaderBasedTemplateLookupResult lookupAndLoadTemplateIfChanged(
             String name, Locale locale, Object customLookupCondition,
             TemplateLoadingSource cachedResultSource, Serializable cachedResultVersion,
             TemplateLoaderSession session) throws IOException {
-        final TemplateLookupResult lookupResult = templateLookupStrategy.lookup(
+        final TemplateLoaderBasedTemplateLookupResult lookupResult = templateLookupStrategy.lookup(
                 new DefaultTemplateResolverTemplateLookupContext(
                         name, locale, customLookupCondition,
                         cachedResultSource, cachedResultVersion,
@@ -919,7 +943,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         }
     }
     
-    private class DefaultTemplateResolverTemplateLookupContext extends TemplateLookupContext {
+    private class DefaultTemplateResolverTemplateLookupContext extends TemplateLoaderBasedTemplateLookupContext {
 
         private final TemplateLoaderSession session; 
         
@@ -932,7 +956,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         }
 
         @Override
-        public TemplateLookupResult lookupWithAcquisitionStrategy(String path) throws IOException {
+        public TemplateLoaderBasedTemplateLookupResult lookupWithAcquisitionStrategy(String path) throws IOException {
             // Only one of the possible ways of making a name non-normalized, but is the easiest mistake to do:
             if (path.startsWith("/")) {
                 throw new IllegalArgumentException("Non-normalized name, starts with \"/\": " + path);
@@ -941,7 +965,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             int asterisk = path.indexOf(ASTERISK);
             // Shortcut in case there is no acquisition
             if (asterisk == -1) {
-                return TemplateLookupResult.from(
+                return createLookupResult(
                         path,
                         templateLoader.load(path, getCachedResultSource(), getCachedResultVersion(), session));
             }
@@ -959,7 +983,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 pathSteps.add(pathStep);
             }
             if (lastAsterisk == -1) {  // if there was no real "*" step after all
-                return TemplateLookupResult.from(
+                return createLookupResult(
                         path,
                         templateLoader.load(path, getCachedResultSource(), getCachedResultVersion(), session));
             }
@@ -972,10 +996,10 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 TemplateLoadingResult templateLoaderResult = templateLoader.load(
                         fullPath, getCachedResultSource(), getCachedResultVersion(), session);
                 if (templateLoaderResult.getStatus() == TemplateLoadingResultStatus.OPENED) {
-                    return TemplateLookupResult.from(fullPath, templateLoaderResult);
+                    return createLookupResult(fullPath, templateLoaderResult);
                 }
                 if (basePathLen == 0) {
-                    return TemplateLookupResult.createNegativeResult();
+                    return createNegativeLookupResult();
                 }
                 basePathLen = basePath.lastIndexOf(SLASH, basePathLen - 2) + 1;
                 buf.setLength(basePathLen);
@@ -983,7 +1007,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         }
 
         @Override
-        public TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(final String templateName,
+        public TemplateLoaderBasedTemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(final String templateName,
                 final Locale templateLocale) throws IOException {
             
                 if (templateLocale == null) {
@@ -999,7 +1023,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 tryLocaleNameVariations: while (true) {
                     buf.setLength(prefix.length());
                     String path = buf.append(localeName).append(suffix).toString();
-                    TemplateLookupResult lookupResult = lookupWithAcquisitionStrategy(path);
+                    TemplateLoaderBasedTemplateLookupResult lookupResult = lookupWithAcquisitionStrategy(path);
                     if (lookupResult.isPositive()) {
                         return lookupResult;
                     }
@@ -1013,16 +1037,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 return createNegativeLookupResult();
         }
         
-    }
-
-    @Override
-    public String toRootBasedName(String baseName, String targetName) throws MalformedTemplateNameException {
-        return templateNameFormat.toRootBasedName(baseName, targetName);
-    }
-
-    @Override
-    public String normalizeRootBasedName(String name) throws MalformedTemplateNameException {
-        return templateNameFormat.normalizeRootBasedName(name);
     }
     
 }

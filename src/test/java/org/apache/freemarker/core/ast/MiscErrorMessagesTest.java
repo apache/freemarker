@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ public class MiscErrorMessagesTest extends TemplateTest {
     
     @Test
     public void wrongTemplateNameFormat() {
-        getConfiguration().setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        getConfiguration().setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         
         assertErrorContains("<#include 'foo:/bar:baaz'>", "Malformed template name", "':'");
         assertErrorContains("<#include '../baaz'>", "Malformed template name", "root");

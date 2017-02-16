@@ -27,7 +27,7 @@ import java.io.IOException;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.util.TestUtil;
 import org.junit.Test;
 public class TemplateLanguageVersionTest {

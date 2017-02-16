@@ -23,10 +23,10 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.templateresolver.ByteArrayTemplateLoader;
-import org.apache.freemarker.core.templateresolver.ClassTemplateLoader;
-import org.apache.freemarker.core.templateresolver.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Ignore;
 

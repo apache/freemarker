@@ -35,6 +35,10 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
 import org.apache.freemarker.test.MonitoredTemplateLoader.CloseSessionEvent;
 import org.apache.freemarker.test.MonitoredTemplateLoader.CreateSessionEvent;
@@ -461,7 +465,7 @@ public class DefaultTemplateResolverTest {
         
         // [2.4] Test it with IcI 2.4
         
-        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         try {
             cfg.getTemplate("../x", null, null, null, true, true);
             fail();

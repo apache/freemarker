@@ -45,7 +45,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.SoftCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

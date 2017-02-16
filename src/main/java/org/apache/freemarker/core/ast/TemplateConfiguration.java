@@ -28,7 +28,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._TemplateAPI;
-import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util.NullArgumentException;
 
 /**

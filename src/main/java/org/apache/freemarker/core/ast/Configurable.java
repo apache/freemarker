@@ -63,6 +63,8 @@ import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.NullArgumentException;
 import org.apache.freemarker.core.util.StringUtil;
 
@@ -2089,7 +2091,7 @@ public class Configurable {
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
      *       If the value does not contain dot,
-     *       then a {@link org.apache.freemarker.core.templateresolver.MruCacheStorage} will be used with the
+     *       then a {@link org.apache.freemarker.core.templateresolver.impl.MruCacheStorage} will be used with the
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
@@ -2155,8 +2157,8 @@ public class Configurable {
      *   <li><p>{@code "template_name_format"}:
      *       See: {@link Configuration#setTemplateNameFormat(org.apache.freemarker.core.templateresolver.TemplateNameFormat)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, {@code "default_2_3_0"}
-     *       for {@link org.apache.freemarker.core.templateresolver.TemplateNameFormat#DEFAULT_2_3_0}, {@code "default_2_4_0"} for
-     *       {@link org.apache.freemarker.core.templateresolver.TemplateNameFormat#DEFAULT_2_4_0}.
+     *       for {@link DefaultTemplateNameFormatFM2#INSTANCE}, {@code "default_2_4_0"} for
+     *       {@link DefaultTemplateNameFormat#INSTANCE}.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was

@@ -26,7 +26,7 @@ import java.io.StringWriter;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 
 import junit.framework.TestCase;
 

@@ -30,12 +30,12 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.CustomAttribute;
 import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.templateresolver.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.junit.Test;
 
 public class TemplateConfigurationWithTemplateResolverTest {

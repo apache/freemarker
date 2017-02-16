@@ -31,10 +31,10 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.ast._ObjectBuilderSettingEvaluator;
 import org.apache.freemarker.core.ast._SettingEvaluationEnvironment;
-import org.apache.freemarker.core.templateresolver.ClassTemplateLoader;
-import org.apache.freemarker.core.templateresolver.FileTemplateLoader;
-import org.apache.freemarker.core.templateresolver.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.util.StringUtil;
 import org.slf4j.Logger;
 

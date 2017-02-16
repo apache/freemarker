@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver;
+package org.apache.freemarker.core.templateresolver.impl;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
+import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 /**

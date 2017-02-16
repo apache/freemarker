@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.templateresolver;
 
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+
 /**
  * Cache storage abstracts away the storage aspects of a cache - associating
  * an object with a key, retrieval and removal via the key. It is actually a
