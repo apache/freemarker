@@ -38,7 +38,7 @@ import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationF
 import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
 import org.junit.Test;
 
-public class TemplateConfigurationWithTemplateCacheTest {
+public class TemplateConfigurationWithTemplateResolverTest {
 
     private static final String TEXT_WITH_ACCENTS = "pr\u00F3ba";
 

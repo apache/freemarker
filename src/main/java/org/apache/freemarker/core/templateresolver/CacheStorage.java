@@ -24,7 +24,7 @@ package org.apache.freemarker.core.templateresolver;
  * an object with a key, retrieval and removal via the key. It is actually a
  * small subset of the {@link java.util.Map} interface. 
  * The implementations can be coded in a non-threadsafe manner as the natural
- * user of the cache storage, {@link TemplateCache} does the necessary
+ * user of the cache storage, {@link DefaultTemplateResolver} does the necessary
  * synchronization.
  *
  * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)

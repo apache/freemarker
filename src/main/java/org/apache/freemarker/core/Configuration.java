@@ -88,13 +88,19 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.ClassTemplateLoader;
+import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.SoftCacheStorage;
-import org.apache.freemarker.core.templateresolver.TemplateCache;
-import org.apache.freemarker.core.templateresolver.TemplateCache.MaybeMissingTemplate;
+import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.TemplateLoader;
+import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
+import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
+import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.URLTemplateLoader;
 import org.apache.freemarker.core.util.CaptureOutput;
 import org.apache.freemarker.core.util.ClassUtil;
 import org.apache.freemarker.core.util.Constants;
@@ -105,12 +111,6 @@ import org.apache.freemarker.core.util.SecurityUtilities;
 import org.apache.freemarker.core.util.StandardCompress;
 import org.apache.freemarker.core.util.StringUtil;
 import org.apache.freemarker.core.util.XmlEscape;
-import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.TemplateLoader;
-import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
-import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.URLTemplateLoader;
 
 /**
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
@@ -120,8 +120,8 @@ import org.apache.freemarker.core.templateresolver.URLTemplateLoader;
  * the application life-cycle, set its {@link #setSetting(String, String) configuration settings} there (either with the
  * setter methods like {@link #setTemplateLoader(TemplateLoader)} or by loading a {@code .properties} file), and then
  * use that single instance everywhere in your application. Frequently re-creating {@link Configuration} is a typical
- * and grave mistake from performance standpoint, as the {@link Configuration} holds the template cache, and often also
- * the class introspection cache, which then will be lost. (Note that, naturally, having multiple long-lived instances,
+ * and grave mistake from performance standpoint, as the {@link Configuration} holds the template templateResolver, and often also
+ * the class introspection templateResolver, which then will be lost. (Note that, naturally, having multiple long-lived instances,
  * like one per component that internally uses FreeMarker is fine.)  
  * 
  * <p>The basic usage pattern is like:
@@ -508,7 +508,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
     private int tabSize = 8;  // Default from JavaCC 3.x 
 
-    private TemplateCache cache;
+    private DefaultTemplateResolver templateResolver;
     
     private boolean templateLoaderExplicitlySet;
     private boolean templateLookupStrategyExplicitlySet;
@@ -601,8 +601,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *         won't remain hidden now. As the old default is a singleton too, potentially shared by independently
      *         developed components, most of them expects the out-of-the-box behavior from it (and the others are
      *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
-     *         cache) because the singleton is modified after publishing to other threads.)
-     *         Furthermore the new default object wrapper shares class introspection cache with other
+     *         templateResolver) because the singleton is modified after publishing to other threads.)
+     *         Furthermore the new default object wrapper shares class introspection templateResolver with other
      *         {@link BeansWrapper}-s created with {@link BeansWrapperBuilder}, which has an impact as
      *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
      *       </li>
@@ -842,7 +842,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
-        createTemplateCache();
+        createTemplateResolver();
         loadBuiltInSharedVariables();
     }
 
@@ -854,33 +854,33 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
     }
     
-    private void createTemplateCache() {
-        cache = new TemplateCache(
+    private void createTemplateResolver() {
+        templateResolver = new DefaultTemplateResolver(
                 null,
                 getDefaultCacheStorage(),
                 getDefaultTemplateLookupStrategy(),
                 getDefaultTemplateNameFormat(),
                 null,
                 this);
-        cache.clear(); // for fully BC behavior
-        cache.setDelay(5000);
+        templateResolver.clearTemplateCache(); // for fully BC behavior
+        templateResolver.setTemplateUpdateDelayMilliseconds(5000);
     }
     
-    private void recreateTemplateCacheWith(
+    private void recreateTemplateResolverWith(
             TemplateLoader loader, CacheStorage storage,
             TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
             TemplateConfigurationFactory templateConfigurations) {
-        TemplateCache oldCache = cache;
-        cache = new TemplateCache(
+        DefaultTemplateResolver oldCache = templateResolver;
+        templateResolver = new DefaultTemplateResolver(
                 loader, storage, templateLookupStrategy, templateNameFormat, templateConfigurations, this);
-        cache.clear(false);
-        cache.setDelay(oldCache.getDelay());
-        cache.setLocalizedLookup(localizedLookup);
+        templateResolver.clearTemplateCache(false);
+        templateResolver.setTemplateUpdateDelayMilliseconds(oldCache.getTemplateUpdateDelayMilliseconds());
+        templateResolver.setLocalizedLookup(localizedLookup);
     }
     
-    private void recreateTemplateCache() {
-        recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+    private void recreateTemplateResolver() {
+        recreateTemplateResolverWith(templateResolver.getTemplateLoader(), templateResolver.getCacheStorage(),
+                templateResolver.getTemplateLookupStrategy(), templateResolver.getTemplateNameFormat(),
                 getTemplateConfigurations());
     }
     
@@ -947,10 +947,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             Configuration copy = (Configuration) super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
             copy.localeToCharsetMap = new ConcurrentHashMap(localeToCharsetMap);
-            copy.recreateTemplateCacheWith(
-                    cache.getTemplateLoader(), cache.getCacheStorage(),
-                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                    cache.getTemplateConfigurations());
+            copy.recreateTemplateResolverWith(
+                    templateResolver.getTemplateLoader(), templateResolver.getCacheStorage(),
+                    templateResolver.getTemplateLookupStrategy(), templateResolver.getTemplateNameFormat(),
+                    templateResolver.getTemplateConfigurations());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException("Cloning failed", e);
@@ -1117,7 +1117,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateLoader} that is used to look up and load templates;
-     * as a side effect the template cache will be emptied.
+     * as a side effect the template templateResolver will be emptied.
      * By providing your own {@link TemplateLoader} implementation, you can load templates from whatever kind of
      * storages, like from relational databases, NoSQL-storages, etc.
      * 
@@ -1137,10 +1137,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void setTemplateLoader(TemplateLoader templateLoader) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            if (cache.getTemplateLoader() != templateLoader) {
-                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(),
-                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                        cache.getTemplateConfigurations());
+            if (templateResolver.getTemplateLoader() != templateLoader) {
+                recreateTemplateResolverWith(templateLoader, templateResolver.getCacheStorage(),
+                        templateResolver.getTemplateLookupStrategy(), templateResolver.getTemplateNameFormat(),
+                        templateResolver.getTemplateConfigurations());
             }
             templateLoaderExplicitlySet = true;
         }
@@ -1173,23 +1173,23 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The getter pair of {@link #setTemplateLoader(TemplateLoader)}.
      */
     public TemplateLoader getTemplateLoader() {
-        if (cache == null) {
+        if (templateResolver == null) {
             return null;
         }
-        return cache.getTemplateLoader();
+        return templateResolver.getTemplateLoader();
     }
     
     /**
      * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
-     * effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
+     * effect the template templateResolver will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
      * 
      * @since 2.3.22
      */
     public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
-        if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                    templateLookupStrategy, cache.getTemplateNameFormat(),
-                    cache.getTemplateConfigurations());
+        if (templateResolver.getTemplateLookupStrategy() != templateLookupStrategy) {
+            recreateTemplateResolverWith(templateResolver.getTemplateLoader(), templateResolver.getCacheStorage(),
+                    templateLookupStrategy, templateResolver.getTemplateNameFormat(),
+                    templateResolver.getTemplateConfigurations());
         }
         templateLookupStrategyExplicitlySet = true;
     }
@@ -1222,10 +1222,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The getter pair of {@link #setTemplateLookupStrategy(TemplateLookupStrategy)}.
      */
     public TemplateLookupStrategy getTemplateLookupStrategy() {
-        if (cache == null) {
+        if (templateResolver == null) {
             return null;
         }
-        return cache.getTemplateLookupStrategy();
+        return templateResolver.getTemplateLookupStrategy();
     }
     
     /**
@@ -1235,10 +1235,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.22
      */
     public void setTemplateNameFormat(TemplateNameFormat templateNameFormat) {
-        if (cache.getTemplateNameFormat() != templateNameFormat) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                    cache.getTemplateLookupStrategy(), templateNameFormat,
-                    cache.getTemplateConfigurations());
+        if (templateResolver.getTemplateNameFormat() != templateNameFormat) {
+            recreateTemplateResolverWith(templateResolver.getTemplateLoader(), templateResolver.getCacheStorage(),
+                    templateResolver.getTemplateLookupStrategy(), templateNameFormat,
+                    templateResolver.getTemplateConfigurations());
         }
         templateNameFormatExplicitlySet = true;
     }
@@ -1270,10 +1270,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The getter pair of {@link #setTemplateNameFormat(TemplateNameFormat)}.
      */
     public TemplateNameFormat getTemplateNameFormat() {
-        if (cache == null) {
+        if (templateResolver == null) {
             return null;
         }
-        return cache.getTemplateNameFormat();
+        return templateResolver.getTemplateNameFormat();
     }
     
     /**
@@ -1291,12 +1291,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void setTemplateConfigurations(TemplateConfigurationFactory templateConfigurations) {
-        if (cache.getTemplateConfigurations() != templateConfigurations) {
+        if (templateResolver.getTemplateConfigurations() != templateConfigurations) {
             if (templateConfigurations != null) {
                 templateConfigurations.setConfiguration(this);
             }
-            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
-                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
+            recreateTemplateResolverWith(templateResolver.getTemplateLoader(), templateResolver.getCacheStorage(),
+                    templateResolver.getTemplateLookupStrategy(), templateResolver.getTemplateNameFormat(),
                     templateConfigurations);
         }
     }
@@ -1305,31 +1305,31 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * The getter pair of {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
      */
     public TemplateConfigurationFactory getTemplateConfigurations() {
-        if (cache == null) {
+        if (templateResolver == null) {
             return null;
         }
-        return cache.getTemplateConfigurations();
+        return templateResolver.getTemplateConfigurations();
     }
 
     /**
      * Sets the {@link CacheStorage} used for caching {@link Template}-s;
-     * the earlier content of the template cache will be dropt.
+     * the earlier content of the template templateResolver will be dropt.
      * 
      * The default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
      * objects is significant but most templates are used rarely, using a
      * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
      * all, use {@link org.apache.freemarker.core.templateresolver.NullCacheStorage} (you can't use {@code null}).
      * 
-     * <p>Note that setting the cache storage will re-create the template cache, so
+     * <p>Note that setting the templateResolver storage will re-create the template templateResolver, so
      * all its content will be lost.
      */
     public void setCacheStorage(CacheStorage cacheStorage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (getCacheStorage() != cacheStorage) {
-                recreateTemplateCacheWith(cache.getTemplateLoader(), cacheStorage,
-                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat(),
-                        cache.getTemplateConfigurations());
+                recreateTemplateResolverWith(templateResolver.getTemplateLoader(), cacheStorage,
+                        templateResolver.getTemplateLookupStrategy(), templateResolver.getTemplateNameFormat(),
+                        templateResolver.getTemplateConfigurations());
             }
             cacheStorageExplicitlySet = true;
         }
@@ -1366,10 +1366,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public CacheStorage getCacheStorage() {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            if (cache == null) {
+            if (templateResolver == null) {
                 return null;
             }
-            return cache.getCacheStorage();
+            return templateResolver.getCacheStorage();
         }
     }
 
@@ -1487,7 +1487,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     @Deprecated
     public void setTemplateUpdateDelay(int seconds) {
-        cache.setDelay(1000L * seconds);
+        templateResolver.setTemplateUpdateDelayMilliseconds(1000L * seconds);
     }
 
     /**
@@ -1496,16 +1496,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * <p>
      * When you get a template via {@link #getTemplate(String)} (or some of its overloads). FreeMarker will try to get
-     * the template from the template cache. If the template is found, and at least this amount of time was elapsed
+     * the template from the template templateResolver. If the template is found, and at least this amount of time was elapsed
      * since the template last modification date was checked, FreeMarker will re-check the last modification date (this
-     * could mean I/O), possibly reloading the template and updating the cache as a consequence (can mean even more
+     * could mean I/O), possibly reloading the template and updating the templateResolver as a consequence (can mean even more
      * I/O). The {@link #getTemplate(String)} (or some of its overloads) call will only return after this all is
      * done, so it will return the fresh template.
      * 
      * @since 2.3.23
      */
     public void setTemplateUpdateDelayMilliseconds(long millis) {
-        cache.setDelay(millis);
+        templateResolver.setTemplateUpdateDelayMilliseconds(millis);
     }
     
     /**
@@ -1514,7 +1514,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.23
      */
     public long getTemplateUpdateDelayMilliseconds() {
-        return cache.getDelay();
+        return templateResolver.getTemplateUpdateDelayMilliseconds();
     }
     
     @Override
@@ -1624,7 +1624,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * was never set in this {@link Configuration} object through the public API, its value will be set to the default
      * value appropriate for the new {@code incompatibleImprovements}. (This adjustment of a setting value doesn't
      * count as setting that setting, so setting {@code incompatibleImprovements} for multiple times also works as
-     * expected.) Note that if the {@code template_loader} have to be changed because of this, the template cache will
+     * expected.) Note that if the {@code template_loader} have to be changed because of this, the template templateResolver will
      * be emptied.
      * 
      * @throws IllegalArgumentException
@@ -1674,7 +1674,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 unsetObjectWrapper();
             }
             
-            recreateTemplateCache();
+            recreateTemplateResolver();
         }
     }
 
@@ -2228,7 +2228,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
+     * Retrieves the template with the given name from the template templateResolver, loading it into the templateResolver first if it's
      * missing/staled.
      * 
      * <p>
@@ -2292,7 +2292,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Retrieves the template with the given name (and according the specified further parameters) from the template
-     * cache, loading it into the cache first if it's missing/staled.
+     * templateResolver, loading it into the templateResolver first if it's missing/staled.
      * 
      * <p>
      * This method is thread-safe.
@@ -2303,7 +2303,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @param name
      *            The name or path of the template, which is not a real path, but interpreted inside the current
      *            {@link TemplateLoader}. Can't be {@code null}. The exact syntax of the name depends on the underlying
-     *            {@link TemplateLoader}, but the cache makes some assumptions. First, the name is expected to be a
+     *            {@link TemplateLoader}, but the templateResolver makes some assumptions. First, the name is expected to be a
      *            hierarchical path, with path components separated by a slash character (not with backslash!). The path
      *            (the name) given here must <em>not</em> begin with slash; it's always interpreted relative to the
      *            "template root directory". Then, the {@code ..} and {@code .} path meta-elements will be resolved. For
@@ -2314,7 +2314,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *            contain at most one path element whose name is {@code *} (asterisk). This path meta-element triggers
      *            the <i>acquisition mechanism</i>. If the template is not found in the location described by the
      *            concatenation of the path left to the asterisk (called base path) and the part to the right of the
-     *            asterisk (called resource path), the cache will attempt to remove the rightmost path component from
+     *            asterisk (called resource path), the templateResolver will attempt to remove the rightmost path component from
      *            the base path ("go up one directory") and concatenate that with the resource path. The process is
      *            repeated until either a template is found, or the base path is completely exhausted.
      *
@@ -2337,7 +2337,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
      *            Can be {@code null} (though it's up to the custom {@link TemplateLookupStrategy} if it allows that).
-     *            This object will be used as part of the cache key, so it must to have a proper
+     *            This object will be used as part of the templateResolver key, so it must to have a proper
      *            {@link Object#equals(Object)} and {@link Object#hashCode()} method. It also should have reasonable
      *            {@link Object#toString()}, as it's possibly quoted in error messages. The expected type is up to the
      *            custom {@link TemplateLookupStrategy}. See also:
@@ -2391,7 +2391,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             encoding = getEncoding(locale);
         }
         
-        final MaybeMissingTemplate maybeTemp = cache.getTemplate(name, locale, customLookupCondition, encoding, parseAsFTL);
+        final GetTemplateResult maybeTemp = templateResolver.getTemplate(name, locale, customLookupCondition, encoding, parseAsFTL);
         final Template temp = maybeTemp.getTemplate();
         if (temp == null) {
             if (ignoreMissing) {
@@ -2685,13 +2685,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Removes all entries from the template cache, thus forcing reloading of templates
+     * Removes all entries from the template templateResolver, thus forcing reloading of templates
      * on subsequent <code>getTemplate</code> calls.
      * 
      * <p>This method is thread-safe and can be called while the engine processes templates.
      */
     public void clearTemplateCache() {
-        cache.clear();
+        templateResolver.clearTemplateCache();
     }
     
     /**
@@ -2728,9 +2728,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Removes a template from the template cache, hence forcing the re-loading
+     * Removes a template from the template templateResolver, hence forcing the re-loading
      * of it when it's next time requested. This is to give the application
-     * finer control over cache updating than {@link #setTemplateUpdateDelay(int)}
+     * finer control over templateResolver updating than {@link #setTemplateUpdateDelay(int)}
      * alone does.
      * 
      * <p>For the meaning of the parameters, see
@@ -2743,7 +2743,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void removeTemplateFromCache(
             String name, Locale locale, String encoding, boolean parse)
     throws IOException {
-        cache.removeTemplate(name, locale, encoding, parse);
+        templateResolver.removeTemplateFromCache(name, locale, encoding, parse);
     }    
     
     /**
@@ -2752,7 +2752,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>This method is thread-safe and can be called while the engine works.
      */
     public boolean getLocalizedLookup() {
-        return cache.getLocalizedLookup();
+        return templateResolver.getLocalizedLookup();
     }
     
     /**
@@ -2767,7 +2767,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * template names, use {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} with your custom
      * {@link TemplateLookupStrategy}.
      * 
-     * <p>Note that changing the value of this setting causes the template cache to be emptied so that old lookup
+     * <p>Note that changing the value of this setting causes the template templateResolver to be emptied so that old lookup
      * results won't be reused (since 2.3.22). 
      * 
      * <p>
@@ -2777,7 +2777,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void setLocalizedLookup(boolean localizedLookup) {
         this.localizedLookup = localizedLookup;
-        cache.setLocalizedLookup(localizedLookup);
+        templateResolver.setLocalizedLookup(localizedLookup);
     }
     
     @Override

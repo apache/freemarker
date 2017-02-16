@@ -26,7 +26,7 @@ import java.io.Reader;
  * Stores shared state between {@link TemplateLoader} operations that are executed close to each other in the same
  * thread. For example, a {@link TemplateLoader} that reads from a database might wants to store the database
  * connection in it for reuse. The goal of sessions is mostly to increase performance. However, because a
- * {@link TemplateCache#getTemplate(String, java.util.Locale, Object, String, boolean)} call is executed inside a single
+ * {@link DefaultTemplateResolver#getTemplate(String, java.util.Locale, Object, String, boolean)} call is executed inside a single
  * session, sessions can be also be utilized to ensure that the template lookup (see {@link TemplateLookupStrategy})
  * happens on a consistent view (a snapshot) of the backing storage, if the backing storage mechanism supports such
  * thing.
@@ -56,7 +56,7 @@ public interface TemplateLoaderSession {
      * closing the {@link Reader} or {@link InputStream} has thrown an exception, the caller should just proceed with
      * closing the session regardless. After {@link #close()} was called on the session, the methods of the
      * {@link Reader} or {@link InputStream} is allowed to throw an exception, or behave in any other erratic way.
-     * (Because the caller of this interface is usually FreeMarker (the {@link TemplateCache}), normally you don't have
+     * (Because the caller of this interface is usually FreeMarker (the {@link DefaultTemplateResolver}), normally you don't have
      * to deal with these rules, but it's useful to know the expectations if you implement
      * {@link TemplateLoaderSession}.)
      * 

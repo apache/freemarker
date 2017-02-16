@@ -45,8 +45,8 @@ import org.apache.freemarker.core.TemplateNotFoundException;
  * 
  * <p>
  * For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside the
- * {@link TemplateCache} of the {@link Configuration}, and is normally only accessed directly by the
- * {@link TemplateCache}, and templates are get via the {@link TemplateCache} API-s.
+ * {@link DefaultTemplateResolver} of the {@link Configuration}, and is normally only accessed directly by the
+ * {@link DefaultTemplateResolver}, and templates are get via the {@link DefaultTemplateResolver} API-s.
  */
 public interface TemplateLoader {
 
@@ -61,7 +61,7 @@ public interface TemplateLoader {
      * 
      * @param name
      *            The name (template root directory relative path) of the template, already localized and normalized by
-     *            the {@link org.apache.freemarker.core.templateresolver.TemplateCache cache}. It is completely up to the loader implementation to
+     *            the {@link org.apache.freemarker.core.templateresolver.DefaultTemplateResolver cache}. It is completely up to the loader implementation to
      *            interpret the name, however it should expect to receive hierarchical paths where path components are
      *            separated by a slash (not backslash). Backslashes (or any other OS specific separator character) are
      *            not considered as separators by FreeMarker, and thus they will not be replaced with slash before

@@ -28,14 +28,14 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._TemplateAPI;
-import org.apache.freemarker.core.templateresolver.TemplateCache;
+import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
 import org.apache.freemarker.core.util.NullArgumentException;
 
 /**
  * Used for customizing the configuration settings for individual {@link Template}-s (or rather groups of templates),
  * relatively to the common setting values coming from the {@link Configuration}. This was designed with the standard
  * template loading mechanism of FreeMarker in mind ({@link Configuration#getTemplate(String)}
- * and {@link TemplateCache}), though can also be reused for custom template loading and caching solutions.
+ * and {@link DefaultTemplateResolver}), though can also be reused for custom template loading and caching solutions.
  * 
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism (

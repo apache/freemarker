@@ -78,3 +78,6 @@ the FreeMarer 3 changelog here:
 - WrappingTemplateModel.objectWrapper is now final, and its statically stored default value can't be set anymore.
 - Removed SimpleObjectWrapper deprecated paramerless constructor
 - Removed ResourceBundleLocalizedString and LocalizedString: Hardly anybody has discovered these, and they had no JUnit coverage.
+- Added early draft of TemplateResolver, renamed TemplateCache to DefaultTemplateResolver. TemplateResolver is not
+  yet directly used in Configuration. This was only added in a hurry, so that it's visible why the
+  o.a.f.core.templateresolver subpackage name makes sense.

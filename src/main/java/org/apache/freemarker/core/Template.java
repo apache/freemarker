@@ -57,7 +57,7 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.templateresolver.TemplateCache;
+import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.util.NullArgumentException;
@@ -652,7 +652,7 @@ public class Template extends Configurable {
      * Mostly only used internally; setter pair of {@link #getCustomLookupCondition()}. This meant to be called directly
      * after instantiating the template with its constructor, after a successfull lookup that used this condition. So
      * this should only be called from code that deals with creating new {@code Template} objects, like from
-     * {@link TemplateCache}.
+     * {@link DefaultTemplateResolver}.
      * 
      * @since 2.3.22
      */

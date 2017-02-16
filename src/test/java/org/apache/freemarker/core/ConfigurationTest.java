@@ -81,7 +81,7 @@ import org.apache.freemarker.core.templateresolver.NullCacheStorage;
 import org.apache.freemarker.core.templateresolver.SoftCacheStorage;
 import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
 import org.apache.freemarker.core.templateresolver.StrongCacheStorage;
-import org.apache.freemarker.core.templateresolver.TemplateCache;
+import org.apache.freemarker.core.templateresolver.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
@@ -1263,7 +1263,7 @@ public class ConfigurationTest extends TestCase {
     public void testTemplateUpdateDelay() throws IOException, TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 
-        assertEquals(TemplateCache.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS, cfg.getTemplateUpdateDelayMilliseconds());
+        assertEquals(DefaultTemplateResolver.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS, cfg.getTemplateUpdateDelayMilliseconds());
         
         cfg.setTemplateUpdateDelay(4);
         assertEquals(4000L, cfg.getTemplateUpdateDelayMilliseconds());

@@ -99,40 +99,12 @@ public abstract class TemplateNameFormat {
     public static final TemplateNameFormat DEFAULT_2_4_0 = new Default020400();
     
     /**
-     * Converts a name to a template root directory based name, so that it can be used to find a template without
-     * knowing what (like which template) has referred to it. The rules depend on the name format, but a typical example
-     * is converting "t.ftl" with base "sub/contex.ftl" to "sub/t.ftl".
-     * 
-     * @param baseName
-     *            Maybe a file name, maybe a directory name. The meaning of file name VS directory name depends on the
-     *            name format, but typically, something like "foo/bar/" is a directory name, and something like
-     *            "foo/bar" is a file name, and thus in the last case the effective base is "foo/" (i.e., the directory
-     *            that contains the file). Not {@code null}.
-     * @param targetName
-     *            The name to convert. This usually comes from a template that refers to another template by name. It
-     *            can be a relative name, or an absolute name. (In typical name formats absolute names start with
-     *            {@code "/"} or maybe with an URL scheme, and all others are relative). Not {@code null}.
-     * 
-     * @return The path in template root directory relative format, or even an absolute name (where the root directory
-     *         is not the real root directory of the file system, but the imaginary directory that exists to store the
-     *         templates). The standard implementations shipped with FreeMarker always return a root relative path
-     *         (except if the name starts with an URI schema, in which case a full URI is returned).
+     * Implements {@link TemplateResolver#toRootBasedName(String, String)}; see more there.
      */
     abstract String toRootBasedName(String baseName, String targetName) throws MalformedTemplateNameException;
     
     /**
-     * Normalizes a template root directory based name (relative to the root or absolute), so that equivalent names
-     * become equivalent according {@link String#equals(Object)} too. The rules depend on the name format, but typical
-     * examples are "sub/../t.ftl" to "t.ftl", "sub/./t.ftl" to "sub/t.ftl" and "/t.ftl" to "t.ftl".
-     * 
-     * <p>The standard implementations shipped with FreeMarker always returns a root relative path
-     * (except if the name starts with an URI schema, in which case a full URI is returned), for example, "/foo.ftl"
-     * becomes to "foo.ftl".
-     * 
-     * @param name
-     *            The root based name. Not {@code null}.
-     * 
-     * @return The normalized root based name. Not {@code null}.
+     * Implements {@link TemplateResolver#normalizeRootBasedName(String)}; see more there.
      */
     abstract String normalizeRootBasedName(String name) throws MalformedTemplateNameException;
 

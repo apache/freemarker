@@ -35,15 +35,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.templateresolver.StringTemplateLoader;
-import org.apache.freemarker.core.templateresolver.StrongCacheStorage;
-import org.apache.freemarker.core.templateresolver.TemplateCache;
-import org.apache.freemarker.core.templateresolver.TemplateLoader;
-import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingResultStatus;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
 import org.apache.freemarker.test.MonitoredTemplateLoader.CloseSessionEvent;
 import org.apache.freemarker.test.MonitoredTemplateLoader.CreateSessionEvent;
@@ -53,23 +44,23 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-public class TemplateCacheTest {
+public class DefaultTemplateResolverTest {
 
     @Test
     public void testCachedException() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
-        TemplateCache cache = new TemplateCache(
+        DefaultTemplateResolver tr = new DefaultTemplateResolver(
                 loader, new StrongCacheStorage(), new Configuration(Configuration.VERSION_3_0_0));
-        cache.setDelay(1000L);
+        tr.setTemplateUpdateDelayMilliseconds(1000L);
         loader.setThrowException(true);
         try {
-            cache.getTemplate("t", Locale.getDefault(), "", true);
+            tr.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate();
             fail();
         } catch (IOException e) {
             assertEquals("mock IO exception", e.getMessage());
             assertEquals(1, loader.getLoadAttemptCount());
             try {
-                cache.getTemplate("t", Locale.getDefault(), "", true);
+                tr.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate();
                 fail();
             } catch (IOException e2) {
                 // Still 1 - returned cached exception
@@ -80,7 +71,7 @@ public class TemplateCacheTest {
                 assertEquals(1, loader.getLoadAttemptCount());
                 try {
                     Thread.sleep(1100L);
-                    cache.getTemplate("t", Locale.getDefault(), "", true);
+                    tr.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate();
                     fail();
                 } catch (IOException e3) {
                     // Cache had to retest
@@ -94,16 +85,16 @@ public class TemplateCacheTest {
     @Test
     public void testCachedNotFound() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
-        TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage(), new Configuration());
-        cache.setDelay(1000L);
+        DefaultTemplateResolver cache = new DefaultTemplateResolver(loader, new StrongCacheStorage(), new Configuration());
+        cache.setTemplateUpdateDelayMilliseconds(1000L);
         cache.setLocalizedLookup(false);
-        assertNull(cache.getTemplate("t", Locale.getDefault(), "", true));
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate());
         assertEquals(1, loader.getLoadAttemptCount());
-        assertNull(cache.getTemplate("t", Locale.getDefault(), "", true));
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate());
         // Still 1 - returned cached exception
         assertEquals(1, loader.getLoadAttemptCount());
         Thread.sleep(1100L);
-        assertNull(cache.getTemplate("t", Locale.getDefault(), "", true));
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate());
         // Cache had to retest
         assertEquals(2, loader.getLoadAttemptCount());
     }

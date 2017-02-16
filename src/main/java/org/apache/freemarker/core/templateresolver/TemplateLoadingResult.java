@@ -124,7 +124,7 @@ public final class TemplateLoadingResult {
      * Returns non-{@code null} exactly if {@link #getStatus()} is {@link TemplateLoadingResultStatus#OPENED} and the
      * backing store mechanism returns content as {@code byte}-s, as opposed to as {@code chars}-s. See also
      * {@link #TemplateLoadingResult(TemplateLoadingSource, Serializable, InputStream, TemplateConfiguration)}. It's the
-     * responsibility of the caller (which is {@link TemplateCache} usually) to {@code close()} the {@link InputStream}.
+     * responsibility of the caller (which is {@link DefaultTemplateResolver} usually) to {@code close()} the {@link InputStream}.
      * The return value is always the same instance, no mater when and how many times this method is called.
      * 
      * <p>
@@ -173,7 +173,7 @@ public final class TemplateLoadingResult {
      * Returns non-{@code null} exactly if {@link #getStatus()} is {@link TemplateLoadingResultStatus#OPENED} and the
      * backing store mechanism returns content as {@code char}-s, as opposed to as {@code byte}-s. See also
      * {@link #TemplateLoadingResult(TemplateLoadingSource, Serializable, Reader, TemplateConfiguration)}. It's the
-     * responsibility of the caller (which is {@link TemplateCache} usually) to {@code close()} the {@link Reader}. The
+     * responsibility of the caller (which is {@link DefaultTemplateResolver} usually) to {@code close()} the {@link Reader}. The
      * return value is always the same instance, no mater when and how many times this method is called.
      * 
      * <p>

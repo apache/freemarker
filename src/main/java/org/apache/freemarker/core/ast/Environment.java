@@ -67,12 +67,13 @@ import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver._CacheAPI;
 import org.apache.freemarker.core.util.DateUtil;
+import org.apache.freemarker.core.util.DateUtil.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util.NullWriter;
 import org.apache.freemarker.core.util.StringUtil;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
-import org.apache.freemarker.core.util.DateUtil.DateToISO8601CalendarFactory;
 import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -2449,7 +2450,7 @@ public final class Environment extends Configurable {
      * @param name
      *            the name of the template, relatively to the template root directory (not the to the directory of the
      *            currently executing template file). (Note that you can use
-     *            {@link org.apache.freemarker.core.templateresolver.TemplateCache#getFullTemplatePath} to convert paths to template root relative
+     *            {@link TemplateResolver#toRootBasedName(String, String)} to convert paths to template root based
      *            paths.) For more details see the identical parameter of
      *            {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
      * 
@@ -2592,7 +2593,7 @@ public final class Environment extends Configurable {
      * @param name
      *            the name of the template, relatively to the template root directory (not the to the directory of the
      *            currently executing template file!). (Note that you can use
-     *            {@link org.apache.freemarker.core.templateresolver.TemplateCache#getFullTemplatePath} to convert paths to template root relative
+     *            {@link TemplateResolver#toRootBasedName(String, String)} to convert paths to template root based
      *            paths.)
      */
     public Template getTemplateForImporting(String name) throws IOException {

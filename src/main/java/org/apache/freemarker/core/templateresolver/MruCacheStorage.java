@@ -37,12 +37,12 @@ import java.util.Map;
  * On the other hand, if you wish to use this storage in a strong-only mode, or
  * in a soft-only mode, you might consider using {@link StrongCacheStorage} or
  * {@link SoftCacheStorage} instead, as they can be used by 
- * {@link TemplateCache} concurrently without any synchronization on a 5.0 or 
+ * {@link DefaultTemplateResolver} concurrently without any synchronization on a 5.0 or 
  * later JRE.
  *  
  * <p>This class is <em>NOT</em> thread-safe. If it's accessed from multiple
  * threads concurrently, proper synchronization must be provided by the callers.
- * Note that {@link TemplateCache}, the natural user of this class provides the
+ * Note that {@link DefaultTemplateResolver}, the natural user of this class provides the
  * necessary synchronizations when it uses the class.
  * Also you might consider whether you need this sort of a mixed storage at all
  * in your solution, as in most cases SoftCacheStorage can also be sufficient. 
