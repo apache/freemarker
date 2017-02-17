@@ -1200,7 +1200,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setSharedVariable("erased", "");
         assertNotNull(cfg.getSharedVariable("erased"));
         
-        Map<String, Object> vars = new HashMap<String, Object>(); 
+        Map<String, Object> vars = new HashMap<>();
         vars.put("a", "aa");
         vars.put("b", "bb");
         vars.put("c", new MyScalarModel());
@@ -1606,8 +1606,8 @@ public class ConfigurationTest extends TestCase {
     public void testGetSettingNamesAreSorted() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         for (boolean camelCase : new boolean[] { false, true }) {
-            List<String> names = new ArrayList<String>(cfg.getSettingNames(camelCase)); 
-            List<String> cfgableNames = new ArrayList<String>(new Template(null, "", cfg).getSettingNames(camelCase));
+            List<String> names = new ArrayList<>(cfg.getSettingNames(camelCase));
+            List<String> cfgableNames = new ArrayList<>(new Template(null, "", cfg).getSettingNames(camelCase));
             assertStartsWith(names, cfgableNames);
             
             String prevName = null;
@@ -1625,15 +1625,15 @@ public class ConfigurationTest extends TestCase {
     public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         ConfigurableTest.testGetSettingNamesNameConventionsContainTheSame(
-                new ArrayList<String>(cfg.getSettingNames(false)),
-                new ArrayList<String>(cfg.getSettingNames(true)));
+                new ArrayList<>(cfg.getSettingNames(false)),
+                new ArrayList<>(cfg.getSettingNames(true)));
     }
 
     @Test
     public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        List<String> names = new ArrayList<String>(cfg.getSettingNames(false)); 
-        List<String> cfgableNames = new ArrayList<String>(cfg.getSettingNames(false));
+        List<String> names = new ArrayList<>(cfg.getSettingNames(false));
+        List<String> cfgableNames = new ArrayList<>(cfg.getSettingNames(false));
         assertStartsWith(names, cfgableNames);
         
         for (int i = cfgableNames.size(); i < names.size(); i++) {

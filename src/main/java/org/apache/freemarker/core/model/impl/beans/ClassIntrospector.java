@@ -141,13 +141,13 @@ class ClassIntrospector {
 
     private final Object sharedLock;
     private final Map<Class<?>, Map<Object, Object>> cache
-            = new ConcurrentHashMap<Class<?>, Map<Object, Object>>(0, 0.75f, 16);
-    private final Set<String> cacheClassNames = new HashSet<String>(0);
-    private final Set<Class<?>> classIntrospectionsInProgress = new HashSet<Class<?>>(0);
+            = new ConcurrentHashMap<>(0, 0.75f, 16);
+    private final Set<String> cacheClassNames = new HashSet<>(0);
+    private final Set<Class<?>> classIntrospectionsInProgress = new HashSet<>(0);
 
     private final List<WeakReference<Object/*ClassBasedModelFactory|ModelCache>*/>> modelFactories
-            = new LinkedList<WeakReference<Object>>();
-    private final ReferenceQueue<Object> modelFactoriesRefQueue = new ReferenceQueue<Object>();
+            = new LinkedList<>();
+    private final ReferenceQueue<Object> modelFactoriesRefQueue = new ReferenceQueue<>();
 
     private int clearingCounter;
 
@@ -258,7 +258,7 @@ class ClassIntrospector {
      * Creates a {@link Map} with the content as described for the return value of {@link #get(Class)}.
      */
     private Map<Object, Object> createClassIntrospectionData(Class<?> clazz) {
-        final Map<Object, Object> introspData = new HashMap<Object, Object>();
+        final Map<Object, Object> introspData = new HashMap<>();
 
         if (exposeFields) {
             addFieldsToClassIntrospectionData(introspData, clazz);
@@ -452,7 +452,7 @@ class ClassIntrospector {
      * interfaces. Basically upcasts every method to the nearest accessible method.
      */
     private static Map<MethodSignature, List<Method>> discoverAccessibleMethods(Class<?> clazz) {
-        Map<MethodSignature, List<Method>> accessibles = new HashMap<MethodSignature, List<Method>>();
+        Map<MethodSignature, List<Method>> accessibles = new HashMap<>();
         discoverAccessibleMethods(clazz, accessibles);
         return accessibles;
     }
@@ -478,7 +478,7 @@ class ClassIntrospector {
                     List<Method> methodList = accessibles.get(sig);
                     if (methodList == null) {
                      // TODO Collection.singletonList is more efficient, though read only.
-                        methodList = new LinkedList<Method>();
+                        methodList = new LinkedList<>();
                         accessibles.put(sig, methodList);
                     }
                     methodList.add(method);
@@ -541,7 +541,7 @@ class ClassIntrospector {
         @SuppressWarnings("unchecked")
         Map<Method, Class<?>[]> argTypes = (Map<Method, Class<?>[]>) classInfo.get(ARG_TYPES_BY_METHOD_KEY);
         if (argTypes == null) {
-            argTypes = new HashMap<Method, Class<?>[]>();
+            argTypes = new HashMap<>();
             classInfo.put(ARG_TYPES_BY_METHOD_KEY, argTypes);
         }
         return argTypes;
@@ -683,7 +683,7 @@ class ClassIntrospector {
     private void registerModelFactory(Object mf) {
         // Note that this `synchronized (sharedLock)` is also need for the BeansWrapper constructor to work safely.
         synchronized (sharedLock) {
-            modelFactories.add(new WeakReference<Object>(mf, modelFactoriesRefQueue));
+            modelFactories.add(new WeakReference<>(mf, modelFactoriesRefQueue));
             removeClearedModelFactoryReferences();
         }
     }
@@ -749,7 +749,7 @@ class ClassIntrospector {
      * interface.
      */
     Set<Object> keySet(Class<?> clazz) {
-        Set<Object> set = new HashSet<Object>(get(clazz).keySet());
+        Set<Object> set = new HashSet<>(get(clazz).keySet());
         set.remove(CONSTRUCTORS_KEY);
         set.remove(GENERIC_GET_KEY);
         set.remove(ARG_TYPES_BY_METHOD_KEY);

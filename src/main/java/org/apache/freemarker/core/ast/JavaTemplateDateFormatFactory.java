@@ -37,7 +37,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     private static final Logger LOG = _CoreLogs.RUNTIME;
 
     private static final ConcurrentHashMap<CacheKey, DateFormat> GLOBAL_FORMAT_CACHE
-            = new ConcurrentHashMap<CacheKey, DateFormat>();
+            = new ConcurrentHashMap<>();
     private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
     
     private JavaTemplateDateFormatFactory() {

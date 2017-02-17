@@ -119,7 +119,7 @@ public class TemplateTestCase extends FileTestCase {
     private final boolean noOutput;
     
     private final Configuration conf;
-    private final HashMap<String, Object> dataModel = new HashMap<String, Object>();
+    private final HashMap<String, Object> dataModel = new HashMap<>();
     
     public TemplateTestCase(String testName, String simpleTestName, String templateName, String expectedFileName, boolean noOutput,
             Version incompatibleImprovements) {
@@ -243,7 +243,7 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.equals("beans")) {
             dataModel.put("array", new String[] { "array-0", "array-1"});
             dataModel.put("list", Arrays.asList(new String[] { "list-0", "list-1", "list-2"}));
-            Map<Object, Object> tmap = new HashMap<Object, Object>();
+            Map<Object, Object> tmap = new HashMap<>();
             tmap.put("key", "value");
             Object objKey = new Object();
             tmap.put(objKey, "objValue");
@@ -297,23 +297,23 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bigDecimal", new SimpleNumber(java.math.BigDecimal.valueOf(1)));
             dataModel.put("bigDecimal2", new SimpleNumber(java.math.BigDecimal.valueOf(1, 16)));
         } else if (simpleTestName.equals("simplehash-char-key")) {
-            HashMap<String, String> mStringC = new HashMap<String, String>();
+            HashMap<String, String> mStringC = new HashMap<>();
             mStringC.put("c", "string");
             dataModel.put("mStringC", mStringC);
             
-            HashMap<String, String> mStringCNull = new HashMap<String, String>();
+            HashMap<String, String> mStringCNull = new HashMap<>();
             mStringCNull.put("c", null);
             dataModel.put("mStringCNull", mStringCNull);
             
-            HashMap<Character, String> mCharC = new HashMap<Character, String>();
+            HashMap<Character, String> mCharC = new HashMap<>();
             mCharC.put(Character.valueOf('c'), "char");
             dataModel.put("mCharC", mCharC);
             
-            HashMap<String, String> mCharCNull = new HashMap<String, String>();
+            HashMap<String, String> mCharCNull = new HashMap<>();
             mCharCNull.put("c", null);
             dataModel.put("mCharCNull", mCharCNull);
             
-            HashMap<Object, String> mMixed = new HashMap<Object, String>();
+            HashMap<Object, String> mMixed = new HashMap<>();
             mMixed.put(Character.valueOf('c'), "char");
             mMixed.put("s", "string");
             mMixed.put("s2", "string2");
@@ -333,8 +333,8 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.startsWith("type-builtins")) {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
-            dataModel.put("testcollection", new SimpleCollection(new ArrayList<Object>()));
-            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet<Object>(), null));
+            dataModel.put("testcollection", new SimpleCollection(new ArrayList<>()));
+            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet<>(), null));
             dataModel.put("bean", new TestBean());
         } else if (simpleTestName.equals("date-type-builtins")) {
             GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
@@ -376,20 +376,20 @@ public class TemplateTestCase extends FileTestCase {
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.startsWith("sequence-builtins")) {
-            Set<String> abcSet = new TreeSet<String>();
+            Set<String> abcSet = new TreeSet<>();
             abcSet.add("a");
             abcSet.add("b");
             abcSet.add("c");
             dataModel.put("abcSet", abcSet);
             dataModel.put("abcSetNonSeq", DefaultNonListCollectionAdapter.adapt(abcSet, beansWrapper));
             
-            List<String> listWithNull = new ArrayList<String>();
+            List<String> listWithNull = new ArrayList<>();
             listWithNull.add("a");
             listWithNull.add(null);
             listWithNull.add("c");
             dataModel.put("listWithNull", listWithNull);
             
-            List<String> listWithNullsOnly = new ArrayList<String>();
+            List<String> listWithNullsOnly = new ArrayList<>();
             listWithNull.add(null);
             listWithNull.add(null);
             listWithNull.add(null);
@@ -397,7 +397,7 @@ public class TemplateTestCase extends FileTestCase {
             
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
             
-            Set<String> set = new HashSet<String>();
+            Set<String> set = new HashSet<>();
             set.add("a");
             set.add("b");
             set.add("c");

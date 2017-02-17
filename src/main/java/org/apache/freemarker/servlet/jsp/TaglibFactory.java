@@ -1627,7 +1627,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         private final BeansWrapper beansWrapper;
 
-        private final Map<String, TemplateModel> tagsAndFunctions = new HashMap<String, TemplateModel>();
+        private final Map<String, TemplateModel> tagsAndFunctions = new HashMap<>();
         private final List listeners = new ArrayList();
 
         private Locator locator;

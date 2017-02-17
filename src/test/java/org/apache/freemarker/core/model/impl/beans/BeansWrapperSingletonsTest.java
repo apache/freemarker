@@ -140,7 +140,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
     }
     
     public void testBeansWrapperFactoryProducts() throws Exception {
-        List<BeansWrapper> hardReferences = new LinkedList<BeansWrapper>();
+        List<BeansWrapper> hardReferences = new LinkedList<>();
         
         assertEquals(0, getBeansWrapperInstanceCacheSize());
         
@@ -344,7 +344,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
     }
 
     public void testMultipleTCCLs() {
-        List<BeansWrapper> hardReferences = new LinkedList<BeansWrapper>();
+        List<BeansWrapper> hardReferences = new LinkedList<>();
         
         assertEquals(0, getBeansWrapperInstanceCacheSize());
         
@@ -402,7 +402,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         BeansWrapperBuilder.clearInstanceCache();
         checkClassIntrospectorCacheSize(0);
         
-        List<BeansWrapper> hardReferences = new LinkedList<BeansWrapper>();
+        List<BeansWrapper> hardReferences = new LinkedList<>();
         BeansWrapperBuilder factory;
         
         {

@@ -45,7 +45,7 @@ public class MonitoredTemplateLoader implements TemplateLoader {
             = Collections.synchronizedList(new ArrayList<AbstractTemplateLoader2Event>());
     
     private Map<String, StoredTemplate> templates
-            = new ConcurrentHashMap<String, MonitoredTemplateLoader.StoredTemplate>();
+            = new ConcurrentHashMap<>();
 
     @Override
     public TemplateLoaderSession createSession() {

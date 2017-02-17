@@ -156,7 +156,7 @@ public abstract class TemplateTest {
     
     @SuppressWarnings("boxing")
     protected Map<String, Object> createCommonTestValuesDataModel() {
-        Map<String, Object> dataModel = new HashMap<String, Object>();
+        Map<String, Object> dataModel = new HashMap<>();
         dataModel.put("map", Collections.singletonMap("key", "value"));
         dataModel.put("list", Collections.singletonList("item"));
         dataModel.put("s", "text");

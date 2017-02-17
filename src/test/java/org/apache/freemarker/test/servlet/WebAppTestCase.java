@@ -60,7 +60,7 @@ public class WebAppTestCase {
 
     private static Server server;
     private static ContextHandlerCollection contextHandlers;
-    private static Map<String, WebAppContext> deployedWebApps = new HashMap<String, WebAppContext>();
+    private static Map<String, WebAppContext> deployedWebApps = new HashMap<>();
     private static volatile File testTempDirectory;
 
     @BeforeClass

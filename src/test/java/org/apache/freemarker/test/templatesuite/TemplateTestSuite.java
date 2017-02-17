@@ -81,7 +81,7 @@ public class TemplateTestSuite extends TestSuite {
     public static final String INCOMPATIBLE_IMPROVEMENTS_PROPERTY_NAME
             = "freemareker.templateTestSuite.incompatibleImprovements";
     
-    private final Map<String, String> testSuiteSettings = new LinkedHashMap<String, String>();
+    private final Map<String, String> testSuiteSettings = new LinkedHashMap<>();
 
     private final ArrayList<Version> testSuiteIcis;
 
@@ -100,7 +100,7 @@ public class TemplateTestSuite extends TestSuite {
             System.out.println("Note: " + TEST_FILTER_PROPERTY_NAME + " is " + _StringUtil.jQuote(testCaseNameFilter));
         }
         
-        testSuiteIcis = new ArrayList<Version>();
+        testSuiteIcis = new ArrayList<>();
         String testedIcIsStr = System.getProperty(INCOMPATIBLE_IMPROVEMENTS_PROPERTY_NAME);
         if (testedIcIsStr != null) {
             for (String iciStr : testedIcIsStr.split(",")) {
@@ -228,7 +228,7 @@ public class TemplateTestSuite extends TestSuite {
             }
         }
 
-        List<TemplateTestCase> result = new ArrayList<TemplateTestCase>(); 
+        List<TemplateTestCase> result = new ArrayList<>();
         for (Version iciToTest : icisToTest) {
             TemplateTestCase testCase = new TemplateTestCase(
                     caseName + "(ici=" + iciToTest + ")", caseName,
@@ -247,7 +247,7 @@ public class TemplateTestSuite extends TestSuite {
     }
 
     private List<Version> parseVersionList(String versionsStr) {
-        List<Version> versions = new ArrayList<Version>();
+        List<Version> versions = new ArrayList<>();
         for (String versionStr : versionsStr.split(",")) {
             versionStr = versionStr.trim();
             if (versionStr.length() != 0) {
@@ -279,7 +279,7 @@ public class TemplateTestSuite extends TestSuite {
 
     private Map<String, String> getCaseFMSettings(Element e) {
         final Map<String, String> caseFMSettings;
-        caseFMSettings = new LinkedHashMap<String, String>();
+        caseFMSettings = new LinkedHashMap<>();
         NodeList settingElems = e.getElementsByTagName(ELEM_SETTING);
         for (int elemIdx = 0; elemIdx < settingElems.getLength(); elemIdx++) {
             NamedNodeMap attrs = settingElems.item(elemIdx).getAttributes();

@@ -103,7 +103,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     @SuppressWarnings("boxing")
     @Override
     protected Object createDataModel() {
-        Map<String, Object> dm = new HashMap<String, Object>();
+        Map<String, Object> dm = new HashMap<>();
         dm.put("uc", new CachingUpperCaseDirective());
         dm.put("lc", new CachingLowerCaseDirective());
         dm.put("pa", new PositionAwareDirective());

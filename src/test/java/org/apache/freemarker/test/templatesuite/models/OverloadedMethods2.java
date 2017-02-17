@@ -922,7 +922,7 @@ public class OverloadedMethods2 {
     
     @SuppressWarnings("boxing")
     public List<Integer> getJavaIntegerList() {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new ArrayList<>();
         list.add(1);
         list.add(2);
         return list;
@@ -930,7 +930,7 @@ public class OverloadedMethods2 {
 
     @SuppressWarnings("boxing")
     public List<Byte> getJavaByteList() {
-        List<Byte> list = new ArrayList<Byte>();
+        List<Byte> list = new ArrayList<>();
         list.add((byte) 1);
         list.add((byte) 2);
         return list;
@@ -938,7 +938,7 @@ public class OverloadedMethods2 {
 
     @SuppressWarnings("boxing")
     public List<Character> getJavaCharacterList() {
-        List<Character> list = new ArrayList<Character>();
+        List<Character> list = new ArrayList<>();
         list.add('c');
         list.add('C');
         return list;

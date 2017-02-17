@@ -44,7 +44,7 @@ import org.apache.freemarker.core.util._NullArgumentException;
 public class MultiTemplateLoader implements TemplateLoader {
 
     private final TemplateLoader[] templateLoaders;
-    private final Map<String, TemplateLoader> lastTemplateLoaderForName = new ConcurrentHashMap<String, TemplateLoader>();
+    private final Map<String, TemplateLoader> lastTemplateLoaderForName = new ConcurrentHashMap<>();
     
     private boolean sticky = false;
 

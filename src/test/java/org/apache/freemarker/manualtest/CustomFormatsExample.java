@@ -41,13 +41,13 @@ public class CustomFormatsExample extends ExamplesTest {
         Configuration cfg = getConfiguration();
 
         Map<String, TemplateNumberFormatFactory> customNumberFormats
-                = new HashMap<String, TemplateNumberFormatFactory>();
+                = new HashMap<>();
         customNumberFormats.put("price", new AliasTemplateNumberFormatFactory(",000.00"));
         customNumberFormats.put("weight", new AliasTemplateNumberFormatFactory("0.##;; roundingMode=halfUp"));
         cfg.setCustomNumberFormats(customNumberFormats);
 
         Map<String, TemplateDateFormatFactory> customDateFormats
-                = new HashMap<String, TemplateDateFormatFactory>();
+                = new HashMap<>();
         customDateFormats.put("fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a"));
         customDateFormats.put("logEventTime", new AliasTemplateDateFormatFactory("iso ms u"));
         cfg.setCustomDateFormats(customDateFormats);
@@ -65,7 +65,7 @@ public class CustomFormatsExample extends ExamplesTest {
         Configuration cfg = getConfiguration();
 
         Map<String, TemplateNumberFormatFactory> customNumberFormats
-                = new HashMap<String, TemplateNumberFormatFactory>();
+                = new HashMap<>();
         customNumberFormats.put("base", BaseNTemplateNumberFormatFactory.INSTANCE);
         customNumberFormats.put("oct", new AliasTemplateNumberFormatFactory("@base 8"));
         cfg.setCustomNumberFormats(customNumberFormats);
@@ -78,7 +78,7 @@ public class CustomFormatsExample extends ExamplesTest {
         Configuration cfg = getConfiguration();
 
         Map<String, TemplateNumberFormatFactory> customNumberFormats
-                = new HashMap<String, TemplateNumberFormatFactory>();
+                = new HashMap<>();
         customNumberFormats.put("ua", UnitAwareTemplateNumberFormatFactory.INSTANCE);
         cfg.setCustomNumberFormats(customNumberFormats);
         cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");

@@ -1645,7 +1645,7 @@ public class Configurable {
     }
 
     private void initAutoImportsMap() {
-        autoImports = new LinkedHashMap<String, String>(4);
+        autoImports = new LinkedHashMap<>(4);
     }
     
     /**
@@ -1785,7 +1785,7 @@ public class Configurable {
     }
 
     private void initAutoIncludesList() {
-        autoIncludes = new ArrayList<String>(4);
+        autoIncludes = new ArrayList<>(4);
     }
     
     /**
@@ -2431,7 +2431,7 @@ public class Configurable {
      * @since 2.3.24
      */
     public Set<String> getSettingNames(boolean camelCase) {
-        return new _SortedArraySet<String>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE); 
+        return new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE);
     }
 
     private TimeZone parseTimeZoneSettingValue(String value) {

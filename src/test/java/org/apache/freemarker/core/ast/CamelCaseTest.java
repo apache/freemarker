@@ -271,7 +271,7 @@ public class CamelCaseTest extends TemplateTest {
     }
 
     private void assertContainsBothNamingStyles(Set<String> names, NamePairAssertion namePairAssertion) {
-        Set<String> underscoredNamesWithCamelCasePair = new HashSet<String>();
+        Set<String> underscoredNamesWithCamelCasePair = new HashSet<>();
         for (String name : names) {
             if (_StringUtil.getIdentifierNamingConvention(name) == Configuration.CAMEL_CASE_NAMING_CONVENTION) {
                 String underscoredName = correctIsoBIExceptions(_StringUtil.camelCaseToUnderscored(name)); 

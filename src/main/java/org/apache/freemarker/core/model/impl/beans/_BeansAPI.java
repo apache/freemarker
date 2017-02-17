@@ -62,9 +62,9 @@ public class _BeansAPI {
         
         final ArgumentTypes argTypes = new ArgumentTypes(args, true);
         final List<ReflectionCallableMemberDescriptor> fixedArgMemberDescs
-                = new ArrayList<ReflectionCallableMemberDescriptor>();
+                = new ArrayList<>();
         final List<ReflectionCallableMemberDescriptor> varArgsMemberDescs
-                = new ArrayList<ReflectionCallableMemberDescriptor>();
+                = new ArrayList<>();
         final Constructor<?>[] constrs = pClass.getConstructors();
         for (int i = 0; i < constrs.length; i++) {
             Constructor<?> constr = constrs[i];
@@ -151,7 +151,7 @@ public class _BeansAPI {
         synchronized (instanceCache) {
             tcclScopedCache = instanceCache.get(tccl);
             if (tcclScopedCache == null) {
-                tcclScopedCache = new HashMap<BWC, WeakReference<BW>>();
+                tcclScopedCache = new HashMap<>();
                 instanceCache.put(tccl, tcclScopedCache);
                 instanceRef = null;
             } else {
@@ -175,7 +175,7 @@ public class _BeansAPI {
             instanceRef = tcclScopedCache.get(settings);
             BW concurrentInstance = instanceRef != null ? instanceRef.get() : null;
             if (concurrentInstance == null) {
-                tcclScopedCache.put(settings, new WeakReference<BW>(instance, instanceCacheRefQue));
+                tcclScopedCache.put(settings, new WeakReference<>(instance, instanceCacheRefQue));
             } else {
                 instance = concurrentInstance;
             }

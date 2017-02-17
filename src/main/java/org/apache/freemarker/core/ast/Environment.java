@@ -1236,7 +1236,7 @@ public final class Environment extends Configurable {
             throws TemplateValueFormatException {
         if (cachedTemplateNumberFormats == null) {
             if (cacheResult) {
-                cachedTemplateNumberFormats = new HashMap<String, TemplateNumberFormat>();
+                cachedTemplateNumberFormats = new HashMap<>();
             }
         } else {
             TemplateNumberFormat format = cachedTemplateNumberFormats.get(formatString);
@@ -1710,7 +1710,7 @@ public final class Environment extends Configurable {
                 cachedFormatsByFormatString = cachedTempDateFormatsByFmtStrArray[cacheArrIdx];
                 if (cachedFormatsByFormatString == null) {
                     if (cacheResult) {
-                        cachedFormatsByFormatString = new HashMap<String, TemplateDateFormat>(4);
+                        cachedFormatsByFormatString = new HashMap<>(4);
                         cachedTempDateFormatsByFmtStrArray[cacheArrIdx] = cachedFormatsByFormatString;
                         format = null;
                     } else {
@@ -2779,7 +2779,7 @@ public final class Environment extends Configurable {
     public Object setCustomState(Object identityKey, Object value) {
         IdentityHashMap<Object, Object> customStateVariables = this.customStateVariables;
         if (customStateVariables == null) {
-            customStateVariables = new IdentityHashMap<Object, Object>();
+            customStateVariables = new IdentityHashMap<>();
             this.customStateVariables = customStateVariables;
         }
         return customStateVariables.put(identityKey, value);

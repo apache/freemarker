@@ -84,8 +84,8 @@ public class ConfigurableTest {
     public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
         Configurable cfgable = createConfigurable();
         ConfigurableTest.testGetSettingNamesNameConventionsContainTheSame(
-                new ArrayList<String>(cfgable.getSettingNames(false)),
-                new ArrayList<String>(cfgable.getSettingNames(true)));
+                new ArrayList<>(cfgable.getSettingNames(false)),
+                new ArrayList<>(cfgable.getSettingNames(true)));
     }
 
     public static void testKeyStaticFieldsHasAllVariationsAndCorrectFormat(
@@ -147,10 +147,10 @@ public class ConfigurableTest {
     }
     
     public static void testGetSettingNamesNameConventionsContainTheSame(List<String> namesSCList, List<String> namesCCList) {
-        Set<String> namesSC = new HashSet<String>(namesSCList);
+        Set<String> namesSC = new HashSet<>(namesSCList);
         assertEquals(namesSCList.size(), namesSC.size());
         
-        Set<String> namesCC = new HashSet<String>(namesCCList);
+        Set<String> namesCC = new HashSet<>(namesCCList);
         assertEquals(namesCCList.size(), namesCC.size());
 
         assertEquals(namesSC.size(), namesCC.size());

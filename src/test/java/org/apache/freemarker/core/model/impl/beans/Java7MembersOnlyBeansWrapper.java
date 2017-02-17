@@ -89,7 +89,7 @@ public class Java7MembersOnlyBeansWrapper extends BeansWrapper {
     }
 
     private static <T> Set<T> newHashSet(T... items) {
-        HashSet<T> r = new HashSet<T>();
+        HashSet<T> r = new HashSet<>();
         for (T item : items) {
             r.add(item);
         }

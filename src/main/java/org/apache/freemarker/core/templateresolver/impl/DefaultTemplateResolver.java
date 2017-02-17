@@ -971,7 +971,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             }
             StringTokenizer pathTokenizer = new StringTokenizer(path, "/");
             int lastAsterisk = -1;
-            List<String> pathSteps = new ArrayList<String>();
+            List<String> pathSteps = new ArrayList<>();
             while (pathTokenizer.hasMoreTokens()) {
                 String pathStep = pathTokenizer.nextToken();
                 if (pathStep.equals(ASTERISKSTR)) {

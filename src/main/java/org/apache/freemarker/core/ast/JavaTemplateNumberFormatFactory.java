@@ -36,7 +36,7 @@ class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     private static final Logger LOG = _CoreLogs.RUNTIME;
 
     private static final ConcurrentHashMap<CacheKey, NumberFormat> GLOBAL_FORMAT_CACHE
-            = new ConcurrentHashMap<CacheKey, NumberFormat>();
+            = new ConcurrentHashMap<>();
     private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
     
     private JavaTemplateNumberFormatFactory() {

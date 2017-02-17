@@ -126,7 +126,7 @@ public class DefaultObjectWrapperTest {
     
     @Test
     public void testIncompatibleImprovementsVersionBreakPoints() throws Exception {
-        List<Version> expected = new ArrayList<Version>();
+        List<Version> expected = new ArrayList<>();
         for (int u = 0; u < 21; u++) {
             expected.add(Configuration.VERSION_2_3_0);
         }
@@ -138,7 +138,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_24); // no non-BC change in 2.3.26
         expected.add(Configuration.VERSION_3_0_0);
 
-        List<Version> actual = new ArrayList<Version>();
+        List<Version> actual = new ArrayList<>();
         int i = _TemplateAPI.VERSION_INT_2_3_0;
         while (i <= Configuration.getVersion().intValue()) {
             int major = i / 1000000;
@@ -473,8 +473,8 @@ public class DefaultObjectWrapperTest {
         {
             // Check custom TM usage and round trip:
             final TemplateModel mr = (TemplateModel) ((TemplateMethodModelEx) bean.get("incTupple"))
-                    .exec(Collections.singletonList(ow.wrap(new Tupple<Integer, Integer>(1, 2))));
-            assertEquals(new Tupple<Integer, Integer>(2, 3), ow.unwrap(mr));
+                    .exec(Collections.singletonList(ow.wrap(new Tupple<>(1, 2))));
+            assertEquals(new Tupple<>(2, 3), ow.unwrap(mr));
             assertTrue(TuppleAdapter.class.isInstance(mr));
         }
     }
@@ -528,7 +528,7 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testMapAdapter() throws TemplateModelException {
-        HashMap<String, Object> testMap = new LinkedHashMap<String, Object>();
+        HashMap<String, Object> testMap = new LinkedHashMap<>();
         testMap.put("a", 1);
         testMap.put("b", null);
         testMap.put("c", "C");
@@ -595,7 +595,7 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testListAdapter() throws TemplateModelException {
         {
-            List testList = new ArrayList<Object>();
+            List testList = new ArrayList<>();
             testList.add(1);
             testList.add(null);
             testList.add("c");
@@ -616,7 +616,7 @@ public class DefaultObjectWrapperTest {
         }
 
         {
-            List testList = new LinkedList<Object>();
+            List testList = new LinkedList<>();
             testList.add(1);
             testList.add(null);
             testList.add("c");
@@ -646,7 +646,7 @@ public class DefaultObjectWrapperTest {
         }
 
         {
-            List testList = new ArrayList<Object>();
+            List testList = new ArrayList<>();
             testList.add(null);
 
             final TemplateSequenceModel seq = (TemplateSequenceModel) OW22NM.wrap(testList);
@@ -943,13 +943,13 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testCharKeyFallback() throws TemplateModelException {
-        Map hashMapS = new HashMap<String, Integer>();
+        Map hashMapS = new HashMap<>();
         hashMapS.put("a", 1);
-        Map sortedMapS = new TreeMap<String, Integer>();
+        Map sortedMapS = new TreeMap<>();
         sortedMapS.put("a", 1);
-        Map hashMapC = new HashMap<Character, Integer>();
+        Map hashMapC = new HashMap<>();
         hashMapC.put('a', 1);
-        Map sortedMapC = new TreeMap<Character, Integer>();
+        Map sortedMapC = new TreeMap<>();
         sortedMapC.put('a', 1);
         
         for (DefaultObjectWrapper ow : new DefaultObjectWrapper[] { OW0, OW22 } ) {
