@@ -60,6 +60,7 @@ class ExtendedDecimalFormatParser {
     static {
         HashMap<String, ParameterHandler> m = new HashMap<String, ParameterHandler>();
         m.put(PARAM_ROUNDING_MODE, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 RoundingMode parsedValue;
@@ -83,14 +84,11 @@ class ExtendedDecimalFormatParser {
                     throw new InvalidParameterValueException("Should be one of: u, d, c, f, hd, he, hu, un");
                 }
 
-                if (_JavaVersions.JAVA_6 == null) {
-                    throw new InvalidParameterValueException("For setting the rounding mode you need Java 6 or later.");
-                }
-
                 parser.roundingMode = parsedValue;
             }
         });
         m.put(PARAM_MULTIPIER, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 try {
@@ -101,6 +99,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_DECIMAL_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -110,6 +109,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_MONETARY_DECIMAL_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -119,6 +119,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_GROUP_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -128,16 +129,14 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_EXPONENT_SEPARATOR, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
-                if (_JavaVersions.JAVA_6 == null) {
-                    throw new InvalidParameterValueException(
-                            "For setting the exponent separator you need Java 6 or later.");
-                }
-                _JavaVersions.JAVA_6.setExponentSeparator(parser.symbols, value);
+                parser.symbols.setExponentSeparator(value);
             }
         });
         m.put(PARAM_MINUS_SIGN, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -147,18 +146,21 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_INFINITY, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setInfinity(value);
             }
         });
         m.put(PARAM_NAN, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 parser.symbols.setNaN(value);
             }
         });
         m.put(PARAM_PERCENT, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -168,6 +170,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_PER_MILL, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -177,6 +180,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_ZERO_DIGIT, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 if (value.length() != 1) {
@@ -186,6 +190,7 @@ class ExtendedDecimalFormatParser {
             }
         });
         m.put(PARAM_CURRENCY_CODE, new ParameterHandler() {
+            @Override
             public void handle(ExtendedDecimalFormatParser parser, String value)
                     throws InvalidParameterValueException {
                 Currency currency;
@@ -235,10 +240,7 @@ class ExtendedDecimalFormatParser {
         }
 
         if (roundingMode != null) {
-            if (_JavaVersions.JAVA_6 == null) {
-                throw new ParseException("Setting rounding mode needs Java 6 or later", 0);
-            }
-            _JavaVersions.JAVA_6.setRoundingMode(decimalFormat, roundingMode);
+            decimalFormat.setRoundingMode(roundingMode);
         }
 
         if (multipier != null) {

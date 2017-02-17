@@ -31,47 +31,50 @@ public final class _JavaVersions {
         // Not meant to be instantiated
     }
 
-    private static final boolean IS_AT_LEAST_6;
+    private static final boolean IS_AT_LEAST_8;
     static {
         boolean result = false;
         String vStr = SecurityUtilities.getSystemProperty("java.version", null);
         if (vStr != null) {
             try {
                 Version v = new Version(vStr);
-                result = v.getMajor() == 1 && v.getMinor() >= 6 || v.getMajor() > 1;
+                result = v.getMajor() == 1 && v.getMinor() >= 8 || v.getMajor() > 1;
             } catch (Exception e) {
                 // Ignore
             }
-        }
-        if (vStr == null) {
+        } else {
             try {
-                Class.forName("java.util.ServiceLoader");
+                Class.forName("java.time.Instant");
                 result = true;
             } catch (Exception e) {
                 // Ignore
             }
         }
-        IS_AT_LEAST_6 = result;
+        IS_AT_LEAST_8 = result;
     }
     
-    static public final _Java6 JAVA_6;
+    /**
+     * {@code null} if Java 8 is not available, otherwise the object through with the Java 8 operations are available.
+     */
+    static public final _Java8 JAVA_8;
     static {
-        _Java6 java6;
-        if (IS_AT_LEAST_6) {
+        _Java8 java8;
+        if (IS_AT_LEAST_8) {
             try {
-                java6 = (_Java6) Class.forName("org.apache.freemarker.core.ast._Java6Impl").getField("INSTANCE").get(null);
+                java8 = (_Java8) Class.forName("org.apache.freemarker.core.ast._Java8Impl")
+                        .getField("INSTANCE").get(null);
             } catch (Exception e) {
                 try {
                     _CoreLogs.RUNTIME.error("Failed to access Java 6 functionality", e);
                 } catch (Exception e2) {
                     // Suppressed
                 }
-                java6 = null;
+                java8 = null;
             }
         } else {
-            java6 = null;
+            java8 = null;
         }
-        JAVA_6 = java6;
+        JAVA_8 = java8;
     }
     
 }

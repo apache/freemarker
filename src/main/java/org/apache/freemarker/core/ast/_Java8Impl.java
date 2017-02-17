@@ -18,18 +18,22 @@
  */
 package org.apache.freemarker.core.ast;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
 /**
  * Used internally only, might changes without notice!
  * Used for accessing functionality that's only present in Java 6 or later.
  */
-public interface _Java6 {
+// Compile this against Java 8
+public final class _Java8Impl implements _Java8 {
+    
+    public static final _Java8 INSTANCE = new _Java8Impl();
 
-    void setRoundingMode(DecimalFormat df, RoundingMode roundingMode);
+    private _Java8Impl() {
+        // Not meant to be instantiated
+    }
 
-    void setExponentSeparator(DecimalFormatSymbols dfs, String exponentSeparator);
+    @Override
+    public void doSomething() {
+        // Do something that requires Java 8 here
+    }
     
 }
