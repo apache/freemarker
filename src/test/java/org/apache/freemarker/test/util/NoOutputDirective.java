@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._NullWriter;
 
 public class NoOutputDirective implements TemplateDirectiveModel {
 
@@ -43,7 +43,7 @@ public class NoOutputDirective implements TemplateDirectiveModel {
         if (!params.isEmpty()) {
             throw new TemplateModelException("This directivey doesn't support any parameters.");
         }
-        body.render(NullWriter.INSTANCE);
+        body.render(_NullWriter.INSTANCE);
     }
 
 }

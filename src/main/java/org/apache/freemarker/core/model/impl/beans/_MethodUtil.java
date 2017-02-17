@@ -31,13 +31,11 @@ import org.apache.freemarker.core.ast._DelayedConversionToString;
 import org.apache.freemarker.core.ast._DelayedJQuote;
 import org.apache.freemarker.core.ast._TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
- * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't. 
- */ 
+ */
 public final class _MethodUtil {
     
     private _MethodUtil() {
@@ -80,7 +78,7 @@ public final class _MethodUtil {
                     return isWideningPrimitiveNumberConversion(specific, generic) ? 3 : 0;
                 } else {  // => specificIsPrim && !genericIsPrim
                     if (bugfixed) {
-                        final Class specificAsBoxed = ClassUtil.primitiveClassToBoxingClass(specific); 
+                        final Class specificAsBoxed = _ClassUtil.primitiveClassToBoxingClass(specific);
                         if (specificAsBoxed == generic) {
                             // A primitive class is more specific than its boxing class, because it can't store null
                             return 2;
@@ -216,7 +214,7 @@ public final class _MethodUtil {
             sb.append("static ");
         }
         
-        String className = ClassUtil.getShortClassName(member.getDeclaringClass());
+        String className = _ClassUtil.getShortClassName(member.getDeclaringClass());
         if (className != null) {
             sb.append(className);
             sb.append('.');
@@ -227,7 +225,7 @@ public final class _MethodUtil {
         Class[] paramTypes = _MethodUtil.getParameterTypes(member);
         for (int i = 0; i < paramTypes.length; i++) {
             if (i != 0) sb.append(", ");
-            String paramTypeDecl = ClassUtil.getShortClassName(paramTypes[i]);
+            String paramTypeDecl = _ClassUtil.getShortClassName(paramTypes[i]);
             if (i == paramTypes.length - 1 && paramTypeDecl.endsWith("[]") && _MethodUtil.isVarargs(member)) {
                 sb.append(paramTypeDecl.substring(0, paramTypeDecl.length() - 2));
                 sb.append("...");

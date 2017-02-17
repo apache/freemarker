@@ -63,8 +63,8 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.RichObjectWrapper;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util.WriteProtectable;
 import org.slf4j.Logger;
@@ -1015,7 +1015,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         final boolean is2321Bugfixed = is2321Bugfixed();
         
         if (is2321Bugfixed && targetClass.isPrimitive()) {
-            targetClass = ClassUtil.primitiveClassToBoxingClass(targetClass);            
+            targetClass = _ClassUtil.primitiveClassToBoxingClass(targetClass);
         }
         
         // This is for transparent interop with other wrappers (and ourselves)
@@ -1029,7 +1029,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             }
             
             // Attempt numeric conversion: 
-            if (targetClass != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(targetClass))) {
+            if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtil.isNumerical(targetClass))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
                 if (number != null) return number;
             }
@@ -1042,7 +1042,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             }
             
             // Attempt numeric conversion: 
-            if (targetClass != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(targetClass))) {
+            if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtil.isNumerical(targetClass))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
                 if (number != null) {
                     return number;
@@ -1066,7 +1066,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             }
     
             // Primitive numeric types & Number.class and its subclasses
-            if (ClassUtil.isNumerical(targetClass)) {
+            if (_ClassUtil.isNumerical(targetClass)) {
                 if (model instanceof TemplateNumberModel) {
                     Number number = forceUnwrappedNumberToType(
                             ((TemplateNumberModel) model).getAsNumber(), targetClass, is2321Bugfixed);
@@ -1302,7 +1302,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 if (listItem != null && !componentType.isInstance(listItem)) {
                     // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
                     if (!isComponentTypeExamined) {
-                        isComponentTypeNumerical = ClassUtil.isNumerical(componentType);
+                        isComponentTypeNumerical = _ClassUtil.isNumerical(componentType);
                         isComponentTypeList = List.class.isAssignableFrom(componentType);
                         isComponentTypeExamined = true;
                     }
@@ -1330,10 +1330,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                     Array.set(array, i, listItem);
                 } catch (IllegalArgumentException e) {
                     throw new TemplateModelException(
-                            "Failed to convert " + ClassUtil.getShortClassNameOfObject(list)
-                            + " object to " + ClassUtil.getShortClassNameOfObject(array)
+                            "Failed to convert " + _ClassUtil.getShortClassNameOfObject(list)
+                            + " object to " + _ClassUtil.getShortClassNameOfObject(array)
                             + ": Problematic List item at index " + i + " with value type: "
-                            + ClassUtil.getShortClassNameOfObject(listItem), e);
+                            + _ClassUtil.getShortClassNameOfObject(listItem), e);
                 }
                 i++;
             }
@@ -1671,7 +1671,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     @Override
     public String toString() {
         final String propsStr = toPropertiesString();
-        return ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
+        return _ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
                 + "(" + incompatibleImprovements + ", "
                 + (propsStr.length() != 0 ? propsStr + ", ..." : "")
                 + ")";

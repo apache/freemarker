@@ -71,10 +71,10 @@ import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver._CacheAPI;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
-import org.apache.freemarker.core.util.DateUtil;
-import org.apache.freemarker.core.util.DateUtil.DateToISO8601CalendarFactory;
-import org.apache.freemarker.core.util.NullWriter;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.slf4j.Logger;
 
@@ -1286,7 +1286,7 @@ public final class Environment extends Configurable {
             TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
             if (formatFactory == null) {
                 throw new UndefinedCustomFormatException(
-                        "No custom number format was defined with name " + StringUtil.jQuote(name));
+                        "No custom number format was defined with name " + _StringUtil.jQuote(name));
             }
 
             return formatFactory.get(params, locale, this);
@@ -1791,7 +1791,7 @@ public final class Environment extends Configurable {
             formatFactory = getCustomDateFormat(name);
             if (formatFactory == null) {
                 throw new UndefinedCustomFormatException(
-                        "No custom date format was defined with name " + StringUtil.jQuote(name));
+                        "No custom date format was defined with name " + _StringUtil.jQuote(name));
             }
         } else {
             formatParams = formatString;
@@ -1835,13 +1835,13 @@ public final class Environment extends Configurable {
     /**
      * Returns the {@link DateToISO8601CalendarFactory} used by the the "iso_" built-ins. Be careful when using this; it
      * should only by used with
-     * {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
-     * and {@link DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
+     * {@link _DateUtil#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
+     * and {@link _DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
      * .
      */
     DateToISO8601CalendarFactory getISOBuiltInCalendarFactory() {
         if (isoBuiltInCalendarFactory == null) {
-            isoBuiltInCalendarFactory = new DateUtil.TrivialDateToISO8601CalendarFactory();
+            isoBuiltInCalendarFactory = new _DateUtil.TrivialDateToISO8601CalendarFactory();
         }
         return isoBuiltInCalendarFactory;
     }
@@ -2666,7 +2666,7 @@ public final class Environment extends Configurable {
         Namespace prevNamespace = this.currentNamespace;
         this.currentNamespace = newNamespace;
         Writer prevOut = out;
-        this.out = NullWriter.INSTANCE;
+        this.out = _NullWriter.INSTANCE;
         try {
             include(loadedTemplate);
         } finally {
@@ -2867,7 +2867,7 @@ public final class Environment extends Configurable {
                 if (status == InitializationStatus.FAILED) {
                     throw new TemplateModelException(
                             "Lazy initialization of the imported namespace for "
-                            + StringUtil.jQuote(templateName)
+                            + _StringUtil.jQuote(templateName)
                             + " has already failed earlier; won't retry it.");
                 }
                 try {
@@ -2878,7 +2878,7 @@ public final class Environment extends Configurable {
                     // [FM3] Rethrow TemplateException-s as is
                     throw new TemplateModelException(
                             "Lazy initialization of the imported namespace for "
-                            + StringUtil.jQuote(templateName)
+                            + _StringUtil.jQuote(templateName)
                             + " has failed; see cause exception", e);
                 } finally {
                     if (status != InitializationStatus.INITIALIZED) {

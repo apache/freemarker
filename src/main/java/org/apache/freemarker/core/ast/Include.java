@@ -26,7 +26,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 
 /**
@@ -80,7 +80,7 @@ final class Include extends TemplateElement {
                 try {
                     if (parseExp instanceof StringLiteral) {
                         // Legacy
-                        parse = Boolean.valueOf(StringUtil.getYesNo(parseExp.evalAndCoerceToPlainText(null)));
+                        parse = Boolean.valueOf(_StringUtil.getYesNo(parseExp.evalAndCoerceToPlainText(null)));
                     } else {
                         try {
                             parse = Boolean.valueOf(parseExp.evalToBoolean(template.getConfiguration()));
@@ -232,7 +232,7 @@ final class Include extends TemplateElement {
 
     private boolean getYesNo(Expression exp, String s) throws TemplateException {
         try {
-           return StringUtil.getYesNo(s);
+           return _StringUtil.getYesNo(s);
         } catch (IllegalArgumentException iae) {
             throw new _MiscTemplateException(exp,
                      "Value must be boolean (or one of these strings: "

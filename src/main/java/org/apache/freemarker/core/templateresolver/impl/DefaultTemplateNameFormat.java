@@ -24,7 +24,7 @@ import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * The default template name format only when {@link Configuration#Configuration(Version) incompatible_improvements}
@@ -175,7 +175,7 @@ public final class DefaultTemplateNameFormat extends TemplateNameFormat {
         String prevName;
         do {
             prevName = path;
-            path = StringUtil.replace(path, "//", "/");
+            path = _StringUtil.replace(path, "//", "/");
         } while (prevName != path);
         return path.startsWith("/") ? path.substring(1) : path;
     }

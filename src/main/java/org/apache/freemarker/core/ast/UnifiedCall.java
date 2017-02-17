@@ -33,7 +33,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.util.ObjectFactory;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -134,7 +134,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 Map.Entry entry = (Map.Entry) entries.get(i);
                 Expression argExp = (Expression) entry.getValue();
                 sb.append(' ');
-                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) entry.getKey()));
+                sb.append(_StringUtil.toFTLTopLevelIdentifierReference((String) entry.getKey()));
                 sb.append('=');
                 MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }
@@ -145,7 +145,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 if (i != 0) {
                     sb.append(", ");
                 }
-                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
+                sb.append(_StringUtil.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
             }
         }
         if (canonical) {
@@ -290,8 +290,8 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         } catch (Exception e) {
             throw new CallPlaceCustomDataInitializationException(
                     "Failed to initialize custom data for provider identity "
-                    + StringUtil.tryToString(provierIdentity) + " via factory "
-                    + StringUtil.tryToString(objectFactory), e);
+                    + _StringUtil.tryToString(provierIdentity) + " via factory "
+                    + _StringUtil.tryToString(objectFactory), e);
         }
         if (customData == null) {
             throw new NullPointerException("ObjectFactory.createObject() has returned null");

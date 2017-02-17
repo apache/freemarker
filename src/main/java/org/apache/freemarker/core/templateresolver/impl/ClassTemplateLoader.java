@@ -25,8 +25,8 @@ import java.net.URLConnection;
 
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * A {@link TemplateLoader} that can load templates from the "classpath". Naturally, it can load from jar files, or from
@@ -83,15 +83,15 @@ public class ClassTemplateLoader extends URLTemplateLoader {
     private ClassTemplateLoader(Class<?> resourceLoaderClass, boolean allowNullResourceLoaderClass,
             ClassLoader classLoader, String basePackagePath) {
         if (!allowNullResourceLoaderClass) {
-            NullArgumentException.check("resourceLoaderClass", resourceLoaderClass);
+            _NullArgumentException.check("resourceLoaderClass", resourceLoaderClass);
         }
-        NullArgumentException.check("basePackagePath", basePackagePath);
+        _NullArgumentException.check("basePackagePath", basePackagePath);
 
         // Either set a non-null resourceLoaderClass or a non-null classLoader, not both:
         this.resourceLoaderClass = classLoader == null ? (resourceLoaderClass == null ? this.getClass()
                 : resourceLoaderClass) : null;
         if (this.resourceLoaderClass == null && classLoader == null) {
-            throw new NullArgumentException("classLoader");
+            throw new _NullArgumentException("classLoader");
         }
         this.classLoader = classLoader;
 
@@ -128,10 +128,10 @@ public class ClassTemplateLoader extends URLTemplateLoader {
         return _TemplateLoaderUtils.getClassNameForToString(this) + "("
                 + (resourceLoaderClass != null
                         ? "resourceLoaderClass=" + resourceLoaderClass.getName()
-                        : "classLoader=" + StringUtil.jQuote(classLoader))
+                        : "classLoader=" + _StringUtil.jQuote(classLoader))
                 + ", basePackagePath"
                 + "="
-                + StringUtil.jQuote(basePackagePath)
+                + _StringUtil.jQuote(basePackagePath)
                 + (resourceLoaderClass != null
                         ? (basePackagePath.startsWith("/") ? "" : " /* relatively to resourceLoaderClass pkg */")
                         : ""

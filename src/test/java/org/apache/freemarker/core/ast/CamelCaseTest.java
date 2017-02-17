@@ -33,7 +33,7 @@ import org.apache.freemarker.core.ast.BuiltIn;
 import org.apache.freemarker.core.ast.BuiltinVariable;
 import org.apache.freemarker.core.ast.HTMLOutputFormat;
 import org.apache.freemarker.core.ast.UndefinedOutputFormat;
-import org.apache.freemarker.core.ast._CoreStringUtils;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
@@ -273,8 +273,8 @@ public class CamelCaseTest extends TemplateTest {
     private void assertContainsBothNamingStyles(Set<String> names, NamePairAssertion namePairAssertion) {
         Set<String> underscoredNamesWithCamelCasePair = new HashSet<String>();
         for (String name : names) {
-            if (_CoreStringUtils.getIdentifierNamingConvention(name) == Configuration.CAMEL_CASE_NAMING_CONVENTION) {
-                String underscoredName = correctIsoBIExceptions(_CoreStringUtils.camelCaseToUnderscored(name)); 
+            if (_StringUtil.getIdentifierNamingConvention(name) == Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+                String underscoredName = correctIsoBIExceptions(_StringUtil.camelCaseToUnderscored(name)); 
                 assertTrue(
                         "Missing underscored variation \"" + underscoredName + "\" for \"" + name + "\".",
                         names.contains(underscoredName));
@@ -284,7 +284,7 @@ public class CamelCaseTest extends TemplateTest {
             }
         }
         for (String name : names) {
-            if (_CoreStringUtils.getIdentifierNamingConvention(name) == Configuration.LEGACY_NAMING_CONVENTION) {
+            if (_StringUtil.getIdentifierNamingConvention(name) == Configuration.LEGACY_NAMING_CONVENTION) {
                 assertTrue("Missing camel case variation for \"" + name + "\".",
                         underscoredNamesWithCamelCasePair.contains(name));
             }

@@ -22,7 +22,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResultStatus;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * Class of {@link TemplateLookupResult} instances created by {@link TemplateLoaderBasedTemplateLookupContext}. To
@@ -73,8 +73,8 @@ public abstract class TemplateLoaderBasedTemplateLookupResult extends TemplateLo
          *            {@code null}.
          */
         private PositiveTemplateLookupResult(String templateSourceName, TemplateLoadingResult templateLoaderResult) {
-            NullArgumentException.check("templateName", templateSourceName);
-            NullArgumentException.check("templateLoaderResult", templateLoaderResult);
+            _NullArgumentException.check("templateName", templateSourceName);
+            _NullArgumentException.check("templateLoaderResult", templateLoaderResult);
 
             this.templateSourceName = templateSourceName;
             this.templateLoaderResult = templateLoaderResult;

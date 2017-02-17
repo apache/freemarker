@@ -37,6 +37,7 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePair;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * A #list (or #foreach) element, or pre-#else section of it inside a {@link ListElseContainer}.
@@ -133,17 +134,17 @@ final class IteratorBlock extends TemplateElement {
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
         if (forEach) {
-            buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVarName));
+            buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
             buf.append(" in ");
             buf.append(listedExp.getCanonicalForm());
         } else {
             buf.append(listedExp.getCanonicalForm());
             if (loopVarName != null) {
                 buf.append(" as ");
-                buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVarName));
+                buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
                 if (loopVar2Name != null) {
                     buf.append(", ");
-                    buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVar2Name));
+                    buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVar2Name));
                 }
             }
         }

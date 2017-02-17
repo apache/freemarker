@@ -20,14 +20,14 @@ package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 abstract class MarkupOutputFormatBoundBuiltIn extends SpecialBuiltIn {
     
     protected MarkupOutputFormat outputFormat;
     
     void bindToMarkupOutputFormat(MarkupOutputFormat outputFormat) {
-        NullArgumentException.check(outputFormat);
+        _NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
     }
     

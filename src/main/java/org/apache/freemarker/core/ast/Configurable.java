@@ -65,8 +65,9 @@ import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._SortedArraySet;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * This is a common superclass of {@link org.apache.freemarker.core.Configuration},
@@ -514,7 +515,7 @@ public class Configurable {
      * @see Configuration#getTemplate(String, Locale)
      */
     public void setLocale(Locale locale) {
-        NullArgumentException.check("locale", locale);
+        _NullArgumentException.check("locale", locale);
         this.locale = locale;
         properties.setProperty(LOCALE_KEY, locale.toString());
     }
@@ -548,7 +549,7 @@ public class Configurable {
      * @see #setSQLDateAndTimeTimeZone(TimeZone)
      */
     public void setTimeZone(TimeZone timeZone) {
-        NullArgumentException.check("timeZone", timeZone);
+        _NullArgumentException.check("timeZone", timeZone);
         this.timeZone = timeZone;
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
     }
@@ -686,7 +687,7 @@ public class Configurable {
      * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
-        NullArgumentException.check("numberFormat", numberFormat);
+        _NullArgumentException.check("numberFormat", numberFormat);
         this.numberFormat = numberFormat;
         properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
     }
@@ -753,7 +754,7 @@ public class Configurable {
      * @since 2.3.24
      */
     public void setCustomNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats) {
-        NullArgumentException.check("customNumberFormats", customNumberFormats);
+        _NullArgumentException.check("customNumberFormats", customNumberFormats);
         validateFormatNames(customNumberFormats.keySet());
         this.customNumberFormats = customNumberFormats;
     }
@@ -830,7 +831,7 @@ public class Configurable {
      * only influenced the result of {@code myBool?string}. 
      */
     public void setBooleanFormat(String booleanFormat) {
-        NullArgumentException.check("booleanFormat", booleanFormat);
+        _NullArgumentException.check("booleanFormat", booleanFormat);
         
         int commaIdx = booleanFormat.indexOf(',');
         if (commaIdx == -1) {
@@ -947,7 +948,7 @@ public class Configurable {
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
      */
     public void setTimeFormat(String timeFormat) {
-        NullArgumentException.check("timeFormat", timeFormat);
+        _NullArgumentException.check("timeFormat", timeFormat);
         this.timeFormat = timeFormat;
         properties.setProperty(TIME_FORMAT_KEY, timeFormat);
     }
@@ -977,7 +978,7 @@ public class Configurable {
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
      */
     public void setDateFormat(String dateFormat) {
-        NullArgumentException.check("dateFormat", dateFormat);
+        _NullArgumentException.check("dateFormat", dateFormat);
         this.dateFormat = dateFormat;
         properties.setProperty(DATE_FORMAT_KEY, dateFormat);
     }
@@ -1085,7 +1086,7 @@ public class Configurable {
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium_medium"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
-        NullArgumentException.check("dateTimeFormat", dateTimeFormat);
+        _NullArgumentException.check("dateTimeFormat", dateTimeFormat);
         this.dateTimeFormat = dateTimeFormat;
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
     }
@@ -1153,7 +1154,7 @@ public class Configurable {
      * @since 2.3.24
      */
     public void setCustomDateFormats(Map<String, ? extends TemplateDateFormatFactory> customDateFormats) {
-        NullArgumentException.check("customDateFormats", customDateFormats);
+        _NullArgumentException.check("customDateFormats", customDateFormats);
         validateFormatNames(customDateFormats.keySet());
         this.customDateFormats = customDateFormats;
     }
@@ -1204,7 +1205,7 @@ public class Configurable {
      * output, or if you want to suppress certain exceptions. 
      */
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
-        NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
+        _NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
         this.templateExceptionHandler = templateExceptionHandler;
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
     }
@@ -1231,7 +1232,7 @@ public class Configurable {
      * The default is {@link ArithmeticEngine#BIGDECIMAL_ENGINE}.
      */
     public void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
-        NullArgumentException.check("arithmeticEngine", arithmeticEngine);
+        _NullArgumentException.check("arithmeticEngine", arithmeticEngine);
         this.arithmeticEngine = arithmeticEngine;
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
     }
@@ -1258,7 +1259,7 @@ public class Configurable {
      * The default is {@link DefaultObjectWrapperBuilder#build()}.
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
-        NullArgumentException.check("objectWrapper", objectWrapper);
+        _NullArgumentException.check("objectWrapper", objectWrapper);
         this.objectWrapper = objectWrapper;
         properties.setProperty(OBJECT_WRAPPER_KEY, objectWrapper.getClass().getName());
     }
@@ -1359,7 +1360,7 @@ public class Configurable {
      * @since 2.3.17
      */
     public void setNewBuiltinClassResolver(TemplateClassResolver newBuiltinClassResolver) {
-        NullArgumentException.check("newBuiltinClassResolver", newBuiltinClassResolver);
+        _NullArgumentException.check("newBuiltinClassResolver", newBuiltinClassResolver);
         this.newBuiltinClassResolver = newBuiltinClassResolver;
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY,
                 newBuiltinClassResolver.getClass().getName());
@@ -1669,7 +1670,7 @@ public class Configurable {
      *            Maps the namespace variable names to the template names; not {@code null}
      */
     public void setAutoImports(Map map) {
-        NullArgumentException.check("map", map);
+        _NullArgumentException.check("map", map);
         
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
@@ -1794,7 +1795,7 @@ public class Configurable {
      * out duplicates from the list if this method was called on a {@link Configuration} instance.
      */
     public void setAutoIncludes(List templateNames) {
-        NullArgumentException.check("templateNames", templateNames);
+        _NullArgumentException.check("templateNames", templateNames);
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (autoIncludes != null) {
@@ -2262,7 +2263,7 @@ public class Configurable {
         boolean unknown = false;
         try {
             if (LOCALE_KEY.equals(name)) {
-                setLocale(StringUtil.deduceLocale(value));
+                setLocale(_StringUtil.deduceLocale(value));
             } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setNumberFormat(value);
             } else if (CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE.equals(name)
@@ -2353,14 +2354,14 @@ public class Configurable {
                 setURLEscapingCharset(value);
             } else if (STRICT_BEAN_MODELS_KEY_SNAKE_CASE.equals(name)
                     || STRICT_BEAN_MODELS_KEY_CAMEL_CASE.equals(name)) {
-                setStrictBeanModels(StringUtil.getYesNo(value));
+                setStrictBeanModels(_StringUtil.getYesNo(value));
             } else if (AUTO_FLUSH_KEY_SNAKE_CASE.equals(name) || AUTO_FLUSH_KEY_CAMEL_CASE.equals(name)) {
-                setAutoFlush(StringUtil.getYesNo(value));
+                setAutoFlush(_StringUtil.getYesNo(value));
             } else if (SHOW_ERROR_TIPS_KEY_SNAKE_CASE.equals(name) || SHOW_ERROR_TIPS_KEY_CAMEL_CASE.equals(name)) {
-                setShowErrorTips(StringUtil.getYesNo(value));
+                setShowErrorTips(_StringUtil.getYesNo(value));
             } else if (API_BUILTIN_ENABLED_KEY_SNAKE_CASE.equals(name)
                     || API_BUILTIN_ENABLED_KEY_CAMEL_CASE.equals(name)) {
-                setAPIBuiltinEnabled(StringUtil.getYesNo(value));
+                setAPIBuiltinEnabled(_StringUtil.getYesNo(value));
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE.equals(name)
                     || NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE.equals(name)) {
                 if ("unrestricted".equals(value)) {
@@ -2381,7 +2382,7 @@ public class Configurable {
                             trustedTemplates = segmentValue;
                         } else {
                             throw new ParseException(
-                                    "Unrecognized list segment key: " + StringUtil.jQuote(segmentKey) +
+                                    "Unrecognized list segment key: " + _StringUtil.jQuote(segmentKey) +
                                     ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
                                     TRUSTED_TEMPLATES + "\"", 0, 0);
                         }
@@ -2397,11 +2398,11 @@ public class Configurable {
                 }
             } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
                     || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
-                setLogTemplateExceptions(StringUtil.getYesNo(value));
+                setLogTemplateExceptions(_StringUtil.getYesNo(value));
             } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
-                setLazyAutoImports(value.equals(NULL) ? null : Boolean.valueOf(StringUtil.getYesNo(value)));
+                setLazyAutoImports(value.equals(NULL) ? null : Boolean.valueOf(_StringUtil.getYesNo(value)));
             } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
-                setLazyImports(StringUtil.getYesNo(value));
+                setLazyImports(_StringUtil.getYesNo(value));
             } else if (AUTO_INCLUDE_KEY_SNAKE_CASE.equals(name)
                     || AUTO_INCLUDE_KEY_CAMEL_CASE.equals(name)) {
                 setAutoIncludes(parseAsList(value));
@@ -2852,7 +2853,7 @@ public class Configurable {
                         "Unexpected end of text: expected \"as\"", 0, 0);
                 String s = fetchKeyword();
                 if (!s.equalsIgnoreCase("as")) throw new ParseException(
-                        "Expected \"as\", but found " + StringUtil.jQuote(s), 0, 0);
+                        "Expected \"as\", but found " + _StringUtil.jQuote(s), 0, 0);
 
                 c = skipWS();
                 if (c == ' ') throw new ParseException(
@@ -2876,7 +2877,7 @@ public class Configurable {
             if (w.startsWith("'") || w.startsWith("\"")) {
                 w = w.substring(1, w.length() - 1);
             }
-            return StringUtil.FTLStringLiteralDec(w);
+            return _StringUtil.FTLStringLiteralDec(w);
         }
 
         String fetchKeyword() throws ParseException {

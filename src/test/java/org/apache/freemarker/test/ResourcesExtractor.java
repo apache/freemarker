@@ -31,7 +31,7 @@ import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,8 +141,8 @@ public final class ResourcesExtractor {
         int arrowIdx = contLine.indexOf(ARROW);
         if (arrowIdx != -1) {
             if (!contLine.startsWith("/")) {
-                throw new IOException("In " + StringUtil.jQuote(contResource) + ", this line must start with "
-                        + "\"/\" as it uses the " + StringUtil.jQuote(ARROW) + " operator : "
+                throw new IOException("In " + _StringUtil.jQuote(contResource) + ", this line must start with "
+                        + "\"/\" as it uses the " + _StringUtil.jQuote(ARROW) + " operator : "
                         + contLine);
             }
             contSrcPath = contLine.substring(0, arrowIdx).trim();
@@ -150,7 +150,7 @@ public final class ResourcesExtractor {
             contSrcPathRelative = false;
         } else {
             if (contLine.startsWith("/")) {
-                throw new IOException("In " + StringUtil.jQuote(contResource)
+                throw new IOException("In " + _StringUtil.jQuote(contResource)
                         + ", this line can't start with \"/\": " + contLine);
             }
             contSrcPathRelative = true;
@@ -171,7 +171,7 @@ public final class ResourcesExtractor {
             try {
                 if (dstFile.exists()) {
                     throw new IOException(
-                            "Destination already exists; check if " + StringUtil.jQuote(contDstPath)
+                            "Destination already exists; check if " + _StringUtil.jQuote(contDstPath)
                             + " occurs for multiple times in \"" + CONTENTS_TXT + "\".");
                 }
                 FileUtils.copyInputStreamToFile(entryIn, dstFile);
@@ -179,8 +179,8 @@ public final class ResourcesExtractor {
                 File parent = dstFile;
                 while ((parent = dstFile.getParentFile()) != null) {
                     if (parent.isFile()) {
-                        throw new IOException("An ancestor directory of " + StringUtil.jQuote(dstFile) + ", "
-                        + StringUtil.jQuote(parent) + " already exists, but as a file, not as a directory. "
+                        throw new IOException("An ancestor directory of " + _StringUtil.jQuote(dstFile) + ", "
+                        + _StringUtil.jQuote(parent) + " already exists, but as a file, not as a directory. "
                         + "Check if you have accidentally added the directory itself to \"" + CONTENTS_TXT
                         + "\". Only files should be listed there.");
                     }

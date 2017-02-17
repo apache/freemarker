@@ -26,7 +26,7 @@ import java.io.IOException;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.junit.Test;
 
 public class ParsingErrorMessagesTest {
@@ -99,10 +99,10 @@ public class ParsingErrorMessagesTest {
                 if (needle.startsWith("\\!")) {
                     String netNeedle = needle.substring(2); 
                     if (msg.contains(netNeedle)) {
-                        fail("The message shouldn't contain substring " + StringUtil.jQuote(netNeedle) + ":\n" + msg);
+                        fail("The message shouldn't contain substring " + _StringUtil.jQuote(netNeedle) + ":\n" + msg);
                     }
                 } else if (!msg.contains(needle)) {
-                    fail("The message didn't contain substring " + StringUtil.jQuote(needle) + ":\n" + msg);
+                    fail("The message didn't contain substring " + _StringUtil.jQuote(needle) + ":\n" + msg);
                 }
             }
             showError(e);

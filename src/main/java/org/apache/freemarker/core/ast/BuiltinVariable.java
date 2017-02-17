@@ -33,7 +33,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * A reference to a built-in identifier, such as .root
@@ -122,7 +122,7 @@ final class BuiltinVariable extends Expression {
         if (Arrays.binarySearch(SPEC_VAR_NAMES, name) < 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("Unknown special variable name: ");
-            sb.append(StringUtil.jQuote(name)).append(".");
+            sb.append(_StringUtil.jQuote(name)).append(".");
             
             int shownNamingConvention;
             {
@@ -142,7 +142,7 @@ final class BuiltinVariable extends Expression {
                 }
                 if (correctName != null) {
                     sb.append(" You may meant: ");
-                    sb.append(StringUtil.jQuote(correctName)).append(".");
+                    sb.append(_StringUtil.jQuote(correctName)).append(".");
                 }
             }
             
@@ -150,7 +150,7 @@ final class BuiltinVariable extends Expression {
             boolean first = true;
             for (int i = 0; i < SPEC_VAR_NAMES.length; i++) {
                 final String correctName = SPEC_VAR_NAMES[i];
-                int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
+                int correctNameNamingConvetion = _StringUtil.getIdentifierNamingConvention(correctName);
                 if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
                         ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
                         : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {

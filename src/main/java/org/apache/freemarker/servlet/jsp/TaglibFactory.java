@@ -70,10 +70,10 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.SecurityUtilities;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._SecurityUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.apache.freemarker.servlet.HttpRequestHashModel;
 import org.apache.freemarker.servlet._ServletLogs;
@@ -123,7 +123,7 @@ public class TaglibFactory implements TemplateHashModel {
     private static final String DEFAULT_TLD_RESOURCE_PATH = META_INF_ABS_PATH + "taglib.tld";
     private static final String JAR_URL_ENTRY_PATH_START = "!/";
 
-    private static final String PLATFORM_FILE_ENCODING = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
+    private static final String PLATFORM_FILE_ENCODING = _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
 
     private final ServletContext servletContext;
 
@@ -190,7 +190,7 @@ public class TaglibFactory implements TemplateHashModel {
             final String normalizedTaglibUri;
             try {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Locating TLD for taglib URI " + StringUtil.jQuoteNoXSS(taglibUri) + ".");
+                    LOG.debug("Locating TLD for taglib URI " + _StringUtil.jQuoteNoXSS(taglibUri) + ".");
                 }
                 
                 TldLocation explicitlyMappedTldLocation = getExplicitlyMappedTldLocation(taglibUri);
@@ -204,7 +204,7 @@ public class TaglibFactory implements TemplateHashModel {
                     try {
                         urlType = getUriType(taglibUri);
                     } catch (MalformedURLException e) {
-                        throw new TaglibGettingException("Malformed taglib URI: " + StringUtil.jQuote(taglibUri), e);
+                        throw new TaglibGettingException("Malformed taglib URI: " + _StringUtil.jQuote(taglibUri), e);
                     }
                     if (urlType == URL_TYPE_RELATIVE) {
                         normalizedTaglibUri = resolveRelativeUri(taglibUri);
@@ -215,7 +215,7 @@ public class TaglibFactory implements TemplateHashModel {
                         String failedTLDsList = getFailedTLDsList();
                         failedTldListAlreadyIncluded = true;
                         throw new TaglibGettingException("No TLD was found for the "
-                                + StringUtil.jQuoteNoXSS(taglibUri) + " JSP taglib URI. (TLD-s are searched according "
+                                + _StringUtil.jQuoteNoXSS(taglibUri) + " JSP taglib URI. (TLD-s are searched according "
                                 + "the JSP 2.2 specification. In development- and embedded-servlet-container "
                                 + "setups you may also need the "
                                 + "\"" + FreemarkerServlet.INIT_PARAM_META_INF_TLD_LOCATIONS + "\" and "
@@ -246,7 +246,7 @@ public class TaglibFactory implements TemplateHashModel {
             } catch (Exception e) {
                 String failedTLDsList = failedTldListAlreadyIncluded ? null : getFailedTLDsList();
                 throw new TemplateModelException(
-                        "Error while looking for TLD file for " + StringUtil.jQuoteNoXSS(taglibUri)
+                        "Error while looking for TLD file for " + _StringUtil.jQuoteNoXSS(taglibUri)
                         + "; see cause exception."
                         + (failedTLDsList == null
                                 ? ""
@@ -259,8 +259,8 @@ public class TaglibFactory implements TemplateHashModel {
                 return loadTaglib(tldLocation, normalizedTaglibUri);
             } catch (Exception e) {
                 throw new TemplateModelException("Error while loading tag library for URI "
-                        + StringUtil.jQuoteNoXSS(normalizedTaglibUri) + " from TLD location "
-                        + StringUtil.jQuoteNoXSS(tldLocation) + "; see cause exception.",
+                        + _StringUtil.jQuoteNoXSS(normalizedTaglibUri) + " from TLD location "
+                        + _StringUtil.jQuoteNoXSS(tldLocation) + "; see cause exception.",
                         e);
             }
         }
@@ -279,7 +279,7 @@ public class TaglibFactory implements TemplateHashModel {
                 if (i != 0) {
                     sb.append(", ");
                 }
-                sb.append(StringUtil.jQuote(failedTldLocations.get(i)));
+                sb.append(_StringUtil.jQuote(failedTldLocations.get(i)));
             }
             return sb.toString();
         }
@@ -344,7 +344,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     public void setMetaInfTldSources(List/*<? extends MetaInfTldSource>*/ metaInfTldSources) {
         checkNotStarted();
-        NullArgumentException.check("metaInfTldSources", metaInfTldSources);
+        _NullArgumentException.check("metaInfTldSources", metaInfTldSources);
         this.metaInfTldSources = metaInfTldSources;
     }
 
@@ -375,7 +375,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     public void setClasspathTlds(List/*<String>*/ classpathTlds) {
         checkNotStarted();
-        NullArgumentException.check("classpathTlds", classpathTlds);
+        _NullArgumentException.check("classpathTlds", classpathTlds);
         this.classpathTlds = classpathTlds;
     }
 
@@ -573,7 +573,7 @@ public class TaglibFactory implements TemplateHashModel {
                 in = tldLocation.getInputStream();
             } catch (IOException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Ignored classpath TLD location " + StringUtil.jQuoteNoXSS(tldResourcePath)
+                    LOG.warn("Ignored classpath TLD location " + _StringUtil.jQuoteNoXSS(tldResourcePath)
                             + " because of error", e);
                 }
                 in = null;
@@ -741,7 +741,7 @@ public class TaglibFactory implements TemplateHashModel {
     private void addTldLocationsFromFileDirectory(final File dir) throws IOException, SAXException {
         if (dir.isDirectory()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Scanning for *.tld-s in File directory: " + StringUtil.jQuoteNoXSS(dir));
+                LOG.debug("Scanning for *.tld-s in File directory: " + _StringUtil.jQuoteNoXSS(dir));
             }
             File[] tldFiles = dir.listFiles(new FilenameFilter() {
     
@@ -759,7 +759,7 @@ public class TaglibFactory implements TemplateHashModel {
                 addTldLocationFromTld(new FileTldLocation(file));
             }
         } else {
-            LOG.warn("Skipped scanning for *.tld for non-existent directory: " + StringUtil.jQuoteNoXSS(dir));
+            LOG.warn("Skipped scanning for *.tld for non-existent directory: " + _StringUtil.jQuoteNoXSS(dir));
         }
     }
     
@@ -802,14 +802,14 @@ public class TaglibFactory implements TemplateHashModel {
     private void addTldLocation(TldLocation tldLocation, String taglibUri) {
         if (tldLocations.containsKey(taglibUri)) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Ignored duplicate mapping of taglib URI " + StringUtil.jQuoteNoXSS(taglibUri)
-                        + " to TLD location " + StringUtil.jQuoteNoXSS(tldLocation));
+                LOG.debug("Ignored duplicate mapping of taglib URI " + _StringUtil.jQuoteNoXSS(taglibUri)
+                        + " to TLD location " + _StringUtil.jQuoteNoXSS(tldLocation));
             }
         } else {
             tldLocations.put(taglibUri, tldLocation);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Mapped taglib URI " + StringUtil.jQuoteNoXSS(taglibUri)
-                        + " to TLD location " + StringUtil.jQuoteNoXSS(tldLocation));
+                LOG.debug("Mapped taglib URI " + _StringUtil.jQuoteNoXSS(taglibUri)
+                        + " to TLD location " + _StringUtil.jQuoteNoXSS(tldLocation));
             }
         }
     }
@@ -853,8 +853,8 @@ public class TaglibFactory implements TemplateHashModel {
      */
     private TemplateHashModel loadTaglib(TldLocation tldLocation, String taglibUri) throws IOException, SAXException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Loading taglib for URI " + StringUtil.jQuoteNoXSS(taglibUri)
-                    + " from TLD location " + StringUtil.jQuoteNoXSS(tldLocation));
+            LOG.debug("Loading taglib for URI " + _StringUtil.jQuoteNoXSS(taglibUri)
+                    + " from TLD location " + _StringUtil.jQuoteNoXSS(tldLocation));
         }
         final Taglib taglib = new Taglib(servletContext, tldLocation, objectWrapper);
         taglibs.put(taglibUri, taglib);
@@ -973,7 +973,7 @@ public class TaglibFactory implements TemplateHashModel {
             relativeEntryPath = relativeEntryPath.substring(1);
         }
         try {
-            return new URL(jarBaseEntryUrl, StringUtil.URLPathEnc(relativeEntryPath, PLATFORM_FILE_ENCODING));
+            return new URL(jarBaseEntryUrl, _StringUtil.URLPathEnc(relativeEntryPath, PLATFORM_FILE_ENCODING));
         } catch (UnsupportedEncodingException e) {
             throw new BugException();
         }
@@ -1071,8 +1071,8 @@ public class TaglibFactory implements TemplateHashModel {
                             PLATFORM_FILE_ENCODING));
         } catch (Exception e) {
             LOG.error("Couldn't get URL for serlvetContext resource "
-                        + StringUtil.jQuoteNoXSS(servletContextJarFilePath)
-                        + " / jar entry " + StringUtil.jQuoteNoXSS(entryPath),
+                        + _StringUtil.jQuoteNoXSS(servletContextJarFilePath)
+                        + " / jar entry " + _StringUtil.jQuoteNoXSS(entryPath),
                     e);
             return null;
         }
@@ -1304,8 +1304,8 @@ public class TaglibFactory implements TemplateHashModel {
         public JarEntryTldLocation(URL entryUrl, InputStreamFactory fallbackRawJarContentInputStreamFactory,
                 String entryPath) {
             if (entryUrl == null) {
-                NullArgumentException.check(fallbackRawJarContentInputStreamFactory);
-                NullArgumentException.check(entryPath);
+                _NullArgumentException.check(fallbackRawJarContentInputStreamFactory);
+                _NullArgumentException.check(entryPath);
             }
             
             this.entryUrl = entryUrl;
@@ -1369,7 +1369,7 @@ public class TaglibFactory implements TemplateHashModel {
                 while (true) {
                     final ZipEntry macthedJarEntry = zipIn.getNextEntry();
                     if (macthedJarEntry == null) {
-                        throw new IOException("Could not find JAR entry " + StringUtil.jQuoteNoXSS(entryPath) + ".");
+                        throw new IOException("Could not find JAR entry " + _StringUtil.jQuoteNoXSS(entryPath) + ".");
                     }
                     if (entryPath.equals(normalizeJarEntryPath(macthedJarEntry.getName(), false))) {
                         returnedZipIn = true;
@@ -1740,7 +1740,7 @@ public class TaglibFactory implements TemplateHashModel {
                                     customTagModel, (TemplateMethodModelEx) replacedTagOrFunction));
                         } else {
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn("TLD contains multiple tags with name " + StringUtil.jQuote(tagNameCData)
+                                LOG.warn("TLD contains multiple tags with name " + _StringUtil.jQuote(tagNameCData)
                                         + "; keeping only the last one.");
                             }
                         }
@@ -1762,9 +1762,9 @@ public class TaglibFactory implements TemplateHashModel {
                                 functionClass, functionSignatureCData);
                     } catch (Exception e) {
                         throw new TldParsingSAXException(
-                                "Error while trying to resolve signature " + StringUtil.jQuote(functionSignatureCData)
-                                        + " on class " + StringUtil.jQuote(functionClass.getName())
-                                        + " for custom EL function " + StringUtil.jQuote(functionNameCData) + ".",
+                                "Error while trying to resolve signature " + _StringUtil.jQuote(functionSignatureCData)
+                                        + " on class " + _StringUtil.jQuote(functionClass.getName())
+                                        + " for custom EL function " + _StringUtil.jQuote(functionNameCData) + ".",
                                 locator,
                                 e);
                     }
@@ -1793,7 +1793,7 @@ public class TaglibFactory implements TemplateHashModel {
                         } else {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn("TLD contains multiple functions with name "
-                                        + StringUtil.jQuote(functionNameCData) + "; keeping only the last one.");
+                                        + _StringUtil.jQuote(functionNameCData) + "; keeping only the last one.");
                             }
                         }
                     }
@@ -1843,7 +1843,7 @@ public class TaglibFactory implements TemplateHashModel {
         private Class resoveClassFromTLD(String className, String entryType, String entryName)
                 throws TldParsingSAXException {
             try {
-                return ClassUtil.forName(className);
+                return _ClassUtil.forName(className);
             } catch (LinkageError e) {
                 throw newTLDEntryClassLoadingException(e, className, entryType, entryName);
             } catch (ClassNotFoundException e) {
@@ -1863,8 +1863,8 @@ public class TaglibFactory implements TemplateHashModel {
                             && Character.isUpperCase(className.charAt(dotIdx + 1));
             return new TldParsingSAXException(
                     (e instanceof ClassNotFoundException ? "Not found class " : "Can't load class ")
-                            + StringUtil.jQuote(className) + " for " + entryType
-                            + (entryName != null ? " " + StringUtil.jQuote(entryName) : "") + "."
+                            + _StringUtil.jQuote(className) + " for " + entryType
+                            + (entryName != null ? " " + _StringUtil.jQuote(entryName) : "") + "."
                             + (looksLikeNestedClass
                                     ? " Hint: Before nested classes, use \"$\", not \".\"."
                                     : ""),

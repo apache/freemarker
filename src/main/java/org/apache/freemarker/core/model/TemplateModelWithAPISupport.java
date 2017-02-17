@@ -19,8 +19,6 @@
 
 package org.apache.freemarker.core.model;
 
-import org.apache.freemarker.core.util.ObjectWrapperWithAPISupport;
-
 /**
  * <b>Experimental - subject to change:</b> A {@link TemplateModel} on which the {@code ?api} operation can be applied.
  * 

@@ -17,21 +17,31 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util._ClassUtil;
+import java.util.AbstractSet;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class _DelayedFTLTypeDescription extends _DelayedConversionToString {
-    
-    public _DelayedFTLTypeDescription(TemplateModel tm) {
-        super(tm);
+public abstract class _UnmodifiableSet<E> extends AbstractSet<E> {
+
+    @Override
+    public boolean add(E o) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    protected String doConversion(Object obj) {
-        return _ClassUtil.getFTLTypeDescription((TemplateModel) obj);
+    public boolean remove(Object o) {
+        if (contains(o)) {
+            throw new UnsupportedOperationException();
+        }
+        return false;
+    }
+
+    @Override
+    public void clear() {
+        if (!isEmpty()) {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }

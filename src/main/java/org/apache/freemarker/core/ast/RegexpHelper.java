@@ -25,7 +25,7 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -145,7 +145,7 @@ final class RegexpHelper {
                         // [FM3] Should be an error
                         RegexpHelper.logFlagWarning(
                                 "Unrecognized regular expression flag: "
-                                + StringUtil.jQuote(String.valueOf(c)) + ".");
+                                + _StringUtil.jQuote(String.valueOf(c)) + ".");
                     }
             }  // switch
         }

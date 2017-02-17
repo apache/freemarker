@@ -54,21 +54,9 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.ast.ArithmeticEngine;
-import org.apache.freemarker.core.ast.Configurable;
-import org.apache.freemarker.core.ast.CustomAttribute;
-import org.apache.freemarker.core.ast.HTMLOutputFormat;
-import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.ast.ParserConfiguration;
-import org.apache.freemarker.core.ast.TemplateClassResolver;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.ast.TemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.UndefinedOutputFormat;
-import org.apache.freemarker.core.ast.XMLOutputFormat;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -854,7 +842,7 @@ public class TemplateConfigurationTest {
         try {
             tc.setParentConfiguration(null);
             fail();
-        } catch (NullArgumentException e) {
+        } catch (_NullArgumentException e) {
             // exected
         }
         

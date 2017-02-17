@@ -43,8 +43,8 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
 import org.apache.freemarker.core.model.impl.beans.CollectionModel;
-import org.apache.freemarker.core.util.Constants;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.model.Constants;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * A holder for builtins that operate exclusively on sequence or collection left-hand value.
@@ -686,7 +686,7 @@ class BuiltInsForSequences {
                                     startErrorMessage(keyNamesLn, i),
                                     (keyNameI == 0
                                             ? "Sequence items must be hashes when using ?sort_by. "
-                                            : "The " + StringUtil.jQuote(keyNames[keyNameI - 1])),
+                                            : "The " + _StringUtil.jQuote(keyNames[keyNameI - 1])),
                                     " subvariable is not a hash, so ?sort_by ",
                                     "can't proceed with getting the ",
                                     new _DelayedJQuote(keyNames[keyNameI]),
@@ -698,7 +698,7 @@ class BuiltInsForSequences {
                     if (key == null) {
                         throw new _TemplateModelException(
                                 startErrorMessage(keyNamesLn, i),
-                                "The " + StringUtil.jQuote(keyNames[keyNameI]), " subvariable was not found.");
+                                "The " + _StringUtil.jQuote(keyNames[keyNameI]), " subvariable was not found.");
                     }
                 } // for each key
                 

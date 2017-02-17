@@ -26,7 +26,7 @@ import java.io.Writer;
 import org.apache.freemarker.core.ast.Configurable;
 import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.ast.StopException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Used for the {@code template_exception_handler} configuration setting;
@@ -134,7 +134,7 @@ public interface TemplateExceptionHandler {
                     te.printStackTrace(stackPW, false, true, true);
                     stackPW.close();
                     pw.println();
-                    pw.println(StringUtil.XMLEncNQG(stackTraceSW.toString()));
+                    pw.println(_StringUtil.XMLEncNQG(stackTraceSW.toString()));
                     
                     pw.println("</pre></div></html>");
                     pw.flush();  // To commit the HTTP response

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core.util;
 
 import java.util.Locale;
 
@@ -25,7 +25,7 @@ import java.util.Locale;
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
  */ 
-public class _CoreLocaleUtils {
+public class _LocaleUtil {
 
     /**
      * Returns a locale that's one less specific, or {@code null} if there's no less specific locale.

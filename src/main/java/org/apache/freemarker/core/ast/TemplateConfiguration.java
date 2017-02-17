@@ -29,7 +29,7 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * Used for customizing the configuration settings for individual {@link Template}-s (or rather groups of templates),
@@ -100,7 +100,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     @Override
     void setParent(Configurable cfg) {
-        NullArgumentException.check("cfg", cfg);
+        _NullArgumentException.check("cfg", cfg);
         if (!(cfg instanceof Configuration)) {
             throw new IllegalArgumentException("The parent of a TemplateConfiguration can only be a Configuration");
         }
@@ -466,7 +466,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * Sets the output format of the template; see {@link Configuration#setOutputFormat(OutputFormat)} for more.
      */
     public void setOutputFormat(OutputFormat outputFormat) {
-        NullArgumentException.check("outputFormat", outputFormat);
+        _NullArgumentException.check("outputFormat", outputFormat);
         this.outputFormat = outputFormat;
     }
 
@@ -532,7 +532,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * {@code encoding} in the documentation of {@link #apply(Template)}.
      */
     public void setEncoding(String encoding) {
-        NullArgumentException.check("encoding", encoding);
+        _NullArgumentException.check("encoding", encoding);
         this.encoding = encoding;
     }
 

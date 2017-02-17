@@ -27,13 +27,11 @@ import java.util.Map;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast._CoreAPI;
 import org.apache.freemarker.core.ast.ThreadInterruptionSupportTemplatePostProcessor.TemplateProcessingThreadInterruptedException;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._NullWriter;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +88,7 @@ public class TheadInterruptingSupportTest {
         @Override
         public void run() {
             try {
-                template.process(this, NullWriter.INSTANCE);
+                template.process(this, _NullWriter.INSTANCE);
             } catch (TemplateProcessingThreadInterruptedException e) {
                 //LOG.debug("Template processing interrupted", e);
                 synchronized (this) {
@@ -138,7 +136,7 @@ public class TheadInterruptingSupportTest {
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 while (true) {
-                    body.render(NullWriter.INSTANCE);
+                    body.render(_NullWriter.INSTANCE);
                 }
             }
             

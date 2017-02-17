@@ -27,6 +27,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
+import org.apache.freemarker.core.util._ArrayEnumeration;
 
 /**
  * <b>Internal API - subject to change:</b> Represent directive call, interpolation, text block, or other such

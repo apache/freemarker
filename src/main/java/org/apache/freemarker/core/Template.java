@@ -60,7 +60,7 @@ import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * <p>
@@ -255,7 +255,7 @@ public class Template extends Configurable {
            String encoding, TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) throws IOException {
         this(name, sourceName, cfg, customParserConfiguration);
        
-        NullArgumentException.check("templateSpecifiedEncodingHandler", templateSpecifiedEncodingHandler);
+        _NullArgumentException.check("templateSpecifiedEncodingHandler", templateSpecifiedEncodingHandler);
        
         this.setEncoding(encoding);
         LineTableBuilder ltbReader;

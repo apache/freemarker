@@ -25,7 +25,7 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 public class GetAndSetTag extends AttributeAccessorTag {
     
@@ -34,7 +34,7 @@ public class GetAndSetTag extends AttributeAccessorTag {
     @SuppressWarnings("boxing")
     @Override
     public void doTag() throws JspException, IOException {
-        NullArgumentException.check("name", name);
+        _NullArgumentException.check("name", name);
         Integer scopeInt = getScopeAsInteger();
 
         JspContext ctx = getJspContext();

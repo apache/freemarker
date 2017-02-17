@@ -25,9 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util.NumberUtil;
-import org.apache.freemarker.core.util.OptimizerUtil;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Class to perform arithmetic operations.
@@ -117,8 +116,8 @@ public abstract class ArithmeticEngine {
             // We try to find the result based on the sign (+/-/0) first, because:
             // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
             // - It doesn't require any type conversions, and thus things like "Infinity > 0" won't fail.
-            int firstSignum = NumberUtil.getSignum(first); 
-            int secondSignum = NumberUtil.getSignum(second);
+            int firstSignum = _NumberUtil.getSignum(first); 
+            int secondSignum = _NumberUtil.getSignum(second);
             if (firstSignum != secondSignum) {
                 return firstSignum < secondSignum ? -1 : (firstSignum > secondSignum ? 1 : 0); 
             } else if (firstSignum == 0 && secondSignum == 0) {
@@ -464,7 +463,7 @@ public abstract class ArithmeticEngine {
         @Override
         public Number toNumber(String s) {
             Number n = toBigDecimalOrDouble(s);
-            return n instanceof BigDecimal ? OptimizerUtil.optimizeNumberRepresentation(n) : n;
+            return n instanceof BigDecimal ? _NumberUtil.optimizeNumberRepresentation(n) : n;
         }
         
         private static Map createClassCodesMap() {
@@ -529,7 +528,7 @@ public abstract class ArithmeticEngine {
             return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
         } catch (NumberFormatException e) {
             // The exception message is useless, so we add a new one:
-            throw new NumberFormatException("Can't parse this as BigDecimal number: " + StringUtil.jQuote(num));
+            throw new NumberFormatException("Can't parse this as BigDecimal number: " + _StringUtil.jQuote(num));
         }
     }
     

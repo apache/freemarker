@@ -23,8 +23,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.NumberUtil;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._NumberUtil;
 
 /**
  * Everything related to coercion to ambiguous numerical types.  
@@ -101,7 +101,7 @@ class OverloadedNumberUtil {
             BigDecimal n = (BigDecimal) num; 
             if ((typeFlags & TypeFlags.MASK_KNOWN_INTEGERS) != 0
                     && (typeFlags & TypeFlags.MASK_KNOWN_NONINTEGERS) != 0
-                    && NumberUtil.isIntegerBigDecimal(n) /* <- can be expensive */) {
+                    && _NumberUtil.isIntegerBigDecimal(n) /* <- can be expensive */) {
                 return new IntegerBigDecimal(n);
             } else {
                 // Either it was a non-integer, or it didn't mater what it was, as we don't have both integer and
@@ -1197,8 +1197,8 @@ class OverloadedNumberUtil {
     static int compareNumberTypeSpecificity(Class c1, Class c2) {
         // DO NOT EDIT, generated code!
         // See: src\main\misc\overloadedNumberRules\README.txt
-        c1 = ClassUtil.primitiveClassToBoxingClass(c1);
-        c2 = ClassUtil.primitiveClassToBoxingClass(c2);
+        c1 = _ClassUtil.primitiveClassToBoxingClass(c1);
+        c2 = _ClassUtil.primitiveClassToBoxingClass(c2);
         
         if (c1 == c2) return 0;
         

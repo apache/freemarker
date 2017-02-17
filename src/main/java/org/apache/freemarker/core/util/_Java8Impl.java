@@ -16,21 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.freemarker.core.util;
 
-/** @since 2.3.21 */
-public class CollectionUtils {
+/**
+ * Used internally only, might changes without notice!
+ * Used for accessing functionality that's only present in Java 6 or later.
+ */
+// Compile this against Java 8
+public final class _Java8Impl implements _Java8 {
     
-    private CollectionUtils() { }
+    public static final _Java8 INSTANCE = new _Java8Impl();
 
-    public static final Object[] EMPTY_OBJECT_ARRAY = new Object[] { };
+    private _Java8Impl() {
+        // Not meant to be instantiated
+    }
 
-    public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };
-
-    /**
-     * @since 2.3.22
-     */
-    public static final char[] EMPTY_CHAR_ARRAY = new char[] { };
+    @Override
+    public void doSomething() {
+        // Do something that requires Java 8 here
+    }
     
 }

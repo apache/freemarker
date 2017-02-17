@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.MapKeyValuePairIterator;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.util.RichObjectWrapper;
+import org.apache.freemarker.core.model.RichObjectWrapper;
 
 /**
  * Model used by {@link BeansWrapper} when <tt>simpleMapWrapper</tt>

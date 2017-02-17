@@ -16,17 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.ast;
 
-/**
- * Used internally only, might changes without notice!
- * Used for accessing functionality that's only present in Java 6 or later.
- */
-public interface _Java8 {
+package org.apache.freemarker.core.util;
+
+/** Don't use this; used internally by FreeMarker, might changes without notice. */
+public class _CollectionUtil {
+    
+    private _CollectionUtil() { }
+
+    public static final Object[] EMPTY_OBJECT_ARRAY = new Object[] { };
+
+    public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };
 
     /**
-     * This is just a placeholder. Remove this when we have some real functionality here.
+     * @since 2.3.22
      */
-    void doSomething();
+    public static final char[] EMPTY_CHAR_ARRAY = new char[] { };
     
 }

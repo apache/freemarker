@@ -21,7 +21,7 @@ package org.apache.freemarker.test.util;
 
 import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Indicates that a named directive/function parameter is not of the expected type.  
@@ -46,9 +46,9 @@ public class BadParameterTypeException extends ParameterException {
     public BadParameterTypeException(
             String parameterName, String expectedType, TemplateModel value, String description, Exception cause, Environment env) {
         super(parameterName,
-                "The type of the parameter " + StringUtil.jQuote(parameterName) + " should be " + expectedType
+                "The type of the parameter " + _StringUtil.jQuote(parameterName) + " should be " + expectedType
                 + ", but the actual value was " + getTypeDescription(value) + "."
-                + (description != null ? " " + StringUtil.jQuote(description) : ""),
+                + (description != null ? " " + _StringUtil.jQuote(description) : ""),
                 cause, env);
     }
 

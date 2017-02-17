@@ -40,15 +40,9 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Expression;
-import org.apache.freemarker.core.ast.MixedContent;
-import org.apache.freemarker.core.ast.ParameterRole;
-import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.ast.TemplateElement;
-import org.apache.freemarker.core.ast.TemplateObject;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Static methods and command-line tool for printing the AST of a template. 
@@ -115,7 +109,7 @@ public class ASTPrinter {
         try {
             fnPattern = Pattern.compile(args[2]);
         } catch (PatternSyntaxException e) {
-            p(StringUtil.jQuote(args[2]) + " is not a valid regular expression");
+            p(_StringUtil.jQuote(args[2]) + " is not a valid regular expression");
             System.exit(-1);
             return;
         }
@@ -337,7 +331,7 @@ public class ASTPrinter {
                     out.write(INDENTATION);
                     out.write(ind);
                     out.write("= const ");
-                    out.write(ClassUtil.getFTLTypeDescription(tm));
+                    out.write(_ClassUtil.getFTLTypeDescription(tm));
                     out.write(' ');
                     out.write(tm.toString());
                     out.write('\n');
@@ -359,7 +353,7 @@ public class ASTPrinter {
             }
         } else {
             printNodeLineStart(paramRole, ind, out);
-            out.write(StringUtil.jQuote(node));
+            out.write(_StringUtil.jQuote(node));
             printNodeLineEnd(node, out, opts);
         }
     }
@@ -369,7 +363,7 @@ public class ASTPrinter {
         if (opts.getShowJavaClass()) {
             out.write("  // ");
             commentStared = true;
-            out.write(ClassUtil.getShortClassNameOfObject(node, true));
+            out.write(_ClassUtil.getShortClassNameOfObject(node, true));
         }
         if (opts.getShowLocation() && node instanceof TemplateObject) {
             if (!commentStared) {

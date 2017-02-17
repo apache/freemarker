@@ -29,7 +29,7 @@ import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 /**
  * The argument types of a method call; usable as cache key.
@@ -201,9 +201,9 @@ final class ArgumentTypes {
                     final boolean argIsNum = Number.class.isAssignableFrom(argType);
                     
                     final int numConvPrice1;
-                    if (argIsNum && ClassUtil.isNumerical(paramType1)) {
+                    if (argIsNum && _ClassUtil.isNumerical(paramType1)) {
                         final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
-                                ? ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1; 
+                                ? _ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1;
                         numConvPrice1 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType1);
                     } else {
                         numConvPrice1 = Integer.MAX_VALUE;
@@ -213,9 +213,9 @@ final class ArgumentTypes {
                     // - FM doesn't know some of the numerical types, or the conversion between them is not allowed    
                     
                     final int numConvPrice2;
-                    if (argIsNum && ClassUtil.isNumerical(paramType2)) {
+                    if (argIsNum && _ClassUtil.isNumerical(paramType2)) {
                         final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
-                                ? ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2; 
+                                ? _ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
                         numConvPrice2 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType2);
                     } else {
                         numConvPrice2 = Integer.MAX_VALUE;
@@ -358,7 +358,7 @@ final class ArgumentTypes {
                         if (argTypesLen == paramTypes1Len - 1) {
                             Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, argTypesLen, true);
                             Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, argTypesLen, true);
-                            if (ClassUtil.isNumerical(paramType1) && ClassUtil.isNumerical(paramType2)) {
+                            if (_ClassUtil.isNumerical(paramType1) && _ClassUtil.isNumerical(paramType2)) {
                                 int r = OverloadedNumberUtil.compareNumberTypeSpecificity(paramType1, paramType2);
                                 if (r != 0) return r;
                                 // falls through
@@ -412,9 +412,9 @@ final class ArgumentTypes {
         // The more specific (smaller) type wins.
         
         final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
-                ? ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1; 
+                ? _ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1;
         final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
-                ? ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
+                ? _ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
                 
         if (nonPrimParamType1 == nonPrimParamType2) {
             if (nonPrimParamType1 != paramType1) {
@@ -540,7 +540,7 @@ final class ArgumentTypes {
                     return CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 }
                 
-                formalNP = ClassUtil.primitiveClassToBoxingClass(formal);
+                formalNP = _ClassUtil.primitiveClassToBoxingClass(formal);
                 if (actual == formalNP) {
                     // Character and char, etc.
                     return CONVERSION_DIFFICULTY_REFLECTION;
@@ -610,7 +610,7 @@ final class ArgumentTypes {
                 } else if (formal == Short.TYPE &&
                    (actual == Short.class || actual == Byte.class)) {
                     return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if (BigDecimal.class.isAssignableFrom(actual) && ClassUtil.isNumerical(formal)) {
+                } else if (BigDecimal.class.isAssignableFrom(actual) && _ClassUtil.isNumerical(formal)) {
                     // Special case for BigDecimals as we deem BigDecimal to be
                     // convertible to any numeric type - either object or primitive.
                     // This can actually cause us trouble as this is a narrowing 

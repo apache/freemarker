@@ -30,7 +30,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 /**
  * A class that will wrap a reflected method call into a
@@ -83,7 +83,7 @@ public final class SimpleMethodModel extends SimpleMethod
     public int size() throws TemplateModelException {
         throw new TemplateModelException(
                 "Getting the number of items or enumerating the items is not supported on this "
-                + ClassUtil.getFTLTypeDescription(this) + " value.\n"
+                + _ClassUtil.getFTLTypeDescription(this) + " value.\n"
                 + "("
                 + "Hint 1: Maybe you wanted to call this method first and then do something with its return value. "
                 + "Hint 2: Getting items by intex possibly works, hence it's a \"+sequence\"."

@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.core.ast;
 
-import org.apache.freemarker.core.util.DateUtil.CalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util.DateUtil.DateToISO8601CalendarFactory;
-import org.apache.freemarker.core.util.DateUtil.TrivialCalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util.DateUtil.TrivialDateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtil.TrivialCalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtil.TrivialDateToISO8601CalendarFactory;
 
 abstract class ISOLikeTemplateDateFormatFactory extends TemplateDateFormatFactory {
     

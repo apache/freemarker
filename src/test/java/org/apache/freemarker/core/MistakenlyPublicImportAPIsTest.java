@@ -26,16 +26,13 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.ast.InvalidReferenceException;
 import org.apache.freemarker.core.ast.LibraryLoad;
 import org.apache.freemarker.core.ast.Environment.Namespace;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._NullWriter;
 import org.junit.Test;
 
 /**
@@ -62,7 +59,7 @@ public class MistakenlyPublicImportAPIsTest {
             }
             
             try {
-                t2.process(null, NullWriter.INSTANCE);
+                t2.process(null, _NullWriter.INSTANCE);
                 fail();
             } catch (InvalidReferenceException e) {
                 // Apparenly, it has never worked like this...
@@ -71,7 +68,7 @@ public class MistakenlyPublicImportAPIsTest {
         }
         
         // It works this way, though it has nothing to do with the problematic API-s: 
-        Environment env = t1.createProcessingEnvironment(null, NullWriter.INSTANCE);
+        Environment env = t1.createProcessingEnvironment(null, _NullWriter.INSTANCE);
         env.process();
         TemplateModel i1 = env.getVariable("i1");
         assertThat(i1, instanceOf(Namespace.class));

@@ -31,7 +31,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.util.DateUtil;
+import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
@@ -43,7 +43,7 @@ public class SQLTimeZoneTest extends TemplateTest {
 
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
     {
-        df.setTimeZone(DateUtil.UTC);
+        df.setTimeZone(_DateUtil.UTC);
     }
     
     // Values that JDBC in GMT+02 would produce
@@ -196,7 +196,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     @Test
     public void testCacheFlushings() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setTimeZone(DateUtil.UTC);
+        cfg.setTimeZone(_DateUtil.UTC);
         cfg.setDateFormat("yyyy-MM-dd E");
         cfg.setTimeFormat("HH:mm:ss E");
         cfg.setDateTimeFormat("yyyy-MM-dd'T'HH:mm:ss E");
@@ -256,7 +256,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     @Test
     public void testDateAndTimeBuiltInsHasNoEffect() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setTimeZone(DateUtil.UTC);
+        cfg.setTimeZone(_DateUtil.UTC);
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         assertOutput(
                 "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
@@ -275,7 +275,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     @Test
     public void testChangeSettingInTemplate() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setTimeZone(DateUtil.UTC);
+        cfg.setTimeZone(_DateUtil.UTC);
         
         assertNull(cfg.getSQLDateAndTimeTimeZone());
 

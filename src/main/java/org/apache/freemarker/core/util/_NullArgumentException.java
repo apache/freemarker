@@ -24,17 +24,17 @@ package org.apache.freemarker.core.util;
  * 
  * @since 2.3.20
  */
-public class NullArgumentException extends IllegalArgumentException {
+public class _NullArgumentException extends IllegalArgumentException {
 
-    public NullArgumentException() {
+    public _NullArgumentException() {
         super("The argument can't be null");
     }
     
-    public NullArgumentException(String argumentName) {
+    public _NullArgumentException(String argumentName) {
         super("The \"" + argumentName + "\" argument can't be null");
     }
 
-    public NullArgumentException(String argumentName, String details) {
+    public _NullArgumentException(String argumentName, String details) {
         super("The \"" + argumentName + "\" argument can't be null. " + details);
     }
     
@@ -43,7 +43,7 @@ public class NullArgumentException extends IllegalArgumentException {
      */
     public static void check(String argumentName, Object argumentValue) {
         if (argumentValue == null) {
-            throw new NullArgumentException(argumentName);
+            throw new _NullArgumentException(argumentName);
         }
     }
 
@@ -52,7 +52,7 @@ public class NullArgumentException extends IllegalArgumentException {
      */
     public static void check(Object argumentValue) {
         if (argumentValue == null) {
-            throw new NullArgumentException();
+            throw new _NullArgumentException();
         }
     }
     

@@ -24,11 +24,9 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.ast.CustomAttribute;
 import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._NullWriter;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -199,7 +197,7 @@ public class CustomAttributeTest {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         
         final Template t = new Template(null, "${testScopesFromTemplateStep1()}", cfg);
-        Environment env = t.createProcessingEnvironment(this, NullWriter.INSTANCE);
+        Environment env = t.createProcessingEnvironment(this, _NullWriter.INSTANCE);
         CUST_ATT_TMP_2.set(123, env);
         CUST_ATT_ENV_2.set(1234, env);
         CUST_ATT_CFG_2.set(12345, env);

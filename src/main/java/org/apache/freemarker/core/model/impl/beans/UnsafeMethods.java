@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 import org.slf4j.Logger;
 
 class UnsafeMethods {
@@ -80,7 +80,7 @@ class UnsafeMethods {
         NoSuchMethodException {
         int brace = methodSpec.indexOf('(');
         int dot = methodSpec.lastIndexOf('.', brace);
-        Class clazz = ClassUtil.forName(methodSpec.substring(0, dot));
+        Class clazz = _ClassUtil.forName(methodSpec.substring(0, dot));
         String methodName = methodSpec.substring(dot + 1, brace);
         String argSpec = methodSpec.substring(brace + 1, methodSpec.length() - 1);
         StringTokenizer tok = new StringTokenizer(argSpec, ",");
@@ -90,7 +90,7 @@ class UnsafeMethods {
             String argClassName = tok.nextToken();
             argTypes[i] = (Class) primClasses.get(argClassName);
             if (argTypes[i] == null) {
-                argTypes[i] = ClassUtil.forName(argClassName);
+                argTypes[i] = _ClassUtil.forName(argClassName);
             }
         }
         return clazz.getMethod(methodName, argTypes);

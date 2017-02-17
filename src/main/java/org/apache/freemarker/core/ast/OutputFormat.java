@@ -19,8 +19,8 @@
 package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Represents an output format. If you need auto-escaping, see its subclass, {@link MarkupOutputFormat}. 
@@ -67,8 +67,8 @@ public abstract class OutputFormat {
     public final String toString() {
         String extras = toStringExtraProperties();
         return getName() + "("
-                + "mimeType=" + StringUtil.jQuote(getMimeType()) + ", "
-                + "class=" + ClassUtil.getShortClassNameOfObject(this, true)
+                + "mimeType=" + _StringUtil.jQuote(getMimeType()) + ", "
+                + "class=" + _ClassUtil.getShortClassNameOfObject(this, true)
                 + (extras.length() != 0 ? ", " : "") + extras
                 + ")";
     }

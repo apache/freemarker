@@ -48,7 +48,7 @@ import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecision;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecisionInput;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 import org.slf4j.Logger;
 
 /**
@@ -171,7 +171,7 @@ class ClassIntrospector {
      */
     ClassIntrospector(ClassIntrospectorBuilder builder, Object sharedLock,
             boolean hasSharedInstanceRestrictons, boolean shared) {
-        NullArgumentException.check("sharedLock", sharedLock);
+        _NullArgumentException.check("sharedLock", sharedLock);
 
         this.exposureLevel = builder.getExposureLevel();
         this.exposeFields = builder.getExposeFields();

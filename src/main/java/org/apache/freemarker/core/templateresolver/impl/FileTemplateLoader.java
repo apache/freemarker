@@ -37,8 +37,8 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
-import org.apache.freemarker.core.util.SecurityUtilities;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._SecurityUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -58,11 +58,11 @@ public class FileTemplateLoader implements TemplateLoader {
             = "org.freemarker.emulateCaseSensitiveFileSystem";
     private static final boolean EMULATE_CASE_SENSITIVE_FILE_SYSTEM_DEFAULT;
     static {
-        final String s = SecurityUtilities.getSystemProperty(SYSTEM_PROPERTY_NAME_EMULATE_CASE_SENSITIVE_FILE_SYSTEM,
+        final String s = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_NAME_EMULATE_CASE_SENSITIVE_FILE_SYSTEM,
                 "false");
         boolean emuCaseSensFS;
         try {
-            emuCaseSensFS = StringUtil.getYesNo(s);
+            emuCaseSensFS = _StringUtil.getYesNo(s);
         } catch (Exception e) {
             emuCaseSensFS = false;
         }
@@ -317,7 +317,7 @@ public class FileTemplateLoader implements TemplateLoader {
      */
     @Override
     public String toString() {
-        // We don't StringUtil.jQuote paths here, because on Windows there will be \\-s then that some may find
+        // We don't _StringUtil.jQuote paths here, because on Windows there will be \\-s then that some may find
         // confusing.
         return _TemplateLoaderUtils.getClassNameForToString(this) + "("
                 + "baseDir=\"" + baseDir + "\""

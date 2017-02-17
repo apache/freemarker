@@ -67,8 +67,7 @@ import org.apache.freemarker.core.ast._DelayedJQuote;
 import org.apache.freemarker.core.ast._MiscTemplateException;
 import org.apache.freemarker.core.ast._ObjectBuilderSettingEvaluator;
 import org.apache.freemarker.core.ast._SettingEvaluationEnvironment;
-import org.apache.freemarker.core.ast._SortedArraySet;
-import org.apache.freemarker.core.ast._UnmodifiableCompositeSet;
+import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -105,15 +104,16 @@ import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.URLTemplateLoader;
 import org.apache.freemarker.core.util.CaptureOutput;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.Constants;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.util.HtmlEscape;
 import org.apache.freemarker.core.util.NormalizeNewlines;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.SecurityUtilities;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util.StandardCompress;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.util.XmlEscape;
+import org.apache.freemarker.core.util._SortedArraySet;
 
 /**
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
@@ -531,7 +531,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
     
-    private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
+    private String defaultEncoding = _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
     /**
@@ -842,7 +842,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         // - This way we avoid the error if FM isn't actually used
         checkFreeMarkerVersionClash();
         
-        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        _NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
         createTemplateResolver();
@@ -1419,11 +1419,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public void setServletContextForTemplateLoading(Object servletContext, String path) {
         try {
             // Don't introduce linking-time dependency on servlets
-            final Class webappTemplateLoaderClass = ClassUtil.forName(
+            final Class webappTemplateLoaderClass = _ClassUtil.forName(
                     "org.apache.freemarker.servlet.WebAppTemplateLoader");
             
             // Don't introduce linking-time dependency on servlets
-            final Class servletContextClass = ClassUtil.forName("javax.servlet.ServletContext");
+            final Class servletContextClass = _ClassUtil.forName("javax.servlet.ServletContext");
             
             final Class[] constructorParamTypes;
             final Object[] constructorParams;
@@ -1825,7 +1825,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void setOutputFormat(OutputFormat outputFormat) {
         if (outputFormat == null) {
-            throw new NullArgumentException(
+            throw new _NullArgumentException(
                     "outputFormat",
                     "You may meant: " + UndefinedOutputFormat.class.getSimpleName() + ".INSTANCE");
         }
@@ -1915,7 +1915,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (stdOF == null) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Unregistered output format name, ");
-                sb.append(StringUtil.jQuote(name));
+                sb.append(_StringUtil.jQuote(name));
                 sb.append(". The output formats registered in the Configuration are: ");
                 
                 Set<String> registeredNames = new TreeSet<String>();
@@ -1929,7 +1929,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     } else {
                         sb.append(", ");
                     }
-                    sb.append(StringUtil.jQuote(registeredName));
+                    sb.append(_StringUtil.jQuote(registeredName));
                 }
                 
                 throw new UnregisteredOutputFormatException(sb.toString());
@@ -1977,7 +1977,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void setRegisteredCustomOutputFormats(Collection<? extends OutputFormat> registeredCustomOutputFormats) {
-        NullArgumentException.check(registeredCustomOutputFormats);
+        _NullArgumentException.check(registeredCustomOutputFormats);
         Map<String, OutputFormat> m = new LinkedHashMap<String, OutputFormat>(
                 registeredCustomOutputFormats.size() * 4 / 3, 1f);
         for (OutputFormat outputFormat : registeredCustomOutputFormats) {
@@ -2405,29 +2405,29 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             TemplateLoader tl = getTemplateLoader();  
             String msg; 
             if (tl == null) {
-                msg = "Don't know where to load template " + StringUtil.jQuote(name)
+                msg = "Don't know where to load template " + _StringUtil.jQuote(name)
                       + " from because the \"template_loader\" FreeMarker "
                       + "setting wasn't set (Configuration.setTemplateLoader), so it's null.";
             } else {
                 final String missingTempNormName = maybeTemp.getMissingTemplateNormalizedName();
                 final String missingTempReason = maybeTemp.getMissingTemplateReason();
                 final TemplateLookupStrategy templateLookupStrategy = getTemplateLookupStrategy();
-                msg = "Template not found for name " + StringUtil.jQuote(name)
+                msg = "Template not found for name " + _StringUtil.jQuote(name)
                         + (missingTempNormName != null && name != null
                                 && !removeInitialSlash(name).equals(missingTempNormName)
-                                ? " (normalized: " + StringUtil.jQuote(missingTempNormName) + ")"
+                                ? " (normalized: " + _StringUtil.jQuote(missingTempNormName) + ")"
                                 : "")
                         + (customLookupCondition != null ? " and custom lookup condition "
-                        + StringUtil.jQuote(customLookupCondition) : "")
+                        + _StringUtil.jQuote(customLookupCondition) : "")
                         + "."
                         + (missingTempReason != null
                                 ? "\nReason given: " + ensureSentenceIsClosed(missingTempReason)
                                 : "")
                         + "\nThe name was interpreted by this TemplateLoader: "
-                        + StringUtil.tryToString(tl) + "."
+                        + _StringUtil.tryToString(tl) + "."
                         + (!isKnownNonConfusingLookupStrategy(templateLookupStrategy)
                                 ? "\n(Before that, the name was possibly changed by this lookup strategy: "
-                                  + StringUtil.tryToString(templateLookupStrategy) + ".)"
+                                  + _StringUtil.tryToString(templateLookupStrategy) + ".)"
                                 : "")
                         // Suspected reasons or warning:
                         + (!templateLoaderExplicitlySet
@@ -2797,10 +2797,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (DEFAULT_ENCODING_KEY_SNAKE_CASE.equals(name) || DEFAULT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
                 setDefaultEncoding(value);
             } else if (LOCALIZED_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
-                setLocalizedLookup(StringUtil.getYesNo(value));
+                setLocalizedLookup(_StringUtil.getYesNo(value));
             } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
                     || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
-                setWhitespaceStripping(StringUtil.getYesNo(value));
+                setWhitespaceStripping(_StringUtil.getYesNo(value));
             } else if (AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE.equals(name) || AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE.equals(name)) {
                 if ("enable_if_default".equals(value) || "enableIfDefault".equals(value)) {
                     setAutoEscapingPolicy(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
@@ -2835,7 +2835,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetRecognizeStandardFileExtensions();
                 } else {
-                    setRecognizeStandardFileExtensions(StringUtil.getYesNo(value));
+                    setRecognizeStandardFileExtensions(_StringUtil.getYesNo(value));
                 }
             } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
@@ -2843,7 +2843,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 } if (value.indexOf('.') == -1) {
                     int strongSize = 0;
                     int softSize = 0;
-                    Map map = StringUtil.parseNameValuePairList(
+                    Map map = _StringUtil.parseNameValuePairList(
                             value, String.valueOf(Integer.MAX_VALUE));
                     Iterator it = map.entrySet().iterator();
                     while (it.hasNext()) {

@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 class ExtendedDecimalFormatParser {
     
@@ -319,14 +319,14 @@ class ExtendedDecimalFormatParser {
     private ParseException newInvalidParameterValueException(String name, String value, int valuePos,
             InvalidParameterValueException e) {
         return new java.text.ParseException(
-                StringUtil.jQuote(value) + " is an invalid value for the \"" + name + "\" parameter: "
+                _StringUtil.jQuote(value) + " is an invalid value for the \"" + name + "\" parameter: "
                 + e.message,
                 valuePos);
     }
 
     private ParseException newUnknownParameterException(String name, int namePos) throws ParseException {
         StringBuilder sb = new StringBuilder(128);
-        sb.append("Unsupported parameter name, ").append(StringUtil.jQuote(name));
+        sb.append("Unsupported parameter name, ").append(_StringUtil.jQuote(name));
         sb.append(". The supported names are: ");
         Set<String> legalNames = PARAM_HANDLERS.keySet();
         String[] legalNameArr = legalNames.toArray(new String[legalNames.size()]);
@@ -422,7 +422,7 @@ class ExtendedDecimalFormatParser {
     }
 
     private String unescape(String s, char openedQuot) {
-        return openedQuot == '\'' ? StringUtil.replace(s, "\'\'", "\'") : StringUtil.replace(s, "\"\"", "\"");
+        return openedQuot == '\'' ? _StringUtil.replace(s, "\'\'", "\'") : _StringUtil.replace(s, "\"\"", "\"");
     }
 
     private String fetchStandardPattern() {

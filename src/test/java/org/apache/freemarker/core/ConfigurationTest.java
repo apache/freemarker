@@ -66,7 +66,6 @@ import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.ast.UndefinedOutputFormat;
 import org.apache.freemarker.core.ast.UnregisteredOutputFormatException;
 import org.apache.freemarker.core.ast.XMLOutputFormat;
-import org.apache.freemarker.core.ast._CoreStringUtils;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -88,9 +87,10 @@ import org.apache.freemarker.core.templateresolver.impl.NullCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
-import org.apache.freemarker.core.util.DateUtil;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.core.util._StringUtil;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -327,7 +327,7 @@ public class ConfigurationTest extends TestCase {
     public void testShowErrorTips() throws Exception {
         Configuration cfg = new Configuration();
         try {
-            new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
+            new Template(null, "${x}", cfg).process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
             assertThat(e.getMessage(), containsString("Tip:"));
@@ -335,7 +335,7 @@ public class ConfigurationTest extends TestCase {
         
         cfg.setShowErrorTips(false);
         try {
-            new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
+            new Template(null, "${x}", cfg).process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
             assertThat(e.getMessage(), not(containsString("Tip:")));
@@ -858,7 +858,7 @@ public class ConfigurationTest extends TestCase {
         {
             Template t = cfg.getTemplate("Stat/t.de.ftlx");
             assertEquals("TODO,XML", t.getBooleanFormat());
-            assertEquals(DateUtil.UTC, t.getTimeZone());
+            assertEquals(_DateUtil.UTC, t.getTimeZone());
         }
         
         assertNotNull(cfg.getTemplateConfigurations());
@@ -912,7 +912,7 @@ public class ConfigurationTest extends TestCase {
        try {
            cfg.setOutputFormat(null);
            fail();
-       } catch (NullArgumentException e) {
+       } catch (_NullArgumentException e) {
            // Expected
        }
        
@@ -1118,15 +1118,15 @@ public class ConfigurationTest extends TestCase {
         assertNull(env2.getSQLDateAndTimeTimeZone());
         assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         
-        env1.setSQLDateAndTimeTimeZone(DateUtil.UTC);
+        env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
         // cfg:
         assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
         assertNull(cfg.getSQLDateAndTimeTimeZone());
         assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env:
         assertEquals(TimeZone.getDefault(), env1.getTimeZone());
-        assertEquals(DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-        assertEquals(DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+        assertEquals(_DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         
         TimeZone localTZ = TimeZone.getTimeZone("Europe/Brussels");
         env1.setTimeZone(localTZ);
@@ -1136,8 +1136,8 @@ public class ConfigurationTest extends TestCase {
         assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env:
         assertEquals(localTZ, env1.getTimeZone());
-        assertEquals(DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-        assertEquals(DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+        assertEquals(_DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env 2:
         assertEquals(TimeZone.getDefault(), env2.getTimeZone());
         assertNull(env2.getSQLDateAndTimeTimeZone());
@@ -1154,8 +1154,8 @@ public class ConfigurationTest extends TestCase {
         assertEquals(otherTZ2.getID(), cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env:
         assertEquals(localTZ, env1.getTimeZone());
-        assertEquals(DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-        assertEquals(DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+        assertEquals(_DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env 2:
         assertEquals(otherTZ1, env2.getTimeZone());
         assertEquals(otherTZ2, env2.getSQLDateAndTimeTimeZone());
@@ -1248,7 +1248,7 @@ public class ConfigurationTest extends TestCase {
         for (Version v : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22 }) {
             Configuration cfg = new Configuration(v);
             try {
-                new Template(null, "${1?api}", cfg).process(null, NullWriter.INSTANCE);
+                new Template(null, "${1?api}", cfg).process(null, _NullWriter.INSTANCE);
                 fail();
             } catch (TemplateException e) {
                 assertThat(e.getMessage(), containsString(Configurable.API_BUILTIN_ENABLED_KEY));
@@ -1258,7 +1258,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setAPIBuiltinEnabled(true);
         new Template(null, "${m?api.hashCode()}", cfg)
-                .process(Collections.singletonMap("m", new HashMap()), NullWriter.INSTANCE);
+                .process(Collections.singletonMap("m", new HashMap()), _NullWriter.INSTANCE);
     }
 
     @Test
@@ -1694,7 +1694,7 @@ public class ConfigurationTest extends TestCase {
                     resultCC = e;
                 }
                 
-                String nameSC = _CoreStringUtils.camelCaseToUnderscored(nameCC);
+                String nameSC = _StringUtil.camelCaseToUnderscored(nameCC);
                 Exception resultSC = null;
                 try {
                     cfg.setSetting(nameSC, value);

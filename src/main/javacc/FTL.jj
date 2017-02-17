@@ -113,13 +113,13 @@ public class FMParser {
     		TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) {
         this(tkMan);
 
-        NullArgumentException.check(pCfg);
+        _NullArgumentException.check(pCfg);
         this.pCfg = pCfg;
         
-        NullArgumentException.check(templateSpecifiedEncodingHandler);
+        _NullArgumentException.check(templateSpecifiedEncodingHandler);
         this.templateSpecifiedEncodingHandler = templateSpecifiedEncodingHandler;
 
-        NullArgumentException.check(template);
+        _NullArgumentException.check(template);
         this.template = template;
 
         int incompatibleImprovements = pCfg.getIncompatibleImprovements().intValue();
@@ -387,7 +387,7 @@ public class FMParser {
         }
         if (legacyCompat && tm instanceof TemplateScalarModel) {
             try {
-                return StringUtil.getYesNo(((TemplateScalarModel) tm).getAsString());
+                return _StringUtil.getYesNo(((TemplateScalarModel) tm).getAsString());
             } catch (Exception e) {
                 throw new ParseException(e.getMessage()
                         + "\nExpecting boolean (true/false), found: " + exp.getCanonicalForm(),
@@ -553,7 +553,7 @@ TOKEN_MGR_DECLS:
     }
 
     void checkNamingConvention(Token tok) {
-        checkNamingConvention(tok, _CoreStringUtils.getIdentifierNamingConvention(tok.image)); 
+        checkNamingConvention(tok, _StringUtil.getIdentifierNamingConvention(tok.image)); 
     }
     
     void checkNamingConvention(Token tok, int tokenNamingConvention) {
@@ -585,9 +585,9 @@ TOKEN_MGR_DECLS:
                         ? "estabilished by auto-detection at "
                             + MessageUtil.formatPosition(
                                     namingConventionEstabilisher.beginLine, namingConventionEstabilisher.beginColumn)
-                            + " by token " + StringUtil.jQuote(namingConventionEstabilisher.image.trim())
+                            + " by token " + _StringUtil.jQuote(namingConventionEstabilisher.image.trim())
                         : "")
-                + ", but the problematic token, " + StringUtil.jQuote(tok.image.trim())
+                + ", but the problematic token, " + _StringUtil.jQuote(tok.image.trim())
                 + ", uses a different convention.",
                 TokenMgrError.LEXICAL_ERROR,
                 tok.beginLine, tok.beginColumn, tok.endLine, tok.endColumn);
@@ -600,7 +600,7 @@ TOKEN_MGR_DECLS:
      *         The index of the deciding character relatively to the first letter of the name.
      */
     private static int getTagNamingConvention(Token tok, int charIdxInName) {
-        return _CoreStringUtils.isUpperUSASCII(getTagNameCharAt(tok, charIdxInName))
+        return _StringUtil.isUpperUSASCII(getTagNameCharAt(tok, charIdxInName))
                 ? Configuration.CAMEL_CASE_NAMING_CONVENTION : Configuration.LEGACY_NAMING_CONVENTION;
     }
 
@@ -2151,7 +2151,7 @@ StringLiteral StringLiteral(boolean interpolate) :
             s = t.image.substring(2, t.image.length() -1);
         } else {
 	        try {
-	            s = StringUtil.FTLStringLiteralDec(t.image.substring(1, t.image.length() -1));
+	            s = _StringUtil.FTLStringLiteralDec(t.image.substring(1, t.image.length() -1));
 	        } catch (ParseException pe) {
 	            pe.lineNumber = t.beginLine;
 	            pe.columnNumber = t.beginColumn;
@@ -3605,7 +3605,7 @@ OutputFormatBlock OutputFormat() :
             }
         } else {
             throw new ParseException(
-                    "Parameter must be a string, but was: " + ClassUtil.getFTLTypeDescription(paramTM),
+                    "Parameter must be a string, but was: " + _ClassUtil.getFTLTypeDescription(paramTM),
                     paramExp);
         }
         
@@ -3982,7 +3982,7 @@ TemplateElement OptionalBlock() :
         tp = MixedContent()
     ]
     {
-        return tp != null ? tp : new TextBlock(CollectionUtils.EMPTY_CHAR_ARRAY, false);
+        return tp != null ? tp : new TextBlock(_CollectionUtil.EMPTY_CHAR_ARRAY, false);
     }
 }
 

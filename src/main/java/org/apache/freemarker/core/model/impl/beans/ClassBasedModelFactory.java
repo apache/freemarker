@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 /**
  * Base class for hash models keyed by Java class names. 
@@ -90,7 +90,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             classIntrospectorClearingCounter = classIntrospector.getClearingCounter();
         }
         try {
-            final Class clazz = ClassUtil.forName(key);
+            final Class clazz = _ClassUtil.forName(key);
             
             // This is called so that we trigger the
             // class-reloading detector. If clazz is a reloaded class,

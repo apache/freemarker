@@ -17,31 +17,35 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core.util;
 
-import java.util.AbstractSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public abstract class _UnmodifiableSet<E> extends AbstractSet<E> {
+public class _ArrayIterator implements Iterator {
 
-    @Override
-    public boolean add(E o) {
+    private final Object[] array;
+    private int nextIndex;
+
+    public _ArrayIterator(Object[] array) {
+        this.array = array;
+        this.nextIndex = 0;
+    }
+
+    public boolean hasNext() {
+        return nextIndex < array.length;
+    }
+
+    public Object next() {
+        if (nextIndex >= array.length) {
+            throw new NoSuchElementException();
+        }
+        return array[nextIndex++];
+    }
+
+    public void remove() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        if (contains(o)) {
-            throw new UnsupportedOperationException();
-        }
-        return false;
-    }
-
-    @Override
-    public void clear() {
-        if (!isEmpty()) {
-            throw new UnsupportedOperationException();
-        }
     }
 
 }

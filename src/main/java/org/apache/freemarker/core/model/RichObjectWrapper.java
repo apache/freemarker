@@ -17,35 +17,22 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core.model;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class _ArrayIterator implements Iterator {
-
-    private final Object[] array;
-    private int nextIndex;
-
-    public _ArrayIterator(Object[] array) {
-        this.array = array;
-        this.nextIndex = 0;
-    }
-
-    public boolean hasNext() {
-        return nextIndex < array.length;
-    }
-
-    public Object next() {
-        if (nextIndex >= array.length) {
-            throw new NoSuchElementException();
-        }
-        return array[nextIndex++];
-    }
-
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
+/**
+ * <b>Experimental - subject to change:</b> Union of the interfaces that a typical feature rich {@link ObjectWrapper} is
+ * expected to implement.
+ * 
+ * <p>
+ * <b>Experimental status warning:</b> This interface is subject to change on non-backward compatible ways, hence, it
+ * shouldn't be implemented outside FreeMarker yet.
+ * 
+ * @since 2.3.22
+ */
+public interface RichObjectWrapper extends ObjectWrapperAndUnwrapper, ObjectWrapperWithAPISupport {
 
 }

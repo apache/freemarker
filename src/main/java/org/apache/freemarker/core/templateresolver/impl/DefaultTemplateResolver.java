@@ -54,8 +54,8 @@ import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.slf4j.Logger;
 
@@ -166,21 +166,21 @@ public class DefaultTemplateResolver extends TemplateResolver {
         
         this.templateLoader = templateLoader;
         
-        NullArgumentException.check("cacheStorage", cacheStorage);
+        _NullArgumentException.check("cacheStorage", cacheStorage);
         this.cacheStorage = cacheStorage;
         isCacheStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
                 ((ConcurrentCacheStorage) cacheStorage).isConcurrent();
         
-        NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
+        _NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
         this.templateLookupStrategy = templateLookupStrategy;
 
-        NullArgumentException.check("templateNameFormat", templateNameFormat);
+        _NullArgumentException.check("templateNameFormat", templateNameFormat);
         this.templateNameFormat = templateNameFormat;
 
         // Can be null
         this.templateConfigurations = templateConfigurations;
         
-        NullArgumentException.check("config", config);
+        _NullArgumentException.check("config", config);
         this.config = config;
     }
     
@@ -255,9 +255,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
     public GetTemplateResult getTemplate(String name, Locale locale, Object customLookupCondition,
             String encoding, boolean parseAsFTL)
     throws IOException {
-        NullArgumentException.check("name", name);
-        NullArgumentException.check("locale", locale);
-        NullArgumentException.check("encoding", encoding);
+        _NullArgumentException.check("name", name);
+        _NullArgumentException.check("locale", locale);
+        _NullArgumentException.check("encoding", encoding);
         
         try {
             name = templateNameFormat.normalizeRootBasedName(name);
@@ -382,8 +382,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
                             Object newSource = newTemplateLoaderResult.getSource();
                             if (!nullSafeEquals(newSource, oldCachedResult.source)) {
                                 debugMsg.append("the source has been changed: ")
-                                        .append("cached.source=").append(StringUtil.jQuoteNoXSS(oldCachedResult.source))
-                                        .append(", current.source=").append(StringUtil.jQuoteNoXSS(newSource));
+                                        .append("cached.source=").append(_StringUtil.jQuoteNoXSS(oldCachedResult.source))
+                                        .append(", current.source=").append(_StringUtil.jQuoteNoXSS(newSource));
                             } else {
                                 Serializable newVersion = newTemplateLoaderResult.getVersion();
                                 if (!nullSafeEquals(oldCachedResult.version, newVersion)) {
@@ -427,7 +427,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             // If we get here, then we need to (re)load the template
             if (debug) {
                 LOG.debug(debugPrefix + "Reading template content (source: "
-                        + StringUtil.jQuoteNoXSS(newCachedResult.source) + ")");
+                        + _StringUtil.jQuoteNoXSS(newCachedResult.source) + ")");
             }
             
             Template template = loadTemplate(
@@ -826,9 +826,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
     private String getDebugPrefix(String operation, String name, Locale locale, Object customLookupCondition, String encoding,
             boolean parse) {
-        return operation + " " + StringUtil.jQuoteNoXSS(name) + "("
-                + StringUtil.jQuoteNoXSS(locale)
-                + (customLookupCondition != null ? ", cond=" + StringUtil.jQuoteNoXSS(customLookupCondition) : "")
+        return operation + " " + _StringUtil.jQuoteNoXSS(name) + "("
+                + _StringUtil.jQuoteNoXSS(locale)
+                + (customLookupCondition != null ? ", cond=" + _StringUtil.jQuoteNoXSS(customLookupCondition) : "")
                 + ", " + encoding
                 + (parse ? ", parsed)" : ", unparsed]")
                 + ": ";

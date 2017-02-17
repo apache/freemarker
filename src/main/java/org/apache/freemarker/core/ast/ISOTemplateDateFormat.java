@@ -22,10 +22,10 @@ package org.apache.freemarker.core.ast;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.util.DateUtil;
-import org.apache.freemarker.core.util.DateUtil.CalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util.DateUtil.DateParseException;
-import org.apache.freemarker.core.util.DateUtil.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtil.DateParseException;
+import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
 
 final class ISOTemplateDateFormat extends ISOLikeTemplateDateFormat {
 
@@ -42,26 +42,26 @@ final class ISOTemplateDateFormat extends ISOLikeTemplateDateFormat {
     @Override
     protected String format(Date date, boolean datePart, boolean timePart, boolean offsetPart, int accuracy,
             TimeZone timeZone, DateToISO8601CalendarFactory calendarFactory) {
-        return DateUtil.dateToISO8601String(
+        return _DateUtil.dateToISO8601String(
                 date, datePart, timePart, timePart && offsetPart, accuracy, timeZone, calendarFactory);
     }
 
     @Override
     protected Date parseDate(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return DateUtil.parseISO8601Date(s, tz, calToDateConverter);
+        return _DateUtil.parseISO8601Date(s, tz, calToDateConverter);
     }
 
     @Override
     protected Date parseTime(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return DateUtil.parseISO8601Time(s, tz, calToDateConverter);
+        return _DateUtil.parseISO8601Time(s, tz, calToDateConverter);
     }
 
     @Override
     protected Date parseDateTime(String s, TimeZone tz,
             CalendarFieldsToDateConverter calToDateConverter) throws DateParseException {
-        return DateUtil.parseISO8601DateTime(s, tz, calToDateConverter);
+        return _DateUtil.parseISO8601DateTime(s, tz, calToDateConverter);
     }
     
     @Override

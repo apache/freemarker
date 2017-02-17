@@ -22,11 +22,11 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Represents the XML output format (MIME type "application/xml", name "XML"). This format escapes by default (via
- * {@link StringUtil#XMLEnc(String)}). The {@code ?html}, {@code ?xhtml} and {@code ?xml} built-ins silently bypass
+ * {@link _StringUtil#XMLEnc(String)}). The {@code ?html}, {@code ?xhtml} and {@code ?xml} built-ins silently bypass
  * template output values of the type produced by this output format ({@link TemplateXHTMLOutputModel}).
  * 
  * @since 2.3.24
@@ -54,12 +54,12 @@ public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLO
 
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        StringUtil.XMLEnc(textToEsc, out);
+        _StringUtil.XMLEnc(textToEsc, out);
     }
 
     @Override
     public String escapePlainText(String plainTextContent) {
-        return StringUtil.XMLEnc(plainTextContent);
+        return _StringUtil.XMLEnc(plainTextContent);
     }
 
     @Override

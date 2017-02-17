@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 class BuiltInsForStringsBasic {
 
@@ -59,14 +59,14 @@ class BuiltInsForStringsBasic {
     static class capitalizeBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.capitalize(s));
+            return new SimpleScalar(_StringUtil.capitalize(s));
         }
     }
 
     static class chop_linebreakBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.chomp(s));
+            return new SimpleScalar(_StringUtil.chomp(s));
         }
     }
 
@@ -458,8 +458,8 @@ class BuiltInsForStringsBasic {
                     try {
                         return new SimpleScalar(
                                 leftPadder
-                                        ? StringUtil.leftPad(s, width, filling)
-                                        : StringUtil.rightPad(s, width, filling));
+                                        ? _StringUtil.leftPad(s, width, filling)
+                                        : _StringUtil.rightPad(s, width, filling));
                     } catch (IllegalArgumentException e) {
                         if (filling.length() == 0) {
                             throw new _TemplateModelException(
@@ -470,7 +470,7 @@ class BuiltInsForStringsBasic {
                         }
                     }
                 } else {
-                    return new SimpleScalar(leftPadder ? StringUtil.leftPad(s, width) : StringUtil.rightPad(s, width));
+                    return new SimpleScalar(leftPadder ? _StringUtil.leftPad(s, width) : _StringUtil.rightPad(s, width));
                 }
             }
         }
@@ -550,7 +550,7 @@ class BuiltInsForStringsBasic {
                 String[] result = null;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
                     RegexpHelper.checkNonRegexpFlags("split", flags);
-                    result = StringUtil.split(s, splitString,
+                    result = _StringUtil.split(s, splitString,
                             (flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) != 0);
                 } else {
                     Pattern pattern = RegexpHelper.getPattern(splitString, (int) flags);

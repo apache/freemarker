@@ -24,9 +24,7 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
- * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't. 
- */ 
+ */
 // [FM3] This was added temporary until we get to cleaning up the parts that depend on a static ObjectWrapper. The
 // ObjectWrapper should always come from the Configuration, not from the statics here.
 public final class _StaticObjectWrappers {

@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 
 /**
@@ -109,7 +109,7 @@ class BuiltInsForStringsRegexp {
                 String result;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
                     RegexpHelper.checkNonRegexpFlags("replace", flags);
-                    result = StringUtil.replace(s, arg1, arg2,
+                    result = _StringUtil.replace(s, arg1, arg2,
                             (flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) != 0,
                             (flags & RegexpHelper.RE_FLAG_FIRST_ONLY) != 0);
                 } else {

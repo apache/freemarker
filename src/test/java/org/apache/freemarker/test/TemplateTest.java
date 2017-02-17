@@ -40,7 +40,7 @@ import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.templatesuite.TemplateTestSuite;
 import org.apache.freemarker.test.util.TestUtil;
 import org.junit.Ignore;
@@ -270,16 +270,16 @@ public abstract class TemplateTest {
             if (needle.startsWith("\\!")) {
                 String netNeedle = needle.substring(2); 
                 if (msg.contains(netNeedle)) {
-                    fail("The message shouldn't contain substring " + StringUtil.jQuote(netNeedle) + ":\n" + msg);
+                    fail("The message shouldn't contain substring " + _StringUtil.jQuote(netNeedle) + ":\n" + msg);
                 }
             } else if (!msg.contains(needle)) {
-                fail("The message didn't contain substring " + StringUtil.jQuote(needle) + ":\n" + msg);
+                fail("The message didn't contain substring " + _StringUtil.jQuote(needle) + ":\n" + msg);
             }
         }
     }
     
     private String normalizeNewLines(String s) {
-        return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
+        return _StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
 
     public static class TestBean {

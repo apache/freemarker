@@ -20,7 +20,7 @@ package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 abstract class OutputFormatBoundBuiltIn extends SpecialBuiltIn {
     
@@ -28,7 +28,7 @@ abstract class OutputFormatBoundBuiltIn extends SpecialBuiltIn {
     protected int autoEscapingPolicy;
     
     void bindToOutputFormat(OutputFormat outputFormat, int autoEscapingPolicy) {
-        NullArgumentException.check(outputFormat);
+        _NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
         this.autoEscapingPolicy = autoEscapingPolicy;
     }

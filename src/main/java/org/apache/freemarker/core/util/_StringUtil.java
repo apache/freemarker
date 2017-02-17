@@ -28,15 +28,15 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.model.impl.dom._ExtDomApi;
 
-/**
- *  Some text related utilities.
- */
-public class StringUtil {
+/** Don't use this; used internally by FreeMarker, might changes without notice. */
+public class _StringUtil {
     
     private static final char[] ESCAPES = createEscapes();
     
@@ -46,23 +46,6 @@ public class StringUtil {
     private static final char[] QUOT = new char[] { '&', 'q', 'u', 'o', 't', ';' };
     private static final char[] HTML_APOS = new char[] { '&', '#', '3', '9', ';' };
     private static final char[] XML_APOS = new char[] { '&', 'a', 'p', 'o', 's', ';' };
-
-    /*
-     *  For better performance most methods are folded down. Don't you scream... :)
-     */
-
-    /**
-     *  HTML encoding (does not convert line breaks and apostrophe-quote).
-     *  Replaces all '&gt;' '&lt;' '&amp;' and '"' with entity reference, but not "'" (apostrophe-quote).
-     *  The last is not escaped as back then when this was written some user agents didn't understood 
-     *  "&amp;apos;" nor "&amp;#39;".
-     *    
-     *  @deprecated Use {@link #XHTMLEnc(String)} instead, because it escapes apostrophe-quote too.
-     */
-    @Deprecated
-    public static String HTMLEnc(String s) {
-        return XMLEncNA(s);
-    }
 
     /**
      *  XML Encoding.
@@ -1378,7 +1361,7 @@ public class StringUtil {
      * @since 2.3.20
      */
     public static String jsStringEnc(String s, boolean json) {
-        NullArgumentException.check("s", s);
+        _NullArgumentException.check("s", s);
         
         int ln = s.length();
         StringBuilder sb = null;
@@ -1875,9 +1858,9 @@ public class StringUtil {
         try {
             eStr = e.toString();
         } catch (Throwable e2) {
-            eStr = ClassUtil.getShortClassNameOfObject(e);
+            eStr = _ClassUtil.getShortClassNameOfObject(e);
         }
-        return "[" + ClassUtil.getShortClassNameOfObject(object) + ".toString() failed: " + eStr + "]";
+        return "[" + _ClassUtil.getShortClassNameOfObject(object) + ".toString() failed: " + eStr + "]";
     }
     
     /**
@@ -1949,7 +1932,7 @@ public class StringUtil {
     /**
      * Behaves exactly like {@link String#trim()}, but works on arrays. If the resulting array would have the same
      * content after trimming, it returns the original array instance. Otherwise it returns a new array instance (or
-     * {@link CollectionUtils#EMPTY_CHAR_ARRAY}).
+     * {@link _CollectionUtil#EMPTY_CHAR_ARRAY}).
      * 
      * @since 2.3.22
      */
@@ -1971,7 +1954,7 @@ public class StringUtil {
             return cs;
         }
         if (start == end) {
-            return CollectionUtils.EMPTY_CHAR_ARRAY;
+            return _CollectionUtil.EMPTY_CHAR_ARRAY;
         }
         
         char[] newCs = new char[end - start];
@@ -2121,6 +2104,95 @@ public class StringUtil {
             sb.append(s, nextStart, ln);
         }
         return sb.toString();
+    }
+
+    public static String toFTLIdentifierReferenceAfterDot(String name) {
+        return _StringUtil.backslashEscapeIdentifier(name);
+    }
+
+    public static String toFTLTopLevelIdentifierReference(String name) {
+        return _StringUtil.backslashEscapeIdentifier(name);
+    }
+
+    public static String toFTLTopLevelTragetIdentifier(final String name) {
+        char quotationType = 0;
+        scanForQuotationType: for (int i = 0; i < name.length(); i++) {
+            final char c = name.charAt(i);
+            if (!(i == 0 ? isFTLIdentifierStart(c) : isFTLIdentifierPart(c)) && c != '@') {
+                if ((quotationType == 0 || quotationType == '\\') && (c == '-' || c == '.' || c == ':')) {
+                    quotationType = '\\';
+                } else {
+                    quotationType = '"';
+                    break scanForQuotationType;
+                }
+            }
+        }
+        switch (quotationType) {
+        case 0:
+            return name;
+        case '"':
+            return ftlQuote(name);
+        case '\\':
+            return _StringUtil.backslashEscapeIdentifier(name);
+        default:
+            throw new BugException();
+        }
+    }
+
+    public static String backslashEscapeIdentifier(String name) {
+        return replace(replace(replace(name, "-", "\\-"), ".", "\\."), ":", "\\:");
+    }
+
+    /**
+     * @return {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}, or {@link Configuration#LEGACY_NAMING_CONVENTION}
+     *         or, {@link Configuration#AUTO_DETECT_NAMING_CONVENTION} when undecidable.
+     */
+    public static int getIdentifierNamingConvention(String name) {
+        final int ln = name.length();
+        for (int i = 0; i < ln; i++) {
+            final char c = name.charAt(i);
+            if (c == '_') {
+                return Configuration.LEGACY_NAMING_CONVENTION;
+            }
+            if (_StringUtil.isUpperUSASCII(c)) {
+                return Configuration.CAMEL_CASE_NAMING_CONVENTION;
+            }
+        }
+        return Configuration.AUTO_DETECT_NAMING_CONVENTION;
+    }
+
+    // [2.4] Won't be needed anymore
+    /**
+     * A deliberately very inflexible camel case to underscored converter; it must not convert improper camel case
+     * names to a proper underscored name.
+     */
+    public static String camelCaseToUnderscored(String camelCaseName) {
+        int i = 0;
+        while (i < camelCaseName.length() && Character.isLowerCase(camelCaseName.charAt(i))) {
+            i++;
+        }
+        if (i == camelCaseName.length()) {
+            // No conversion needed
+            return camelCaseName;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(camelCaseName.substring(0, i));
+        while (i < camelCaseName.length()) {
+            final char c = camelCaseName.charAt(i);
+            if (_StringUtil.isUpperUSASCII(c)) {
+                sb.append('_');
+                sb.append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+            i++;
+        }
+        return sb.toString();
+    }
+
+    public static boolean isUpperUSASCII(char c) {
+        return c >= 'A' && c <= 'Z';
     }
     
 }

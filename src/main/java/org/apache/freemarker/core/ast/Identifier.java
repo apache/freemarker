@@ -21,6 +21,7 @@ package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * A reference to a top-level variable
@@ -50,7 +51,7 @@ final class Identifier extends Expression {
 
     @Override
     public String getCanonicalForm() {
-        return _CoreStringUtils.toFTLTopLevelIdentifierReference(name);
+        return _StringUtil.toFTLTopLevelIdentifierReference(name);
     }
     
     /**

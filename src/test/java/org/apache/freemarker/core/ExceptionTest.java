@@ -32,12 +32,9 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Locale;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._NullWriter;
 
 import junit.framework.TestCase;
 public class ExceptionTest extends TestCase {
@@ -81,7 +78,7 @@ public class ExceptionTest extends TestCase {
         
         Template t = cfg.getTemplate("foo.ftl", Locale.US);
         try {
-            t.process(null, NullWriter.INSTANCE);
+            t.process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
             assertEquals("foo.ftl", e.getTemplateName());

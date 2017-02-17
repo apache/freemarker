@@ -27,8 +27,7 @@ import java.lang.reflect.Method;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util.WriteProtectable;
 
 import junit.framework.TestCase;
@@ -65,7 +64,7 @@ public class BeansWrapperReadOnlyTest extends TestCase {
                 Class t = pd.getPropertyType();
                 
                 Object val;
-                if (ClassUtil.isNumerical(t)) {
+                if (_ClassUtil.isNumerical(t)) {
                     val = Byte.valueOf((byte) 1);
                 } else if (t == boolean.class) {
                     val = Boolean.TRUE;

@@ -38,7 +38,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.beans.RationalNumber;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.util.TestUtil;
 
 public class OverloadedMethods2 {
@@ -321,15 +321,15 @@ public class OverloadedMethods2 {
     }
 
     public String varargs1(String s, int... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
+        return "varargs1(String s = " + _StringUtil.jQuote(s) + ", int... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs1(String s, double... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", double... xs = " + TestUtil.arrayToString(xs) + ")";
+        return "varargs1(String s = " + _StringUtil.jQuote(s) + ", double... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs1(String s, Object... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", Object... xs = " + TestUtil.arrayToString(xs) + ")";
+        return "varargs1(String s = " + _StringUtil.jQuote(s) + ", Object... xs = " + TestUtil.arrayToString(xs) + ")";
     }
 
     public String varargs1(Object s, Object... xs) {

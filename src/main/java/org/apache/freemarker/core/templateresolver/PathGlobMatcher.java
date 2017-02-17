@@ -21,7 +21,7 @@ package org.apache.freemarker.core.templateresolver;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Matches the whole template source name (also known as template source path) with the given glob.
@@ -29,7 +29,7 @@ import org.apache.freemarker.core.util.StringUtil;
  * it's not the full path of a file on the file system.
  * 
  * <p>This glob implementation recognizes {@code **} (Ant-style directory wildcard) among others. For more details see
- * {@link StringUtil#globToRegularExpression(String, boolean)}.
+ * {@link _StringUtil#globToRegularExpression(String, boolean)}.
  * 
  * <p>About the usage of {@code /} (slash):
  * <ul>
@@ -54,7 +54,7 @@ public class PathGlobMatcher extends TemplateSourceMatcher {
     
     /**
      * @param glob
-     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String, boolean)}. Must not
+     *            Glob with the syntax defined by {@link _StringUtil#globToRegularExpression(String, boolean)}. Must not
      *            start with {@code /}.
      */
     public PathGlobMatcher(String glob) {
@@ -66,7 +66,7 @@ public class PathGlobMatcher extends TemplateSourceMatcher {
     }
 
     private void buildPattern() {
-        pattern = StringUtil.globToRegularExpression(glob, caseInsensitive);
+        pattern = _StringUtil.globToRegularExpression(glob, caseInsensitive);
     }
     
     @Override

@@ -29,7 +29,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResultStatus;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * A {@link TemplateLoader} that uses a set of other loaders to load the templates. On every request, loaders are
@@ -56,7 +56,7 @@ public class MultiTemplateLoader implements TemplateLoader {
      *            (except where {@linkplain #setSticky(boolean) stickiness} says otherwise).
      */
     public MultiTemplateLoader(TemplateLoader... templateLoaders) {
-        NullArgumentException.check("templateLoaders", templateLoaders);
+        _NullArgumentException.check("templateLoaders", templateLoaders);
         this.templateLoaders = templateLoaders.clone();
     }
 

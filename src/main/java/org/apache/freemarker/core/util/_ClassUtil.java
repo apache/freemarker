@@ -56,7 +56,7 @@ import org.apache.freemarker.core.model.impl.beans.OverloadedMethodsModel;
 import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
 import org.apache.freemarker.core.model.impl.beans.StringModel;
 
-public class ClassUtil {
+public class _ClassUtil {
     
     private static final String ORG_APACHE_FREEMARKER = "org.apache.freemarker.";
     private static final String ORG_APACHE_FREEMARKER_CORE = "org.apache.freemarker.core.";
@@ -64,7 +64,7 @@ public class ClassUtil {
             = "org.apache.freemarker.core.templateresolver.";
     private static final String ORG_APACHE_FREEMARKER_CORE_MODEL = "org.apache.freemarker.core.model.";
 
-    private ClassUtil() {
+    private _ClassUtil() {
     }
     
     /**
@@ -104,7 +104,7 @@ public class ClassUtil {
      * 
      * @param pClass can be {@code null}, in which case the method returns {@code null}.
      * @param shortenFreeMarkerClasses if {@code true}, it will also shorten FreeMarker class names. The exact rules
-     *     aren't specified and might change over time, but right now, {@code org.apache.freemarker.core.model.impl.beans.NumberModel} for
+     *     aren't specified and might change over time, but right now, {@link NumberModel} for
      *     example becomes to {@code f.e.b.NumberModel}. 
      * 
      * @since 2.3.20
@@ -155,7 +155,7 @@ public class ClassUtil {
         if (obj == null) {
             return "Null";
         } else {
-            return ClassUtil.getShortClassName(obj.getClass(), shortenFreeMarkerClasses);
+            return _ClassUtil.getShortClassName(obj.getClass(), shortenFreeMarkerClasses);
         }
     }
 

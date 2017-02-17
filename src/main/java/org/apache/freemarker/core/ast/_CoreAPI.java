@@ -30,11 +30,10 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._TemplateAPI;
-import org.apache.freemarker.core.ast.FMParser;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 
 /**
@@ -189,8 +188,8 @@ public class _CoreAPI {
         for (Object value : values) {
             if (!expectedClass.isInstance(value)) {
                 throw new IllegalArgumentException(somethingsSentenceStart + " must be instances of "
-                        + ClassUtil.getShortClassName(expectedClass) + ", but one of them was a(n) "
-                        + ClassUtil.getShortClassNameOfObject(value) + ".");
+                        + _ClassUtil.getShortClassName(expectedClass) + ", but one of them was a(n) "
+                        + _ClassUtil.getShortClassNameOfObject(value) + ".");
             }
         }
     }

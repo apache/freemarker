@@ -21,7 +21,7 @@ package org.apache.freemarker.core.templateresolver.impl;
 import java.net.URL;
 
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -31,7 +31,7 @@ public class URLTemplateLoadingSource implements TemplateLoadingSource {
     private final URL url;
 
     public URLTemplateLoadingSource(URL url) {
-        NullArgumentException.check("url", url);
+        _NullArgumentException.check("url", url);
         this.url = url;
     }
 

@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * An instruction that outputs the value of an <tt>Expression</tt>.
@@ -101,7 +101,7 @@ final class DollarVariable extends Interpolation {
         StringBuilder sb = new StringBuilder();
         sb.append("${");
         final String exprCF = expression.getCanonicalForm();
-        sb.append(inStringLiteral ? StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);
+        sb.append(inStringLiteral ? _StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);
         sb.append("}");
         if (!canonical && expression != escapedExpression) {
             sb.append(" auto-escaped");            

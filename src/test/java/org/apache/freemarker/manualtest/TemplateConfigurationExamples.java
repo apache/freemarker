@@ -36,7 +36,7 @@ import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurati
 import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
-import org.apache.freemarker.core.util.DateUtil;
+import org.apache.freemarker.core.util._DateUtil;
 import org.junit.Test;
 
 public class TemplateConfigurationExamples extends ExamplesTest {
@@ -128,7 +128,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         tcStats.setDateTimeFormat("iso");
         tcStats.setDateFormat("iso");
         tcStats.setTimeFormat("iso");
-        tcStats.setTimeZone(DateUtil.UTC);
+        tcStats.setTimeZone(_DateUtil.UTC);
 
         TemplateConfiguration tcMail = new TemplateConfiguration();
         tcMail.setEncoding("utf-8");

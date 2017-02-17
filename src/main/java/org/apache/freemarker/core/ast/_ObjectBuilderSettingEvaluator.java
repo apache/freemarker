@@ -54,9 +54,9 @@ import org.apache.freemarker.core.templateresolver.NotMatcher;
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.StringUtil;
 import org.apache.freemarker.core.util.WriteProtectable;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Don't use this; used internally by FreeMarker, might changes without notice.
@@ -539,7 +539,7 @@ public class _ObjectBuilderSettingEvaluator {
         final String sInside = src.substring(startPos + (raw ? 2 : 1), pos);
         try {
             pos++; // skip closing quotation mark
-            return raw ? sInside : StringUtil.FTLStringLiteralDec(sInside);
+            return raw ? sInside : _StringUtil.FTLStringLiteralDec(sInside);
         } catch (ParseException e) {
             throw new _ObjectBuilderSettingEvaluationException("Malformed string literal: " + sInside, e);
         }
@@ -640,7 +640,7 @@ public class _ObjectBuilderSettingEvaluator {
                 if (i != 0) {
                     sb.append(" or ");
                 }
-                sb.append(StringUtil.jQuote(expectedChars.substring(i, i + 1)));
+                sb.append(_StringUtil.jQuote(expectedChars.substring(i, i + 1)));
             }
             throw new _ObjectBuilderSettingEvaluationException(
                     sb.toString(),
@@ -689,7 +689,8 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, UndefinedOutputFormat.class);
             
             addWithSimpleName(SHORTHANDS, Locale.class);
-            SHORTHANDS.put("TimeZone", "org.apache.freemarker.core.ast._TimeZone");
+            String tzbClassName = _TimeZoneBuilder.class.getName();
+            SHORTHANDS.put("TimeZone", tzbClassName.substring(0, tzbClassName.length() - 7));
 
             // For accessing static fields:
             addWithSimpleName(SHORTHANDS, Configuration.class);
@@ -731,13 +732,13 @@ public class _ObjectBuilderSettingEvaluator {
             if (!beanPropSetters.containsKey(name)) {
                 throw new _ObjectBuilderSettingEvaluationException(
                         "The " + cl.getName() + " class has no writeable JavaBeans property called "
-                        + StringUtil.jQuote(name) + ".");
+                        + _StringUtil.jQuote(name) + ".");
             }
             
             Method beanPropSetter = (Method) beanPropSetters.put(name, null);
             if (beanPropSetter == null) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "JavaBeans property " + StringUtil.jQuote(name) + " is set twice.");
+                            "JavaBeans property " + _StringUtil.jQuote(name) + " is set twice.");
             }
             
             try {
@@ -757,14 +758,14 @@ public class _ObjectBuilderSettingEvaluator {
                 }
                 if (!(m instanceof TemplateMethodModelEx)) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
+                            _StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
                 }
                 List/*TemplateModel*/ args = new ArrayList();
                 args.add(env.getObjectWrapper().wrap(namedParamValues.get(i)));
                 ((TemplateMethodModelEx) m).exec(args);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to set " + StringUtil.jQuote(name), e);
+                        "Failed to set " + _StringUtil.jQuote(name), e);
             }
         }
     }
@@ -869,7 +870,7 @@ public class _ObjectBuilderSettingEvaluator {
             if (!modernMode) {
                 try {
                     try {
-                        return ClassUtil.forName(className).newInstance();
+                        return _ClassUtil.forName(className).newInstance();
                     } catch (InstantiationException e) {
                         throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
                     } catch (IllegalAccessException e) {
@@ -892,12 +893,12 @@ public class _ObjectBuilderSettingEvaluator {
 
             boolean clIsBuilderClass;
             try {
-                cl = ClassUtil.forName(className + BUILDER_CLASS_POSTFIX);
+                cl = _ClassUtil.forName(className + BUILDER_CLASS_POSTFIX);
                 clIsBuilderClass = true;
             } catch (ClassNotFoundException e) {
                 clIsBuilderClass = false;
                 try {
-                    cl = ClassUtil.forName(className);
+                    cl = _ClassUtil.forName(className);
                 } catch (Exception e2) {
                     boolean failedToGetAsStaticField;
                     if (canBeStaticField) {
@@ -912,7 +913,7 @@ public class _ObjectBuilderSettingEvaluator {
                         failedToGetAsStaticField = false;
                     }
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "Failed to get class " + StringUtil.jQuote(className)
+                            "Failed to get class " + _StringUtil.jQuote(className)
                             + (failedToGetAsStaticField ? " (also failed to resolve name as static field)" : "")
                             + ".",
                             e2);
@@ -930,7 +931,7 @@ public class _ObjectBuilderSettingEvaluator {
                     // Expected
                 } catch (Exception e) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "Error when trying to access " + StringUtil.jQuote(className) + "."
+                            "Error when trying to access " + _StringUtil.jQuote(className) + "."
                             + INSTANCE_FIELD_NAME, e);
                 }
             }
@@ -964,10 +965,10 @@ public class _ObjectBuilderSettingEvaluator {
 
             Class<?> cl;
             try {
-                cl = ClassUtil.forName(className);
+                cl = _ClassUtil.forName(className);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to get field's parent class, " + StringUtil.jQuote(className) + ".",
+                        "Failed to get field's parent class, " + _StringUtil.jQuote(className) + ".",
                         e);
             }
             
@@ -976,8 +977,8 @@ public class _ObjectBuilderSettingEvaluator {
                 field = cl.getField(fieldName);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to get field " + StringUtil.jQuote(fieldName) + " from class "
-                        + StringUtil.jQuote(className) + ".",
+                        "Failed to get field " + _StringUtil.jQuote(fieldName) + " from class "
+                        + _StringUtil.jQuote(className) + ".",
                         e);
             }
             

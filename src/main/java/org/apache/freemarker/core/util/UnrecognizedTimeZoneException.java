@@ -27,7 +27,7 @@ public class UnrecognizedTimeZoneException extends Exception {
     private final String timeZoneName;
 
     public UnrecognizedTimeZoneException(String timeZoneName) {
-        super("Unrecognized time zone: " + StringUtil.jQuote(timeZoneName));
+        super("Unrecognized time zone: " + _StringUtil.jQuote(timeZoneName));
         this.timeZoneName = timeZoneName;
     }
     

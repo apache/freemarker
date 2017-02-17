@@ -29,7 +29,7 @@ import java.util.TreeMap;
 
 import org.apache.freemarker.core.model.impl.beans.ArgumentTypes;
 import org.apache.freemarker.core.model.impl.beans.OverloadedNumberUtil;
-import org.apache.freemarker.core.util.NumberUtil;
+import org.apache.freemarker.core.util._NumberUtil;
 
 import junit.framework.TestCase;
 
@@ -424,9 +424,9 @@ public class ParameterListPreferabilityTest extends TestCase {
         for (int i = 0; i < sortedSignatures.length; i++) {
             for (int j = 0; j < sortedSignatures.length; j++) {
                 assertEquals("sortedSignatures[" + i + "] <==> sortedSignatures [" + j + "]",
-                        NumberUtil.getSignum(
+                        _NumberUtil.getSignum(
                                 Integer.valueOf(j).compareTo(i)),
-                        NumberUtil.getSignum(
+                        _NumberUtil.getSignum(
                                 argTs.compareParameterListPreferability(
                                         sortedSignatures[i], sortedSignatures[j], varargs)));
             }

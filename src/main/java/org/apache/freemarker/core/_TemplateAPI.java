@@ -27,7 +27,7 @@ import org.apache.freemarker.core.ast.TemplateObject;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -48,7 +48,7 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_4_0 = Version.intValueFor(2, 4, 0);
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
-        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        _NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         int iciV = incompatibleImprovements.intValue();
         if (iciV > Configuration.getVersion().intValue()) {
             throw new IllegalArgumentException("The FreeMarker version requested by \"incompatibleImprovements\" was "

@@ -30,7 +30,7 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * An instruction that sets a property of the template rendering
@@ -75,7 +75,7 @@ final class PropertySetting extends TemplateElement {
                         + "supported.");                
             } else {
                 sb.append("Unknown setting name: ");
-                sb.append(StringUtil.jQuote(key)).append(".");
+                sb.append(_StringUtil.jQuote(key)).append(".");
                 sb.append(" The allowed setting names are: ");
 
                 int shownNamingConvention;
@@ -88,7 +88,7 @@ final class PropertySetting extends TemplateElement {
                 boolean first = true;
                 for (int i = 0; i < SETTING_NAMES.length; i++) {
                     String correctName = SETTING_NAMES[i];
-                    int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
+                    int correctNameNamingConvetion = _StringUtil.getIdentifierNamingConvention(correctName);
                     if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
                             ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
                             : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
@@ -132,7 +132,7 @@ final class PropertySetting extends TemplateElement {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(' ');
-        sb.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(key));
+        sb.append(_StringUtil.toFTLTopLevelTragetIdentifier(key));
         sb.append('=');
         sb.append(value.getCanonicalForm());
         if (canonical) sb.append("/>");

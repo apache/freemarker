@@ -21,8 +21,8 @@ package org.apache.freemarker.core.ast;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.util.CollectionUtils;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * A TemplateElement representing a block of plain text.
@@ -77,7 +77,7 @@ public final class TextBlock extends TemplateElement {
             }
             return text;
         } else {
-            return "text " + StringUtil.jQuote(new String(text));
+            return "text " + _StringUtil.jQuote(new String(text));
         }
     }
     
@@ -156,7 +156,7 @@ public final class TextBlock extends TemplateElement {
                     if (lastNewLineIndex >= 0  || beginColumn == 1) {
                         char[] firstPart = substring(text, 0, lastNewLineIndex + 1);
                         char[] lastLine = substring(text, 1 + lastNewLineIndex); 
-                        if (StringUtil.isTrimmableToEmpty(lastLine)) {
+                        if (_StringUtil.isTrimmableToEmpty(lastLine)) {
                             this.text = firstPart;
                             this.endColumn = 0;
                         } else {
@@ -201,7 +201,7 @@ public final class TextBlock extends TemplateElement {
                     }
                     char[] trailingPart = substring(text, firstLineIndex);
                     char[] openingPart = substring(text, 0, firstLineIndex);
-                    if (StringUtil.isTrimmableToEmpty(openingPart)) {
+                    if (_StringUtil.isTrimmableToEmpty(openingPart)) {
                         this.text = trailingPart;
                         this.beginLine++;
                         this.beginColumn = 1;
@@ -211,7 +211,7 @@ public final class TextBlock extends TemplateElement {
                             lastNonWS--;
                         }
                         char[] printablePart = substring(text, 0, lastNonWS + 1);
-                        if (StringUtil.isTrimmableToEmpty(trailingPart)) {
+                        if (_StringUtil.isTrimmableToEmpty(trailingPart)) {
                         // THIS BLOCK IS HEINOUS! THERE MUST BE A BETTER WAY! REVISIT (JR)
                             boolean trimTrailingPart = true;
                             for (TemplateElement te = this.nextTerminalNode(); 
@@ -225,7 +225,7 @@ public final class TextBlock extends TemplateElement {
                                     break;
                                 }
                             }
-                            if (trimTrailingPart) trailingPart = CollectionUtils.EMPTY_CHAR_ARRAY;
+                            if (trimTrailingPart) trailingPart = _CollectionUtil.EMPTY_CHAR_ARRAY;
                         }
                         this.text = concat(printablePart, trailingPart);
                     }
@@ -272,7 +272,7 @@ public final class TextBlock extends TemplateElement {
                 ++newlineIndex;
             }
         }
-        if (!StringUtil.isTrimmableToEmpty(text, 0, newlineIndex)) {
+        if (!_StringUtil.isTrimmableToEmpty(text, 0, newlineIndex)) {
             return 0;
         }
         // We look at the preceding elements on the line to see if we should
@@ -296,7 +296,7 @@ public final class TextBlock extends TemplateElement {
         if (lastNewlineIndex == -1 && beginColumn != 1) {
             return 0;
         }
-        if (!StringUtil.isTrimmableToEmpty(text, lastNewlineIndex + 1)) {
+        if (!_StringUtil.isTrimmableToEmpty(text, lastNewlineIndex + 1)) {
             return 0;
         }
         // We look at the elements afterward on the same line to see if we should
@@ -351,7 +351,7 @@ public final class TextBlock extends TemplateElement {
             return true;
         }
         if (stripWhitespace) {
-            if (!StringUtil.isTrimmableToEmpty(text)) {
+            if (!_StringUtil.isTrimmableToEmpty(text)) {
                 return false;
             }
             TemplateElement parentElement = getParentElement();

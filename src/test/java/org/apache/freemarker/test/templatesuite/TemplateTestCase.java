@@ -67,9 +67,9 @@ import org.apache.freemarker.core.model.impl.beans.Java7MembersOnlyBeansWrapper;
 import org.apache.freemarker.core.model.impl.beans.ResourceBundleModel;
 import org.apache.freemarker.core.model.impl.dom.NodeModel;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.NullWriter;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.CopyrightCommentRemoverTemplateLoader;
 import org.apache.freemarker.test.templatesuite.models.BooleanAndStringTemplateModel;
 import org.apache.freemarker.test.templatesuite.models.BooleanHash1;
@@ -124,15 +124,15 @@ public class TemplateTestCase extends FileTestCase {
     public TemplateTestCase(String testName, String simpleTestName, String templateName, String expectedFileName, boolean noOutput,
             Version incompatibleImprovements) {
         super(testName);
-        NullArgumentException.check("testName", testName);
+        _NullArgumentException.check("testName", testName);
         
-        NullArgumentException.check("simpleTestName", simpleTestName);
+        _NullArgumentException.check("simpleTestName", simpleTestName);
         this.simpleTestName = simpleTestName;
         
-        NullArgumentException.check("templateName", templateName);
+        _NullArgumentException.check("templateName", templateName);
         this.templateName = templateName;
         
-        NullArgumentException.check("expectedFileName", expectedFileName);
+        _NullArgumentException.check("expectedFileName", expectedFileName);
         this.expectedFileName = expectedFileName;
         
         this.noOutput = noOutput;
@@ -152,7 +152,7 @@ public class TemplateTestCase extends FileTestCase {
             String alias = st.nextToken();
             conf.addAutoImport(alias, libname);
         } else if ("clear_encoding_map".equals(param)) {
-            if (StringUtil.getYesNo(value)) {
+            if (_StringUtil.getYesNo(value)) {
                 conf.clearEncodingMap();
             }
         } else if ("input_encoding".equals(param)) {
@@ -164,8 +164,8 @@ public class TemplateTestCase extends FileTestCase {
             } catch (TemplateException e) {
                 throw new RuntimeException(
                         "Failed to set setting " +
-                        StringUtil.jQuote(param) + " to " +
-                        StringUtil.jQuote(value) + "; see cause exception.",
+                        _StringUtil.jQuote(param) + " to " +
+                        _StringUtil.jQuote(value) + "; see cause exception.",
                         e);
             }
         }
@@ -453,15 +453,15 @@ public class TemplateTestCase extends FileTestCase {
             template = conf.getTemplate(templateName);
         } catch (IOException e) {
             throw new AssertionFailedError(
-                    "Could not load template " + StringUtil.jQuote(templateName) + ":\n" + getStackTrace(e));
+                    "Could not load template " + _StringUtil.jQuote(templateName) + ":\n" + getStackTrace(e));
         }
         ASTPrinter.validateAST(template);
         
         StringWriter out = noOutput ? null : new StringWriter();
         try {
-            template.process(dataModel, out != null ? out : NullWriter.INSTANCE);
+            template.process(dataModel, out != null ? out : _NullWriter.INSTANCE);
         } catch (TemplateException e) {
-            throw new AssertionFailedError("Template " + StringUtil.jQuote(templateName) + " has stopped with error:\n"
+            throw new AssertionFailedError("Template " + _StringUtil.jQuote(templateName) + " has stopped with error:\n"
                         + getStackTrace(e));
         }
         

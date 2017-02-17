@@ -29,6 +29,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * An element representing a macro declaration.
@@ -99,7 +100,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(' ');
-        sb.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(name));
+        sb.append(_StringUtil.toFTLTopLevelTragetIdentifier(name));
         if (function) sb.append('(');
         int argCnt = paramNames.length;
         for (int i = 0; i < argCnt; i++) {
@@ -111,7 +112,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 sb.append(' ');
             }
             String argName = paramNames[i];
-            sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(argName));
+            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(argName));
             if (paramDefaults != null && paramDefaults.get(argName) != null) {
                 sb.append('=');
                 Expression defaultExpr = (Expression) paramDefaults.get(argName);

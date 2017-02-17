@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.freemarker.core.ast.ASTPrinter.Options;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.util.FileTestCase;
 import org.apache.freemarker.test.util.TestUtil;
 
@@ -92,7 +92,7 @@ public class ASTTest extends FileTestCase {
     }
     
     private String normalizeLineBreaks(final String s) throws FileNotFoundException, IOException {
-        return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
+        return _StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
     
 }

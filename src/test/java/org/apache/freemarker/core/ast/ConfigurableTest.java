@@ -33,7 +33,7 @@ import java.util.Set;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.ast.Configurable;
-import org.apache.freemarker.core.ast._CoreStringUtils;
+import org.apache.freemarker.core.util._StringUtil;
 import org.junit.Test;
 
 public class ConfigurableTest {
@@ -100,7 +100,7 @@ public class ConfigurableTest {
             if (fieldName.endsWith("_KEY")) {
                 String keyFieldValue = (String) field.get(null);
                 assertNotEquals(Configuration.CAMEL_CASE_NAMING_CONVENTION,
-                        _CoreStringUtils.getIdentifierNamingConvention(keyFieldValue));
+                        _StringUtil.getIdentifierNamingConvention(keyFieldValue));
                 assertEquals(fieldName.substring(0, fieldName.length() - 4).toLowerCase(), keyFieldValue);
                 
                 try {
@@ -113,8 +113,8 @@ public class ConfigurableTest {
                 try {
                     String keyCCFieldValue = (String) confClass.getField(fieldName + "_CAMEL_CASE").get(null);
                     assertNotEquals(Configuration.LEGACY_NAMING_CONVENTION,
-                            _CoreStringUtils.getIdentifierNamingConvention(keyCCFieldValue));
-                    assertEquals(keyFieldValue, _CoreStringUtils.camelCaseToUnderscored(keyCCFieldValue));
+                            _StringUtil.getIdentifierNamingConvention(keyCCFieldValue));
+                    assertEquals(keyFieldValue, _StringUtil.camelCaseToUnderscored(keyCCFieldValue));
                 } catch (NoSuchFieldException e) {
                     fail("Missing ..._CAMEL_CASE field for " + fieldName);
                 }
@@ -156,7 +156,7 @@ public class ConfigurableTest {
         assertEquals(namesSC.size(), namesCC.size());
         
         for (String nameCC : namesCC) {
-            final String nameSC = _CoreStringUtils.camelCaseToUnderscored(nameCC);
+            final String nameSC = _StringUtil.camelCaseToUnderscored(nameCC);
             if (!namesSC.contains(nameSC)) {
                 fail("\"" + nameCC + "\" misses corresponding snake case name, \"" + nameSC + "\".");
             }

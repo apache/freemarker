@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Don't use this; used internally by FreeMarker, might changes without notice.
@@ -38,7 +38,7 @@ public class _ObjectBuilderSettingEvaluationException extends Exception {
     public _ObjectBuilderSettingEvaluationException(String expected, String src, int location) {
         super("Expression syntax error: Expected a(n) " + expected + ", but "
                 + (location < src.length()
-                        ? "found character " + StringUtil.jQuote("" + src.charAt(location)) + " at position "
+                        ? "found character " + _StringUtil.jQuote("" + src.charAt(location)) + " at position "
                             + (location + 1) + "."
                         : "the end of the parsed string was reached.") );
     }

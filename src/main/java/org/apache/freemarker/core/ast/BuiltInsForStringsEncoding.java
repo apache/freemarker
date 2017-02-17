@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 class BuiltInsForStringsEncoding {
 
@@ -37,7 +37,7 @@ class BuiltInsForStringsEncoding {
         static class BIBeforeICI2d3d20 extends BuiltInForLegacyEscaping {
             @Override
             TemplateModel calculateResult(String s, Environment env) {
-                return new SimpleScalar(StringUtil.HTMLEnc(s));
+                return new SimpleScalar(_StringUtil.XMLEncNA(s));
             }
         }
         
@@ -45,13 +45,15 @@ class BuiltInsForStringsEncoding {
         
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.XHTMLEnc(s));
+            return new SimpleScalar(_StringUtil.XHTMLEnc(s));
         }
     
+        @Override
         public int getMinimumICIVersion() {
             return _TemplateAPI.VERSION_INT_2_3_20;
         }
     
+        @Override
         public Object getPreviousICIChainMember() {
             return prevICIObj;
         }
@@ -61,28 +63,28 @@ class BuiltInsForStringsEncoding {
     static class j_stringBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.javaStringEnc(s));
+            return new SimpleScalar(_StringUtil.javaStringEnc(s));
         }
     }
 
     static class js_stringBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.javaScriptStringEnc(s));
+            return new SimpleScalar(_StringUtil.javaScriptStringEnc(s));
         }
     }
 
     static class json_stringBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.jsonStringEnc(s));
+            return new SimpleScalar(_StringUtil.jsonStringEnc(s));
         }
     }
 
     static class rtfBI extends BuiltInForLegacyEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.RTFEnc(s));
+            return new SimpleScalar(_StringUtil.RTFEnc(s));
         }
     }
 
@@ -96,7 +98,7 @@ class BuiltInsForStringsEncoding {
     
             @Override
             protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
-                return StringUtil.URLEnc(targetAsString, cs);
+                return _StringUtil.URLEnc(targetAsString, cs);
             }
             
         }
@@ -118,7 +120,7 @@ class BuiltInsForStringsEncoding {
     
             @Override
             protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
-                return StringUtil.URLPathEnc(targetAsString, cs);
+                return _StringUtil.URLPathEnc(targetAsString, cs);
             }
             
         }
@@ -133,14 +135,14 @@ class BuiltInsForStringsEncoding {
     static class xhtmlBI extends BuiltInForLegacyEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.XHTMLEnc(s));
+            return new SimpleScalar(_StringUtil.XHTMLEnc(s));
         }
     }
 
     static class xmlBI extends BuiltInForLegacyEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.XMLEnc(s));
+            return new SimpleScalar(_StringUtil.XMLEnc(s));
         }
     }
 
@@ -163,6 +165,7 @@ class BuiltInsForStringsEncoding {
         
         protected abstract String encodeWithCharset(String cs) throws UnsupportedEncodingException;
     
+        @Override
         public Object exec(List args) throws TemplateModelException {
             parent.checkMethodArgCount(args.size(), 1);
             try {
@@ -172,6 +175,7 @@ class BuiltInsForStringsEncoding {
             }
         }
         
+        @Override
         public String getAsString() throws TemplateModelException {
             if (cachedResult == null) {
                 String cs = env.getEffectiveURLEscapingCharset();

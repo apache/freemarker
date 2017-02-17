@@ -52,6 +52,7 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
  *
  * @see org.apache.freemarker.core.util.XmlEscape
  */
+// [FM3] Remove (or move to o.a.f.test)
 public class HtmlEscape implements TemplateTransformModel {
 
     private static final char[] LT = "&lt;".toCharArray();

@@ -28,8 +28,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ast.FMParserTokenManager;
-import org.apache.freemarker.core.ast.Token;
 import org.apache.freemarker.core.ast.BuiltInsForDates.iso_BI;
 import org.apache.freemarker.core.ast.BuiltInsForDates.iso_utc_or_local_BI;
 import org.apache.freemarker.core.ast.BuiltInsForMarkupOutputs.markup_stringBI;
@@ -72,8 +70,8 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.util.DateUtil;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * The {@code ?} operator used for things like {@code foo?upper_case}.
@@ -161,66 +159,66 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("is_transform", "isTransform", new BuiltInsForMultipleTypes.is_transformBI());
         
         putBI("iso_utc", "isoUtc", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
         putBI("iso_utc_fz", "isoUtcFZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.TRUE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
         putBI("iso_utc_nz", "isoUtcNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
         
         putBI("iso_utc_ms", "isoUtcMs", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
         putBI("iso_utc_ms_nz", "isoUtcMsNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
         
         putBI("iso_utc_m", "isoUtcM", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
         putBI("iso_utc_m_nz", "isoUtcMNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
         
         putBI("iso_utc_h", "isoUtcH", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
         putBI("iso_utc_h_nz", "isoUtcHNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
         
         putBI("iso_local", "isoLocal", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
         putBI("iso_local_nz", "isoLocalNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
         
         putBI("iso_local_ms", "isoLocalMs", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
         putBI("iso_local_ms_nz", "isoLocalMsNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
         
         putBI("iso_local_m", "isoLocalM", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
         putBI("iso_local_m_nz", "isoLocalMNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
         
         putBI("iso_local_h", "isoLocalH", new iso_utc_or_local_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
         putBI("iso_local_h_nz", "isoLocalHNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
         
         putBI("iso", new iso_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_SECONDS));
+                /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS));
         putBI("iso_nz", "isoNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS));
         
         putBI("iso_ms", "isoMs", new iso_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS));
+                /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS));
         putBI("iso_ms_nz", "isoMsNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS));
         
         putBI("iso_m", "isoM", new iso_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_MINUTES));
+                /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES));
         putBI("iso_m_nz", "isoMNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES));
         
         putBI("iso_h", "isoH", new iso_BI(
-                /* showOffset = */ null, DateUtil.ACCURACY_HOURS));
+                /* showOffset = */ null, _DateUtil.ACCURACY_HOURS));
         putBI("iso_h_nz", "isoHNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS));
+                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS));
         
         putBI("j_string", "jString", new BuiltInsForStringsEncoding.j_stringBI());
         putBI("join", new BuiltInsForSequences.joinBI());
@@ -321,7 +319,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         String key = keyTk.image;
         BuiltIn bi = BUILT_INS_BY_NAME.get(key);
         if (bi == null) {
-            StringBuilder buf = new StringBuilder("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
+            StringBuilder buf = new StringBuilder("Unknown built-in: ").append(_StringUtil.jQuote(key)).append(". ");
             
             buf.append(
                     "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
@@ -342,7 +340,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             boolean first = true;
             for (Iterator it = names.iterator(); it.hasNext(); ) {
                 String correctName = (String) it.next();
-                int correctNameNamingConvetion = _CoreStringUtils.getIdentifierNamingConvention(correctName);
+                int correctNameNamingConvetion = _StringUtil.getIdentifierNamingConvention(correctName);
                 if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
                         ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
                         : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {

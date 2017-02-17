@@ -32,7 +32,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._NullWriter;
 
 
 /**
@@ -72,7 +72,7 @@ final class MethodCall extends Expression {
             }
             Writer prevOut = env.getOut();
             try {
-                env.setOut(NullWriter.INSTANCE);
+                env.setOut(_NullWriter.INSTANCE);
                 env.invoke(func, null, arguments.items, null, null);
             } catch (IOException e) {
                 // Should not occur

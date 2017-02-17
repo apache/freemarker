@@ -31,7 +31,7 @@ import org.apache.freemarker.core.ast._ErrorDescriptionBuilder;
 import org.apache.freemarker.core.ast._TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 /**
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods and
@@ -218,7 +218,7 @@ final class OverloadedMethods {
     private _DelayedConversionToString getTMActualParameterTypes(List arguments) {
         final String[] argumentTypeDescs = new String[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
-            argumentTypeDescs[i] = ClassUtil.getFTLTypeDescription((TemplateModel) arguments.get(i));
+            argumentTypeDescs[i] = _ClassUtil.getFTLTypeDescription((TemplateModel) arguments.get(i));
         }
         
         return new DelayedCallSignatureToString(argumentTypeDescs) {
@@ -243,8 +243,8 @@ final class OverloadedMethods {
             @Override
             String argumentToString(Object argType) {
                 return argType != null
-                        ? ClassUtil.getShortClassName((Class) argType)
-                        : ClassUtil.getShortClassNameOfObject(null);
+                        ? _ClassUtil.getShortClassName((Class) argType)
+                        : _ClassUtil.getShortClassNameOfObject(null);
             }
             
         };

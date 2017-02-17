@@ -29,9 +29,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Don't use this; used internally by FreeMarker, might changes without notice.
  * Date and time related utilities.
  */
-public class DateUtil {
+public class _DateUtil {
 
     /**
      * Show hours (24h); always 2 digits, like {@code 00}, {@code 05}, etc.
@@ -121,7 +122,7 @@ public class DateUtil {
     private static final String MSG_YEAR_0_NOT_ALLOWED
             = "Year 0 is not allowed in XML schema dates. BC 1 is -1, AD 1 is 1.";
     
-    private DateUtil() {
+    private _DateUtil() {
         // can't be instantiated
     }
     
@@ -230,7 +231,7 @@ public class DateUtil {
      *        Thus, if the milliseconds happen to be exactly 0, no fraction
      *        seconds will be shown at all.
      * @param timeZone the time zone in which the date/time will be shown. (You
-     *        may find {@link DateUtil#UTC} handy here.) Note
+     *        may find {@link _DateUtil#UTC} handy here.) Note
      *        that although date-only formats has no time zone offset part,
      *        the result still depends on the time zone, as days start and end
      *        at different points on the time line in different zones.      
@@ -465,7 +466,7 @@ public class DateUtil {
             boolean xsMode,
             CalendarFieldsToDateConverter calToDateConverter) 
             throws DateParseException {
-        NullArgumentException.check("defaultTZ", defaultTZ);
+        _NullArgumentException.check("defaultTZ", defaultTZ);
         try {
             int year = groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
             
@@ -535,7 +536,7 @@ public class DateUtil {
             Matcher m, TimeZone defaultTZ,
             CalendarFieldsToDateConverter calToDateConverter) 
             throws DateParseException {
-        NullArgumentException.check("defaultTZ", defaultTZ);
+        _NullArgumentException.check("defaultTZ", defaultTZ);
         try {
             // ISO 8601 allows both 00:00 and 24:00,
             // but Calendar.set(...) doesn't if the Calendar is not lenient.
@@ -631,7 +632,7 @@ public class DateUtil {
             boolean xsMode,
             CalendarFieldsToDateConverter calToDateConverter) 
             throws DateParseException {
-        NullArgumentException.check("defaultTZ", defaultTZ);
+        _NullArgumentException.check("defaultTZ", defaultTZ);
         try {
             int year = groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
             
@@ -767,7 +768,7 @@ public class DateUtil {
             return defaultZone;
         }
         if (s.equals("Z")) {
-            return DateUtil.UTC;
+            return _DateUtil.UTC;
         }
         
         StringBuilder sb = new StringBuilder(9);
@@ -805,7 +806,7 @@ public class DateUtil {
     }
     
     /**
-     * Used internally by {@link DateUtil}; don't use its implementations for
+     * Used internally by {@link _DateUtil}; don't use its implementations for
      * anything else.
      */
     public interface DateToISO8601CalendarFactory {
@@ -821,7 +822,7 @@ public class DateUtil {
     }
 
     /**
-     * Used internally by {@link DateUtil}; don't use its implementations for anything else.
+     * Used internally by {@link _DateUtil}; don't use its implementations for anything else.
      */
     public interface CalendarFieldsToDateConverter {
 

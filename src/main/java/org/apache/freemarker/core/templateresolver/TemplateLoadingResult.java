@@ -28,7 +28,7 @@ import java.util.Date;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ast.TemplateConfiguration;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * Return value of {@link TemplateLoader#load(String, TemplateLoadingSource, Serializable, TemplateLoaderSession)}
@@ -67,8 +67,8 @@ public final class TemplateLoadingResult {
      */
     public TemplateLoadingResult(TemplateLoadingSource source, Serializable version, Reader reader,
             TemplateConfiguration templateConfiguration) {
-        NullArgumentException.check("templateSource", source);
-        NullArgumentException.check("reader", reader);
+        _NullArgumentException.check("templateSource", source);
+        _NullArgumentException.check("reader", reader);
         this.status = TemplateLoadingResultStatus.OPENED;
         this.source = source;
         this.version = version;
@@ -99,8 +99,8 @@ public final class TemplateLoadingResult {
      */
     public TemplateLoadingResult(TemplateLoadingSource source, Serializable version, InputStream inputStream,
             TemplateConfiguration templateConfiguration) {
-        NullArgumentException.check("templateSource", source);
-        NullArgumentException.check("inputStream", inputStream);
+        _NullArgumentException.check("templateSource", source);
+        _NullArgumentException.check("inputStream", inputStream);
         this.status = TemplateLoadingResultStatus.OPENED;
         this.source = source;
         this.version = version;

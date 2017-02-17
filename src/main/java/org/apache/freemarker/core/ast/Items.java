@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.IteratorBlock.IterationContext;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * An #items element.
@@ -66,10 +67,10 @@ class Items extends TemplateElement {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(" as ");
-        sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVarName));
+        sb.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
         if (loopVar2Name != null) {
             sb.append(", ");
-            sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVar2Name));
+            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVar2Name));
         }
         if (canonical) {
             sb.append('>');

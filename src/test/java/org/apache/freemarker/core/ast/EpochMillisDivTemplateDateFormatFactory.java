@@ -32,7 +32,7 @@ import org.apache.freemarker.core.ast.UnknownDateTypeFormattingUnsupportedExcept
 import org.apache.freemarker.core.ast.UnparsableValueException;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
@@ -54,7 +54,7 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
                         "A format parameter is required, which specifies the divisor.");
             }
             throw new InvalidFormatParametersException(
-                    "The format paramter must be an integer, but was (shown quoted): " + StringUtil.jQuote(params));
+                    "The format paramter must be an integer, but was (shown quoted): " + _StringUtil.jQuote(params));
         }
         return new EpochMillisDivTemplateDateFormat(divisor);
     }

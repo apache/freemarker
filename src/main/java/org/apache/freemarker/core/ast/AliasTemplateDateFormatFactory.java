@@ -22,7 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._LocaleUtil;
 
 /**
  * Creates an alias to another format, so that the format can be referred to with a simple name in the template, rather
@@ -72,7 +73,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
                 Locale lookupLocale = locale;
                 targetFormatString = localizedTargetFormatStrings.get(lookupLocale);
                 while (targetFormatString == null
-                        && (lookupLocale = _CoreLocaleUtils.getLessSpecificLocale(lookupLocale)) != null) {
+                        && (lookupLocale = _LocaleUtil.getLessSpecificLocale(lookupLocale)) != null) {
                     targetFormatString = localizedTargetFormatStrings.get(lookupLocale);
                 }
             } else {
@@ -84,7 +85,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
             return env.getTemplateDateFormat(targetFormatString, dateType, locale, timeZone, zonelessInput);
         } catch (TemplateValueFormatException e) {
             throw new AliasTargetTemplateValueFormatException("Failed to create format based on target format string,  "
-                    + StringUtil.jQuote(params) + ". Reason given: " + e.getMessage(), e);
+                    + _StringUtil.jQuote(params) + ". Reason given: " + e.getMessage(), e);
         }
     }
 

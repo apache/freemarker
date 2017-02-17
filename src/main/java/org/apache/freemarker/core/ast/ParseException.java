@@ -26,10 +26,8 @@ import java.util.Set;
 
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.FMParserConstants;
-import org.apache.freemarker.core.ast.Token;
-import org.apache.freemarker.core.util.SecurityUtilities;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._SecurityUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Parsing-time exception in a template (as opposed to a runtime exception, a {@link TemplateException}). This usually
@@ -79,7 +77,7 @@ public class ParseException extends IOException implements FMParserConstants {
     /**
      * The end of line string for this machine.
      */
-    protected String eol = SecurityUtilities.getSystemProperty("line.separator", "\n");
+    protected String eol = _SecurityUtil.getSystemProperty("line.separator", "\n");
 
     /** @deprecated Will be remove without replacement in 2.4. */
     @Deprecated
@@ -491,7 +489,7 @@ public class ParseException extends IOException implements FMParserConstants {
                     + "Check if you have a valid #if-#elseif-#else or #list-#else structure.";
         } else if (kind == END_IF || kind == ELSE_IF) {
             return "Unexpected directive, "
-                    + StringUtil.jQuote(nextToken)
+                    + _StringUtil.jQuote(nextToken)
                     + ". Check if you have a valid #if-#elseif-#else structure.";
         }
         return null;

@@ -21,7 +21,7 @@ package org.apache.freemarker.core.templateresolver;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Matches the whole template source name (also known as template source path) with the given regular expression.
@@ -36,7 +36,7 @@ public class PathRegexMatcher extends TemplateSourceMatcher {
     
     /**
      * @param regex
-     *            Glob with the syntax defined by {@link StringUtil#globToRegularExpression(String)}. Must not
+     *            Glob with the syntax defined by {@link _StringUtil#globToRegularExpression(String)}. Must not
      *            start with {@code /}.
      */
     public PathRegexMatcher(String regex) {

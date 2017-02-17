@@ -32,6 +32,7 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
  * <p>An instance of this transform is initially visible as shared
  * variable called <tt>xml_escape</tt>.</p>
  */
+// [FM3] Remove (or move to o.a.f.test)
 public class XmlEscape implements TemplateTransformModel {
 
     private static final char[] LT = "&lt;".toCharArray();

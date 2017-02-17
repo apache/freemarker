@@ -22,6 +22,7 @@ package org.apache.freemarker.core.ast;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * The dot operator. Used to reference items inside a
@@ -47,7 +48,7 @@ final class Dot extends Expression {
 
     @Override
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + getNodeTypeSymbol() + _CoreStringUtils.toFTLIdentifierReferenceAfterDot(key);
+        return target.getCanonicalForm() + getNodeTypeSymbol() + _StringUtil.toFTLIdentifierReferenceAfterDot(key);
     }
     
     @Override

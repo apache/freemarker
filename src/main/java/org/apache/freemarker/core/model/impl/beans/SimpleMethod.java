@@ -32,7 +32,7 @@ import org.apache.freemarker.core.ast._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 /**
  * This class is used for as a base for non-overloaded method models and for constructors.
@@ -153,7 +153,7 @@ class SimpleMethod {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
                 new _DelayedOrdinal(Integer.valueOf(argIdx + 1)),
-                " argument's value to the target Java type, ", ClassUtil.getShortClassName(targetType),
+                " argument's value to the target Java type, ", _ClassUtil.getShortClassName(targetType),
                 ". The type of the actual value was: ", new _DelayedFTLTypeDescription(argVal));
         if (argVal instanceof TemplateMarkupOutputModel && (targetType.isAssignableFrom(String.class))) {
             desc.tip(MARKUP_OUTPUT_TO_STRING_TIP);
@@ -165,7 +165,7 @@ class SimpleMethod {
         return new _TemplateModelException(
                 _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: The value of the ",
                 new _DelayedOrdinal(Integer.valueOf(argIdx + 1)),
-                " argument was null, but the target Java parameter type (", ClassUtil.getShortClassName(targetType),
+                " argument was null, but the target Java parameter type (", _ClassUtil.getShortClassName(targetType),
                 ") is primitive and so can't store null.");
     }
     

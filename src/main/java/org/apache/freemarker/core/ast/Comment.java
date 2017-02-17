@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * <b>Internal API - subject to change:</b> A template element where the content is ignored, a Comment.
@@ -47,7 +47,7 @@ public final class Comment extends TemplateElement {
         if (canonical) {
             return "<#--" + text + "-->";
         } else {
-            return "comment " + StringUtil.jQuote(text.trim());
+            return "comment " + _StringUtil.jQuote(text.trim());
         }
     }
     

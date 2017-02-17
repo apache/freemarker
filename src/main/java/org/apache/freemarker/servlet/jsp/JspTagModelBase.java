@@ -41,7 +41,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 
 class JspTagModelBase {
@@ -96,7 +96,7 @@ class JspTagModelBase {
                 if (setterMethod == null) {
                     if (dynaSetter == null) {
                         throw new TemplateModelException("Unknown property "
-                                + StringUtil.jQuote(paramName.toString())
+                                + _StringUtil.jQuote(paramName.toString())
                                 + " on instance of " + tagClass.getName());
                     } else {
                         dynaSetter.invoke(tag, null, paramName, argArray[0]);

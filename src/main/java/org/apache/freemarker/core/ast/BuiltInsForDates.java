@@ -33,7 +33,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util.DateUtil;
+import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util.UnrecognizedTimeZoneException;
 
 /**
@@ -103,7 +103,7 @@ class BuiltInsForDates {
                 } else if (tzArgTM instanceof TemplateScalarModel) {
                     String tzName = EvalUtil.modelToString((TemplateScalarModel) tzArgTM, null, null);
                     try {
-                        tzArg = DateUtil.getTimeZone(tzName);
+                        tzArg = _DateUtil.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
                         throw new _TemplateModelException(
                                 "The time zone string specified for ?", key,
@@ -115,7 +115,7 @@ class BuiltInsForDates {
                             "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
                 }
                 
-                return new SimpleScalar(DateUtil.dateToISO8601String(
+                return new SimpleScalar(_DateUtil.dateToISO8601String(
                         date,
                         dateType != TemplateDateModel.TIME,
                         dateType != TemplateDateModel.DATE,
@@ -159,14 +159,14 @@ class BuiltInsForDates {
                 Date date, int dateType, Environment env)
         throws TemplateException {
             checkDateTypeNotUnknown(dateType);
-            return new SimpleScalar(DateUtil.dateToISO8601String(
+            return new SimpleScalar(_DateUtil.dateToISO8601String(
                     date,
                     dateType != TemplateDateModel.TIME,
                     dateType != TemplateDateModel.DATE,
                     shouldShowOffset(date, dateType, env),
                     accuracy,
                     useUTC
-                            ? DateUtil.UTC
+                            ? _DateUtil.UTC
                             : env.shouldUseSQLDTTZ(date.getClass())
                                     ? env.getSQLDateAndTimeTimeZone()
                                     : env.getTimeZone(),

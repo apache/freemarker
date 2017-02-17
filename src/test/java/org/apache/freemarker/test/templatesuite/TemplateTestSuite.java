@@ -37,7 +37,7 @@ import junit.framework.TestSuite;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.dom.NodeModel;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -97,7 +97,7 @@ public class TemplateTestSuite extends TestSuite {
         String filterStr = System.getProperty(TEST_FILTER_PROPERTY_NAME);
         testCaseNameFilter = filterStr != null ? Pattern.compile(filterStr) : null;
         if (testCaseNameFilter != null) {
-            System.out.println("Note: " + TEST_FILTER_PROPERTY_NAME + " is " + StringUtil.jQuote(testCaseNameFilter));
+            System.out.println("Note: " + TEST_FILTER_PROPERTY_NAME + " is " + _StringUtil.jQuote(testCaseNameFilter));
         }
         
         testSuiteIcis = new ArrayList<Version>();
@@ -177,7 +177,7 @@ public class TemplateTestSuite extends TestSuite {
      */
     private List<TemplateTestCase> createTestCasesFromElement(Element testCaseElem)
             throws Exception {
-        final String caseName = StringUtil.emptyToNull(testCaseElem.getAttribute("name"));
+        final String caseName = _StringUtil.emptyToNull(testCaseElem.getAttribute("name"));
         if (caseName == null) throw new Exception("Invalid XML: the \"name\" attribute is mandatory.");
         
         if (testCaseNameFilter != null
@@ -198,20 +198,20 @@ public class TemplateTestSuite extends TestSuite {
             }
             
             {
-                String s = StringUtil.emptyToNull(testCaseElem.getAttribute(ATTR_TEMPLATE));
+                String s = _StringUtil.emptyToNull(testCaseElem.getAttribute(ATTR_TEMPLATE));
                 templateName = s != null ? s : beforeEndTN + ".ftl";
             }
     
             {
-                String s = StringUtil.emptyToNull(testCaseElem.getAttribute(ATTR_EXPECTED));
+                String s = _StringUtil.emptyToNull(testCaseElem.getAttribute(ATTR_EXPECTED));
                 expectedFileName = s != null ? s : beforeEndTN + afterEndTN + ".txt";
             }
         }
         
         final boolean noOutput;
         {
-            String s = StringUtil.emptyToNull(testCaseElem.getAttribute(ATTR_NO_OUTPUT));
-            noOutput = s == null ? false : StringUtil.getYesNo(s);
+            String s = _StringUtil.emptyToNull(testCaseElem.getAttribute(ATTR_NO_OUTPUT));
+            noOutput = s == null ? false : _StringUtil.getYesNo(s);
         }
 
         final Map<String, String> testCaseSettings = getCaseFMSettings(testCaseElem);

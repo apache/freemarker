@@ -29,8 +29,8 @@ import org.apache.freemarker.core.ast.TemplateValueFormatException;
 import org.apache.freemarker.core.ast.UnformattableValueException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.util.NumberUtil;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Shows a number in base N number system. Can only format numbers that fit into an {@code int},
@@ -60,7 +60,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
                 } catch (TemplateValueFormatException e) {
                     throw new InvalidFormatParametersException(
                             "Couldn't get the fallback number format (specified after the \"|\"), "
-                            + StringUtil.jQuote(fallbackFormatStr) + ". Reason: " + e.getMessage(),
+                            + _StringUtil.jQuote(fallbackFormatStr) + ". Reason: " + e.getMessage(),
                             e);
                 }
             } else {
@@ -78,7 +78,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
             }
             throw new InvalidFormatParametersException(
                     "The format paramter must be an integer, but was (shown quoted): "
-                    + StringUtil.jQuote(params));
+                    + _StringUtil.jQuote(params));
         }
         if (base < 2) {
             throw new InvalidFormatParametersException("A base must be at least 2.");
@@ -101,7 +101,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
                 throws TemplateModelException, TemplateValueFormatException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
-                return Integer.toString(NumberUtil.toIntExact(n), base);
+                return Integer.toString(_NumberUtil.toIntExact(n), base);
             } catch (ArithmeticException e) {
                 if (fallbackFormat == null) {
                     throw new UnformattableValueException(

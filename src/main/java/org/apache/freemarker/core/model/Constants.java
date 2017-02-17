@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.util;
+package org.apache.freemarker.core.model;
 
 import java.io.Serializable;
 

@@ -25,7 +25,7 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Utilities for creating error messages (and other messages).
@@ -106,12 +106,12 @@ class MessageUtil {
             macroOrFuncName = null;
         } else { 
             templateDesc = templateSourceName != null
-                ? "template " + StringUtil.jQuoteNoXSS(templateSourceName)
+                ? "template " + _StringUtil.jQuoteNoXSS(templateSourceName)
                 : "nameless template";
         }
         return "in " + templateDesc
               + (macroOrFuncName != null
-                      ? " in " + (isFunction ? "function " : "macro ") + StringUtil.jQuote(macroOrFuncName)
+                      ? " in " + (isFunction ? "function " : "macro ") + _StringUtil.jQuote(macroOrFuncName)
                       : "")
               + " "
               + preposition + " " + formatPosition(line, column);

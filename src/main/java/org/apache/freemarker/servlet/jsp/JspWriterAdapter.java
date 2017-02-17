@@ -24,10 +24,10 @@ import java.io.Writer;
 
 import javax.servlet.jsp.JspWriter;
 
-import org.apache.freemarker.core.util.SecurityUtilities;
+import org.apache.freemarker.core.util._SecurityUtil;
 
 class JspWriterAdapter extends JspWriter {
-    static final char[] NEWLINE = SecurityUtilities.getSystemProperty("line.separator", "\n").toCharArray();
+    static final char[] NEWLINE = _SecurityUtil.getSystemProperty("line.separator", "\n").toCharArray();
     
     private final Writer out;
     

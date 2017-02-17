@@ -26,13 +26,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.ast.Macro;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.NullWriter;
+import org.apache.freemarker.core.util._NullWriter;
 import org.junit.Test;
 
 /**
@@ -72,7 +69,7 @@ public class MistakenlyPublicMacroAPIsTest {
     @Test
     public void testMacroCopyingFromFTLVariable() throws IOException, TemplateException {
         Template tMacros = new Template(null, "<#assign x = 0><#macro m1>${x}</#macro>", cfg);
-        Environment env = tMacros.createProcessingEnvironment(null, NullWriter.INSTANCE);
+        Environment env = tMacros.createProcessingEnvironment(null, _NullWriter.INSTANCE);
         env.process();
         TemplateModel m1 = env.getVariable("m1");
         assertThat(m1, instanceOf(Macro.class));

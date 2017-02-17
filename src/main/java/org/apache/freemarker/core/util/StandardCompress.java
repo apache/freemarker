@@ -69,6 +69,7 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
  * whitespace removed.&lt;/p&gt;
  * </pre>
  */
+// [FM3] Remove (or move to o.a.f.test), instead extend #compress
 public class StandardCompress implements TemplateTransformModel {
     private static final String BUFFER_SIZE_KEY = "buffer_size";
     private static final String SINGLE_LINE_KEY = "single_line";

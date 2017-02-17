@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 /**
  * Used when a custom JSP tag and an EL function uses the same name in a tag library, to create a single FTL value from
@@ -66,7 +66,7 @@ class CustomTagAndELFunctionCombiner {
                             (TemplateTransformModel) customTag, elFunction);
         } else {
             throw new BugException(
-                    "Unexpected custom JSP tag class: " + ClassUtil.getShortClassNameOfObject(customTag));
+                    "Unexpected custom JSP tag class: " + _ClassUtil.getShortClassNameOfObject(customTag));
         }
     }
 

@@ -17,14 +17,16 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.util;
+package org.apache.freemarker.core.model;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
- * <b>Experimental - subject to change:</b> Union of the interfaces that a typical feature rich {@link ObjectWrapper} is
- * expected to implement.
+ * <b>Experimental - subject to change:</b> Implemented by {@link ObjectWrapper}-s to help {@link TemplateModel}-s to
+ * implement the {@code someValue?api} operation.
  * 
  * <p>
  * <b>Experimental status warning:</b> This interface is subject to change on non-backward compatible ways, hence, it
@@ -32,6 +34,18 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
  * 
  * @since 2.3.22
  */
-public interface RichObjectWrapper extends ObjectWrapperAndUnwrapper, ObjectWrapperWithAPISupport {
+public interface ObjectWrapperWithAPISupport extends ObjectWrapper {
+
+    /**
+     * Wraps an object to a {@link TemplateModel} that exposes the object's "native" (usually, Java) API.
+     * 
+     * @param obj
+     *            The object for which the API model has to be returned. Shouldn't be {@code null}.
+     * 
+     * @return The {@link TemplateModel} through which the API of the object can be accessed. Can't be {@code null}.
+     * 
+     * @since 2.3.22
+     */
+    TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException;
 
 }

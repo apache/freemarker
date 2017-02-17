@@ -61,6 +61,7 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
  * &lt;/transform&gt;
  * </pre>
  */
+// [FM3] Remove (or move to o.a.f.test)
 public class NormalizeNewlines implements TemplateTransformModel {
 
     public Writer getWriter(final Writer out,

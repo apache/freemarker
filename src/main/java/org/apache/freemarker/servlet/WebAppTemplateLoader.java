@@ -35,9 +35,9 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
-import org.apache.freemarker.core.util.CollectionUtils;
-import org.apache.freemarker.core.util.NullArgumentException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.impl.URLTemplateLoader;
@@ -85,8 +85,8 @@ public class WebAppTemplateLoader implements TemplateLoader {
      *            the base path to template resources.
      */
     public WebAppTemplateLoader(ServletContext servletContext, String subdirPath) {
-        NullArgumentException.check("servletContext", servletContext);
-        NullArgumentException.check("subdirPath", subdirPath);
+        _NullArgumentException.check("servletContext", servletContext);
+        _NullArgumentException.check("subdirPath", subdirPath);
 
         subdirPath = subdirPath.replace('\\', '/');
         if (!subdirPath.endsWith("/")) {
@@ -125,16 +125,16 @@ public class WebAppTemplateLoader implements TemplateLoader {
     @Override
     public String toString() {
         return _TemplateLoaderUtils.getClassNameForToString(this)
-                + "(subdirPath=" + StringUtil.jQuote(subdirPath)
-                + ", servletContext={contextPath=" + StringUtil.jQuote(getContextPath())
-                + ", displayName=" + StringUtil.jQuote(servletContext.getServletContextName()) + "})";
+                + "(subdirPath=" + _StringUtil.jQuote(subdirPath)
+                + ", servletContext={contextPath=" + _StringUtil.jQuote(getContextPath())
+                + ", displayName=" + _StringUtil.jQuote(servletContext.getServletContextName()) + "})";
     }
 
     /** Gets the context path if we are on Servlet 2.5+, or else returns failure description string. */
     private String getContextPath() {
         try {
-            Method m = servletContext.getClass().getMethod("getContextPath", CollectionUtils.EMPTY_CLASS_ARRAY);
-            return (String) m.invoke(servletContext, CollectionUtils.EMPTY_OBJECT_ARRAY);
+            Method m = servletContext.getClass().getMethod("getContextPath", _CollectionUtil.EMPTY_CLASS_ARRAY);
+            return (String) m.invoke(servletContext, _CollectionUtil.EMPTY_OBJECT_ARRAY);
         } catch (Throwable e) {
             return "[can't query before Serlvet 2.5]";
         }
@@ -231,7 +231,7 @@ public class WebAppTemplateLoader implements TemplateLoader {
             url = servletContext.getResource(fullPath);
         } catch (MalformedURLException e) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath), e);
+                LOG.warn("Could not retrieve resource " + _StringUtil.jQuoteNoXSS(fullPath), e);
             }
             return null;
         }

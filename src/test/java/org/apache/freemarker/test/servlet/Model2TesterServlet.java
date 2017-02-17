@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +108,7 @@ public class Model2TesterServlet extends HttpServlet {
             final RequestDispatcher requestDispatcher = getServletContext().getNamedDispatcher(paramViewServlet);
             if (requestDispatcher == null) {
                 throw new ServletException("Can't find request dispatched for servlet name "
-                        + StringUtil.jQuote(paramViewServlet) + ".");
+                        + _StringUtil.jQuote(paramViewServlet) + ".");
             }
             
             final HttpServletRequestWrapper viewReq = new HttpServletRequestWrapper(req) {

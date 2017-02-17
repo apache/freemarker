@@ -27,12 +27,12 @@ import java.io.Writer;
  * 
  * @since 2.3.20
  */
-public final class NullWriter extends Writer {
+public final class _NullWriter extends Writer {
     
-    public static final NullWriter INSTANCE = new NullWriter();
+    public static final _NullWriter INSTANCE = new _NullWriter();
     
     /** Can't be instantiated; use {@link #INSTANCE}. */
-    private NullWriter() { }
+    private _NullWriter() { }
     
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {

@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
 public class _DelayedJQuote extends _DelayedConversionToString {
@@ -30,7 +30,7 @@ public class _DelayedJQuote extends _DelayedConversionToString {
 
     @Override
     protected String doConversion(Object obj) {
-        return StringUtil.jQuote(_ErrorDescriptionBuilder.toString(obj));
+        return _StringUtil.jQuote(_ErrorDescriptionBuilder.toString(obj));
     }
 
 }

@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.util.SecurityUtilities;
+import org.apache.freemarker.core.util._SecurityUtil;
 
 /**
  * This class provides debugging hooks for the core FreeMarker engine. It is
@@ -40,7 +40,7 @@ public abstract class DebuggerService {
         // off, this is a fast no-op service, otherwise it's the real-thing
         // RMI service.
         return 
-            SecurityUtilities.getSystemProperty("org.apache.freemarker.core.debug.password", null) == null
+            _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.password", null) == null
             ? (DebuggerService) new NoOpDebuggerService()
             : (DebuggerService) new RmiDebuggerService();
     }

@@ -81,3 +81,6 @@ the FreeMarer 3 changelog here:
 - Added early draft of TemplateResolver, renamed TemplateCache to DefaultTemplateResolver. TemplateResolver is not
   yet directly used in Configuration. This was only added in a hurry, so that it's visible why the
   o.a.f.core.templateresolver subpackage name makes sense.
+- Marked most static utility classes as internal, and renamed them to start with "_" (for example StringUtils was renamed to
+  _StringUtil, thus people won't accidentally use it when they wanted to autocomplete to Apache Commons StringUtil).
+- Deleted o.a.f..core.util.DOMNodeModel

@@ -27,7 +27,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 import junit.framework.TestCase;
 
@@ -220,13 +220,13 @@ public class TagSyntaxVariationsTest extends TestCase {
         } catch (ParseException e) {
             if (expected != null) {
                 fail("Couldn't create Template from "
-                        + StringUtil.jQuote(template) + ": " + e);
+                        + _StringUtil.jQuote(template) + ": " + e);
             } else {
                 return;
             }
         }
         if (expected == null) fail("Template parsing should have fail for "
-                + StringUtil.jQuote(template));
+                + _StringUtil.jQuote(template));
         
         StringWriter out = new StringWriter();
         t.process(new Object(), out);

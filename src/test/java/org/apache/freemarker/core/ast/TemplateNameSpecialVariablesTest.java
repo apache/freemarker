@@ -26,7 +26,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -168,8 +168,8 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
                 + "{main.ftl}\n"
                 + "In main: main.ftl\n";
         if (allMain) {
-            expected = StringUtil.replace(expected, "imp.ftl", "main.ftl");
-            expected = StringUtil.replace(expected, "inc.ftl", "main.ftl");
+            expected = _StringUtil.replace(expected, "imp.ftl", "main.ftl");
+            expected = _StringUtil.replace(expected, "inc.ftl", "main.ftl");
         }
         assertOutputForNamed("main.ftl", expected);
     }

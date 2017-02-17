@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Returns the first non-{@code null} result of the child factories, ignoring all further child factories. The child
@@ -51,7 +51,7 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
             throw new TemplateConfigurationFactoryException(
                     FirstMatchTemplateConfigurationFactory.class.getSimpleName()
                     + " has found no matching choice for source name "
-                    + StringUtil.jQuote(sourceName) + ". "
+                    + _StringUtil.jQuote(sourceName) + ". "
                     + (noMatchErrorDetails != null
                             ? "Error details: " + noMatchErrorDetails 
                             : "(Set the noMatchErrorDetails property of the factory bean to give a more specific error "

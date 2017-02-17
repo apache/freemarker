@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core.util;
 
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core.util.SecurityUtilities;
 
 /**
  * Used internally only, might changes without notice!
@@ -34,7 +33,7 @@ public final class _JavaVersions {
     private static final boolean IS_AT_LEAST_8;
     static {
         boolean result = false;
-        String vStr = SecurityUtilities.getSystemProperty("java.version", null);
+        String vStr = _SecurityUtil.getSystemProperty("java.version", null);
         if (vStr != null) {
             try {
                 Version v = new Version(vStr);
@@ -61,7 +60,7 @@ public final class _JavaVersions {
         _Java8 java8;
         if (IS_AT_LEAST_8) {
             try {
-                java8 = (_Java8) Class.forName("org.apache.freemarker.core.ast._Java8Impl")
+                java8 = (_Java8) Class.forName("org.apache.freemarker.core.util._Java8Impl")
                         .getField("INSTANCE").get(null);
             } catch (Exception e) {
                 try {

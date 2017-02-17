@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core.util;
 
 import java.util.Arrays;
 import java.util.Collection;

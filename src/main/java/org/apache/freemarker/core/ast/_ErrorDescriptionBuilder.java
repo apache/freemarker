@@ -27,8 +27,8 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.impl.beans._MethodUtil;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -262,19 +262,19 @@ public class _ErrorDescriptionBuilder {
         if (partObj == null) {
             return null;
         } else if (partObj instanceof Class) {
-            partStr = ClassUtil.getShortClassName((Class) partObj);
+            partStr = _ClassUtil.getShortClassName((Class) partObj);
         } else if (partObj instanceof Method || partObj instanceof Constructor) {
             partStr = _MethodUtil.toString((Member) partObj);
         } else {
-            partStr = suppressToStringException ? StringUtil.tryToString(partObj) : partObj.toString();
+            partStr = suppressToStringException ? _StringUtil.tryToString(partObj) : partObj.toString();
         }
         return partStr;
     }
 
     private String[] splitToLines(String s) {
-        s = StringUtil.replace(s, "\r\n", "\n");
-        s = StringUtil.replace(s, "\r", "\n");
-        String[] lines = StringUtil.split(s, '\n');
+        s = _StringUtil.replace(s, "\r\n", "\n");
+        s = _StringUtil.replace(s, "\r", "\n");
+        String[] lines = _StringUtil.split(s, '\n');
         return lines;
     }
     

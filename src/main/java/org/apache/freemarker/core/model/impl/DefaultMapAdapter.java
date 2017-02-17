@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
-import org.apache.freemarker.core.util.ObjectWrapperWithAPISupport;
+import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 
 /**
  * Adapts a {@link Map} to the corresponding {@link TemplateModel} interface(s), most importantly to

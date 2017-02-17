@@ -23,7 +23,7 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
-import org.apache.freemarker.core.util.CollectionUtils;
+import org.apache.freemarker.core.util._CollectionUtil;
 
 /**
  * Indicates that a {@link TemplateSequenceModel} or {@link TemplateCollectionModel} value was expected, but the value
@@ -55,7 +55,7 @@ public class NonSequenceOrCollectionException extends UnexpectedTypeException {
     NonSequenceOrCollectionException(
             Expression blamed, TemplateModel model, Environment env)
             throws InvalidReferenceException {
-        this(blamed, model, CollectionUtils.EMPTY_OBJECT_ARRAY, env);
+        this(blamed, model, _CollectionUtil.EMPTY_OBJECT_ARRAY, env);
     }
 
     NonSequenceOrCollectionException(

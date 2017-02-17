@@ -28,8 +28,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.ClassUtil;
-import org.apache.freemarker.core.util.NullArgumentException;
+import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -184,7 +184,7 @@ abstract class OverloadedMethodsSubset {
             // c1 primitive class to boxing class:
             final boolean c1WasPrim; 
             if (c1.isPrimitive()) {
-                c1 = ClassUtil.primitiveClassToBoxingClass(c1);
+                c1 = _ClassUtil.primitiveClassToBoxingClass(c1);
                 c1WasPrim = true;
             } else {
                 c1WasPrim = false;
@@ -193,7 +193,7 @@ abstract class OverloadedMethodsSubset {
             // c2 primitive class to boxing class:
             final boolean c2WasPrim; 
             if (c2.isPrimitive()) {
-                c2 = ClassUtil.primitiveClassToBoxingClass(c2);
+                c2 = _ClassUtil.primitiveClassToBoxingClass(c2);
                 c2WasPrim = true;
             } else {
                 c2WasPrim = false;
@@ -326,7 +326,7 @@ abstract class OverloadedMethodsSubset {
      *        Maybe {@link #ALL_ZEROS_ARRAY}. Maybe a 0-length array. Can't be {@code null}.
      */
     final protected void mergeInTypesFlags(int dstParamCount, int[] srcTypeFlagsByParamIdx) {
-        NullArgumentException.check("srcTypesFlagsByParamIdx", srcTypeFlagsByParamIdx);
+        _NullArgumentException.check("srcTypesFlagsByParamIdx", srcTypeFlagsByParamIdx);
         
         // Special case of 0 param count:
         if (dstParamCount == 0) {

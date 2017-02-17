@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.Expression.ReplacemenetState;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Representation of the compile-time #escape directive.
@@ -60,7 +61,7 @@ class EscapeBlock extends TemplateElement {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol())
-                .append(' ').append(_CoreStringUtils.toFTLTopLevelIdentifierReference(variable))
+                .append(' ').append(_StringUtil.toFTLTopLevelIdentifierReference(variable))
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>');

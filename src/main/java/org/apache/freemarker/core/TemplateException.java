@@ -35,7 +35,7 @@ import org.apache.freemarker.core.ast.TemplateElement;
 import org.apache.freemarker.core.ast.TemplateObject;
 import org.apache.freemarker.core.ast._CoreAPI;
 import org.apache.freemarker.core.ast._ErrorDescriptionBuilder;
-import org.apache.freemarker.core.util.CollectionUtils;
+import org.apache.freemarker.core.util._CollectionUtil;
 
 /**
  * Runtime exception in a template (as opposed to a parsing-time exception: {@link ParseException}).
@@ -401,8 +401,8 @@ public class TemplateException extends Exception {
                     if (causeCause == null) {
                         try {
                             // Reflection is used to prevent dependency on Servlet classes.
-                            Method m = getCause().getClass().getMethod("getRootCause", CollectionUtils.EMPTY_CLASS_ARRAY);
-                            Throwable rootCause = (Throwable) m.invoke(getCause(), CollectionUtils.EMPTY_OBJECT_ARRAY);
+                            Method m = getCause().getClass().getMethod("getRootCause", _CollectionUtil.EMPTY_CLASS_ARRAY);
+                            Throwable rootCause = (Throwable) m.invoke(getCause(), _CollectionUtil.EMPTY_OBJECT_ARRAY);
                             if (rootCause != null) {
                                 out.println("ServletException root cause: ");
                                 out.printStandardStackTrace(rootCause);

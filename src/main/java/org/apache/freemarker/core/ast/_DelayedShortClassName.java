@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import org.apache.freemarker.core.util.ClassUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 
 public class _DelayedShortClassName extends _DelayedConversionToString {
 
@@ -29,7 +29,7 @@ public class _DelayedShortClassName extends _DelayedConversionToString {
 
     @Override
     protected String doConversion(Object obj) {
-        return ClassUtil.getShortClassName((Class) obj, true);
+        return _ClassUtil.getShortClassName((Class) obj, true);
     }
 
 }

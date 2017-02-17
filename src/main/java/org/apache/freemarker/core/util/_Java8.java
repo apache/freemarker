@@ -16,34 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.freemarker.core.util;
 
-package org.apache.freemarker.core.ast;
+/**
+ * Used internally only, might changes without notice!
+ * Used for accessing functionality that's only present in Java 6 or later.
+ */
+public interface _Java8 {
 
-import java.util.Enumeration;
-import java.util.NoSuchElementException;
-
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class _ArrayEnumeration implements Enumeration {
-
-    private final Object[] array;
-    private final int size;
-    private int nextIndex;
-
-    public _ArrayEnumeration(Object[] array, int size) {
-        this.array = array;
-        this.size = size;
-        this.nextIndex = 0;
-    }
-
-    public boolean hasMoreElements() {
-        return nextIndex < size;
-    }
-
-    public Object nextElement() {
-        if (nextIndex >= size) {
-            throw new NoSuchElementException();
-        }
-        return array[nextIndex++];
-    }
-
+    /**
+     * This is just a placeholder. Remove this when we have some real functionality here.
+     */
+    void doSomething();
+    
 }

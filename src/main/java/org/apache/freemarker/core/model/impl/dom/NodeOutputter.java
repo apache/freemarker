@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
@@ -78,7 +78,7 @@ class NodeOutputter {
                 if (prefix == null) {
                     // Assign a generated prefix:
                     do {
-                        prefix = StringUtil.toLowerABC(nextGeneratedPrefixNumber++);
+                        prefix = _StringUtil.toLowerABC(nextGeneratedPrefixNumber++);
                     } while (env.getNamespaceForPrefix(prefix) != null);
                 }
             }
@@ -150,7 +150,7 @@ class NodeOutputter {
                     buf.append(' ');
                     outputQualifiedName(n, buf);
                     buf.append("=\"")
-                       .append(StringUtil.XMLEncQAttr(n.getNodeValue()))
+                       .append(_StringUtil.XMLEncQAttr(n.getNodeValue()))
                        .append('"');
                 }
                 break;
@@ -216,7 +216,7 @@ class NodeOutputter {
                         }*/
             case Node.CDATA_SECTION_NODE:
             case Node.TEXT_NODE: {
-                buf.append(StringUtil.XMLEncNQG(n.getNodeValue()));
+                buf.append(_StringUtil.XMLEncNQG(n.getNodeValue()));
                 break;
             }
         }

@@ -31,7 +31,7 @@ import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.ast.UnformattableValueException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Formats like {@code %G} in {@code printf}, with the specified number of significant digits. Also has special
@@ -55,7 +55,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
             } catch (NumberFormatException e) {
                 throw new InvalidFormatParametersException(
                         "The format parameter must be an integer, but was (shown quoted) "
-                        + StringUtil.jQuote(params) + ".");
+                        + _StringUtil.jQuote(params) + ".");
             }
         } else {
             // Use the default of %G

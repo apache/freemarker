@@ -33,7 +33,7 @@ import java.util.Random;
 
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.debug.Debugger;
-import org.apache.freemarker.core.util.SecurityUtilities;
+import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.slf4j.Logger;
 
@@ -54,9 +54,9 @@ class DebuggerServer {
     private ServerSocket serverSocket;
     
     public DebuggerServer(Serializable debuggerStub) {
-        port = SecurityUtilities.getSystemProperty("org.apache.freemarker.core.debug.port", Debugger.DEFAULT_PORT).intValue();
+        port = _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.port", Debugger.DEFAULT_PORT).intValue();
         try {
-            password = SecurityUtilities.getSystemProperty("org.apache.freemarker.core.debug.password", "").getBytes("UTF-8");
+            password = _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.password", "").getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new UndeclaredThrowableException(e);
         }

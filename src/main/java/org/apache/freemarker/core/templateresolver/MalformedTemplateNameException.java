@@ -25,7 +25,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Indicates that the template name given was malformed according the {@link TemplateNameFormat} in use. Note that for
@@ -44,7 +44,7 @@ public class MalformedTemplateNameException extends IOException {
     private final String malformednessDescription;
 
     public MalformedTemplateNameException(String templateName, String malformednessDescription) {
-        super("Malformed template name, " + StringUtil.jQuote(templateName) + ": " + malformednessDescription);
+        super("Malformed template name, " + _StringUtil.jQuote(templateName) + ": " + malformednessDescription);
         this.templateName = templateName;
         this.malformednessDescription = malformednessDescription;
     }

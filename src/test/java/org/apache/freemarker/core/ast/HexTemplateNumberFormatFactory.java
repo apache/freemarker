@@ -28,7 +28,7 @@ import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.ast.UnformattableValueException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.util.NumberUtil;
+import org.apache.freemarker.core.util._NumberUtil;
 
 public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
 
@@ -56,7 +56,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
                 throws UnformattableValueException, TemplateModelException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
-                return Integer.toHexString(NumberUtil.toIntExact(n));
+                return Integer.toHexString(_NumberUtil.toIntExact(n));
             } catch (ArithmeticException e) {
                 throw new UnformattableValueException(n + " doesn't fit into an int");
             }

@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * <b>Internal API - subject to change:</b> Represents an import via {@code #import}.
@@ -80,7 +81,7 @@ public final class LibraryLoad extends TemplateElement {
         buf.append(' ');
         buf.append(importedTemplateNameExp.getCanonicalForm());
         buf.append(" as ");
-        buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(targetNsVarName));
+        buf.append(_StringUtil.toFTLTopLevelTragetIdentifier(targetNsVarName));
         if (canonical) buf.append("/>");
         return buf.toString();
     }

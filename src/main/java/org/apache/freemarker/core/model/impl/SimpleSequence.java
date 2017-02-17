@@ -24,14 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.WrappingTemplateModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 
 /**
@@ -61,7 +54,7 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
  * 
  * <p>
  * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the sequence
- * from a {@link List} (via {@link DefaultListAdapter#adapt(List, org.apache.freemarker.core.util.RichObjectWrapper)} or
+ * from a {@link List} (via {@link DefaultListAdapter#adapt(List, RichObjectWrapper)} or
  * {@link SimpleSequence#SimpleSequence(Collection)}), which will be the faster depends on how many times will the
  * <em>same</em> {@link List} entry be read from the template(s) later, on average. If, on average, you read each entry
  * for more than 4 times, {@link SimpleSequence} will be most certainly faster, but if for 2 times or less (and

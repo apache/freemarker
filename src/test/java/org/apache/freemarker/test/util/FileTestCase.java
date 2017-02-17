@@ -31,7 +31,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import junit.framework.AssertionFailedError;
@@ -102,7 +102,7 @@ public abstract class FileTestCase extends TestCase {
     }
 
     private String normalizeNewLines(String s) {
-        return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
+        return _StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
 
     private void saveString(File actualFile, String actualContents) throws IOException {

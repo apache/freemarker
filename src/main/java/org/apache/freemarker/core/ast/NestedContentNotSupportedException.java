@@ -23,7 +23,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.Environment.NestedElementTemplateDirectiveBody;
 import org.apache.freemarker.core.ast.ThreadInterruptionSupportTemplatePostProcessor.ThreadInterruptionCheck;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * [2.4] Should become public somehow; this is more intelligent than a {@code null} check, for example, when the body
@@ -61,7 +61,7 @@ class NestedContentNotSupportedException extends TemplateException {
 
     private NestedContentNotSupportedException(String description, Exception cause, Environment env) {
         super( "Nested content (body) not supported."
-                + (description != null ? " " + StringUtil.jQuote(description) : ""),
+                + (description != null ? " " + _StringUtil.jQuote(description) : ""),
                 cause, env);
     }
     

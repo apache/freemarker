@@ -23,6 +23,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.ast.FMParserConstants;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * An instruction that makes a single assignment, like [#local x=1].
@@ -190,7 +191,7 @@ final class Assignment extends TemplateElement {
             buf.append(' ');
         }
         
-        buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(variableName));
+        buf.append(_StringUtil.toFTLTopLevelTragetIdentifier(variableName));
         
         if (valueExp != null) {
             buf.append(' ');

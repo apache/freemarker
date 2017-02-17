@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Represents a version number plus the further qualifiers and build info. This is
@@ -73,14 +73,14 @@ public final class Version implements Serializable {
                 } else {
                     if (i == 0) {
                         throw new IllegalArgumentException(
-                                "The version number string " + StringUtil.jQuote(stringValue)
+                                "The version number string " + _StringUtil.jQuote(stringValue)
                                 + " doesn't start with a number.");
                     }
                     if (c == '.') {
                         char nextC = i + 1 >= stringValue.length() ? 0 : stringValue.charAt(i + 1);
                         if (nextC == '.') {
                             throw new IllegalArgumentException(
-                                    "The version number string " + StringUtil.jQuote(stringValue)
+                                    "The version number string " + _StringUtil.jQuote(stringValue)
                                     + " contains multiple dots after a number.");
                         }
                         if (partIdx == 2 || !isNumber(nextC)) {
@@ -102,7 +102,7 @@ public final class Version implements Serializable {
                     extraInfoTmp = extraInfoTmp.substring(1);
                     if (extraInfoTmp.length() == 0) {
                         throw new IllegalArgumentException(
-                            "The version number string " + StringUtil.jQuote(stringValue)
+                            "The version number string " + _StringUtil.jQuote(stringValue)
                             + " has an extra info section opened with \"" + firstChar + "\", but it's empty.");
                     }
                 }

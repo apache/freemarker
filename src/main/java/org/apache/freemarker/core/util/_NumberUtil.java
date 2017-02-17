@@ -22,19 +22,17 @@ package org.apache.freemarker.core.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-/**
- * Number- and math-related utilities.
- * 
- * @since 2.3.20
- */
-public class NumberUtil {
+/** Don't use this; used internally by FreeMarker, might changes without notice. */
+public class _NumberUtil {
 
     private static final BigDecimal BIG_DECIMAL_INT_MIN = BigDecimal.valueOf(Integer.MIN_VALUE);
     private static final BigDecimal BIG_DECIMAL_INT_MAX = BigDecimal.valueOf(Integer.MAX_VALUE);
     private static final BigInteger BIG_INTEGER_INT_MIN = BIG_DECIMAL_INT_MIN.toBigInteger();
     private static final BigInteger BIG_INTEGER_INT_MAX = BIG_DECIMAL_INT_MAX.toBigInteger();
+    private static final BigInteger BIG_INTEGER_LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
+    private static final BigInteger BIG_INTEGER_LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
-    private NumberUtil() { }
+    private _NumberUtil() { }
     
     public static boolean isInfinite(Number num) {
         if (num instanceof Double) {
@@ -164,7 +162,44 @@ public class NumberUtil {
 
     private static ArithmeticException newLossyConverionException(Number fromValue, Class/*<Number>*/ toType) {
         return new ArithmeticException(
-                "Can't convert " + fromValue + " to type " + ClassUtil.getShortClassName(toType) + " without loss.");
+                "Can't convert " + fromValue + " to type " + _ClassUtil.getShortClassName(toType) + " without loss.");
     }
-    
+
+    /**
+     * This is needed to reverse the extreme conversions in arithmetic
+     * operations so that numbers can be meaningfully used with models that
+     * don't know what to do with a BigDecimal. Of course, this will make
+     * impossible for these models (i.e. Jython) to receive a BigDecimal even if
+     * it was originally placed as such in the data model. However, since
+     * arithmetic operations aggressively erase the information regarding the
+     * original number type, we have no other choice to ensure expected operation
+     * in majority of cases.
+     */
+    public static Number optimizeNumberRepresentation(Number number) {
+        if (number instanceof BigDecimal) {
+            BigDecimal bd = (BigDecimal) number;
+            if (bd.scale() == 0) {
+                // BigDecimal -> BigInteger
+                number = bd.unscaledValue();
+            } else {
+                double d = bd.doubleValue();
+                if (d != Double.POSITIVE_INFINITY && d != Double.NEGATIVE_INFINITY) {
+                    // BigDecimal -> Double
+                    return Double.valueOf(d);
+                }
+            }
+        }
+        if (number instanceof BigInteger) {
+            BigInteger bi = (BigInteger) number;
+            if (bi.compareTo(BIG_INTEGER_INT_MAX) <= 0 && bi.compareTo(BIG_INTEGER_INT_MIN) >= 0) {
+                // BigInteger -> Integer
+                return Integer.valueOf(bi.intValue());
+            }
+            if (bi.compareTo(BIG_INTEGER_LONG_MAX) <= 0 && bi.compareTo(BIG_INTEGER_LONG_MIN) >= 0) {
+                // BigInteger -> Long
+                return Long.valueOf(bi.longValue());
+            }
+        }
+        return number;
+    }
 }

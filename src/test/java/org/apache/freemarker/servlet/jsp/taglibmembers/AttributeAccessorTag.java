@@ -22,7 +22,7 @@ package org.apache.freemarker.servlet.jsp.taglibmembers;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 public abstract class AttributeAccessorTag extends SimpleTagSupport {
 
@@ -62,7 +62,7 @@ public abstract class AttributeAccessorTag extends SimpleTagSupport {
         if (scope.equals("application")) {
             return PageContext.APPLICATION_SCOPE;
         }
-        throw new IllegalArgumentException("Invalid scope name: " + StringUtil.jQuote(scope));
+        throw new IllegalArgumentException("Invalid scope name: " + _StringUtil.jQuote(scope));
     }
     
 }

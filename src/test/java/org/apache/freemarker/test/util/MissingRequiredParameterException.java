@@ -20,7 +20,7 @@
 package org.apache.freemarker.test.util;
 
 import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.util.StringUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Indicates that a named directive/function parameter is missing.  
@@ -42,9 +42,9 @@ class MissingRequiredParameterException extends ParameterException {
 
     public MissingRequiredParameterException(String parameterName, String description, Exception cause, Environment env) {
         super(parameterName,
-                "Required parameter " + StringUtil.jQuote(parameterName) + " is missing, "
+                "Required parameter " + _StringUtil.jQuote(parameterName) + " is missing, "
                 + "or the parameter value was null."
-                + (description != null ? " " + StringUtil.jQuote(description) : ""),
+                + (description != null ? " " + _StringUtil.jQuote(description) : ""),
                 cause, env);
     }
 

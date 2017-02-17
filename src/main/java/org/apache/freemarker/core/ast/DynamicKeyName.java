@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.util.Constants;
+import org.apache.freemarker.core.model.Constants;
 
 /**
  * {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number or a range,
