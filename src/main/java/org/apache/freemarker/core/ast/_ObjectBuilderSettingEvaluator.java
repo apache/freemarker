@@ -54,6 +54,7 @@ import org.apache.freemarker.core.templateresolver.NotMatcher;
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
+import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.WriteProtectable;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._StringUtil;
@@ -539,7 +540,7 @@ public class _ObjectBuilderSettingEvaluator {
         final String sInside = src.substring(startPos + (raw ? 2 : 1), pos);
         try {
             pos++; // skip closing quotation mark
-            return raw ? sInside : _StringUtil.FTLStringLiteralDec(sInside);
+            return raw ? sInside : FTLUtil.unescapeStringLiteralPart(sInside);
         } catch (ParseException e) {
             throw new _ObjectBuilderSettingEvaluationException("Malformed string literal: " + sInside, e);
         }

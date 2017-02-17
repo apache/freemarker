@@ -20,7 +20,7 @@
 package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util.FTLUtil;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
 public class _DelayedFTLTypeDescription extends _DelayedConversionToString {
@@ -31,7 +31,7 @@ public class _DelayedFTLTypeDescription extends _DelayedConversionToString {
 
     @Override
     protected String doConversion(Object obj) {
-        return _ClassUtil.getFTLTypeDescription((TemplateModel) obj);
+        return FTLUtil.getFTLTypeDescription((TemplateModel) obj);
     }
 
 }

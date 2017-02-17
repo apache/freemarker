@@ -114,31 +114,11 @@ public class StringUtilTest {
         assertEsc("->", "-\\>", "-\\u003E");
     }
 
-    @Test
-    public void testFTLEscaping() {
-        assertFTLEsc("", "", "", "", "\"\"");
-        assertFTLEsc("\'", "\\'", "'", "\\'", "\"'\"");
-        assertFTLEsc("\"", "\\\"", "\\\"", "\"", "'\"'");
-        assertFTLEsc("\"", "\\\"", "\\\"", "\"", "'\"'");
-        assertFTLEsc("foo", "foo", "foo", "foo", "\"foo\"");
-        assertFTLEsc("foo's", "foo\\'s", "foo's", "foo\\'s", "\"foo's\"");
-        assertFTLEsc("foo \"", "foo \\\"", "foo \\\"", "foo \"", "'foo \"'");
-        assertFTLEsc("foo's \"", "foo\\'s \\\"", "foo's \\\"", "foo\\'s \"", "\"foo's \\\"\"");
-        assertFTLEsc("foo\nb\u0000c", "foo\\nb\\x0000c", "foo\\nb\\x0000c", "foo\\nb\\x0000c", "\"foo\\nb\\x0000c\"");
-    }
-    
     private void assertEsc(String s, String javaScript, String json) {
         assertEquals(javaScript, _StringUtil.jsStringEnc(s, false));
         assertEquals(json, _StringUtil.jsStringEnc(s, true));
     }
 
-    private void assertFTLEsc(String s, String partAny, String partQuot, String partApos, String quoted) {
-        assertEquals(partAny, _StringUtil.FTLStringLiteralEnc(s));
-        assertEquals(partQuot, _StringUtil.FTLStringLiteralEnc(s, '\"'));
-        assertEquals(partApos, _StringUtil.FTLStringLiteralEnc(s, '\''));
-        assertEquals(quoted, _StringUtil.ftlQuote(s));
-    }
-    
     @Test
     public void testTrim() {
         assertSame(_CollectionUtil.EMPTY_CHAR_ARRAY, _StringUtil.trim(_CollectionUtil.EMPTY_CHAR_ARRAY));
@@ -190,24 +170,7 @@ public class StringUtilTest {
         assertEquals("\"\\u003C\\nb\\rc\\td\\u0001>\"",
                 _StringUtil.jQuoteNoXSS((Object) "<\nb\rc\td\u0001>"));
     }
-    
-    @Test
-    public void testFTLStringLiteralEnc() {
-        assertEquals("", _StringUtil.FTLStringLiteralEnc(""));
-        assertEquals("abc", _StringUtil.FTLStringLiteralEnc("abc"));
-        assertEquals("{", _StringUtil.FTLStringLiteralEnc("{"));
-        assertEquals("a{b}c", _StringUtil.FTLStringLiteralEnc("a{b}c"));
-        assertEquals("a#b", _StringUtil.FTLStringLiteralEnc("a#b"));
-        assertEquals("a$b", _StringUtil.FTLStringLiteralEnc("a$b"));
-        assertEquals("a#\\{b}c", _StringUtil.FTLStringLiteralEnc("a#{b}c"));
-        assertEquals("a$\\{b}c", _StringUtil.FTLStringLiteralEnc("a${b}c"));
-        assertEquals("a'c\\\"d", _StringUtil.FTLStringLiteralEnc("a'c\"d", '"'));
-        assertEquals("a\\'c\"d", _StringUtil.FTLStringLiteralEnc("a'c\"d", '\''));
-        assertEquals("a\\'c\"d", _StringUtil.FTLStringLiteralEnc("a'c\"d", '\''));
-        assertEquals("\\n\\r\\t\\f\\x0002\\\\", _StringUtil.FTLStringLiteralEnc("\n\r\t\f\u0002\\"));
-        assertEquals("\\l\\g\\a", _StringUtil.FTLStringLiteralEnc("<>&"));
-    }
-    
+
     @Test
     public void testGlobToRegularExpression() {
         assertGlobMatches("a/b/c.ftl", "a/b/c.ftl");

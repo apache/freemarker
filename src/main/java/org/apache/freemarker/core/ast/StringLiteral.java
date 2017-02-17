@@ -24,13 +24,10 @@ import java.util.List;
 
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.FMParser;
-import org.apache.freemarker.core.ast.FMParserTokenManager;
-import org.apache.freemarker.core.ast.SimpleCharStream;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util.FTLUtil;
 
 final class StringLiteral extends Expression implements TemplateScalarModel {
     
@@ -149,7 +146,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     @Override
     public String getCanonicalForm() {
         if (dynamicValue == null) {
-            return _StringUtil.ftlQuote(value);
+            return FTLUtil.toStringLiteral(value);
         } else {
             StringBuilder sb = new StringBuilder();
             sb.append('"');
@@ -157,7 +154,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 if (child instanceof Interpolation) {
                     sb.append(((Interpolation) child).getCanonicalFormInStringLiteral());
                 } else {
-                    sb.append(_StringUtil.FTLStringLiteralEnc((String) child, '"'));
+                    sb.append(FTLUtil.escapeStringLiteralPart((String) child, '"'));
                 }
             }
             sb.append('"');

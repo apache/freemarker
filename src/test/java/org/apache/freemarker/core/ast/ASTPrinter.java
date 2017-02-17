@@ -41,6 +41,7 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._StringUtil;
 
@@ -331,7 +332,7 @@ public class ASTPrinter {
                     out.write(INDENTATION);
                     out.write(ind);
                     out.write("= const ");
-                    out.write(_ClassUtil.getFTLTypeDescription(tm));
+                    out.write(FTLUtil.getFTLTypeDescription(tm));
                     out.write(' ');
                     out.write(tm.toString());
                     out.write('\n');

@@ -32,14 +32,11 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.model.impl.dom._ExtDomApi;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
 public class _StringUtil {
-    
-    private static final char[] ESCAPES = createEscapes();
-    
+
     private static final char[] LT = new char[] { '&', 'l', 't', ';' };
     private static final char[] GT = new char[] { '&', 'g', 't', ';' };
     private static final char[] AMP = new char[] { '&', 'a', 'm', 'p', ';' };
@@ -396,236 +393,6 @@ public class _StringUtil {
                 || c >= '\'' && c <= '*'
                 || keepSlash && c == '/';
     }
-    
-    private static char[] createEscapes() {
-        char[] escapes = new char['\\' + 1];
-        for (int i = 0; i < 32; ++i) {
-            escapes[i] = 1;
-        }
-        escapes['\\'] = '\\';
-        escapes['\''] = '\'';
-        escapes['"'] = '"';
-        escapes['<'] = 'l';
-        escapes['>'] = 'g';
-        escapes['&'] = 'a';
-        escapes['\b'] = 'b';
-        escapes['\t'] = 't';
-        escapes['\n'] = 'n';
-        escapes['\f'] = 'f';
-        escapes['\r'] = 'r';
-        return escapes;
-    }
-
-    /**
-     * Escapes a string according the FTL string literal escaping rules, assuming the literal is quoted with
-     * {@code quotation}; it doesn't add the quotation marks itself.
-     * 
-     * @param quotation
-     *            Either {@code '"'} or {@code '\''}. It's assumed that the string literal whose part we calculate is
-     *            enclosed within this kind of quotation mark. Thus, the other kind of quotation character will not be
-     *            escaped in the result.
-     *
-     * @since 2.3.22
-     */
-    public static String FTLStringLiteralEnc(String s, char quotation) {
-        return FTLStringLiteralEnc(s, quotation, false);
-    }
-    
-    /**
-     * Escapes a string according the FTL string literal escaping rules; it doesn't add the quotation marks. As this
-     * method doesn't know if the string literal is quoted with reuglar quotation marks or apostrophe quute, it will
-     * escape both.
-     * 
-     * @see #FTLStringLiteralEnc(String, char)
-     */
-    public static String FTLStringLiteralEnc(String s) {
-        return FTLStringLiteralEnc(s, (char) 0, false);
-    }
-
-    private static String FTLStringLiteralEnc(String s, char quotation, boolean addQuotation) {
-        final int ln = s.length();
-        
-        final char otherQuotation;
-        if (quotation == 0) {
-            otherQuotation = 0;
-        } else if (quotation == '"') {
-            otherQuotation = '\'';
-        } else if (quotation == '\'') {
-            otherQuotation = '"';
-        } else {
-            throw new IllegalArgumentException("Unsupported quotation character: " + quotation);
-        }
-        
-        final int escLn = ESCAPES.length;
-        StringBuilder buf = null;
-        for (int i = 0; i < ln; i++) {
-            char c = s.charAt(i);
-            char escape =
-                    c < escLn ? ESCAPES[c] :
-                    c == '{' && i > 0 && isInterpolationStart(s.charAt(i - 1)) ? '{' :
-                    0;
-            if (escape == 0 || escape == otherQuotation) {
-                if (buf != null) {
-                    buf.append(c);
-                }
-            } else {
-                if (buf == null) {
-                    buf = new StringBuilder(s.length() + 4 + (addQuotation ? 2 : 0));
-                    if (addQuotation) {
-                        buf.append(quotation);
-                    }
-                    buf.append(s.substring(0, i));
-                }
-                if (escape == 1) {
-                    // hex encoding for characters below 0x20
-                    // that have no other escape representation
-                    buf.append("\\x00");
-                    int c2 = (c >> 4) & 0x0F;
-                    c = (char) (c & 0x0F);
-                    buf.append((char) (c2 < 10 ? c2 + '0' : c2 - 10 + 'A'));
-                    buf.append((char) (c < 10 ? c + '0' : c - 10 + 'A'));
-                } else {
-                    buf.append('\\');
-                    buf.append(escape);
-                }
-            }
-        }
-        
-        if (buf == null) {
-            return addQuotation ? quotation + s + quotation : s;
-        } else {
-            if (addQuotation) {
-                buf.append(quotation);
-            }
-            return buf.toString();
-        }
-    }
-
-    private static boolean isInterpolationStart(char c) {
-        return c == '$' || c == '#';
-    }
-
-    /**
-     * FTL string literal decoding.
-     *
-     * \\, \", \', \n, \t, \r, \b and \f will be replaced according to
-     * Java rules. In additional, it knows \g, \l, \a and \{ which are
-     * replaced with &lt;, &gt;, &amp; and { respectively.
-     * \x works as hexadecimal character code escape. The character
-     * codes are interpreted according to UCS basic plane (Unicode).
-     * "f\x006Fo", "f\x06Fo" and "f\x6Fo" will be "foo".
-     * "f\x006F123" will be "foo123" as the maximum number of digits is 4.
-     *
-     * All other \X (where X is any character not mentioned above or End-of-string)
-     * will cause a ParseException.
-     *
-     * @param s String literal <em>without</em> the surrounding quotation marks
-     * @return String with all escape sequences resolved
-     * @throws ParseException if there string contains illegal escapes
-     */
-    public static String FTLStringLiteralDec(String s) throws ParseException {
-
-        int idx = s.indexOf('\\');
-        if (idx == -1) {
-            return s;
-        }
-
-        int lidx = s.length() - 1;
-        int bidx = 0;
-        StringBuilder buf = new StringBuilder(lidx);
-        do {
-            buf.append(s.substring(bidx, idx));
-            if (idx >= lidx) {
-                throw new ParseException("The last character of string literal is backslash", 0,0);
-            }
-            char c = s.charAt(idx + 1);
-            switch (c) {
-                case '"':
-                    buf.append('"');
-                    bidx = idx + 2;
-                    break;
-                case '\'':
-                    buf.append('\'');
-                    bidx = idx + 2;
-                    break;
-                case '\\':
-                    buf.append('\\');
-                    bidx = idx + 2;
-                    break;
-                case 'n':
-                    buf.append('\n');
-                    bidx = idx + 2;
-                    break;
-                case 'r':
-                    buf.append('\r');
-                    bidx = idx + 2;
-                    break;
-                case 't':
-                    buf.append('\t');
-                    bidx = idx + 2;
-                    break;
-                case 'f':
-                    buf.append('\f');
-                    bidx = idx + 2;
-                    break;
-                case 'b':
-                    buf.append('\b');
-                    bidx = idx + 2;
-                    break;
-                case 'g':
-                    buf.append('>');
-                    bidx = idx + 2;
-                    break;
-                case 'l':
-                    buf.append('<');
-                    bidx = idx + 2;
-                    break;
-                case 'a':
-                    buf.append('&');
-                    bidx = idx + 2;
-                    break;
-                case '{':
-                    buf.append('{');
-                    bidx = idx + 2;
-                    break;
-                case 'x': {
-                    idx += 2;
-                    int x = idx;
-                    int y = 0;
-                    int z = lidx > idx + 3 ? idx + 3 : lidx;
-                    while (idx <= z) {
-                        char b = s.charAt(idx);
-                        if (b >= '0' && b <= '9') {
-                            y <<= 4;
-                            y += b - '0';
-                        } else if (b >= 'a' && b <= 'f') {
-                            y <<= 4;
-                            y += b - 'a' + 10;
-                        } else if (b >= 'A' && b <= 'F') {
-                            y <<= 4;
-                            y += b - 'A' + 10;
-                        } else {
-                            break;
-                        }
-                        idx++;
-                    }
-                    if (x < idx) {
-                        buf.append((char) y);
-                    } else {
-                        throw new ParseException("Invalid \\x escape in a string literal",0,0);
-                    }
-                    bidx = idx;
-                    break;
-                }
-                default:
-                    throw new ParseException("Invalid escape sequence (\\" + c + ") in a string literal",0,0);
-            }
-            idx = s.indexOf('\\', bidx);
-        } while (idx != -1);
-        buf.append(s.substring(bidx));
-
-        return buf.toString();
-    }
 
     public static Locale deduceLocale(String input) {
        if (input == null) return null;
@@ -749,53 +516,53 @@ public class _StringUtil {
     
     /**
      * Replaces all occurrences of a sub-string in a string.
-     * @param text The string where it will replace <code>oldsub</code> with
-     *     <code>newsub</code>.
+     * @param text The string where it will replace <code>oldSub</code> with
+     *     <code>newSub</code>.
      * @return String The string after the replacements.
      */
     public static String replace(String text, 
-                                  String oldsub, 
-                                  String newsub, 
+                                  String oldSub,
+                                  String newSub,
                                   boolean caseInsensitive,
                                   boolean firstOnly) {
         StringBuilder buf;
         int tln;
-        int oln = oldsub.length();
+        int oln = oldSub.length();
         
         if (oln == 0) {
-            int nln = newsub.length();
+            int nln = newSub.length();
             if (nln == 0) {
                 return text;
             } else {
                 if (firstOnly) {
-                    return newsub + text;
+                    return newSub + text;
                 } else {
                     tln = text.length();
                     buf = new StringBuilder(tln + (tln + 1) * nln);
-                    buf.append(newsub);
+                    buf.append(newSub);
                     for (int i = 0; i < tln; i++) {
                         buf.append(text.charAt(i));
-                        buf.append(newsub);
+                        buf.append(newSub);
                     }
                     return buf.toString();
                 }
             }
         } else {
-            oldsub = caseInsensitive ? oldsub.toLowerCase() : oldsub;
+            oldSub = caseInsensitive ? oldSub.toLowerCase() : oldSub;
             String input = caseInsensitive ? text.toLowerCase() : text;
-            int e = input.indexOf(oldsub);
+            int e = input.indexOf(oldSub);
             if (e == -1) {
                 return text;
             }
             int b = 0;
             tln = text.length();
             buf = new StringBuilder(
-                    tln + Math.max(newsub.length() - oln, 0) * 3);
+                    tln + Math.max(newSub.length() - oln, 0) * 3);
             do {
                 buf.append(text.substring(b, e));
-                buf.append(newsub);
+                buf.append(newSub);
                 b = e + oln;
-                e = input.indexOf(oldsub, b);
+                e = input.indexOf(oldSub, b);
             } while (e != -1 && !firstOnly);
             buf.append(text.substring(b));
             return buf.toString();
@@ -926,308 +693,7 @@ public class _StringUtil {
         b.append('"');
         return b.toString();
     }
-    
-    /**
-     * Creates a <em>quoted</em> FTL string literal from a string, using escaping where necessary. The result either
-     * uses regular quotation marks (UCS 0x22) or apostrophe-quotes (UCS 0x27), depending on the string content.
-     * (Currently, apostrophe-quotes will be chosen exactly when the string contains regular quotation character and
-     * doesn't contain apostrophe-quote character.)
-     *
-     * @param s
-     *            The value that should be converted to an FTL string literal whose evaluated value equals to {@code s}
-     *
-     * @since 2.3.22
-     */
-    public static String ftlQuote(String s) {
-        char quotation;
-        if (s.indexOf('"') != -1 && s.indexOf('\'') == -1) {
-            quotation = '\'';
-        } else {
-            quotation = '\"';
-        }
-        return FTLStringLiteralEnc(s, quotation, true);
-    }
-    
-    /**
-     * Tells if a character can occur on the beginning of an FTL identifier expression (without escaping). 
-     * 
-     * @since 2.3.22
-     */
-    public static boolean isFTLIdentifierStart(final char c) {
-        // This code was generated on JDK 1.8.0_20 Win64 with src/main/misc/identifierChars/IdentifierCharGenerator.java
-        if (c < 0xAA) { // This branch was edited for speed.
-            if (c >= 'a' && c <= 'z' || c >= '@' && c <= 'Z') {
-                return true;
-            } else {
-                return c == '$' || c == '_'; 
-            }
-        } else { // c >= 0xAA
-            if (c < 0xA7F8) {
-                if (c < 0x2D6F) {
-                    if (c < 0x2128) {
-                        if (c < 0x2090) {
-                            if (c < 0xD8) {
-                                if (c < 0xBA) {
-                                    return c == 0xAA || c == 0xB5;
-                                } else { // c >= 0xBA
-                                    return c == 0xBA || c >= 0xC0 && c <= 0xD6;
-                                }
-                            } else { // c >= 0xD8
-                                if (c < 0x2071) {
-                                    return c >= 0xD8 && c <= 0xF6 || c >= 0xF8 && c <= 0x1FFF;
-                                } else { // c >= 0x2071
-                                    return c == 0x2071 || c == 0x207F;
-                                }
-                            }
-                        } else { // c >= 0x2090
-                            if (c < 0x2115) {
-                                if (c < 0x2107) {
-                                    return c >= 0x2090 && c <= 0x209C || c == 0x2102;
-                                } else { // c >= 0x2107
-                                    return c == 0x2107 || c >= 0x210A && c <= 0x2113;
-                                }
-                            } else { // c >= 0x2115
-                                if (c < 0x2124) {
-                                    return c == 0x2115 || c >= 0x2119 && c <= 0x211D;
-                                } else { // c >= 0x2124
-                                    return c == 0x2124 || c == 0x2126;
-                                }
-                            }
-                        }
-                    } else { // c >= 0x2128
-                        if (c < 0x2C30) {
-                            if (c < 0x2145) {
-                                if (c < 0x212F) {
-                                    return c == 0x2128 || c >= 0x212A && c <= 0x212D;
-                                } else { // c >= 0x212F
-                                    return c >= 0x212F && c <= 0x2139 || c >= 0x213C && c <= 0x213F;
-                                }
-                            } else { // c >= 0x2145
-                                if (c < 0x2183) {
-                                    return c >= 0x2145 && c <= 0x2149 || c == 0x214E;
-                                } else { // c >= 0x2183
-                                    return c >= 0x2183 && c <= 0x2184 || c >= 0x2C00 && c <= 0x2C2E;
-                                }
-                            }
-                        } else { // c >= 0x2C30
-                            if (c < 0x2D00) {
-                                if (c < 0x2CEB) {
-                                    return c >= 0x2C30 && c <= 0x2C5E || c >= 0x2C60 && c <= 0x2CE4;
-                                } else { // c >= 0x2CEB
-                                    return c >= 0x2CEB && c <= 0x2CEE || c >= 0x2CF2 && c <= 0x2CF3;
-                                }
-                            } else { // c >= 0x2D00
-                                if (c < 0x2D2D) {
-                                    return c >= 0x2D00 && c <= 0x2D25 || c == 0x2D27;
-                                } else { // c >= 0x2D2D
-                                    return c == 0x2D2D || c >= 0x2D30 && c <= 0x2D67;
-                                }
-                            }
-                        }
-                    }
-                } else { // c >= 0x2D6F
-                    if (c < 0x31F0) {
-                        if (c < 0x2DD0) {
-                            if (c < 0x2DB0) {
-                                if (c < 0x2DA0) {
-                                    return c == 0x2D6F || c >= 0x2D80 && c <= 0x2D96;
-                                } else { // c >= 0x2DA0
-                                    return c >= 0x2DA0 && c <= 0x2DA6 || c >= 0x2DA8 && c <= 0x2DAE;
-                                }
-                            } else { // c >= 0x2DB0
-                                if (c < 0x2DC0) {
-                                    return c >= 0x2DB0 && c <= 0x2DB6 || c >= 0x2DB8 && c <= 0x2DBE;
-                                } else { // c >= 0x2DC0
-                                    return c >= 0x2DC0 && c <= 0x2DC6 || c >= 0x2DC8 && c <= 0x2DCE;
-                                }
-                            }
-                        } else { // c >= 0x2DD0
-                            if (c < 0x3031) {
-                                if (c < 0x2E2F) {
-                                    return c >= 0x2DD0 && c <= 0x2DD6 || c >= 0x2DD8 && c <= 0x2DDE;
-                                } else { // c >= 0x2E2F
-                                    return c == 0x2E2F || c >= 0x3005 && c <= 0x3006;
-                                }
-                            } else { // c >= 0x3031
-                                if (c < 0x3040) {
-                                    return c >= 0x3031 && c <= 0x3035 || c >= 0x303B && c <= 0x303C;
-                                } else { // c >= 0x3040
-                                    return c >= 0x3040 && c <= 0x318F || c >= 0x31A0 && c <= 0x31BA;
-                                }
-                            }
-                        }
-                    } else { // c >= 0x31F0
-                        if (c < 0xA67F) {
-                            if (c < 0xA4D0) {
-                                if (c < 0x3400) {
-                                    return c >= 0x31F0 && c <= 0x31FF || c >= 0x3300 && c <= 0x337F;
-                                } else { // c >= 0x3400
-                                    return c >= 0x3400 && c <= 0x4DB5 || c >= 0x4E00 && c <= 0xA48C;
-                                }
-                            } else { // c >= 0xA4D0
-                                if (c < 0xA610) {
-                                    return c >= 0xA4D0 && c <= 0xA4FD || c >= 0xA500 && c <= 0xA60C;
-                                } else { // c >= 0xA610
-                                    return c >= 0xA610 && c <= 0xA62B || c >= 0xA640 && c <= 0xA66E;
-                                }
-                            }
-                        } else { // c >= 0xA67F
-                            if (c < 0xA78B) {
-                                if (c < 0xA717) {
-                                    return c >= 0xA67F && c <= 0xA697 || c >= 0xA6A0 && c <= 0xA6E5;
-                                } else { // c >= 0xA717
-                                    return c >= 0xA717 && c <= 0xA71F || c >= 0xA722 && c <= 0xA788;
-                                }
-                            } else { // c >= 0xA78B
-                                if (c < 0xA7A0) {
-                                    return c >= 0xA78B && c <= 0xA78E || c >= 0xA790 && c <= 0xA793;
-                                } else { // c >= 0xA7A0
-                                    return c >= 0xA7A0 && c <= 0xA7AA;
-                                }
-                            }
-                        }
-                    }
-                }
-            } else { // c >= 0xA7F8
-                if (c < 0xAB20) {
-                    if (c < 0xAA44) {
-                        if (c < 0xA8FB) {
-                            if (c < 0xA840) {
-                                if (c < 0xA807) {
-                                    return c >= 0xA7F8 && c <= 0xA801 || c >= 0xA803 && c <= 0xA805;
-                                } else { // c >= 0xA807
-                                    return c >= 0xA807 && c <= 0xA80A || c >= 0xA80C && c <= 0xA822;
-                                }
-                            } else { // c >= 0xA840
-                                if (c < 0xA8D0) {
-                                    return c >= 0xA840 && c <= 0xA873 || c >= 0xA882 && c <= 0xA8B3;
-                                } else { // c >= 0xA8D0
-                                    return c >= 0xA8D0 && c <= 0xA8D9 || c >= 0xA8F2 && c <= 0xA8F7;
-                                }
-                            }
-                        } else { // c >= 0xA8FB
-                            if (c < 0xA984) {
-                                if (c < 0xA930) {
-                                    return c == 0xA8FB || c >= 0xA900 && c <= 0xA925;
-                                } else { // c >= 0xA930
-                                    return c >= 0xA930 && c <= 0xA946 || c >= 0xA960 && c <= 0xA97C;
-                                }
-                            } else { // c >= 0xA984
-                                if (c < 0xAA00) {
-                                    return c >= 0xA984 && c <= 0xA9B2 || c >= 0xA9CF && c <= 0xA9D9;
-                                } else { // c >= 0xAA00
-                                    return c >= 0xAA00 && c <= 0xAA28 || c >= 0xAA40 && c <= 0xAA42;
-                                }
-                            }
-                        }
-                    } else { // c >= 0xAA44
-                        if (c < 0xAAC0) {
-                            if (c < 0xAA80) {
-                                if (c < 0xAA60) {
-                                    return c >= 0xAA44 && c <= 0xAA4B || c >= 0xAA50 && c <= 0xAA59;
-                                } else { // c >= 0xAA60
-                                    return c >= 0xAA60 && c <= 0xAA76 || c == 0xAA7A;
-                                }
-                            } else { // c >= 0xAA80
-                                if (c < 0xAAB5) {
-                                    return c >= 0xAA80 && c <= 0xAAAF || c == 0xAAB1;
-                                } else { // c >= 0xAAB5
-                                    return c >= 0xAAB5 && c <= 0xAAB6 || c >= 0xAAB9 && c <= 0xAABD;
-                                }
-                            }
-                        } else { // c >= 0xAAC0
-                            if (c < 0xAAF2) {
-                                if (c < 0xAADB) {
-                                    return c == 0xAAC0 || c == 0xAAC2;
-                                } else { // c >= 0xAADB
-                                    return c >= 0xAADB && c <= 0xAADD || c >= 0xAAE0 && c <= 0xAAEA;
-                                }
-                            } else { // c >= 0xAAF2
-                                if (c < 0xAB09) {
-                                    return c >= 0xAAF2 && c <= 0xAAF4 || c >= 0xAB01 && c <= 0xAB06;
-                                } else { // c >= 0xAB09
-                                    return c >= 0xAB09 && c <= 0xAB0E || c >= 0xAB11 && c <= 0xAB16;
-                                }
-                            }
-                        }
-                    }
-                } else { // c >= 0xAB20
-                    if (c < 0xFB46) {
-                        if (c < 0xFB13) {
-                            if (c < 0xAC00) {
-                                if (c < 0xABC0) {
-                                    return c >= 0xAB20 && c <= 0xAB26 || c >= 0xAB28 && c <= 0xAB2E;
-                                } else { // c >= 0xABC0
-                                    return c >= 0xABC0 && c <= 0xABE2 || c >= 0xABF0 && c <= 0xABF9;
-                                }
-                            } else { // c >= 0xAC00
-                                if (c < 0xD7CB) {
-                                    return c >= 0xAC00 && c <= 0xD7A3 || c >= 0xD7B0 && c <= 0xD7C6;
-                                } else { // c >= 0xD7CB
-                                    return c >= 0xD7CB && c <= 0xD7FB || c >= 0xF900 && c <= 0xFB06;
-                                }
-                            }
-                        } else { // c >= 0xFB13
-                            if (c < 0xFB38) {
-                                if (c < 0xFB1F) {
-                                    return c >= 0xFB13 && c <= 0xFB17 || c == 0xFB1D;
-                                } else { // c >= 0xFB1F
-                                    return c >= 0xFB1F && c <= 0xFB28 || c >= 0xFB2A && c <= 0xFB36;
-                                }
-                            } else { // c >= 0xFB38
-                                if (c < 0xFB40) {
-                                    return c >= 0xFB38 && c <= 0xFB3C || c == 0xFB3E;
-                                } else { // c >= 0xFB40
-                                    return c >= 0xFB40 && c <= 0xFB41 || c >= 0xFB43 && c <= 0xFB44;
-                                }
-                            }
-                        }
-                    } else { // c >= 0xFB46
-                        if (c < 0xFF21) {
-                            if (c < 0xFDF0) {
-                                if (c < 0xFD50) {
-                                    return c >= 0xFB46 && c <= 0xFBB1 || c >= 0xFBD3 && c <= 0xFD3D;
-                                } else { // c >= 0xFD50
-                                    return c >= 0xFD50 && c <= 0xFD8F || c >= 0xFD92 && c <= 0xFDC7;
-                                }
-                            } else { // c >= 0xFDF0
-                                if (c < 0xFE76) {
-                                    return c >= 0xFDF0 && c <= 0xFDFB || c >= 0xFE70 && c <= 0xFE74;
-                                } else { // c >= 0xFE76
-                                    return c >= 0xFE76 && c <= 0xFEFC || c >= 0xFF10 && c <= 0xFF19;
-                                }
-                            }
-                        } else { // c >= 0xFF21
-                            if (c < 0xFFCA) {
-                                if (c < 0xFF66) {
-                                    return c >= 0xFF21 && c <= 0xFF3A || c >= 0xFF41 && c <= 0xFF5A;
-                                } else { // c >= 0xFF66
-                                    return c >= 0xFF66 && c <= 0xFFBE || c >= 0xFFC2 && c <= 0xFFC7;
-                                }
-                            } else { // c >= 0xFFCA
-                                if (c < 0xFFDA) {
-                                    return c >= 0xFFCA && c <= 0xFFCF || c >= 0xFFD2 && c <= 0xFFD7;
-                                } else { // c >= 0xFFDA
-                                    return c >= 0xFFDA && c <= 0xFFDC;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 
-    /**
-     * Tells if a character can occur in an FTL identifier expression (without escaping) as other than the first
-     * character. 
-     * 
-     * @since 2.3.22
-     */
-    public static boolean isFTLIdentifierPart(final char c) {
-        return isFTLIdentifierStart(c) || (c >= '0' && c <= '9');  
-    }
-    
     /**
      * Escapes the <code>String</code> with the escaping rules of Java language
      * string literals, so it's safe to insert the value into a string literal.
@@ -2104,18 +1570,18 @@ public class _StringUtil {
     }
 
     public static String toFTLIdentifierReferenceAfterDot(String name) {
-        return _StringUtil.backslashEscapeIdentifier(name);
+        return FTLUtil.escapeIdentifier(name);
     }
 
     public static String toFTLTopLevelIdentifierReference(String name) {
-        return _StringUtil.backslashEscapeIdentifier(name);
+        return FTLUtil.escapeIdentifier(name);
     }
 
     public static String toFTLTopLevelTragetIdentifier(final String name) {
         char quotationType = 0;
         scanForQuotationType: for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
-            if (!(i == 0 ? isFTLIdentifierStart(c) : isFTLIdentifierPart(c)) && c != '@') {
+            if (!(i == 0 ? FTLUtil.isNonEscapedIdentifierStart(c) : FTLUtil.isNonEscapedIdentifierPart(c)) && c != '@') {
                 if ((quotationType == 0 || quotationType == '\\') && (c == '-' || c == '.' || c == ':')) {
                     quotationType = '\\';
                 } else {
@@ -2128,16 +1594,12 @@ public class _StringUtil {
         case 0:
             return name;
         case '"':
-            return ftlQuote(name);
+            return FTLUtil.toStringLiteral(name);
         case '\\':
-            return _StringUtil.backslashEscapeIdentifier(name);
+            return FTLUtil.escapeIdentifier(name);
         default:
             throw new BugException();
         }
-    }
-
-    public static String backslashEscapeIdentifier(String name) {
-        return replace(replace(replace(name, "-", "\\-"), ".", "\\."), ":", "\\:");
     }
 
     /**

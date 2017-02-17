@@ -20,7 +20,7 @@
 package org.apache.freemarker.core.model;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util.FTLUtil;
 
 /**
  * The common super-interface of the interfaces that stand for the FreeMarker Template Language (FTL) data types.
@@ -42,7 +42,7 @@ import org.apache.freemarker.core.util._ClassUtil;
  * these types: string, number, boolean, date. The intended applications are like string+hash, string+method,
  * hash+sequence, etc.
  * 
- * @see _ClassUtil#getFTLTypeDescription(TemplateModel)
+ * @see FTLUtil#getFTLTypeDescription(TemplateModel)
  */
 public interface TemplateModel {
     

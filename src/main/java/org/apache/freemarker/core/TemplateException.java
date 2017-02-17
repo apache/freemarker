@@ -329,7 +329,7 @@ public class TemplateException extends Exception {
     
     /**
      * @param heading should the heading at the top be printed 
-     * @param ftlStackTrace should the FTL stack trace be printed 
+     * @param ftlStackTrace should the FTL stack trace be printed
      * @param javaStackTrace should the Java stack trace be printed
      *  
      * @since 2.3.20
@@ -342,7 +342,7 @@ public class TemplateException extends Exception {
 
     /**
      * @param heading should the heading at the top be printed 
-     * @param ftlStackTrace should the FTL stack trace be printed 
+     * @param ftlStackTrace should the FTL stack trace be printed
      * @param javaStackTrace should the Java stack trace be printed
      *  
      * @since 2.3.20

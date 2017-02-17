@@ -25,7 +25,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util.FTLUtil;
 
 /**
  * An instruction that outputs the value of a numerical expression.
@@ -104,7 +104,7 @@ final class NumericalOutput extends Interpolation {
     protected String dump(boolean canonical, boolean inStringLiteral) {
         StringBuilder buf = new StringBuilder("#{");
         final String exprCF = expression.getCanonicalForm();
-        buf.append(inStringLiteral ? _StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);
+        buf.append(inStringLiteral ? FTLUtil.escapeStringLiteralPart(exprCF, '"') : exprCF);
         if (hasFormat) {
             buf.append(" ; ");
             buf.append("m");

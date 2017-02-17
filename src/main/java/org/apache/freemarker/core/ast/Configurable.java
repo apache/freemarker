@@ -65,6 +65,7 @@ import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
+import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
@@ -2875,7 +2876,7 @@ public class Configurable {
             if (w.startsWith("'") || w.startsWith("\"")) {
                 w = w.substring(1, w.length() - 1);
             }
-            return _StringUtil.FTLStringLiteralDec(w);
+            return FTLUtil.unescapeStringLiteralPart(w);
         }
 
         String fetchKeyword() throws ParseException {
