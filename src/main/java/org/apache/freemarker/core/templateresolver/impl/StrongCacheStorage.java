@@ -21,10 +21,10 @@ package org.apache.freemarker.core.templateresolver.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
-import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
 
 /**
  * Strong cache storage is a cache storage that simply wraps a {@link Map}. It holds a strong reference to all objects
@@ -33,18 +33,10 @@ import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
  *
  * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
  */
-public class StrongCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize {
+public class StrongCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     
-    private final Map map = new ConcurrentHashMap();
+    private final ConcurrentMap map = new ConcurrentHashMap();
 
-    /**
-     * Always returns {@code true}.
-     */
-    @Override
-    public boolean isConcurrent() {
-        return true;
-    }
-    
     @Override
     public Object get(Object key) {
         return map.get(key);

@@ -41,7 +41,6 @@ import org.apache.freemarker.core.ast.MarkReleaserTemplateSpecifiedEncodingHandl
 import org.apache.freemarker.core.ast.TemplateConfiguration;
 import org.apache.freemarker.core.ast.TemplateSpecifiedEncodingHandler;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
@@ -54,9 +53,9 @@ import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
+import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
-import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.slf4j.Logger;
 
 /**
@@ -94,7 +93,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private final TemplateNameFormat templateNameFormat;
     private final TemplateConfigurationFactory templateConfigurations;
     
-    private final boolean isCacheStorageConcurrent;
     /** {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} */
     private long templateUpdateDelayMilliseconds = DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS;
     /** {@link Configuration#setLocalizedLookup(boolean)} */
@@ -168,8 +166,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
         
         _NullArgumentException.check("cacheStorage", cacheStorage);
         this.cacheStorage = cacheStorage;
-        isCacheStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
-                ((ConcurrentCacheStorage) cacheStorage).isConcurrent();
         
         _NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
         this.templateLookupStrategy = templateLookupStrategy;
@@ -298,14 +294,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 : null;
         final CachedResultKey cacheKey = new CachedResultKey(name, locale, customLookupCondition, encoding, parseAsFTL);
         
-        CachedResult oldCachedResult;
-        if (isCacheStorageConcurrent) {
-            oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
-        } else {
-            synchronized (cacheStorage) {
-                oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
-            }
-        }
+        CachedResult oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
         
         final long now = System.currentTimeMillis();
         
@@ -365,7 +354,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                                 + "(source: " + newTemplateLoaderResult.getSource() + ")"
                                 + " as it hasn't been changed on the backing store.");
                     }
-                    putIntoCache(cacheKey, newCachedResult);
+                    cacheStorage.put(cacheKey, newCachedResult);
                     return (Template) newCachedResult.templateOrException;
                 } else {
                     if (newTemplateLoaderResult.getStatus() != TemplateLoadingResultStatus.OPENED) {
@@ -442,7 +431,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             }
             newCachedResult.templateOrException = template;
             newCachedResult.version = templateLoaderResult.getVersion();
-            putIntoCache(cacheKey, newCachedResult);
+            cacheStorage.put(cacheKey, newCachedResult);
             return template;
         } catch (RuntimeException e) {
             if (newCachedResult != null) {
@@ -563,17 +552,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         cachedResult.templateOrException = e;
         cachedResult.source = null;
         cachedResult.version = null;
-        putIntoCache(cacheKey, cachedResult);
-    }
-
-    private void putIntoCache(CachedResultKey tk, CachedResult cachedTemplate) {
-        if (isCacheStorageConcurrent) {
-            cacheStorage.put(tk, cachedTemplate);
-        } else {
-            synchronized (cacheStorage) {
-                cacheStorage.put(tk, cachedTemplate);
-            }
-        }
+        cacheStorage.put(cacheKey, cachedResult);
     }
 
     @SuppressWarnings("deprecation")
@@ -811,13 +790,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                     : null;
             CachedResultKey tk = new CachedResultKey(name, locale, customLookupCondition, encoding, parse);
             
-            if (isCacheStorageConcurrent) {
-                cacheStorage.remove(tk);
-            } else {
-                synchronized (cacheStorage) {
-                    cacheStorage.remove(tk);
-                }
-            }
+            cacheStorage.remove(tk);
             if (debug) {
                 LOG.debug(debugPrefix + "Template was removed from the cache, if it was there");
             }

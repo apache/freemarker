@@ -44,23 +44,16 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-/**
- */
-class RmiDebuggedEnvironmentImpl
-extends
-    RmiDebugModelImpl
-implements
-    DebuggedEnvironment {
-    private static final long serialVersionUID = 1L;
+@SuppressWarnings("serial")
+class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEnvironment {
 
-    private static final CacheStorage storage = new SoftCacheStorage(new IdentityHashMap());
-    private static final Object idLock = new Object();
+    private static final SoftCache CACHE = new SoftCache(new IdentityHashMap());
+    private static final Object ID_LOCK = new Object();
+    
     private static long nextId = 1;
     private static Set remotes = new HashSet();
 
@@ -70,14 +63,14 @@ implements
     
     private RmiDebuggedEnvironmentImpl(Environment env) throws RemoteException {
         super(new DebugEnvironmentModel(env), DebugModel.TYPE_ENVIRONMENT);
-        synchronized (idLock) {
+        synchronized (ID_LOCK) {
             id = nextId++;
         }
     }
 
     static synchronized Object getCachedWrapperFor(Object key)
     throws RemoteException {
-        Object value = storage.get(key);
+        Object value = CACHE.get(key);
         if (value == null) {
             if (key instanceof TemplateModel) {
                 int extraTypes;
@@ -98,7 +91,7 @@ implements
             }
         }
         if (value != null) {
-            storage.put(key, value);
+            CACHE.put(key, value);
         }
         if (value instanceof Remote) {
             remotes.add(value);

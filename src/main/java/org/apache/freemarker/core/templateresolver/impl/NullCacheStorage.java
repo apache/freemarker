@@ -21,7 +21,6 @@ package org.apache.freemarker.core.templateresolver.impl;
 
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
-import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
 
 /**
  * A cache storage that doesn't store anything. Use this if you
@@ -31,17 +30,12 @@ import org.apache.freemarker.core.templateresolver.ConcurrentCacheStorage;
  * 
  * @since 2.3.17
  */
-public class NullCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize {
+public class NullCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     
     /**
      * @since 2.3.22
      */
     public static final NullCacheStorage INSTANCE = new NullCacheStorage();
-
-    @Override
-    public boolean isConcurrent() {
-        return true;
-    }
     
     @Override
     public Object get(Object key) {

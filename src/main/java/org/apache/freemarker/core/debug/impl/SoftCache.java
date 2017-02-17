@@ -17,57 +17,38 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templateresolver.impl;
+package org.apache.freemarker.core.debug.impl;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 
-import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
-
-/**
- * Soft cache storage is a cache storage that uses {@link SoftReference} objects to hold the objects it was passed,
- * therefore allows the garbage collector to purge the cache when it determines that it wants to free up memory. This
- * class is thread-safe to the extent that its underlying map is. The parameterless constructor uses a thread-safe map
- * since 2.3.24 or Java 5.
- *
- * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
- */
-public class SoftCacheStorage implements CacheStorage, CacheStorageWithGetSize {
+class SoftCache {
     
     private final ReferenceQueue queue = new ReferenceQueue();
-    private final ConcurrentMap map;
+    private final Map map;
     
-    /**
-     * Creates an instance that uses a {@link ConcurrentMap} internally.
-     */
-    public SoftCacheStorage() {
-        map = new ConcurrentHashMap();
+    public SoftCache(Map backingMap) {
+        map = backingMap;
     }
     
-    @Override
     public Object get(Object key) {
         processQueue();
         Reference ref = (Reference) map.get(key);
         return ref == null ? null : ref.get();
     }
 
-    @Override
     public void put(Object key, Object value) {
         processQueue();
         map.put(key, new SoftValueReference(key, value, queue));
     }
 
-    @Override
     public void remove(Object key) {
         processQueue();
         map.remove(key);
     }
 
-    @Override
     public void clear() {
         map.clear();
         processQueue();
@@ -75,10 +56,7 @@ public class SoftCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     
     /**
      * Returns a close approximation of the number of cache entries.
-     * 
-     * @since 2.3.21
      */
-    @Override
     public int getSize() {
         processQueue();
         return map.size();
@@ -91,7 +69,7 @@ public class SoftCacheStorage implements CacheStorage, CacheStorageWithGetSize {
                 return;
             }
             Object key = ref.getKey();
-            map.remove(key, ref);
+            map.remove(key);
         }
     }
 

@@ -84,3 +84,4 @@ the FreeMarer 3 changelog here:
 - Marked most static utility classes as internal, and renamed them to start with "_" (for example StringUtils was renamed to
   _StringUtil, thus people won't accidentally use it when they wanted to autocomplete to Apache Commons StringUtil).
 - Deleted o.a.f..core.util.DOMNodeModel
+- All CacheStorage-s must be thread safe from now on (removed ConcurrentCacheStorage marker interface)
