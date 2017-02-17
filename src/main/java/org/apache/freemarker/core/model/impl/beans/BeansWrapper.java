@@ -1297,8 +1297,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             boolean isComponentTypeNumerical = false;  // will be filled on demand
             boolean isComponentTypeList = false;  // will be filled on demand
             int i = 0;
-            for (Iterator<?> it = list.iterator(); it.hasNext(); ) {
-                Object listItem = it.next();
+            for (Object listItem : list) {
                 if (listItem != null && !componentType.isInstance(listItem)) {
                     // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
                     if (!isComponentTypeExamined) {

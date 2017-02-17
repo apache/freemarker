@@ -115,8 +115,7 @@ final class StaticModel implements TemplateHashModelEx {
         }
 
         Field[] fields = clazz.getFields();
-        for (int i = 0; i < fields.length; ++i) {
-            Field field = fields[i];
+        for (Field field : fields) {
             int mod = field.getModifiers();
             if (Modifier.isPublic(mod) && Modifier.isStatic(mod)) {
                 if (Modifier.isFinal(mod))
@@ -126,7 +125,8 @@ final class StaticModel implements TemplateHashModelEx {
                         map.put(field.getName(), wrapper.getOuterIdentity().wrap(field.get(null)));
                     } catch (IllegalAccessException e) {
                         // Intentionally ignored
-                    } else
+                    }
+                else
                     // This is a special flagging value: Field in the map means
                     // that this is a non-final field, and it must be evaluated
                     // on each get() call.
@@ -135,8 +135,7 @@ final class StaticModel implements TemplateHashModelEx {
         }
         if (wrapper.getExposureLevel() < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
             Method[] methods = clazz.getMethods();
-            for (int i = 0; i < methods.length; ++i) {
-                Method method = methods[i];
+            for (Method method : methods) {
                 int mod = method.getModifiers();
                 if (Modifier.isPublic(mod) && Modifier.isStatic(mod)
                         && wrapper.getClassIntrospector().isAllowedToExpose(method)) {
@@ -154,7 +153,7 @@ final class StaticModel implements TemplateHashModelEx {
                         if (obj != null) {
                             if (LOG.isInfoEnabled()) {
                                 LOG.info("Overwriting value [" + obj + "] for " +
-                                        " key '" + name + "' with [" + method + 
+                                        " key '" + name + "' with [" + method +
                                         "] in static model for " + clazz.getName());
                             }
                         }

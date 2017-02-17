@@ -98,8 +98,8 @@ public class TaglibMethodUtilTest {
 
         public static double sum(double [] a) { 
             double sum = 0.0;
-            for (int i = 0; i < a.length; i++) {
-                sum += a[i];
+            for (double i : a) {
+                sum += i;
             }
             return sum;
         }

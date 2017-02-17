@@ -65,9 +65,7 @@ public class _BeansAPI {
                 = new ArrayList<>();
         final List<ReflectionCallableMemberDescriptor> varArgsMemberDescs
                 = new ArrayList<>();
-        final Constructor<?>[] constrs = pClass.getConstructors();
-        for (int i = 0; i < constrs.length; i++) {
-            Constructor<?> constr = constrs[i];
+        for (Constructor<?> constr : pClass.getConstructors()) {
             ReflectionCallableMemberDescriptor memberDesc = new ReflectionCallableMemberDescriptor(constr, constr.getParameterTypes());
             if (!_MethodUtil.isVarargs(constr)) {
                 fixedArgMemberDescs.add(memberDesc);

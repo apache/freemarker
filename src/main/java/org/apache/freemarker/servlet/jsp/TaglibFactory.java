@@ -754,8 +754,7 @@ public class TaglibFactory implements TemplateHashModel {
             if (tldFiles == null) {
                 throw new IOException("Can't list this directory for some reason: " + dir);
             }
-            for (int i = 0; i < tldFiles.length; i++) {
-                final File file = tldFiles[i];
+            for (final File file : tldFiles) {
                 addTldLocationFromTld(new FileTldLocation(file));
             }
         } else {

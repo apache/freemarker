@@ -662,8 +662,8 @@ public class TypeFlagsTest extends TestCase {
                 assertEquals(expectedTypeFlags[i], actualParamTypes[i]);
             }
         } else {
-            for (int i = 0; i < expectedTypeFlags.length; i++) {
-                assertEquals(expectedTypeFlags[i], 0);
+            for (int expectedTypeFlag : expectedTypeFlags) {
+                assertEquals(expectedTypeFlag, 0);
             }
         }
     }

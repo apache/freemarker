@@ -325,7 +325,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
                     "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
                     + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
                     + "The alphabetical list of built-ins:");
-            List names = new ArrayList(BUILT_INS_BY_NAME.keySet().size());
+            List<String> names = new ArrayList<>(BUILT_INS_BY_NAME.keySet().size());
             names.addAll(BUILT_INS_BY_NAME.keySet());
             Collections.sort(names);
             char lastLetter = 0;
@@ -338,10 +338,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
             
             boolean first = true;
-            for (Iterator it = names.iterator(); it.hasNext(); ) {
-                String correctName = (String) it.next();
+            for (String correctName : names) {
                 int correctNameNamingConvetion = _StringUtil.getIdentifierNamingConvention(correctName);
-                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
+                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
                         ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
                         : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
                     if (first) {
@@ -349,7 +348,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
                     } else {
                         buf.append(", ");
                     }
-                    
+
                     char firstChar = correctName.charAt(0);
                     if (firstChar != lastLetter) {
                         lastLetter = firstChar;

@@ -55,8 +55,7 @@ class JspTagModelBase {
         this.tagClass = tagClass;
         BeanInfo bi = Introspector.getBeanInfo(tagClass);
         PropertyDescriptor[] pda = bi.getPropertyDescriptors();
-        for (int i = 0; i < pda.length; i++) {
-            PropertyDescriptor pd = pda[i];
+        for (PropertyDescriptor pd : pda) {
             Method m = pd.getWriteMethod();
             if (m != null) {
                 propertySetters.put(pd.getName(), m);

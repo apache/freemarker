@@ -175,8 +175,8 @@ public final class _MethodUtil {
             collectAssignables(sc, c2, s);
         }
         Class[] itf = c1.getInterfaces();
-        for (int i = 0; i < itf.length; ++i) {
-            collectAssignables(itf[i], c2, s);
+        for (Class anItf : itf) {
+            collectAssignables(anItf, c2, s);
         }
     }
 

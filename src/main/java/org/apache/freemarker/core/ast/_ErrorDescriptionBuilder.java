@@ -142,8 +142,8 @@ public class _ErrorDescriptionBuilder {
                 int dst = 0;
                 if (tip != null) allTips[dst++] = tip; 
                 if (tips != null) {
-                    for (int i = 0; i < tips.length; i++) {
-                        allTips[dst++] = tips[i]; 
+                    for (Object t : tips) {
+                        allTips[dst++] = t;
                     }
                 }
                 if (extraTip != null) allTips[dst++] = extraTip; 
@@ -209,9 +209,8 @@ public class _ErrorDescriptionBuilder {
     }
 
     private void appendParts(StringBuilder sb, Object[] parts) {
-        Template template = this.template != null ? this.template : (blamed != null ? blamed.getTemplate() : null); 
-        for (int i = 0; i < parts.length; i++) {
-            Object partObj = parts[i];
+        Template template = this.template != null ? this.template : (blamed != null ? blamed.getTemplate() : null);
+        for (Object partObj : parts) {
             if (partObj instanceof Object[]) {
                 appendParts(sb, (Object[]) partObj);
             } else {
@@ -220,14 +219,14 @@ public class _ErrorDescriptionBuilder {
                 if (partStr == null) {
                     partStr = "null";
                 }
-                
+
                 if (template != null) {
                     if (partStr.length() > 4
                             && partStr.charAt(0) == '<'
                             && (
-                                    (partStr.charAt(1) == '#' || partStr.charAt(1) == '@')
+                            (partStr.charAt(1) == '#' || partStr.charAt(1) == '@')
                                     || (partStr.charAt(1) == '/') && (partStr.charAt(2) == '#' || partStr.charAt(2) == '@')
-                               )
+                    )
                             && partStr.charAt(partStr.length() - 1) == '>') {
                         if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
                             sb.append('[');

@@ -213,9 +213,8 @@ public class _StringUtil {
      * For efficiently copying very short char arrays.
      */
     private static int shortArrayCopy(char[] src, char[] dst, int dstOffset) {
-        int ln = src.length;
-        for (int i = 0; i < ln; i++) {
-            dst[dstOffset++] = src[i];
+        for (char aSrc : src) {
+            dst[dstOffset++] = aSrc;
         }
         return dstOffset;
     }
@@ -360,9 +359,8 @@ public class _StringUtil {
             if (safeInURL(c, keepSlash)) {
                 if (encStart != -1) {
                     byte[] o = s.substring(encStart, i).getBytes(charset);
-                    for (int j = 0; j < o.length; j++) {
+                    for (byte bc : o) {
                         b.append('%');
-                        byte bc = o[j];
                         int c1 = bc & 0x0F;
                         int c2 = (bc >> 4) & 0x0F;
                         b.append((char) (c2 < 10 ? c2 + '0' : c2 - 10 + 'A'));
@@ -379,9 +377,8 @@ public class _StringUtil {
         }
         if (encStart != -1) {
             byte[] o = s.substring(encStart, i).getBytes(charset);
-            for (int j = 0; j < o.length; j++) {
+            for (byte bc : o) {
                 b.append('%');
-                byte bc = o[j];
                 int c1 = bc & 0x0F;
                 int c2 = (bc >> 4) & 0x0F;
                 b.append((char) (c2 < 10 ? c2 + '0' : c2 - 10 + 'A'));

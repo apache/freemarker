@@ -422,63 +422,62 @@ public class ParseException extends IOException implements FMParserConstants {
         final int kind = nextToken.kind;
         if (kind == EOF) {
             Set/*<String>*/ endNames = new HashSet();
-            for (int i = 0; i < expectedTokenSequences.length; i++) {
-                int[] sequence = expectedTokenSequences[i];
-                for (int j = 0; j < sequence.length; j++) {
-                    switch (sequence[j]) {
-                    case END_FOREACH:
-                        endNames.add( "#foreach");
-                        break;
-                    case END_LIST:
-                        endNames.add( "#list");
-                        break;
-                    case END_SWITCH:
-                        endNames.add( "#switch");
-                        break;
-                    case END_IF:
-                        endNames.add( "#if");
-                        break;
-                    case END_COMPRESS:
-                        endNames.add( "#compress");
-                        break;
-                    case END_MACRO:
-                        endNames.add( "#macro");
-                    case END_FUNCTION:
-                        endNames.add( "#function");
-                        break;
-                    case END_TRANSFORM:
-                        endNames.add( "#transform");
-                        break;
-                    case END_ESCAPE:
-                        endNames.add( "#escape");
-                        break;
-                    case END_NOESCAPE:
-                        endNames.add( "#noescape");
-                        break;
-                    case END_ASSIGN:
-                        endNames.add( "#assign");
-                        break;
-                    case END_LOCAL:
-                        endNames.add( "#local");
-                        break;
-                    case END_GLOBAL:
-                        endNames.add( "#global");
-                        break;
-                    case END_ATTEMPT:
-                        endNames.add( "#attempt");
-                        break;
-                    case CLOSING_CURLY_BRACKET:
-                        endNames.add( "\"{\"");
-                        break;
-                    case CLOSE_BRACKET:
-                        endNames.add( "\"[\"");
-                        break;
-                    case CLOSE_PAREN:
-                        endNames.add( "\"(\"");
-                        break;
-                    case UNIFIED_CALL_END:
-                        endNames.add( "@...");
-                        break;
+            for (int[] sequence : expectedTokenSequences) {
+                for (int aSequence : sequence) {
+                    switch (aSequence) {
+                        case END_FOREACH:
+                            endNames.add("#foreach");
+                            break;
+                        case END_LIST:
+                            endNames.add("#list");
+                            break;
+                        case END_SWITCH:
+                            endNames.add("#switch");
+                            break;
+                        case END_IF:
+                            endNames.add("#if");
+                            break;
+                        case END_COMPRESS:
+                            endNames.add("#compress");
+                            break;
+                        case END_MACRO:
+                            endNames.add("#macro");
+                        case END_FUNCTION:
+                            endNames.add("#function");
+                            break;
+                        case END_TRANSFORM:
+                            endNames.add("#transform");
+                            break;
+                        case END_ESCAPE:
+                            endNames.add("#escape");
+                            break;
+                        case END_NOESCAPE:
+                            endNames.add("#noescape");
+                            break;
+                        case END_ASSIGN:
+                            endNames.add("#assign");
+                            break;
+                        case END_LOCAL:
+                            endNames.add("#local");
+                            break;
+                        case END_GLOBAL:
+                            endNames.add("#global");
+                            break;
+                        case END_ATTEMPT:
+                            endNames.add("#attempt");
+                            break;
+                        case CLOSING_CURLY_BRACKET:
+                            endNames.add("\"{\"");
+                            break;
+                        case CLOSE_BRACKET:
+                            endNames.add("\"[\"");
+                            break;
+                        case CLOSE_PAREN:
+                            endNames.add("\"(\"");
+                            break;
+                        case UNIFIED_CALL_END:
+                            endNames.add("@...");
+                            break;
                     }
                 }
             }

@@ -715,8 +715,7 @@ public class _ObjectBuilderSettingEvaluator {
         try {
             PropertyDescriptor[] propDescs = Introspector.getBeanInfo(cl).getPropertyDescriptors();
             beanPropSetters = new HashMap(propDescs.length * 4 / 3, 1.0f);
-            for (int i = 0; i < propDescs.length; i++) {
-                PropertyDescriptor propDesc = propDescs[i];
+            for (PropertyDescriptor propDesc : propDescs) {
                 final Method writeMethod = propDesc.getWriteMethod();
                 if (writeMethod != null) {
                     beanPropSetters.put(propDesc.getName(), writeMethod);

@@ -2369,22 +2369,21 @@ public class Configurable {
                 } else if ("allows_nothing".equals(value) || "allowsNothing".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
                 } else if (value.indexOf(":") != -1) {
-                    List segments = parseAsSegmentedList(value);
+                    List<KeyValuePair<List<String>>> segments = parseAsSegmentedList(value);
                     Set allowedClasses = null;
-                    List trustedTemplates = null;
-                    for (int i = 0; i < segments.size(); i++) {
-                        KeyValuePair kv = (KeyValuePair) segments.get(i);
-                        String segmentKey = (String) kv.getKey();
-                        List segmentValue = (List) kv.getValue();
+                    List<String> trustedTemplates = null;
+                    for (KeyValuePair<List<String>> segment : segments) {
+                        String segmentKey = segment.getKey();
+                        List<String> segmentValue = segment.getValue();
                         if (segmentKey.equals(ALLOWED_CLASSES)) {
-                            allowedClasses = new HashSet(segmentValue); 
+                            allowedClasses = new HashSet(segmentValue);
                         } else if (segmentKey.equals(TRUSTED_TEMPLATES)) {
                             trustedTemplates = segmentValue;
                         } else {
                             throw new ParseException(
                                     "Unrecognized list segment key: " + _StringUtil.jQuote(segmentKey) +
-                                    ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
-                                    TRUSTED_TEMPLATES + "\"", 0, 0);
+                                            ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
+                                            TRUSTED_TEMPLATES + "\"", 0, 0);
                         }
                     }
                     setNewBuiltinClassResolver(
@@ -2581,9 +2580,8 @@ public class Configurable {
     public void setSettings(Properties props) throws TemplateException {
         final _SettingEvaluationEnvironment prevEnv = _SettingEvaluationEnvironment.startScope();
         try {
-            for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
-                String key = (String) it.next();
-                setSetting(key, props.getProperty(key).trim()); 
+            for (String key : props.stringPropertyNames()) {
+                setSetting(key, props.getProperty(key).trim());
             }
         } finally {
             _SettingEvaluationEnvironment.endScope(prevEnv);
@@ -2745,11 +2743,11 @@ public class Configurable {
         if (parent != null) parent.doAutoImportsAndIncludes(env);
     }
 
-    protected ArrayList parseAsList(String text) throws ParseException {
+    protected List<String> parseAsList(String text) throws ParseException {
         return new SettingStringParser(text).parseAsList();
     }
 
-    protected ArrayList parseAsSegmentedList(String text)
+    protected List<KeyValuePair<List<String>>> parseAsSegmentedList(String text)
     throws ParseException {
         return new SettingStringParser(text).parseAsSegmentedList();
     }
@@ -2758,20 +2756,20 @@ public class Configurable {
         return new SettingStringParser(text).parseAsImportList();
     }
     
-    private static class KeyValuePair {
-        private final Object key;
-        private final Object value;
+    private static class KeyValuePair<V> {
+        private final String key;
+        private final V value;
         
-        KeyValuePair(Object key, Object value) {
+        KeyValuePair(String key, V value) {
             this.key = key;
             this.value = value;
         }
-        
-        Object getKey() {
+
+        String getKey() {
             return key;
         }
-        
-        Object getValue() {
+
+        V getValue() {
             return value;
         }
     }
@@ -2790,9 +2788,9 @@ public class Configurable {
             this.ln = text.length();
         }
 
-        ArrayList parseAsSegmentedList() throws ParseException {
-            ArrayList segments = new ArrayList();
-            ArrayList currentSegment = null;
+        List<KeyValuePair<List<String>>> parseAsSegmentedList() throws ParseException {
+            List<KeyValuePair<List<String>>> segments = new ArrayList();
+            List<String> currentSegment = null;
             
             char c;
             while (true) {
@@ -2803,7 +2801,7 @@ public class Configurable {
                 
                 if (c == ':') {
                     currentSegment = new ArrayList();
-                    segments.add(new KeyValuePair(item, currentSegment));
+                    segments.add(new KeyValuePair<List<String>>(item, currentSegment));
                 } else {
                     if (currentSegment == null) {
                         throw new ParseException(

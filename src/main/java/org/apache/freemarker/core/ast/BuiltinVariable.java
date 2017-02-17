@@ -148,12 +148,11 @@ final class BuiltinVariable extends Expression {
             
             sb.append("\nThe allowed special variable names are: ");
             boolean first = true;
-            for (int i = 0; i < SPEC_VAR_NAMES.length; i++) {
-                final String correctName = SPEC_VAR_NAMES[i];
-                int correctNameNamingConvetion = _StringUtil.getIdentifierNamingConvention(correctName);
-                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
-                        ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
-                        : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+            for (final String correctName : SPEC_VAR_NAMES) {
+                int correctNameNamingConvention = _StringUtil.getIdentifierNamingConvention(correctName);
+                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                        ? correctNameNamingConvention != Configuration.LEGACY_NAMING_CONVENTION
+                        : correctNameNamingConvention != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
                     if (first) {
                         first = false;
                     } else {

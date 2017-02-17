@@ -81,8 +81,8 @@ final class ArgumentTypes {
     @Override
     public int hashCode() {
         int hash = 0;
-        for (int i = 0; i < types.length; ++i) {
-            hash ^= types[i].hashCode();
+        for (Class<?> type : types) {
+            hash ^= type.hashCode();
         }
         return hash;
     }

@@ -66,15 +66,15 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
      *     This parameter can be <code>null</code> (means no trusted templates).
      */
     public OptInTemplateClassResolver(
-            Set allowedClasses, List trustedTemplates) {
+            Set allowedClasses, List<String> trustedTemplates) {
         this.allowedClasses = allowedClasses != null ? allowedClasses : Collections.EMPTY_SET;
         if (trustedTemplates != null) {
             trustedTemplateNames = new HashSet();
             trustedTemplatePrefixes = new ArrayList();
             
-            Iterator it = trustedTemplates.iterator();
+            Iterator<String> it = trustedTemplates.iterator();
             while (it.hasNext()) {
-                String li = (String) it.next();
+                String li = it.next();
                 if (li.startsWith("/")) li = li.substring(1);
                 if (li.endsWith("*")) {
                     trustedTemplatePrefixes.add(li.substring(0, li.length() - 1));

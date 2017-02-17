@@ -291,9 +291,7 @@ class ClassIntrospector {
 
     private void addFieldsToClassIntrospectionData(Map<Object, Object> introspData, Class<?> clazz)
             throws SecurityException {
-        Field[] fields = clazz.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
+        for (Field field : clazz.getFields()) {
             if ((field.getModifiers() & Modifier.STATIC) == 0) {
                 introspData.put(field.getName(), field);
             }
@@ -436,8 +434,8 @@ class ClassIntrospector {
                 introspData.put(CONSTRUCTORS_KEY, new SimpleMethod(ctor, ctor.getParameterTypes()));
             } else if (ctors.length > 1) {
                 OverloadedMethods overloadedCtors = new OverloadedMethods(bugfixed);
-                for (int i = 0; i < ctors.length; i++) {
-                    overloadedCtors.addConstructor(ctors[i]);
+                for (Constructor<?> ctor : ctors) {
+                    overloadedCtors.addConstructor(ctor);
                 }
                 introspData.put(CONSTRUCTORS_KEY, overloadedCtors);
             }
@@ -461,8 +459,7 @@ class ClassIntrospector {
         if (Modifier.isPublic(clazz.getModifiers())) {
             try {
                 Method[] methods = clazz.getMethods();
-                for (int i = 0; i < methods.length; i++) {
-                    Method method = methods[i];
+                for (Method method : methods) {
                     MethodSignature sig = new MethodSignature(method);
                     // Contrary to intuition, a class can actually have several
                     // different methods with same signature *but* different
@@ -477,7 +474,7 @@ class ClassIntrospector {
                     // C.class will have both "Object m()" and "Integer m()" methods.
                     List<Method> methodList = accessibles.get(sig);
                     if (methodList == null) {
-                     // TODO Collection.singletonList is more efficient, though read only.
+                        // TODO Collection.singletonList is more efficient, though read only.
                         methodList = new LinkedList<>();
                         accessibles.put(sig, methodList);
                     }
@@ -492,8 +489,8 @@ class ClassIntrospector {
         }
 
         Class<?>[] interfaces = clazz.getInterfaces();
-        for (int i = 0; i < interfaces.length; i++) {
-            discoverAccessibleMethods(interfaces[i], accessibles);
+        for (Class<?> anInterface : interfaces) {
+            discoverAccessibleMethods(anInterface, accessibles);
         }
         Class<?> superclass = clazz.getSuperclass();
         if (superclass != null) {

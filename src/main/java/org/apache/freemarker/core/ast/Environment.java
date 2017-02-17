@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,11 +70,11 @@ import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver._CacheAPI;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
+import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtil;
-import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -749,8 +748,7 @@ public final class Environment extends Configurable {
                 catchAllParamValue = null;
             }
 
-            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
-                final Map.Entry argNameAndValExp = (Map.Entry) it.next();
+             for (Map.Entry argNameAndValExp : (Set<Map.Entry>) namedArgs.entrySet()) {
                 final String argName = (String) argNameAndValExp.getKey();
                 final boolean isArgNameDeclared = macro.hasArgNamed(argName);
                 if (isArgNameDeclared || catchAllParamName != null) {
@@ -2721,8 +2719,8 @@ public final class Environment extends Configurable {
     }
 
     void importMacros(Template template) {
-        for (Iterator it = template.getMacros().values().iterator(); it.hasNext();) {
-            visitMacroDef((Macro) it.next());
+        for (Object macro : template.getMacros().values()) {
+            visitMacroDef((Macro) macro);
         }
     }
 

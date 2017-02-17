@@ -316,8 +316,7 @@ public final class TextBlock extends TemplateElement {
         if (isIgnorable(true)) {
             return false;
         }
-        for (int i = 0; i < text.length; i++) {
-            char c = text[i];
+        for (char c : text) {
             if (c == '\n' || c == '\r') {
                 return false;
             }

@@ -86,19 +86,18 @@ final class PropertySetting extends TemplateElement {
                 }
                 
                 boolean first = true;
-                for (int i = 0; i < SETTING_NAMES.length; i++) {
-                    String correctName = SETTING_NAMES[i];
-                    int correctNameNamingConvetion = _StringUtil.getIdentifierNamingConvention(correctName);
-                    if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION 
-                            ? correctNameNamingConvetion != Configuration.LEGACY_NAMING_CONVENTION
-                            : correctNameNamingConvetion != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+                for (String correctName : SETTING_NAMES) {
+                    int correctNameNamingConvention = _StringUtil.getIdentifierNamingConvention(correctName);
+                    if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                            ? correctNameNamingConvention != Configuration.LEGACY_NAMING_CONVENTION
+                            : correctNameNamingConvention != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
                         if (first) {
                             first = false;
                         } else {
                             sb.append(", ");
                         }
-                    
-                        sb.append(SETTING_NAMES[i]);
+
+                        sb.append(correctName);
                     }
                 }
             }

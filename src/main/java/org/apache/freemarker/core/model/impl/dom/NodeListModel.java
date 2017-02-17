@@ -204,8 +204,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
 
     @Override
     public Object[] explainTypeError(Class[] expectedClasses) {
-        for (int i = 0; i < expectedClasses.length; i++) {
-            Class expectedClass = expectedClasses[i];
+        for (Class expectedClass : expectedClasses) {
             if (TemplateScalarModel.class.isAssignableFrom(expectedClass)
                     || TemplateDateModel.class.isAssignableFrom(expectedClass)
                     || TemplateNumberModel.class.isAssignableFrom(expectedClass)

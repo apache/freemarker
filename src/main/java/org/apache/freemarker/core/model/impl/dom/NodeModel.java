@@ -771,17 +771,16 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     
     @Override
     public Object[] explainTypeError(Class[] expectedClasses) {
-        for (int i = 0; i < expectedClasses.length; i++) {
-            Class expectedClass = expectedClasses[i];
+        for (Class expectedClass : expectedClasses) {
             if (TemplateDateModel.class.isAssignableFrom(expectedClass)
                     || TemplateNumberModel.class.isAssignableFrom(expectedClass)
                     || TemplateBooleanModel.class.isAssignableFrom(expectedClass)) {
-                return new Object[] {
+                return new Object[]{
                         "XML node values are always strings (text), that is, they can't be used as number, "
-                        + "date/time/datetime or boolean without explicit conversion (such as "
-                        + "someNode?number, someNode?datetime.xs, someNode?date.xs, someNode?time.xs, "
-                        + "someNode?boolean).",
-                        };
+                                + "date/time/datetime or boolean without explicit conversion (such as "
+                                + "someNode?number, someNode?datetime.xs, someNode?date.xs, someNode?time.xs, "
+                                + "someNode?boolean).",
+                };
             }
         }
         return null;

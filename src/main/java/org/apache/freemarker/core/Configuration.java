@@ -529,7 +529,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * and {@link #setObjectWrapper(ObjectWrapper)}. When the user configures FreeMarker from Spring XML, he has no
      * control over the order, so it has to work on both ways.
      */
-    private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
+    private HashMap<String, Object> rewrappableSharedVariables = null;
     
     private String defaultEncoding = _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
@@ -2622,11 +2622,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     private void setSharedVariablesFromRewrappableSharedVariables() throws TemplateModelException {
         if (rewrappableSharedVariables == null) return;
-        for (Iterator it = rewrappableSharedVariables.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry/*<String, Object>*/ ent = (Entry) it.next();
-            String name = (String) ent.getKey();
+        for (Entry<String, Object> ent : rewrappableSharedVariables.entrySet()) {
+            String name = ent.getKey();
             Object value = ent.getValue();
-            
+
             TemplateModel valueAsTM;
             if (value instanceof TemplateModel) {
                 valueAsTM = (TemplateModel) value;

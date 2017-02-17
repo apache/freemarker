@@ -233,8 +233,7 @@ public class FileTemplateLoader implements TemplateLoader {
         
                 if (!identicalNameFound) {
                     // If we find a similarly named file that only differs in case, then this is a file-not-found.
-                    for (int i = 0; i < listing.length; i++) {
-                        final String listingEntry = listing[i];
+                    for (final String listingEntry : listing) {
                         if (fileName.equalsIgnoreCase(listingEntry)) {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("Emulating file-not-found because of letter case differences to the "
