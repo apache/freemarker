@@ -369,7 +369,7 @@ class OverloadedNumberUtil {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj != null && this.getClass() == obj.getClass()) {
+            if (obj != null && getClass() == obj.getClass()) {
                 return getSourceNumber().equals(((NumberWithFallbackType) obj).getSourceNumber());
             } else {
                 return false;

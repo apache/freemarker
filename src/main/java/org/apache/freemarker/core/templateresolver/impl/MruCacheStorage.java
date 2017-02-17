@@ -318,7 +318,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
         
         MruReference(MruEntry entry, ReferenceQueue queue) {
             super(entry.getValue(), queue);
-            this.key = entry.getKey();
+            key = entry.getKey();
         }
         
         Object getKey() {

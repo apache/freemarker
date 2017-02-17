@@ -70,7 +70,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
         private final String printfFormat; 
 
         private PrintfGTemplateNumberFormat(Integer significantDigits, Locale locale) {
-            this.printfFormat = "%" + (significantDigits != null ? "." + significantDigits : "") + "G";
+            printfFormat = "%" + (significantDigits != null ? "." + significantDigits : "") + "G";
             this.locale = locale;
         }
         

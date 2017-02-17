@@ -284,7 +284,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean writeProtected, boolean finalizeConstruction) {
         // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
         if (bwConf.getMethodAppearanceFineTuner() == null) {
-            Class<?> thisClass = this.getClass();
+            Class<?> thisClass = getClass();
             boolean overridden = false;
             boolean testFailed = false;
             try {
@@ -321,14 +321,14 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                     @Override
                     public void process(
                             MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
-                        BeansWrapper.this.finetuneMethodAppearance(in.getContainingClass(), in.getMethod(), out);
+                        finetuneMethodAppearance(in.getContainingClass(), in.getMethod(), out);
                     }
                     
                 });
             }
         }
-        
-        this.incompatibleImprovements = bwConf.getIncompatibleImprovements();  // normalized
+
+        incompatibleImprovements = bwConf.getIncompatibleImprovements();  // normalized
         
         simpleMapWrapper = bwConf.isSimpleMapWrapper();
         defaultDateType = bwConf.getDefaultDateType();
@@ -415,7 +415,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     protected void checkModifiable() {
         if (writeProtected) throw new IllegalStateException(
-                "Can't modify the " + this.getClass().getName() + " object, as it was write protected.");
+                "Can't modify the " + getClass().getName() + " object, as it was write protected.");
     }
 
     /**
@@ -1748,16 +1748,16 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             return exposeMethodAs;
         }
         
-        public void setExposeMethodAs(String exposeAsMethod) {
-            this.exposeMethodAs = exposeAsMethod;
+        public void setExposeMethodAs(String exposeMethodAs) {
+            this.exposeMethodAs = exposeMethodAs;
         }
         
         public boolean getMethodShadowsProperty() {
             return methodShadowsProperty;
         }
         
-        public void setMethodShadowsProperty(boolean shadowEarlierProperty) {
-            this.methodShadowsProperty = shadowEarlierProperty;
+        public void setMethodShadowsProperty(boolean methodShadowsProperty) {
+            this.methodShadowsProperty = methodShadowsProperty;
         }
 
     }

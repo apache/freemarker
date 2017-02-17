@@ -136,7 +136,7 @@ abstract public class Expression extends TemplateObject {
     }
 
     TemplateModel evalToNonMissing(Environment env) throws TemplateException {
-        TemplateModel result = this.eval(env);
+        TemplateModel result = eval(env);
         assertNonNull(result, env);
         return result;
     }

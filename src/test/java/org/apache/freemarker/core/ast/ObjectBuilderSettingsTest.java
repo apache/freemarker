@@ -1041,21 +1041,21 @@ public class ObjectBuilderSettingsTest {
         }
         
         public TestBean1(Integer i, boolean b) {
-            this.f = 2;
+            f = 2;
             this.i = i;
-            this.l = 2;
+            l = 2;
             this.b = b;
         }
     
         public TestBean1(Integer i, long l) {
-            this.f = 3;
+            f = 3;
             this.i = i;
             this.l = l;
-            this.b = false;
+            b = false;
         }
         
         public TestBean1() {
-            this.f = 4;
+            f = 4;
         }
     
         public double getP1() {
@@ -1097,18 +1097,18 @@ public class ObjectBuilderSettingsTest {
         final int x;
 
         public TestBean2() {
-            this.built = false;
-            this.x = 0;
+            built = false;
+            x = 0;
         }
         
         public TestBean2(int x) {
-            this.built = false;
+            built = false;
             this.x = x;
         }
 
         public TestBean2(TestBean2Builder builder) {
-            this.built = true;
-            this.x = builder.x;
+            built = true;
+            x = builder.x;
         }
         
     }

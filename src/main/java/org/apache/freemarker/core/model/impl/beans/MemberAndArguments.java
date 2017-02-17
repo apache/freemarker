@@ -34,8 +34,8 @@ class MemberAndArguments extends MaybeEmptyMemberAndArguments {
     /**
      * @param args The already unwrapped arguments
      */
-    MemberAndArguments(CallableMemberDescriptor memberDesc, Object[] args) {
-        this.callableMemberDesc = memberDesc;
+    MemberAndArguments(CallableMemberDescriptor callableMemberDesc, Object[] args) {
+        this.callableMemberDesc = callableMemberDesc;
         this.args = args;
     }
     

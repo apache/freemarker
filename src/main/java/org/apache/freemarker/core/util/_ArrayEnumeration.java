@@ -32,7 +32,7 @@ public class _ArrayEnumeration implements Enumeration {
     public _ArrayEnumeration(Object[] array, int size) {
         this.array = array;
         this.size = size;
-        this.nextIndex = 0;
+        nextIndex = 0;
     }
 
     @Override

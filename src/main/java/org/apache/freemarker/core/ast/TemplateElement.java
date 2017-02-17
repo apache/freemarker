@@ -173,9 +173,9 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     public String getNodeName() {
-        String classname = this.getClass().getName();
-        int shortNameOffset = classname.lastIndexOf('.') + 1;
-        return classname.substring(shortNameOffset);
+        String className = getClass().getName();
+        int shortNameOffset = className.lastIndexOf('.') + 1;
+        return className.substring(shortNameOffset);
     }
 
     // Methods so that we can implement the Swing TreeNode API.
@@ -452,8 +452,8 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     private TemplateElement getLastChild() {
-        final int regulatedChildCount = this.childCount;
-        return regulatedChildCount == 0 ? null : childBuffer[regulatedChildCount - 1];
+        final int childCount = this.childCount;
+        return childCount == 0 ? null : childBuffer[childCount - 1];
     }
 
     private TemplateElement getFirstLeaf() {

@@ -57,9 +57,9 @@ class NodeOutputter {
     
     private void setContext(Element contextNode) {
         this.contextNode = contextNode;
-        this.env = Environment.getCurrentEnvironment();
-        this.defaultNS = env.getDefaultNS();
-        this.hasDefaultNS = defaultNS != null && defaultNS.length() > 0;
+        env = Environment.getCurrentEnvironment();
+        defaultNS = env.getDefaultNS();
+        hasDefaultNS = defaultNS != null && defaultNS.length() > 0;
         namespacesToPrefixLookup.put(null, "");
         namespacesToPrefixLookup.put("", "");
         buildPrefixLookup(contextNode);
@@ -121,7 +121,7 @@ class NodeOutputter {
             buf.append(nsURI);
             buf.append("\"");
         }
-        this.namespaceDecl = buf.toString();
+        namespaceDecl = buf.toString();
     }
     
     private void outputQualifiedName(Node n, StringBuilder buf) {

@@ -65,7 +65,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
     
     public SoftCacheStorage(Map backingMap) {
         map = backingMap;
-        this.concurrent = map instanceof ConcurrentMap;
+        concurrent = map instanceof ConcurrentMap;
     }
     
     @Override

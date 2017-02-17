@@ -283,7 +283,7 @@ public class ConfigurationTest extends TestCase {
     
     public void testTemplateLoadingErrors() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setClassForTemplateLoading(this.getClass(), "nosuchpackage");
+        cfg.setClassForTemplateLoading(getClass(), "nosuchpackage");
         try {
             cfg.getTemplate("missing.ftl");
             fail();

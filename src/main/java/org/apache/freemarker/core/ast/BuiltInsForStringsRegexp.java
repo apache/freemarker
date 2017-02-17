@@ -188,10 +188,10 @@ class BuiltInsForStringsRegexp {
         TemplateModel getGroups() {
            TemplateSequenceModel entireInputMatchGroups = this.entireInputMatchGroups;
            if (entireInputMatchGroups == null) {
-               Matcher t = this.firedEntireInputMatcher;
+               Matcher t = firedEntireInputMatcher;
                if (t == null) {
                    isEntrieInputMatchesAndStoreResults();
-                   t = this.firedEntireInputMatcher;
+                   t = firedEntireInputMatcher;
                }
                final Matcher firedEntireInputMatcher = t;
                

@@ -150,11 +150,11 @@ public class TaglibFactory implements TemplateHashModel {
      * <p>This object is only thread-safe after you have stopped calling its setter methods (and it was properly
      * published to the other threads; see JSR 133 (Java Memory Model)).
      * 
-     * @param ctx
+     * @param servletContext
      *            The servlet context whose JSP tag libraries this factory will load.
      */
-    public TaglibFactory(ServletContext ctx) {
-        this.servletContext = ctx;
+    public TaglibFactory(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 
     /**
@@ -1955,7 +1955,7 @@ public class TaglibFactory implements TemplateHashModel {
         @Override
         public Throwable getCause() {
             Throwable superCause = super.getCause();
-            return superCause == null ? this.cause : superCause;
+            return superCause == null ? cause : superCause;
         }
     
     }
@@ -1967,7 +1967,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         public URLWithExternalForm(URL url) {
             this.url = url;
-            this.externalForm = url.toExternalForm();
+            externalForm = url.toExternalForm();
         }
 
         public URL getUrl() {
@@ -1998,7 +1998,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         @Override
         public int compareTo(Object that) {
-            return this.getExternalForm().compareTo(((URLWithExternalForm) that).getExternalForm());
+            return getExternalForm().compareTo(((URLWithExternalForm) that).getExternalForm());
         }
 
     }

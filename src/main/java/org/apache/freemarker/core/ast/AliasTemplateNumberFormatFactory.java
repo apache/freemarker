@@ -40,7 +40,7 @@ public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormat
      *            The format string this format will be an alias to
      */
     public AliasTemplateNumberFormatFactory(String targetFormatString) {
-        this.defaultTargetFormatString = targetFormatString;
+        defaultTargetFormatString = targetFormatString;
         localizedTargetFormatStrings = null;
     }
 
@@ -79,7 +79,7 @@ public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormat
                 targetFormatString = null;
             }
             if (targetFormatString == null) {
-                targetFormatString = this.defaultTargetFormatString;
+                targetFormatString = defaultTargetFormatString;
             }
             return env.getTemplateNumberFormat(targetFormatString, locale);
         } catch (TemplateValueFormatException e) {

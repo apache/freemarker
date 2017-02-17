@@ -86,7 +86,7 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
 
     protected ParseException newArgumentCountException(String ordinalityDesc, Token openParen, Token closeParen) {
         return new ParseException(
-                "?" + key + "(...) " + ordinalityDesc + " parameters", this.getTemplate(),
+                "?" + key + "(...) " + ordinalityDesc + " parameters", getTemplate(),
                 openParen.beginLine, openParen.beginColumn,
                 closeParen.endLine, closeParen.endColumn);
     }

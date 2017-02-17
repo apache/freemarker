@@ -173,11 +173,11 @@ class ClassIntrospector {
             boolean hasSharedInstanceRestrictons, boolean shared) {
         _NullArgumentException.check("sharedLock", sharedLock);
 
-        this.exposureLevel = builder.getExposureLevel();
-        this.exposeFields = builder.getExposeFields();
-        this.methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
-        this.methodSorter = builder.getMethodSorter();
-        this.bugfixed = builder.isBugfixed();
+        exposureLevel = builder.getExposureLevel();
+        exposeFields = builder.getExposeFields();
+        methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
+        methodSorter = builder.getMethodSorter();
+        bugfixed = builder.isBugfixed();
 
         this.sharedLock = sharedLock;
 
@@ -588,7 +588,7 @@ class ClassIntrospector {
     void clearCache() {
         if (getHasSharedInstanceRestrictons()) {
             throw new IllegalStateException(
-                    "It's not allowed to clear the whole cache in a read-only " + this.getClass().getName() +
+                    "It's not allowed to clear the whole cache in a read-only " + getClass().getName() +
                             "instance. Use removeFromClassIntrospectionCache(String prefix) instead.");
         }
         forcedClearCache();

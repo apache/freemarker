@@ -44,7 +44,7 @@ class EscapeBlock extends TemplateElement {
     void setContent(TemplateElements children) {
         setChildren(children);
         // We don't need it anymore at this point
-        this.escapedExpr = null;
+        escapedExpr = null;
     }
 
     @Override

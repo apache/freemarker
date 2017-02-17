@@ -37,23 +37,23 @@ public final class GetTemplateResult {
     
     public GetTemplateResult(Template template) {
         this.template = template;
-        this.missingTemplateNormalizedName = null;
-        this.missingTemplateReason = null;
-        this.missingTemplateCauseException = null;
+        missingTemplateNormalizedName = null;
+        missingTemplateReason = null;
+        missingTemplateCauseException = null;
     }
     
     public GetTemplateResult(String normalizedName, Exception missingTemplateCauseException) {
-        this.template = null;
-        this.missingTemplateNormalizedName = normalizedName;
-        this.missingTemplateReason = null;
+        template = null;
+        missingTemplateNormalizedName = normalizedName;
+        missingTemplateReason = null;
         this.missingTemplateCauseException = missingTemplateCauseException;
     }
     
     public GetTemplateResult(String normalizedName, String missingTemplateReason) {
-        this.template = null;
-        this.missingTemplateNormalizedName = normalizedName;
+        template = null;
+        missingTemplateNormalizedName = normalizedName;
         this.missingTemplateReason = missingTemplateReason;
-        this.missingTemplateCauseException = null;
+        missingTemplateCauseException = null;
     }
     
     /**

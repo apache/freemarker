@@ -39,7 +39,7 @@ final class BoundedRangeModel extends RangeModel {
         step = begin <= end ? 1 : -1;
         size = Math.abs(end - begin) + (inclusiveEnd ? 1 : 0);
         this.rightAdaptive = rightAdaptive;
-        this.affectedByStringSlicingBug = inclusiveEnd;
+        affectedByStringSlicingBug = inclusiveEnd;
     }
 
     @Override

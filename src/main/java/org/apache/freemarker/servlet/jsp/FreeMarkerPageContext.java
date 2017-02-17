@@ -92,7 +92,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                     FreemarkerServlet.KEY_APPLICATION);
         }
         if (appModel instanceof ServletContextHashModel) {
-            this.servlet = ((ServletContextHashModel) appModel).getServlet();
+            servlet = ((ServletContextHashModel) appModel).getServlet();
         } else {
             throw new  TemplateModelException("Could not find an instance of " + 
                     ServletContextHashModel.class.getName() + 
@@ -113,8 +113,8 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             session = request.getSession(false);
             response = reqHash.getResponse();
             wrapper = reqHash.getObjectWrapper();
-            unwrapper = this.wrapper instanceof ObjectWrapperAndUnwrapper
-                    ? (ObjectWrapperAndUnwrapper) this.wrapper : null;
+            unwrapper = wrapper instanceof ObjectWrapperAndUnwrapper
+                    ? (ObjectWrapperAndUnwrapper) wrapper : null;
         } else {
             throw new  TemplateModelException("Could not find an instance of " + 
                     HttpRequestHashModel.class.getName() + 

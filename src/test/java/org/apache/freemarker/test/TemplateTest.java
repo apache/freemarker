@@ -95,9 +95,9 @@ public abstract class TemplateTest {
         String expectedOut;
         {
             String resName = name + ".out";
-            InputStream in = this.getClass().getResourceAsStream(resName);
+            InputStream in = getClass().getResourceAsStream(resName);
             if (in == null) {
-                throw new IOException("Reference output resource not found: " + this.getClass() + ", " + resName);
+                throw new IOException("Reference output resource not found: " + getClass() + ", " + resName);
             }
             try {
                 expectedOut = TestUtil.removeTxtCopyrightComment(IOUtils.toString(in, "utf-8"));

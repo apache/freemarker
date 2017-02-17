@@ -29,12 +29,12 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 public abstract class BeansWrapperWithShortedMethods extends BeansWrapper {
     
     public BeansWrapperWithShortedMethods(boolean desc) {
-        this.setMethodSorter(new AlphabeticalMethodSorter(desc));
+        setMethodSorter(new AlphabeticalMethodSorter(desc));
     }
 
     public BeansWrapperWithShortedMethods(Version incompatibleImprovements, boolean desc) {
         super(incompatibleImprovements);
-        this.setMethodSorter(new AlphabeticalMethodSorter(desc));
+        setMethodSorter(new AlphabeticalMethodSorter(desc));
     }
 
 }

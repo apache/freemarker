@@ -88,7 +88,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
         _NullArgumentException.check("basePackagePath", basePackagePath);
 
         // Either set a non-null resourceLoaderClass or a non-null classLoader, not both:
-        this.resourceLoaderClass = classLoader == null ? (resourceLoaderClass == null ? this.getClass()
+        this.resourceLoaderClass = classLoader == null ? (resourceLoaderClass == null ? getClass()
                 : resourceLoaderClass) : null;
         if (this.resourceLoaderClass == null && classLoader == null) {
             throw new _NullArgumentException("classLoader");

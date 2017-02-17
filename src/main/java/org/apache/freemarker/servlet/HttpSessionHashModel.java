@@ -53,9 +53,9 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
         this.session = session;
         this.wrapper = wrapper;
 
-        this.servlet = null;
-        this.request = null;
-        this.response = null;
+        servlet = null;
+        request = null;
+        response = null;
     }
 
     /**

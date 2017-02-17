@@ -69,11 +69,11 @@ public final class TemplateLoadingResult {
             TemplateConfiguration templateConfiguration) {
         _NullArgumentException.check("templateSource", source);
         _NullArgumentException.check("reader", reader);
-        this.status = TemplateLoadingResultStatus.OPENED;
+        status = TemplateLoadingResultStatus.OPENED;
         this.source = source;
         this.version = version;
         this.reader = reader;
-        this.inputStream = null;
+        inputStream = null;
         this.templateConfiguration = templateConfiguration; 
     }
 
@@ -101,10 +101,10 @@ public final class TemplateLoadingResult {
             TemplateConfiguration templateConfiguration) {
         _NullArgumentException.check("templateSource", source);
         _NullArgumentException.check("inputStream", inputStream);
-        this.status = TemplateLoadingResultStatus.OPENED;
+        status = TemplateLoadingResultStatus.OPENED;
         this.source = source;
         this.version = version;
-        this.reader = null;
+        reader = null;
         this.inputStream = inputStream;
         this.templateConfiguration = templateConfiguration; 
     }
@@ -114,11 +114,11 @@ public final class TemplateLoadingResult {
      */
     private TemplateLoadingResult(TemplateLoadingResultStatus status) {
         this.status = status;
-        this.source = null;
-        this.version = null;
-        this.reader = null;
-        this.inputStream = null;
-        this.templateConfiguration = null;
+        source = null;
+        version = null;
+        reader = null;
+        inputStream = null;
+        templateConfiguration = null;
     }
 
     /**

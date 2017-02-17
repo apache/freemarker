@@ -46,7 +46,7 @@ final class DollarVariable extends Interpolation {
         this.expression = expression;
         this.escapedExpression = escapedExpression;
         this.outputFormat = outputFormat;
-        this.markupOutputFormat
+        markupOutputFormat
                 = (MarkupOutputFormat) (outputFormat instanceof MarkupOutputFormat ? outputFormat : null);
         this.autoEscape = autoEscape;
     }

@@ -135,23 +135,23 @@ public final class Version implements Serializable {
      */
     public Version(int intValue) {
         this.intValue = intValue;
-        
-        this.micro = intValue % 1000;
-        this.minor = (intValue / 1000) % 1000;
-        this.major = intValue / 1000000;
-        
-        this.extraInfo = null;
-        this.gaeCompliant = null;
-        this.buildDate = null;
+
+        micro = intValue % 1000;
+        minor = (intValue / 1000) % 1000;
+        major = intValue / 1000000;
+
+        extraInfo = null;
+        gaeCompliant = null;
+        buildDate = null;
         originalStringValue = null;
     }
     
-    public Version(int major, int minor, int micro, String extraInfo, Boolean gaeCompatible, Date buildDate) {
+    public Version(int major, int minor, int micro, String extraInfo, Boolean gaeCompliant, Date buildDate) {
         this.major = major;
         this.minor = minor;
         this.micro = micro;
         this.extraInfo = extraInfo;
-        this.gaeCompliant = gaeCompatible;
+        this.gaeCompliant = gaeCompliant;
         this.buildDate = buildDate;
         intValue = calculateIntValue();
         originalStringValue = null;

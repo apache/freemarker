@@ -118,7 +118,7 @@ class DebuggerServer {
     }
 
     public void stop() {
-        this.stop = true;
+        stop = true;
         if (serverSocket != null) {
             try {
                 serverSocket.close();

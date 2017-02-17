@@ -243,7 +243,7 @@ implements
 
         DebugTemplateModel(Template template) {
             super(template);
-            this.name = new SimpleScalar(template.getName());
+            name = new SimpleScalar(template.getName());
         }
 
         @Override

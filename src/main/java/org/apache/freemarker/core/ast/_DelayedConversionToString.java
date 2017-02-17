@@ -39,8 +39,8 @@ public abstract class _DelayedConversionToString {
                 stringValue = this.stringValue;
                 if (stringValue == NOT_SET) {
                     stringValue = doConversion(object);
-                    this.stringValue = stringValue; 
-                    this.object = null;
+                    this.stringValue = stringValue;
+                    object = null;
                 }
             }
         }

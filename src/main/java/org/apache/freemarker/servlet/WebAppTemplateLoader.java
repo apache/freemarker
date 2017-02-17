@@ -160,8 +160,8 @@ public class WebAppTemplateLoader implements TemplateLoader {
      * 
      * @since 2.3.23
      */
-    public void setAttemptFileAccess(boolean attemptLoadingFromFile) {
-        this.attemptFileAccess = attemptLoadingFromFile;
+    public void setAttemptFileAccess(boolean attemptFileAccess) {
+        this.attemptFileAccess = attemptFileAccess;
     }
 
     @Override
@@ -250,11 +250,11 @@ public class WebAppTemplateLoader implements TemplateLoader {
         
         WebAppTemplateLoadingSource(File file) {
             this.file = file;
-            this.url = null;
+            url = null;
         }
 
         WebAppTemplateLoadingSource(URL url) {
-            this.file = null;
+            file = null;
             this.url = url;
         }
 

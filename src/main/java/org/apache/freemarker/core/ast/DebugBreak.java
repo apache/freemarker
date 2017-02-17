@@ -40,7 +40,7 @@ public class DebugBreak extends TemplateElement {
     @Override
     protected TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         if (!DebuggerService.suspendEnvironment(
-                env, this.getTemplate().getSourceName(), getChild(0).getBeginLine())) {
+                env, getTemplate().getSourceName(), getChild(0).getBeginLine())) {
             return getChild(0).accept(env);
         } else {
             throw new StopException(env, "Stopped by debugger");

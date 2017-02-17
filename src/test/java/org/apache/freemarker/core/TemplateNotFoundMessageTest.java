@@ -55,7 +55,7 @@ public class TemplateNotFoundMessageTest {
 
     @Test
     public void testClassTemplateLoader() throws IOException {
-        final String errMsg = failWith(new ClassTemplateLoader(this.getClass(), "foo/bar"));
+        final String errMsg = failWith(new ClassTemplateLoader(getClass(), "foo/bar"));
         showErrorMessage(errMsg);
         assertThat(errMsg, containsString("ClassTemplateLoader"));
         assertThat(errMsg, containsString("foo/bar"));
@@ -88,7 +88,7 @@ public class TemplateNotFoundMessageTest {
     public void testMultiTemplateLoader() throws IOException {
         final String errMsg = failWith(new MultiTemplateLoader(new TemplateLoader[] {
                 new WebAppTemplateLoader(new MockServletContext(), "WEB-INF/templates"),
-                new ClassTemplateLoader(this.getClass(), "foo/bar")
+                new ClassTemplateLoader(getClass(), "foo/bar")
         }));
         showErrorMessage(errMsg);
         assertThat(errMsg, containsString("MultiTemplateLoader"));

@@ -168,8 +168,8 @@ public String getMessage() {
    @Deprecated
 public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) {
        this(detail, reason, errorLine, errorColumn, 0, 0);
-       this.endLineNumber = null; 
-       this.endColumnNumber = null; 
+      endLineNumber = null;
+      endColumnNumber = null;
     }
    
    /**
@@ -181,9 +181,9 @@ public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) 
        super(detail);  // the "detail" must not contain location information, the "message" might does
        this.detail = detail;
        errorCode = reason;
-       
-       this.lineNumber = Integer.valueOf(errorLine);  // In J2SE there was no Integer.valueOf(int)
-       this.columnNumber = Integer.valueOf(errorColumn);
+
+      lineNumber = Integer.valueOf(errorLine);  // In J2SE there was no Integer.valueOf(int)
+      columnNumber = Integer.valueOf(errorColumn);
        this.endLineNumber = Integer.valueOf(endLineNumber); 
        this.endColumnNumber = Integer.valueOf(endColumnNumber); 
     }
@@ -199,12 +199,12 @@ public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) 
    
    public TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar, int reason) {
       this(LexicalError(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
-      
-      this.lineNumber = Integer.valueOf(errorLine);  // In J2SE there was no Integer.valueOf(int)
-      this.columnNumber = Integer.valueOf(errorColumn);
+
+      lineNumber = Integer.valueOf(errorLine);  // In J2SE there was no Integer.valueOf(int)
+      columnNumber = Integer.valueOf(errorColumn);
       // We blame the single character that can't be the start of a legal token: 
-      this.endLineNumber = this.lineNumber; 
-      this.endColumnNumber = this.columnNumber; 
+      endLineNumber = lineNumber;
+      endColumnNumber = columnNumber;
    }
 
    /**

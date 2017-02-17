@@ -148,7 +148,7 @@ class BuiltInsForMultipleTypes {
             throws TemplateException {
                 this.text = text;
                 this.env = env;
-                this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target, false);
+                defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target, false);
             }
             
             @Override
@@ -563,7 +563,7 @@ class BuiltInsForMultipleTypes {
                 this.env = env;
                 
                 final int dateType = dateModel.getDateType();
-                this.defaultFormat = dateType == TemplateDateModel.UNKNOWN
+                defaultFormat = dateType == TemplateDateModel.UNKNOWN
                         ? null  // Lazy unknown type error in getAsString()
                         : env.getTemplateDateFormat(
                                 dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target, true);

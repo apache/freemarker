@@ -38,7 +38,7 @@ public final class ServletContextHashModel implements TemplateHashModel {
     public ServletContextHashModel(
         GenericServlet servlet, ObjectWrapper wrapper) {
         this.servlet = servlet;
-        this.servletctx = servlet.getServletContext();
+        servletctx = servlet.getServletContext();
         this.wrapper = wrapper;
     }
     
@@ -49,7 +49,7 @@ public final class ServletContextHashModel implements TemplateHashModel {
     @Deprecated
     public ServletContextHashModel(
         ServletContext servletctx, ObjectWrapper wrapper) {
-        this.servlet = null;
+        servlet = null;
         this.servletctx = servletctx;
         this.wrapper = wrapper;
     }

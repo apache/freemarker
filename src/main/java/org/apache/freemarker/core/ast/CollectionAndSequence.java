@@ -93,7 +93,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
 
         SequenceIterator(TemplateSequenceModel sequence) throws TemplateModelException {
             this.sequence = sequence;
-            this.size = sequence.size();
+            size = sequence.size();
             
         }
         @Override

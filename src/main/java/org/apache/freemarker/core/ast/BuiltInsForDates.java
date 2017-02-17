@@ -201,8 +201,8 @@ class BuiltInsForDates {
         protected boolean shouldShowOffset(Date date, int dateType, Environment env) {
             if (dateType == TemplateDateModel.DATE) {
                 return false;  // ISO 8061 doesn't allow zone for date-only values
-            } else if (this.showOffset != null) {
-                return this.showOffset.booleanValue();
+            } else if (showOffset != null) {
+                return showOffset.booleanValue();
             } else {
                 // java.sql.Time values meant to carry calendar field values only, so we don't show offset for them.
                 return !(date instanceof java.sql.Time

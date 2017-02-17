@@ -61,8 +61,8 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
     }
 
     /** See {@link DefaultObjectWrapper#setForceLegacyNonListCollections(boolean)}. */
-    public void setForceLegacyNonListCollections(boolean legacyNonListCollectionWrapping) {
-        this.forceLegacyNonListCollections = legacyNonListCollectionWrapping;
+    public void setForceLegacyNonListCollections(boolean forceLegacyNonListCollections) {
+        this.forceLegacyNonListCollections = forceLegacyNonListCollections;
     }
 
     /**

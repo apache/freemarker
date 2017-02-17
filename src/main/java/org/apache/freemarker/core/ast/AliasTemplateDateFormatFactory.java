@@ -41,7 +41,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
      *            The format string this format will be an alias to.
      */
     public AliasTemplateDateFormatFactory(String targetFormatString) {
-        this.defaultTargetFormatString = targetFormatString;
+        defaultTargetFormatString = targetFormatString;
         localizedTargetFormatStrings = null;
     }
 
@@ -80,7 +80,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
                 targetFormatString = null;
             }
             if (targetFormatString == null) {
-                targetFormatString = this.defaultTargetFormatString;
+                targetFormatString = defaultTargetFormatString;
             }
             return env.getTemplateDateFormat(targetFormatString, dateType, locale, timeZone, zonelessInput);
         } catch (TemplateValueFormatException e) {

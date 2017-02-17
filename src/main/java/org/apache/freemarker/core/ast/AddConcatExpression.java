@@ -275,8 +275,8 @@ final class AddConcatExpression extends Expression {
             if (keys == null) {
                 HashSet keySet = new HashSet();
                 SimpleSequence keySeq = new SimpleSequence(32);
-                addKeys(keySet, keySeq, (TemplateHashModelEx) this.left);
-                addKeys(keySet, keySeq, (TemplateHashModelEx) this.right);
+                addKeys(keySet, keySeq, (TemplateHashModelEx) left);
+                addKeys(keySet, keySeq, (TemplateHashModelEx) right);
                 size = keySet.size();
                 keys = new CollectionAndSequence(keySeq);
             }

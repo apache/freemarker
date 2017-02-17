@@ -86,14 +86,14 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     return new SimpleScalar(buf.toString().trim());
                 } else if (key.equals(AtAtKey.PREVIOUS_SIBLING_ELEMENT.getKey())) {
                     Node previousSibling = node.getPreviousSibling();
-                    while (previousSibling != null && !this.isSignificantNode(previousSibling)) {
+                    while (previousSibling != null && !isSignificantNode(previousSibling)) {
                         previousSibling = previousSibling.getPreviousSibling();
                     }
                     return previousSibling != null && previousSibling.getNodeType() == Node.ELEMENT_NODE
                             ? wrap(previousSibling) : new NodeListModel(Collections.emptyList(), null);  
                 } else if (key.equals(AtAtKey.NEXT_SIBLING_ELEMENT.getKey())) {
                     Node nextSibling = node.getNextSibling();
-                    while (nextSibling != null && !this.isSignificantNode(nextSibling)) {
+                    while (nextSibling != null && !isSignificantNode(nextSibling)) {
                         nextSibling = nextSibling.getNextSibling();
                     }
                     return nextSibling != null && nextSibling.getNodeType() == Node.ELEMENT_NODE

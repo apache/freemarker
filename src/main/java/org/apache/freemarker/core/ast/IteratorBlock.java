@@ -413,18 +413,18 @@ final class IteratorBlock extends TemplateElement {
         }
 
         String getLoopVariableName() {
-            return this.loopVarName;
+            return loopVarName;
         }
 
         String getLoopVariable2Name() {
-            return this.loopVar2Name;
+            return loopVar2Name;
         }
         
         @Override
         public TemplateModel getLocalVariable(String name) {
-            String loopVariableName = this.loopVarName;
-            if (loopVariableName != null && name.startsWith(loopVariableName)) {
-                switch(name.length() - loopVariableName.length()) {
+            String loopVarName = this.loopVarName;
+            if (loopVarName != null && name.startsWith(loopVarName)) {
+                switch(name.length() - loopVarName.length()) {
                     case 0: 
                         return loopVar;
                     case 6: 
@@ -449,13 +449,13 @@ final class IteratorBlock extends TemplateElement {
         
         @Override
         public Collection getLocalVariableNames() {
-            String loopVariableName = this.loopVarName;
-            if (loopVariableName != null) {
+            String loopVarName = this.loopVarName;
+            if (loopVarName != null) {
                 if (localVarNames == null) {
                     localVarNames = new ArrayList(3);
-                    localVarNames.add(loopVariableName);
-                    localVarNames.add(loopVariableName + LOOP_STATE_INDEX);
-                    localVarNames.add(loopVariableName + LOOP_STATE_HAS_NEXT);
+                    localVarNames.add(loopVarName);
+                    localVarNames.add(loopVarName + LOOP_STATE_INDEX);
+                    localVarNames.add(loopVarName + LOOP_STATE_HAS_NEXT);
                 }
                 return localVarNames;
             } else {

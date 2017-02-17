@@ -72,7 +72,7 @@ public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOu
         }
         
         mc = escapePlainText(mo.getPlainTextContent());
-        mo.setMarkupContet(mc);
+        mo.setMarkupContent(mc);
         return mc;
     }
     

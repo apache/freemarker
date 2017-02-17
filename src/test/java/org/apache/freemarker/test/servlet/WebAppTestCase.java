@@ -274,7 +274,7 @@ public class WebAppTestCase {
         final String appRelResPath = "webapps/" + webAppName + "/";
         final String relResPath = appRelResPath + "WEB-INF/web.xml";
 
-        Class<?> baseClass = this.getClass();
+        Class<?> baseClass = getClass();
         do {
             URL r = baseClass.getResource(relResPath);
             if (r != null) {

@@ -43,8 +43,8 @@ final class NumericalOutput extends Interpolation {
     NumericalOutput(Expression expression, MarkupOutputFormat autoEscapeOutputFormat) {
         this.expression = expression;
         hasFormat = false;
-        this.minFracDigits = 0;
-        this.maxFracDigits = 0;
+        minFracDigits = 0;
+        maxFracDigits = 0;
         this.autoEscapeOutputFormat = autoEscapeOutputFormat;
     }
 

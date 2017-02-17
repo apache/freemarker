@@ -55,8 +55,8 @@ public class FreeMarkerTree extends JTree {
     }
 
     public void setTemplate(Template template) {
-        this.setModel(new DefaultTreeModel(getNode(template.getRootTreeNode())));
-        this.invalidate();
+        setModel(new DefaultTreeModel(getNode(template.getRootTreeNode())));
+        invalidate();
     }
 
     @Override

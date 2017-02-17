@@ -38,7 +38,7 @@ public class ConditionalTemplateConfigurationFactory extends TemplateConfigurati
     public ConditionalTemplateConfigurationFactory(
             TemplateSourceMatcher matcher, TemplateConfigurationFactory templateConfigurationFactory) {
         this.matcher = matcher;
-        this.templateConfiguration = null;
+        templateConfiguration = null;
         this.templateConfigurationFactory = templateConfigurationFactory;
     }
     
@@ -46,7 +46,7 @@ public class ConditionalTemplateConfigurationFactory extends TemplateConfigurati
             TemplateSourceMatcher matcher, TemplateConfiguration templateConfiguration) {
         this.matcher = matcher;
         this.templateConfiguration = templateConfiguration;
-        this.templateConfigurationFactory = null;
+        templateConfigurationFactory = null;
     }
 
     @Override

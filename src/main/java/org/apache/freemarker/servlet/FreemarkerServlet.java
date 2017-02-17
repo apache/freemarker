@@ -552,7 +552,7 @@ public class FreemarkerServlet extends HttpServlet {
         } catch (Exception e) {
             // At least Jetty doesn't log the ServletException itself, only its cause exception. Thus we add some
             // message here that (re)states the obvious.
-            throw new ServletException("Error while initializing " + this.getClass().getName()
+            throw new ServletException("Error while initializing " + getClass().getName()
                     + " servlet; see cause exception.", e);
         }
     }
@@ -978,7 +978,7 @@ public class FreemarkerServlet extends HttpServlet {
             }
             if (logWarn) {
                 LOG.warn(
-                        this.getClass().getName()
+                        getClass().getName()
                         + ".wrapper != config.getObjectWrapper(); possibly the result of incorrect extension of "
                         + FreemarkerServlet.class.getName() + ".");
             }

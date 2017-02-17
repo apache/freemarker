@@ -117,8 +117,8 @@ public class Template extends Configurable {
         super(toNonNull(cfg));
         this.name = name;
         this.sourceName = sourceName;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
-        this.parserConfiguration = customParserConfiguration != null ? customParserConfiguration : getConfiguration();
+        templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
+        parserConfiguration = customParserConfiguration != null ? customParserConfiguration : getConfiguration();
     }
 
     private static Configuration toNonNull(Configuration cfg) {
@@ -256,8 +256,8 @@ public class Template extends Configurable {
         this(name, sourceName, cfg, customParserConfiguration);
        
         _NullArgumentException.check("templateSpecifiedEncodingHandler", templateSpecifiedEncodingHandler);
-       
-        this.setEncoding(encoding);
+
+       setEncoding(encoding);
         LineTableBuilder ltbReader;
         try {
             ParserConfiguration actualParserConfiguration = getParserConfiguration();
@@ -275,7 +275,7 @@ public class Template extends Configurable {
                 parser = _CoreAPI.newFMParser(
                         this, reader, actualParserConfiguration, templateSpecifiedEncodingHandler);
                 try {
-                    this.rootElement = parser.Root();
+                    rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
                     // There's a JavaCC bug where the Reader throws a RuntimeExcepton and then JavaCC fails with
                     // IndexOutOfBoundsException. If that wasn't the case, we just rethrow. Otherwise we suppress the
@@ -285,8 +285,8 @@ public class Template extends Configurable {
                     }
                     rootElement = null;
                 }
-                this.actualTagSyntax = parser._getLastTagSyntax();
-                this.actualNamingConvention = parser._getLastNamingConvention();
+                actualTagSyntax = parser._getLastTagSyntax();
+                actualNamingConvention = parser._getLastNamingConvention();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
@@ -327,9 +327,9 @@ public class Template extends Configurable {
      */
     @Deprecated
     // [2.4] remove this
-    Template(String name, TemplateElement root, Configuration cfg) {
+    Template(String name, TemplateElement rootElement, Configuration cfg) {
         this(name, null, cfg, (ParserConfiguration) null);
-        this.rootElement = root;
+        this.rootElement = rootElement;
         DebuggerService.registerTemplate(this);
     }
     
@@ -634,7 +634,7 @@ public class Template extends Configurable {
      * the encoding returned by {@link Configuration#getEncoding(java.util.Locale)} should be used instead.
      */
     public String getEncoding() {
-        return this.encoding;
+        return encoding;
     }
     
     /**
@@ -955,7 +955,7 @@ public class Template extends Configurable {
             throw new IllegalArgumentException("The namespace URI: " + nsURI + " cannot be mapped to 2 different prefixes.");
         }
         if (prefix.equals(DEFAULT_NAMESPACE_PREFIX)) {
-            this.defaultNS = nsURI;
+            defaultNS = nsURI;
         } else {
             prefixToNamespaceURILookup.put(prefix, nsURI);
             namespaceURIToPrefixLookup.put(nsURI, prefix);
@@ -963,7 +963,7 @@ public class Template extends Configurable {
     }
     
     public String getDefaultNS() {
-        return this.defaultNS;
+        return defaultNS;
     }
     
     /**
@@ -1046,7 +1046,7 @@ public class Template extends Configurable {
 
         /** @deprecated Use {@link #getTemplateSpecifiedEncoding()} instead. */
         @Deprecated
-        public String specifiedEncoding;
+        public String templateSpecifiedEncoding;
         
         private final String constructorSpecifiedEncoding;
 
@@ -1062,13 +1062,13 @@ public class Template extends Configurable {
          * @since 2.3.22
          */
         public WrongEncodingException(String templateSpecifiedEncoding, String constructorSpecifiedEncoding) {
-            this.specifiedEncoding = templateSpecifiedEncoding;
+            this.templateSpecifiedEncoding = templateSpecifiedEncoding;
             this.constructorSpecifiedEncoding = constructorSpecifiedEncoding;
         }
         
         @Override
         public String getMessage() {
-            return "Encoding specified inside the template (" + specifiedEncoding
+            return "Encoding specified inside the template (" + templateSpecifiedEncoding
                     + ") doesn't match the encoding specified for the Template constructor"
                     + (constructorSpecifiedEncoding != null ? " (" + constructorSpecifiedEncoding + ")." : ".");
         }
@@ -1077,7 +1077,7 @@ public class Template extends Configurable {
          * @since 2.3.22
          */
         public String getTemplateSpecifiedEncoding() {
-            return specifiedEncoding;
+            return templateSpecifiedEncoding;
         }
 
         /**

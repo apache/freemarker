@@ -446,8 +446,8 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     @Override
     public boolean equals(Object other) {
         if (other == null) return false;
-        return other.getClass() == this.getClass() 
-                && ((NodeModel) other).node.equals(this.node);
+        return other.getClass() == getClass()
+                && ((NodeModel) other).node.equals(node);
     }
     
     static public NodeModel wrap(Node node) {

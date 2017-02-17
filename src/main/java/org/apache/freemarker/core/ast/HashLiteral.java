@@ -41,7 +41,7 @@ final class HashLiteral extends Expression {
     HashLiteral(ArrayList/*<Expression>*/ keys, ArrayList/*<Expression>*/ values) {
         this.keys = keys;
         this.values = values;
-        this.size = keys.size();
+        size = keys.size();
         keys.trimToSize();
         values.trimToSize();
     }

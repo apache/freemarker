@@ -202,8 +202,8 @@ public final class Environment extends Configurable {
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         configuration = template.getConfiguration();
-        this.globalNamespace = new Namespace(null);
-        this.currentNamespace = mainNamespace = new Namespace(template);
+        globalNamespace = new Namespace(null);
+        currentNamespace = mainNamespace = new Namespace(template);
         this.out = out;
         this.rootDataModel = rootDataModel;
         importMacros(template);
@@ -498,9 +498,9 @@ public final class Environment extends Configurable {
      void visitAttemptRecover(
              AttemptBlock attemptBlock, TemplateElement attemptedSection, RecoveryBlock recoverySection)
              throws TemplateException, IOException {
-        Writer prevOut = this.out;
+        Writer prevOut = out;
         StringWriter sw = new StringWriter();
-        this.out = sw;
+         out = sw;
         TemplateException thrownException = null;
         boolean lastFIRE = setFastInvalidReferenceExceptions(false);
         boolean lastInAttemptBlock = inAttemptBlock;
@@ -512,7 +512,7 @@ public final class Environment extends Configurable {
         } finally {
             inAttemptBlock = lastInAttemptBlock;
             setFastInvalidReferenceExceptions(lastFIRE);
-            this.out = prevOut;
+            out = prevOut;
         }
         if (thrownException != null) {
             if (LOG_ATTEMPT.isDebugEnabled()) {
@@ -556,7 +556,7 @@ public final class Environment extends Configurable {
         LocalContextStack prevLocalContextStack = localContextStack;
         TemplateElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
         if (nestedContentBuffer != null) {
-            this.currentMacroContext = invokingMacroContext.prevMacroContext;
+            currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;
 
             final Configurable prevParent;
@@ -568,7 +568,7 @@ public final class Environment extends Configurable {
                 legacyParent = currentNamespace.getTemplate();
             }
 
-            this.localContextStack = invokingMacroContext.prevLocalContextStack;
+            localContextStack = invokingMacroContext.prevLocalContextStack;
             if (invokingMacroContext.nestedContentParameterNames != null) {
                 pushLocalContext(bodyCtx);
             }
@@ -578,14 +578,14 @@ public final class Environment extends Configurable {
                 if (invokingMacroContext.nestedContentParameterNames != null) {
                     localContextStack.pop();
                 }
-                this.currentMacroContext = invokingMacroContext;
+                currentMacroContext = invokingMacroContext;
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
                 if (parentReplacementOn) {
                     setParent(prevParent);
                 } else {
                     legacyParent = prevParent;
                 }
-                this.localContextStack = prevLocalContextStack;
+                localContextStack = prevLocalContextStack;
             }
         }
     }
@@ -616,14 +616,14 @@ public final class Environment extends Configurable {
             ss.add(currentNamespace);
             nodeNamespaces = ss;
         }
-        int prevNodeNamespaceIndex = this.nodeNamespaceIndex;
-        String prevNodeName = this.currentNodeName;
-        String prevNodeNS = this.currentNodeNS;
+        int prevNodeNamespaceIndex = nodeNamespaceIndex;
+        String prevNodeName = currentNodeName;
+        String prevNodeNS = currentNodeNS;
         TemplateSequenceModel prevNodeNamespaces = nodeNamespaces;
         TemplateNodeModel prevVisitorNode = currentVisitorNode;
         currentVisitorNode = node;
         if (namespaces != null) {
-            this.nodeNamespaces = namespaces;
+            nodeNamespaces = namespaces;
         }
         try {
             TemplateModel macroOrTransform = getNodeProcessor(node);
@@ -654,11 +654,11 @@ public final class Environment extends Configurable {
                 }
             }
         } finally {
-            this.currentVisitorNode = prevVisitorNode;
-            this.nodeNamespaceIndex = prevNodeNamespaceIndex;
-            this.currentNodeName = prevNodeName;
-            this.currentNodeNS = prevNodeNS;
-            this.nodeNamespaces = prevNodeNamespaces;
+            currentVisitorNode = prevVisitorNode;
+            nodeNamespaceIndex = prevNodeNamespaceIndex;
+            currentNodeName = prevNodeName;
+            currentNodeNS = prevNodeNS;
+            nodeNamespaces = prevNodeNamespaces;
         }
     }
 
@@ -814,7 +814,7 @@ public final class Environment extends Configurable {
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
             throws TemplateException, IOException {
         if (node == null) {
-            node = this.getCurrentVisitorNode();
+            node = getCurrentVisitorNode();
             if (node == null) {
                 throw new _TemplateModelException(
                         "The target node of recursion is missing or null.");
@@ -1358,7 +1358,7 @@ public final class Environment extends Configurable {
     }
 
     void clearLastReturnValue() {
-        this.lastReturnValue = null;
+        lastReturnValue = null;
     }
 
     /**
@@ -1647,12 +1647,12 @@ public final class Environment extends Configurable {
             throw new UnknownDateTypeFormattingUnsupportedException();
         }
         int cacheIdx = getTemplateDateFormatCacheArrayIndex(dateType, zonelessInput, useSQLDTTZ);
-        TemplateDateFormat[] cachedTemplateDateFormats = this.cachedTempDateFormatArray;
-        if (cachedTemplateDateFormats == null) {
-            cachedTemplateDateFormats = new TemplateDateFormat[CACHED_TDFS_LENGTH];
-            this.cachedTempDateFormatArray = cachedTemplateDateFormats;
+        TemplateDateFormat[] cachedTempDateFormatArray = this.cachedTempDateFormatArray;
+        if (cachedTempDateFormatArray == null) {
+            cachedTempDateFormatArray = new TemplateDateFormat[CACHED_TDFS_LENGTH];
+            this.cachedTempDateFormatArray = cachedTempDateFormatArray;
         }
-        TemplateDateFormat format = cachedTemplateDateFormats[cacheIdx];
+        TemplateDateFormat format = cachedTempDateFormatArray[cacheIdx];
         if (format == null) {
             final String formatString;
             switch (dateType) {
@@ -1671,7 +1671,7 @@ public final class Environment extends Configurable {
 
             format = getTemplateDateFormat(formatString, dateType, useSQLDTTZ, zonelessInput, false);
             
-            cachedTemplateDateFormats[cacheIdx] = format;
+            cachedTempDateFormatArray[cacheIdx] = format;
         }
         return format;
     }
@@ -2365,9 +2365,9 @@ public final class Environment extends Configurable {
                 break;
         }
         if (result != null) {
-            this.nodeNamespaceIndex = i + 1;
-            this.currentNodeName = nodeName;
-            this.currentNodeNS = nsURI;
+            nodeNamespaceIndex = i + 1;
+            currentNodeName = nodeName;
+            currentNodeNS = nsURI;
         }
         return result;
     }
@@ -2492,7 +2492,7 @@ public final class Environment extends Configurable {
         // [FM3] This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
         encoding = getTemplate().getEncoding();
         if (encoding == null) {
-            encoding = configuration.getEncoding(this.getLocale());
+            encoding = configuration.getEncoding(getLocale());
         }
         return encoding;
     }
@@ -2661,15 +2661,15 @@ public final class Environment extends Configurable {
 
     private void initializeImportLibNamespace(final Namespace newNamespace, Template loadedTemplate)
             throws TemplateException, IOException {
-        Namespace prevNamespace = this.currentNamespace;
-        this.currentNamespace = newNamespace;
+        Namespace prevNamespace = currentNamespace;
+        currentNamespace = newNamespace;
         Writer prevOut = out;
-        this.out = _NullWriter.INSTANCE;
+        out = _NullWriter.INSTANCE;
         try {
             include(loadedTemplate);
         } finally {
-            this.out = prevOut;
-            this.currentNamespace = prevNamespace;
+            out = prevOut;
+            currentNamespace = prevNamespace;
         }
     }
 
@@ -2710,11 +2710,11 @@ public final class Environment extends Configurable {
         Writer prevOut = out;
         try {
             StringWriter sw = new StringWriter();
-            this.out = sw;
+            out = sw;
             visit(te);
             return sw.toString();
         } finally {
-            this.out = prevOut;
+            out = prevOut;
         }
     }
 
@@ -2813,7 +2813,7 @@ public final class Environment extends Configurable {
         private Template template;
 
         Namespace() {
-            this.template = Environment.this.getTemplate();
+            template = Environment.this.getTemplate();
         }
 
         Namespace(Template template) {
@@ -2855,9 +2855,9 @@ public final class Environment extends Configurable {
             
             this.templateName = templateName;
             // Make snapshot of all settings that influence template resolution:
-            this.locale = getLocale();
-            this.encoding = getIncludedTemplateEncoding();
-            this.customLookupCondition = getIncludedTemplateCustomLookupCondition();
+            locale = getLocale();
+            encoding = getIncludedTemplateEncoding();
+            customLookupCondition = getIncludedTemplateCustomLookupCondition();
         }
 
         private void ensureInitializedTME() throws TemplateModelException {

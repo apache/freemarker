@@ -1165,7 +1165,7 @@ public class Configurable {
      * @since 2.3.24
      */
     public boolean isCustomDateFormatsSet() {
-        return this.customDateFormats != null;
+        return customDateFormats != null;
     }
 
     /**
@@ -1436,7 +1436,7 @@ public class Configurable {
      * @since 2.3.21
      */
     public void setShowErrorTips(boolean showTips) {
-        this.showErrorTips = Boolean.valueOf(showTips);
+        showErrorTips = Boolean.valueOf(showTips);
         properties.setProperty(SHOW_ERROR_TIPS_KEY, String.valueOf(showTips));
     }
     
@@ -2784,8 +2784,8 @@ public class Configurable {
 
         private SettingStringParser(String text) {
             this.text = text;
-            this.p = 0;
-            this.ln = text.length();
+            p = 0;
+            ln = text.length();
         }
 
         List<KeyValuePair<List<String>>> parseAsSegmentedList() throws ParseException {

@@ -221,7 +221,7 @@ public class ParseException extends IOException implements FMParserConstants {
             Throwable cause) {
         super(description);  // but we override getMessage, so it will be different
         try {
-            this.initCause(cause);
+            initCause(cause);
         } catch (Exception e) {
             // Suppressed; we can't do more
         }

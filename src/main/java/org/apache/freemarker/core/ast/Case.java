@@ -30,7 +30,7 @@ final class Case extends TemplateElement {
     Expression condition;
 
     Case(Expression matchingValue, TemplateElements children) {
-        this.condition = matchingValue;
+        condition = matchingValue;
         setChildren(children);
     }
 

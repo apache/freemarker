@@ -388,7 +388,7 @@ extends
     void shutdownSpi() {
         server.stop();
         try {
-            UnicastRemoteObject.unexportObject(this.debugger, true);
+            UnicastRemoteObject.unexportObject(debugger, true);
         } catch (Exception e) {
         }
 

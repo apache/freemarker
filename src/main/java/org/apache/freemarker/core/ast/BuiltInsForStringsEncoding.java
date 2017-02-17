@@ -157,9 +157,9 @@ class BuiltInsForStringsEncoding {
         private final Environment env;
         private String cachedResult;
         
-        protected AbstractUrlBIResult(BuiltIn parent, String target, Environment env) {
+        protected AbstractUrlBIResult(BuiltIn parent, String targetAsString, Environment env) {
             this.parent = parent;
-            this.targetAsString = target;
+            this.targetAsString = targetAsString;
             this.env = env;
         }
         

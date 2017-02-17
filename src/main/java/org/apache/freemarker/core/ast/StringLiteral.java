@@ -80,7 +80,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 e.setTemplateName(parentTemplate.getSourceName());
                 throw e;
             }
-            this.constantValue = null;
+            constantValue = null;
         }
     }
     
@@ -180,7 +180,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         StringLiteral cloned = new StringLiteral(value);
         // FIXME: replacedIdentifier should be searched inside interpolatedOutput too:
-        cloned.dynamicValue = this.dynamicValue;
+        cloned.dynamicValue = dynamicValue;
         return cloned;
     }
 

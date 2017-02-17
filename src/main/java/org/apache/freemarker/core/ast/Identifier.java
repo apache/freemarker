@@ -89,7 +89,7 @@ final class Identifier extends Expression {
     @Override
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
-        if (this.name.equals(replacedIdentifier)) {
+        if (name.equals(replacedIdentifier)) {
             if (replacementState.replacementAlreadyInUse) {
                 Expression clone = replacement.deepCloneWithIdentifierReplaced(null, null, replacementState);
                 clone.copyLocationFrom(replacement);
@@ -99,7 +99,7 @@ final class Identifier extends Expression {
                 return replacement;
             }
         } else {
-            return new Identifier(this.name);
+            return new Identifier(name);
         }
     }
 

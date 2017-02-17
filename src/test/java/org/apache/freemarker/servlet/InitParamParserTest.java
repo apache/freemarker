@@ -73,7 +73,7 @@ public class InitParamParserTest {
         {
             ClassTemplateLoader ctl = (ClassTemplateLoader) InitParamParser.createTemplateLoader(
                     "classpath:templates",
-                    cfg, this.getClass(), null);
+                    cfg, getClass(), null);
             assertEquals("templates/", ctl.getBasePackagePath());
             assertEquals(Boolean.FALSE, ctl.getURLConnectionUsesCaches());
         }
@@ -81,7 +81,7 @@ public class InitParamParserTest {
         {
             ClassTemplateLoader ctl = (ClassTemplateLoader) InitParamParser.createTemplateLoader(
                     "classpath:templates?settings(URLConnectionUsesCaches=true)",
-                    cfg, this.getClass(), null);
+                    cfg, getClass(), null);
             assertEquals("templates/", ctl.getBasePackagePath());
             assertEquals(Boolean.TRUE, ctl.getURLConnectionUsesCaches());
         }
@@ -94,7 +94,7 @@ public class InitParamParserTest {
                     + "classpath:templates, "
                     + "classpath:foo/templates?settings(URLConnectionUsesCaches=true)"
                     + "]",
-                    cfg, this.getClass(), new MockServletContext());
+                    cfg, getClass(), new MockServletContext());
 
             assertEquals(4, mtl.getTemplateLoaderCount());
             

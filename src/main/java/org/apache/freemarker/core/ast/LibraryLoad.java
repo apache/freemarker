@@ -40,14 +40,14 @@ public final class LibraryLoad extends TemplateElement {
 
     /**
      * @param template the template that this <tt>Include</tt> is a part of.
-     * @param templateName the name of the template to be included.
+     * @param importedTemplateNameExp the name of the template to be included.
      * @param targetNsVarName the name of the  variable to assign this library's namespace to
      */
     LibraryLoad(Template template,
-            Expression templateName,
+            Expression importedTemplateNameExp,
             String targetNsVarName) {
         this.targetNsVarName = targetNsVarName;
-        this.importedTemplateNameExp = templateName;
+        this.importedTemplateNameExp = importedTemplateNameExp;
     }
 
     @Override

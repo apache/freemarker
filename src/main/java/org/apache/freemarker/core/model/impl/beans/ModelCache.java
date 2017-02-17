@@ -136,7 +136,7 @@ public abstract class ModelCache {
         }
 
         TemplateModel getModel() {
-            return this.get();
+            return get();
         }
     }
 

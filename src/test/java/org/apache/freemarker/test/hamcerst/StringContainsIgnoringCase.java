@@ -31,7 +31,7 @@ public class StringContainsIgnoringCase extends SubstringMatcher {
 
     @Override
     protected boolean evalSubstringOf(String s) {
-        return s.toLowerCase().contains(this.substring.toLowerCase());
+        return s.toLowerCase().contains(substring.toLowerCase());
     }
 
     @Override

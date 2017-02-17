@@ -139,7 +139,7 @@ public abstract class FileTestCase extends TestCase {
 
     @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
     protected final File getTestClassDirectory() throws IOException {
-        URL url = this.getClass().getResource(".");
+        URL url = getClass().getResource(".");
         if (url == null) throw new IOException("Couldn't get resource URL for \".\"");
         return new File(url.getFile());
     }

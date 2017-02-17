@@ -138,7 +138,7 @@ public class FileTemplateLoader implements TemplateLoader {
                 }
             });
             this.baseDir = (File) retval[0];
-            this.canonicalBasePath = (String) retval[1];
+            canonicalBasePath = (String) retval[1];
             
             setEmulateCaseSensitiveFileSystem(getEmulateCaseSensitiveFileSystemDefault());
         } catch (PrivilegedActionException e) {
@@ -275,9 +275,9 @@ public class FileTemplateLoader implements TemplateLoader {
      * 
      * @since 2.3.23
      */
-    public void setEmulateCaseSensitiveFileSystem(boolean nameCaseChecked) {
+    public void setEmulateCaseSensitiveFileSystem(boolean emulateCaseSensitiveFileSystem) {
         // Ensure that the cache exists exactly when needed:
-        if (nameCaseChecked) {
+        if (emulateCaseSensitiveFileSystem) {
             if (correctCasePaths == null) {
                 correctCasePaths = new MruCacheStorage(CASE_CHECH_CACHE_HARD_SIZE, CASE_CHECK_CACHE__SOFT_SIZE);
             }
@@ -285,7 +285,7 @@ public class FileTemplateLoader implements TemplateLoader {
             correctCasePaths = null;
         }
         
-        this.emulateCaseSensitiveFileSystem = nameCaseChecked;
+        this.emulateCaseSensitiveFileSystem = emulateCaseSensitiveFileSystem;
     }
 
     /**

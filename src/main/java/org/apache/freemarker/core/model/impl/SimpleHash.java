@@ -285,7 +285,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     public void putAll(Map m) {
         for (Iterator it = m.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
-            this.put((String) entry.getKey(), entry.getValue());
+            put((String) entry.getKey(), entry.getValue());
         }
     }
     
@@ -298,7 +298,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      */
     public Map toMap() throws TemplateModelException {
         if (unwrappedMap == null) {
-            Class mapClass = this.map.getClass();
+            Class mapClass = map.getClass();
             Map m = null;
             try {
                 m = (Map) mapClass.newInstance();

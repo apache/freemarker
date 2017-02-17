@@ -125,13 +125,13 @@ public final class TextBlock extends TemplateElement {
         if (openingCharsToStrip == 0 && trailingCharsToStrip == 0) {
             return this;
         }
-        this.text = substring(text, openingCharsToStrip, text.length - trailingCharsToStrip);
+        text = substring(text, openingCharsToStrip, text.length - trailingCharsToStrip);
         if (openingCharsToStrip > 0) {
-            this.beginLine++;
-            this.beginColumn = 1;
+            beginLine++;
+            beginColumn = 1;
         }
         if (trailingCharsToStrip > 0) {
-            this.endColumn = 0;
+            endColumn = 0;
         }
         return this;
     }
@@ -142,8 +142,8 @@ public final class TextBlock extends TemplateElement {
      */
     private boolean deliberateLeftTrim() {
         boolean result = false;
-        for (TemplateElement elem = this.nextTerminalNode(); 
-             elem != null && elem.beginLine == this.endLine;
+        for (TemplateElement elem = nextTerminalNode();
+             elem != null && elem.beginLine == endLine;
              elem = elem.nextTerminalNode()) {
             if (elem instanceof TrimInstruction) {
                 TrimInstruction ti = (TrimInstruction) elem;
@@ -157,15 +157,15 @@ public final class TextBlock extends TemplateElement {
                         char[] firstPart = substring(text, 0, lastNewLineIndex + 1);
                         char[] lastLine = substring(text, 1 + lastNewLineIndex); 
                         if (_StringUtil.isTrimmableToEmpty(lastLine)) {
-                            this.text = firstPart;
-                            this.endColumn = 0;
+                            text = firstPart;
+                            endColumn = 0;
                         } else {
                             int i = 0;
                             while (Character.isWhitespace(lastLine[i])) {
                                 i++;
                             }
                             char[] printablePart = substring(lastLine, i);
-                            this.text = concat(firstPart, printablePart);
+                            text = concat(firstPart, printablePart);
                         }
                     }
                 }
@@ -180,8 +180,8 @@ public final class TextBlock extends TemplateElement {
      */
     private boolean deliberateRightTrim() {
         boolean result = false;
-        for (TemplateElement elem = this.prevTerminalNode(); 
-             elem != null && elem.endLine == this.beginLine;
+        for (TemplateElement elem = prevTerminalNode();
+             elem != null && elem.endLine == beginLine;
              elem = elem.prevTerminalNode()) {
             if (elem instanceof TrimInstruction) {
                 TrimInstruction ti = (TrimInstruction) elem;
@@ -202,9 +202,9 @@ public final class TextBlock extends TemplateElement {
                     char[] trailingPart = substring(text, firstLineIndex);
                     char[] openingPart = substring(text, 0, firstLineIndex);
                     if (_StringUtil.isTrimmableToEmpty(openingPart)) {
-                        this.text = trailingPart;
-                        this.beginLine++;
-                        this.beginColumn = 1;
+                        text = trailingPart;
+                        beginLine++;
+                        beginColumn = 1;
                     } else {
                         int lastNonWS = openingPart.length - 1;
                         while (Character.isWhitespace(text[lastNonWS])) {
@@ -214,8 +214,8 @@ public final class TextBlock extends TemplateElement {
                         if (_StringUtil.isTrimmableToEmpty(trailingPart)) {
                         // THIS BLOCK IS HEINOUS! THERE MUST BE A BETTER WAY! REVISIT (JR)
                             boolean trimTrailingPart = true;
-                            for (TemplateElement te = this.nextTerminalNode(); 
-                                 te != null && te.beginLine == this.endLine;
+                            for (TemplateElement te = nextTerminalNode();
+                                 te != null && te.beginLine == endLine;
                                  te = te.nextTerminalNode()) {
                                 if (te.heedsOpeningWhitespace()) {
                                     trimTrailingPart = false;
@@ -227,7 +227,7 @@ public final class TextBlock extends TemplateElement {
                             }
                             if (trimTrailingPart) trailingPart = _CollectionUtil.EMPTY_CHAR_ARRAY;
                         }
-                        this.text = concat(printablePart, trailingPart);
+                        text = concat(printablePart, trailingPart);
                     }
                 }
             }
@@ -277,8 +277,8 @@ public final class TextBlock extends TemplateElement {
         }
         // We look at the preceding elements on the line to see if we should
         // strip the opening newline and any whitespace preceding it.
-        for (TemplateElement elem = this.prevTerminalNode(); 
-             elem != null && elem.endLine == this.beginLine;
+        for (TemplateElement elem = prevTerminalNode();
+             elem != null && elem.endLine == beginLine;
              elem = elem.prevTerminalNode()) {
             if (elem.heedsOpeningWhitespace()) {
                 return 0;
@@ -301,8 +301,8 @@ public final class TextBlock extends TemplateElement {
         }
         // We look at the elements afterward on the same line to see if we should
         // strip any whitespace after the last newline
-        for (TemplateElement elem = this.nextTerminalNode(); 
-             elem != null && elem.beginLine == this.endLine;
+        for (TemplateElement elem = nextTerminalNode();
+             elem != null && elem.beginLine == endLine;
              elem = elem.nextTerminalNode()) {
             if (elem.heedsTrailingWhitespace()) {
                 return 0;

@@ -30,7 +30,7 @@ public class _ArrayIterator implements Iterator {
 
     public _ArrayIterator(Object[] array) {
         this.array = array;
-        this.nextIndex = 0;
+        nextIndex = 0;
     }
 
     @Override

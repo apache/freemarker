@@ -354,7 +354,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         
         ClassLoader oldTCCL = Thread.currentThread().getContextClassLoader();
         // Doesn't mater what, just be different from oldTCCL: 
-        ClassLoader newTCCL = oldTCCL == null ? this.getClass().getClassLoader() : null;
+        ClassLoader newTCCL = oldTCCL == null ? getClass().getClassLoader() : null;
         
         BeansWrapper bw2;
         Thread.currentThread().setContextClassLoader(newTCCL);

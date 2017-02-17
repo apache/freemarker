@@ -35,7 +35,7 @@ public abstract class ExamplesTest extends TemplateTest {
 
     protected Properties loadPropertiesFile(String name) throws IOException {
         Properties props = new Properties();
-        InputStream in = this.getClass().getResourceAsStream(name);
+        InputStream in = getClass().getResourceAsStream(name);
         try {
             props.load(in);
         } finally {
@@ -53,7 +53,10 @@ public abstract class ExamplesTest extends TemplateTest {
 
     protected void setupTemplateLoaders(Configuration cfg) {
         cfg.setTemplateLoader(new MultiTemplateLoader(
-                new TemplateLoader[] { new ByteArrayTemplateLoader(), new ClassTemplateLoader(this.getClass(), "") }));
+                new TemplateLoader[] {
+                        new ByteArrayTemplateLoader(),
+                        new ClassTemplateLoader(getClass(), "")
+                }));
     }
     
 }

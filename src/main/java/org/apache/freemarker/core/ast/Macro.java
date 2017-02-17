@@ -58,14 +58,14 @@ public final class Macro extends TemplateElement implements TemplateModel {
             String catchAllParamName, boolean function,
             TemplateElements children) {
         this.name = name;
-        this.paramNames = (String[]) argumentNames.toArray(
+        paramNames = (String[]) argumentNames.toArray(
                 new String[argumentNames.size()]);
-        this.paramDefaults = args;
+        paramDefaults = args;
         
         this.function = function;
-        this.catchAllParamName = catchAllParamName; 
-        
-        this.setChildren(children);
+        this.catchAllParamName = catchAllParamName;
+
+        setChildren(children);
     }
 
     public String getCatchAll() {
@@ -163,12 +163,12 @@ public final class Macro extends TemplateElement implements TemplateModel {
         Context(Environment env, 
                 TemplateElement[] nestedContentBuffer,
                 List nestedContentParameterNames) {
-            this.localVars = env.new Namespace(); 
+            localVars = env.new Namespace();
             this.nestedContentBuffer = nestedContentBuffer;
-            this.nestedContentNamespace = env.getCurrentNamespace();
+            nestedContentNamespace = env.getCurrentNamespace();
             this.nestedContentParameterNames = nestedContentParameterNames;
-            this.prevLocalContextStack = env.getLocalContextStack();
-            this.prevMacroContext = env.getCurrentMacroContext();
+            prevLocalContextStack = env.getLocalContextStack();
+            prevMacroContext = env.getCurrentMacroContext();
         }
                 
         

@@ -42,14 +42,14 @@ final class Include extends TemplateElement {
 
     /**
      * @param template the template that this <tt>#include</tt> is a part of.
-     * @param includedTemplatePathExp the path of the template to be included.
+     * @param includedTemplateNameExp the path of the template to be included.
      * @param encodingExp the encoding to be used or null, if it's the default.
      * @param parseExp whether the template should be parsed (or is raw text)
      */
     Include(Template template,
-            Expression includedTemplatePathExp,
+            Expression includedTemplateNameExp,
             Expression encodingExp, Expression parseExp, Expression ignoreMissingExp) throws ParseException {
-        this.includedTemplateNameExp = includedTemplatePathExp;
+        this.includedTemplateNameExp = includedTemplateNameExp;
         
         this.encodingExp = encodingExp;
         if (encodingExp == null) {
@@ -149,8 +149,8 @@ final class Include extends TemplateElement {
         }
         
         final boolean ignoreMissing;
-        if (this.ignoreMissingExpPrecalcedValue != null) {
-            ignoreMissing = this.ignoreMissingExpPrecalcedValue.booleanValue();
+        if (ignoreMissingExpPrecalcedValue != null) {
+            ignoreMissing = ignoreMissingExpPrecalcedValue.booleanValue();
         } else if (ignoreMissingExp != null) {
             ignoreMissing = ignoreMissingExp.evalToBoolean(env);
         } else {

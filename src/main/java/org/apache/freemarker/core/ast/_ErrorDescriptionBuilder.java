@@ -51,7 +51,7 @@ public class _ErrorDescriptionBuilder {
 
     public _ErrorDescriptionBuilder(String description) {
         this.description = description;
-        this.descriptionParts = null;
+        descriptionParts = null;
     }
 
     /**
@@ -61,7 +61,7 @@ public class _ErrorDescriptionBuilder {
      */
     public _ErrorDescriptionBuilder(Object... descriptionParts) {
         this.descriptionParts = descriptionParts;
-        this.description = null;
+        description = null;
     }
 
     @Override
@@ -285,8 +285,8 @@ public class _ErrorDescriptionBuilder {
         return this;
     }
 
-    public _ErrorDescriptionBuilder blame(Expression blamedExpr) {
-        this.blamed = blamedExpr;
+    public _ErrorDescriptionBuilder blame(Expression blamed) {
+        this.blamed = blamed;
         return this;
     }
     
