@@ -181,8 +181,8 @@ public class DefaultObjectWrapper extends org.apache.freemarker.core.model.impl.
                     return DefaultListAdapter.adapt((List<?>) obj, this);
                 } else {
                     return forceLegacyNonListCollections
-                            ? (TemplateModel) new SimpleSequence((Collection<?>) obj, this)
-                            : (TemplateModel) DefaultNonListCollectionAdapter.adapt((Collection<?>) obj, this);
+                            ? new SimpleSequence((Collection<?>) obj, this)
+                            : DefaultNonListCollectionAdapter.adapt((Collection<?>) obj, this);
                 }
             } else {
                 return new SimpleSequence((Collection<?>) obj, this);
@@ -190,16 +190,16 @@ public class DefaultObjectWrapper extends org.apache.freemarker.core.model.impl.
         }
         if (obj instanceof Map) {
             return useAdaptersForContainers
-                    ? (TemplateModel) DefaultMapAdapter.adapt((Map<?, ?>) obj, this)
-                    : (TemplateModel) new SimpleHash((Map<?, ?>) obj, this);
+                    ? DefaultMapAdapter.adapt((Map<?, ?>) obj, this)
+                    : new SimpleHash((Map<?, ?>) obj, this);
         }
         if (obj instanceof Boolean) {
             return obj.equals(Boolean.TRUE) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
         if (obj instanceof Iterator) {
             return useAdaptersForContainers
-                    ? (TemplateModel) DefaultIteratorAdapter.adapt((Iterator<?>) obj, this)
-                    : (TemplateModel) new SimpleCollection((Iterator<?>) obj, this);
+                    ? DefaultIteratorAdapter.adapt((Iterator<?>) obj, this)
+                    : new SimpleCollection((Iterator<?>) obj, this);
         }
         if (iterableSupport && obj instanceof Iterable) {
             return DefaultIterableAdapter.adapt((Iterable<?>) obj, this);

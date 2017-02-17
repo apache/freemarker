@@ -115,7 +115,7 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
         } catch (ClassCastException e) {
             throw new _TemplateModelException(e,
                     "Failed to check if the collection contains the item. Probably the item's Java type, ",
-                    itemPojo != null ? new _DelayedShortClassName(itemPojo.getClass()) : (Object) "Null",
+                    itemPojo != null ? new _DelayedShortClassName(itemPojo.getClass()) : "Null",
                     ", doesn't match the type of (some of) the collection items; see cause exception.");
         }
     }

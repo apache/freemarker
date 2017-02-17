@@ -317,7 +317,7 @@ public class Template extends Configurable {
      */
     @Deprecated
     public Template(String name, Reader reader) throws IOException {
-        this(name, reader, (Configuration) null);
+        this(name, reader, null);
     }
 
     /**

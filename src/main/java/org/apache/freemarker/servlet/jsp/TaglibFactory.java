@@ -239,9 +239,9 @@ public class TaglibFactory implements TemplateHashModel {
                     }
 
                     tldLocation = isJarPath(normalizedTaglibUri)
-                                ? (TldLocation) new ServletContextJarEntryTldLocation(
+                                ? new ServletContextJarEntryTldLocation(
                                         normalizedTaglibUri, DEFAULT_TLD_RESOURCE_PATH)
-                                : (TldLocation) new ServletContextTldLocation(normalizedTaglibUri);
+                                : new ServletContextTldLocation(normalizedTaglibUri);
                 }
             } catch (Exception e) {
                 String failedTLDsList = failedTldListAlreadyIncluded ? null : getFailedTLDsList();
@@ -1563,9 +1563,9 @@ public class TaglibFactory implements TemplateHashModel {
             } else if (E_TAGLIB.equals(qName)) {
                 addTldLocation(
                         isJarPath(taglibLocationCData)
-                                ? (TldLocation) new ServletContextJarEntryTldLocation(
+                                ? new ServletContextJarEntryTldLocation(
                                         taglibLocationCData, DEFAULT_TLD_RESOURCE_PATH)
-                                : (TldLocation) new ServletContextTldLocation(taglibLocationCData),
+                                : new ServletContextTldLocation(taglibLocationCData),
                         taglibUriCData);
             }
         }

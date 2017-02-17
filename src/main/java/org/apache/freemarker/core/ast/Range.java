@@ -57,8 +57,8 @@ final class Range extends Expression {
                     endType == END_INCLUSIVE, endType == END_SIZE_LIMITED); 
         } else {
             return _TemplateAPI.getTemplateLanguageVersionAsInt(this) >= _TemplateAPI.VERSION_INT_2_3_21
-                    ? (RangeModel) new ListableRightUnboundedRangeModel(begin)
-                    : (RangeModel) new NonListableRightUnboundedRangeModel(begin);
+                    ? new ListableRightUnboundedRangeModel(begin)
+                    : new NonListableRightUnboundedRangeModel(begin);
         }
     }
     

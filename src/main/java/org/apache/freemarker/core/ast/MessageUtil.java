@@ -303,8 +303,8 @@ class MessageUtil {
                 e.getMessage())
                 .blame(dataSrcExp); 
         return useTempModelExc
-                ? new _TemplateModelException(e, (Environment) null, desc)
-                : new _MiscTemplateException(e, (Environment) null, desc);
+                ? new _TemplateModelException(e, null, desc)
+                : new _MiscTemplateException(e, null, desc);
     }
     
     static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
@@ -314,8 +314,8 @@ class MessageUtil {
                 e.getMessage())
                 .blame(dataSrcExp); 
         return useTempModelExc
-                ? new _TemplateModelException(e, (Environment) null, desc)
-                : new _MiscTemplateException(e, (Environment) null, desc);
+                ? new _TemplateModelException(e, null, desc)
+                : new _MiscTemplateException(e, null, desc);
     }
     
     /**

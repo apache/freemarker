@@ -98,7 +98,7 @@ public class UnexpectedTypeException extends TemplateException {
         return new Object[] {
                 "Expected ", new _DelayedAOrAn(expectedTypesDesc), ", but ",
                 (blamedAssignmentTargetVarName == null
-                        ? (Object) (blamed != null ? "this" : "the expression")
+                        ? blamed != null ? "this" : "the expression"
                         : new Object[] {
                                 "assignment target variable ",
                                 new _DelayedJQuote(blamedAssignmentTargetVarName) }), 

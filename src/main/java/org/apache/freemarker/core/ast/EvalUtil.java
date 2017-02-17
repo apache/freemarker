@@ -285,12 +285,12 @@ class EvalUtil {
                     "Left hand operand ",
                     (quoteOperandsInErrors && leftExp != null
                             ? new Object[] { "(", new _DelayedGetCanonicalForm(leftExp), ") value " }
-                            : (Object) ""),
+                            : ""),
                     "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
                     "Right hand operand ",
                     (quoteOperandsInErrors && rightExp != null
                             ? new Object[] { "(", new _DelayedGetCanonicalForm(rightExp), ") value " }
-                            : (Object) ""),
+                            : ""),
                     "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)),
                     ".");
         }

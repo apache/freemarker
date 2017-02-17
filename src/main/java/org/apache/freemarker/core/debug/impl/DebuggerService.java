@@ -41,8 +41,8 @@ public abstract class DebuggerService {
         // RMI service.
         return 
             _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.password", null) == null
-            ? (DebuggerService) new NoOpDebuggerService()
-            : (DebuggerService) new RmiDebuggerService();
+            ? new NoOpDebuggerService()
+            : new RmiDebuggerService();
     }
 
     public static List getBreakpoints(String templateName) {

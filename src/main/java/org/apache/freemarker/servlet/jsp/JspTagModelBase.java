@@ -114,7 +114,7 @@ class JspTagModelBase {
                                 " (declared type: ", new _DelayedShortClassName(setterType)
                                 + ", actual value's type: ",
                                 (argArray[0] != null
-                                        ? (Object) new _DelayedShortClassName(argArray[0].getClass()) : "Null"),
+                                        ? new _DelayedShortClassName(argArray[0].getClass()) : "Null"),
                                 "). See cause exception for the more specific cause...");
                         if (e instanceof IllegalArgumentException && !(setterType.isAssignableFrom(String.class))
                                 && argArray[0] != null && argArray[0] instanceof String) {

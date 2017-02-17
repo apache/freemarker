@@ -270,7 +270,7 @@ class BuiltInsForNumbers {
 
     private static final long safeToLong(Number num) throws TemplateModelException {
         if (num instanceof Double) {
-            double d = Math.round(((Double) num).doubleValue());
+            double d = Math.round(num.doubleValue());
             if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
                 throw new _TemplateModelException(
                         "Number doesn't fit into a 64 bit signed integer (long): ", Double.valueOf(d));
@@ -278,7 +278,7 @@ class BuiltInsForNumbers {
                 return (long) d;
             }
         } else if (num instanceof Float) {
-            float f = Math.round(((Float) num).floatValue());
+            float f = Math.round(num.floatValue());
             if (f > Long.MAX_VALUE || f < Long.MIN_VALUE) {
                 throw new _TemplateModelException(
                         "Number doesn't fit into a 64 bit signed integer (long): ", Float.valueOf(f));

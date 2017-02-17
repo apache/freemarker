@@ -87,7 +87,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
                 if (n instanceof BigInteger) {
                     gCompatibleN = new BigDecimal((BigInteger) n);                        
                 } else if (n instanceof Long) {
-                    gCompatibleN = BigDecimal.valueOf(((Long) n).longValue());
+                    gCompatibleN = BigDecimal.valueOf(n.longValue());
                 } else {
                     gCompatibleN = Double.valueOf(n.doubleValue());
                 }

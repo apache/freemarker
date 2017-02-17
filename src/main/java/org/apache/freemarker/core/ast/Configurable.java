@@ -2542,14 +2542,14 @@ public class Configurable {
             super(env,
                     "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     correctedName == null
-                            ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) });
+                            ? "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) });
         }
 
         private UnknownSettingException(Environment env, String name, Version removedInVersion) {
             super(env,
                     "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     removedInVersion == null
-                            ? (Object) "" : new Object[] { ". This setting was removed in version ", removedInVersion });
+                            ? "" : new Object[] { ". This setting was removed in version ", removedInVersion });
         }
         
     }

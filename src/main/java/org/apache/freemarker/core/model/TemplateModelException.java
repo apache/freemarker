@@ -33,7 +33,7 @@ public class TemplateModelException extends TemplateException {
      * specified detail message.
      */
     public TemplateModelException() {
-        this((String) null, null);
+        this(null, null);
     }
 
     /**
@@ -51,7 +51,7 @@ public class TemplateModelException extends TemplateException {
      * backward-compatibility.
      */
     public TemplateModelException(Exception cause) {
-        this((String) null, cause);
+        this(null, cause);
     }
 
     /**
@@ -62,7 +62,7 @@ public class TemplateModelException extends TemplateException {
      * exception to be raised
      */
     public TemplateModelException(Throwable cause) {
-        this((String) null, cause);
+        this(null, cause);
     }
 
     
