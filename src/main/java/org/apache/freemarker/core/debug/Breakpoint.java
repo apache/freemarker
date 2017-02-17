@@ -67,6 +67,7 @@ public class Breakpoint implements Serializable, Comparable {
         return false;
     }
     
+    @Override
     public int compareTo(Object o) {
         Breakpoint b = (Breakpoint) o;
         int r = templateName.compareTo(b.templateName);

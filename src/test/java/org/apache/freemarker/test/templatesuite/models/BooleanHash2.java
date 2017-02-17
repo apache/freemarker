@@ -35,6 +35,7 @@ public class BooleanHash2 implements TemplateHashModel {
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
+    @Override
     public TemplateModel get(String key) {
         return null;
     }
@@ -42,6 +43,7 @@ public class BooleanHash2 implements TemplateHashModel {
     /**
      * @return true if this object is empty.
      */
+    @Override
     public boolean isEmpty() {
         return false;
     }

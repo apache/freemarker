@@ -40,6 +40,7 @@ public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
     /**
      * @return the specified index in the list
      */
+    @Override
     public TemplateModel get(int i) throws TemplateModelException {
         return m_cList.get( i );
     }
@@ -47,10 +48,12 @@ public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
     /**
      * @return true if this object is empty.
      */
+    @Override
     public boolean isEmpty() {
         return false;
     }
 
+    @Override
     public int size() {
         return m_cList.size();
     }
@@ -63,6 +66,7 @@ public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
+    @Override
     public TemplateModel get(String key) {
         if ( key.equals( "empty" )) {
             return new SimpleScalar( "Dummy hash value, for test purposes." );

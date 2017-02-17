@@ -42,6 +42,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new ArrayModel(object, (BeansWrapper) wrapper);
             }
@@ -68,10 +69,12 @@ implements
     }
 
 
+    @Override
     public TemplateModelIterator iterator() {
         return new Iterator();
     }
 
+    @Override
     public TemplateModel get(int index)
     throws TemplateModelException {
         try {
@@ -88,20 +91,24 @@ implements
         TemplateModelIterator {
         private int position = 0;
 
+        @Override
         public boolean hasNext() {
             return position < length;
         }
 
+        @Override
         public TemplateModel get(int index)
         throws TemplateModelException {
             return ArrayModel.this.get(index);
         }
 
+        @Override
         public TemplateModel next()
         throws TemplateModelException {
             return position < length ? get(position++) : null;
         }
 
+        @Override
         public int size() {
             return ArrayModel.this.size();
         }

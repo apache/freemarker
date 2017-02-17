@@ -59,6 +59,7 @@ class XalanXPathSupport implements XPathSupport {
     private static final String ERRMSG_EMPTY_NODE_SET
             = "Cannot perform an XPath query against an empty node set."; /* " + ERRMSG_RECOMMEND_JAXEN;*/
     
+    @Override
     synchronized public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
         if (!(context instanceof Node)) {
             if (context != null) {
@@ -118,10 +119,12 @@ class XalanXPathSupport implements XPathSupport {
     
     private static PrefixResolver customPrefixResolver = new PrefixResolver() {
         
+        @Override
         public String getNamespaceForPrefix(String prefix, Node node) {
             return getNamespaceForPrefix(prefix);
         }
         
+        @Override
         public String getNamespaceForPrefix(String prefix) {
             if (prefix.equals(Template.DEFAULT_NAMESPACE_PREFIX)) {
                 return Environment.getCurrentEnvironment().getDefaultNS();
@@ -129,10 +132,12 @@ class XalanXPathSupport implements XPathSupport {
             return Environment.getCurrentEnvironment().getNamespaceForPrefix(prefix);
         }
         
+        @Override
         public String getBaseIdentifier() {
             return null;
         }
         
+        @Override
         public boolean handlesNullPrefixes() {
             return false;
         }

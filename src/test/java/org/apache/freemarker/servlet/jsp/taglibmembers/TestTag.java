@@ -77,10 +77,12 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
         }
     }
     
+    @Override
     public void doCatch(Throwable t) throws Throwable {
         pageContext.getOut().println("doCatch() called here with " + t.getClass() + ": " + getFirstLine(t.getMessage()));
     }
 
+    @Override
     public void doFinally() {
         try {
             pageContext.getOut().println("doFinally() called here");

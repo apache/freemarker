@@ -35,9 +35,11 @@ class AlphabeticalMethodSorter implements MethodSorter {
         this.desc = desc;
     }
 
+    @Override
     public MethodDescriptor[] sortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
         ArrayList<MethodDescriptor> ls = new ArrayList<>(Arrays.asList(methodDescriptors));
         Collections.sort(ls, new Comparator<MethodDescriptor>() {
+            @Override
             public int compare(MethodDescriptor o1, MethodDescriptor o2) {
                 int res = o1.getMethod().toString().compareTo(o2.getMethod().toString());
                 return desc ? -res : res;

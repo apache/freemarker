@@ -33,6 +33,7 @@ implements TemplateScalarModel {
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new StringModel(object, (BeansWrapper) wrapper);
             }
@@ -55,6 +56,7 @@ implements TemplateScalarModel {
      * Returns the result of calling {@link Object#toString()} on the wrapped
      * object.
      */
+    @Override
     public String getAsString() {
         return object.toString();
     }

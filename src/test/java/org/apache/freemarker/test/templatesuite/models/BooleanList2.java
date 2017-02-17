@@ -39,10 +39,12 @@ public class BooleanList2 implements TemplateSequenceModel {
     /**
      * @return the specified index in the list
      */
+    @Override
     public TemplateModel get(int i) throws TemplateModelException {
         return cList.get(i);
     }
 
+    @Override
     public int size() {
         return cList.size();
     }

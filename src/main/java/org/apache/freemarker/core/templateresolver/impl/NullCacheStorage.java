@@ -38,22 +38,27 @@ public class NullCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
      */
     public static final NullCacheStorage INSTANCE = new NullCacheStorage();
 
+    @Override
     public boolean isConcurrent() {
         return true;
     }
     
+    @Override
     public Object get(Object key) {
         return null;
     }
 
+    @Override
     public void put(Object key, Object value) {
         // do nothing
     }
 
+    @Override
     public void remove(Object key) {
         // do nothing
     }
     
+    @Override
     public void clear() {
         // do nothing
     }
@@ -63,6 +68,7 @@ public class NullCacheStorage implements ConcurrentCacheStorage, CacheStorageWit
      * 
      * @since 2.3.21
      */
+    @Override
     public int getSize() {
         return 0;
     }

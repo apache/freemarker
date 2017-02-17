@@ -64,6 +64,7 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
 // [FM3] Remove (or move to o.a.f.test)
 public class NormalizeNewlines implements TemplateTransformModel {
 
+    @Override
     public Writer getWriter(final Writer out,
                             final Map args) {
         final StringBuilder buf = new StringBuilder();

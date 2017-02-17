@@ -38,10 +38,12 @@ public class TemplateModelListSequence implements TemplateSequenceModel {
         this.list = list;
     }
 
+    @Override
     public TemplateModel get(int index) {
         return (TemplateModel) list.get(index);
     }
 
+    @Override
     public int size() {
         return list.size();
     }

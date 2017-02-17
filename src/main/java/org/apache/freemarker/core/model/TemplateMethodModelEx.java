@@ -48,6 +48,7 @@ public interface TemplateMethodModelEx extends TemplateMethodModel {
      *     wrapped using the {@link Environment#getObjectWrapper() environment's 
      *     object wrapper}.
      */
+    @Override
     public Object exec(List arguments) throws TemplateModelException;
     
 }

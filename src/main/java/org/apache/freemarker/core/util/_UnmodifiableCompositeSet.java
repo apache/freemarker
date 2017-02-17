@@ -54,6 +54,7 @@ public class _UnmodifiableCompositeSet<E> extends _UnmodifiableSet<E> {
         private Iterator<E> it1, it2;
         private boolean it1Deplected;
         
+        @Override
         public boolean hasNext() {
             if (!it1Deplected) {
                 if (it1 == null) {
@@ -71,6 +72,7 @@ public class _UnmodifiableCompositeSet<E> extends _UnmodifiableSet<E> {
             return it2.hasNext();
         }
 
+        @Override
         public E next() {
             if (!it1Deplected) {
                 if (it1 == null) {
@@ -88,6 +90,7 @@ public class _UnmodifiableCompositeSet<E> extends _UnmodifiableSet<E> {
             return it2.next();
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

@@ -60,6 +60,7 @@ public class HtmlEscape implements TemplateTransformModel {
     private static final char[] AMP = "&amp;".toCharArray();
     private static final char[] QUOT = "&quot;".toCharArray();
 
+    @Override
     public Writer getWriter(final Writer out, Map args) {
         return new Writer()
         {

@@ -35,25 +35,32 @@ class DefaultToExpression extends Expression {
     
 	static private class EmptyStringAndSequence 
 	  implements TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx {
-		public String getAsString() {
+		@Override
+        public String getAsString() {
 			return "";
 		}
-		public TemplateModel get(int i) {
+		@Override
+        public TemplateModel get(int i) {
 			return null;
 		}
-		public TemplateModel get(String s) {
+		@Override
+        public TemplateModel get(String s) {
 			return null;
 		}
-		public int size() {
+		@Override
+        public int size() {
 			return 0;
 		}
-		public boolean isEmpty() {
+		@Override
+        public boolean isEmpty() {
 			return true;
 		}
-		public TemplateCollectionModel keys() {
+		@Override
+        public TemplateCollectionModel keys() {
 			return EMPTY_COLLECTION;
 		}
-		public TemplateCollectionModel values() {
+		@Override
+        public TemplateCollectionModel values() {
 			return EMPTY_COLLECTION;
 		}
 		

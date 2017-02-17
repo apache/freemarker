@@ -39,6 +39,7 @@ class DocumentModel extends NodeModel implements TemplateHashModel {
         super(doc);
     }
     
+    @Override
     public String getNodeName() {
         return "@document";
     }
@@ -68,6 +69,7 @@ class DocumentModel extends NodeModel implements TemplateHashModel {
         return rootElement;
     }
     
+    @Override
     public boolean isEmpty() {
         return false;
     }

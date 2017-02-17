@@ -186,6 +186,7 @@ public class NumberFormatTest extends TemplateTest {
         addToDataModel("n", nm);
         addToDataModel("incN", new TemplateDirectiveModel() {
             
+            @Override
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 nm.setNumber(nm.getAsNumber().intValue() + 1);
@@ -327,6 +328,7 @@ public class NumberFormatTest extends TemplateTest {
             this.number = number;
         }
 
+        @Override
         public Number getAsNumber() throws TemplateModelException {
             return number;
         }

@@ -57,6 +57,7 @@ public class MultiModel1 implements TemplateHashModel,
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
+    @Override
     public TemplateModel get(String key) {
         if ( key.equals( "model2" )) {
             return m_cSubModel;
@@ -80,6 +81,7 @@ public class MultiModel1 implements TemplateHashModel,
     /**
      * @return true if this object is empty.
      */
+    @Override
     public boolean isEmpty() {
         return false;
     }
@@ -87,6 +89,7 @@ public class MultiModel1 implements TemplateHashModel,
     /**
      * @return the specified index in the list
      */
+    @Override
     public TemplateModel get(int i) throws TemplateModelException {
         return m_cListModel.get( i );
     }
@@ -96,10 +99,12 @@ public class MultiModel1 implements TemplateHashModel,
      *
      * @return the String value of this scalar.
      */
+    @Override
     public String getAsString() {
         return "MultiModel1 as a string!";
     }
 
+    @Override
     public int size() throws TemplateModelException {
         return m_cListModel.size();
     }

@@ -33,13 +33,16 @@ public class HashAndScalarModel implements TemplateHashModelEx, TemplateScalarMo
     
     private final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
 
+        @Override
         public TemplateModelIterator iterator() throws TemplateModelException {
             return new TemplateModelIterator() {
 
+                @Override
                 public TemplateModel next() throws TemplateModelException {
                     return null;
                 }
 
+                @Override
                 public boolean hasNext() throws TemplateModelException {
                     return false;
                 }
@@ -48,26 +51,32 @@ public class HashAndScalarModel implements TemplateHashModelEx, TemplateScalarMo
         }
     };
 
+    @Override
     public String getAsString() throws TemplateModelException {
         return "scalarValue";
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         return new SimpleScalar("mapValue for " + key);
     }
 
+    @Override
     public boolean isEmpty() throws TemplateModelException {
         return true;
     }
 
+    @Override
     public int size() throws TemplateModelException {
         return 0;
     }
 
+    @Override
     public TemplateCollectionModel keys() throws TemplateModelException {
         return EMPTY_COLLECTION;
     }
 
+    @Override
     public TemplateCollectionModel values() throws TemplateModelException {
         return EMPTY_COLLECTION;
     }

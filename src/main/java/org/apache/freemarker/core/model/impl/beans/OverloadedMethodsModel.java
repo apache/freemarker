@@ -54,6 +54,7 @@ implements
      * @throws TemplateModelException if the method cannot be chosen
      * unambiguously.
      */
+    @Override
     public Object exec(List arguments)
     throws TemplateModelException {
         MemberAndArguments maa = overloadedMethods.getMemberAndArguments(arguments, wrapper);
@@ -69,11 +70,13 @@ implements
         }
     }
 
+    @Override
     public TemplateModel get(int index) throws TemplateModelException {
         return (TemplateModel) exec(Collections.singletonList(
                 new SimpleNumber(Integer.valueOf(index))));
     }
 
+    @Override
     public int size() throws TemplateModelException {
         throw new TemplateModelException("?size is unsupported for " + getClass().getName());
     }

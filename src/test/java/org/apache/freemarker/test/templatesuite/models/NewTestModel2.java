@@ -45,6 +45,7 @@ implements
         string = o1 + ":" + o2;
     }
 
+    @Override
     public String getAsString() {
         return string;
     }

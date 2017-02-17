@@ -37,6 +37,7 @@ public class BooleanHash1 implements TemplateHashModel {
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
+    @Override
     public TemplateModel get(String key) {
         if ( key.equals( "temp" )) {
             return new SimpleScalar( "Hello, world." );
@@ -50,6 +51,7 @@ public class BooleanHash1 implements TemplateHashModel {
     /**
      * @return true if this object is empty.
      */
+    @Override
     public boolean isEmpty() {
         return true;
     }

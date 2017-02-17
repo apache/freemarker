@@ -38,6 +38,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new DateModel((Date) object, (BeansWrapper) wrapper);
             }
@@ -66,10 +67,12 @@ implements
         }
     }
 
+    @Override
     public Date getAsDate() {
         return (Date) object;
     }
 
+    @Override
     public int getDateType() {
         return type;
     }

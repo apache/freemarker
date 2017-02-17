@@ -119,6 +119,7 @@ public class BeansWrapperBuilder extends BeansWrapperConfiguration {
         
         private static final BeansWrapperFactory INSTANCE = new BeansWrapperFactory(); 
 
+        @Override
         public BeansWrapper create(BeansWrapperConfiguration bwConf) {
             return new BeansWrapper(bwConf, true);
         }

@@ -35,6 +35,7 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
     /**
      * @return the specified index in the list
      */
+    @Override
     public TemplateModel get(int i) throws TemplateModelException {
         return m_cList.get( i );
     }
@@ -47,6 +48,7 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
+    @Override
     public TemplateModel get(String key) {
         if ( key.equals( "size" )) {
             return new SimpleScalar( "Key size, not the listSize method." );
@@ -56,10 +58,12 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
     }
 
 
+    @Override
     public int size() {
         return m_cList.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return size() == 0;
     }

@@ -49,6 +49,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new MapModel((Map) object, (BeansWrapper) wrapper);
             }
@@ -69,6 +70,7 @@ implements
     /**
      * The first argument is used as a key to call the map's <tt>get</tt> method.
      */
+    @Override
     public Object exec(List arguments)
     throws TemplateModelException {
         Object key = unwrap((TemplateModel) arguments.get(0));

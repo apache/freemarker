@@ -32,6 +32,7 @@ final class NonListableRightUnboundedRangeModel extends RightUnboundedRangeModel
         super(begin);
     }
 
+    @Override
     public int size() throws TemplateModelException {
         return 0;
     }

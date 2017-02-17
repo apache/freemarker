@@ -36,6 +36,7 @@ public class MultiModel2 implements TemplateScalarModel, TemplateMethodModel {
      *
      * @return the String value of this scalar.
      */
+    @Override
     public String getAsString() {
         return "Model2 is alive!";
     }
@@ -47,6 +48,7 @@ public class MultiModel2 implements TemplateScalarModel, TemplateMethodModel {
      * of the arguments passed to the method.
      * @return the <tt>TemplateModel</tt> produced by the method, or null.
      */
+    @Override
     public Object exec(List arguments) {
         StringBuilder  aResults = new StringBuilder( "Arguments are:<br />" );
         Iterator    iList = arguments.iterator();

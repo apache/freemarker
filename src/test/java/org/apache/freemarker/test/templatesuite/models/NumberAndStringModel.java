@@ -33,11 +33,13 @@ public class NumberAndStringModel implements TemplateNumberModel,
 		this.s = s;
 	}
 
-	public String getAsString() throws TemplateModelException {
+	@Override
+    public String getAsString() throws TemplateModelException {
 		return s;
 	}
 
-	@SuppressWarnings("boxing")
+	@Override
+    @SuppressWarnings("boxing")
     public Number getAsNumber() throws TemplateModelException {
 		return s.length();
 	}

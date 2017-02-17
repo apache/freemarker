@@ -337,14 +337,17 @@ public class RealServletContainertTest extends WebAppTestCase {
                 this.value = value;
             }
 
+            @Override
             public String getKey() {
                 return key;
             }
 
+            @Override
             public Integer getValue() {
                 return value;
             }
 
+            @Override
             public Integer setValue(Integer value) {
                 throw new UnsupportedOperationException();
             }

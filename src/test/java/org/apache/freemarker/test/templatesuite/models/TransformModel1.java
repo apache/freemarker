@@ -42,7 +42,8 @@ public class TransformModel1 implements TemplateTransformModel {
 
     private static final int READER_BUFFER_SIZE = 4096;
 
-    public Writer getWriter(final Writer out, 
+    @Override
+    public Writer getWriter(final Writer out,
                             final Map args) {
         final StringBuilder buf = new StringBuilder();
         return new Writer(out) {

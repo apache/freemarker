@@ -32,6 +32,7 @@ public class ExceptionModel implements TemplateScalarModel {
      *
      * @return the String value of this scalar.
      */
+    @Override
     public String getAsString () throws TemplateModelException {
         throw new TemplateModelException( "Throwing from ExceptionModel!" );
     }

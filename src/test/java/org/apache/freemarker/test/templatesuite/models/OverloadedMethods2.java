@@ -1015,6 +1015,7 @@ public class OverloadedMethods2 {
     
     private static class MyAdapterNumberModel implements TemplateNumberModel, AdapterTemplateModel {
 
+        @Override
         public Object getAdaptedObject(Class hint) {
             if (hint == double.class) {
                 return Double.valueOf(123.0001);
@@ -1025,6 +1026,7 @@ public class OverloadedMethods2 {
             }
         }
 
+        @Override
         public Number getAsNumber() throws TemplateModelException {
             return Integer.valueOf(122);
         }
@@ -1033,10 +1035,12 @@ public class OverloadedMethods2 {
     
     private static class MyWrapperNumberModel implements TemplateNumberModel, WrapperTemplateModel {
 
+        @Override
         public Number getAsNumber() throws TemplateModelException {
             return Integer.valueOf(122);
         }
 
+        @Override
         public Object getWrappedObject() {
             return Double.valueOf(123.0001);
         }
@@ -1045,10 +1049,12 @@ public class OverloadedMethods2 {
     
     private static class MyStringWrapperAsBooleanModel implements TemplateBooleanModel, WrapperTemplateModel {
 
+        @Override
         public Object getWrappedObject() {
             return "yes";
         }
 
+        @Override
         public boolean getAsBoolean() throws TemplateModelException {
             return true;
         }
@@ -1057,10 +1063,12 @@ public class OverloadedMethods2 {
 
     private static class MyBooleanWrapperAsAnotherBooleanModel implements TemplateBooleanModel, WrapperTemplateModel {
 
+        @Override
         public Object getWrappedObject() {
             return Boolean.TRUE;
         }
 
+        @Override
         public boolean getAsBoolean() throws TemplateModelException {
             return false;
         }
@@ -1069,6 +1077,7 @@ public class OverloadedMethods2 {
     
     private static class MyStringAdaptedToBooleanModel implements TemplateBooleanModel, AdapterTemplateModel {
 
+        @Override
         public Object getAdaptedObject(Class hint) {
             if (hint != Boolean.class && hint != boolean.class) {
                 return "yes";
@@ -1077,6 +1086,7 @@ public class OverloadedMethods2 {
             }
         }
 
+        @Override
         public boolean getAsBoolean() throws TemplateModelException {
             return false;
         }
@@ -1085,10 +1095,12 @@ public class OverloadedMethods2 {
 
     private static class MyStringAdaptedToBooleanModel2 implements TemplateBooleanModel, AdapterTemplateModel {
 
+        @Override
         public Object getAdaptedObject(Class hint) {
             return "yes";
         }
 
+        @Override
         public boolean getAsBoolean() throws TemplateModelException {
             return true;
         }

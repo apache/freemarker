@@ -27,10 +27,12 @@ public class BooleanAndScalarModel implements TemplateBooleanModel, TemplateScal
 
     public static final BooleanAndScalarModel INSTANCE = new BooleanAndScalarModel();
 
+    @Override
     public String getAsString() throws TemplateModelException {
         return "s";
     }
 
+    @Override
     public boolean getAsBoolean() throws TemplateModelException {
         return true;
     }

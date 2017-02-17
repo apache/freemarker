@@ -50,6 +50,7 @@ implements TemplateScalarModel, Serializable {
         this.value = value;
     }
 
+    @Override
     public String getAsString() {
         return (value == null) ? "" : value;
     }

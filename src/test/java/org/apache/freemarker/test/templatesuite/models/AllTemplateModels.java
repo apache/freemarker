@@ -44,10 +44,12 @@ public class AllTemplateModels implements
     
     private final TemplateModelIterator EMPTY_ITERATOR = new TemplateModelIterator() {
 
+        @Override
         public TemplateModel next() throws TemplateModelException {
             return null;
         }
 
+        @Override
         public boolean hasNext() throws TemplateModelException {
             return false;
         }
@@ -56,56 +58,69 @@ public class AllTemplateModels implements
     
     private final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
 
+        @Override
         public TemplateModelIterator iterator() throws TemplateModelException {
             return EMPTY_ITERATOR;
         }
     };
     
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         return new SimpleScalar("value for key " + key);
     }
 
+    @Override
     public boolean isEmpty() throws TemplateModelException {
         return true;
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return EMPTY_ITERATOR;
     }
 
+    @Override
     public TemplateModel get(int index) throws TemplateModelException {
         return null;
     }
 
+    @Override
     public int size() throws TemplateModelException {
         return 0;
     }
 
+    @Override
     public TemplateCollectionModel keys() throws TemplateModelException {
         return EMPTY_COLLECTION;
     }
 
+    @Override
     public TemplateCollectionModel values() throws TemplateModelException {
         return EMPTY_COLLECTION;
     }
 
+    @Override
     public boolean getAsBoolean() throws TemplateModelException {
         return true;
     }
 
+    @Override
     public Date getAsDate() throws TemplateModelException {
         return new Date(0);
     }
 
+    @Override
     public int getDateType() {
         return TemplateDateModel.DATETIME;
     }
 
+    @Override
     @SuppressWarnings("boxing")
     public Number getAsNumber() throws TemplateModelException {
         return 1;
     }
 
+    @Override
     public String getAsString() throws TemplateModelException {
         return "s";
     }

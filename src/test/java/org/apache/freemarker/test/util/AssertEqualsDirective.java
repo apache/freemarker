@@ -44,6 +44,7 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
 
     private AssertEqualsDirective() { }
     
+    @Override
     public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
             throws TemplateException, IOException {
         TemplateModel actual = null;

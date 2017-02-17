@@ -65,6 +65,7 @@ public final class SimpleNumber implements TemplateNumberModel, Serializable {
         this.value = Double.valueOf(val);
     }
 
+    @Override
     public Number getAsNumber() {
         return value;
     }

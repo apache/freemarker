@@ -164,22 +164,27 @@ public class Listables {
             this.map = map;
         }
         
+        @Override
         public TemplateModel get(String key) throws TemplateModelException {
             return wrap(map.get(key));
         }
         
+        @Override
         public boolean isEmpty() {
             return map.isEmpty();
         }
         
+        @Override
         public int size() {
             return map.size();
         }
         
+        @Override
         public TemplateCollectionModel keys() {
             return new SimpleCollection(map.keySet(), getObjectWrapper());
         }
         
+        @Override
         public TemplateCollectionModel values() {
             return new SimpleCollection(map.values(), getObjectWrapper());
         }

@@ -36,6 +36,7 @@ public class DefaultModel2TesterAction implements Model2Action {
     
     protected DefaultModel2TesterAction() { }
 
+    @Override
     @SuppressWarnings("boxing")
     public String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         req.setAttribute("s", "abc");

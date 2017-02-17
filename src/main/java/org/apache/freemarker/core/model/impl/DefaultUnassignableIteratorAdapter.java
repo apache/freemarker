@@ -42,6 +42,7 @@ class DefaultUnassignableIteratorAdapter implements TemplateModelIterator {
         this.wrapper = wrapper;
     }
 
+    @Override
     public TemplateModel next() throws TemplateModelException {
         try {
             return wrapper.wrap(it.next());
@@ -50,6 +51,7 @@ class DefaultUnassignableIteratorAdapter implements TemplateModelIterator {
         }
     }
 
+    @Override
     public boolean hasNext() throws TemplateModelException {
         return it.hasNext();
     }

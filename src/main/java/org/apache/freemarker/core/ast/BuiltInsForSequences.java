@@ -61,6 +61,7 @@ class BuiltInsForSequences {
                 this.tsm = tsm;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1, 2);
                 int chunkSize = getNumberMethodArg(args, 0).intValue();
@@ -94,6 +95,7 @@ class BuiltInsForSequences {
                 numberOfChunks = (wrappedTsm.size() + chunkSize - 1) / chunkSize; 
             }
 
+            @Override
             public TemplateModel get(final int chunkIndex)
                     throws TemplateModelException {
                 if (chunkIndex >= numberOfChunks) {
@@ -104,6 +106,7 @@ class BuiltInsForSequences {
                     
                     private final int baseIndex = chunkIndex * chunkSize;
 
+                    @Override
                     public TemplateModel get(int relIndex)
                             throws TemplateModelException {
                         int absIndex = baseIndex + relIndex;
@@ -116,6 +119,7 @@ class BuiltInsForSequences {
                         }
                     }
 
+                    @Override
                     public int size() throws TemplateModelException {
                         return fillerItem != null || chunkIndex + 1 < numberOfChunks
                                 ? chunkSize
@@ -125,6 +129,7 @@ class BuiltInsForSequences {
                 };
             }
 
+            @Override
             public int size() throws TemplateModelException {
                 return numberOfChunks;
             }
@@ -186,6 +191,7 @@ class BuiltInsForSequences {
                 this.coll = coll;
             }
 
+            @Override
             public Object exec(List args)
                     throws TemplateModelException {
                 checkMethodArgCount(args, 1, 3);
@@ -266,10 +272,12 @@ class BuiltInsForSequences {
                 this.seq = seq;
             }
 
+            @Override
             public TemplateModel get(int index) throws TemplateModelException {
                 return seq.get(seq.size() - 1 - index);
             }
 
+            @Override
             public int size() throws TemplateModelException {
                 return seq.size();
             }
@@ -295,6 +303,7 @@ class BuiltInsForSequences {
                 m_env = env;
             }
 
+            @Override
             public Object exec(List args)
                     throws TemplateModelException {
                 checkMethodArgCount(args, 1);
@@ -320,6 +329,7 @@ class BuiltInsForSequences {
                 m_env = env;
             }
 
+            @Override
             public Object exec(List args)
                     throws TemplateModelException {
                 checkMethodArgCount(args, 1);
@@ -383,6 +393,7 @@ class BuiltInsForSequences {
                 m_env = env;
             }
 
+            @Override
             public final Object exec(List args)
                     throws TemplateModelException {
                 int argCnt = args.size();
@@ -520,6 +531,7 @@ class BuiltInsForSequences {
                 this.seq = seq;
             }
             
+            @Override
             public Object exec(List args)
                     throws TemplateModelException {
                 // Should be:
@@ -568,6 +580,7 @@ class BuiltInsForSequences {
         
         private static class BooleanKVPComparator implements Comparator, Serializable {
 
+            @Override
             public int compare(Object arg0, Object arg1) {
                 // JDK 1.2 doesn't have Boolean.compareTo
                 boolean b0 = ((Boolean) ((KVP) arg0).key).booleanValue();
@@ -581,6 +594,7 @@ class BuiltInsForSequences {
         }
         private static class DateKVPComparator implements Comparator, Serializable {
 
+            @Override
             public int compare(Object arg0, Object arg1) {
                 return ((Date) ((KVP) arg0).key).compareTo(
                         (Date) ((KVP) arg1).key);
@@ -605,6 +619,7 @@ class BuiltInsForSequences {
                 this.collator = collator;
             }
 
+            @Override
             public int compare(Object arg0, Object arg1) {
                 return collator.compare(
                         ((KVP) arg0).key, ((KVP) arg1).key);
@@ -617,6 +632,7 @@ class BuiltInsForSequences {
                 this.ae = ae;
             }
 
+            @Override
             public int compare(Object arg0, Object arg1) {
                 try {
                     return ae.compareNumbers(

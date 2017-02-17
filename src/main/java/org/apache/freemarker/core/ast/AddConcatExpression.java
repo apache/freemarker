@@ -201,11 +201,13 @@ final class AddConcatExpression extends Expression {
             this.right = right;
         }
 
+        @Override
         public int size()
         throws TemplateModelException {
             return left.size() + right.size();
         }
 
+        @Override
         public TemplateModel get(int i)
         throws TemplateModelException {
             int ls = left.size();
@@ -223,12 +225,14 @@ final class AddConcatExpression extends Expression {
             this.right = right;
         }
         
+        @Override
         public TemplateModel get(String key)
         throws TemplateModelException {
             TemplateModel model = right.get(key);
             return (model != null) ? model : left.get(key);
         }
 
+        @Override
         public boolean isEmpty()
         throws TemplateModelException {
             return left.isEmpty() && right.isEmpty();
@@ -246,17 +250,20 @@ final class AddConcatExpression extends Expression {
             super(left, right);
         }
         
+        @Override
         public int size() throws TemplateModelException {
             initKeys();
             return size;
         }
 
+        @Override
         public TemplateCollectionModel keys()
         throws TemplateModelException {
             initKeys();
             return keys;
         }
 
+        @Override
         public TemplateCollectionModel values()
         throws TemplateModelException {
             initValues();

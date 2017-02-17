@@ -40,6 +40,7 @@ public class MarkReleaserTemplateSpecifiedEncodingHandler implements TemplateSpe
         this.markedInputStream = markedInputStream;
     }
 
+    @Override
     public void handle(String templateSpecificEncoding, String constructorSpecifiedEncoding)
             throws WrongEncodingException {
         TemplateSpecifiedEncodingHandler.DEFAULT.handle(templateSpecificEncoding, constructorSpecifiedEncoding);

@@ -121,6 +121,7 @@ public class TheadInterruptingSupportTest {
 
         public class StartedDirective implements TemplateDirectiveModel {
             
+            @Override
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 synchronized (TemplateRunnerThread.this) {
@@ -133,6 +134,7 @@ public class TheadInterruptingSupportTest {
 
         public class CustomLoopDirective implements TemplateDirectiveModel {
 
+            @Override
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 while (true) {
@@ -144,6 +146,7 @@ public class TheadInterruptingSupportTest {
         
         public class SleepDirective implements TemplateDirectiveModel {
 
+            @Override
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 try {

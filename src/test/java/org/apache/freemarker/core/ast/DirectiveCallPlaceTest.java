@@ -123,6 +123,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             cacheRecreationCount.set(0);
         }
         
+        @Override
         public void execute(Environment env, Map params, TemplateModel[] loopVars, final TemplateDirectiveBody body)
                 throws TemplateException, IOException {
             if (body == null) {
@@ -137,6 +138,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                     convertedText = (String) callPlace.getOrCreateCustomData(
                             getTextConversionIdentity(), new ObjectFactory<String>() {
 
+                                @Override
                                 public String createObject() throws TemplateException, IOException {
                                     return convertBodyText(body)
                                             + "[cached " + cacheRecreationCount.incrementAndGet() + "]";
@@ -196,6 +198,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     
     private static class PositionAwareDirective implements TemplateDirectiveModel {
 
+        @Override
         public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                 throws TemplateException, IOException {
             Writer out = env.getOut();
@@ -224,6 +227,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
 
     private static class ArgPrinterDirective implements TemplateDirectiveModel {
 
+        @Override
         public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                 throws TemplateException, IOException {
             final Writer out = env.getOut();
@@ -243,6 +247,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     
     private static class CurDirLineScalar implements TemplateScalarModel {
 
+        @Override
         public String getAsString() throws TemplateModelException {
             DirectiveCallPlace callPlace = Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace();
             return callPlace != null

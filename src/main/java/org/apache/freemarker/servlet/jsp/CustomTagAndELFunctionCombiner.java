@@ -104,23 +104,28 @@ class CustomTagAndELFunctionCombiner {
             this.simpleMethodModel = simpleMethodModel;
         }
 
+        @Override
         public Object exec(List arguments) throws TemplateModelException {
             return simpleMethodModel.exec(arguments);
         }
 
+        @Override
         public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                 throws TemplateException, IOException {
             templateDirectiveModel.execute(env, params, loopVars, body);
         }
 
+        @Override
         public Object[] explainTypeError(Class[] expectedClasses) {
             return simpleMethodModel.explainTypeError(expectedClasses);
         }
 
+        @Override
         public TemplateModel get(int index) throws TemplateModelException {
             return simpleMethodModel.get(index);
         }
 
+        @Override
         public int size() throws TemplateModelException {
             return simpleMethodModel.size();
         }
@@ -139,10 +144,12 @@ class CustomTagAndELFunctionCombiner {
             this.templateMethodModelEx = templateMethodModelEx;
         }
 
+        @Override
         public Object exec(List arguments) throws TemplateModelException {
             return templateMethodModelEx.exec(arguments);
         }
 
+        @Override
         public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                 throws TemplateException, IOException {
             templateDirectiveModel.execute(env, params, loopVars, body);
@@ -162,10 +169,12 @@ class CustomTagAndELFunctionCombiner {
             this.templateMethodModelEx = templateMethodModelEx;
         }
 
+        @Override
         public Object exec(List arguments) throws TemplateModelException {
             return templateMethodModelEx.exec(arguments);
         }
 
+        @Override
         public Writer getWriter(Writer out, Map args) throws TemplateModelException, IOException {
             return templateTransformModel.getWriter(out, args);
         }
@@ -185,22 +194,27 @@ class CustomTagAndELFunctionCombiner {
             this.simpleMethodModel = simpleMethodModel;
         }
 
+        @Override
         public Object exec(List arguments) throws TemplateModelException {
             return simpleMethodModel.exec(arguments);
         }
 
+        @Override
         public Object[] explainTypeError(Class[] expectedClasses) {
             return simpleMethodModel.explainTypeError(expectedClasses);
         }
 
+        @Override
         public TemplateModel get(int index) throws TemplateModelException {
             return simpleMethodModel.get(index);
         }
 
+        @Override
         public int size() throws TemplateModelException {
             return simpleMethodModel.size();
         }
 
+        @Override
         public Writer getWriter(Writer out, Map args) throws TemplateModelException, IOException {
             return templateTransformModel.getWriter(out, args);
         }

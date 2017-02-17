@@ -31,6 +31,7 @@ public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
         this.unit = unit;
     }
 
+    @Override
     public Number getAsNumber() throws TemplateModelException {
         return value;
     }

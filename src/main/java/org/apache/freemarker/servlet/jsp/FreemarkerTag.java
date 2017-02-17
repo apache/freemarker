@@ -57,40 +57,49 @@ public class FreemarkerTag implements BodyTag {
         this.name = name == null ? "" : name;
     }
     
+    @Override
     public Tag getParent() {
         return parent;
     }
 
+    @Override
     public void setParent(Tag parent) {
         this.parent = parent;
     }
 
+    @Override
     public int doStartTag() {
         return EVAL_BODY_BUFFERED;
     }
 
+    @Override
     public void setBodyContent(BodyContent bodyContent) {
         this.bodyContent = bodyContent;
     }
 
+    @Override
     public void setPageContext(PageContext pageContext) {
         this.pageContext = pageContext;
         root = null;
     }
 
+    @Override
     public void doInitBody() {
     }
 
+    @Override
     public int doAfterBody() {
         return SKIP_BODY;
     }
 
+    @Override
     public void release() {
         root = null;
         template = null;
         name = "";
     }
 
+    @Override
     public int doEndTag()
         throws JspException {
         if (bodyContent == null)

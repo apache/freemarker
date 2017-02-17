@@ -131,7 +131,9 @@ public class TLDParsingTest {
     }
     
     public static class ExampleContextListener implements ServletContextListener {
+        @Override
         public void contextInitialized(ServletContextEvent event) { }
+        @Override
         public void contextDestroyed(ServletContextEvent event) { }
     }    
     

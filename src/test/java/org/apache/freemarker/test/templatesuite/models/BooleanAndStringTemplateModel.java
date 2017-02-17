@@ -25,10 +25,12 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 
 public class BooleanAndStringTemplateModel implements TemplateBooleanModel, TemplateScalarModel {
 
+    @Override
     public String getAsString() throws TemplateModelException {
         return "theStringValue";
     }
 
+    @Override
     public boolean getAsBoolean() throws TemplateModelException {
         return true;
     }

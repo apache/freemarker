@@ -43,38 +43,47 @@ implements
         this.service = service;
     }
 
+    @Override
     public void addBreakpoint(Breakpoint breakpoint) {
         service.addBreakpoint(breakpoint);
     }
 
+    @Override
     public Object addDebuggerListener(DebuggerListener listener) {
         return service.addDebuggerListener(listener);
     }
 
+    @Override
     public List getBreakpoints() {
         return service.getBreakpointsSpi();
     }
 
+    @Override
     public List getBreakpoints(String templateName) {
         return service.getBreakpointsSpi(templateName);
     }
 
+    @Override
     public Collection getSuspendedEnvironments() {
         return service.getSuspendedEnvironments();
     }
 
+    @Override
     public void removeBreakpoint(Breakpoint breakpoint) {
         service.removeBreakpoint(breakpoint);
     }
 
+    @Override
     public void removeDebuggerListener(Object id) {
         service.removeDebuggerListener(id);
     }
 
+    @Override
     public void removeBreakpoints() {
         service.removeBreakpoints();
     }
 
+    @Override
     public void removeBreakpoints(String templateName) {
         service.removeBreakpoints(templateName);
     }

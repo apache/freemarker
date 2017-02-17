@@ -36,6 +36,7 @@ public class SimpleTestMethod implements TemplateMethodModel {
      * the values of the arguments passed to the method.
      * @return the <tt>TemplateModel</tt> produced by the method, or null.
      */
+    @Override
     public Object exec(List arguments) {
         if ( arguments.size() == 0 ) {
             return new SimpleScalar( "Empty list provided" );

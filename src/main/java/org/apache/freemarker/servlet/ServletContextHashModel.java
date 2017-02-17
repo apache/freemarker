@@ -54,10 +54,12 @@ public final class ServletContextHashModel implements TemplateHashModel {
         this.wrapper = wrapper;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         return wrapper.wrap(servletctx.getAttribute(key));
     }
 
+    @Override
     public boolean isEmpty() {
         return !servletctx.getAttributeNames().hasMoreElements();
     }

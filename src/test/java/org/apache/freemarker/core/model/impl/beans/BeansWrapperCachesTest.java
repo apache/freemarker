@@ -54,6 +54,7 @@ public class BeansWrapperCachesTest {
         checkRegisteredModelFactories(ci3, bw.getStaticModels(), bw.getEnumModels(), bw.getModelCache());
         
         MethodAppearanceFineTuner maf = new MethodAppearanceFineTuner() {
+            @Override
             public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
                 // nop
             }

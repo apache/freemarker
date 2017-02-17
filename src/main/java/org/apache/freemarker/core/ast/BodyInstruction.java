@@ -141,10 +141,12 @@ final class BodyInstruction extends TemplateElement {
             }
         }
         
+        @Override
         public TemplateModel getLocalVariable(String name) throws TemplateModelException {
             return bodyVars == null ? null : bodyVars.get(name);
         }
         
+        @Override
         public Collection getLocalVariableNames() {
             List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
             return bodyParameterNames == null ? Collections.EMPTY_LIST : bodyParameterNames;

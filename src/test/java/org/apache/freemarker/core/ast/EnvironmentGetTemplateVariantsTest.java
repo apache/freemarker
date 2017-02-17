@@ -209,6 +209,7 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
     protected Object createDataModel() {
         return Collections.singletonMap("tNames", new TemplateDirectiveModel() {
 
+            @Override
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 Writer out = env.getOut();

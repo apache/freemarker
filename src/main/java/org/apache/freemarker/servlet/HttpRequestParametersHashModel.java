@@ -46,33 +46,41 @@ public class HttpRequestParametersHashModel
         this.request = request;
     }
 
+    @Override
     public TemplateModel get(String key) {
         String value = request.getParameter(key);
         return value == null ? null : new SimpleScalar(value);
     }
 
+    @Override
     public boolean isEmpty() {
         return !request.getParameterNames().hasMoreElements();
     }
     
+    @Override
     public int size() {
         return getKeys().size();
     }
     
+    @Override
     public TemplateCollectionModel keys() {
         return new SimpleCollection(getKeys().iterator());
     }
     
+    @Override
     public TemplateCollectionModel values() {
         final Iterator iter = getKeys().iterator();
         return new SimpleCollection(
             new Iterator() {
+                @Override
                 public boolean hasNext() {
                     return iter.hasNext();
                 }
+                @Override
                 public Object next() {
                     return request.getParameter((String) iter.next()); 
                 }
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }

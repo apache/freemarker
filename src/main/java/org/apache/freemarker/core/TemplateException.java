@@ -606,18 +606,22 @@ public class TemplateException extends Exception {
             this.out = out;
         }
 
+        @Override
         public void print(Object obj) {
             out.print(obj);
         }
 
+        @Override
         public void println(Object obj) {
             out.println(obj);
         }
 
+        @Override
         public void println() {
             out.println();
         }
 
+        @Override
         public void printStandardStackTrace(Throwable exception) {
             if (exception instanceof TemplateException) {
                 ((TemplateException) exception).printStandardStackTrace(out);
@@ -636,18 +640,22 @@ public class TemplateException extends Exception {
             this.out = out;
         }
 
+        @Override
         public void print(Object obj) {
             out.print(obj);
         }
 
+        @Override
         public void println(Object obj) {
             out.println(obj);
         }
 
+        @Override
         public void println() {
             out.println();
         }
 
+        @Override
         public void printStandardStackTrace(Throwable exception) {
             if (exception instanceof TemplateException) {
                 ((TemplateException) exception).printStandardStackTrace(out);

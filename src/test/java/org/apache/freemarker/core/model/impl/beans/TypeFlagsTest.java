@@ -562,48 +562,60 @@ public class TypeFlagsTest extends TestCase {
 
     static public class MapDate extends Date implements Map {
     
+        @Override
         public int size() {
             return 0;
         }
     
+        @Override
         public boolean isEmpty() {
             return false;
         }
     
+        @Override
         public boolean containsKey(Object key) {
             return false;
         }
     
+        @Override
         public boolean containsValue(Object value) {
             return false;
         }
     
+        @Override
         public Object get(Object key) {
             return null;
         }
     
+        @Override
         public Object put(Object key, Object value) {
             return null;
         }
     
+        @Override
         public Object remove(Object key) {
             return null;
         }
     
+        @Override
         public void putAll(Map m) {
         }
     
+        @Override
         public void clear() {
         }
     
+        @Override
         public Set keySet() {
             return null;
         }
     
+        @Override
         public Collection values() {
             return null;
         }
     
+        @Override
         public Set entrySet() {
             return null;
         }
@@ -621,6 +633,7 @@ public class TypeFlagsTest extends TestCase {
         }
         // As the order in which getMethods() returns the methods is undefined, we sort them for test predictability: 
         Collections.sort(filteredMethods, new Comparator<Method>() {
+            @Override
             public int compare(Method o1, Method o2) {
                 int res = o1.toString().compareTo(o2.toString());
                 return desc ? -res : res;

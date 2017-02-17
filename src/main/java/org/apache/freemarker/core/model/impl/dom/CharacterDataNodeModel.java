@@ -29,14 +29,17 @@ class CharacterDataNodeModel extends NodeModel implements TemplateScalarModel {
         super(text);
     }
     
+    @Override
     public String getAsString() {
         return ((org.w3c.dom.CharacterData) node).getData();
     }
     
+    @Override
     public String getNodeName() {
         return (node instanceof Comment) ? "@comment" : "@text";
     }
     
+    @Override
     public boolean isEmpty() {
         return true;
     }

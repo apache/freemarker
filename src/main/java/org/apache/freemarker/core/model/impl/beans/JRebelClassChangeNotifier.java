@@ -30,6 +30,7 @@ class JRebelClassChangeNotifier implements ClassChangeNotifier {
         ReloaderFactory.getInstance();
     }
 
+    @Override
     public void subscribe(ClassIntrospector classIntrospector) {
         ReloaderFactory.getInstance().addClassReloadListener(
                 new ClassIntrospectorCacheInvalidator(classIntrospector));
@@ -43,6 +44,7 @@ class JRebelClassChangeNotifier implements ClassChangeNotifier {
             ref = new WeakReference(w);
         }
 
+        @Override
         public void onClassEvent(int eventType, Class pClass) {
             ClassIntrospector ci = (ClassIntrospector) ref.get();
             if (ci == null) {

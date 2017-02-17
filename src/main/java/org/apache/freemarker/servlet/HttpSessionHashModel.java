@@ -77,6 +77,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
         this.response = response;
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         checkSessionExistence();
         return wrapper.wrap(session != null ? session.getAttribute(key) : null);
@@ -103,6 +104,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
             (session == null && request == null);
     }
     
+    @Override
     public boolean isEmpty()
     throws TemplateModelException {
         checkSessionExistence();

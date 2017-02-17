@@ -58,26 +58,32 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
     private static DebugModel getDebugModel(TemplateModel tm) throws RemoteException {
         return (DebugModel) RmiDebuggedEnvironmentImpl.getCachedWrapperFor(tm);
     }
+    @Override
     public String getAsString() throws TemplateModelException {
         return ((TemplateScalarModel) model).getAsString();
     }
 
+    @Override
     public Number getAsNumber() throws TemplateModelException {
         return ((TemplateNumberModel) model).getAsNumber();
     }
 
+    @Override
     public Date getAsDate() throws TemplateModelException {
         return ((TemplateDateModel) model).getAsDate();
     }
 
+    @Override
     public int getDateType() {
         return ((TemplateDateModel) model).getDateType();
     }
 
+    @Override
     public boolean getAsBoolean() throws TemplateModelException {
         return ((TemplateBooleanModel) model).getAsBoolean();
     }
 
+    @Override
     public int size() throws TemplateModelException {
         if (model instanceof TemplateSequenceModel) {
             return ((TemplateSequenceModel) model).size();
@@ -85,10 +91,12 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         return ((TemplateHashModelEx) model).size();
     }
 
+    @Override
     public DebugModel get(int index) throws TemplateModelException, RemoteException {
         return getDebugModel(((TemplateSequenceModel) model).get(index));
     }
     
+    @Override
     public DebugModel[] get(int fromIndex, int toIndex) throws TemplateModelException, RemoteException {
         DebugModel[] dm = new DebugModel[toIndex - fromIndex];
         TemplateSequenceModel s = (TemplateSequenceModel) model;
@@ -98,6 +106,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         return dm;
     }
 
+    @Override
     public DebugModel[] getCollection() throws TemplateModelException, RemoteException {
         List list = new ArrayList();
         TemplateModelIterator i = ((TemplateCollectionModel) model).iterator();
@@ -107,10 +116,12 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         return (DebugModel[]) list.toArray(new DebugModel[list.size()]);
     }
     
+    @Override
     public DebugModel get(String key) throws TemplateModelException, RemoteException {
         return getDebugModel(((TemplateHashModel) model).get(key));
     }
     
+    @Override
     public DebugModel[] get(String[] keys) throws TemplateModelException, RemoteException {
         DebugModel[] dm = new DebugModel[keys.length];
         TemplateHashModel h = (TemplateHashModel) model;
@@ -120,6 +131,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         return dm;
     }
 
+    @Override
     public String[] keys() throws TemplateModelException {
         TemplateHashModelEx h = (TemplateHashModelEx) model;
         List list = new ArrayList();
@@ -130,6 +142,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         return (String[]) list.toArray(new String[list.size()]);
     }
 
+    @Override
     public int getModelTypes() {
         return type;
     }

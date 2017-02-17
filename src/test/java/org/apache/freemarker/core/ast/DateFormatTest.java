@@ -449,10 +449,12 @@ public class DateFormatTest extends TemplateTest {
             this.date = date;
         }
 
+        @Override
         public Date getAsDate() throws TemplateModelException {
             return date;
         }
 
+        @Override
         public int getDateType() {
             return DATETIME;
         }

@@ -24,6 +24,7 @@ package org.apache.freemarker.core.model;
  */
 final class FalseTemplateBooleanModel implements SerializableTemplateBooleanModel {
     
+    @Override
     public boolean getAsBoolean() {
         return false;
     }

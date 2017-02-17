@@ -34,6 +34,7 @@ public class MultiModel3 implements TemplateScalarModel, TemplateHashModel {
      *
      * @return the String value of this scalar.
      */
+    @Override
     public String getAsString() {
         return "Model3 is alive!";
     }
@@ -41,6 +42,7 @@ public class MultiModel3 implements TemplateScalarModel, TemplateHashModel {
     /**
      * @return true if this object is empty.
      */
+    @Override
     public boolean isEmpty() {
         return false;
     }
@@ -53,6 +55,7 @@ public class MultiModel3 implements TemplateScalarModel, TemplateHashModel {
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
+    @Override
     public TemplateModel get(String key) {
         if ( key.equals( "selftest" )) {
             return new SimpleScalar( "Selftest from MultiModel3!" );

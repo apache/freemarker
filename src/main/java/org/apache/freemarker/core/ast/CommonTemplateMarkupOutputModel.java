@@ -43,6 +43,7 @@ public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateM
         this.markupContet = markupContent;
     }
 
+    @Override
     public abstract CommonMarkupOutputFormat<MO> getOutputFormat();
 
     /** Maybe {@code null}, but then {@link #getMarkupContent()} isn't {@code null}. */

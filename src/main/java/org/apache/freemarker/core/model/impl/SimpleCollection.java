@@ -91,6 +91,7 @@ implements TemplateCollectionModel, Serializable {
      * <tt>TemplateModelException</tt> when you try to call their methods, since the wrapped <tt>Iterator</tt>
      * can't return the first element anymore.
      */
+    @Override
     public TemplateModelIterator iterator() {
         if (iterator != null) {
             return new SimpleTemplateModelIterator(iterator, false);
@@ -117,6 +118,7 @@ implements TemplateCollectionModel, Serializable {
             this.iteratorOwnedByMe = iteratorOwnedByMe;
         }
 
+        @Override
         public TemplateModel next() throws TemplateModelException {
             if (!iteratorOwnedByMe) { 
                 synchronized (SimpleCollection.this) {
@@ -134,6 +136,7 @@ implements TemplateCollectionModel, Serializable {
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
 
+        @Override
         public boolean hasNext() throws TemplateModelException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {

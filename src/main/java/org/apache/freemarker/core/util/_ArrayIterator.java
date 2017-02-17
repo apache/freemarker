@@ -33,10 +33,12 @@ public class _ArrayIterator implements Iterator {
         this.nextIndex = 0;
     }
 
+    @Override
     public boolean hasNext() {
         return nextIndex < array.length;
     }
 
+    @Override
     public Object next() {
         if (nextIndex >= array.length) {
             throw new NoSuchElementException();
@@ -44,6 +46,7 @@ public class _ArrayIterator implements Iterator {
         return array[nextIndex++];
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

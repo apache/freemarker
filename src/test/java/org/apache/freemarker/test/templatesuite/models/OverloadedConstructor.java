@@ -38,6 +38,7 @@ public class OverloadedConstructor implements TemplateScalarModel {
         value = "CharSequence " + s;
     }
     
+    @Override
     public String getAsString() throws TemplateModelException {
         return value;
     }

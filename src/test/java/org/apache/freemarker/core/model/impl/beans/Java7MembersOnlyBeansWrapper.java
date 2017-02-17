@@ -47,6 +47,7 @@ public class Java7MembersOnlyBeansWrapper extends BeansWrapper {
     
     MethodAppearanceFineTuner POST_JAVA_7_FILTER = new MethodAppearanceFineTuner() {
 
+        @Override
         public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
             Method m = in.getMethod();
             Class declCl = m.getDeclaringClass();

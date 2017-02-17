@@ -473,6 +473,7 @@ public JspWriter pushBody(Writer w) {
             it = hashEx.keys().iterator();
         }
         
+        @Override
         public boolean hasMoreElements() {
             try {
                 return it.hasNext();
@@ -481,6 +482,7 @@ public JspWriter pushBody(Writer w) {
             }
         }
         
+        @Override
         public Object nextElement() {
             try {
                 return ((TemplateScalarModel) it.next()).getAsString();

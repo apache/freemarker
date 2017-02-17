@@ -43,6 +43,7 @@ implements
     static final ModelFactory FACTORY =
         new ModelFactory()
         {
+            @Override
             public TemplateModel create(Object object, ObjectWrapper wrapper) {
                 return new CollectionModel((Collection) object, (BeansWrapper) wrapper);
             }
@@ -66,6 +67,7 @@ implements
      * @throws TemplateModelException if the index is out of bounds, or the
      * underlying collection is not a List.
      */
+    @Override
     public TemplateModel get(int index)
     throws TemplateModelException {
         // Don't forget to keep getSupportsIndexedAccess in sync with this!
@@ -94,6 +96,7 @@ implements
         return object instanceof List;
     }
     
+    @Override
     public TemplateModelIterator iterator() {
         return new IteratorModel(((Collection) object).iterator(), wrapper);
     }

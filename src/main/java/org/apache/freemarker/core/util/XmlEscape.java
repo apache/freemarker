@@ -41,6 +41,7 @@ public class XmlEscape implements TemplateTransformModel {
     private static final char[] QUOT = "&quot;".toCharArray();
     private static final char[] APOS = "&apos;".toCharArray();
 
+    @Override
     public Writer getWriter(final Writer out, Map args) {
         return new Writer()
         {

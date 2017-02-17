@@ -35,6 +35,7 @@ class GetlessMethodsAsPropertyGettersRule implements MethodAppearanceFineTuner, 
     // Can't be constructed from outside
     private GetlessMethodsAsPropertyGettersRule() { }
 
+    @Override
     public void process(
             MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
         legacyProcess(in.getContainingClass(), in.getMethod(), out);

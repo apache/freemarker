@@ -110,10 +110,12 @@ public class AppMetaTemplateDateFormatFactory extends TemplateDateFormatFactory 
             this.appMeta = appMeta;
         }
 
+        @Override
         public Date getAsDate() throws TemplateModelException {
             return date;
         }
 
+        @Override
         public int getDateType() {
             return dateType;
         }

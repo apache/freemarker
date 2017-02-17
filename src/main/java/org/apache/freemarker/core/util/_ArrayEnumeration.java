@@ -35,10 +35,12 @@ public class _ArrayEnumeration implements Enumeration {
         this.nextIndex = 0;
     }
 
+    @Override
     public boolean hasMoreElements() {
         return nextIndex < size;
     }
 
+    @Override
     public Object nextElement() {
         if (nextIndex >= size) {
             throw new NoSuchElementException();

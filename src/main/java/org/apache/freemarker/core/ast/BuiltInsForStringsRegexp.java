@@ -70,6 +70,7 @@ class BuiltInsForStringsRegexp {
                 this.matchString = matchString;
             }
             
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
@@ -100,6 +101,7 @@ class BuiltInsForStringsRegexp {
                 this.s = s;
             }
 
+            @Override
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 2, 3);
@@ -148,6 +150,7 @@ class BuiltInsForStringsRegexp {
                 }
             }
             
+            @Override
             public String getAsString() {
                 return matchedInputPart;
             }
@@ -167,6 +170,7 @@ class BuiltInsForStringsRegexp {
             this.input = input;
         }
         
+        @Override
         public TemplateModel get(int i) throws TemplateModelException {
             ArrayList matchingInputParts = this.matchingInputParts;
             if (matchingInputParts == null) {
@@ -175,6 +179,7 @@ class BuiltInsForStringsRegexp {
             return (TemplateModel) matchingInputParts.get(i);
         }
         
+        @Override
         public boolean getAsBoolean() {
             Boolean result = entireInputMatched;
             return result != null ? result.booleanValue() : isEntrieInputMatchesAndStoreResults();
@@ -192,6 +197,7 @@ class BuiltInsForStringsRegexp {
                
                 entireInputMatchGroups = new TemplateSequenceModel() {
                     
+                    @Override
                     public TemplateModel get(int i) throws TemplateModelException {
                         try {
                             return new SimpleScalar(firedEntireInputMatcher.group(i));
@@ -200,6 +206,7 @@ class BuiltInsForStringsRegexp {
                         }
                     }
                     
+                    @Override
                     public int size() throws TemplateModelException {
                         try {
                             return firedEntireInputMatcher.groupCount() + 1;
@@ -234,6 +241,7 @@ class BuiltInsForStringsRegexp {
             return matches;
         }
         
+        @Override
         public TemplateModelIterator iterator() {
             final ArrayList matchingInputParts = this.matchingInputParts;
             if (matchingInputParts == null) {
@@ -243,6 +251,7 @@ class BuiltInsForStringsRegexp {
                     private int nextIdx = 0;
                     boolean hasFindInfo = matcher.find();
                     
+                    @Override
                     public boolean hasNext() {
                         final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
                         if (matchingInputParts == null) {
@@ -252,6 +261,7 @@ class BuiltInsForStringsRegexp {
                         }
                     }
                     
+                    @Override
                     public TemplateModel next() throws TemplateModelException {
                         final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
                         if (matchingInputParts == null) {
@@ -275,10 +285,12 @@ class BuiltInsForStringsRegexp {
                     
                     private int nextIdx = 0;
                     
+                    @Override
                     public boolean hasNext() {
                         return nextIdx < matchingInputParts.size();
                     }
                     
+                    @Override
                     public TemplateModel next() throws TemplateModelException {
                         try {
                             return (TemplateModel) matchingInputParts.get(nextIdx++);
@@ -290,6 +302,7 @@ class BuiltInsForStringsRegexp {
             }
         }
         
+        @Override
         public int size() throws TemplateModelException {
             ArrayList matchingInputParts = this.matchingInputParts;
             if (matchingInputParts == null) {

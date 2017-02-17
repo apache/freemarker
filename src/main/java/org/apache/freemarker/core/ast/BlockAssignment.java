@@ -89,6 +89,7 @@ final class BlockAssignment extends TemplateElement {
             fnsModel = (Environment.Namespace ) nsModel; 
         }
         
+        @Override
         public Writer getWriter(Writer out, Map args) {
             return new StringWriter() {
                 @Override

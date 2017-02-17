@@ -45,6 +45,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     
     private AssertFailsDirective() { }
 
+    @Override
     public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
             throws TemplateException, IOException {
         String message = null;

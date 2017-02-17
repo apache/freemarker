@@ -68,6 +68,7 @@ public class BooleanList1 implements TemplateSequenceModel {
     /**
      * @return the specified index in the list
      */
+    @Override
     public TemplateModel get(int i) throws TemplateModelException {
         return cList.get(i);
     }
@@ -79,6 +80,7 @@ public class BooleanList1 implements TemplateSequenceModel {
         cList.rewind();
     }
 
+    @Override
     public int size() {
         return cList.size();
     }

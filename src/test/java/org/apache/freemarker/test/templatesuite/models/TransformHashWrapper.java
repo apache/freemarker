@@ -51,6 +51,7 @@ public class TransformHashWrapper implements TemplateHashModel,
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
+    @Override
     public TemplateModel get(String key) throws TemplateModelException {
         return m_cHashModel.get( key );
     }
@@ -58,6 +59,7 @@ public class TransformHashWrapper implements TemplateHashModel,
     /**
      * @return true if this object is empty.
      */
+    @Override
     public boolean isEmpty() {
         return false;
     }
@@ -66,6 +68,7 @@ public class TransformHashWrapper implements TemplateHashModel,
      * Returns the scalar's value as a String.
      * @return the String value of this scalar.
      */
+    @Override
     public String getAsString() {
         return "Utility transformations";
     }
