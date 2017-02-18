@@ -2151,7 +2151,7 @@ StringLiteral StringLiteral(boolean interpolate) :
             s = t.image.substring(2, t.image.length() -1);
         } else {
 	        try {
-	            s = _StringUtil.FTLStringLiteralDec(t.image.substring(1, t.image.length() -1));
+	            s = FTLUtil.unescapeStringLiteralPart(t.image.substring(1, t.image.length() -1));
 	        } catch (ParseException pe) {
 	            pe.lineNumber = t.beginLine;
 	            pe.columnNumber = t.beginColumn;
@@ -3605,7 +3605,7 @@ OutputFormatBlock OutputFormat() :
             }
         } else {
             throw new ParseException(
-                    "Parameter must be a string, but was: " + _ClassUtil.getFTLTypeDescription(paramTM),
+                    "Parameter must be a string, but was: " + FTLUtil.getTypeDescription(paramTM),
                     paramExp);
         }
         

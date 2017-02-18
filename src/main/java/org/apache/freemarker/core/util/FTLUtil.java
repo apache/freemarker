@@ -640,7 +640,7 @@ public final class FTLUtil {
      *
      * @since 2.3.20
      */
-    public static String getFTLTypeDescription(TemplateModel tm) {
+    public static String getTypeDescription(TemplateModel tm) {
         if (tm == null) {
             return "Null";
         } else {

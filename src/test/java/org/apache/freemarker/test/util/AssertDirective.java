@@ -59,7 +59,7 @@ public class AssertDirective implements TemplateDirectiveModel {
         
         if (!(test instanceof TemplateBooleanModel)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "The value had to be boolean, but it was of type" + FTLUtil.getFTLTypeDescription(test),
+                    + "The value had to be boolean, but it was of type" + FTLUtil.getTypeDescription(test),
                     env);
         }
         if (!((TemplateBooleanModel) test).getAsBoolean()) {

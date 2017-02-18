@@ -42,7 +42,7 @@ import org.apache.freemarker.core.util.FTLUtil;
  * these types: string, number, boolean, date. The intended applications are like string+hash, string+method,
  * hash+sequence, etc.
  * 
- * @see FTLUtil#getFTLTypeDescription(TemplateModel)
+ * @see FTLUtil#getTypeDescription(TemplateModel)
  */
 public interface TemplateModel {
     

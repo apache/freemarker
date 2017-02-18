@@ -31,7 +31,7 @@ public class _DelayedFTLTypeDescription extends _DelayedConversionToString {
 
     @Override
     protected String doConversion(Object obj) {
-        return FTLUtil.getFTLTypeDescription((TemplateModel) obj);
+        return FTLUtil.getTypeDescription((TemplateModel) obj);
     }
 
 }

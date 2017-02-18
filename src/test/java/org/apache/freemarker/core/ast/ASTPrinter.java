@@ -332,7 +332,7 @@ public class ASTPrinter {
                     out.write(INDENTATION);
                     out.write(ind);
                     out.write("= const ");
-                    out.write(FTLUtil.getFTLTypeDescription(tm));
+                    out.write(FTLUtil.getTypeDescription(tm));
                     out.write(' ');
                     out.write(tm.toString());
                     out.write('\n');

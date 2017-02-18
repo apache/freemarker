@@ -219,7 +219,7 @@ final class OverloadedMethods {
     private _DelayedConversionToString getTMActualParameterTypes(List arguments) {
         final String[] argumentTypeDescs = new String[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
-            argumentTypeDescs[i] = FTLUtil.getFTLTypeDescription((TemplateModel) arguments.get(i));
+            argumentTypeDescs[i] = FTLUtil.getTypeDescription((TemplateModel) arguments.get(i));
         }
         
         return new DelayedCallSignatureToString(argumentTypeDescs) {

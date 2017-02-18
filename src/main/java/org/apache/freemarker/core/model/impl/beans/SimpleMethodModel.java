@@ -86,7 +86,7 @@ public final class SimpleMethodModel extends SimpleMethod
     public int size() throws TemplateModelException {
         throw new TemplateModelException(
                 "Getting the number of items or enumerating the items is not supported on this "
-                + FTLUtil.getFTLTypeDescription(this) + " value.\n"
+                + FTLUtil.getTypeDescription(this) + " value.\n"
                 + "("
                 + "Hint 1: Maybe you wanted to call this method first and then do something with its return value. "
                 + "Hint 2: Getting items by intex possibly works, hence it's a \"+sequence\"."
