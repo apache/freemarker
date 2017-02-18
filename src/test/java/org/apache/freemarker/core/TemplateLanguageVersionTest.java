@@ -19,14 +19,13 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.util.TestUtil;
 import org.junit.Test;
@@ -34,13 +33,9 @@ public class TemplateLanguageVersionTest {
 
     @Test
     public void testDefaultVersion() throws IOException {
-        testDefaultWithVersion(Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_0);
-        testDefaultWithVersion(new Version(2, 3, 18), Configuration.VERSION_2_3_0);
-        testDefaultWithVersion(Configuration.VERSION_2_3_19, Configuration.VERSION_2_3_19);
-        testDefaultWithVersion(Configuration.VERSION_2_3_20, Configuration.VERSION_2_3_20);
-        testDefaultWithVersion(Configuration.VERSION_2_3_21, Configuration.VERSION_2_3_21);
+        testDefaultWithVersion(Configuration.VERSION_3_0_0, Configuration.VERSION_3_0_0);
         try {
-            testDefaultWithVersion(TestUtil.getClosestFutureVersion(), Configuration.VERSION_2_3_21);
+            testDefaultWithVersion(TestUtil.getClosestFutureVersion(), Configuration.VERSION_3_0_0);
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("version"));

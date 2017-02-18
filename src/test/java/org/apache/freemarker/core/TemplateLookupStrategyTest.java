@@ -43,7 +43,7 @@ public class TemplateLookupStrategyTest {
 
     @Test
     public void testSetSetting() throws TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
 
         cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, MyTemplateLookupStrategy.class.getName() + "()");
@@ -55,7 +55,7 @@ public class TemplateLookupStrategyTest {
     
     @Test
     public void testCustomStrategy() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.ftl", "");
@@ -90,7 +90,7 @@ public class TemplateLookupStrategyTest {
     
     @Test
     public void testDefaultStrategy() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.ftl", "");
@@ -260,7 +260,7 @@ public class TemplateLookupStrategyTest {
     
     @Test
     public void testAcquisition() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("t.ftl", "");
@@ -303,11 +303,8 @@ public class TemplateLookupStrategyTest {
     
     @Test
     public void testCustomLookupCondition() throws IOException, TemplateException {
-        testCustomLookup(new Configuration(Configuration.VERSION_2_3_0));
-        testCustomLookup(new Configuration(Configuration.VERSION_2_3_22));
-    }
-
-    private void testCustomLookup(Configuration cfg) throws IOException, TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+        
         final String iAtDefaultContent = "i at default";
         final String iXxAtDefaultContent = "i_xx at default";
         final String iAtBaazComContent = "i at baaz.com";
@@ -533,7 +530,7 @@ public class TemplateLookupStrategyTest {
     
     @Test
     public void testNonparsed() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.txt", "");
@@ -569,7 +566,7 @@ public class TemplateLookupStrategyTest {
 
     @Test
     public void testParseError() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.ftl", "");

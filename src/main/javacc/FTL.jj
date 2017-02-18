@@ -187,10 +187,6 @@ public class FMParser {
         
         this.outputFormat = outputFormat;
         recalculateAutoEscapingField();                                
-        if (incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_24) {
-            // Emulate bug, where the string literal parser haven't inherited the IcI:
-            incompatibleImprovements = _TemplateAPI.VERSION_INT_2_3_0;
-        }
     }
 
     void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
@@ -931,70 +927,66 @@ TOKEN:
      */
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z", "A"-"Z", "_"])+>
     {
-        if (!directiveSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
+        char firstChar = matchedToken.image.charAt(0);
+
+        if (!directiveSyntaxEstablished && autodetectTagSyntax) {
+            squBracTagSyntax = (firstChar == '[');
+            directiveSyntaxEstablished = true;
+        }
+
+        if (firstChar == '<' && squBracTagSyntax) {
+            matchedToken.kind = STATIC_TEXT_NON_WS;
+        } else if (firstChar == '[' && !squBracTagSyntax) {
             matchedToken.kind = STATIC_TEXT_NON_WS;
         } else {
-            char firstChar = matchedToken.image.charAt(0);
+            String dn = matchedToken.image;
+            int index = dn.indexOf('#');
+            dn = dn.substring(index + 1);
 
-            if (!directiveSyntaxEstablished && autodetectTagSyntax) {
-                squBracTagSyntax = (firstChar == '[');
-                directiveSyntaxEstablished = true;
-            }
-
-            if (firstChar == '<' && squBracTagSyntax) {
-                matchedToken.kind = STATIC_TEXT_NON_WS;
-            } else if (firstChar == '[' && !squBracTagSyntax) {
-                matchedToken.kind = STATIC_TEXT_NON_WS;
-            } else {
-                String dn = matchedToken.image;
-                int index = dn.indexOf('#');
-                dn = dn.substring(index + 1);
-
-                // Until the tokenizer/parser is reworked, we have this quirk where something like <#list>
-                // doesn't match any directive starter tokens, because that token requires whitespace after the
-                // name as it should be followed by parameters. For now we work this around so we don't report
-                // unknown directive:
-                if (_CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
-                    throw new TokenMgrError(
-                            "#" + dn + " is an existing directive, but the tag is malformed. " 
-                            + " (See FreeMarker Manual / Directive Reference.)",
-                            TokenMgrError.LEXICAL_ERROR,
-                            matchedToken.beginLine, matchedToken.beginColumn + 1,
-                            matchedToken.endLine, matchedToken.endColumn);
-                }
-
-                String tip = null;
-                if (dn.equals("set") || dn.equals("var")) {
-                    tip = "Use #assign or #local or #global, depending on the intented scope "
-                          + "(#assign is template-scope). " + PLANNED_DIRECTIVE_HINT;
-                } else if (dn.equals("else_if") || dn.equals("elif")) {
-                	tip = "Use #elseif.";
-                } else if (dn.equals("no_escape")) {
-                	tip = "Use #noescape instead.";
-                } else if (dn.equals("method")) {
-                	tip = "Use #function instead.";
-                } else if (dn.equals("head") || dn.equals("template") || dn.equals("fm")) {
-                	tip = "You may meant #ftl.";
-                } else if (dn.equals("try") || dn.equals("atempt")) {
-                	tip = "You may meant #attempt.";
-                } else if (dn.equals("for") || dn.equals("each") || dn.equals("iterate") || dn.equals("iterator")) {
-                    tip = "You may meant #list (http://freemarker.org/docs/ref_directive_list.html).";
-                } else if (dn.equals("prefix")) {
-                    tip = "You may meant #import. " + PLANNED_DIRECTIVE_HINT;
-                } else if (dn.equals("item") || dn.equals("row") || dn.equals("rows")) {
-                    tip = "You may meant #items.";
-                } else if (dn.equals("separator") || dn.equals("separate") || dn.equals("separ")) {
-                    tip = "You may meant #sep.";
-                } else {
-                    tip = "Help (latest version): http://freemarker.org/docs/ref_directive_alphaidx.html; "
-                            + "you're using FreeMarker " + Configuration.getVersion() + ".";
-                }
+            // Until the tokenizer/parser is reworked, we have this quirk where something like <#list>
+            // doesn't match any directive starter tokens, because that token requires whitespace after the
+            // name as it should be followed by parameters. For now we work this around so we don't report
+            // unknown directive:
+            if (_CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                 throw new TokenMgrError(
-                        "Unknown directive: #" + dn + (tip != null ? ". " + tip : ""),
+                        "#" + dn + " is an existing directive, but the tag is malformed. " 
+                        + " (See FreeMarker Manual / Directive Reference.)",
                         TokenMgrError.LEXICAL_ERROR,
                         matchedToken.beginLine, matchedToken.beginColumn + 1,
                         matchedToken.endLine, matchedToken.endColumn);
             }
+
+            String tip = null;
+            if (dn.equals("set") || dn.equals("var")) {
+                tip = "Use #assign or #local or #global, depending on the intented scope "
+                      + "(#assign is template-scope). " + PLANNED_DIRECTIVE_HINT;
+            } else if (dn.equals("else_if") || dn.equals("elif")) {
+            	tip = "Use #elseif.";
+            } else if (dn.equals("no_escape")) {
+            	tip = "Use #noescape instead.";
+            } else if (dn.equals("method")) {
+            	tip = "Use #function instead.";
+            } else if (dn.equals("head") || dn.equals("template") || dn.equals("fm")) {
+            	tip = "You may meant #ftl.";
+            } else if (dn.equals("try") || dn.equals("atempt")) {
+            	tip = "You may meant #attempt.";
+            } else if (dn.equals("for") || dn.equals("each") || dn.equals("iterate") || dn.equals("iterator")) {
+                tip = "You may meant #list (http://freemarker.org/docs/ref_directive_list.html).";
+            } else if (dn.equals("prefix")) {
+                tip = "You may meant #import. " + PLANNED_DIRECTIVE_HINT;
+            } else if (dn.equals("item") || dn.equals("row") || dn.equals("rows")) {
+                tip = "You may meant #items.";
+            } else if (dn.equals("separator") || dn.equals("separate") || dn.equals("separ")) {
+                tip = "You may meant #sep.";
+            } else {
+                tip = "Help (latest version): http://freemarker.org/docs/ref_directive_alphaidx.html; "
+                        + "you're using FreeMarker " + Configuration.getVersion() + ".";
+            }
+            throw new TokenMgrError(
+                    "Unknown directive: #" + dn + (tip != null ? ". " + tip : ""),
+                    TokenMgrError.LEXICAL_ERROR,
+                    matchedToken.beginLine, matchedToken.beginColumn + 1,
+                    matchedToken.endLine, matchedToken.endColumn);
         }
     }
 }
@@ -3150,12 +3142,8 @@ Macro Macro() :
         // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
         lastIteratorBlockContexts = iteratorBlockContexts;
         iteratorBlockContexts = null;
-        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
-	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
-	        breakableDirectiveNesting = 0; 
-        } else {
-            lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
-        }
+        lastBreakableDirectiveNesting = breakableDirectiveNesting;
+        breakableDirectiveNesting = 0; 
     }
     children = MixedContentElements()
     (
@@ -3171,9 +3159,7 @@ Macro Macro() :
     )
     {
         iteratorBlockContexts = lastIteratorBlockContexts;
-        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
-            breakableDirectiveNesting = lastBreakableDirectiveNesting;
-        }
+        breakableDirectiveNesting = lastBreakableDirectiveNesting;
         
         inMacro = inFunction = false;
         Macro result = new Macro(name, argNames, args, catchAll, isFunction, children);
@@ -3876,8 +3862,7 @@ Token UnparsedContent(Token start, StringBuilder buf) :
     )+
     {
         buf.setLength(buf.length() - t.image.length());
-        if (!t.image.endsWith(";")
-                && _TemplateAPI.getTemplateLanguageVersionAsInt(template) >= _TemplateAPI.VERSION_INT_2_3_21) {
+        if (!t.image.endsWith(";")) {
             throw new ParseException("Unclosed \"" + start.image + "\"", template, start);
         }
         return t;

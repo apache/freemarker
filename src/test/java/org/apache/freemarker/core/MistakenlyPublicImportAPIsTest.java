@@ -19,17 +19,19 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
 import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.ast.Environment.Namespace;
 import org.apache.freemarker.core.ast.InvalidReferenceException;
 import org.apache.freemarker.core.ast.LibraryLoad;
-import org.apache.freemarker.core.ast.Environment.Namespace;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util._NullWriter;
@@ -42,7 +44,7 @@ public class MistakenlyPublicImportAPIsTest {
 
     @Test
     public void testImportCopying() throws IOException, TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("imp1", "<#macro m>1</#macro>");
         tl.putTemplate("imp2", "<#assign x = 2><#macro m>${x}</#macro>");

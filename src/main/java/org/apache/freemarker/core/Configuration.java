@@ -22,8 +22,6 @@ package org.apache.freemarker.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,24 +65,13 @@ import org.apache.freemarker.core.ast._DelayedJQuote;
 import org.apache.freemarker.core.ast._MiscTemplateException;
 import org.apache.freemarker.core.ast._ObjectBuilderSettingEvaluator;
 import org.apache.freemarker.core.ast._SettingEvaluationEnvironment;
-import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
-import org.apache.freemarker.core.model.impl.SimpleCollection;
-import org.apache.freemarker.core.model.impl.SimpleDate;
-import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
@@ -102,18 +89,17 @@ import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
-import org.apache.freemarker.core.templateresolver.impl.URLTemplateLoader;
 import org.apache.freemarker.core.util.CaptureOutput;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.util.HtmlEscape;
 import org.apache.freemarker.core.util.NormalizeNewlines;
+import org.apache.freemarker.core.util.StandardCompress;
+import org.apache.freemarker.core.util.XmlEscape;
+import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SecurityUtil;
-import org.apache.freemarker.core.util.StandardCompress;
-import org.apache.freemarker.core.util._StringUtil;
-import org.apache.freemarker.core.util.XmlEscape;
 import org.apache.freemarker.core.util._SortedArraySet;
+import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
 
 /**
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
@@ -396,38 +382,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** Enable auto-escaping if the {@link OutputFormat} supports it. */
     public static final int ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY = 22;
     
-    /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
-    
-    /** FreeMarker version 2.3.19 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_19 = new Version(2, 3, 19);
-    
-    /** FreeMarker version 2.3.20 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_20 = new Version(2, 3, 20);
-    
-    /** FreeMarker version 2.3.21 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_21 = new Version(2, 3, 21);
-
-    /** FreeMarker version 2.3.22 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_22 = new Version(2, 3, 22);
-
-    /** FreeMarker version 2.3.23 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_23 = new Version(2, 3, 23);
-
-    /** FreeMarker version 2.3.24 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_24 = new Version(2, 3, 24);
-
-    /** FreeMarker version 2.3.25 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_25 = new Version(2, 3, 25);
-
-    /** FreeMarker version 2.3.26 (an {@link #Configuration(Version) incompatible improvements break-point}) */
-    public static final Version VERSION_2_3_26 = new Version(2, 3, 26);
-    
     /** FreeMarker version 3.0.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_3_0_0 = new Version(3, 0, 0);
     
-    /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
-    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
+    /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_3_0_0}. */
+    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_3_0_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     @Deprecated
     public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
@@ -475,24 +434,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         } catch (IOException e) {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
-    }
-    
-    private static final String FM_24_DETECTION_CLASS_NAME = "org.apache.freemarker.core.ast._2_4_OrLaterMarker";
-    private static final boolean FM_24_DETECTED;
-    static {
-        boolean fm24detected;
-        try {
-            Class.forName(FM_24_DETECTION_CLASS_NAME);
-            fm24detected = true;
-        } catch (ClassNotFoundException e) {
-            fm24detected = false;
-        } catch (LinkageError e) {
-            fm24detected = true;
-        } catch (Throwable e) {
-            // Unexpected. We assume that there's no clash.
-            fm24detected = false;
-        }
-        FM_24_DETECTED = fm24detected;
     }
     
     private final static Object defaultConfigLock = new Object();
@@ -574,273 +515,18 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>Currently the effects of this setting are:
      * <ul>
      *   <li><p>
-     *     2.3.0: This is the lowest supported value, the version used in older projects. This is the default in the
-     *     FreeMarker 2.3.x series.
-     *   </li>
-     *   <li><p>
-     *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
-     *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
-     *     same template.
-     *   </li>
-     *   <li><p>
-     *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
-     *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
-     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'&gt;</tt>) instead of plain quotation mark
-     *     (<tt>&lt;foo bar="${val}"&gt;</tt>), they might produce HTML/XML that's not well-formed. Note that
-     *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
-     *     concern anymore.
-     *   </li>
-     *   <li><p>
-     *     2.3.21 (or higher):
-     *     <ul>
-     *       <li><p>
-     *         The <em>default</em> of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
-     *         {@code ObjectWrapper.DEFAULT_WRAPPER} to another almost identical {@link DefaultObjectWrapper} singleton,
-     *         returned by {@link DefaultObjectWrapperBuilder#build()}. The new default object wrapper's
-     *         "incompatible improvements" version is set to the same as of the {@link Configuration}.
-     *         See {@link BeansWrapper#BeansWrapper(Version)} for further details. Furthermore, the new default
-     *         object wrapper doesn't allow changing its settings; setter methods throw {@link IllegalStateException}).
-     *         (If anything tries to call setters on the old default in your application, that's a dangerous bug that
-     *         won't remain hidden now. As the old default is a singleton too, potentially shared by independently
-     *         developed components, most of them expects the out-of-the-box behavior from it (and the others are
-     *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
-     *         templateResolver) because the singleton is modified after publishing to other threads.)
-     *         Furthermore the new default object wrapper shares class introspection templateResolver with other
-     *         {@link BeansWrapper}-s created with {@link BeansWrapperBuilder}, which has an impact as
-     *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
-     *       </li>
-     *       <li><p>
-     *          The {@code ?iso_...} built-ins won't show the time zone offset for {@link java.sql.Time} values anymore,
-     *          because most databases store time values that aren't in any time zone, but just store hour, minute,
-     *          second, and decimal second field values. If you still want to show the offset (like for PostgreSQL
-     *          "time with time zone" columns you should), you can force showing the time zone offset by using
-     *          {@code myTime?string.iso_fz} (and its other variants).
-     *       </li>
-     *       <li><p>{@code ?is_enumerable} correctly returns {@code false} for Java methods get from Java objects that
-     *         are wrapped with {@link BeansWrapper} and its subclasses, like {@link DefaultObjectWrapper}. Although
-     *         method values implement {@link TemplateSequenceModel} (because of a historical design quirk in
-     *         {@link BeansWrapper}), trying to {@code #list} them will cause error, hence they aren't enumerable.
-     *       </li>
-     *       <li><p>
-     *          {@code ?c} will return {@code "INF"}, {@code "-INF"} and {@code "NaN"} for positive/negative infinity
-     *          and IEEE floating point Not-a-Number, respectively. These are the XML Schema compatible representations
-     *          of these special values. Earlier it has returned what {@link DecimalFormat} did with US locale, none of
-     *          which was understood by any (common) computer language.
-     *       </li>
-     *       <li><p>
-     *          FTL hash literals that repeat keys now only have the key once with {@code ?keys}, and only has the last
-     *          value associated to that key with {@code ?values}. This is consistent with the behavior of
-     *          {@code hash[key]} and how maps work in Java.       
-     *       </li>
-     *       <li><p>In most cases (where FreeMarker is able to do that), for {@link TemplateLoader}-s that use
-     *         {@link URLConnection}, {@code URLConnection#setUseCaches(boolean)} will called with {@code false},
-     *         so that only FreeMarker will do caching, not the URL scheme's handler.
-     *         See {@link URLTemplateLoader#setURLConnectionUsesCaches(Boolean)} for more details.
-     *       </li>
-     *       <li><p>
-     *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
-     *         to {@code null}, which means that FreeMarker will not find any templates. Earlier
-     *         the default was a {@link FileTemplateLoader} that used the current directory as the root. This was
-     *         dangerous and fragile as you usually don't have good control over what the current directory will be.
-     *         Luckily, the old default almost never looked for the templates at the right place
-     *         anyway, so pretty much all applications had to set the {@code template_loader} setting, so it's unlikely
-     *         that changing the default breaks your application.
-     *       </li>
-     *       <li><p>
-     *          Right-unlimited ranges become readable (like listable), so {@code <#list 1.. as i>...</#list>} works.
-     *          Earlier they were only usable for slicing (like {@code hits[10..]}).
-     *       </li>
-     *       <li><p>
-     *          Empty ranges return {@link Constants#EMPTY_SEQUENCE} instead of an empty {@link SimpleSequence}. This
-     *          is in theory backward compatible, as the API only promises to give something that implements
-     *          {@link TemplateSequenceModel}.
-     *       </li>
-     *       <li><p>
-     *          Unclosed comments ({@code <#-- ...}) and {@code #noparse}-s won't be silently closed at the end of
-     *          template anymore, but cause a parsing error instead.
-     *       </li>
-     *     </ul>
-     *   </li>
-     *   <li><p>
-     *     2.3.22 (or higher):
-     *     <ul>
-     *       <li><p>
-     *          {@link DefaultObjectWrapper} has some substantial changes with {@code incompatibleImprovements} 2.3.22;
-     *          check them out at {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. It's important to know
-     *          that if you set the {@code object_wrapper} setting (to an other value than {@code "default"}), rather
-     *          than leaving it on its default value, the {@code object_wrapper} won't inherit the
-     *          {@code incompatibleImprovements} of the {@link Configuration}. In that case, if you want the 2.3.22
-     *          improvements of {@link DefaultObjectWrapper}, you have to set it in the {@link DefaultObjectWrapper}
-     *          object itself too! (Note that it's OK to use a {@link DefaultObjectWrapper} with a different
-     *          {@code incompatibleImprovements} version number than that of the {@link Configuration}, if that's
-     *          really what you want.)
-     *       </li>
-     *       <li><p>
-     *          In templates, {@code .template_name} will <em>always</em> return the main (top level) template's name.
-     *          It won't be affected by {@code #include} and {@code #nested} anymore. This is unintended, a bug with
-     *          {@code incompatible_improvement} 2.3.22 (a consequence of the lower level fixing described in the next
-     *          point). The old behavior of {@code .template_name} is restored if you set
-     *          {@code incompatible_improvement} to 2.3.23 (while {@link Configurable#getParent()}) of
-     *          {@link Environment} keeps the changed behavior shown in the next point). 
-     *       </li>
-     *       <li><p>
-     *          {@code #include} and {@code #nested} doesn't change the parent {@link Template} (see
-     *          {@link Configurable#getParent()}) of the {@link Environment} anymore to the {@link Template} that's
-     *          included or whose namespace {@code #nested} "returns" to. Thus, the parent of {@link Environment} will
-     *          be now always the main {@link Template}. (The main {@link Template} is the {@link Template} whose
-     *          {@code process} or {@code createProcessingEnvironment} method was called to initiate the output
-     *          generation.) Note that apart from the effect on FTL's {@code .template_name} (see
-     *          previous point), this should only matter if you have set settings directly on {@link Template} objects,
-     *          and almost nobody does that. Also note that macro calls have never changed the {@link Environment}
-     *          parent to the {@link Template} that contains the macro definition, so this mechanism was always broken.
-     *          As now we consistently never change the parent, the behavior when calling macros didn't change.
-     *       </li>
-     *       <li><p>
-     *          When using {@code org.apache.freemarker.servlet.FreemarkerServlet}:
-     *          <ul>
-     *             <li>
-     *               <p>When using custom JSP tag libraries: Fixes bug where some kind of
-     *               values, when put into the JSP <em>page</em> scope (via {@code #global} or via the JSP
-     *               {@code PageContext} API) and later read back with the JSP {@code PageContext} API (typically in a
-     *               custom JSP tag), might come back as FreeMarker {@link TemplateModel} objects instead of as objects
-     *               with a standard Java type. Other Servlet scopes aren't affected. It's highly unlikely that
-     *               something expects the presence of this bug. The affected values are of the FTL types listed below,
-     *               and to trigger the bug, they either had to be created directly in the template (like as an FTL
-     *               literal or with {@code ?date}/{@code time}/{@code datetime}), or you had to use
-     *               {@link DefaultObjectWrapper} or {@link SimpleObjectWrapper} (or a subclass of them):
-     *               
-     *               <ul>
-     *                 <li>FTL date/time/date-time values may came back as {@link SimpleDate}-s, now they come back as
-     *                 {@link java.util.Date java.util.Date}-s instead.</li>
-     *             
-     *                 <li>FTL sequence values may came back as {@link SimpleSequence}-s, now they come back as
-     *                 {@link java.util.List}-s as expected. This at least stands assuming that the
-     *                 {@link Configuration#setSetting(String, String) object_wrapper} configuration setting is a
-     *                 subclass of {@link BeansWrapper} (such as {@link DefaultObjectWrapper}, which is the default),
-     *                 but that's practically always the case in applications that use FreeMarker's JSP extension
-     *                 (otherwise it can still work, but it depends on the quality and capabilities of the
-     *                 {@link ObjectWrapper} implementation).</li>
-     *             
-     *                 <li>FTL hash values may came back as {@link SimpleHash}-es, now they come back as
-     *                 {@link java.util.Map}-s as expected (again, assuming that the object wrapper is a subclass of
-     *                 {@link BeansWrapper}, like preferably {@link DefaultObjectWrapper}, which is also the default).
-     *                 </li>
-     *             
-     *                 <li>FTL collection values may came back as {@link SimpleCollection}-s, now they come back as
-     *                 {@link java.util.Collection}-s as expected (again, assuming that the object wrapper is a subclass
-     *                 of {@link BeansWrapper}, like preferably {@link DefaultObjectWrapper}).</li>
-     *               </ul>
-     *             </li>
-     *             <li><p>
-     *               Initial {@code "["} in the {@code TemplatePath} init-param
-     *               has special meaning; it's used for specifying multiple comma separated locations, like in
-     *               {@code <param-value>[ WEB-INF/templates, classpath:com/example/myapp/templates ]</param-value>}
-     *             </li>
-     *             <li><p>
-     *               Initial <tt>"{"</tt> in the {@code TemplatePath} init-param is reserved for future purposes, and
-     *               thus will throw exception.
-     *             </li>
-     *          </ul>
-     *       </li>
-     *     </ul>
-     *   </li>
-     *   <li><p>
-     *     2.3.23 (or higher):
-     *     <ul>
-     *       <li><p>
-     *          Fixed a loophole in the implementation of the long existing parse-time rule that says that
-     *          {@code #break}, in the FTL source code itself, must occur nested inside a breakable directive, such as
-     *          {@code #list} or {@code #switch}. This check could be circumvented with {@code #macro} or
-     *          {@code #function}, like this:
-     *          {@code <#list 1..1 as x><#macro callMeLater><#break></#macro></#list><@callMeLater />}.
-     *          After activating this fix, this will be a parse time error.
-     *       </li>
-     *       <li><p>
-     *          If you have used {@code incompatible_improvements} 2.3.22 earlier, know that there the behavior of the
-     *          {@code .template_name} special variable used in templates was accidentally altered, but now it's
-     *          restored to be backward compatible with 2.3.0. (Ironically, the restored legacy behavior itself is
-     *          broken when it comes to macro invocations, we just keep it for backward compatibility. If you need fixed
-     *          behavior, use {@code .current_template_name} or {@code .main_template_name} instead.)
-     *       </li>
-     *     </ul>
-     *   </li>
-     *   <li><p>
-     *     2.3.24 (or higher):
-     *     <ul>
-     *       <li><p>
-     *          The default of the
-     *          {@link #setRecognizeStandardFileExtensions(boolean) recognize_standard_file_extensions}
-     *          setting changes to {@code true}, which means that templates whose name ends with {@code ".ftlh"} or
-     *          {@code ".ftlx"} will automatically get {@link HTMLOutputFormat#INSTANCE} or
-     *          {@link XMLOutputFormat#INSTANCE} output format respectively, in both cases with
-     *          {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY} {@link #setAutoEscapingPolicy(int) auto_escaping_policy}.
-     *          These "file" extensions aren't case sensitive.
-     *       </li>
-     *       <li><p>
-     *          In number format and date format strings (like in the {@code number_format} setting, or in templates in
-     *          {@code n?string("0.##")}), an initial {@code '@'} has special meaning; they refer to a custom format
-     *          with the name given after the {@code @} (see: {@link #setCustomNumberFormats(Map)},
-     *          {@link #setCustomDateFormats(Map)}, {@link #setNumberFormat(String)}, and {@link #setDateTimeFormat}).
-     *          If the custom format doesn't exist, that will be an error. To have a literal {@code @} as the first
-     *          character in the output, it has to be written as {@code @@}. Again, all this only applies to the very
-     *          first character of the format string, so {@code @} characters elsewhere must not be doubled. Also, if
-     *          there are any custom formats defined, initial {@code '@'} will have the new meaning regardless of
-     *          the value of the {@code incompatible_improvements} setting. So you don't need to set the
-     *          {@code incompatible_improvements} only to use custom formats. 
-     *       </li>
-     *       <li><p>
-     *          Expressions inside interpolations that were inside <em>string literal expressions</em>
-     *          (not <code>${...}</code>-s in general), like in <code>&lt;#assign s="Hello ${name}!"&gt;</code>, has
-     *          always used {@code incompatbileImprovement}-s 0 (2.3.0 in effect). Now it's fixed.
-     *       </li>
-     *       <li><p>
-     *          {@link DefaultObjectWrapper} has some minor changes with {@code incompatibleImprovements} 2.3.24;
-     *          check them out at {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. It's important to know
-     *          that if you set the {@code object_wrapper} setting (to an other value than {@code "default"}), rather
-     *          than leaving it on its default value, the {@code object_wrapper} won't inherit the
-     *          {@code incompatibleImprovements} of the {@link Configuration}. In that case, if you want the 2.3.24
-     *          improvements of {@link DefaultObjectWrapper}, you have to set it in the {@link DefaultObjectWrapper}
-     *          object itself too! (Note that it's OK to use a {@link DefaultObjectWrapper} with a different
-     *          {@code incompatibleImprovements} version number than that of the {@link Configuration}, if that's
-     *          really what you want.)
-     *       </li>
-     *       <li><p>
-     *          Fixed bug: The {@code #import} directive meant to copy the library variable into a global variable if
-     *          it's executed in the main namespace, but that haven't happened when the imported template was already
-     *          imported earlier in another namespace. 
-     *       </li>
-     *       <li><p>
-     *          {@code ?is_sequence} doesn't return {@code true} for Java methods wrapped by {@link BeansWrapper} and
-     *          its subclasses (most notably {@link DefaultObjectWrapper}) anymore, as they only implement the
-     *          {@code [index]} operator, but not {@code ?size}, which causes {@code <#list ...>} to fail among others.
-     *          (They shouldn't implement either, but this is historical heritage.)
-     *     </ul>
-     *   </li>
-     *   <li><p>
-     *     2.3.25 (or higher):
-     *     <ul>
-     *       <li><p>
-     *          When calling {@link Configurable#setAutoIncludes(List)} on a {@link Configuration}, it filters out
-     *          duplicates from the list, similarly as repeatedly calling {@link Configurable#addAutoInclude(String)}
-     *          would, hence avoiding repeated inclusions. Calling {@link Configurable#setAutoIncludes(List)} on other
-     *          {@link Configurable}-s always do this filtering regardless of the incompatible improvements setting. 
-     *     </ul>
+     *     3.0.0: This is the lowest supported value in FreeMarker 3.
      *   </li>
      * </ul>
      * 
      * @throws IllegalArgumentException
      *             If {@code incompatibleImmprovements} refers to a version that wasn't released yet when the currently
-     *             used FreeMarker version was released, or is less than 2.3.0, or is {@code null}.
+     *             used FreeMarker version was released, or is less than 3.0.0, or is {@code null}.
      * 
      * @since 2.3.21
      */
     public Configuration(Version incompatibleImprovements) {
         super(incompatibleImprovements);
-        
-        // We postpone this until here (rather that doing this in static initializer) for two reason:
-        // - Class initialization errors are often not reported very well
-        // - This way we avoid the error if FM isn't actually used
-        checkFreeMarkerVersionClash();
         
         _NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
@@ -849,14 +535,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         loadBuiltInSharedVariables();
     }
 
-    private static void checkFreeMarkerVersionClash() {
-        if (FM_24_DETECTED) {
-            throw new RuntimeException("Clashing FreeMarker versions (" + VERSION + " and some post-2.3.x) detected: "
-                    + "found post-2.3.x class " + FM_24_DETECTION_CLASS_NAME + ". You probably have two different "
-                    + "freemarker.jar-s in the classpath.");
-        }
-    }
-    
     private void createTemplateResolver() {
         templateResolver = new DefaultTemplateResolver(
                 null,
@@ -926,10 +604,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return getDefaultTemplateExceptionHandler(getIncompatibleImprovements());
     }
     
-    private boolean getDefaultLogTemplateExceptions() {
-        return getDefaultLogTemplateExceptions(getIncompatibleImprovements());
-    }
-    
     private ObjectWrapper getDefaultObjectWrapper() {
         return getDefaultObjectWrapper(getIncompatibleImprovements());
     }
@@ -937,11 +611,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     // Package visible as Configurable needs this to initialize the field defaults.
     final static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
         return TemplateExceptionHandler.DEBUG_HANDLER;
-    }
-
-    // Package visible as Configurable needs this to initialize the field defaults.
-    final static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
-        return true;
     }
     
     @Override
@@ -1608,7 +1277,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void unsetLogTemplateExceptions() {
         if (logTemplateExceptionsExplicitlySet) {
-            setLogTemplateExceptions(getDefaultLogTemplateExceptions());
+            setLogTemplateExceptions(false);
             logTemplateExceptionsExplicitlySet = false;
         }
     }
@@ -2098,7 +1767,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     public boolean getRecognizeStandardFileExtensions() {
         return recognizeStandardFileExtensions == null
-                ? incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_24
+                ? true
                 : recognizeStandardFileExtensions.booleanValue();
     }
 
@@ -3128,11 +2797,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.21
      */
     public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
-            return _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
-        } else {
-            return new DefaultObjectWrapperBuilder(incompatibleImprovements).build();
-        }
+        return new DefaultObjectWrapperBuilder(incompatibleImprovements).build();
     }
 
     /**

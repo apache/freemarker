@@ -60,7 +60,7 @@ public class _BeansAPI {
             throws NoSuchMethodException {
         if (args == null) args = _CollectionUtil.EMPTY_OBJECT_ARRAY;
         
-        final ArgumentTypes argTypes = new ArgumentTypes(args, true);
+        final ArgumentTypes argTypes = new ArgumentTypes(args);
         final List<ReflectionCallableMemberDescriptor> fixedArgMemberDescs
                 = new ArrayList<>();
         final List<ReflectionCallableMemberDescriptor> varArgsMemberDescs

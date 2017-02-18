@@ -45,7 +45,6 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -166,7 +165,7 @@ public final class Environment extends Configurable {
     private final Namespace mainNamespace;
     private Namespace currentNamespace, globalNamespace;
     private HashMap<String, Namespace> loadedLibs;
-    private Configurable legacyParent;
+    private Configurable legacyParent; // [FM3] Get rid of this
 
     private boolean inAttemptBlock;
     private Throwable lastThrowable;
@@ -560,13 +559,8 @@ public final class Environment extends Configurable {
             currentNamespace = invokingMacroContext.nestedContentNamespace;
 
             final Configurable prevParent;
-            final boolean parentReplacementOn = isBeforeIcI2322();
             prevParent = getParent();
-            if (parentReplacementOn) {
-                setParent(currentNamespace.getTemplate());
-            } else {
-                legacyParent = currentNamespace.getTemplate();
-            }
+            legacyParent = currentNamespace.getTemplate();
 
             localContextStack = invokingMacroContext.prevLocalContextStack;
             if (invokingMacroContext.nestedContentParameterNames != null) {
@@ -580,11 +574,7 @@ public final class Environment extends Configurable {
                 }
                 currentMacroContext = invokingMacroContext;
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
-                if (parentReplacementOn) {
-                    setParent(prevParent);
-                } else {
-                    legacyParent = prevParent;
-                }
+                legacyParent = prevParent;
                 localContextStack = prevLocalContextStack;
             }
         }
@@ -1265,7 +1255,6 @@ public final class Environment extends Configurable {
         int formatStringLen = formatString.length();
         if (formatStringLen > 1
                 && formatString.charAt(0) == '@'
-                && (isIcI2324OrLater() || hasCustomFormats())
                 && Character.isLetter(formatString.charAt(1))) {
             final String name;
             final String params;
@@ -1771,7 +1760,6 @@ public final class Environment extends Configurable {
             formatParams = formatString; // for speed, we don't remove the prefix
         } else if (firstChar == '@'
                 && formatStringLen > 1
-                && (isIcI2324OrLater() || hasCustomFormats())
                 && Character.isLetter(formatString.charAt(1))) {
             final String name;
             {
@@ -2508,23 +2496,14 @@ public final class Environment extends Configurable {
     public void include(Template includedTemplate)
             throws TemplateException, IOException {
         final Template prevTemplate;
-        final boolean parentReplacementOn = isBeforeIcI2322();
         prevTemplate = getTemplate();
-        if (parentReplacementOn) {
-            setParent(includedTemplate);
-        } else {
-            legacyParent = includedTemplate;
-        }
+        legacyParent = includedTemplate;
 
         importMacros(includedTemplate);
         try {
             visit(includedTemplate.getRootTreeNode());
         } finally {
-            if (parentReplacementOn) {
-                setParent(prevTemplate);
-            } else {
-                legacyParent = prevTemplate;
-            }
+            legacyParent = prevTemplate;
         }
     }
 
@@ -2615,7 +2594,7 @@ public final class Environment extends Configurable {
             lazyImport = false;
             // As we have an already normalized name, we use it. 2.3.x note: We should use the template.sourceName as
             // namespace key, but historically we use the looked up name (template.name); check what lazy import does if
-            // that will be fixed, as that can't do the template lookup, yet the keys must be the same.
+            // that will be oms, as that can't do the template lookup, yet the keys must be the same.
             templateName = loadedTemplate.getName();
         } else {
             lazyImport = true;
@@ -2633,7 +2612,7 @@ public final class Environment extends Configurable {
         if (existingNamespace != null) {
             if (targetNsVarName != null) {
                 setVariable(targetNsVarName, existingNamespace);
-                if (isIcI2324OrLater() && currentNamespace == mainNamespace) {
+                if (currentNamespace == mainNamespace) {
                     globalNamespace.put(targetNsVarName, existingNamespace);
                 }
             }
@@ -3018,14 +2997,6 @@ public final class Environment extends Configurable {
         public void close() {
         }
     };
-
-    private boolean isBeforeIcI2322() {
-        return configuration.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
-    }
-
-    boolean isIcI2324OrLater() {
-        return configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
-    }
 
     /**
      * See {@link #setFastInvalidReferenceExceptions(boolean)}.

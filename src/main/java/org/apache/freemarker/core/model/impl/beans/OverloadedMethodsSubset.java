@@ -60,17 +60,14 @@ abstract class OverloadedMethodsSubset {
     private int[/*number of args*/][/*arg index*/] typeFlagsByParamCount;
     
     // TODO: This can cause memory-leak when classes are re-loaded. However, first the genericClassIntrospectionCache
-    // and such need to be fixed in this regard. 
+    // and such need to be oms in this regard. 
     private final Map/*<ArgumentTypes, MaybeEmptyCallableMemberDescriptor>*/ argTypesToMemberDescCache
             = new ConcurrentHashMap(6, 0.75f, 1);
     
     private final List/*<ReflectionCallableMemberDescriptor>*/ memberDescs = new LinkedList();
     
-    /** Enables 2.3.21 {@link BeansWrapper} incompatibleImprovements */
-    protected final boolean bugfixed;
-    
-    OverloadedMethodsSubset(boolean bugfixed) {
-        this.bugfixed = bugfixed;
+    OverloadedMethodsSubset() {
+        //
     }
     
     void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
@@ -111,23 +108,19 @@ abstract class OverloadedMethodsSubset {
         }
 
         int[] typeFlagsByParamIdx = ALL_ZEROS_ARRAY;
-        if (bugfixed) {
-            // Fill typeFlagsByParamCount (if necessary)
-            for (int paramIdx = 0; paramIdx < paramCount; paramIdx++) {
-                final int typeFlags = TypeFlags.classToTypeFlags(prepedParamTypes[paramIdx]);
-                if (typeFlags != 0) {
-                    if (typeFlagsByParamIdx == ALL_ZEROS_ARRAY) {
-                        typeFlagsByParamIdx = new int[paramCount];
-                    }
-                    typeFlagsByParamIdx[paramIdx] = typeFlags;
+        // Fill typeFlagsByParamCount (if necessary)
+        for (int paramIdx = 0; paramIdx < paramCount; paramIdx++) {
+            final int typeFlags = TypeFlags.classToTypeFlags(prepedParamTypes[paramIdx]);
+            if (typeFlags != 0) {
+                if (typeFlagsByParamIdx == ALL_ZEROS_ARRAY) {
+                    typeFlagsByParamIdx = new int[paramCount];
                 }
+                typeFlagsByParamIdx[paramIdx] = typeFlags;
             }
-            mergeInTypesFlags(paramCount, typeFlagsByParamIdx);
         }
+        mergeInTypesFlags(paramCount, typeFlagsByParamIdx);
         
-        afterWideningUnwrappingHints(
-                bugfixed ? prepedParamTypes : unwrappingHintsByParamCount[paramCount],
-                typeFlagsByParamIdx);
+        afterWideningUnwrappingHints(prepedParamTypes, typeFlagsByParamIdx);
     }
     
     Class[][] getUnwrappingHintsByParamCount() {
@@ -137,7 +130,7 @@ abstract class OverloadedMethodsSubset {
     @SuppressFBWarnings(value="JLM_JSR166_UTILCONCURRENT_MONITORENTER",
             justification="Locks for member descriptor creation only")
     final MaybeEmptyCallableMemberDescriptor getMemberDescriptorForArgs(Object[] args, boolean varArg) {
-        ArgumentTypes argTypes = new ArgumentTypes(args, bugfixed);
+        ArgumentTypes argTypes = new ArgumentTypes(args);
         MaybeEmptyCallableMemberDescriptor memberDesc
                 = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
         if (memberDesc == null) {
@@ -180,54 +173,41 @@ abstract class OverloadedMethodsSubset {
         // This also means that the hint for (Integer, Integer) will be Integer, not just Number. This is consistent
         // with how non-overloaded method hints work.
         
-        if (bugfixed) {
-            // c1 primitive class to boxing class:
-            final boolean c1WasPrim; 
-            if (c1.isPrimitive()) {
-                c1 = _ClassUtil.primitiveClassToBoxingClass(c1);
-                c1WasPrim = true;
-            } else {
-                c1WasPrim = false;
-            }
-            
-            // c2 primitive class to boxing class:
-            final boolean c2WasPrim; 
-            if (c2.isPrimitive()) {
-                c2 = _ClassUtil.primitiveClassToBoxingClass(c2);
-                c2WasPrim = true;
-            } else {
-                c2WasPrim = false;
-            }
-    
-            if (c1 == c2) {
-                // If it was like int and Integer, boolean and Boolean, etc., we return the boxing type (as that's the
-                // less specific, because it allows null.)
-                // (If it was two equivalent primitives, we don't get here, because of the 1st line of the method.) 
-                return c1;
-            } else if (Number.class.isAssignableFrom(c1) && Number.class.isAssignableFrom(c2)) {
-                // We don't want the unwrapper to convert to a numerical super-type [*] as it's not yet known what the
-                // actual number type of the chosen method will be. We will postpone the actual numerical conversion
-                // until that, especially as some conversions (like fixed point to floating point) can be lossy.
-                // * Numerical super-type: Like long > int > short > byte.  
-                return Number.class;
-            } else if (c1WasPrim || c2WasPrim) {
-                // At this point these all stand:
-                // - At least one of them was primitive
-                // - No more than one of them was numerical
-                // - They don't have the same wrapper (boxing) class
-                return Object.class;
-            }
-            // Falls through
-        } else {  // old buggy behavior
-            if (c2.isPrimitive()) {
-                if (c2 == Byte.TYPE) c2 = Byte.class;
-                else if (c2 == Short.TYPE) c2 = Short.class;
-                else if (c2 == Character.TYPE) c2 = Character.class;
-                else if (c2 == Integer.TYPE) c2 = Integer.class;
-                else if (c2 == Float.TYPE) c2 = Float.class;
-                else if (c2 == Long.TYPE) c2 = Long.class;
-                else if (c2 == Double.TYPE) c2 = Double.class;
-            }
+        // c1 primitive class to boxing class:
+        final boolean c1WasPrim; 
+        if (c1.isPrimitive()) {
+            c1 = _ClassUtil.primitiveClassToBoxingClass(c1);
+            c1WasPrim = true;
+        } else {
+            c1WasPrim = false;
+        }
+        
+        // c2 primitive class to boxing class:
+        final boolean c2WasPrim; 
+        if (c2.isPrimitive()) {
+            c2 = _ClassUtil.primitiveClassToBoxingClass(c2);
+            c2WasPrim = true;
+        } else {
+            c2WasPrim = false;
+        }
+
+        if (c1 == c2) {
+            // If it was like int and Integer, boolean and Boolean, etc., we return the boxing type (as that's the
+            // less specific, because it allows null.)
+            // (If it was two equivalent primitives, we don't get here, because of the 1st line of the method.) 
+            return c1;
+        } else if (Number.class.isAssignableFrom(c1) && Number.class.isAssignableFrom(c2)) {
+            // We don't want the unwrapper to convert to a numerical super-type [*] as it's not yet known what the
+            // actual number type of the chosen method will be. We will postpone the actual numerical conversion
+            // until that, especially as some conversions (like oms point to floating point) can be lossy.
+            // * Numerical super-type: Like long > int > short > byte.  
+            return Number.class;
+        } else if (c1WasPrim || c2WasPrim) {
+            // At this point these all stand:
+            // - At least one of them was primitive
+            // - No more than one of them was numerical
+            // - They don't have the same wrapper (boxing) class
+            return Object.class;
         }
         
         // We never get to this point if buxfixed is true and any of these stands:
@@ -243,7 +223,7 @@ abstract class OverloadedMethodsSubset {
         }
         
         // Gather maximally specific elements. Yes, there can be more than one 
-        // thank to interfaces. I.e., if you call this method for String.class 
+        // because of interfaces. I.e., if you call this method for String.class 
         // and Number.class, you'll have Comparable, Serializable, and Object as 
         // maximal elements. 
         List max = new ArrayList();
@@ -270,35 +250,31 @@ abstract class OverloadedMethodsSubset {
         }
         
         if (max.size() > 1) {  // we have an ambiguity
-            if (bugfixed) {
-                // Find the non-interface class
-                for (Iterator it = max.iterator(); it.hasNext(); ) {
-                    Class maxCl = (Class) it.next();
-                    if (!maxCl.isInterface()) {
-                        if (maxCl != Object.class) {  // This actually shouldn't ever happen, but to be sure...
-                            // If it's not Object, we use it as the most specific
-                            return maxCl;
-                        } else {
-                            // Otherwise remove Object, and we will try with the interfaces 
-                            it.remove();
-                        }
+            // Find the non-interface class
+            for (Iterator it = max.iterator(); it.hasNext(); ) {
+                Class maxCl = (Class) it.next();
+                if (!maxCl.isInterface()) {
+                    if (maxCl != Object.class) {  // This actually shouldn't ever happen, but to be sure...
+                        // If it's not Object, we use it as the most specific
+                        return maxCl;
+                    } else {
+                        // Otherwise remove Object, and we will try with the interfaces 
+                        it.remove();
                     }
                 }
-                
-                // At this point we only have interfaces left.
-                // Try removing interfaces about which we know that they are useless as unwrapping hints:
-                max.remove(Cloneable.class);
-                if (max.size() > 1) {  // Still have an ambiguity...
-                    max.remove(Serializable.class);
-                    if (max.size() > 1) {  // Still had an ambiguity...
-                        max.remove(Comparable.class);
-                        if (max.size() > 1) {
-                            return Object.class; // Still had an ambiguity... no luck.
-                        }
+            }
+            
+            // At this point we only have interfaces left.
+            // Try removing interfaces about which we know that they are useless as unwrapping hints:
+            max.remove(Cloneable.class);
+            if (max.size() > 1) {  // Still have an ambiguity...
+                max.remove(Serializable.class);
+                if (max.size() > 1) {  // Still had an ambiguity...
+                    max.remove(Comparable.class);
+                    if (max.size() > 1) {
+                        return Object.class; // Still had an ambiguity... no luck.
                     }
                 }
-            } else {
-                return Object.class;
             }
         }
         
@@ -318,7 +294,6 @@ abstract class OverloadedMethodsSubset {
 
     /**
      * Updates the content of the {@link #typeFlagsByParamCount} field with the parameter type flags of a method.
-     * Don't call this when {@link #bugfixed} is {@code false}! 
      * 
      * @param dstParamCount The parameter count for which we want to merge in the type flags 
      * @param srcTypeFlagsByParamIdx If shorter than {@code dstParamCount}, its last item will be repeated until
@@ -415,8 +390,7 @@ abstract class OverloadedMethodsSubset {
                 // If arg isn't a number, we can't do any conversions anyway, regardless of the param type.
                 if (arg instanceof Number) {
                     final Class targetType = paramTypes[paramTypeIdx];
-                    final Number convertedArg = BeansWrapper.forceUnwrappedNumberToType(
-                            (Number) arg, targetType, bugfixed);
+                    final Number convertedArg = BeansWrapper.forceUnwrappedNumberToType((Number) arg, targetType);
                     if (convertedArg != null) {
                         args[argIdx] = convertedArg;
                     }

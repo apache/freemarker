@@ -19,7 +19,11 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -55,7 +59,7 @@ public class CustomAttributeTest {
     
     @Test
     public void testStringKey() throws Exception {
-        Template t = new Template(null, "", new Configuration(Configuration.VERSION_2_3_22));
+        Template t = new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
         assertEquals(0, t.getCustomAttributeNames().length);        
         assertNull(t.getCustomAttribute(KEY_1));
         
@@ -86,7 +90,7 @@ public class CustomAttributeTest {
 
     @Test
     public void testRemoveFromEmptySet() throws Exception {
-        Template t = new Template(null, "", new Configuration(Configuration.VERSION_2_3_22));
+        Template t = new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
         t.removeCustomAttribute(KEY_1);
         assertEquals(0, t.getCustomAttributeNames().length);        
         assertNull(t.getCustomAttribute(KEY_1));
@@ -102,7 +106,7 @@ public class CustomAttributeTest {
                 + "'" + KEY_1 + "': [ 's', 2, true, {  'a': 'A' } ], "
                 + "'" + KEY_2 + "': " + VALUE_BIGDECIMAL + " "
                 + "}>",
-                new Configuration(Configuration.VERSION_2_3_22));
+                new Configuration(Configuration.VERSION_3_0_0));
         
         assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));
         assertEquals(VALUE_LIST, t.getCustomAttribute(KEY_1));
@@ -120,7 +124,7 @@ public class CustomAttributeTest {
                 + "'" + KEY_2 + "': 'b', "
                 + "'" + KEY_3 + "': 'c' "
                 + "}>",
-                new Configuration(Configuration.VERSION_2_3_22));
+                new Configuration(Configuration.VERSION_3_0_0));
         
         assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
         assertEquals("a", t.getCustomAttribute(KEY_1));
@@ -141,7 +145,7 @@ public class CustomAttributeTest {
                 + "'" + KEY_2 + "': 'b', "
                 + "'" + KEY_3 + "': 'c' "
                 + "}>",
-                new Configuration(Configuration.VERSION_2_3_22));
+                new Configuration(Configuration.VERSION_3_0_0));
         
         assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
         assertEquals("a", t.getCustomAttribute(KEY_1));
@@ -162,7 +166,7 @@ public class CustomAttributeTest {
 
     @Test
     public void testObjectKey() throws Exception {
-        Template t = new Template(null, "", new Configuration(Configuration.VERSION_2_3_22));
+        Template t = new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
         assertNull(CUST_ATT_TMP_1.get(t));
         
         CUST_ATT_TMP_1.set(VALUE_1, t);
@@ -194,7 +198,7 @@ public class CustomAttributeTest {
             // Expected
         }
         
-        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         final Template t = new Template(null, "${testScopesFromTemplateStep1()}", cfg);
         Environment env = t.createProcessingEnvironment(this, _NullWriter.INSTANCE);

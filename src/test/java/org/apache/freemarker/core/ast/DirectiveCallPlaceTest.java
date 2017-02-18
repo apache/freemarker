@@ -28,10 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.CallPlaceCustomDataInitializationException;
-import org.apache.freemarker.core.ast.DirectiveCallPlace;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.UnifiedCall;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -45,7 +41,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     
     @Override
     protected Configuration createConfiguration() {
-        return new Configuration(Configuration.VERSION_2_3_22);
+        return new Configuration(Configuration.VERSION_3_0_0);
     }
     
     @Test

@@ -21,10 +21,10 @@ package org.apache.freemarker.core.model.impl.beans;
 
 import org.apache.freemarker.core.Configuration;
 
-public class DefaultObjectWrapperDesc2003020 extends DefaultObjectWrapperWithSortedMethods {
+public class BeansWrapperInc extends BeansWrapperWithShortedMethods {
 
-    public DefaultObjectWrapperDesc2003020() {
-        super(Configuration.VERSION_2_3_20, true);
+    public BeansWrapperInc() {
+        super(Configuration.VERSION_3_0_0, false);
     }
-    
+
 }

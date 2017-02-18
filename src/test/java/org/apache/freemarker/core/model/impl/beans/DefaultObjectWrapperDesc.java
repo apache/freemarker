@@ -21,10 +21,10 @@ package org.apache.freemarker.core.model.impl.beans;
 
 import org.apache.freemarker.core.Configuration;
 
-public class DefaultObjectWrapperInc2003022 extends DefaultObjectWrapperWithSortedMethods {
+public class DefaultObjectWrapperDesc extends DefaultObjectWrapperWithSortedMethods {
 
-    public DefaultObjectWrapperInc2003022() {
-        super(Configuration.VERSION_2_3_22, false);
+    public DefaultObjectWrapperDesc() {
+        super(Configuration.VERSION_3_0_0, true);
     }
-
+    
 }

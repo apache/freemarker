@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class TheadInterruptingSupportTest {
     private static final Logger LOG = LoggerFactory.getLogger(TheadInterruptingSupportTest.class);
 
     private static final int TEMPLATE_INTERRUPTION_TIMEOUT = 5000;
-    private final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+    private final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
     @Test
     public void test() throws IOException, InterruptedException {

@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.ast._ObjectBuilderSettingEvaluator;
 import org.apache.freemarker.core.ast._SettingEvaluationEnvironment;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -80,10 +79,9 @@ final class InitParamParser {
         } else if (pureTemplatePath.startsWith(TEMPLATE_PATH_PREFIX_FILE)) {
             String filePath = pureTemplatePath.substring(TEMPLATE_PATH_PREFIX_FILE.length());
             templateLoader = new FileTemplateLoader(new File(filePath));
-        } else if (pureTemplatePath.startsWith("[")
-                && cfg.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
+        } else if (pureTemplatePath.startsWith("[")) {
             if (!pureTemplatePath.endsWith("]")) {
-                // B.C. constraint: Can't throw any checked exceptions.
+                // B.C. constraint: Can't throw any checked exceptions. [FM3] Fix it?
                 throw new TemplatePathParsingException("Failed to parse template path; closing \"]\" is missing.");
             }
             String commaSepItems = pureTemplatePath.substring(1, pureTemplatePath.length() - 1).trim();
@@ -94,9 +92,9 @@ final class InitParamParser {
                 templateLoaders[i] = createTemplateLoader(pathItem, cfg, classLoaderClass, srvCtx);
             }
             templateLoader = new MultiTemplateLoader(templateLoaders);
-        } else if (pureTemplatePath.startsWith("{")
-                && cfg.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
-            throw new TemplatePathParsingException("Template paths starting with \"{\" are reseved for future purposes");
+        } else if (pureTemplatePath.startsWith("{")) {
+            throw new TemplatePathParsingException(
+                    "Template paths starting with \"{\" are reseved for future purposes");
         } else {
             templateLoader = new WebAppTemplateLoader(srvCtx, pureTemplatePath);
         }

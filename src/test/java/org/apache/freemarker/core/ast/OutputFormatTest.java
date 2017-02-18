@@ -18,7 +18,10 @@
  */
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -28,16 +31,6 @@ import java.util.Collections;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.ast.HTMLOutputFormat;
-import org.apache.freemarker.core.ast.InvalidReferenceException;
-import org.apache.freemarker.core.ast.OutputFormat;
-import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.ast.PlainTextOutputFormat;
-import org.apache.freemarker.core.ast.RTFOutputFormat;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.ast.UndefinedOutputFormat;
-import org.apache.freemarker.core.ast.XMLOutputFormat;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
@@ -100,7 +93,7 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tWithHeader.ftlx", "<#ftl outputFormat='HTML'>" + commonContent);
         
         Configuration cfg = getConfiguration();
-        for (int setupNumber = 1; setupNumber <= 5; setupNumber++) {
+        for (int setupNumber = 1; setupNumber <= 3; setupNumber++) {
             final OutputFormat cfgOutputFormat;
             final OutputFormat ftlhOutputFormat;
             final OutputFormat ftlxOutputFormat;
@@ -130,18 +123,6 @@ public class OutputFormatTest extends TemplateTest {
                                 tcXml));
                 ftlhOutputFormat = HTMLOutputFormat.INSTANCE; // can't be overidden
                 ftlxOutputFormat = XMLOutputFormat.INSTANCE;
-                break;
-            case 4:
-                cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlhOutputFormat = XMLOutputFormat.INSTANCE; // now gets overidden
-                ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
-                break;
-            case 5:
-                cfg.setTemplateConfigurations(null);
-                cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlhOutputFormat = UndefinedOutputFormat.INSTANCE;
-                ftlxOutputFormat = UndefinedOutputFormat.INSTANCE;
                 break;
             default:
                 throw new AssertionError();
@@ -210,7 +191,7 @@ public class OutputFormatTest extends TemplateTest {
         
         cfg.setTemplateConfigurations(null);
         cfg.unsetOutputFormat();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);  // Extensions has no effect
+        cfg.setRecognizeStandardFileExtensions(false);
         assertErrorContainsForNamed("t.ftlx", UndefinedOutputFormat.INSTANCE.getName());
         cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
         assertOutputForNamed("t.ftlx", "&#39; &#39; '");
@@ -229,7 +210,6 @@ public class OutputFormatTest extends TemplateTest {
         
         cfg.setTemplateConfigurations(null);
         cfg.unsetOutputFormat();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         cfg.setTemplateConfigurations(tcfHTML);
         assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         cfg.setRecognizeStandardFileExtensions(false);
@@ -260,15 +240,6 @@ public class OutputFormatTest extends TemplateTest {
             StringWriter out = new StringWriter();
             t.process(null, out);
             assertEquals("&#39;", out.toString());
-        }
-        
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-        {
-            Template t = new Template("foo.ftlx", commonFTL, cfg);
-            assertSame(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
-            StringWriter out = new StringWriter();
-            t.process(null, out);
-            assertEquals("'", out.toString());
         }
     }
     
@@ -907,21 +878,19 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testBannedBIsWhenAutoEscaping() throws Exception {
         for (String biName : new String[] { "html", "xhtml", "rtf", "xml" }) {
-            for (Version ici : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_24 }) {
-                getConfiguration().setIncompatibleImprovements(ici);
-                
-                String commonFTL = "${'x'?" + biName + "}";
-                assertOutput(commonFTL, "x");
-                assertErrorContains("<#ftl outputFormat='HTML'>" + commonFTL,
-                        "?" + biName, "HTML", "double-escaping");
-                assertErrorContains("<#ftl outputFormat='HTML'>${'${\"x\"?" + biName + "}'}",
-                        "?" + biName, "HTML", "double-escaping");
-                assertOutput("<#ftl outputFormat='plainText'>" + commonFTL, "x");
-                assertOutput("<#ftl outputFormat='HTML' autoEsc=false>" + commonFTL, "x");
-                assertOutput("<#ftl outputFormat='HTML'><#noAutoEsc>" + commonFTL + "</#noAutoEsc>", "x");
-                assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>",
-                        "x");
-            }
+            getConfiguration().setIncompatibleImprovements(Configuration.VERSION_3_0_0);
+            
+            String commonFTL = "${'x'?" + biName + "}";
+            assertOutput(commonFTL, "x");
+            assertErrorContains("<#ftl outputFormat='HTML'>" + commonFTL,
+                    "?" + biName, "HTML", "double-escaping");
+            assertErrorContains("<#ftl outputFormat='HTML'>${'${\"x\"?" + biName + "}'}",
+                    "?" + biName, "HTML", "double-escaping");
+            assertOutput("<#ftl outputFormat='plainText'>" + commonFTL, "x");
+            assertOutput("<#ftl outputFormat='HTML' autoEsc=false>" + commonFTL, "x");
+            assertOutput("<#ftl outputFormat='HTML'><#noAutoEsc>" + commonFTL + "</#noAutoEsc>", "x");
+            assertOutput("<#ftl outputFormat='HTML'><#outputFormat 'plainText'>" + commonFTL + "</#outputFormat>",
+                    "x");
         }
     }
 
@@ -1033,7 +1002,7 @@ public class OutputFormatTest extends TemplateTest {
     
     @Override
     protected Configuration createConfiguration() throws TemplateModelException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         TemplateConfiguration xmlTC = new TemplateConfiguration();
         xmlTC.setOutputFormat(XMLOutputFormat.INSTANCE);

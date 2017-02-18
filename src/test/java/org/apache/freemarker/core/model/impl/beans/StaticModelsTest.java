@@ -19,8 +19,14 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
@@ -30,7 +36,6 @@ import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -40,7 +45,7 @@ public class StaticModelsTest {
 
     @Test
     public void modelCaching() throws Exception {
-        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_21);
+        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_3_0_0);
         TemplateHashModel statics = bw.getStaticModels();
         TemplateHashModel s = (TemplateHashModel) statics.get(S.class.getName());
         assertNotNull(s);

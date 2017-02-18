@@ -19,13 +19,11 @@
 package org.apache.freemarker.core.model.impl.beans;
 
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -42,7 +40,7 @@ final class ArgumentTypes {
     private static final int CONVERSION_DIFFICULTY_REFLECTION = 0;
 
     /**
-     * Conversion difficulty: Java reflection API will won't convert it, FreeMarker has to do it.
+     * Conversion difficulty: Medium: Java reflection API won't convert it, FreeMarker has to do it.
      */
     private static final int CONVERSION_DIFFICULTY_FREEMARKER = 1;
     
@@ -56,26 +54,21 @@ final class ArgumentTypes {
      */
     private final Class<?>[] types;
     
-    private final boolean bugfixed;
-    
     /**
      * @param args The actual arguments. A varargs argument should be present exploded, no as an array.
-     * @param bugfixed Introduced in 2.3.21, sets this object to a mode that works well with {@link BeansWrapper}-s
-     *      created with {@link Version} 2.3.21 or higher.
      */
-    ArgumentTypes(Object[] args, boolean bugfixed) {
+    ArgumentTypes(Object[] args) {
         int ln = args.length;
         Class<?>[] typesTmp = new Class[ln];
         for (int i = 0; i < ln; ++i) {
             Object arg = args[i];
             typesTmp[i] = arg == null
-                    ? (bugfixed ? Null.class : Object.class)
+                    ? Null.class
                     : arg.getClass();
         }
         
         // `typesTmp` is used so the array is only modified before it's stored in the final `types` field (see JSR-133)
         types = typesTmp;  
-        this.bugfixed = bugfixed;
     }
     
     @Override
@@ -147,9 +140,6 @@ final class ArgumentTypes {
      * This method assumes that the parameter lists are applicable to this argument lists; if that's not ensured,
      * what the result will be is undefined.
      * 
-     * <p>This method behaves differently in {@code bugfixed}-mode (used when a {@link BeansWrapper} is created with
-     * incompatible improvements set to 2.3.21 or higher). Below we describe the bugfixed behavior only. 
-     *  
      * <p>The decision is made by comparing the preferability of each parameter types of the same position in a loop.
      * At the end, the parameter list with the more preferred parameters will be the preferred one. If both parameter
      * lists has the same amount of preferred parameters, the one that has the first (lower index) preferred parameter
@@ -179,222 +169,197 @@ final class ArgumentTypes {
         final int paramTypes2Len = paramTypes2.length;
         //assert varArg || paramTypes1Len == paramTypes2Len;
         
-        if (bugfixed) {
-            int paramList1WeakWinCnt = 0;
-            int paramList2WeakWinCnt = 0;
-            int paramList1WinCnt = 0;
-            int paramList2WinCnt = 0;
-            int paramList1StrongWinCnt = 0;
-            int paramList2StrongWinCnt = 0;
-            int paramList1VeryStrongWinCnt = 0;
-            int paramList2VeryStrongWinCnt = 0;
-            int firstWinerParamList = 0;
-            for (int i = 0; i < argTypesLen; i++) {
-                final Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
-                final Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
+        int paramList1WeakWinCnt = 0;
+        int paramList2WeakWinCnt = 0;
+        int paramList1WinCnt = 0;
+        int paramList2WinCnt = 0;
+        int paramList1StrongWinCnt = 0;
+        int paramList2StrongWinCnt = 0;
+        int paramList1VeryStrongWinCnt = 0;
+        int paramList2VeryStrongWinCnt = 0;
+        int firstWinerParamList = 0;
+        for (int i = 0; i < argTypesLen; i++) {
+            final Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
+            final Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
+            
+            final int winerParam;  // 1 => paramType1; -1 => paramType2; 0 => draw
+            if (paramType1 == paramType2) {
+                winerParam = 0;
+            } else {
+                final Class<?> argType = types[i];
+                final boolean argIsNum = Number.class.isAssignableFrom(argType);
                 
-                final int winerParam;  // 1 => paramType1; -1 => paramType2; 0 => draw
-                if (paramType1 == paramType2) {
-                    winerParam = 0;
+                final int numConvPrice1;
+                if (argIsNum && _ClassUtil.isNumerical(paramType1)) {
+                    final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
+                            ? _ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1;
+                    numConvPrice1 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType1);
                 } else {
-                    final Class<?> argType = types[i];
-                    final boolean argIsNum = Number.class.isAssignableFrom(argType);
-                    
-                    final int numConvPrice1;
-                    if (argIsNum && _ClassUtil.isNumerical(paramType1)) {
-                        final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
-                                ? _ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1;
-                        numConvPrice1 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType1);
-                    } else {
-                        numConvPrice1 = Integer.MAX_VALUE;
-                    }
-                    // numConvPrice1 is Integer.MAX_VALUE if either:
-                    // - argType and paramType1 aren't both numerical
-                    // - FM doesn't know some of the numerical types, or the conversion between them is not allowed    
-                    
-                    final int numConvPrice2;
-                    if (argIsNum && _ClassUtil.isNumerical(paramType2)) {
-                        final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
-                                ? _ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
-                        numConvPrice2 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType2);
-                    } else {
-                        numConvPrice2 = Integer.MAX_VALUE;
-                    }
-                    
-                    if (numConvPrice1 == Integer.MAX_VALUE) {
-                        if (numConvPrice2 == Integer.MAX_VALUE) {  // No numerical conversions anywhere
-                            // List to array conversions (unwrapping sometimes makes a List instead of an array)
-                            if (List.class.isAssignableFrom(argType)
-                                    && (paramType1.isArray() || paramType2.isArray())) {
-                                if (paramType1.isArray()) {
-                                    if (paramType2.isArray()) {  // both paramType1 and paramType2 are arrays
-                                        int r = compareParameterListPreferability_cmpTypeSpecificty(
-                                                paramType1.getComponentType(), paramType2.getComponentType());
-                                        // Because we don't know if the List items are instances of the component
-                                        // type or not, we prefer the safer choice, which is the more generic array:
-                                        if (r > 0) {
-                                            winerParam = 2;
-                                            paramList2StrongWinCnt++;
-                                        } else if (r < 0) {
-                                            winerParam = 1;
-                                            paramList1StrongWinCnt++;
-                                        } else {
-                                            winerParam = 0;
-                                        }
-                                    } else {  // paramType1 is array, paramType2 isn't
-                                        // Avoid List to array conversion if the other way makes any sense:
-                                        if (Collection.class.isAssignableFrom(paramType2)) {
-                                            winerParam = 2;
-                                            paramList2StrongWinCnt++;
-                                        } else {
-                                            winerParam = 1;
-                                            paramList1WeakWinCnt++;
-                                        }
-                                    }
-                                } else {  // paramType2 is array, paramType1 isn't
-                                    // Avoid List to array conversion if the other way makes any sense:
-                                    if (Collection.class.isAssignableFrom(paramType1)) {
+                    numConvPrice1 = Integer.MAX_VALUE;
+                }
+                // numConvPrice1 is Integer.MAX_VALUE if either:
+                // - argType and paramType1 aren't both numerical
+                // - FM doesn't know some of the numerical types, or the conversion between them is not allowed    
+                
+                final int numConvPrice2;
+                if (argIsNum && _ClassUtil.isNumerical(paramType2)) {
+                    final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
+                            ? _ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
+                    numConvPrice2 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType2);
+                } else {
+                    numConvPrice2 = Integer.MAX_VALUE;
+                }
+                
+                if (numConvPrice1 == Integer.MAX_VALUE) {
+                    if (numConvPrice2 == Integer.MAX_VALUE) {  // No numerical conversions anywhere
+                        // List to array conversions (unwrapping sometimes makes a List instead of an array)
+                        if (List.class.isAssignableFrom(argType)
+                                && (paramType1.isArray() || paramType2.isArray())) {
+                            if (paramType1.isArray()) {
+                                if (paramType2.isArray()) {  // both paramType1 and paramType2 are arrays
+                                    int r = compareParameterListPreferability_cmpTypeSpecificty(
+                                            paramType1.getComponentType(), paramType2.getComponentType());
+                                    // Because we don't know if the List items are instances of the component
+                                    // type or not, we prefer the safer choice, which is the more generic array:
+                                    if (r > 0) {
+                                        winerParam = 2;
+                                        paramList2StrongWinCnt++;
+                                    } else if (r < 0) {
                                         winerParam = 1;
                                         paramList1StrongWinCnt++;
                                     } else {
-                                        winerParam = 2;
-                                        paramList2WeakWinCnt++;
-                                    }
-                                }
-                            } else if (argType.isArray()
-                                    && (List.class.isAssignableFrom(paramType1)
-                                            || List.class.isAssignableFrom(paramType2))) {
-                                // Array to List conversions (unwrapping sometimes makes an array instead of a List)
-                                if (List.class.isAssignableFrom(paramType1)) {
-                                    if (List.class.isAssignableFrom(paramType2)) {
-                                        // Both paramType1 and paramType2 extends List
                                         winerParam = 0;
-                                    } else {
-                                        // Only paramType1 extends List
-                                        winerParam = 2;
-                                        paramList2VeryStrongWinCnt++;
                                     }
-                                } else {
-                                    // Only paramType2 extends List
-                                    winerParam = 1;
-                                    paramList1VeryStrongWinCnt++;
-                                }
-                            } else {  // No list to/from array conversion
-                                final int r = compareParameterListPreferability_cmpTypeSpecificty(
-                                        paramType1, paramType2);
-                                if (r > 0) {
-                                    winerParam = 1;
-                                    if (r > 1) {
-                                        paramList1WinCnt++;
+                                } else {  // paramType1 is array, paramType2 isn't
+                                    // Avoid List to array conversion if the other way makes any sense:
+                                    if (Collection.class.isAssignableFrom(paramType2)) {
+                                        winerParam = 2;
+                                        paramList2StrongWinCnt++;
                                     } else {
+                                        winerParam = 1;
                                         paramList1WeakWinCnt++;
                                     }
-                                } else if (r < 0) {
-                                    winerParam = -1;
-                                    if (r < -1) {
-                                        paramList2WinCnt++;
-                                    } else {
-                                        paramList2WeakWinCnt++;
-                                    }
-                                } else {
-                                    winerParam = 0;
                                 }
-                            }
-                        } else {  // No num. conv. of param1, num. conv. of param2
-                            winerParam = -1;
-                            paramList2WinCnt++;
-                        }
-                    } else if (numConvPrice2 == Integer.MAX_VALUE) {  // Num. conv. of param1, not of param2
-                        winerParam = 1;
-                        paramList1WinCnt++;
-                    } else {  // Num. conv. of both param1 and param2
-                        if (numConvPrice1 != numConvPrice2) {
-                            if (numConvPrice1 < numConvPrice2) {
-                                winerParam = 1;
-                                if (numConvPrice1 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
-                                        && numConvPrice2 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
+                            } else {  // paramType2 is array, paramType1 isn't
+                                // Avoid List to array conversion if the other way makes any sense:
+                                if (Collection.class.isAssignableFrom(paramType1)) {
+                                    winerParam = 1;
                                     paramList1StrongWinCnt++;
                                 } else {
-                                    paramList1WinCnt++;
+                                    winerParam = 2;
+                                    paramList2WeakWinCnt++;
+                                }
+                            }
+                        } else if (argType.isArray()
+                                && (List.class.isAssignableFrom(paramType1)
+                                        || List.class.isAssignableFrom(paramType2))) {
+                            // Array to List conversions (unwrapping sometimes makes an array instead of a List)
+                            if (List.class.isAssignableFrom(paramType1)) {
+                                if (List.class.isAssignableFrom(paramType2)) {
+                                    // Both paramType1 and paramType2 extends List
+                                    winerParam = 0;
+                                } else {
+                                    // Only paramType1 extends List
+                                    winerParam = 2;
+                                    paramList2VeryStrongWinCnt++;
                                 }
                             } else {
-                                winerParam = -1;
-                                if (numConvPrice2 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
-                                        && numConvPrice1 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
-                                    paramList2StrongWinCnt++;
+                                // Only paramType2 extends List
+                                winerParam = 1;
+                                paramList1VeryStrongWinCnt++;
+                            }
+                        } else {  // No list to/from array conversion
+                            final int r = compareParameterListPreferability_cmpTypeSpecificty(
+                                    paramType1, paramType2);
+                            if (r > 0) {
+                                winerParam = 1;
+                                if (r > 1) {
+                                    paramList1WinCnt++;
                                 } else {
-                                    paramList2WinCnt++;
+                                    paramList1WeakWinCnt++;
                                 }
+                            } else if (r < 0) {
+                                winerParam = -1;
+                                if (r < -1) {
+                                    paramList2WinCnt++;
+                                } else {
+                                    paramList2WeakWinCnt++;
+                                }
+                            } else {
+                                winerParam = 0;
                             }
-                        } else {
-                            winerParam = (paramType1.isPrimitive() ? 1 : 0) - (paramType2.isPrimitive() ? 1 : 0);
-                            if (winerParam == 1) paramList1WeakWinCnt++;
-                            else if (winerParam == -1) paramList2WeakWinCnt++;
                         }
+                    } else {  // No num. conv. of param1, num. conv. of param2
+                        winerParam = -1;
+                        paramList2WinCnt++;
                     }
-                }  // when paramType1 != paramType2
-                
-                if (firstWinerParamList == 0 && winerParam != 0) {
-                    firstWinerParamList = winerParam; 
-                }
-            }  // for each parameter types
-            
-            if (paramList1VeryStrongWinCnt != paramList2VeryStrongWinCnt) {
-                return paramList1VeryStrongWinCnt - paramList2VeryStrongWinCnt;
-            } else if (paramList1StrongWinCnt != paramList2StrongWinCnt) {
-                return paramList1StrongWinCnt - paramList2StrongWinCnt;
-            } else if (paramList1WinCnt != paramList2WinCnt) {
-                return paramList1WinCnt - paramList2WinCnt;
-            } else if (paramList1WeakWinCnt != paramList2WeakWinCnt) {
-                return paramList1WeakWinCnt - paramList2WeakWinCnt;
-            } else if (firstWinerParamList != 0) {  // paramList1WinCnt == paramList2WinCnt
-                return firstWinerParamList;
-            } else { // still undecided
-                if (varArg) {
-                    if (paramTypes1Len == paramTypes2Len) {
-                        // If we had a 0-length varargs array in both methods, we also compare the types at the
-                        // index of the varargs parameter, like if we had a single varargs argument. However, this
-                        // time we don't have an argument type, so we can only decide based on type specificity:
-                        if (argTypesLen == paramTypes1Len - 1) {
-                            Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, argTypesLen, true);
-                            Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, argTypesLen, true);
-                            if (_ClassUtil.isNumerical(paramType1) && _ClassUtil.isNumerical(paramType2)) {
-                                int r = OverloadedNumberUtil.compareNumberTypeSpecificity(paramType1, paramType2);
-                                if (r != 0) return r;
-                                // falls through
+                } else if (numConvPrice2 == Integer.MAX_VALUE) {  // Num. conv. of param1, not of param2
+                    winerParam = 1;
+                    paramList1WinCnt++;
+                } else {  // Num. conv. of both param1 and param2
+                    if (numConvPrice1 != numConvPrice2) {
+                        if (numConvPrice1 < numConvPrice2) {
+                            winerParam = 1;
+                            if (numConvPrice1 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
+                                    && numConvPrice2 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
+                                paramList1StrongWinCnt++;
+                            } else {
+                                paramList1WinCnt++;
                             }
-                            return compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
                         } else {
-                            return 0;
+                            winerParam = -1;
+                            if (numConvPrice2 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
+                                    && numConvPrice1 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
+                                paramList2StrongWinCnt++;
+                            } else {
+                                paramList2WinCnt++;
+                            }
                         }
                     } else {
-                        // The method with more fixed parameters wins:
-                        return paramTypes1Len - paramTypes2Len;
+                        winerParam = (paramType1.isPrimitive() ? 1 : 0) - (paramType2.isPrimitive() ? 1 : 0);
+                        if (winerParam == 1) paramList1WeakWinCnt++;
+                        else if (winerParam == -1) paramList2WeakWinCnt++;
+                    }
+                }
+            }  // when paramType1 != paramType2
+            
+            if (firstWinerParamList == 0 && winerParam != 0) {
+                firstWinerParamList = winerParam; 
+            }
+        }  // for each parameter types
+        
+        if (paramList1VeryStrongWinCnt != paramList2VeryStrongWinCnt) {
+            return paramList1VeryStrongWinCnt - paramList2VeryStrongWinCnt;
+        } else if (paramList1StrongWinCnt != paramList2StrongWinCnt) {
+            return paramList1StrongWinCnt - paramList2StrongWinCnt;
+        } else if (paramList1WinCnt != paramList2WinCnt) {
+            return paramList1WinCnt - paramList2WinCnt;
+        } else if (paramList1WeakWinCnt != paramList2WeakWinCnt) {
+            return paramList1WeakWinCnt - paramList2WeakWinCnt;
+        } else if (firstWinerParamList != 0) {  // paramList1WinCnt == paramList2WinCnt
+            return firstWinerParamList;
+        } else { // still undecided
+            if (varArg) {
+                if (paramTypes1Len == paramTypes2Len) {
+                    // If we had a 0-length varargs array in both methods, we also compare the types at the
+                    // index of the varargs parameter, like if we had a single varargs argument. However, this
+                    // time we don't have an argument type, so we can only decide based on type specificity:
+                    if (argTypesLen == paramTypes1Len - 1) {
+                        Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, argTypesLen, true);
+                        Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, argTypesLen, true);
+                        if (_ClassUtil.isNumerical(paramType1) && _ClassUtil.isNumerical(paramType2)) {
+                            int r = OverloadedNumberUtil.compareNumberTypeSpecificity(paramType1, paramType2);
+                            if (r != 0) return r;
+                            // falls through
+                        }
+                        return compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
+                    } else {
+                        return 0;
                     }
                 } else {
-                    return 0;
+                    // The method with more oms parameters wins:
+                    return paramTypes1Len - paramTypes2Len;
                 }
-            }
-        } else { // non-bugfixed (backward-compatible) mode
-            boolean paramTypes1HasAMoreSpecific = false;
-            boolean paramTypes2HasAMoreSpecific = false;
-            for (int i = 0; i < paramTypes1Len; ++i) {
-                Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
-                Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
-                if (paramType1 != paramType2) {
-                    paramTypes1HasAMoreSpecific = 
-                        paramTypes1HasAMoreSpecific
-                        || _MethodUtil.isMoreOrSameSpecificParameterType(paramType1, paramType2, false, 0) != 0;
-                    paramTypes2HasAMoreSpecific = 
-                        paramTypes2HasAMoreSpecific
-                        || _MethodUtil.isMoreOrSameSpecificParameterType(paramType2, paramType1, false, 0) != 0;
-                }
-            }
-            
-            if (paramTypes1HasAMoreSpecific) {
-                return paramTypes2HasAMoreSpecific ? 0 : 1;
-            } else if (paramTypes2HasAMoreSpecific) {
-                return -1;
             } else {
                 return 0;
             }
@@ -533,7 +498,7 @@ final class ArgumentTypes {
         // Check for identity or widening reference conversion
         if (formal.isAssignableFrom(actual) && actual != CharacterOrString.class) {
             return CONVERSION_DIFFICULTY_REFLECTION;
-        } else if (bugfixed) {
+        } else {
             final Class<?> formalNP;
             if (formal.isPrimitive()) {
                 if (actual == Null.class) {
@@ -566,59 +531,6 @@ final class ArgumentTypes {
                     && (formal.isAssignableFrom(String.class)
                             || formal.isAssignableFrom(Character.class) || formal == char.class)) {
                 return CONVERSION_DIFFICULTY_FREEMARKER;
-            } else {
-                return CONVERSION_DIFFICULTY_IMPOSSIBLE;
-            }
-        } else { // if !bugfixed
-            // This non-bugfixed (backward-compatible, pre-2.3.21) branch:
-            // - Doesn't convert *to* non-primitive numerical types (unless the argument is a BigDecimal).
-            //   (This is like in Java language, which also doesn't coerce to non-primitive numerical types.) 
-            // - Doesn't support BigInteger conversions
-            // - Doesn't support NumberWithFallbackType-s and CharacterOrString-s. Those are only produced in bugfixed
-            //   mode anyway.
-            // - Doesn't support conversion between array and List
-            if (formal.isPrimitive()) {
-                // Check for boxing with widening primitive conversion. Note that 
-                // actual parameters are never primitives.
-                // It doesn't do the same with boxing types... that was a bug.
-                if (formal == Boolean.TYPE) {
-                    return actual == Boolean.class
-                            ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
-                } else if (formal == Double.TYPE && 
-                        (actual == Double.class || actual == Float.class || 
-                         actual == Long.class || actual == Integer.class || 
-                         actual == Short.class || actual == Byte.class)) {
-                     return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if (formal == Integer.TYPE && 
-                        (actual == Integer.class || actual == Short.class || 
-                         actual == Byte.class)) {
-                     return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if (formal == Long.TYPE && 
-                        (actual == Long.class || actual == Integer.class || 
-                         actual == Short.class || actual == Byte.class)) {
-                     return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if (formal == Float.TYPE && 
-                        (actual == Float.class || actual == Long.class || 
-                         actual == Integer.class || actual == Short.class || 
-                         actual == Byte.class)) {
-                     return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if (formal == Character.TYPE) {
-                    return actual == Character.class
-                            ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
-                } else if (formal == Byte.TYPE && actual == Byte.class) {
-                    return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if (formal == Short.TYPE &&
-                   (actual == Short.class || actual == Byte.class)) {
-                    return CONVERSION_DIFFICULTY_REFLECTION;
-                } else if (BigDecimal.class.isAssignableFrom(actual) && _ClassUtil.isNumerical(formal)) {
-                    // Special case for BigDecimals as we deem BigDecimal to be
-                    // convertible to any numeric type - either object or primitive.
-                    // This can actually cause us trouble as this is a narrowing 
-                    // conversion, not widening. 
-                    return CONVERSION_DIFFICULTY_REFLECTION;
-                } else {
-                    return CONVERSION_DIFFICULTY_IMPOSSIBLE;
-                }
             } else {
                 return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }

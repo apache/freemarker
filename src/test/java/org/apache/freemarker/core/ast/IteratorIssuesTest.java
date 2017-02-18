@@ -38,81 +38,35 @@ public class IteratorIssuesTest extends TemplateTest {
     
     private static final String FTL_LIST_AND_HAS_CONTENT
             = "<#list it as i>${i}${it?hasContent?then('+', '-')}</#list>";
-    private static final String OUT_LIST_AND_HAS_CONTENT_BW_WRONG = "a+b+c+";
     private static final String OUT_LIST_AND_HAS_CONTENT_BW_GOOD = "a+b+c-";
 
     @Test
-    public void testHasContentAndListDOW230() throws Exception {
-        addToDataModel("it", getDOW230().wrap(getAbcIt()));
+    public void testHasContentAndListDOW() throws Exception {
+        addToDataModel("it", getDOW300().wrap(getAbcIt()));
         assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_ABC);
         
-        addToDataModel("it", getDOW230().wrap(getEmptyIt()));
+        addToDataModel("it", getDOW300().wrap(getEmptyIt()));
         assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_EMPTY);
     }
 
     @Test
-    public void testHasContentAndListDOW2323() throws Exception {
-        addToDataModel("it", getDOW2323().wrap(getAbcIt()));
+    public void testHasContentAndListBW() throws Exception {
+        addToDataModel("it", getBW300().wrap(getAbcIt()));
         assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_ABC);
         
-        addToDataModel("it", getDOW2323().wrap(getEmptyIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_EMPTY);
-    }
-
-    @Test
-    public void testHasContentAndListBW230() throws Exception {
-        addToDataModel("it", getBW230().wrap(getAbcIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_ABC);
-        
-        addToDataModel("it", getBW230().wrap(getEmptyIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, "");
-    }
-    
-    @Test
-    public void testHasContentAndListBW2323() throws Exception {
-        addToDataModel("it", getBW2323().wrap(getAbcIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_ABC);
-        
-        addToDataModel("it", getBW230().wrap(getEmptyIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, "");
-    }
-    
-    @Test
-    public void testHasContentAndListBW2324() throws Exception {
-        addToDataModel("it", getBW2324().wrap(getAbcIt()));
-        assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_ABC);
-        
-        addToDataModel("it", getBW2324().wrap(getEmptyIt()));
+        addToDataModel("it", getBW300().wrap(getEmptyIt()));
         assertOutput(FTL_HAS_CONTENT_AND_LIST, OUT_HAS_CONTENT_AND_LIST_EMPTY);
     }
     
     @Test
-    public void testListAndHasContentDOW230() throws Exception {
-        addToDataModel("it", getDOW230().wrap(getAbcIt()));
+    public void testListAndHasContentDOW() throws Exception {
+        addToDataModel("it", getDOW300().wrap(getAbcIt()));
         assertErrorContains(FTL_LIST_AND_HAS_CONTENT, "can be listed only once");
     }
 
     @Test
-    public void testListAndHasContentDOW2323() throws Exception {
-        addToDataModel("it", getDOW2323().wrap(getAbcIt()));
-        assertErrorContains(FTL_LIST_AND_HAS_CONTENT, "can be listed only once");
-    }
-
-    @Test
-    public void testListAndHasContentBW230() throws Exception {
-        addToDataModel("it", getBW230().wrap(getAbcIt()));
-        assertOutput(FTL_LIST_AND_HAS_CONTENT, OUT_LIST_AND_HAS_CONTENT_BW_WRONG);
-    }
-
-    @Test
-    public void testListAndHasContentBW2323() throws Exception {
-        addToDataModel("it", getBW2323().wrap(getAbcIt()));
-        assertOutput(FTL_LIST_AND_HAS_CONTENT, OUT_LIST_AND_HAS_CONTENT_BW_WRONG);
-    }
-
-    @Test
-    public void testListAndHasContentBW2324() throws Exception {
-        addToDataModel("it", getBW2324().wrap(getAbcIt()));
+    public void testListAndHasContentBW() throws Exception {
+        addToDataModel("it", getBW300().wrap(getAbcIt()));
         assertOutput(FTL_LIST_AND_HAS_CONTENT, OUT_LIST_AND_HAS_CONTENT_BW_GOOD);
     }
     
@@ -124,24 +78,12 @@ public class IteratorIssuesTest extends TemplateTest {
         return Arrays.asList(new String[] {  }).iterator();
     }
     
-    private DefaultObjectWrapper getDOW230() {
-        return new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).build();
-    }
-    
-    private DefaultObjectWrapper getDOW2323() {
-        return new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_23).build();
+    private DefaultObjectWrapper getDOW300() {
+        return new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
     }
 
-    private BeansWrapper getBW230() {
-        return new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build();
-    }
-
-    private BeansWrapper getBW2323() {
-        return new BeansWrapperBuilder(Configuration.VERSION_2_3_23).build();
-    }
-
-    private BeansWrapper getBW2324() {
-        return new BeansWrapperBuilder(Configuration.VERSION_2_3_24).build();
+    private BeansWrapper getBW300() {
+        return new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
     }
     
 }

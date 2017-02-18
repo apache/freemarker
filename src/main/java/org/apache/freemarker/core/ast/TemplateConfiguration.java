@@ -113,13 +113,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             return;
         }
         
-        if (((Configuration) cfg).getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22
-                && hasAnyConfigurableSet()) {
-            throw new IllegalStateException(
-                    "This TemplateConfiguration can't be associated to a Configuration that has "
-                    + "incompatibleImprovements less than 2.3.22, because it changes non-parser settings.");
-        }
-        
         super.setParent(cfg);
         parentConfigurationSet = true;
     }

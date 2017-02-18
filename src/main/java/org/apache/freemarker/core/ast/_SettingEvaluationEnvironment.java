@@ -54,7 +54,7 @@ public class _SettingEvaluationEnvironment {
 
     public BeansWrapper getObjectWrapper() {
         if (objectWrapper == null) {
-            objectWrapper = new BeansWrapper(Configuration.VERSION_2_3_21);
+            objectWrapper = new BeansWrapper(Configuration.VERSION_3_0_0);
         }
         return objectWrapper;
     }

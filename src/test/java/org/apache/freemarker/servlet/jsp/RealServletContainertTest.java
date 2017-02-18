@@ -19,7 +19,10 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.AbstractList;
@@ -32,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -54,7 +56,6 @@ import org.apache.freemarker.test.servlet.WebAppTestCase;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -96,19 +97,10 @@ public class RealServletContainertTest extends WebAppTestCase {
                 + "&view=attributes.ftl");
 
         restartWebAppIfStarted(WEBAPP_BASIC);  // To clear the application scope attributes
-        assertExpectedEqualsOutput(WEBAPP_BASIC, "attributes-2.3.22-future.txt", "tester"
+        assertExpectedEqualsOutput(WEBAPP_BASIC, "attributes-modernModels.txt", "tester"
                 + "?action=" + AllKindOfContainersModel2Action.class.getName()
-                + "&view=attributes.ftl&viewServlet=freemarker-2.3.22-future");
-        
-        restartWebAppIfStarted(WEBAPP_BASIC);  // To clear the application scope attributes
-        assertExpectedEqualsOutput(WEBAPP_BASIC, "attributes-2.3.0.txt", "tester"
-                + "?action=" + AllKindOfContainersModel2Action.class.getName()
-                + "&view=attributes.ftl&viewServlet=freemarker-2.3.0",
-                true,
-                ImmutableList.<Pattern>of(
-                        Pattern.compile("(?<=^Date-time: ).*", Pattern.MULTILINE), // Uses Date.toString, so plat. dep.
-                        Pattern.compile("(?<=^MyMap: ).*", Pattern.MULTILINE)  // Uses HashMap, so order unknown
-                        ));
+                + "&view=attributes.ftl&viewServlet=freemarker-modernModels");
+        // [FM3] Won't need the "modern" servlet as soon as DOW defaults change to recommended values
     }
 
     @Test
@@ -273,8 +265,6 @@ public class RealServletContainertTest extends WebAppTestCase {
         assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-assertDefaultsFreemarkerServlet"));
         assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-assertDefaultsIcI2322FreemarkerServlet"));
-        assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-assertCustomizedDefaultsFreemarkerServlet"));
         assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-assertObjectWrapperDefaults1FreemarkerServlet"));
@@ -395,7 +385,7 @@ public class RealServletContainertTest extends WebAppTestCase {
 
         @Override
         protected void doAssertions(Configuration cfg) {
-            assertEquals(Configuration.VERSION_2_3_22, cfg.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
             
             assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG_HANDLER);
             
@@ -404,7 +394,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             {
                 ObjectWrapper ow = cfg.getObjectWrapper();
                 assertTrue(ow instanceof DefaultObjectWrapper);
-                assertEquals(Configuration.VERSION_2_3_22, ((DefaultObjectWrapper) ow).getIncompatibleImprovements());
+                assertEquals(Configuration.VERSION_3_0_0, ((DefaultObjectWrapper) ow).getIncompatibleImprovements());
             }
             
             {
@@ -416,32 +406,24 @@ public class RealServletContainertTest extends WebAppTestCase {
         }
         
     }
-
-    public static class AssertDefaultsIcI2322FreemarkerServlet extends AssertDefaultsFreemarkerServlet {
-
-        @Override
-        protected Configuration createConfiguration() {
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-            return cfg;
-        }
-        
-    }
     
     public static class AssertCustomizedDefaultsFreemarkerServlet extends AssertingFreemarkerServlet {
 
         @Override
         protected Configuration createConfiguration() {
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             cfg.setLogTemplateExceptions(true);
-            cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build());
+            BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_3_0_0);
+            bwb.setUseModelCache(true);
+            cfg.setObjectWrapper(bwb.build());
             cfg.setTemplateLoader(new WebAppTemplateLoader(getServletContext()));
             return cfg;
         }
 
         @Override
         protected void doAssertions(Configuration cfg) {
-            assertEquals(Configuration.VERSION_2_3_20, cfg.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
             
             assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.RETHROW_HANDLER);
             
@@ -450,7 +432,8 @@ public class RealServletContainertTest extends WebAppTestCase {
             {
                 ObjectWrapper ow = cfg.getObjectWrapper();
                 assertSame(BeansWrapper.class, ow.getClass());
-                assertEquals(Configuration.VERSION_2_3_21, ((BeansWrapper) ow).getIncompatibleImprovements());
+                assertTrue(((BeansWrapper) ow).getUseModelCache());
+                assertEquals(Configuration.VERSION_3_0_0, ((BeansWrapper) ow).getIncompatibleImprovements());
             }
             
             {
@@ -468,12 +451,15 @@ public class RealServletContainertTest extends WebAppTestCase {
         protected void doAssertions(Configuration cfg) throws Exception {
             ObjectWrapper ow = cfg.getObjectWrapper();
             assertSame(BeansWrapper.class, ow.getClass());
-            assertEquals(Configuration.VERSION_2_3_21, ((BeansWrapper) ow).getIncompatibleImprovements());
+            assertTrue(((BeansWrapper) ow).getUseModelCache());
         }
 
         @Override
         protected ObjectWrapper createDefaultObjectWrapper() {
-            return new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
+            BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_3_0_0);
+            bwb.setUseModelCache(true);
+            assertEquals(Configuration.VERSION_3_0_0, bwb.getIncompatibleImprovements());
+            return bwb.build();
         }
         
     }
@@ -483,8 +469,8 @@ public class RealServletContainertTest extends WebAppTestCase {
 
         @Override
         protected Configuration createConfiguration() {
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
-            cfg.setObjectWrapper(new SimpleObjectWrapper(Configuration.VERSION_2_3_22));
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            cfg.setObjectWrapper(new SimpleObjectWrapper(Configuration.VERSION_3_0_0));
             return cfg;
         }
         
@@ -492,7 +478,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         protected void doAssertions(Configuration cfg) throws Exception {
             ObjectWrapper ow = cfg.getObjectWrapper();
             assertSame(SimpleObjectWrapper.class, ow.getClass());
-            assertEquals(Configuration.VERSION_2_3_22, ((BeansWrapper) ow).getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0, ((BeansWrapper) ow).getIncompatibleImprovements());
         }
         
     }

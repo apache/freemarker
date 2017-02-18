@@ -46,7 +46,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.ast.ASTPrinter;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -80,7 +79,6 @@ import org.apache.freemarker.test.templatesuite.models.BooleanVsStringMethods;
 import org.apache.freemarker.test.templatesuite.models.JavaObjectInfo;
 import org.apache.freemarker.test.templatesuite.models.Listables;
 import org.apache.freemarker.test.templatesuite.models.MultiModel1;
-import org.apache.freemarker.test.templatesuite.models.OverloadedMethods;
 import org.apache.freemarker.test.templatesuite.models.OverloadedMethods2;
 import org.apache.freemarker.test.templatesuite.models.VarArgTestModel;
 import org.apache.freemarker.test.util.AssertDirective;
@@ -183,7 +181,7 @@ public class TemplateTestCase extends FileTestCase {
         conf.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
                 new FileTemplateLoader(new File(getTestClassDirectory(), "templates"))));
         
-        BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build();
+        BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
         
         dataModel.put(ASSERT_VAR_NAME, AssertDirective.INSTANCE);
         dataModel.put(ASSERT_EQUALS_VAR_NAME, AssertEqualsDirective.INSTANCE);
@@ -407,8 +405,6 @@ public class TemplateTestCase extends FileTestCase {
           dataModel.put("bigDecimal", new BigDecimal("1305575275539.5"));
         } else if (simpleTestName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
-        } else if (simpleTestName.startsWith("overloaded-methods-") && !simpleTestName.startsWith("overloaded-methods-2-")) {
-          dataModel.put("obj", new OverloadedMethods());
         } else if (simpleTestName.startsWith("boolean-formatting")) {
           dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (BeansWrapper) conf.getObjectWrapper()));
           dataModel.put("booleanAndString", new BooleanAndStringTemplateModel());
@@ -436,13 +432,10 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bp", Byte.valueOf((byte) 5));
             dataModel.put("bip", BigInteger.valueOf(5));
             dataModel.put("bdp", BigDecimal.valueOf(0.05));
-        } else if (simpleTestName.startsWith("overloaded-methods-2-")) {
+        } else if (simpleTestName.startsWith("overloaded-methods")) {
             dataModel.put("obj", new OverloadedMethods2());
             final boolean dow = conf.getObjectWrapper() instanceof DefaultObjectWrapper;
             dataModel.put("dow", dow);
-            dataModel.put("dowPre22", dow
-                    && ((DefaultObjectWrapper) conf.getObjectWrapper()).getIncompatibleImprovements()
-                            .intValue() < _TemplateAPI.VERSION_INT_2_3_22);
         }
     }
     

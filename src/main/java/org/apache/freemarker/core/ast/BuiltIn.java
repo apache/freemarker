@@ -22,7 +22,6 @@ package org.apache.freemarker.core.ast;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -359,11 +358,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
                 
             throw new ParseException(buf.toString(), null, keyTk);
-        }
-        
-        while (bi instanceof ICIChainMember
-                && incompatibleImprovements < ((ICIChainMember) bi).getMinimumICIVersion()) {
-            bi = (BuiltIn) ((ICIChainMember) bi).getPreviousICIChainMember();
         }
         
         try {

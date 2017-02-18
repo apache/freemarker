@@ -29,7 +29,6 @@ import java.util.Set;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
@@ -252,8 +251,7 @@ public class DefaultObjectWrapper extends org.apache.freemarker.core.model.impl.
 
     /**
      * Sets if to wrap container objects ({@link Map}-s, {@link List}-s, arrays and such) the legacy copying approach or
-     * the newer adapter approach should be used. {@code true} is recommended, which is also the default when the
-     * {@code incompatible_improvements} of this instance was set to {@link Configuration#VERSION_2_3_22} or higher. To
+     * the newer adapter approach should be used. {@code true} is recommended, which is also the default. To
      * understand the difference, check some of the classes that implement the two approaches:
      * <ul>
      * <li>Copying approach: {@link SimpleHash}, {@link SimpleSequence}</li>
@@ -340,11 +338,7 @@ public class DefaultObjectWrapper extends org.apache.freemarker.core.model.impl.
      * @since 2.3.22
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        Version bwIcI = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
-        return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_22
-                || bwIcI.intValue() >= _TemplateAPI.VERSION_INT_2_3_22
-                ? bwIcI : Configuration.VERSION_2_3_22;
+        return BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
     }
 
     /**

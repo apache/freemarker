@@ -79,7 +79,7 @@ class Interpret extends OutputFormatBoundBuiltIn {
                     env);
         }
         String templateSource = sourceExpr.evalAndCoerceToPlainText(env);
-        Template parentTemplate = env.getTemplate();
+        Template parentTemplate = env.getCurrentTemplate();
         
         final Template interpretedTemplate;
         try {

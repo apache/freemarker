@@ -19,15 +19,16 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
 import org.junit.Test;
 public class TemplateConstructorsTest {
 
@@ -36,7 +37,7 @@ public class TemplateConstructorsTest {
     
     @Test
     public void test() throws IOException {
-        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         //cfg.setDefaultEncoding("ISO-8859-1");
         
         final String name = "foo/bar.ftl";

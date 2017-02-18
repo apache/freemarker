@@ -31,8 +31,8 @@ import org.apache.freemarker.core.model.TemplateModelException;
  */
 class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
     
-    OverloadedFixArgsMethods(boolean bugfixed) {
-        super(bugfixed);
+    OverloadedFixArgsMethods() {
+        super();
     }
 
     @Override
@@ -84,15 +84,11 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, false);
         if (maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
-            if (bugfixed) {
-                if (typeFlags != null) {
-                    // Note that overloaded method selection has already accounted for overflow errors when the method
-                    // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
-                    // BigDecimal is allowed to overflow for backward-compatibility.
-                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.getParamTypes(), typeFlags);
-                }
-            } else {
-                BeansWrapper.coerceBigDecimals(memberDesc.getParamTypes(), pojoArgs);
+            if (typeFlags != null) {
+                // Note that overloaded method selection has already accounted for overflow errors when the method
+                // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
+                // BigDecimal is allowed to overflow for backward-compatibility.
+                forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.getParamTypes(), typeFlags);
             }
             return new MemberAndArguments(memberDesc, pojoArgs);
         } else {

@@ -18,7 +18,8 @@
  */
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -28,8 +29,6 @@ import java.util.Locale;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.CustomAttribute;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
@@ -112,7 +111,7 @@ public class TemplateConfigurationWithTemplateResolverTest {
 
     @Test
     public void testLocale() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
         
         StringTemplateLoader tl = new StringTemplateLoader();
@@ -153,7 +152,7 @@ public class TemplateConfigurationWithTemplateResolverTest {
     @Test
     public void testPlainText() throws Exception {
         Configuration cfg = createCommonEncodingTesterConfig();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
+        cfg.setIncompatibleImprovements(Configuration.VERSION_3_0_0);
         
         TemplateConfiguration tcDE = new TemplateConfiguration();
         tcDE.setLocale(Locale.GERMANY);
@@ -195,7 +194,7 @@ public class TemplateConfigurationWithTemplateResolverTest {
 
     @Test
     public void testConfigurableSettings() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
         
         TemplateConfiguration tcFR = new TemplateConfiguration();
@@ -228,7 +227,7 @@ public class TemplateConfigurationWithTemplateResolverTest {
     
     @Test
     public void testCustomAttributes() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         TemplateConfiguration tc1 = new TemplateConfiguration();
         tc1.setCustomAttribute("a1", "a1tc1");
@@ -297,7 +296,7 @@ public class TemplateConfigurationWithTemplateResolverTest {
     }
 
     private Configuration createCommonEncodingTesterConfig() throws UnsupportedEncodingException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setDefaultEncoding("iso-8859-1");
         cfg.setLocale(Locale.US);
         

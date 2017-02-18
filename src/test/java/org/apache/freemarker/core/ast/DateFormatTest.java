@@ -18,8 +18,10 @@
  */
 package org.apache.freemarker.core.ast;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.sql.Time;
@@ -32,12 +34,6 @@ import java.util.TimeZone;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.AliasTemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.ast.TemplateDateFormat;
-import org.apache.freemarker.core.ast.TemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.UndefinedCustomFormatException;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
@@ -58,7 +54,7 @@ public class DateFormatTest extends TemplateTest {
     @Before
     public void setup() {
         Configuration cfg = getConfiguration();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
+        cfg.setIncompatibleImprovements(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
         cfg.setSQLDateAndTimeTimeZone(TimeZone.getTimeZone("UTC"));
@@ -212,38 +208,19 @@ public class DateFormatTest extends TemplateTest {
         Configuration cfg = getConfiguration();
         addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
         
-        testIcIAndEscapingWhenCustFormsAreAccepted(cfg);
-        
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-        testIcIAndEscapingWhenCustFormsAreAccepted(cfg);
-        
-        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
-        
-        cfg.setDateTimeFormat("@epoch");
-        assertErrorContains("${d}", "\"@epoch\"");
-        cfg.setDateTimeFormat("'@'yyyy");
-        assertOutput("${d}", "@1970");
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@@1970");
-        
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
-        cfg.setDateTimeFormat("@epoch");
-        assertErrorContains("${d}", "custom", "\"epoch\"");
-        cfg.setDateTimeFormat("'@'yyyy");
-        assertOutput("${d}", "@1970");
-        cfg.setDateTimeFormat("@@yyyy");
-        assertOutput("${d}", "@@1970");
-    }
-
-    protected void testIcIAndEscapingWhenCustFormsAreAccepted(Configuration cfg) throws IOException, TemplateException {
         cfg.setDateTimeFormat("@epoch");
         assertOutput("${d}", "12345678");
         cfg.setDateTimeFormat("'@'yyyy");
         assertOutput("${d}", "@1970");
         cfg.setDateTimeFormat("@@yyyy");
         assertOutput("${d}", "@@1970");
+        
+        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
+        
+        cfg.setDateTimeFormat("@epoch");
+        assertErrorContains("${d}", "custom", "\"epoch\"");
     }
-    
+
     @Test
     public void testEnvironmentGetters() throws Exception {
         Template t = new Template(null, "", getConfiguration());

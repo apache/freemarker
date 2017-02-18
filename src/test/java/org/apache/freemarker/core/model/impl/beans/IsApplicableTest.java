@@ -26,10 +26,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.freemarker.core.model.impl.beans.ArgumentTypes;
-import org.apache.freemarker.core.model.impl.beans.OverloadedNumberUtil;
-import org.apache.freemarker.core.model.impl.beans.ReflectionCallableMemberDescriptor;
-
 import junit.framework.TestCase;
 
 @SuppressWarnings("boxing")
@@ -40,21 +36,21 @@ public class IsApplicableTest extends TestCase {
     }
     
     public void testSingle() {
-        ArgumentTypes ats = new ArgumentTypes(new Object[] { new Object() }, true);
+        ArgumentTypes ats = new ArgumentTypes(new Object[] { new Object() });
         assertApplicable(ats, Object.class);
         assertNotApplicable(ats, String.class);
         assertNotApplicable(ats, CharSequence.class);
         assertNotApplicable(ats, Integer.class);
         assertNotApplicable(ats, Integer.TYPE);
         
-        ats = new ArgumentTypes(new Object[] { "" }, true);
+        ats = new ArgumentTypes(new Object[] { "" });
         assertApplicable(ats, Object.class);
         assertApplicable(ats, CharSequence.class);
         assertApplicable(ats, String.class);
         assertNotApplicable(ats, Integer.class);
         assertNotApplicable(ats, Integer.TYPE);
 
-        ats = new ArgumentTypes(new Object[] { 1 }, true);
+        ats = new ArgumentTypes(new Object[] { 1 });
         assertApplicable(ats, Object.class);
         assertNotApplicable(ats, CharSequence.class);
         assertNotApplicable(ats, String.class);
@@ -69,7 +65,7 @@ public class IsApplicableTest extends TestCase {
         assertApplicable(ats, BigDecimal.class);
         assertApplicable(ats, BigInteger.class);
 
-        ats = new ArgumentTypes(new Object[] { new OverloadedNumberUtil.IntegerOrByte(1, (byte) 1) }, true);
+        ats = new ArgumentTypes(new Object[] { new OverloadedNumberUtil.IntegerOrByte(1, (byte) 1) });
         assertApplicable(ats, Object.class);
         assertNotApplicable(ats, CharSequence.class);
         assertNotApplicable(ats, String.class);
@@ -84,7 +80,7 @@ public class IsApplicableTest extends TestCase {
         assertApplicable(ats, BigDecimal.class);
         assertApplicable(ats, BigInteger.class);
         
-        ats = new ArgumentTypes(new Object[] { 1.0f }, true);
+        ats = new ArgumentTypes(new Object[] { 1.0f });
         assertApplicable(ats, Object.class);
         assertNotApplicable(ats, CharSequence.class);
         assertNotApplicable(ats, String.class);
@@ -97,7 +93,7 @@ public class IsApplicableTest extends TestCase {
         assertApplicable(ats, BigDecimal.class);
         assertNotApplicable(ats, BigInteger.class);
         
-        ats = new ArgumentTypes(new Object[] { null }, true);
+        ats = new ArgumentTypes(new Object[] { null });
         assertApplicable(ats, Object.class);
         assertApplicable(ats, String.class);
         assertApplicable(ats, Integer.class);
@@ -108,7 +104,7 @@ public class IsApplicableTest extends TestCase {
     }
     
     public void testMulti() {
-        ArgumentTypes ats = new ArgumentTypes(new Object[] { new Object(), "", 1, true }, true);
+        ArgumentTypes ats = new ArgumentTypes(new Object[] { new Object(), "", 1, true });
         assertApplicable(ats, Object.class, Object.class, Object.class, Object.class);
         assertApplicable(ats, Object.class, String.class, Number.class, Boolean.class);
         assertApplicable(ats, Object.class, CharSequence.class, Integer.class, Serializable.class);
@@ -121,7 +117,7 @@ public class IsApplicableTest extends TestCase {
     }    
 
     public void testNoParam() {
-        ArgumentTypes ats = new ArgumentTypes(new Object[] { }, true);
+        ArgumentTypes ats = new ArgumentTypes(new Object[] { });
         assertApplicable(ats);
         assertNotApplicable(ats, Object.class);
     }
@@ -134,7 +130,7 @@ public class IsApplicableTest extends TestCase {
             new Object[] { "" },
         };
         for (Object[] args : argLists) {
-            ArgumentTypes ats = new ArgumentTypes(args, true);
+            ArgumentTypes ats = new ArgumentTypes(args);
             assertApplicable(ats, true, String.class, int[].class);
             assertApplicable(ats, true, String.class, Integer[].class);
             assertApplicable(ats, true, Object.class, Comparable[].class);

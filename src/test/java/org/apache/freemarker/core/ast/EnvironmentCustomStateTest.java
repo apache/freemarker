@@ -18,11 +18,11 @@
  */
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Environment;
 import org.junit.Test;
 
 public class EnvironmentCustomStateTest {
@@ -32,7 +32,7 @@ public class EnvironmentCustomStateTest {
 
     @Test
     public void test() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Template t = new Template(null, "", cfg);
         Environment env = t.createProcessingEnvironment(null, null);
         assertNull(env.getCustomState(KEY_1));

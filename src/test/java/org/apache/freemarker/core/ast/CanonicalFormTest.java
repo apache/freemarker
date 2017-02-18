@@ -24,7 +24,6 @@ import java.io.StringWriter;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.test.CopyrightCommentRemoverTemplateLoader;
@@ -58,7 +57,7 @@ public class CanonicalFormTest extends FileTestCase {
     
     private void assertCanonicalFormOf(String ftlFileName)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateLoader(
                 new CopyrightCommentRemoverTemplateLoader(
                         new ClassTemplateLoader(CanonicalFormTest.class, "")));

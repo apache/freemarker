@@ -96,7 +96,7 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
  *         these caches aren't unused.
  *       </li>
  *       <li><p>
- *         Instance model cache: By default off (see {@link BeansWrapper#setUseCache(boolean)}). Caches the
+ *         Instance model cache: By default off (see {@link BeansWrapper#setUseModelCache(boolean)}). Caches the
  *         {@link TemplateModel}-s for all Java objects that were accessed from templates.
  *       </li>
  *     </ul>

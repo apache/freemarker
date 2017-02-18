@@ -27,10 +27,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 final class ClassIntrospectorBuilder implements Cloneable {
-    
-    private final boolean bugfixed;
 
     private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
     private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue(); 
@@ -47,7 +46,6 @@ final class ClassIntrospectorBuilder implements Cloneable {
     // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
     
     ClassIntrospectorBuilder(ClassIntrospector ci) {
-        bugfixed = ci.bugfixed;
         exposureLevel = ci.exposureLevel;
         exposeFields = ci.exposeFields;
         methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
@@ -57,8 +55,9 @@ final class ClassIntrospectorBuilder implements Cloneable {
     ClassIntrospectorBuilder(Version incompatibleImprovements) {
         // Warning: incompatibleImprovements must not affect this object at versions increments where there's no
         // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
-        // to some version changes that affects BeansWrapper, but not the other way around. 
-        bugfixed = BeansWrapper.is2321Bugfixed(incompatibleImprovements);
+        // to some version changes that affects BeansWrapper, but not the other way around.
+        _NullArgumentException.check(incompatibleImprovements);
+        // Currently nothing depends on incompatibleImprovements
     }
     
     @Override
@@ -74,7 +73,6 @@ final class ClassIntrospectorBuilder implements Cloneable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (bugfixed ? 1231 : 1237);
         result = prime * result + (exposeFields ? 1231 : 1237);
         result = prime * result + exposureLevel;
         result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
@@ -89,7 +87,6 @@ final class ClassIntrospectorBuilder implements Cloneable {
         if (getClass() != obj.getClass()) return false;
         ClassIntrospectorBuilder other = (ClassIntrospectorBuilder) obj;
         
-        if (bugfixed != other.bugfixed) return false;
         if (exposeFields != other.exposeFields) return false;
         if (exposureLevel != other.exposureLevel) return false;
         if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
@@ -190,10 +187,6 @@ final class ClassIntrospectorBuilder implements Cloneable {
             // BeansWrapper.
             return new ClassIntrospector(this, new Object(), true, false);
         }
-    }
-
-    public boolean isBugfixed() {
-        return bugfixed;
     }
     
 }

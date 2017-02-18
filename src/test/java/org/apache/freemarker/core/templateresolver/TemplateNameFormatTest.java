@@ -32,6 +32,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
+import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
@@ -226,7 +227,7 @@ public class TemplateNameFormatTest {
     
     @Test
     public void assertBackslashNotSpecialWith23() throws MalformedTemplateNameException, ParseException, IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("foo\\bar.ftl", "");
@@ -275,8 +276,9 @@ public class TemplateNameFormatTest {
     }
 
     @Test
-    public void assertBackslashNotAllowedWith24() throws MalformedTemplateNameException, ParseException, IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+    public void assertBackslashNotAllowed() throws MalformedTemplateNameException, ParseException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+        cfg.setTemplateLoader(new ByteArrayTemplateLoader());
         cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         try {
             cfg.getTemplate("././foo\\bar.ftl", Locale.US);

@@ -28,8 +28,9 @@ import org.junit.Test;
 
 public class WhitespaceStrippingTest extends TemplateTest {
 
-    private final Configuration cfgStripWS = new Configuration(Configuration.VERSION_2_3_21);
-    private final Configuration cfgNoStripWS = new Configuration(Configuration.VERSION_2_3_21);
+    private final Configuration cfgStripWS = new Configuration(Configuration.VERSION_3_0_0);
+    
+    private final Configuration cfgNoStripWS = new Configuration(Configuration.VERSION_3_0_0);
     {
         cfgNoStripWS.setWhitespaceStripping(false);
     }

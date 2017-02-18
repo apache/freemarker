@@ -20,16 +20,13 @@ package org.apache.freemarker.core;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
 import org.junit.Test;
 
 public class GetSourceTest {
 
-    
     @Test
     public void testGetSource() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         {
             // Note: Default tab size is 8.

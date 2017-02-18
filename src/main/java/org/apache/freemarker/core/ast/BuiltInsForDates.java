@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
@@ -33,8 +32,8 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util.UnrecognizedTimeZoneException;
+import org.apache.freemarker.core.util._DateUtil;
 
 /**
  * A holder for built-ins that operate exclusively on date left-hand values.
@@ -205,8 +204,7 @@ class BuiltInsForDates {
                 return showOffset.booleanValue();
             } else {
                 // java.sql.Time values meant to carry calendar field values only, so we don't show offset for them.
-                return !(date instanceof java.sql.Time
-                        && _TemplateAPI.getTemplateLanguageVersionAsInt(this) >= _TemplateAPI.VERSION_INT_2_3_21);
+                return !(date instanceof java.sql.Time);
             }
         }
         

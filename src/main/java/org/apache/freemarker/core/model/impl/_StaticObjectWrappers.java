@@ -34,13 +34,13 @@ public final class _StaticObjectWrappers {
     }
 
     public static final DefaultObjectWrapper DEFAULT_OBJECT_WRAPPER
-            = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).build();
+            = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
 
     public static final BeansWrapper BEANS_WRAPPER
-            = new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build();
+            = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
     
     public static final SimpleObjectWrapper SIMPLE_OBJECT_WRAPPER
-            = new SimpleObjectWrapper(Configuration.VERSION_2_3_0);
+            = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
     {
         SIMPLE_OBJECT_WRAPPER.writeProtect();
     }    

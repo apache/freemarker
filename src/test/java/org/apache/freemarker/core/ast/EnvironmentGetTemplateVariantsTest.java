@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -30,7 +30,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -125,74 +124,67 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
                 );
     }
     
-    private final static String EXPECTED_2_3_21 =
-            "<t=main ct=main mt=main>\n"
-            + "---1---\n"
-            + "[imp: <t=imp ct=imp mt=main>]\n"
-            + "---2---\n"
-            + "[impM: <t=main ct=imp mt=main>\n"
-                + "{<t=main ct=main mt=main>}\n"
-                + "[inc: <t=inc ct=inc mt=main>\n"
-                    + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
-                    + "[incInc: <t=inc ct=inc mt=main>\n"
-                        + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
+    @Test
+    public void test() throws IOException, TemplateException {
+        setConfiguration(createConfiguration(Configuration.VERSION_3_0_0));
+        assertOutputForNamed(
+                "main",
+                "<t=main ct=main mt=main>\n"
+                + "---1---\n"
+                + "[imp: <t=main ct=imp mt=main>]\n"
+                + "---2---\n"
+                + "[impM: <t=main ct=imp mt=main>\n"
+                    + "{<t=main ct=main mt=main>}\n"
+                    + "[inc: <t=main ct=inc mt=main>\n"
+                        + "[incM: <t=main ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
+                        + "[incInc: <t=main ct=inc mt=main>\n"
+                            + "[incM: <t=main ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
+                        + "]\n"
+                    + "]\n"
+                    + "[incM: <t=main ct=inc mt=main> {<t=main ct=imp mt=main>}]\n"
+                + "]\n"
+                + "---3---\n"
+                + "[inc: <t=main ct=inc mt=main>\n"
+                    + "[incM: <t=main ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
+                    + "[incInc: <t=main ct=inc mt=main>\n"
+                        + "[incM: <t=main ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
                     + "]\n"
                 + "]\n"
-                + "[incM: <t=main ct=inc mt=main> {<t=imp ct=imp mt=main>}]\n"
-            + "]\n"
-            + "---3---\n"
-            + "[inc: <t=inc ct=inc mt=main>\n"
-                + "[incM: <t=inc ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
-                + "[incInc: <t=inc ct=inc mt=main>\n"
-                    + "[incM: <t=inc ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
-                + "]\n"
-            + "]\n"
-            + "---4---\n"
-            + "[incM: <t=main ct=inc mt=main> {<t=main ct=main mt=main>}]\n"
-            + "---5---\n"
-            + "[inc2: <t=inc2 ct=inc2 mt=main>\n"
-                + "[impM: <t=inc2 ct=imp mt=main>\n"
-                    + "{<t=main ct=inc2 mt=main>}\n"
-                    + "[inc: <t=inc ct=inc mt=main>\n"
-                        + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
+                + "---4---\n"
+                + "[incM: <t=main ct=inc mt=main> {<t=main ct=main mt=main>}]\n"
+                + "---5---\n"
+                + "[inc2: <t=main ct=inc2 mt=main>\n"
+                    + "[impM: <t=main ct=imp mt=main>\n"
+                        + "{<t=main ct=inc2 mt=main>}\n"
+                        + "[inc: <t=main ct=inc mt=main>\n"
+                            + "[incM: <t=main ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
+                        + "]\n"
+                        + "[incM: <t=main ct=inc mt=main> {<t=main ct=imp mt=main>}]\n"
                     + "]\n"
-                    + "[incM: <t=inc2 ct=inc mt=main> {<t=imp ct=imp mt=main>}]\n"
                 + "]\n"
-            + "]\n"
-            + "---6---\n"
-            + "[impM2: <t=main ct=imp mt=main>\n"
-                + "{<t=main ct=main mt=main>}\n"
-                + "[imp2M: <t=main ct=imp2 mt=main> {<t=imp ct=imp mt=main>}]\n"
-            + "]\n"
-            + "---7---\n"
-            + "[inc3: <t=inc3 ct=inc3 mt=main>\n"
-                + "[mainM: <t=inc3 ct=main mt=main> {<t=main ct=inc3 mt=main>} <t=inc3 ct=main mt=main>]\n"
-            + "]\n"
-            + "[mainM: "
-                + "<t=main ct=main mt=main> "
-                + "{<t=main ct=main mt=main> <t=inc4 ct=inc4 mt=main> <t=main ct=main mt=main>} "
-                + "<t=main ct=main mt=main>"
-            + "]\n"
-            + "<t=main ct=main mt=main>\n"
-            + "---8---\n"
-            + "mainF: <t=main ct=main mt=main>, impF: <t=main ct=imp mt=main>, incF: <t=main ct=inc mt=main>\n"
-            ;
-
-    @Test
-    public void test2321() throws IOException, TemplateException {
-        setConfiguration(createConfiguration(Configuration.VERSION_2_3_21));
-        assertOutputForNamed("main", EXPECTED_2_3_21);
-    }
-
-    @Test
-    public void test2322() throws IOException, TemplateException {
-        setConfiguration(createConfiguration(Configuration.VERSION_2_3_22));
-        assertOutputForNamed("main", EXPECTED_2_3_21.replaceAll("<t=\\w+", "<t=main"));
+                + "---6---\n"
+                + "[impM2: <t=main ct=imp mt=main>\n"
+                    + "{<t=main ct=main mt=main>}\n"
+                    + "[imp2M: <t=main ct=imp2 mt=main> {<t=main ct=imp mt=main>}]\n"
+                + "]\n"
+                + "---7---\n"
+                + "[inc3: <t=main ct=inc3 mt=main>\n"
+                    + "[mainM: <t=main ct=main mt=main> {<t=main ct=inc3 mt=main>} <t=main ct=main mt=main>]\n"
+                + "]\n"
+                + "[mainM: "
+                    + "<t=main ct=main mt=main> "
+                    + "{<t=main ct=main mt=main> <t=main ct=inc4 mt=main> <t=main ct=main mt=main>} "
+                    + "<t=main ct=main mt=main>"
+                + "]\n"
+                + "<t=main ct=main mt=main>\n"
+                + "---8---\n"
+                + "mainF: <t=main ct=main mt=main>, impF: <t=main ct=imp mt=main>, incF: <t=main ct=inc mt=main>\n"
+                .replaceAll("<t=\\w+", "<t=main"));
     }
 
     @Test
     public void testNotStarted() throws IOException, TemplateException {
-        Template t = new Template("foo", "", createConfiguration(Configuration.VERSION_2_3_21));
+        Template t = new Template("foo", "", createConfiguration(Configuration.VERSION_3_0_0));
         final Environment env = t.createProcessingEnvironment(null, null);
         assertSame(t, env.getMainTemplate());
         assertSame(t, env.getCurrentTemplate());

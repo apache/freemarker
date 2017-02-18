@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
@@ -51,25 +50,8 @@ import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
  */
 class BuiltInsForMultipleTypes {
 
-    static class cBI extends AbstractCBI implements ICIChainMember {
+    static class cBI extends AbstractCBI {
         
-        static class BIBeforeICE2d3d21 extends AbstractCBI {
-
-            @Override
-            protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
-                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
-                if (num instanceof Integer || num instanceof Long) {
-                    // Accelerate these fairly common cases
-                    return new SimpleScalar(num.toString());
-                } else {
-                    return new SimpleScalar(env.getCNumberFormat().format(num));
-                }
-            }
-            
-        }
-        
-        private final BIBeforeICE2d3d21 prevICIObj = new BIBeforeICE2d3d21();
-
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
@@ -119,16 +101,6 @@ class BuiltInsForMultipleTypes {
             }
         
             return new SimpleScalar(env.getCNumberFormat().format(num));
-        }
-
-        @Override
-        public int getMinimumICIVersion() {
-            return _TemplateAPI.VERSION_INT_2_3_21;
-        }
-        
-        @Override
-        public Object getPreviousICIChainMember() {
-            return prevICIObj;
         }
         
     }
@@ -351,9 +323,7 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
-                    && (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
-                        // These implement TemplateSequenceModel, yet they can't be #list-ed:
-                        || !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel))
+                    && !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel)
                     ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -441,12 +411,9 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateSequenceModel
-                        && (
-                            !(tm instanceof OverloadedMethodsModel || tm instanceof SimpleMethodModel)
-                            || !env.isIcI2324OrLater())
-                        )
-                        ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+            return tm instanceof TemplateSequenceModel
+                    && !(tm instanceof OverloadedMethodsModel || tm instanceof SimpleMethodModel) // [FM3] Until BW fixed
+                    ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 

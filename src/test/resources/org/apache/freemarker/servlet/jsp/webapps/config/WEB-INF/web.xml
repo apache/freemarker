@@ -90,12 +90,8 @@
         <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainertTest$AssertDefaultsFreemarkerServlet</servlet-class>
         <init-param>
             <param-name>incompatible_improvements</param-name>
-            <param-value>2.3.22</param-value>
+            <param-value>3.0.0</param-value>
         </init-param>
-    </servlet>
-    <servlet>
-        <servlet-name>freemarker-assertDefaultsIcI2322FreemarkerServlet</servlet-name>
-        <servlet-class>org.apache.freemarker.servlet.jsp.RealServletContainertTest$AssertDefaultsIcI2322FreemarkerServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>freemarker-assertCustomizedDefaultsFreemarkerServlet</servlet-name>

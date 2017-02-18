@@ -25,8 +25,6 @@ import org.apache.freemarker.core.ast.Expression;
 import org.apache.freemarker.core.ast.OutputFormat;
 import org.apache.freemarker.core.ast.TemplateObject;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
-import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
@@ -36,16 +34,7 @@ import org.apache.freemarker.core.util._NullArgumentException;
  */ 
 public class _TemplateAPI {
     
-    public static final int VERSION_INT_2_3_0 = Configuration.VERSION_2_3_0.intValue();
-    public static final int VERSION_INT_2_3_19 = Configuration.VERSION_2_3_19.intValue();
-    public static final int VERSION_INT_2_3_20 = Configuration.VERSION_2_3_20.intValue();
-    public static final int VERSION_INT_2_3_21 = Configuration.VERSION_2_3_21.intValue();
-    public static final int VERSION_INT_2_3_22 = Configuration.VERSION_2_3_22.intValue();
-    public static final int VERSION_INT_2_3_23 = Configuration.VERSION_2_3_23.intValue();
-    public static final int VERSION_INT_2_3_24 = Configuration.VERSION_2_3_24.intValue();
-    public static final int VERSION_INT_2_3_25 = Configuration.VERSION_2_3_25.intValue();
-    public static final int VERSION_INT_2_3_26 = Configuration.VERSION_2_3_26.intValue();
-    public static final int VERSION_INT_2_4_0 = Version.intValueFor(2, 4, 0);
+    public static final int VERSION_INT_3_0_0 = Configuration.VERSION_3_0_0.intValue();
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
         _NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
@@ -55,8 +44,9 @@ public class _TemplateAPI {
                     + incompatibleImprovements + ", but the installed FreeMarker version is only "
                     + Configuration.getVersion() + ". You may need to upgrade FreeMarker in your project.");
         }
-        if (iciV < VERSION_INT_2_3_0) {
-            throw new IllegalArgumentException("\"incompatibleImprovements\" must be at least 2.3.0.");
+        if (iciV < VERSION_INT_3_0_0) {
+            throw new IllegalArgumentException("\"incompatibleImprovements\" must be at least 3.0.0, but was "
+                    + incompatibleImprovements);
         }
     }
     
@@ -73,20 +63,8 @@ public class _TemplateAPI {
         return Configuration.getDefaultTemplateExceptionHandler(incompatibleImprovements);
     }
 
-    public static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
-        return Configuration.getDefaultLogTemplateExceptions(incompatibleImprovements);
-    }
-
     public static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements) {
         return Configuration.createDefaultCacheStorage(incompatibleImprovements);
-    }
-    
-    public static TemplateLookupStrategy getDefaultTemplateLookupStrategy(Version incompatibleImprovements) {
-        return Configuration.getDefaultTemplateLookupStrategy(incompatibleImprovements);
-    }
-    
-    public static TemplateNameFormat getDefaultTemplateNameFormat(Version incompatibleImprovements) {
-        return Configuration.getDefaultTemplateNameFormat(incompatibleImprovements);
     }
     
     /**

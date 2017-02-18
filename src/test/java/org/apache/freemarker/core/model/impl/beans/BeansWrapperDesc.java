@@ -17,24 +17,14 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core.model.impl.beans;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.Configuration;
 
-/**
- * This exists for backward compatibly, and is used before Incompatible Improvements 2.3.21 only.
- * 
- * @since 2.3.21
- */
-final class NonListableRightUnboundedRangeModel extends RightUnboundedRangeModel {
+public class BeansWrapperDesc extends BeansWrapperWithShortedMethods {
 
-    NonListableRightUnboundedRangeModel(int begin) {
-        super(begin);
+    public BeansWrapperDesc() {
+        super(Configuration.VERSION_3_0_0, true);
     }
-
-    @Override
-    public int size() throws TemplateModelException {
-        return 0;
-    }
-
+    
 }

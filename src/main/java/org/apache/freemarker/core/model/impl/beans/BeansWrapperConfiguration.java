@@ -183,7 +183,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         return useModelCache;
     }
 
-    /** See {@link BeansWrapper#setUseCache(boolean)} (it means the same). */
+    /** See {@link BeansWrapper#setUseModelCache(boolean)} (it means the same). */
     public void setUseModelCache(boolean useModelCache) {
         this.useModelCache = useModelCache;
     }

@@ -23,7 +23,6 @@ import java.io.IOException;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util._StringUtil;
@@ -33,9 +32,6 @@ import org.junit.Test;
 
 public class TemplateNameSpecialVariablesTest extends TemplateTest {
     
-    private static final Version[] BREAK_POINT_VERSIONS = new Version[] {
-            Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22, Configuration.VERSION_2_3_23 };
-
     private static TemplateLoader createTemplateLoader(String specVar) {
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("main.ftl",
@@ -84,67 +80,18 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
             = "t=${.templateName}, ct=${.currentTemplateName!'-'}, mt=${.mainTemplateName!'-'}";
     
     @Test
-    public void testTemplateName230() throws IOException, TemplateException {
+    public void testTemplateName() throws IOException, TemplateException {
         getConfiguration().setTemplateLoader(createTemplateLoader(".templateName"));
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_0);
-        assertMainFtlOutput(false);
-    }
-    
-    /** This IcI version was buggy. */
-    @Test
-    public void testTemplateName2322() throws IOException, TemplateException {
-        getConfiguration().setTemplateLoader(createTemplateLoader(".templateName"));
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_22);
-        assertMainFtlOutput(true);
-    }
-    
-    @Test
-    public void testTemplateName2323() throws IOException, TemplateException {
-        getConfiguration().setTemplateLoader(createTemplateLoader(".templateName"));
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_23);
         assertMainFtlOutput(false);
     }
 
     @Test
     public void testMainTemplateName() throws IOException, TemplateException {
         getConfiguration().setTemplateLoader(createTemplateLoader(".mainTemplateName"));
-        for (Version ici : BREAK_POINT_VERSIONS) {
-            getConfiguration().setIncompatibleImprovements(ici);
-            assertMainFtlOutput(true);
-        }
+        assertMainFtlOutput(true);
     }
 
-    @Test
-    public void testCurrentTemplateName() throws IOException, TemplateException {
-        getConfiguration().setTemplateLoader(createTemplateLoader(".currentTemplateName"));
-        for (Version ici : BREAK_POINT_VERSIONS) {
-            getConfiguration().setIncompatibleImprovements(ici);
-            assertOutputForNamed("main.ftl",
-                    "In main: main.ftl\n"
-                    + "In imp: imp.ftl\n"
-                    + "In main: main.ftl\n"
-                    + "imp.ftl\n"
-                    + "{main.ftl}\n"
-                    + "In imp call imp:\n"
-                    + "imp.ftl\n"
-                    + "{imp.ftl}\n"
-                    + "After: imp.ftl\n"
-                    + "In main: main.ftl\n"
-                    + "In inc: inc.ftl\n"
-                    + "In inc call imp:\n"
-                    + "imp.ftl\n"
-                    + "{inc.ftl}\n"
-                    + "In main: main.ftl\n"
-                    + "inc.ftl\n"
-                    + "{main.ftl}\n"
-                    + "In inc call imp:\n"
-                    + "imp.ftl\n"
-                    + "{inc.ftl}\n"
-                    + "In main: main.ftl\n");
-        }
-    }
-    
-    protected void assertMainFtlOutput(boolean allMain) throws IOException, TemplateException {
+    private void assertMainFtlOutput(boolean allMain) throws IOException, TemplateException {
         String expected
                 = "In main: main.ftl\n"
                 + "In imp: imp.ftl\n"
@@ -172,6 +119,33 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
             expected = _StringUtil.replace(expected, "inc.ftl", "main.ftl");
         }
         assertOutputForNamed("main.ftl", expected);
+    }
+
+    @Test
+    public void testCurrentTemplateName() throws IOException, TemplateException {
+        getConfiguration().setTemplateLoader(createTemplateLoader(".currentTemplateName"));
+        assertOutputForNamed("main.ftl",
+                "In main: main.ftl\n"
+                + "In imp: imp.ftl\n"
+                + "In main: main.ftl\n"
+                + "imp.ftl\n"
+                + "{main.ftl}\n"
+                + "In imp call imp:\n"
+                + "imp.ftl\n"
+                + "{imp.ftl}\n"
+                + "After: imp.ftl\n"
+                + "In main: main.ftl\n"
+                + "In inc: inc.ftl\n"
+                + "In inc call imp:\n"
+                + "imp.ftl\n"
+                + "{inc.ftl}\n"
+                + "In main: main.ftl\n"
+                + "inc.ftl\n"
+                + "{main.ftl}\n"
+                + "In inc call imp:\n"
+                + "imp.ftl\n"
+                + "{inc.ftl}\n"
+                + "In main: main.ftl\n");
     }
 
     @Before

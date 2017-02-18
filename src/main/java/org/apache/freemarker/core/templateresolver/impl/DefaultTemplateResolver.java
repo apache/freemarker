@@ -35,7 +35,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.ast.MarkReleaserTemplateSpecifiedEncodingHandler;
 import org.apache.freemarker.core.ast.TemplateConfiguration;
@@ -99,30 +98,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private boolean localizedLookup = true;
 
     private Configuration config;
-
-    /**
-     * Same as {@link #DefaultTemplateResolver(TemplateLoader, CacheStorage, Configuration)} with a new {@link SoftCacheStorage}
-     * as the 2nd parameter.
-     * 
-     * @since 2.3.21
-     */
-    public DefaultTemplateResolver(TemplateLoader templateLoader, Configuration config) {
-        this(templateLoader, _TemplateAPI.createDefaultCacheStorage(Configuration.VERSION_2_3_0), config);
-    }
-    
-    /**
-     * Same as
-     * {@link #DefaultTemplateResolver(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat, Configuration)}
-     * with {@link DefaultTemplateLookupStrategy#INSTANCE} and {@link DefaultTemplateNameFormatFM2#INSTANCE}.
-     * 
-     * @since 2.3.21
-     */
-    public DefaultTemplateResolver(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config) {
-        this(templateLoader, cacheStorage,
-                _TemplateAPI.getDefaultTemplateLookupStrategy(Configuration.VERSION_2_3_0),
-                _TemplateAPI.getDefaultTemplateNameFormat(Configuration.VERSION_2_3_0),
-                config);
-    }
     
     /**
      * Same as
@@ -255,16 +230,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         _NullArgumentException.check("locale", locale);
         _NullArgumentException.check("encoding", encoding);
         
-        try {
-            name = templateNameFormat.normalizeRootBasedName(name);
-        } catch (MalformedTemplateNameException e) {
-            // If we don't have to emulate backward compatible behavior, then just rethrow it: 
-            if (templateNameFormat != DefaultTemplateNameFormatFM2.INSTANCE
-                    || config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_4_0) {
-                throw e;
-            }
-            return new GetTemplateResult(null, e);
-        }
+        name = templateNameFormat.normalizeRootBasedName(name);
         
         if (templateLoader == null) {
             return new GetTemplateResult(name, "The TemplateLoader (and TemplateLoader2) was null.");

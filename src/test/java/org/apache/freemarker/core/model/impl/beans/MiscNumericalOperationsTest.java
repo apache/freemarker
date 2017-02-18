@@ -22,14 +22,9 @@ package org.apache.freemarker.core.model.impl.beans;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import junit.framework.TestCase;
-
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.OverloadedFixArgsMethods;
-import org.apache.freemarker.core.model.impl.beans.OverloadedMethodsSubset;
-import org.apache.freemarker.core.model.impl.beans.OverloadedNumberUtil;
 import org.junit.Assert;
+
+import junit.framework.TestCase;
 
 public class MiscNumericalOperationsTest extends TestCase {
 
@@ -40,57 +35,50 @@ public class MiscNumericalOperationsTest extends TestCase {
     public void testForceUnwrappedNumberToType() {
         // Usual type to to all other types:
         Double n = Double.valueOf(123.75);
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Short.class, false), Short.valueOf(n.shortValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Short.TYPE, false), Short.valueOf(n.shortValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Byte.class, false), Byte.valueOf(n.byteValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Byte.TYPE, false), Byte.valueOf(n.byteValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Integer.class, false), Integer.valueOf(n.intValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Integer.TYPE, false), Integer.valueOf(n.intValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Long.class, false), Long.valueOf(n.longValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Long.TYPE, false), Long.valueOf(n.longValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Float.class, false), Float.valueOf(n.floatValue()));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Float.TYPE, false), Float.valueOf(n.floatValue()));
-        assertTrue(BeansWrapper.forceUnwrappedNumberToType(n, Double.class, false) == n);
-        assertTrue(BeansWrapper.forceUnwrappedNumberToType(n, Double.TYPE, false) == n);
-        try {
-            assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, BigInteger.class, false), new BigInteger("123"));
-            fail();
-        } catch (NumberFormatException e) {
-            // expected
-        }
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, BigInteger.class, true), new BigInteger("123"));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, BigDecimal.class, false), new BigDecimal("123.75"));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Short.class), Short.valueOf(n.shortValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Short.TYPE), Short.valueOf(n.shortValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Byte.class), Byte.valueOf(n.byteValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Byte.TYPE), Byte.valueOf(n.byteValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Integer.class), Integer.valueOf(n.intValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Integer.TYPE), Integer.valueOf(n.intValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Long.class), Long.valueOf(n.longValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Long.TYPE), Long.valueOf(n.longValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Float.class), Float.valueOf(n.floatValue()));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, Float.TYPE), Float.valueOf(n.floatValue()));
+        assertTrue(BeansWrapper.forceUnwrappedNumberToType(n, Double.class) == n);
+        assertTrue(BeansWrapper.forceUnwrappedNumberToType(n, Double.TYPE) == n);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, BigInteger.class), new BigInteger("123"));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(n, BigDecimal.class), new BigDecimal("123.75"));
         
         // Cases of conversion to BigDecimal:
         BigDecimal bd = new BigDecimal("123");
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(new BigInteger("123"), BigDecimal.class, false), bd);
-        assertTrue(BeansWrapper.forceUnwrappedNumberToType(bd, BigDecimal.class, false) == bd);
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Long.valueOf(123), BigDecimal.class, false), bd);
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Double.valueOf(123), BigDecimal.class, false), bd);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(new BigInteger("123"), BigDecimal.class), bd);
+        assertTrue(BeansWrapper.forceUnwrappedNumberToType(bd, BigDecimal.class) == bd);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Long.valueOf(123), BigDecimal.class), bd);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Double.valueOf(123), BigDecimal.class), bd);
         
         // Cases of conversion to BigInteger:
         BigInteger bi = new BigInteger("123");
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(new BigDecimal("123.6"), BigInteger.class, true), bi);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(new BigDecimal("123.6"), BigInteger.class), bi);
         assertEquals(BeansWrapper.forceUnwrappedNumberToType(
-                new OverloadedNumberUtil.IntegerBigDecimal(new BigDecimal("123")), BigInteger.class, true), bi);
-        assertTrue(BeansWrapper.forceUnwrappedNumberToType(bi, BigInteger.class, true) == bi);
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Long.valueOf(123), BigInteger.class, true), bi);
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Double.valueOf(123.6), BigInteger.class, true), bi);
+                new OverloadedNumberUtil.IntegerBigDecimal(new BigDecimal("123")), BigInteger.class), bi);
+        assertTrue(BeansWrapper.forceUnwrappedNumberToType(bi, BigInteger.class) == bi);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Long.valueOf(123), BigInteger.class), bi);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(Double.valueOf(123.6), BigInteger.class), bi);
 
-        assertTrue(BeansWrapper.forceUnwrappedNumberToType(n, Number.class, true) == n);
-        assertNull(BeansWrapper.forceUnwrappedNumberToType(n, RationalNumber.class, true));
+        assertTrue(BeansWrapper.forceUnwrappedNumberToType(n, Number.class) == n);
+        assertNull(BeansWrapper.forceUnwrappedNumberToType(n, RationalNumber.class));
         RationalNumber r = new RationalNumber(1, 2);
-        assertTrue(BeansWrapper.forceUnwrappedNumberToType(r, RationalNumber.class, true) == r);
-        assertTrue(BeansWrapper.forceUnwrappedNumberToType(r, Number.class, true) == r);
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(r, Double.class, true), Double.valueOf(0.5));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(r, BigDecimal.class, true), new BigDecimal("0.5"));
-        assertEquals(BeansWrapper.forceUnwrappedNumberToType(r, BigInteger.class, true), BigInteger.ZERO);
+        assertTrue(BeansWrapper.forceUnwrappedNumberToType(r, RationalNumber.class) == r);
+        assertTrue(BeansWrapper.forceUnwrappedNumberToType(r, Number.class) == r);
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(r, Double.class), Double.valueOf(0.5));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(r, BigDecimal.class), new BigDecimal("0.5"));
+        assertEquals(BeansWrapper.forceUnwrappedNumberToType(r, BigInteger.class), BigInteger.ZERO);
     }
     
     @SuppressWarnings("boxing")
     public void testForceNumberArgumentsToParameterTypes() {
-        OverloadedMethodsSubset oms
-                = new OverloadedFixArgsMethods(new BeansWrapper(Configuration.VERSION_2_3_21).is2321Bugfixed());
+        OverloadedMethodsSubset oms = new OverloadedFixArgsMethods();
         Class[] paramTypes = new Class[] { Short.TYPE, Short.class, Double.TYPE, BigDecimal.class, BigInteger.class };
         Object[] args;
         

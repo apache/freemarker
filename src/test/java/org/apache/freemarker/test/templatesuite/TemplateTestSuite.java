@@ -32,8 +32,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import junit.framework.TestSuite;
-
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.dom.NodeModel;
@@ -45,6 +43,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import junit.framework.TestSuite;
 
 /**
  * Test suite where the test cases are defined in testcases.xml, and usually process
@@ -274,7 +274,7 @@ public class TemplateTestSuite extends TestSuite {
     }
 
     private Version getMinIcIVersion() {
-        return Configuration.VERSION_2_3_0;
+        return Configuration.VERSION_3_0_0;
     }
 
     private Map<String, String> getCaseFMSettings(Element e) {

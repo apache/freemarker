@@ -23,8 +23,6 @@ import java.util.Collections;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.InvalidReferenceException;
-import org.apache.freemarker.core.ast.RTFOutputFormat;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
@@ -89,6 +87,8 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         assertOutput("<#escape x as x?html><#assign x = '&'>${x} ${'${x}'}</#escape> ${x}", "&amp; &amp; &");
     }
     
+    // We couldn't test this on 3.0.0, as nothing was fixed there with IcI yet
+    /*-
     @Test
     public void iciInheritanceBugFixed() throws Exception {
         // Broken behavior emulated:
@@ -99,6 +99,7 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         assertOutput("${'&\\''?html} ${\"${'&\\\\\\''?html}\"}", "&amp;&#39; &amp;&#39;");
     }
+    */
     
     @Test
     public void markup() throws IOException, TemplateException {

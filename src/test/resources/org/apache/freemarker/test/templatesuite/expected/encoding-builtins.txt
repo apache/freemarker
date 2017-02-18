@@ -18,11 +18,11 @@
  */
 FreeMarker: Encoding built-in tests
 
-html: [&amp;&lt;&gt;&quot;'{}\a/]
+html: [&amp;&lt;&gt;&quot;&#39;{}\a/]
 xml:  [&amp;&lt;&gt;&quot;&apos;{}\a/]
 xhtml: [&amp;&lt;&gt;&quot;&#39;{}\a/]
 rtf:  [&<>"'\{\}\\a/]
-html: [a&amp;a&lt;a&gt;a&quot;a'a{a}a\]
+html: [a&amp;a&lt;a&gt;a&quot;a&#39;a{a}a\]
 xml:  [a&amp;a&lt;a&gt;a&quot;a&apos;a{a}a\]
 xhtml: [a&amp;a&lt;a&gt;a&quot;a&#39;a{a}a\]
 rtf:  [a&a<a>a"a'a\{a\}a\\]

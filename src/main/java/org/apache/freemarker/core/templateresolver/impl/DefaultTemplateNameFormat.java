@@ -64,7 +64,7 @@ import org.apache.freemarker.core.util._StringUtil;
  * {@code foo//bar///baaz.ftl} is normalized to {@code foo/bar/baaz.ftl}. (In general, 0 long step names aren't
  * possible anymore.)</li>
  * 
- * <li>The {@code ".."} bugs of the legacy normalizer are fixed: {@code ".."} steps has removed the preceding
+ * <li>The {@code ".."} bugs of the legacy normalizer are oms: {@code ".."} steps has removed the preceding
  * {@code "."} or {@code "*"} or scheme steps, not treating them specially as they should be. Now these work as
  * expected. Examples: {@code "a/./../c"} has become to {@code "a/c"}, now it will be {@code "c"}; {@code "a/b/*}
  * {@code /../c"} has become to {@code "a/b/c"}, now it will be {@code "a/*}{@code /c"}; {@code "scheme://.."} has

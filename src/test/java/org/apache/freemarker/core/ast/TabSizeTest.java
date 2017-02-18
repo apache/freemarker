@@ -18,14 +18,14 @@
  */
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
@@ -35,7 +35,6 @@ public class TabSizeTest extends TemplateTest {
     @Override
     protected Configuration createConfiguration() throws Exception {
         Configuration cfg = super.createConfiguration();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
         return cfg;
     }
 

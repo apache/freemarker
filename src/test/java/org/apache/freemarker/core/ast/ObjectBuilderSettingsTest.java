@@ -376,9 +376,9 @@ public class ObjectBuilderSettingsTest {
     @Test
     public void beansWrapperTest() throws Exception {
         BeansWrapper bw = (BeansWrapper) _ObjectBuilderSettingEvaluator.eval(
-                "BeansWrapper(2.3.21, simpleMapWrapper=true, exposeFields=true)",
+                "BeansWrapper(3.0.0, simpleMapWrapper=true, exposeFields=true)",
                 ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
-        assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
+        assertEquals(Configuration.VERSION_3_0_0, bw.getIncompatibleImprovements());
         assertTrue(bw.isSimpleMapWrapper());
         assertTrue(bw.isExposeFields());
     }
@@ -386,19 +386,20 @@ public class ObjectBuilderSettingsTest {
     @Test
     public void defaultObjectWrapperTest() throws Exception {
         DefaultObjectWrapper bw = (DefaultObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
-                "DefaultObjectWrapper(2.3.21)",
+                "DefaultObjectWrapper(3.0.0)",
                 ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
-        assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
+        assertEquals(Configuration.VERSION_3_0_0, bw.getIncompatibleImprovements());
         assertFalse(bw.isExposeFields());
     }
 
     @Test
     public void configurationPropertiesTest() throws TemplateException {
-        final Configuration cfg = new Configuration();
+        final Configuration cfg = new Configuration(Configuration.getVersion());
         
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "org.apache.freemarker.core.model.impl.beans.BeansWrapper(2.3.21)");
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY,
+                    "org.apache.freemarker.core.model.impl.beans.BeansWrapper(3.0.0)");
             props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY,
                     "org.apache.freemarker.core.ast.ObjectBuilderSettingsTest$DummyArithmeticEngine");
             props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY,
@@ -413,7 +414,8 @@ public class ObjectBuilderSettingsTest {
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-            assertEquals(Configuration.VERSION_2_3_21, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals(
+                    Configuration.VERSION_3_0_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(DummyArithmeticEngine.class, cfg.getArithmeticEngine().getClass());
             assertEquals(DummyTemplateExceptionHandler.class, cfg.getTemplateExceptionHandler().getClass());
             assertEquals(DummyCacheStorage.class, cfg.getCacheStorage().getClass());
@@ -438,7 +440,8 @@ public class ObjectBuilderSettingsTest {
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(1, ((DummyArithmeticEngine) cfg.getArithmeticEngine()).getX());
             assertEquals(1, ((DummyTemplateExceptionHandler) cfg.getTemplateExceptionHandler()).getX());
-            assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0,
+                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getSoftSizeLimit());
             assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
             assertEquals("utf-8", cfg.getDefaultEncoding());
@@ -454,33 +457,41 @@ public class ObjectBuilderSettingsTest {
             assertSame(ArithmeticEngine.BIGDECIMAL_ENGINE, cfg.getArithmeticEngine());
             assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-            assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0,
+                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
 
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "org.apache.freemarker.core.model.impl.beans.BeansWrapper");
+            props.setProperty(
+                    Configurable.OBJECT_WRAPPER_KEY,
+                    "org.apache.freemarker.core.model.impl.beans.BeansWrapper");
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
             assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-            assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0,
+                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
         
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(2.3.19)");
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(3.0.0)");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-            assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals(
+                    Configuration.VERSION_3_0_0,
+                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
     }
     
     @Test
-    public void timeZoneTest() throws _ObjectBuilderSettingEvaluationException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void timeZoneTest() throws _ObjectBuilderSettingEvaluationException, ClassNotFoundException,
+    InstantiationException, IllegalAccessException {
         for (String timeZoneId : new String[] { "GMT+01", "GMT", "UTC" }) {
             TestBean8 result = (TestBean8) _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.ast.ObjectBuilderSettingsTest$TestBean8(timeZone=TimeZone('" + timeZoneId + "'))",
+                    "org.apache.freemarker.core.ast.ObjectBuilderSettingsTest$TestBean8(timeZone=TimeZone('"
+                    + timeZoneId + "'))",
                     TestBean8.class, false, new _SettingEvaluationEnvironment());
             assertEquals(TimeZone.getTimeZone(timeZoneId), result.getTimeZone());
         }

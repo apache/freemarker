@@ -31,7 +31,6 @@ import java.lang.reflect.Modifier;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.ast.InvalidReferenceException;
 import org.apache.freemarker.core.ast.Environment.LazilyInitializedNamespace;
 import org.apache.freemarker.core.ast.Environment.Namespace;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
@@ -81,20 +80,14 @@ public class IncludeAndImportTest extends TemplateTest {
                 + "<#import 'lib1.ftl' as lib1> ${.main.lib1???c} ${.globals.lib1???c}";
         String expectedOut = "false false true true";
         assertOutput(ftl, expectedOut);
-        // No difference:
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_24);
-        assertOutput(ftl, expectedOut);
     }
     
     @Test
     public void importInMainCreatesGlobalBugfix() throws IOException, TemplateException {
-        // An import in the main namespace should create a global variable, but there's a bug where that doesn't happen
-        // if the imported library was already initialized elsewhere.
+        // An import in the main namespace should create a global variable, even if the imported library was already
+        // initialized elsewhere.
         String ftl = "<#import 'lib3ImportsLib1.ftl' as lib3>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}, "
         + "<#import 'lib1.ftl' as lib1>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}";
-        assertOutput(ftl, "1 false false, 1 true false");
-        // Activate bugfix:
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         assertOutput(ftl, "1 false false, 1 true true");
     }
 

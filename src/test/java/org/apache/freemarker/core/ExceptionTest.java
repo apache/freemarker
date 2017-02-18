@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -94,7 +94,7 @@ public class ExceptionTest extends TestCase {
 
     @SuppressWarnings("cast")
     public void testParseExceptionLocationInformation() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("foo_en.ftl", "\n\nxxx<#noSuchDirective>");

@@ -27,8 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.freemarker.core.model.impl.beans.ArgumentTypes;
-import org.apache.freemarker.core.model.impl.beans.OverloadedNumberUtil;
 import org.apache.freemarker.core.util._NumberUtil;
 
 import junit.framework.TestCase;
@@ -397,7 +395,7 @@ public class ParameterListPreferabilityTest extends TestCase {
                 true);
         
         
-        // Different fixed prefix length; in the case of ambiguity, the one with higher fixed param count wins.
+        // Different oms prefix length; in the case of ambiguity, the one with higher oms param count wins.
         testAllCmpPermutationsInc(
                 new Class[][] {
                     new Class[] { String.class, int.class, int.class, int[].class },
@@ -420,7 +418,7 @@ public class ParameterListPreferabilityTest extends TestCase {
      * @param sortedSignatures method signatures sorted by decreasing specificity
      */
     private void testAllCmpPermutationsInc(Class[][] sortedSignatures, Object[] args, boolean varargs) {
-        final ArgumentTypes argTs = new ArgumentTypes(args, true);
+        final ArgumentTypes argTs = new ArgumentTypes(args);
         for (int i = 0; i < sortedSignatures.length; i++) {
             for (int j = 0; j < sortedSignatures.length; j++) {
                 assertEquals("sortedSignatures[" + i + "] <==> sortedSignatures [" + j + "]",
@@ -434,7 +432,7 @@ public class ParameterListPreferabilityTest extends TestCase {
     }
 
     private void testAllCmpPermutationsEqu(Class[][] signatures, Object[] args) {
-        final ArgumentTypes argTs = new ArgumentTypes(args, true);
+        final ArgumentTypes argTs = new ArgumentTypes(args);
         for (int i = 0; i < signatures.length; i++) {
             for (int j = 0; j < signatures.length; j++) {
                 assertEquals("sortedSignatures[" + i + "] <==> sortedSignatures [" + j + "]",

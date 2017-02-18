@@ -18,8 +18,11 @@
  */
 package org.apache.freemarker.core.ast;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,12 +34,6 @@ import java.util.Map;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.AliasTemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.ast.TemplateNumberFormat;
-import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.UndefinedCustomFormatException;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -57,7 +54,6 @@ public class NumberFormatTest extends TemplateTest {
     @Before
     public void setup() {
         Configuration cfg = getConfiguration();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         cfg.setLocale(Locale.US);
         
         cfg.setCustomNumberFormats(ImmutableMap.of(
@@ -216,33 +212,19 @@ public class NumberFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testIcIAndEscaping() throws Exception {
+    public void testAtPrefix() throws Exception {
         Configuration cfg = getConfiguration();
-        testIcIAndEscapingWhenCustFormsAccepted(cfg);
         
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-        testIcIAndEscapingWhenCustFormsAccepted(cfg);
+        cfg.setNumberFormat("@hex");
+        assertOutput("${10}", "a");
+        cfg.setNumberFormat("'@'0");
+        assertOutput("${10}", "@10");
+        cfg.setNumberFormat("@@0");
+        assertOutput("${10}", "@@10");
         
         cfg.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
         cfg.setNumberFormat("@hex");
-        assertOutput("${10}", "@hex10");
-        cfg.setNumberFormat("'@'0");
-        assertOutput("${10}", "@10");
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@@10");
-        
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
-        cfg.setNumberFormat("@hex");
         assertErrorContains("${10}", "custom", "\"hex\"");
-        cfg.setNumberFormat("'@'0");
-        assertOutput("${10}", "@10");
-        cfg.setNumberFormat("@@0");
-        assertOutput("${10}", "@@10");
-    }
-
-    protected void testIcIAndEscapingWhenCustFormsAccepted(Configuration cfg) throws IOException, TemplateException {
-        cfg.setNumberFormat("@hex");
-        assertOutput("${10}", "a");
         cfg.setNumberFormat("'@'0");
         assertOutput("${10}", "@10");
         cfg.setNumberFormat("@@0");

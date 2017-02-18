@@ -57,7 +57,7 @@
 		<!-- FreeMarker settings: -->
 		<init-param>
 			<param-name>incompatible_improvements</param-name>
-			<param-value>2.3.22</param-value>
+			<param-value>3.0.0</param-value>
             <!-- Recommended to set to a high value. For the details, see the Java API docs of
                  freemarker.template.Configuration#Configuration(Version). -->
 		</init-param>
@@ -87,47 +87,17 @@
 	</servlet>
 
     <servlet>
-        <servlet-name>freemarker-2.3.0</servlet-name>
+        <servlet-name>freemarker-modernModels</servlet-name>
         <servlet-class>org.apache.freemarker.servlet.FreemarkerServlet</servlet-class>
         
         <!-- Specific parts: -->
         <init-param>
             <param-name>incompatible_improvements</param-name>
-            <param-value>2.3.0</param-value>
-        </init-param>
-        
-        <!-- Common parts: -->
-        <init-param>
-            <param-name>TemplatePath</param-name>
-            <param-value>/</param-value>
-        </init-param>
-        <init-param>
-            <param-name>locale</param-name>
-            <param-value>en_US</param-value>
-        </init-param>
-        <init-param>
-            <param-name>default_encoding</param-name>
-            <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
-        </init-param>
-        <init-param>
-            <param-name>template_exception_handler</param-name>
-            <!-- Some may prefer "html_debug" for development. -->
-            <param-value>rethrow</param-value>
-        </init-param>
-    </servlet>
-
-    <servlet>
-        <servlet-name>freemarker-2.3.22-future</servlet-name>
-        <servlet-class>org.apache.freemarker.servlet.FreemarkerServlet</servlet-class>
-        
-        <!-- Specific parts: -->
-        <init-param>
-            <param-name>incompatible_improvements</param-name>
-            <param-value>2.3.22</param-value>
+            <param-value>3.0.0</param-value>
         </init-param>
         <init-param>
             <param-name>object_wrapper</param-name>
-            <param-value>DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)</param-value>
+            <param-value>DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)</param-value>
         </init-param>
         
         <!-- Common parts: -->

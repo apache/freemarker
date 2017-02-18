@@ -19,19 +19,18 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.util._StringUtil;
 import org.junit.Test;
 
 public class ParsingErrorMessagesTest {
 
-    private Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+    private Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
     {
         cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
     }

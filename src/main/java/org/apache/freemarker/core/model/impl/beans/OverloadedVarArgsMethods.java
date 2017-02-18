@@ -33,8 +33,8 @@ import org.apache.freemarker.core.model.TemplateModelException;
  */
 class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
 
-    OverloadedVarArgsMethods(boolean bugfixed) {
-        super(bugfixed);
+    OverloadedVarArgsMethods() {
+        super();
     }
     
     /**
@@ -133,9 +133,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
             }
         }
         
-        if (bugfixed) {
-            mergeInTypesFlags(paramCountOfWidened, wideningTypeFlags);
-        }
+        mergeInTypesFlags(paramCountOfWidened, wideningTypeFlags);
     }
     
     @Override
@@ -191,15 +189,11 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
             } else {
                 return EmptyMemberAndArguments.noCompatibleOverload(((Integer) argsOrErrorIdx).intValue());
             }
-            if (bugfixed) {
-                if (typesFlags != null) {
-                    // Note that overloaded method selection has already accounted for overflow errors when the method
-                    // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
-                    // BigDecimal is allowed to overflow for backward-compatibility.
-                    forceNumberArgumentsToParameterTypes(pojoArgsWithArray, memberDesc.getParamTypes(), typesFlags);
-                }
-            } else {
-                BeansWrapper.coerceBigDecimals(memberDesc.getParamTypes(), pojoArgsWithArray);
+            if (typesFlags != null) {
+                // Note that overloaded method selection has already accounted for overflow errors when the method
+                // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
+                // BigDecimal is allowed to overflow for backward-compatibility.
+                forceNumberArgumentsToParameterTypes(pojoArgsWithArray, memberDesc.getParamTypes(), typesFlags);
             }
             return new MemberAndArguments(memberDesc, pojoArgsWithArray);
         } else {

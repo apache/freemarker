@@ -19,8 +19,12 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -32,7 +36,6 @@ import java.util.Set;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Configurable;
 import org.apache.freemarker.core.util._StringUtil;
 import org.junit.Test;
 
@@ -164,7 +167,7 @@ public class ConfigurableTest {
     }
     
     private Configurable createConfigurable() throws IOException {
-        return new Template(null, "", new Configuration(Configuration.VERSION_2_3_22));
+        return new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
     }
 
     private boolean keyFieldExists(String name) throws Exception {

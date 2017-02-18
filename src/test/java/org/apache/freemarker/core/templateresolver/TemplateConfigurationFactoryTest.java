@@ -31,19 +31,11 @@ import java.util.List;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
-import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
-import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactoryException;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.junit.Test;
 
 public class TemplateConfigurationFactoryTest {
     
-    private Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+    private Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
     @Test
     public void testCondition1() throws IOException, TemplateConfigurationFactoryException {

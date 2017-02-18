@@ -35,12 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.OverloadedFixArgsMethods;
-import org.apache.freemarker.core.model.impl.beans.OverloadedMethodsSubset;
-import org.apache.freemarker.core.model.impl.beans.OverloadedVarArgsMethods;
-import org.apache.freemarker.core.model.impl.beans.ReflectionCallableMemberDescriptor;
-import org.apache.freemarker.core.model.impl.beans.TypeFlags;
 
 import junit.framework.TestCase;
 
@@ -50,7 +44,7 @@ public class TypeFlagsTest extends TestCase {
         super(name);
     }
     
-    private final BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_21); 
+    private final BeansWrapper bw = new BeansWrapper(Configuration.VERSION_3_0_0); 
 
     public void testSingleNumType() {
         checkTypeFlags(SingleNumTypeC.class, "mInt",
@@ -641,7 +635,7 @@ public class TypeFlagsTest extends TestCase {
         });
         
         final OverloadedMethodsSubset oms = cl.getName().indexOf("VarArgs") == -1
-                ? new OverloadedFixArgsMethods(bw.is2321Bugfixed()) : new OverloadedVarArgsMethods(bw.is2321Bugfixed());
+                ? new OverloadedFixArgsMethods() : new OverloadedVarArgsMethods();
         for (Method m : filteredMethods) {
             oms.addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(m, m.getParameterTypes()));
         }

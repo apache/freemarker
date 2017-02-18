@@ -19,15 +19,11 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertThat;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.ast.BuiltinVariable;
-import org.apache.freemarker.core.ast.HTMLOutputFormat;
-import org.apache.freemarker.core.ast.PlainTextOutputFormat;
-import org.apache.freemarker.core.ast.UndefinedOutputFormat;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
@@ -56,7 +52,7 @@ public class SpecialVariableTest extends TemplateTest {
                 "${.incompatibleImprovements}",
                 getConfiguration().getIncompatibleImprovements().toString());
         
-        getConfiguration().setIncompatibleImprovements(new Version(2, 3, 23));
+        getConfiguration().setIncompatibleImprovements(new Version(3, 0, 0));
         assertOutput(
                 "${.incompatible_improvements}",
                 getConfiguration().getIncompatibleImprovements().toString());

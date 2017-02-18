@@ -19,7 +19,9 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -32,15 +34,13 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
-import org.apache.freemarker.servlet.jsp.JspTagModelBase;
-import org.apache.freemarker.servlet.jsp.TaglibFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,8 +55,7 @@ public class TLDParsingTest {
 
     @Before
     public void before() throws Exception {
-        BeansWrapperBuilder builder = new BeansWrapperBuilder(new Version("2.3"));
-        wrapper = builder.build();
+        wrapper = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
     }
 
     @Test

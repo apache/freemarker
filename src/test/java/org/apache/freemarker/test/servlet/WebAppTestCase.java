@@ -185,8 +185,12 @@ public class WebAppTestCase {
         final String expected;
         {
             ClassPathResource cpResource = findWebAppDirectoryResource(webAppName);
+            String expectedResource = cpResource.path + EXPECTED_DIR + expectedFileName;
             final InputStream in = cpResource.resolverClass.getResourceAsStream(
-                    cpResource.path + EXPECTED_DIR + expectedFileName);
+                    expectedResource);
+            if (in == null) {
+                throw new IOException("Test resource not found: " + expectedResource);
+            }
             try {
                 expected = TestUtil.removeTxtCopyrightComment(normalizeWS(IOUtils.toString(in, "utf-8"), compressWS));
             } finally {

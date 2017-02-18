@@ -103,7 +103,7 @@ public class TemplateConfigurationTest {
         }
     }
 
-    private static final Version ICI = Configuration.VERSION_2_3_22;
+    private static final Version ICI = Configuration.VERSION_3_0_0;
 
     private static final Configuration DEFAULT_CFG = new Configuration(ICI);
     static {
@@ -168,7 +168,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("dateFormat", "yyyy-#DDD");
         SETTING_ASSIGNMENTS.put("dateTimeFormat", "yyyy-#DDD-@HH:mm");
         SETTING_ASSIGNMENTS.put("locale", NON_DEFAULT_LOCALE);
-        SETTING_ASSIGNMENTS.put("logTemplateExceptions", false);
+        SETTING_ASSIGNMENTS.put("logTemplateExceptions", true);
         SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
         SETTING_ASSIGNMENTS.put("numberFormat", "0.0000");
         SETTING_ASSIGNMENTS.put("objectWrapper", new SimpleObjectWrapper(ICI));
@@ -190,7 +190,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
         SETTING_ASSIGNMENTS.put("autoEscapingPolicy", Configuration.DISABLE_AUTO_ESCAPING_POLICY);
         SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
-        SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", true);
+        SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", false);
         SETTING_ASSIGNMENTS.put("tabSize", 1);
         SETTING_ASSIGNMENTS.put("lazyImports", Boolean.TRUE);
         SETTING_ASSIGNMENTS.put("lazyAutoImports", Boolean.FALSE);
@@ -489,7 +489,7 @@ public class TemplateConfigurationTest {
     
     @Test
     public void applyOrder() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Template t = new Template(null, "", cfg);
         
         {
@@ -552,7 +552,7 @@ public class TemplateConfigurationTest {
     
     @Test
     public void testConfigureCustomAttributes() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setCustomAttribute("k1", "c");
         cfg.setCustomAttribute("k2", "c");
         cfg.setCustomAttribute("k3", "c");
@@ -648,24 +648,26 @@ public class TemplateConfigurationTest {
         
         {
             TemplateConfiguration tc = new TemplateConfiguration();
+            /* Can't test this now, as the only valid value is 3.0.0. [FM3.0.1]
             tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
             assertOutputWithoutAndWithTC(tc, "<#foo>", null, "<#foo>");
+            */
             testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
         }
 
         {
             TemplateConfiguration tc = new TemplateConfiguration();
-            tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
-            tc.setRecognizeStandardFileExtensions(true);
-            assertOutputWithoutAndWithTC(tc, "${.outputFormat}",
-                    UndefinedOutputFormat.INSTANCE.getName(), HTMLOutputFormat.INSTANCE.getName());
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setRecognizeStandardFileExtensions(false);
+            assertOutputWithoutAndWithTC(tc, "adhoc.ftlh", "${.outputFormat}",
+                    HTMLOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE.getName());
             testedProps.add(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE);
         }
 
         {
             TemplateConfiguration tc = new TemplateConfiguration();
             tc.setLogTemplateExceptions(false);
-            tc.setParentConfiguration(new Configuration(new Version(2, 3, 22)));
+            tc.setParentConfiguration(DEFAULT_CFG);
             tc.setTabSize(3);
             assertOutputWithoutAndWithTC(tc,
                     "<#attempt><@'\\t$\\{1+}'?interpret/><#recover>"
@@ -676,40 +678,6 @@ public class TemplateConfigurationTest {
         }
         
         assertEquals("Check that you have tested all parser settings; ", PARSER_PROP_NAMES, testedProps);
-    }
-    
-    @Test
-    public void testConfigureParserTooLowIcI() throws Exception {
-        Configuration cfgWithTooLowIcI = new Configuration(Configuration.VERSION_2_3_21);
-        for (PropertyDescriptor propDesc : getTemplateConfigurationSettingPropDescs(true, false)) {
-            TemplateConfiguration tc = new TemplateConfiguration();
-
-            String propName = propDesc.getName();
-            Object value = SETTING_ASSIGNMENTS.get(propName);
-            propDesc.getWriteMethod().invoke(tc, value);
-            
-            boolean shouldFail;
-            if (CONFIGURABLE_PROP_NAMES.contains(propName)) {
-                shouldFail = true;
-            } else if (PARSER_PROP_NAMES.contains(propName)) {
-                shouldFail = false;
-            } else {
-                fail("Uncategorized property: " + propName);
-                return;
-            }
-            
-            try {
-                tc.setParentConfiguration(cfgWithTooLowIcI);
-                if (shouldFail) {
-                    fail("Should fail with property: " + propName);
-                }
-            } catch (IllegalStateException e) {
-                if (!shouldFail) {
-                    throw e;
-                }
-                assertThat(e.getMessage(), containsString("2.3.22"));
-            }
-        }
     }
     
     @Test
@@ -850,19 +818,29 @@ public class TemplateConfigurationTest {
         
         tc.apply(t);
     }
-    
-    private void assertOutputWithoutAndWithTC(TemplateConfiguration tc, String ftl, String expectedDefaultOutput,
+
+    private void assertOutputWithoutAndWithTC(
+            TemplateConfiguration tc, String ftl, String expectedDefaultOutput,
             String expectedConfiguredOutput) throws TemplateException, IOException {
-        assertOutput(null, ftl, expectedDefaultOutput);
-        assertOutput(tc, ftl, expectedConfiguredOutput);
+        assertOutputWithoutAndWithTC(tc, null, ftl, expectedDefaultOutput, expectedConfiguredOutput);
+    }
+    
+    private void assertOutputWithoutAndWithTC(
+            TemplateConfiguration tc, String templateName, String ftl, String expectedDefaultOutput,
+            String expectedConfiguredOutput) throws TemplateException, IOException {
+        if (templateName == null) {
+            templateName = "adhoc.ftl";
+        }
+        assertOutput(null, templateName, ftl, expectedDefaultOutput);
+        assertOutput(tc, templateName, ftl, expectedConfiguredOutput);
     }
 
-    private void assertOutput(TemplateConfiguration tc, String ftl, String expectedConfiguredOutput)
+    private void assertOutput(TemplateConfiguration tc, String templateName, String ftl, String expectedConfiguredOutput)
             throws TemplateException, IOException {
         StringWriter sw = new StringWriter();
         try {
             Configuration cfg = tc != null ? tc.getParentConfiguration() : DEFAULT_CFG;
-            Template t = new Template("adhoc.ftlh", null, new StringReader(ftl), cfg, tc, null);
+            Template t = new Template(templateName, null, new StringReader(ftl), cfg, tc, null);
             if (tc != null) {
                 tc.apply(t);
             }

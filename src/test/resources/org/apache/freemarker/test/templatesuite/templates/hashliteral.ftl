@@ -92,16 +92,9 @@ ${({} + { "a" : "foo" }).a}, ${({ "a" : "bar" } + {}).a}
 <@noOutput>
 
 <#assign m = { 'a': 1, 'b', 2, 'a': 3 }>
-<#if iciIntValue gte 2003021>
-	<@assertEquals expected="a, b" actual=m?keys?join(', ') />
-	<@assertEquals expected="3, 2" actual=m?values?join(', ') />
-	<@assertEquals expected=3 actual=m['a'] />
-	<@assertEquals expected=2 actual=m['b'] />
-<#else>
-	<@assertEquals expected="a, b, a" actual=m?keys?join(', ') />
-	<@assertEquals expected="1, 2, 3" actual=m?values?join(', ') />
-	<@assertEquals expected=3 actual=m['a'] />
-	<@assertEquals expected=2 actual=m['b'] />
-</#if>
+<@assertEquals expected="a, b" actual=m?keys?join(', ') />
+<@assertEquals expected="3, 2" actual=m?values?join(', ') />
+<@assertEquals expected=3 actual=m['a'] />
+<@assertEquals expected=2 actual=m['b'] />
 
 </@noOutput>

@@ -69,7 +69,6 @@ import org.apache.freemarker.core.ast.XMLOutputFormat;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
@@ -104,98 +103,21 @@ public class ConfigurationTest extends TestCase {
     public ConfigurationTest(String name) {
         super(name);
     }
-    
-    public void testIncompatibleImprovementsChangesDefaults() {
-        Version newVersion = Configuration.VERSION_2_3_21;
-        Version oldVersion = Configuration.VERSION_2_3_20;
-        
-        Configuration cfg = new Configuration();
-        assertUsesLegacyObjectWrapper(cfg);
-        assertEquals(cfg.getIncompatibleImprovements(), Configuration.VERSION_2_3_0);
-        
-        cfg.setIncompatibleImprovements(newVersion);
-        assertUsesNewObjectWrapper(cfg);
-        assertUsesNewTemplateLoader(cfg);
-        
-        cfg.setIncompatibleImprovements(oldVersion);
-        assertUsesLegacyObjectWrapper(cfg);
-        cfg.setIncompatibleImprovements(oldVersion);
-        assertUsesLegacyObjectWrapper(cfg);
-        
-        cfg.setIncompatibleImprovements(newVersion);
-        assertUsesNewObjectWrapper(cfg);
-        assertUsesNewTemplateLoader(cfg);
-        cfg.setIncompatibleImprovements(newVersion);
-        assertUsesNewObjectWrapper(cfg);
-        assertUsesNewTemplateLoader(cfg);
-        
-        cfg.setObjectWrapper(new SimpleObjectWrapper(Configuration.VERSION_2_3_0));
-        cfg.setIncompatibleImprovements(oldVersion);
-        assertSame(SimpleObjectWrapper.class, cfg.getObjectWrapper().getClass());
-        
-        cfg.setTemplateLoader(new StringTemplateLoader());
-        cfg.setIncompatibleImprovements(newVersion);
-        assertSame(SimpleObjectWrapper.class, cfg.getObjectWrapper().getClass());
-        assertSame(StringTemplateLoader.class, cfg.getTemplateLoader().getClass());
-        
-        cfg.setIncompatibleImprovements(oldVersion);
-        assertSame(SimpleObjectWrapper.class, cfg.getObjectWrapper().getClass());
-        assertSame(StringTemplateLoader.class, cfg.getTemplateLoader().getClass());
 
-        cfg.setObjectWrapper(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER);
-        cfg.setIncompatibleImprovements(newVersion);
-        assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
-        assertSame(StringTemplateLoader.class, cfg.getTemplateLoader().getClass());
-        
-        cfg.unsetObjectWrapper();
-        assertUsesNewObjectWrapper(cfg);
-        cfg.unsetTemplateLoader();
-        assertUsesNewTemplateLoader(cfg);
-
-        cfg.setIncompatibleImprovements(oldVersion);
-        assertUsesLegacyObjectWrapper(cfg);
-
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
-        assertUses2322ObjectWrapper(cfg);
-        assertUsesNewTemplateLoader(cfg);
-        
-        // ---
-        
-        cfg = new Configuration(newVersion);
-        assertUsesNewObjectWrapper(cfg);
-        assertUsesNewTemplateLoader(cfg);
-        
-        cfg.setIncompatibleImprovements(oldVersion);
-        assertUsesLegacyObjectWrapper(cfg);
-        
-        // ---
-        
-        cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertUses2322ObjectWrapper(cfg);
-        assertUsesNewTemplateLoader(cfg);
-    }
-
-    private void assertUses2322ObjectWrapper(Configuration cfg) {
-        Object ow = cfg.getObjectWrapper();
-        assertEquals(DefaultObjectWrapper.class, ow.getClass());
-        assertEquals(Configuration.VERSION_2_3_22,
-                ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
-    }
-    
     public void testUnsetAndIsExplicitlySet() {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         assertFalse(cfg.isLogTemplateExceptionsExplicitlySet());
-        assertTrue(cfg.getLogTemplateExceptions());
-        //
-        cfg.setLogTemplateExceptions(false);
-        assertTrue(cfg.isLogTemplateExceptionsExplicitlySet());
         assertFalse(cfg.getLogTemplateExceptions());
+        //
+        cfg.setLogTemplateExceptions(true);
+        assertTrue(cfg.isLogTemplateExceptionsExplicitlySet());
+        assertTrue(cfg.getLogTemplateExceptions());
         //
         for (int i = 0; i < 2; i++) {
             cfg.unsetLogTemplateExceptions();
             assertFalse(cfg.isLogTemplateExceptionsExplicitlySet());
-            assertTrue(cfg.getLogTemplateExceptions());
+            assertFalse(cfg.getLogTemplateExceptions());
         }
         
         assertFalse(cfg.isObjectWrapperExplicitlySet());
@@ -298,7 +220,7 @@ public class ConfigurationTest extends TestCase {
 
     private void assertUsesNewObjectWrapper(Configuration cfg) {
         assertEquals(
-                Configuration.VERSION_2_3_21,
+                Configuration.VERSION_3_0_0,
                 ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
     }
     
@@ -308,7 +230,7 @@ public class ConfigurationTest extends TestCase {
     
     public void testVersion() {
         Version v = Configuration.getVersion();
-        assertTrue(v.intValue() > _TemplateAPI.VERSION_INT_2_3_20);
+        assertTrue(v.intValue() >= _TemplateAPI.VERSION_INT_3_0_0);
         assertSame(v.toString(), Configuration.getVersionNumber());
         
         try {
@@ -318,14 +240,14 @@ public class ConfigurationTest extends TestCase {
         }
         
         try {
-            new Configuration(new Version(2, 2, 2));
+            new Configuration(new Version(2, 3, 0));
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("2.3.0"));
+            assertThat(e.getMessage(), containsString("3.0.0"));
         }
     }
     
     public void testShowErrorTips() throws Exception {
-        Configuration cfg = new Configuration();
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         try {
             new Template(null, "${x}", cfg).process(null, _NullWriter.INSTANCE);
             fail();
@@ -354,7 +276,7 @@ public class ConfigurationTest extends TestCase {
         final String tUtf8Ftl = "t-utf8.ftl";
         final Integer custLookupCond = 123;
         
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.GERMAN);
         cfg.setDefaultEncoding(latin1);
         cfg.setEncoding(hu, latin2);
@@ -697,23 +619,23 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testChangingTemplateNameFormatHasEffect() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("a/b.ftl", "In a/b.ftl");
         tl.putTemplate("b.ftl", "In b.ftl");
         cfg.setTemplateLoader(tl);
-        
+
         {
+            cfg.setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
             final Template template = cfg.getTemplate("a/./../b.ftl");
             assertEquals("a/b.ftl", template.getName());
             assertEquals("a/b.ftl", template.getSourceName());
             assertEquals("In a/b.ftl", template.toString());
         }
         
-        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
-        
         {
+            cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
             final Template template = cfg.getTemplate("a/./../b.ftl");
             assertEquals("b.ftl", template.getName());
             assertEquals("b.ftl", template.getSourceName());
@@ -722,7 +644,7 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testTemplateNameFormatSetSetting() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfg.getTemplateNameFormat());
         cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defAult_2_4_0");
         assertSame(DefaultTemplateNameFormat.INSTANCE, cfg.getTemplateNameFormat());
@@ -734,44 +656,37 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testObjectWrapperSetSetting() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         {
             cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult");
             assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
-        }
-        
-        {
-            cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
-            assertNotSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
             DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
-            assertEquals(Configuration.VERSION_2_3_22, dow.getIncompatibleImprovements());
-            assertTrue(dow.getForceLegacyNonListCollections());
+            assertEquals(Configuration.VERSION_3_0_0, dow.getIncompatibleImprovements());
         }
         
         {
-            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult_2_3_0");
-            assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
+            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "simple");
+            assertSame(_StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER, cfg.getObjectWrapper());
         }
         
         {
             cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY,
-                    "DefaultObjectWrapper(2.3.21, useAdaptersForContainers=true, forceLegacyNonListCollections=false)");
+                    "DefaultObjectWrapper(3.0.0, useAdaptersForContainers=true, forceLegacyNonListCollections=false)");
             DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
-            assertEquals(Configuration.VERSION_2_3_21, dow.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0, dow.getIncompatibleImprovements());
             assertFalse(dow.getForceLegacyNonListCollections());
         }
         
         {
             cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult");
             DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
-            assertEquals(Configuration.VERSION_2_3_22, dow.getIncompatibleImprovements());
             assertTrue(dow.getForceLegacyNonListCollections());
         }
     }
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
         
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
@@ -806,7 +721,7 @@ public class ConfigurationTest extends TestCase {
     }
     
     public void testSetTemplateConfigurations() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertNull(cfg.getTemplateConfigurations());
 
         StringTemplateLoader tl = new StringTemplateLoader();
@@ -867,7 +782,7 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testSetAutoEscaping() throws Exception {
-       Configuration cfg = new Configuration();
+       Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
     
        assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfg.getAutoEscapingPolicy());
 
@@ -904,7 +819,7 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testSetOutputFormat() throws Exception {
-       Configuration cfg = new Configuration();
+       Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
        
        assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getOutputFormat());
        assertFalse(cfg.isOutputFormatExplicitlySet());
@@ -942,7 +857,7 @@ public class ConfigurationTest extends TestCase {
     
     @Test
     public void testGetOutputFormatByName() throws Exception {
-        Configuration cfg = new Configuration();
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         assertSame(HTMLOutputFormat.INSTANCE, cfg.getOutputFormat(HTMLOutputFormat.INSTANCE.getName()));
         
@@ -995,7 +910,7 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testSetRegisteredCustomOutputFormats() throws Exception {
-        Configuration cfg = new Configuration();
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         assertTrue(cfg.getRegisteredCustomOutputFormats().isEmpty());
         
@@ -1014,38 +929,30 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testSetRecognizeStandardFileExtensions() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
      
-        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.getRecognizeStandardFileExtensions());
         assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
 
-        cfg.setRecognizeStandardFileExtensions(true);
-        assertTrue(cfg.getRecognizeStandardFileExtensions());
+        cfg.setRecognizeStandardFileExtensions(false);
+        assertFalse(cfg.getRecognizeStandardFileExtensions());
         assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
      
         cfg.unsetRecognizeStandardFileExtensions();
-        assertFalse(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.getRecognizeStandardFileExtensions());
         assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
+        
+        cfg.setRecognizeStandardFileExtensions(true);
+        assertTrue(cfg.getRecognizeStandardFileExtensions());
+        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
      
         cfg.setSetting(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE, "false");
         assertFalse(cfg.getRecognizeStandardFileExtensions());
         assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
         
         cfg.setSetting(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE, "default");
-        assertFalse(cfg.getRecognizeStandardFileExtensions());
-        assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
-        
-        cfg.unsetRecognizeStandardFileExtensions();
-        assertFalse(cfg.getRecognizeStandardFileExtensions());
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
         assertTrue(cfg.getRecognizeStandardFileExtensions());
         assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_23);
-        assertFalse(cfg.getRecognizeStandardFileExtensions());
-        cfg.setRecognizeStandardFileExtensions(false);
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_24);
-        assertFalse(cfg.getRecognizeStandardFileExtensions());
-        assertTrue(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
      }
     
     public void testSetTimeZone() throws TemplateException {
@@ -1054,7 +961,7 @@ public class ConfigurationTest extends TestCase {
             TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
             TimeZone.setDefault(sysDefTZ);
             
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             assertEquals(sysDefTZ, cfg.getTimeZone());
             assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
             cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
@@ -1079,7 +986,7 @@ public class ConfigurationTest extends TestCase {
             TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
             TimeZone.setDefault(sysDefTZ);
             
-            Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
             
@@ -1100,7 +1007,7 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testTimeZoneLayers() throws TemplateException, IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Template t = new Template(null, "", cfg);
         Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
         Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
@@ -1183,19 +1090,19 @@ public class ConfigurationTest extends TestCase {
     public void testSetICIViaSetSettingAPI() throws TemplateException {
         Configuration cfg = new Configuration();
         assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
-        cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, "2.3.21");
-        assertEquals(Configuration.VERSION_2_3_21, cfg.getIncompatibleImprovements());
+        cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, "3.0.0"); // This is the only valid value ATM...
+        assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
     }
 
     public void testSetLogTemplateExceptionsViaSetSettingAPI() throws TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
-        assertEquals(true, cfg.getLogTemplateExceptions());
-        cfg.setSetting(Configurable.LOG_TEMPLATE_EXCEPTIONS_KEY, "false");
-        assertEquals(false, cfg.getLogTemplateExceptions());
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+        assertFalse(cfg.getLogTemplateExceptions());
+        cfg.setSetting(Configurable.LOG_TEMPLATE_EXCEPTIONS_KEY, "true");
+        assertTrue(cfg.getLogTemplateExceptions());
     }
     
     public void testSharedVariables() throws TemplateModelException {
-        Configuration cfg = new Configuration();
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         cfg.setSharedVariable("erased", "");
         assertNotNull(cfg.getSharedVariable("erased"));
@@ -1226,7 +1133,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setSharedVariable("b", "bbLegacy");
         
         // Cause re-wrapping of variables added via setSharedVaribles:
-        cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build());
+        cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build());
 
         {
             TemplateScalarModel aVal = (TemplateScalarModel) cfg.getSharedVariable("a");
@@ -1245,17 +1152,15 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testApiBuiltinEnabled() throws IOException, TemplateException {
-        for (Version v : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22 }) {
-            Configuration cfg = new Configuration(v);
-            try {
-                new Template(null, "${1?api}", cfg).process(null, _NullWriter.INSTANCE);
-                fail();
-            } catch (TemplateException e) {
-                assertThat(e.getMessage(), containsString(Configurable.API_BUILTIN_ENABLED_KEY));
-            }
-        }
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        try {
+            new Template(null, "${1?api}", cfg).process(null, _NullWriter.INSTANCE);
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString(Configurable.API_BUILTIN_ENABLED_KEY));
+        }
+            
         cfg.setAPIBuiltinEnabled(true);
         new Template(null, "${m?api.hashCode()}", cfg)
                 .process(Collections.singletonMap("m", new HashMap()), _NullWriter.INSTANCE);
@@ -1263,7 +1168,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testTemplateUpdateDelay() throws IOException, TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertEquals(DefaultTemplateResolver.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS, cfg.getTemplateUpdateDelayMilliseconds());
         
@@ -1300,7 +1205,7 @@ public class ConfigurationTest extends TestCase {
     @Test
     @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS ", justification = "Testing wrong args")
     public void testSetCustomNumberFormat() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         try {
             cfg.setCustomNumberFormats(null);
@@ -1372,7 +1277,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testSetTabSize() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         String ftl = "${\t}";
         
@@ -1408,7 +1313,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testTabSizeSetting() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertEquals(8, cfg.getTabSize());
         cfg.setSetting(Configuration.TAB_SIZE_KEY_CAMEL_CASE, "4");
         assertEquals(4, cfg.getTabSize());
@@ -1426,7 +1331,7 @@ public class ConfigurationTest extends TestCase {
     @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
     @Test
     public void testSetCustomDateFormat() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         try {
             cfg.setCustomDateFormats(null);
@@ -1498,7 +1403,7 @@ public class ConfigurationTest extends TestCase {
     
     @Test
     public void testHasCustomFormats() throws IOException, TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Template t = new Template(null, "", cfg);
         Environment env = t.createProcessingEnvironment(null, null);
         assertFalse(cfg.hasCustomFormats());
@@ -1562,7 +1467,7 @@ public class ConfigurationTest extends TestCase {
     }
     
     public void testNamingConventionSetSetting() throws TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
         
@@ -1577,7 +1482,7 @@ public class ConfigurationTest extends TestCase {
     }
 
     public void testLazyImportsSetSetting() throws TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertFalse(cfg.getLazyImports());
         assertTrue(cfg.isLazyImportsSet());
@@ -1588,7 +1493,7 @@ public class ConfigurationTest extends TestCase {
     }
     
     public void testLazyAutoImportsSetSetting() throws TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertNull(cfg.getLazyAutoImports());
         assertTrue(cfg.isLazyAutoImportsSet());
@@ -1604,7 +1509,7 @@ public class ConfigurationTest extends TestCase {
     
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         for (boolean camelCase : new boolean[] { false, true }) {
             List<String> names = new ArrayList<>(cfg.getSettingNames(camelCase));
             List<String> cfgableNames = new ArrayList<>(new Template(null, "", cfg).getSettingNames(camelCase));
@@ -1623,7 +1528,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         ConfigurableTest.testGetSettingNamesNameConventionsContainTheSame(
                 new ArrayList<>(cfg.getSettingNames(false)),
                 new ArrayList<>(cfg.getSettingNames(true)));
@@ -1631,7 +1536,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         List<String> names = new ArrayList<>(cfg.getSettingNames(false));
         List<String> cfgableNames = new ArrayList<>(cfg.getSettingNames(false));
         assertStartsWith(names, cfgableNames);
@@ -1644,7 +1549,7 @@ public class ConfigurationTest extends TestCase {
     
     @Test
     public void testGetSettingNamesCoversAllStaticKeyFields() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Collection<String> names = cfg.getSettingNames(false);
         
         for (Class<? extends Configurable> cfgableClass : new Class[] { Configuration.class, Configurable.class }) {
@@ -1664,7 +1569,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testGetSettingNamesCoversAllSettingNames() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Collection<String> names = cfg.getSettingNames(false);
         
         for (Field f : Configurable.class.getFields()) {
@@ -1677,7 +1582,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testSetSettingSupportsBothNamingConventions() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY_CAMEL_CASE, "UTF-16LE");
         assertEquals("UTF-16LE", cfg.getDefaultEncoding());

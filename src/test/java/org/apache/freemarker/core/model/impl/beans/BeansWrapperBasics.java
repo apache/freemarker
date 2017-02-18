@@ -19,21 +19,12 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
-import org.apache.freemarker.core.model.impl.beans.APIModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
-import org.apache.freemarker.core.model.impl.beans.BooleanModel;
-import org.apache.freemarker.core.model.impl.beans.CollectionModel;
-import org.apache.freemarker.core.model.impl.beans.MapModel;
-import org.apache.freemarker.core.model.impl.beans.NumberModel;
-import org.apache.freemarker.core.model.impl.beans.SimpleMapModel;
-import org.apache.freemarker.core.model.impl.beans.StringModel;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -45,7 +36,7 @@ public class BeansWrapperBasics {
     @Test
     public void testAPIBuiltInSupport() throws TemplateModelException {
         {
-            BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build();
+            BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
             assertWrappingResult(StringModel.class, bw.wrap("s"));
             assertWrappingResult(NumberModel.class, bw.wrap(1.5));
             assertWrappingResult(BooleanModel.class, bw.wrap(true));
@@ -54,7 +45,7 @@ public class BeansWrapperBasics {
         }
         
         {
-            BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_2_3_0);
+            BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_3_0_0);
             bwb.setSimpleMapWrapper(true);
             BeansWrapper bw = bwb.build();
             assertWrappingResult(SimpleMapModel.class, bw.wrap(ImmutableMap.of("a", 1)));

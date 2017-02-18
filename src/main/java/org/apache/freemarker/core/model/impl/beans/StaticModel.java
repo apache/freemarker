@@ -142,7 +142,7 @@ final class StaticModel implements TemplateHashModelEx {
                     String name = method.getName();
                     Object obj = map.get(name);
                     if (obj instanceof Method) {
-                        OverloadedMethods overloadedMethods = new OverloadedMethods(wrapper.is2321Bugfixed());
+                        OverloadedMethods overloadedMethods = new OverloadedMethods();
                         overloadedMethods.addMethod((Method) obj);
                         overloadedMethods.addMethod(method);
                         map.put(name, overloadedMethods);

@@ -55,7 +55,7 @@ public interface TemplateHashModelEx2 extends TemplateHashModelEx {
     }
     
     /**
-     * Iterates over the key-value pairs in a hash. This is very similar to an {@link Iterator}, but has a fixed item
+     * Iterates over the key-value pairs in a hash. This is very similar to an {@link Iterator}, but has a oms item
      * type, can throw {@link TemplateModelException}-s, and has no {@code remove()} method. 
      *
      * @since 2.3.25

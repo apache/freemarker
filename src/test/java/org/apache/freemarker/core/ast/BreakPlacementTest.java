@@ -56,11 +56,9 @@ public class BreakPlacementTest extends TemplateTest {
     }
 
     @Test
-    public void testInvalidPlacementMacroLoophole() throws IOException, TemplateException {
+    public void testInvalidPlacementInsideMacro() throws IOException, TemplateException {
         final String ftl = "<#list 1..2 as x>${x}<#macro m><#break></#macro></#list>";
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_22);
-        assertOutput(ftl, "12");
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_23);
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_3_0_0);
         assertErrorContains(ftl, BREAK_NESTING_ERROR_MESSAGE_PART);
     }
     

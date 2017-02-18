@@ -285,8 +285,9 @@ implements
     }
 
     /**
-     * Tells whether the model is empty. It is empty if either the wrapped 
-     * object is null, or it's a Boolean with false value.
+     * Tells whether the model is considered to be empty.
+     * It is empty if the wrapped object is a 0 length {@link String}, or an empty {@link Collection} or and empty
+     * {@link Map}, or an {@link Iterator} that has no more items, or a {@link Boolean#FALSE}, or {@code null}. 
      */
     @Override
     public boolean isEmpty() {
@@ -296,12 +297,13 @@ implements
         if (object instanceof Collection) {
             return ((Collection<?>) object).isEmpty();
         }
-        if (object instanceof Iterator && wrapper.is2324Bugfixed()) {
+        if (object instanceof Iterator) {
             return !((Iterator<?>) object).hasNext();
         }
         if (object instanceof Map) {
             return ((Map<?,?>) object).isEmpty();
         }
+        // [FM3] Why's FALSE empty? 
         return object == null || Boolean.FALSE.equals(object);
     }
     

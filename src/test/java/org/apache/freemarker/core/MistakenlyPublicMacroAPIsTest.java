@@ -19,8 +19,9 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -37,7 +38,7 @@ import org.junit.Test;
  */
 public class MistakenlyPublicMacroAPIsTest {
 
-    private final Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+    private final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
     
     /**
      * Getting the macros from one template, and adding them to another.

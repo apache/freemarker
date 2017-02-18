@@ -19,12 +19,13 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -34,8 +35,8 @@ public class ModelCacheTest {
     
     @Test
     public void modelCacheOff() throws Exception {
-        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
-        assertFalse(bw.getUseCache());  // default is off
+        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        assertFalse(bw.getUseModelCache());  // default is off
         
         String s = "foo";
         assertNotSame(bw.wrap(s), bw.wrap(s));
@@ -46,9 +47,9 @@ public class ModelCacheTest {
     
     @Test
     public void modelCacheOn() throws Exception {
-        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_21);
-        bw.setUseCache(true);
-        assertTrue(bw.getUseCache());
+        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_3_0_0);
+        bw.setUseModelCache(true);
+        assertTrue(bw.getUseModelCache());
         
         String s = "foo";
         assertSame(bw.wrap(s), bw.wrap(s));

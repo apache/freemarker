@@ -18,29 +18,31 @@
  */
 
 package org.apache.freemarker.core.model.impl.beans;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.Collections;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.ast.HTMLOutputFormat;
 import org.apache.freemarker.core.ast.TemplateHTMLOutputModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.junit.Test;
 
 public class ErrorMessagesTest {
 
     @Test
     public void getterMessage() throws TemplateModelException {
-        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build();
+        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel thm= (TemplateHashModel) bw.wrap(new TestBean());
         
         try {
@@ -58,68 +60,66 @@ public class ErrorMessagesTest {
     public void markupOutputParameter() throws Exception {
         TemplateHTMLOutputModel html = HTMLOutputFormat.INSTANCE.fromMarkup("<p>a");
 
-        for (Version ici : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_24 }) {
-            BeansWrapper bw = new BeansWrapperBuilder(ici).build();
-            TemplateHashModel thm = (TemplateHashModel) bw.wrap(new TestBean());
-            
-            {
-                TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("m1");
-                try {
-                    m.exec(Collections.singletonList(html));
-                    fail();
-                } catch (TemplateModelException e) {
-                    assertThat(e.getMessage(), allOf(
-                            containsString("String"), containsString("convert"), containsString("markup_output"),
-                            containsString("Tip:"), containsString("?markup_string")));
-                }
+        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        TemplateHashModel thm = (TemplateHashModel) bw.wrap(new TestBean());
+        
+        {
+            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("m1");
+            try {
+                m.exec(Collections.singletonList(html));
+                fail();
+            } catch (TemplateModelException e) {
+                assertThat(e.getMessage(), allOf(
+                        containsString("String"), containsString("convert"), containsString("markup_output"),
+                        containsString("Tip:"), containsString("?markup_string")));
             }
-            
-            {
-                TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("m2");
-                try {
-                    m.exec(Collections.singletonList(html));
-                    fail();
-                } catch (TemplateModelException e) {
-                    assertThat(e.getMessage(), allOf(
-                            containsString("Date"), containsString("convert"), containsString("markup_output"),
-                            not(containsString("?markup_string"))));
-                }
+        }
+        
+        {
+            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("m2");
+            try {
+                m.exec(Collections.singletonList(html));
+                fail();
+            } catch (TemplateModelException e) {
+                assertThat(e.getMessage(), allOf(
+                        containsString("Date"), containsString("convert"), containsString("markup_output"),
+                        not(containsString("?markup_string"))));
             }
-            
-            for (String methodName : new String[] { "mOverloaded", "mOverloaded3" }) {
-                TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get(methodName);
-                try {
-                    m.exec(Collections.singletonList(html));
-                    fail();
-                } catch (TemplateModelException e) {
-                    assertThat(e.getMessage(), allOf(
-                            containsString("No compatible overloaded"),
-                            containsString("String"), containsString("markup_output"),
-                            containsString("Tip:"), containsString("?markup_string")));
-                }
+        }
+        
+        for (String methodName : new String[] { "mOverloaded", "mOverloaded3" }) {
+            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get(methodName);
+            try {
+                m.exec(Collections.singletonList(html));
+                fail();
+            } catch (TemplateModelException e) {
+                assertThat(e.getMessage(), allOf(
+                        containsString("No compatible overloaded"),
+                        containsString("String"), containsString("markup_output"),
+                        containsString("Tip:"), containsString("?markup_string")));
             }
-            
-            {
-                TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("mOverloaded2");
-                try {
-                    m.exec(Collections.singletonList(html));
-                    fail();
-                } catch (TemplateModelException e) {
-                    assertThat(e.getMessage(), allOf(
-                            containsString("No compatible overloaded"),
-                            containsString("Integer"), containsString("markup_output"),
-                            not(containsString("?markup_string"))));
-                }
+        }
+        
+        {
+            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("mOverloaded2");
+            try {
+                m.exec(Collections.singletonList(html));
+                fail();
+            } catch (TemplateModelException e) {
+                assertThat(e.getMessage(), allOf(
+                        containsString("No compatible overloaded"),
+                        containsString("Integer"), containsString("markup_output"),
+                        not(containsString("?markup_string"))));
             }
-            
-            {
-                TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("mOverloaded4");
-                Object r = m.exec(Collections.singletonList(html));
-                if (r instanceof TemplateScalarModel) {
-                    r = ((TemplateScalarModel) r).getAsString();
-                }
-                assertEquals("<p>a", r);
+        }
+        
+        {
+            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("mOverloaded4");
+            Object r = m.exec(Collections.singletonList(html));
+            if (r instanceof TemplateScalarModel) {
+                r = ((TemplateScalarModel) r).getAsString();
             }
+            assertEquals("<p>a", r);
         }
     }
     

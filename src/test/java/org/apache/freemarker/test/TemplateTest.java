@@ -135,7 +135,7 @@ public abstract class TemplateTest {
     }
     
     protected Configuration createConfiguration() throws Exception {
-        return new Configuration(Configuration.VERSION_2_3_0);
+        return new Configuration(Configuration.VERSION_3_0_0);
     }
     
     protected void addCommonTemplates() {

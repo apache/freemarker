@@ -128,7 +128,6 @@ class ClassIntrospector {
     final boolean exposeFields;
     final MethodAppearanceFineTuner methodAppearanceFineTuner;
     final MethodSorter methodSorter;
-    final boolean bugfixed;
 
     /** See {@link #getHasSharedInstanceRestrictons()} */
     final private boolean hasSharedInstanceRestrictons;
@@ -177,7 +176,6 @@ class ClassIntrospector {
         exposeFields = builder.getExposeFields();
         methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
         methodSorter = builder.getMethodSorter();
-        bugfixed = builder.isBugfixed();
 
         this.sharedLock = sharedLock;
 
@@ -345,7 +343,7 @@ class ClassIntrospector {
                             Object previous = introspData.get(methodKey);
                             if (previous instanceof Method) {
                                 // Overloaded method - replace Method with a OverloadedMethods
-                                OverloadedMethods overloadedMethods = new OverloadedMethods(bugfixed);
+                                OverloadedMethods overloadedMethods = new OverloadedMethods();
                                 overloadedMethods.addMethod((Method) previous);
                                 overloadedMethods.addMethod(method);
                                 introspData.put(methodKey, overloadedMethods);
@@ -433,7 +431,7 @@ class ClassIntrospector {
                 Constructor<?> ctor = ctors[0];
                 introspData.put(CONSTRUCTORS_KEY, new SimpleMethod(ctor, ctor.getParameterTypes()));
             } else if (ctors.length > 1) {
-                OverloadedMethods overloadedCtors = new OverloadedMethods(bugfixed);
+                OverloadedMethods overloadedCtors = new OverloadedMethods();
                 for (Constructor<?> ctor : ctors) {
                     overloadedCtors.addConstructor(ctor);
                 }

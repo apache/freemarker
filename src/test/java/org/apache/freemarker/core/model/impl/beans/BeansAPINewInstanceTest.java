@@ -19,17 +19,14 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import junit.framework.TestCase;
-
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
-import org.apache.freemarker.core.model.impl.beans._BeansAPI;
 import org.apache.freemarker.test.util.TestUtil;
+
+import junit.framework.TestCase;
 
 public class BeansAPINewInstanceTest extends TestCase {
 
-    private BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
+    private BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
 
     public BeansAPINewInstanceTest(String name) {
         super(name);

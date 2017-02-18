@@ -22,7 +22,6 @@ package org.apache.freemarker.core.ast;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -32,30 +31,11 @@ import org.apache.freemarker.core.util._StringUtil;
 
 class BuiltInsForStringsEncoding {
 
-    static class htmlBI extends BuiltInForLegacyEscaping implements ICIChainMember {
-        
-        static class BIBeforeICI2d3d20 extends BuiltInForLegacyEscaping {
-            @Override
-            TemplateModel calculateResult(String s, Environment env) {
-                return new SimpleScalar(_StringUtil.XMLEncNA(s));
-            }
-        }
-        
-        private final BIBeforeICI2d3d20 prevICIObj = new BIBeforeICI2d3d20();
+    static class htmlBI extends BuiltInForLegacyEscaping {
         
         @Override
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(_StringUtil.XHTMLEnc(s));
-        }
-    
-        @Override
-        public int getMinimumICIVersion() {
-            return _TemplateAPI.VERSION_INT_2_3_20;
-        }
-    
-        @Override
-        public Object getPreviousICIChainMember() {
-            return prevICIObj;
         }
         
     }

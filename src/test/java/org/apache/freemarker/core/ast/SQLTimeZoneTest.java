@@ -19,7 +19,8 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -337,7 +338,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     
     @Override
     protected Configuration createConfiguration() {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
         cfg.setDateFormat("yyyy-MM-dd");
         cfg.setTimeFormat("HH:mm:ss");

@@ -29,8 +29,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.TemplateNotFoundException;
+import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
@@ -109,20 +108,24 @@ public class TemplateNotFoundMessageTest {
     
     @Test
     public void testOtherMessageDetails() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateLoader(new StringTemplateLoader());
         
         {
             String errMsg = failWith("../x", cfg);
             showErrorMessage(errMsg);
             assertThat(errMsg,
-                    allOf(containsStringIgnoringCase("reason"), containsStringIgnoringCase("root directory")));
+                    allOf(
+                            containsStringIgnoringCase("Malformed template name"),
+                            containsStringIgnoringCase("root directory")));
         }
         {
             String errMsg = failWith("x\u0000y", cfg);
             showErrorMessage(errMsg);
             assertThat(errMsg,
-                    allOf(containsStringIgnoringCase("reason"), containsStringIgnoringCase("null character")));
+                    allOf(
+                            containsStringIgnoringCase("Malformed template name"),
+                            containsStringIgnoringCase("null character")));
         }
         {
             String errMsg = failWith("x\\y", cfg);
@@ -180,16 +183,16 @@ public class TemplateNotFoundMessageTest {
         try {
             cfg.getTemplate(name);
             fail();
-        } catch (TemplateNotFoundException e) {
+        } catch (TemplateNotFoundException | MalformedTemplateNameException e) {
             return e.getMessage();
         } catch (IOException e) {
-            fail();
+            fail("Unexpected exception: " + e);
         }
         return null;
     }
     
     private String failWith(TemplateLoader tl) {
-        return failWith(tl, "missing.ftl", new Configuration(Configuration.VERSION_2_3_21));
+        return failWith(tl, "missing.ftl", new Configuration(Configuration.VERSION_3_0_0));
     }
 
     private String failWith(Configuration cfg) {

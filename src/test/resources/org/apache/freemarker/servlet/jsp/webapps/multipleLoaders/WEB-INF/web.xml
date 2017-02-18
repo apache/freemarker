@@ -43,7 +43,7 @@
 		</init-param>
         <init-param>
             <param-name>incompatible_improvements</param-name>
-            <param-value>2.3.22</param-value>
+            <param-value>3.0.0</param-value>
         </init-param>
 		<init-param>
 			<param-name>template_exception_handler</param-name>

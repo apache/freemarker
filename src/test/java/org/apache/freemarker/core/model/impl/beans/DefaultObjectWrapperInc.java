@@ -16,18 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-StNuBoMeTaMaHaHxSeCoCxEnInDiNo
-1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
-0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
-0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
-0 0 0 0 1 0 0 0 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 0 0 0 0 0 0 1 0
-0 0 0 0 0 0 1 1 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 1 0 0 1 1 0 0
-0 0 0 0 0 0 0 0 0 1 0 1 0 0 0
-0 0 0 0 0 0 0 0 0 1 1 1 0 0 0
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
-1 0 0 0 0 0 1 1 0 0 0 0 0 0 0
-0 0 0 1 0 0 0 0 1 0 0 0 1 0 0
-0 0 0 1 0 0 0 0 1 0 0 0 1 0 0
+
+package org.apache.freemarker.core.model.impl.beans;
+
+import org.apache.freemarker.core.Configuration;
+
+public class DefaultObjectWrapperInc extends DefaultObjectWrapperWithSortedMethods {
+
+    public DefaultObjectWrapperInc() {
+        super(Configuration.VERSION_3_0_0, false);
+    }
+
+}

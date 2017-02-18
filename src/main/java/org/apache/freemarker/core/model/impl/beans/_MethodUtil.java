@@ -63,6 +63,7 @@ public final class _MethodUtil {
      *               But unlike in Java, primitive numerical types are {@code instanceof} {@link Number} here.</li>
      *         </ul> 
      */
+    // TODO Seems that we don't use the full functionality of this anymore, so we could simplify this. See usages.
     public static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
             int ifHigherThan) {
         if (ifHigherThan >= 4) return 0;

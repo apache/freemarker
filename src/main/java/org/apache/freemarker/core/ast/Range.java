@@ -20,7 +20,6 @@
 package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
@@ -56,9 +55,7 @@ final class Range extends Expression {
                     begin, endType != END_SIZE_LIMITED ? lhoValue : begin + lhoValue,
                     endType == END_INCLUSIVE, endType == END_SIZE_LIMITED); 
         } else {
-            return _TemplateAPI.getTemplateLanguageVersionAsInt(this) >= _TemplateAPI.VERSION_INT_2_3_21
-                    ? new ListableRightUnboundedRangeModel(begin)
-                    : new NonListableRightUnboundedRangeModel(begin);
+            return new ListableRightUnboundedRangeModel(begin);
         }
     }
     

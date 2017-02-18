@@ -27,11 +27,6 @@ import org.junit.Test;
 public class ASTBasedErrorMessagesTest extends TemplateTest {
     
     @Test
-    public void testOverloadSelectionError() {
-        assertErrorContains("${overloads.m(null)}", "2.3.21", "overloaded");
-    }
-    
-    @Test
     public void testInvalidRefBasic() {
         assertErrorContains("${foo}", "foo", "specify a default");
         assertErrorContains("${map[foo]}", "foo", "\\!map[", "specify a default");

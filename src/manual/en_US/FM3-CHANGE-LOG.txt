@@ -85,5 +85,7 @@ the FreeMarer 3 changelog here:
   renamed to _StringUtil, thus people won't accidentally use it when they wanted to autocomplete to Apache Commons
   StringUtil). Created published static utility class, o.a.f.core.util.FTLUtil, which contains some methods moved
   over from the now internal utility classes.
-- Deleted o.a.f..core.util.DOMNodeModel
+- Deleted o.a.f.core.util.DOMNodeModel (it has noting to do with the standard XML support, o.a.f.core.model.dom)
 - All CacheStorage-s must be thread safe from now on (removed ConcurrentCacheStorage marker interface)
+- Removed support for incompatibleImprovements before 3.0.0. So currently 3.0.0 is the only support value.
+- Changed the default of logTemplateExceptions to false.

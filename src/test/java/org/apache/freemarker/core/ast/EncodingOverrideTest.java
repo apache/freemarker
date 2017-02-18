@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -60,7 +60,7 @@ public class EncodingOverrideTest {
     }
     
     private Configuration createConfig(String charset) {
-       Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+       Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
        cfg.setClassForTemplateLoading(EncodingOverrideTest.class, "");
        cfg.setDefaultEncoding(charset);
        return cfg;

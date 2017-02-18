@@ -20,10 +20,9 @@
 package org.apache.freemarker.core.ast;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._TemplateAPI;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -31,7 +30,6 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.model.Constants;
 
 /**
  * {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number or a range,
@@ -244,11 +242,7 @@ final class DynamicKeyName extends Expression {
     }
 
     private TemplateModel emptyResult(boolean seq) {
-        return seq
-                ? (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
-                        ? new SimpleSequence(Collections.EMPTY_LIST, null)
-                        : Constants.EMPTY_SEQUENCE)
-                : TemplateScalarModel.EMPTY_STRING;
+        return seq ? Constants.EMPTY_SEQUENCE : TemplateScalarModel.EMPTY_STRING;
     }
 
     @Override

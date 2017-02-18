@@ -47,19 +47,23 @@
             api_builtin_enabled CDATA #IMPLIED
       >
 ]>
+<!--
+Note that for the incompatible_improvements setting you can specify a list of versions, for example:
+<setting incompatible_improvements="min, 3.0.5, max" /> 
+-->
 
 <testCases>
    <setting input_encoding="UTF-8" output_encoding="UTF-8" />
    
    <testCase name="api-builtins" noOutput="true">
       <setting
-            object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)"
+            object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)"
             api_builtin_enabled="true"
       />
    </testCase>
    <testCase name="api-builtins[#endTN]-bw" noOutput="true">
       <setting
-            object_wrapper="BeansWrapper(2.3.0)"
+            object_wrapper="BeansWrapper(3.0.0)"
             api_builtin_enabled="true"
       />
    </testCase>
@@ -67,7 +71,7 @@
    <testCase name="assignments" noOutput="true" />
    <testCase name="bean-maps"/>
    <testCase name="beans">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/>
+      <setting object_wrapper="beans"/>
    </testCase>
    <testCase name="boolean" />
    <testCase name="charset-in-header">
@@ -79,27 +83,15 @@
    <testCase name="then-builtin" noOutput="true" />
    <testCase name="dateformat-java" />
    <testCase name="dateformat-iso-like" noOutput="true" />
-   <testCase name="dateformat-iso-bi" noOutput="true">
-      <setting incompatible_improvements="min, 2.3.20" /> 
-   </testCase>
-   <testCase name="dateformat-iso-bi-ici-2.3.21" noOutput="true">
-      <setting incompatible_improvements="2.3.21, max" /> 
-   </testCase>   
+   <testCase name="dateformat-iso-bi" noOutput="true" />
    <testCase name="dateparsing" noOutput="true" />
    <testCase name="default"/>
    <testCase name="default-xmlns">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/>
+      <setting object_wrapper="beans"/>
    </testCase>
-   <testCase name="encoding-builtins">
-      <setting incompatible_improvements="min, 2.3.19" /> 
-   </testCase>
-   <testCase name="encoding-builtins[#endTN]-ici-2.3.20">
-      <setting incompatible_improvements="2.3.20, max" /> 
-   </testCase>
+   <testCase name="encoding-builtins" />
    <testCase name="escapes" />
-   <testCase name="hashliteral">
-      <setting incompatible_improvements="min, 2.3.20, 2.3.21, max" /> 
-   </testCase>
+   <testCase name="hashliteral" />
    <testCase name="identifier-non-ascii" />
    <testCase name="identifier-escaping" />
    <testCase name="import">
@@ -112,29 +104,30 @@
    <testCase name="interpret"/>
    <testCase name="iterators"/>
    <testCase name="lastcharacter"/>
-   <testCase name="list" />
+   <testCase name="list[#endTN]-simpleTemplateModels" expected="list.txt">
+      <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+   </testCase>
    <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
-      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
    </testCase>
-   <testCase name="list2" />
+   <testCase name="list2[#endTN]-simpleTemplateModels" expected="list2.txt">
+      <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+   </testCase>
    <testCase name="list2[#endTN]-collectionAdapter" expected="list2.txt">
-      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
    </testCase>
-   <testCase name="list3" />
+   <testCase name="list3[#endTN]-simpleTemplateModels" expected="list3.txt">
+      <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+   </testCase>
    <testCase name="list3[#endTN]-collectionAdapter" expected="list3.txt">
-      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
    </testCase>
    <testCase name="list-bis" />
    <testCase name="list-bis[#endTN]-collectionAdapter" expected="list-bis.txt">
-      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
    </testCase>
    <testCase name="listhash" />
-   <testCase name="listhashliteral[#endTN]-ici-2.3.20">
-      <setting incompatible_improvements="min, 2.3.20" /> 
-   </testCase>
-   <testCase name="listhashliteral[#endTN]-ici-2.3.21">
-      <setting incompatible_improvements="2.3.21, max" /> 
-   </testCase>
+   <testCase name="listhashliteral" />
    <testCase name="listliteral" />
    <testCase name="localization" >
       <setting locale="en_AU"/>
@@ -148,9 +141,7 @@
    <testCase name="newlines1" />
    <testCase name="newlines2" />
    <testCase name="noparse" />
-   <testCase name="number-format">
-      <setting incompatible_improvements="min, 2.3.21, max" /> 
-   </testCase>
+   <testCase name="number-format" />
    <testCase name="number-literal" >
       <setting locale="fr_FR"/>
    </testCase>
@@ -163,32 +154,25 @@
        <setting output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
    </testCase>
    <testCase name="precedence"/>
-   <testCase name="range-ici-2.3.20" noOutput="true">
-   	  <setting incompatible_improvements="min, 2.3.20"/>
-   </testCase>
-   <testCase name="range-ici-2.3.21" noOutput="true">
-      <setting incompatible_improvements="2.3.21, max"/>
-   </testCase>
+   <testCase name="range" noOutput="true" />
    <testCase name="recover" />
    <testCase name="root" />
    <testCase name="setting" noOutput="true" />
    <testCase name="sequence-builtins[#endTN]-with-BeansWrapper" expected="sequence-builtins.txt">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/> 
+      <setting object_wrapper="beans"/> 
+   </testCase>
+   <testCase name="sequence-builtins[#endTN]-with-SimpleTemplateModel" expected="sequence-builtins.txt">
+      <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper" expected="sequence-builtins.txt">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapper"/> 
+      <setting object_wrapper="default"/> 
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper-collAdapters" expected="sequence-builtins.txt">
-      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)"/> 
-   </testCase>
-   <testCase name="sequence-builtins[#endTN]-with-SimpleObjectWrapper" expected="sequence-builtins.txt">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.SimpleObjectWrapper(2.3.25)"/> 
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)"/> 
    </testCase>
    <testCase name="simplehash-char-key" noOutput="true" />
    <testCase name="existence-operators" noOutput="true" />
-   <testCase name="string-builtins1">
-      <setting incompatible_improvements="min, 2.3.20, max"/>
-   </testCase>
+   <testCase name="string-builtins1" />
    <testCase name="string-builtins2" />
    <testCase name="string-builtins3" noOutput="true" />
    <testCase name="string-builtins-regexps" />
@@ -199,15 +183,7 @@
    <testCase name="switch" />
    <testCase name="switch-builtin" noOutput="true" />
    <testCase name="transforms"/>
-   <testCase name="type-builtins">
-      <setting incompatible_improvements="min, 2.3.20"/>
-   </testCase>
-   <testCase name="type-builtins[#endTN]-ici-2.3.21">
-   	  <setting incompatible_improvements="2.3.21, 2.3.23"/>
-   </testCase>
-   <testCase name="type-builtins[#endTN]-ici-2.3.24">
-      <setting incompatible_improvements="2.3.24, max"/>
-   </testCase>
+   <testCase name="type-builtins" />
    <testCase name="date-type-builtins" noOutput="true" />
    <testCase name="url" noOutput="true" />
    <testCase name="var-layers"/>
@@ -215,20 +191,20 @@
    <testCase name="whitespace-trim"/>
    <testCase name="wstrip-in-header"/>
    <testCase name="xml-fragment">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/> 
+      <setting object_wrapper="beans"/> 
    </testCase>
    <testCase name="xmlns1">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/>
+      <setting object_wrapper="beans"/>
    </testCase>
    <testCase name="xmlns2" template="xmlns1.ftl"  expected="xmlns1.txt" />
    <testCase name="xmlns3">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/>
+      <setting object_wrapper="beans"/>
    </testCase>   
    <testCase name="xmlns4">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/>
+      <setting object_wrapper="beans"/>
    </testCase>   
    <testCase name="xmlns5">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapper"/>
+      <setting object_wrapper="beans"/>
    </testCase>   
    <testCase name="xml-ns_prefix-scope" template="xml-ns_prefix-scope-main.ftl" />
    <testCase name="hashconcat"/>
@@ -253,44 +229,17 @@
    <testCase name="boolean-formatting"  />
    <testCase name="number-math-builtins" noOutput="true" />
    <testCase name="string-builtin-coercion" noOutput="true" />
-   <testCase name="string-builtins-ici-2.3.20" noOutput="true">
-      <setting incompatible_improvements="2.3.20"/>
-   </testCase>
-   <testCase name="string-builtins-ici-2.3.19" noOutput="true">
-      <setting incompatible_improvements="2.3.19"/>
-   </testCase>
    
-   <testCase name="overloaded-methods-23bc" noOutput="true">
-      <setting incompatible_improvements="2.3.0, 2.3.19"/>
+   <testCase name="overloaded-methods[#endTN]-inc-bw" noOutput="true">
+      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperInc"/>
    </testCase>
-   <testCase name="overloaded-methods-2-inc-bwici-2.3.20" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperInc2003020"/>
+   <testCase name="overloaded-methods[#endTN]-desc-bw" noOutput="true">
+      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperDesc"/>
    </testCase>
-   <testCase name="overloaded-methods-2-desc-bwici-2.3.20" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperDesc2003020"/>
+   <testCase name="overloaded-methods[#endTN]-inc-dow" noOutput="true">
+      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperInc"/>
    </testCase>
-   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-inc" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperInc2003021"/>
-   </testCase>
-   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperDesc2003021"/>
-   </testCase>
-   <testCase name="overloaded-methods-2-inc-bwici-2.3.20[#endTN]-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperInc2003020"/>
-   </testCase>
-   <testCase name="overloaded-methods-2-desc-bwici-2.3.20[#endTN]-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperDesc2003020"/>
-   </testCase>
-   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-inc-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperInc2003021"/>
-   </testCase>
-   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperDesc2003021"/>
-   </testCase>
-   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-inc-dow-2.3.22" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperInc2003022"/>
-   </testCase>
-   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc-dow-2.3.22" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperDesc2003022"/>
+   <testCase name="overloaded-methods[#endTN]-desc-dow" noOutput="true">
+      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperDesc"/>
    </testCase>
 </testCases>

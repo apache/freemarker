@@ -45,7 +45,6 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyContent;
 
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
@@ -195,9 +194,9 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             case PAGE_SCOPE: {
                 try {
                     final TemplateModel tm = environment.getGlobalNamespace().get(name);
-                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22 && unwrapper != null) {
+                    if (unwrapper != null) {
                         return unwrapper.unwrap(tm);
-                    } else { // Legacy behavior branch
+                    } else { // [FM3] Such unwrapping logic rather belongs to some core util
                         if (tm instanceof AdapterTemplateModel) {
                             return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
                         }
@@ -213,8 +212,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                         if (tm instanceof TemplateBooleanModel) {
                             return Boolean.valueOf(((TemplateBooleanModel) tm).getAsBoolean());
                         }
-                        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22
-                                && tm instanceof TemplateDateModel) {
+                        if (tm instanceof TemplateDateModel) {
                             return ((TemplateDateModel) tm).getAsDate();
                         }
                         return tm;

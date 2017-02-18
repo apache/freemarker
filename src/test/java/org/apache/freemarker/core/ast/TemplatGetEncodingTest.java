@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
@@ -39,7 +38,7 @@ public class TemplatGetEncodingTest {
 
     @Test
     public void test() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         {
             cfg.setDefaultEncoding("ISO-8859-2");
             ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();

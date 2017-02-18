@@ -69,8 +69,7 @@ public class ASTPrinter {
     }
     
     private ASTPrinter() {
-        cfg = new Configuration();
-        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_20);
+        cfg = new Configuration(Configuration.VERSION_3_0_0);
     }
     
     private void mainSingleTemplate(String[] args) throws IOException, FileNotFoundException {

@@ -19,8 +19,11 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +37,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -56,7 +56,7 @@ public class SimpleObjetWrapperTest {
     
     @Test
     public void testDoesNotAllowAPIBuiltin() throws TemplateModelException {
-        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_2_3_22);
+        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
         
         TemplateModelWithAPISupport map = (TemplateModelWithAPISupport) sow.wrap(new HashMap());
         try {
@@ -70,19 +70,17 @@ public class SimpleObjetWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testCanWrapBasicTypes() throws TemplateModelException {
-        for (Version version : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22 }) {
-            SimpleObjectWrapper sow = new SimpleObjectWrapper(version);
-            assertTrue(sow.wrap("s") instanceof TemplateScalarModel);
-            assertTrue(sow.wrap(1) instanceof TemplateNumberModel);
-            assertTrue(sow.wrap(true) instanceof TemplateBooleanModel);
-            assertTrue(sow.wrap(new Date()) instanceof TemplateDateModel);
-            assertTrue(sow.wrap(new ArrayList()) instanceof TemplateSequenceModel);
-            assertTrue(sow.wrap(new String[0]) instanceof TemplateSequenceModel);
-            assertTrue(sow.wrap(new ArrayList().iterator()) instanceof TemplateCollectionModel);
-            assertTrue(sow.wrap(new HashSet()) instanceof TemplateSequenceModel);
-            assertTrue(sow.wrap(new HashMap()) instanceof TemplateHashModelEx);
-            assertNull(sow.wrap(null));
-        }
+        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+        assertTrue(sow.wrap("s") instanceof TemplateScalarModel);
+        assertTrue(sow.wrap(1) instanceof TemplateNumberModel);
+        assertTrue(sow.wrap(true) instanceof TemplateBooleanModel);
+        assertTrue(sow.wrap(new Date()) instanceof TemplateDateModel);
+        assertTrue(sow.wrap(new ArrayList()) instanceof TemplateSequenceModel);
+        assertTrue(sow.wrap(new String[0]) instanceof TemplateSequenceModel);
+        assertTrue(sow.wrap(new ArrayList().iterator()) instanceof TemplateCollectionModel);
+        assertTrue(sow.wrap(new HashSet()) instanceof TemplateSequenceModel);
+        assertTrue(sow.wrap(new HashMap()) instanceof TemplateHashModelEx);
+        assertNull(sow.wrap(null));
     }
     
     @Test
@@ -93,7 +91,7 @@ public class SimpleObjetWrapperTest {
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
         Document doc = db.parse(is);
         
-        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_2_3_22);
+        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
         try {
             sow.wrap(doc);
             fail();
@@ -104,7 +102,7 @@ public class SimpleObjetWrapperTest {
     
     @Test
     public void testWontWrapGenericObjects() {
-        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_2_3_22);
+        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
         try {
             sow.wrap(new File("/x"));
             fail();

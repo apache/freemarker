@@ -19,48 +19,38 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultArrayAdapter;
 import org.apache.freemarker.core.model.impl.DefaultListAdapter;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperTest.TestBean;
 import org.apache.freemarker.core.model.impl.SimpleDate;
-import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperTest.TestBean;
 import org.junit.Test;
 
 public class SimpleObjectWrapperTest {
     
     @Test
     public void testBasics() throws TemplateModelException {
-        {
-            SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_2_3_22);
-            testCustomizationCommonPart(ow);
-            assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
-            assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
-            assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
-            assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);  // at least until IcI 2.4
-        }
-        
-        {
-            SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_2_3_21);
-            testCustomizationCommonPart(ow);
-            assertTrue(ow.wrap(Collections.emptyMap()) instanceof SimpleHash);
-            assertTrue(ow.wrap(Collections.emptyList()) instanceof SimpleSequence);
-            assertTrue(ow.wrap(new boolean[] { }) instanceof SimpleSequence);
-            assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);
-        }
+        SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+        testCustomizationCommonPart(ow);
+        assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
+        assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
+        assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
+        assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);  // at least until IcI 2.4
     }
 
     @SuppressWarnings("boxing")

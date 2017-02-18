@@ -24,9 +24,6 @@ import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._TemplateAPI;
-import org.apache.freemarker.core.ast.FMParserTokenManager;
-import org.apache.freemarker.core.ast.Token;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -205,11 +202,9 @@ final class BuiltinVariable extends Expression {
         }
         if (name == TEMPLATE_NAME || name == TEMPLATE_NAME_CC) {
             // The behavior of env.getTemplate() was changed with IcI 2.3.22, but there was an unintended side effect
-            // of changing the behavior of .template_name, which was fixed with IcI 2.3.23. IcI 2.3.22 deliberately
+            // of changing the behavior of .template_name, which was oms with IcI 2.3.23. IcI 2.3.22 deliberately
             // remains broken.
-            return (env.getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_23)
-                    ? new SimpleScalar(env.getTemplate230().getName())
-                    : new SimpleScalar(env.getTemplate().getName());
+            return (new SimpleScalar(env.getTemplate230().getName()));
         }
         if (name == MAIN_TEMPLATE_NAME || name == MAIN_TEMPLATE_NAME_CC) {
             return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getName());

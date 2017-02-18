@@ -46,11 +46,9 @@ final class OverloadedMethods {
 
     private final OverloadedMethodsSubset fixArgMethods;
     private OverloadedMethodsSubset varargMethods;
-    private final boolean bugfixed;
     
-    OverloadedMethods(boolean bugfixed) {
-        this.bugfixed = bugfixed;
-        fixArgMethods = new OverloadedFixArgsMethods(bugfixed);
+    OverloadedMethods() {
+        fixArgMethods = new OverloadedFixArgsMethods();
     }
     
     void addMethod(Method method) {
@@ -64,11 +62,11 @@ final class OverloadedMethods {
     }
     
     private void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
-        // Note: "varargs" methods are always callable as fixed args, with a sequence (array) as the last parameter.
+        // Note: "varargs" methods are always callable as oms args, with a sequence (array) as the last parameter.
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
         if (memberDesc.isVarargs()) {
             if (varargMethods == null) {
-                varargMethods = new OverloadedVarArgsMethods(bugfixed);
+                varargMethods = new OverloadedVarArgsMethods();
             }
             varargMethods.addCallableMemberDescriptor(memberDesc);
         }
@@ -76,7 +74,7 @@ final class OverloadedMethods {
     
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
-        // Try to find a fixed args match:
+        // Try to find a oms args match:
         MaybeEmptyMemberAndArguments fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper);
         if (fixArgsRes instanceof MemberAndArguments) {
             return (MemberAndArguments) fixArgsRes;
@@ -100,10 +98,6 @@ final class OverloadedMethods {
                         tmArgs),
                 "\nThe matching overload was searched among these members:\n",
                 memberListToString());
-        if (!bugfixed) {
-            edb.tip("You seem to use BeansWrapper with incompatibleImprovements set below 2.3.21. If you think this "
-                    + "error is unfounded, enabling 2.3.21 fixes may helps. See version history for more.");
-        }
         addMarkupBITipAfterNoNoMarchIfApplicable(edb, tmArgs);
         throw new _TemplateModelException(edb);
     }

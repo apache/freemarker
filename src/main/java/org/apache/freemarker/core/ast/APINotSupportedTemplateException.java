@@ -20,7 +20,6 @@
 package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -56,10 +55,6 @@ class APINotSupportedTemplateException extends TemplateException {
                     desc.tip("In the FreeMarker configuration, \"", Configurable.OBJECT_WRAPPER_KEY,
                             "\" is a DefaultObjectWrapper with its \"useAdaptersForContainers\" property set to "
                             + "false. Setting it to true might solves this problem.");
-                    if (dow.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22) {
-                        desc.tip("Setting DefaultObjectWrapper's \"incompatibleImprovements\" to 2.3.22 or higher will "
-                                + "change the default value of \"useAdaptersForContainers\" to true.");
-                    }
                 } else if (tm instanceof SimpleSequence && dow.getForceLegacyNonListCollections()) {
                     desc.tip("In the FreeMarker configuration, \"",
                             Configurable.OBJECT_WRAPPER_KEY,

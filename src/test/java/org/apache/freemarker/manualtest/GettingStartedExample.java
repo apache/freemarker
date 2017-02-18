@@ -36,7 +36,7 @@ public class GettingStartedExample {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_24);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setClassForTemplateLoading(GettingStartedExample.class, "");
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);

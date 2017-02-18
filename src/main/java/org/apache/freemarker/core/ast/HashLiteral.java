@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.ListIterator;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -111,34 +110,14 @@ final class HashLiteral extends Expression {
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
 
         SequenceHash(Environment env) throws TemplateException {
-            if (_TemplateAPI.getTemplateLanguageVersionAsInt(HashLiteral.this) >= _TemplateAPI.VERSION_INT_2_3_21) {
-                map = new LinkedHashMap();
-                for (int i = 0; i < size; i++) {
-                    Expression keyExp = (Expression) keys.get(i);
-                    Expression valExp = (Expression) values.get(i);
-                    String key = keyExp.evalAndCoerceToPlainText(env);
-                    TemplateModel value = valExp.eval(env);
-                    valExp.assertNonNull(value, env);
-                    map.put(key, value);
-                }
-            } else {
-                // Legacy hash literal, where repeated keys were kept when doing ?values or ?keys, yet overwritten when
-                // doing hash[key].
-                map = new HashMap();
-                ArrayList keyList = new ArrayList(size);
-                ArrayList valueList = new ArrayList(size);
-                for (int i = 0; i < size; i++) {
-                    Expression keyExp = (Expression) keys.get(i);
-                    Expression valExp = (Expression) values.get(i);
-                    String key = keyExp.evalAndCoerceToPlainText(env);
-                    TemplateModel value = valExp.eval(env);
-                    valExp.assertNonNull(value, env);
-                    map.put(key, value);
-                    keyList.add(key);
-                    valueList.add(value);
-                }
-                keyCollection = new CollectionAndSequence(new SimpleSequence(keyList));
-                valueCollection = new CollectionAndSequence(new SimpleSequence(valueList));
+            map = new LinkedHashMap();
+            for (int i = 0; i < size; i++) {
+                Expression keyExp = (Expression) keys.get(i);
+                Expression valExp = (Expression) values.get(i);
+                String key = keyExp.evalAndCoerceToPlainText(env);
+                TemplateModel value = valExp.eval(env);
+                valExp.assertNonNull(value, env);
+                map.put(key, value);
             }
         }
 
@@ -150,7 +129,6 @@ final class HashLiteral extends Expression {
         @Override
         public TemplateCollectionModel keys() {
             if (keyCollection == null) {
-                // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
                 keyCollection = new CollectionAndSequence(new SimpleSequence(map.keySet()));
             }
             return keyCollection;
@@ -159,7 +137,6 @@ final class HashLiteral extends Expression {
         @Override
         public TemplateCollectionModel values() {
             if (valueCollection == null) {
-                // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
                 valueCollection = new CollectionAndSequence(new SimpleSequence(map.values()));
             }
             return valueCollection;

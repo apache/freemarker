@@ -34,17 +34,9 @@ ${double3?c}
 ${double4?c}
 ${bigDecimal?c}
 ${bigDecimal2?c}
-<#if iciIntValue gte 2003021>
-  <@assertEquals expected="INF" actual="INF"?number?c />
-  <@assertEquals expected="INF" actual="INF"?number?c />
-  <@assertEquals expected="-INF" actual="-INF"?number?c />
-  <@assertEquals expected="-INF" actual="-INF"?number?float?c />
-  <@assertEquals expected="NaN" actual="NaN"?number?float?c />
-  <@assertEquals expected="NaN" actual="NaN"?number?float?c />
-<#else>
-  <#setting locale = "en_US">
-  <#setting number_format = "0.#">
-  <@assertEquals expected="INF"?number?string actual="INF"?number?c />
-  <@assertEquals expected="-INF"?number?string actual="-INF"?number?c />
-  <@assertEquals expected="NaN"?number?string actual="NaN"?number?c />
-</#if>
+<@assertEquals expected="INF" actual="INF"?number?c />
+<@assertEquals expected="INF" actual="INF"?number?c />
+<@assertEquals expected="-INF" actual="-INF"?number?c />
+<@assertEquals expected="-INF" actual="-INF"?number?float?c />
+<@assertEquals expected="NaN" actual="NaN"?number?float?c />
+<@assertEquals expected="NaN" actual="NaN"?number?float?c />

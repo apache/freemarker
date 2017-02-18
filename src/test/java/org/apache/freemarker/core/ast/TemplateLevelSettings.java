@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.ast;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -57,33 +57,26 @@ public class TemplateLevelSettings {
     @Test
     public void test() throws IOException, TemplateException {
         assertOutputs(
-                "M[inc:INC]MM[impM1:M{M}M[impM2:M{IMP}M]M]M[incM:M{M}M]M",
                 "M[inc:M]MM[impM1:M{M}M[impM2:M{M}M]M]M[incM:M{M}M]M",
                 "M,m", "INC,inc", "IMP,imp");
         assertOutputs(
-                "C[inc:INC]CC[impM1:C{C}C[impM2:C{IMP}C]C]C[incM:C{C}C]C",
                 "C[inc:C]CC[impM1:C{C}C[impM2:C{C}C]C]C[incM:C{C}C]C",
                 null, "INC,inc", "IMP,imp");
         assertOutputs(
-                "M[inc:C]MM[impM1:M{M}M[impM2:M{IMP}M]M]M[incM:M{M}M]M",
                 "M[inc:M]MM[impM1:M{M}M[impM2:M{M}M]M]M[incM:M{M}M]M",
                 "M,m", null, "IMP,imp");
         assertOutputs(
-                "M[inc:INC]MM[impM1:M{M}M[impM2:M{C}M]M]M[incM:M{M}M]M",
                 "M[inc:M]MM[impM1:M{M}M[impM2:M{M}M]M]M[incM:M{M}M]M",
                 "M,m", "INC,inc", null);
     }
 
     private void assertOutputs(
-            String legacyOutput, String fixedOutput,
+            String expectedOutput,
             String mainBoolFmt, String incBoolFmt, String impBoolFtm)
             throws IOException, TemplateException {
         assertEquals(
-                legacyOutput,
-                renderWith(Configuration.VERSION_2_3_21, mainBoolFmt, incBoolFmt, impBoolFtm));
-        assertEquals(
-                fixedOutput,
-                renderWith(Configuration.VERSION_2_3_22, mainBoolFmt, incBoolFmt, impBoolFtm));
+                expectedOutput,
+                renderWith(Configuration.VERSION_3_0_0, mainBoolFmt, incBoolFmt, impBoolFtm));
     }
     
     private String renderWith(Version version, String mainBoolFmt, String incBoolFmt, String impBoolFtm)

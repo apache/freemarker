@@ -87,7 +87,6 @@ public class Configurable {
     
     private static final String NULL = "null";
     private static final String DEFAULT = "default";
-    private static final String DEFAULT_2_3_0 = "default_2_3_0";
     private static final String JVM_DEFAULT = "JVM default";
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
@@ -426,8 +425,7 @@ public class Configurable {
         apiBuiltinEnabled = Boolean.FALSE;
         properties.setProperty(API_BUILTIN_ENABLED_KEY, apiBuiltinEnabled.toString());
         
-        logTemplateExceptions = Boolean.valueOf(
-                _TemplateAPI.getDefaultLogTemplateExceptions(incompatibleImprovements));
+        logTemplateExceptions = Boolean.FALSE;
         properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, logTemplateExceptions.toString());
         
         // outputEncoding and urlEscapingCharset defaults to null,
@@ -613,7 +611,7 @@ public class Configurable {
      *   {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time}, and then if, for example,
      *   {@code time_zone} is GMT+00:00, the
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
-     *   those are the time zone correct renderings, those values probably was meant to shown "as is".
+     *   those are the time zone correct renderings, those values are probably meant to be shown "as is".
      *   
      *   <li>You may wonder why this setting isn't simply "SQL time zone", since the time zone related behavior of JDBC
      *   applies to {@link java.sql.Timestamp java.sql.Timestamp} too. FreeMarker assumes that you have set up your
@@ -1763,23 +1761,12 @@ public class Configurable {
      * @see #setAutoIncludes(List)
      */
     public void addAutoInclude(String templateName) {
-        addAutoInclude(templateName, false);
-    }
-
-    /**
-     * @param keepDuplicate
-     *            Used for emulating legacy glitch, where duplicates weren't removed if the inclusion was added via
-     *            {@link #setAutoIncludes(List)}.
-     */
-    private void addAutoInclude(String templateName, boolean keepDuplicate) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (autoIncludes == null) {
                 initAutoIncludesList();
             } else {
-                if (!keepDuplicate) {
-                    autoIncludes.remove(templateName);
-                }
+                autoIncludes.remove(templateName);
             }
             autoIncludes.add(templateName);
         }
@@ -1806,8 +1793,7 @@ public class Configurable {
                 if (!(templateName instanceof String)) {
                     throw new IllegalArgumentException("List items must be String-s.");
                 }
-                addAutoInclude((String) templateName, this instanceof Configuration && ((Configuration) this)
-                        .getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_25);
+                addAutoInclude((String) templateName);
             }
         }
     }
@@ -2334,10 +2320,8 @@ public class Configurable {
                     if (this instanceof Configuration) {
                         ((Configuration) this).unsetObjectWrapper();
                     } else {
-                        setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_2_3_0));
+                        setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0));
                     }
-                } else if (DEFAULT_2_3_0.equalsIgnoreCase(value)) {
-                    setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_2_3_0));
                 } else if ("simple".equalsIgnoreCase(value)) {
                     setObjectWrapper(_StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER);
                 } else if ("beans".equalsIgnoreCase(value)) {

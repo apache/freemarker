@@ -49,6 +49,7 @@ import org.apache.freemarker.core.ast._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -63,10 +64,9 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util.WriteProtectable;
+import org.apache.freemarker.core.util._ClassUtil;
 import org.slf4j.Logger;
 
 /**
@@ -227,11 +227,11 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *     </li>
      *     <li>
      *       <p>2.3.21 (or higher):
-     *       Several glitches were fixed in <em>overloaded</em> method selection. This usually just gets
+     *       Several glitches were oms in <em>overloaded</em> method selection. This usually just gets
      *       rid of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method
      *       choices), still, as in some cases the method chosen can be a different one now (that was the point of
      *       the reworking after all), it can mean a change in the behavior of the application. The most important
-     *       change is that the treatment of {@code null} arguments were fixed, as earlier they were only seen
+     *       change is that the treatment of {@code null} arguments were oms, as earlier they were only seen
      *       applicable to parameters of type {@code Object}. Now {@code null}-s are seen to be applicable to any
      *       non-primitive parameters, and among those the one with the most specific type will be preferred (just
      *       like in Java), which is hence never the one with the {@code Object} parameter type. For more details
@@ -354,7 +354,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         staticModels = new StaticModels(BeansWrapper.this);
         enumModels = createEnumModels(BeansWrapper.this);
         modelCache = new BeansModelCache(BeansWrapper.this);
-        setUseCache(bwConf.getUseModelCache());
+        setUseModelCache(bwConf.getUseModelCache());
 
         finalizeConstruction(writeProtected);
     }
@@ -492,7 +492,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * (Technical note: {@link Map}-s will be wrapped into {@link SimpleMapModel} in this case.)
      * 
      * <p>*: For historical reasons, FreeMarker 2.3.X doesn't support non-string keys with the {@code []} operator,
-     *       hence the workarounds. This will be likely fixed in FreeMarker 2.4.0. Also note that the method- and
+     *       hence the workarounds. This will be likely oms in FreeMarker 2.4.0. Also note that the method- and
      *       the "field"-namespaces aren't separate in FreeMarker, hence {@code myMap.get} can return the {@code get}
      *       method.
      */
@@ -747,7 +747,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * the same object will likely return the same model (although there is
      * no guarantee as the cache items can be cleared any time).
      */
-    public void setUseCache(boolean useCache) {
+    public void setUseModelCache(boolean useCache) {
         checkModifiable();
         modelCache.setUseCache(useCache);
     }
@@ -755,7 +755,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     /**
      * @since 2.3.21
      */
-    public boolean getUseCache() {
+    public boolean getUseModelCache() {
         return modelCache.getUseCache();
     }
     
@@ -784,39 +784,13 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         return incompatibleImprovements;
     }
     
-    boolean is2321Bugfixed() {
-        return is2321Bugfixed(getIncompatibleImprovements());
-    }
-
-    static boolean is2321Bugfixed(Version version) {
-        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_21;
-    }
-
-    boolean is2324Bugfixed() {
-        return is2324Bugfixed(getIncompatibleImprovements());
-    }
-
-    static boolean is2324Bugfixed(Version version) {
-        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_24;
-    }
-
-    private static boolean is300Bugfixed(Version incompatibleImprovements) {
-        return incompatibleImprovements.intValue() >= Configuration.VERSION_3_0_0.intValue();
-    }
-    
     /** 
      * Returns the lowest version number that is equivalent with the parameter version.
      * @since 2.3.21
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
-            throw new IllegalArgumentException("Version must be at least 2.3.0.");
-        }
-        return is300Bugfixed(incompatibleImprovements) ? Configuration.VERSION_3_0_0 
-                : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
-                : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
-                : Configuration.VERSION_2_3_0;
+        return Configuration.VERSION_3_0_0;
     }
 
     /**
@@ -986,13 +960,12 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     /**
      * @param typeFlags
-     *            Used when unwrapping for overloaded methods and so the {@code targetClass} is possibly too generic.
-     *            Must be 0 when unwrapping parameter values for non-overloaded methods, also if
-     *            {@link #is2321Bugfixed()} is {@code false}.
+     *            Used when unwrapping for overloaded methods and so the {@code targetClass} is possibly too generic
+     *            (as it's the most specific common superclass). Must be 0 when unwrapping parameter values for
+     *            non-overloaded methods.
      * @return {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} or the unwrapped object.
      */
-    Object tryUnwrapTo(TemplateModel model, Class<?> targetClass, int typeFlags) 
-    throws TemplateModelException {
+    Object tryUnwrapTo(TemplateModel model, Class<?> targetClass, int typeFlags) throws TemplateModelException {
         Object res = tryUnwrapTo(model, targetClass, typeFlags, null);
         if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
@@ -1012,9 +985,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             return null;
         }
         
-        final boolean is2321Bugfixed = is2321Bugfixed();
-        
-        if (is2321Bugfixed && targetClass.isPrimitive()) {
+        if (targetClass.isPrimitive()) {
             targetClass = _ClassUtil.primitiveClassToBoxingClass(targetClass);
         }
         
@@ -1030,7 +1001,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             
             // Attempt numeric conversion: 
             if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtil.isNumerical(targetClass))) {
-                Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
+                Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass);
                 if (number != null) return number;
             }
         }
@@ -1043,7 +1014,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             
             // Attempt numeric conversion: 
             if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtil.isNumerical(targetClass))) {
-                Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
+                Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass);
                 if (number != null) {
                     return number;
                 }
@@ -1069,7 +1040,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             if (_ClassUtil.isNumerical(targetClass)) {
                 if (model instanceof TemplateNumberModel) {
                     Number number = forceUnwrappedNumberToType(
-                            ((TemplateNumberModel) model).getAsNumber(), targetClass, is2321Bugfixed);
+                            ((TemplateNumberModel) model).getAsNumber(), targetClass);
                     if (number != null) {
                         return number;
                     }
@@ -1204,9 +1175,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 return new SetAdapter((TemplateCollectionModel) model, this);
             }
             
-            // In 2.3.21 bugfixed mode only, List-s are convertible to arrays on invocation time. Only overloaded
-            // methods need this. As itf will be 0 in non-bugfixed mode and for non-overloaded method calls, it's
-            // enough to check if the TypeFlags.ACCEPTS_ARRAY bit is 1:
             if ((itf & TypeFlags.ACCEPTS_ARRAY) != 0
                     && model instanceof TemplateSequenceModel) {
                 return new SequenceAdapter((TemplateSequenceModel) model, this);
@@ -1306,7 +1274,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                         isComponentTypeExamined = true;
                     }
                     if (isComponentTypeNumerical && listItem instanceof Number) {
-                        listItem = forceUnwrappedNumberToType((Number) listItem, componentType, true);
+                        listItem = forceUnwrappedNumberToType((Number) listItem, componentType);
                     } else if (componentType == String.class && listItem instanceof Character) {
                         listItem = String.valueOf(((Character) listItem).charValue());
                     } else if ((componentType == Character.class || componentType == char.class)
@@ -1362,7 +1330,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @param n Non-{@code null}
      * @return {@code null} if the conversion has failed.
      */
-    static Number forceUnwrappedNumberToType(final Number n, final Class<?> targetType, final boolean bugfixed) {
+    static Number forceUnwrappedNumberToType(final Number n, final Class<?> targetType) {
         // We try to order the conditions by decreasing probability.
         if (targetType == n.getClass()) {
             return n;
@@ -1392,7 +1360,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         } else if (targetType == BigInteger.class) {
             if (n instanceof BigInteger) {
                 return n;
-            } else if (bugfixed) {
+            } else {
                 if (n instanceof OverloadedNumberUtil.IntegerBigDecimal) {
                     return ((OverloadedNumberUtil.IntegerBigDecimal) n).bigIntegerValue();
                 } else if (n instanceof BigDecimal) {
@@ -1400,9 +1368,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                 } else {
                     return BigInteger.valueOf(n.longValue()); 
                 }
-            } else {
-                // This is wrong, because something like "123.4" will cause NumberFormatException instead of flooring.
-                return new BigInteger(n.toString());
             }
         } else {
             final Number oriN = n instanceof OverloadedNumberUtil.NumberWithFallbackType

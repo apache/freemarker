@@ -52,7 +52,6 @@ import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
-import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -547,7 +546,7 @@ public class FreemarkerServletTest {
         protected Configuration createConfiguration() {
             Configuration cfg = super.createConfiguration();
             // Needed for the TemplateConfiguration that sets outputEncoding:
-            cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
+            cfg.setIncompatibleImprovements(Configuration.VERSION_3_0_0);
 
             // Set a test runner environment independent default locale:
             cfg.setLocale(DEFAULT_LOCALE);

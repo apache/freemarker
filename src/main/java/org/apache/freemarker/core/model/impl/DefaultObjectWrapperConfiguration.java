@@ -20,7 +20,6 @@
 package org.apache.freemarker.core.model.impl;
 
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._TemplateAPI;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapperConfiguration;
 
@@ -35,14 +34,12 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapperConfiguration;
  */
 public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConfiguration {
     
-    private boolean useAdaptersForContainers;
-    private boolean forceLegacyNonListCollections;
+    private boolean useAdaptersForContainers = true;
+    private boolean forceLegacyNonListCollections = true; // [FM3] [2.4]: = IcI < _TemplateAPI.VERSION_INT_2_4_0;
     private boolean iterableSupport;
 
     protected DefaultObjectWrapperConfiguration(Version incompatibleImprovements) {
         super(DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements), true);
-        useAdaptersForContainers = getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22;
-        forceLegacyNonListCollections = true; // [2.4]: = IcI < _TemplateAPI.VERSION_INT_2_4_0;
     }
 
     /** See {@link DefaultObjectWrapper#getUseAdaptersForContainers()}. */

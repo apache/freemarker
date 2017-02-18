@@ -37,6 +37,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleHash;
@@ -128,7 +129,7 @@ public class Listables {
     public List<? extends TemplateHashModelEx> getEmptyHashes() throws TemplateModelException {
         List<TemplateHashModelEx> emptyMaps = new ArrayList<>();
         emptyMaps.addAll(getMapsWrappedAsEx2(Collections.emptyMap()));
-        emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build()
+        emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build()
                 .wrap(Collections.emptyMap()));
         return emptyMaps;
     }
@@ -139,11 +140,11 @@ public class Listables {
     private List<TemplateHashModelEx2> getMapsWrappedAsEx2(Map<?, ?> map) throws TemplateModelException {
         List<TemplateHashModelEx2> maps = new ArrayList<>();
         
-        maps.add((SimpleHash) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).build().wrap(map));
+        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        maps.add(new SimpleHash(map, ow));
+        maps.add((DefaultMapAdapter) ow.wrap(map));
         
-        maps.add((DefaultMapAdapter) new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build().wrap(map));
-        
-        BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_2_3_24);
+        BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_3_0_0);
         bwb.setSimpleMapWrapper(true);
         maps.add((TemplateHashModelEx2) bwb.build().wrap(map));
 
@@ -152,7 +153,7 @@ public class Listables {
     
     public TemplateHashModelEx getHashNonEx2() {
         return new NonEx2MapAdapter(ImmutableMap.of("k1", 11, "k2", 22),
-                new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_24).build());
+                new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
     }
     
     public static class NonEx2MapAdapter extends WrappingTemplateModel implements TemplateHashModelEx {

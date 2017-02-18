@@ -35,6 +35,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.ast.ParseException;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
@@ -54,7 +55,9 @@ public class DefaultTemplateResolverTest {
     public void testCachedException() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
         DefaultTemplateResolver tr = new DefaultTemplateResolver(
-                loader, new StrongCacheStorage(), new Configuration(Configuration.VERSION_3_0_0));
+                loader, new StrongCacheStorage(),
+                DefaultTemplateLookupStrategy.INSTANCE, DefaultTemplateNameFormat.INSTANCE,
+                new Configuration(Configuration.VERSION_3_0_0));
         tr.setTemplateUpdateDelayMilliseconds(1000L);
         loader.setThrowException(true);
         try {
@@ -89,7 +92,9 @@ public class DefaultTemplateResolverTest {
     @Test
     public void testCachedNotFound() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
-        DefaultTemplateResolver cache = new DefaultTemplateResolver(loader, new StrongCacheStorage(), new Configuration());
+        DefaultTemplateResolver cache = new DefaultTemplateResolver(
+                loader, new StrongCacheStorage(), DefaultTemplateLookupStrategy.INSTANCE,
+                DefaultTemplateNameFormat.INSTANCE, new Configuration());
         cache.setTemplateUpdateDelayMilliseconds(1000L);
         cache.setLocalizedLookup(false);
         assertNull(cache.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate());
@@ -273,7 +278,7 @@ public class DefaultTemplateResolverTest {
     
     @Test
     public void testWrongEncodingReload() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
@@ -337,7 +342,7 @@ public class DefaultTemplateResolverTest {
 
     @Test
     public void testNoWrongEncodingForTemplateLoader2WithReader() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
@@ -384,7 +389,7 @@ public class DefaultTemplateResolverTest {
     public void testEncodingSelection() throws IOException {
         Locale hungary = new Locale("hu", "HU"); 
                 
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setDefaultEncoding("utf-8");
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
@@ -452,19 +457,8 @@ public class DefaultTemplateResolverTest {
     }
     
     @Test
-    public void testTemplateNameFormatExceptionAndBackwardCompatibility() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        
-        assertNull(cfg.getTemplate("../x", null, null, null, true, true));
-        try {
-            cfg.getTemplate("../x");
-            fail();
-        } catch (TemplateNotFoundException e) {
-            // expected
-        }
-        
-        // [2.4] Test it with IcI 2.4
-        
+    public void testTemplateNameFormatException() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         try {
             cfg.getTemplate("../x", null, null, null, true, true);
@@ -474,6 +468,12 @@ public class DefaultTemplateResolverTest {
         }
         try {
             cfg.getTemplate("../x");
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            // expected
+        }
+        try {
+            cfg.getTemplate("\\x");
             fail();
         } catch (MalformedTemplateNameException e) {
             // expected
