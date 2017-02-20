@@ -224,14 +224,9 @@ public class ConfigurationTest extends TestCase {
                 ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
     }
     
-    private void assertUsesNewTemplateLoader(Configuration cfg) {
-        assertNull(cfg.getTemplateLoader());
-    }
-    
     public void testVersion() {
         Version v = Configuration.getVersion();
         assertTrue(v.intValue() >= _TemplateAPI.VERSION_INT_3_0_0);
-        assertSame(v.toString(), Configuration.getVersionNumber());
         
         try {
             new Configuration(new Version(999, 1, 2));
@@ -1149,7 +1144,7 @@ public class ConfigurationTest extends TestCase {
 
         assertEquals(DefaultTemplateResolver.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS, cfg.getTemplateUpdateDelayMilliseconds());
         
-        cfg.setTemplateUpdateDelay(4);
+        cfg.setTemplateUpdateDelayMilliseconds(4000);
         assertEquals(4000L, cfg.getTemplateUpdateDelayMilliseconds());
         
         cfg.setTemplateUpdateDelayMilliseconds(100);

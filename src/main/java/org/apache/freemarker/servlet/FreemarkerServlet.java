@@ -321,6 +321,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * 
  * </ul>
  */
+// [FM3] Lot of things are marked here with "BC" and deprecated
 public class FreemarkerServlet extends HttpServlet {
     
     private static final Logger LOG = _ServletLogs.SERVLET;
@@ -635,7 +636,7 @@ public class FreemarkerServlet extends HttpServlet {
                                 Configuration.TEMPLATE_UPDATE_DELAY_KEY, DEPR_INITPARAM_TEMPLATE_DELAY);
                     }
                     try {
-                        config.setTemplateUpdateDelay(Integer.parseInt(value));
+                        config.setTemplateUpdateDelayMilliseconds(Integer.parseInt(value) * 1000L);
                     } catch (NumberFormatException e) {
                         // Intentionally ignored
                     }

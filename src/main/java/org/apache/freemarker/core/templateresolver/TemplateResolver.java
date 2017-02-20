@@ -105,7 +105,7 @@ public abstract class TemplateResolver {
     /**
      * Removes a template from the template cache, hence forcing the re-loading of it when it's next time requested;
      * this is an optional operation. This is to give the application finer control over cache updating than
-     * {@link Configuration#setTemplateUpdateDelay(int)} alone does.
+     * {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} alone does.
      * 
      * <p>
      * For the meaning of the parameters, see {@link #getTemplate(String, Locale, Object, String, boolean)}

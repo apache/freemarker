@@ -148,7 +148,7 @@ public class DefaultTemplateResolverTest {
         cfg.setCacheStorage(new StrongCacheStorage());
         StringTemplateLoader loader = new StringTemplateLoader();
         cfg.setTemplateLoader(loader);
-        cfg.setTemplateUpdateDelay(Integer.MAX_VALUE);
+        cfg.setTemplateUpdateDelayMilliseconds(Integer.MAX_VALUE);
         
         loader.putTemplate("1.ftl", "1 v1");
         loader.putTemplate("2.ftl", "2 v1");
@@ -176,7 +176,7 @@ public class DefaultTemplateResolverTest {
         cfg.setLocale(Locale.US);
         StringTemplateLoader loader = new StringTemplateLoader();
         cfg.setTemplateLoader(loader);
-        cfg.setTemplateUpdateDelay(Integer.MAX_VALUE);
+        cfg.setTemplateUpdateDelayMilliseconds(Integer.MAX_VALUE);
         
         loader.putTemplate("1_en_US.ftl", "1_en_US v1");
         loader.putTemplate("1_en.ftl", "1_en v1");

@@ -1066,23 +1066,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets the time in seconds that must elapse before checking whether there is a newer version of a template "file"
-     * than the cached one.
-     * 
-     * <p>
-     * Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe. While
-     * it works well on most hardware, it's not guaranteed that FreeMarker will see the update in all threads, and
-     * theoretically it's also possible that it will see a value that's a binary mixture of the new and the old one.
-     * 
-     * @deprecated Use {@link #setTemplateUpdateDelayMilliseconds(long)} instead, because the time granularity of this method
-     *             is often misunderstood to be milliseconds.
-     */
-    @Deprecated
-    public void setTemplateUpdateDelay(int seconds) {
-        templateResolver.setTemplateUpdateDelayMilliseconds(1000L * seconds);
-    }
-
-    /**
      * Sets the time in milliseconds that must elapse before checking whether there is a newer version of a template
      * "file" exists than the cached one. Defaults to 5000 ms.
      * 
@@ -2296,7 +2279,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /**
      * Removes a template from the template templateResolver, hence forcing the re-loading
      * of it when it's next time requested. This is to give the application
-     * finer control over templateResolver updating than {@link #setTemplateUpdateDelay(int)}
+     * finer control over templateResolver updating than {@link #setTemplateUpdateDelayMilliseconds(long)}
      * alone does.
      * 
      * <p>For the meaning of the parameters, see
@@ -2644,16 +2627,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 env.include(getTemplate(templateName, env.getLocale()));
             }
         }
-    }
-
-    /**
-     * Returns FreeMarker version number string. 
-     * 
-     * @deprecated Use {@link #getVersion()} instead.
-     */
-    @Deprecated
-    public static String getVersionNumber() {
-        return VERSION.toString();
     }
     
     /**

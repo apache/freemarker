@@ -226,7 +226,7 @@ final class BuiltinVariable extends Expression {
             return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
         }
         if (name == VERSION) {
-            return new SimpleScalar(Configuration.getVersionNumber());
+            return new SimpleScalar(Configuration.getVersion().toString());
         }
         if (name == INCOMPATIBLE_IMPROVEMENTS || name == INCOMPATIBLE_IMPROVEMENTS_CC) {
             return new SimpleScalar(env.getConfiguration().getIncompatibleImprovements().toString());
