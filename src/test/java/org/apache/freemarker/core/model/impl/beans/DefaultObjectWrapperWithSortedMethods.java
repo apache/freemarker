@@ -19,14 +19,14 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 
 public class DefaultObjectWrapperWithSortedMethods extends DefaultObjectWrapper {
     
     public DefaultObjectWrapperWithSortedMethods(boolean desc) {
-        setMethodSorter(this, desc);
+        this(Configuration.VERSION_3_0_0, desc);
     }
 
     public DefaultObjectWrapperWithSortedMethods(Version incompatibleImprovements, boolean desc) {

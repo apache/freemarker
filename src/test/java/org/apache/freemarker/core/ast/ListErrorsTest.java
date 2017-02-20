@@ -21,6 +21,7 @@ package org.apache.freemarker.core.ast;
 
 import java.io.IOException;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.test.TemplateTest;
@@ -127,7 +128,8 @@ public class ListErrorsTest extends TemplateTest {
 
     @Test
     public void testNonEx2NonStringKey() throws IOException, TemplateException {
-        addToDataModel("m", new Listables.NonEx2MapAdapter(ImmutableMap.of("k1", "v1", 2, "v2"), new DefaultObjectWrapper()));
+        addToDataModel("m", new Listables.NonEx2MapAdapter(ImmutableMap.of("k1", "v1", 2, "v2"),
+                new DefaultObjectWrapper(Configuration.VERSION_3_0_0)));
         assertOutput("<#list m?keys as k>${k};</#list>", "k1;2;");
         assertErrorContains("<#list m as k, v></#list>",
                 "string", "number", ".TemplateHashModelEx2");

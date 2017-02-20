@@ -221,7 +221,7 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testConstructors() throws Exception {
         {
-            DefaultObjectWrapper ow = new DefaultObjectWrapper();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
             assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, ow.getIncompatibleImprovements());
         }
         

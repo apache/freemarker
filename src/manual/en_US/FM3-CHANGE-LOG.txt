@@ -103,6 +103,8 @@ the FreeMarer 3 changelog here:
   - Removed the overridable BeansWrapper.finetuneMethodAppearance method, which was deprecated by the
     finetuneMethodAppearance setting (BeansWrapper.setFinetuneMethodAppearance).
   - Removed NodeModel static utility classes dealing with parsing XML to DOM. How it's best to do that is environment
-    and application dependent, and it has security implications. Since XML loading/parsing it's not the topic of the
+    and application dependent, and it has security implications. Since XML loading/parsing is not the topic of the
     project, these were removed. Static methods that simplify an already loaded DOM have remained, because that's
     FreeMarker-specific functionality.
+  - Removed parameterless DefaultObjectWrapper and BeansWrapper constructors. Now specifying the
+    incomplatibleImprovement version is required.

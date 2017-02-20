@@ -68,18 +68,6 @@ public class DefaultObjectWrapper extends org.apache.freemarker.core.model.impl.
     private boolean iterableSupport;
     
     /**
-     * Creates a new instance with the incompatible-improvements-version specified in
-     * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
-     * 
-     * @deprecated Use {@link DefaultObjectWrapperBuilder}, or in rare cases,
-     *          {@link #DefaultObjectWrapper(Version)} instead.
-     */
-    @Deprecated
-    public DefaultObjectWrapper() {
-        this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-    }
-    
-    /**
      * Use {@link DefaultObjectWrapperBuilder} instead if possible. Instances created with this constructor won't share
      * the class introspection caches with other instances. See {@link BeansWrapper#BeansWrapper(Version)} (the
      * superclass constructor) for more details.
