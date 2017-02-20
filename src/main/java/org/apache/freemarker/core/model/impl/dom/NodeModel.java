@@ -20,19 +20,11 @@
 package org.apache.freemarker.core.model.impl.dom;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core._CoreLogs;
@@ -61,9 +53,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * A base class for wrapping a single W3C DOM_WRAPPER Node as a FreeMarker template model.
@@ -90,13 +79,9 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
 
     private static final Object STATIC_LOCK = new Object();
     
-    static private DocumentBuilderFactory docBuilderFactory;
-    
     static private final Map xpathSupportMap = Collections.synchronizedMap(new WeakHashMap());
     
     static private XPathSupport jaxenXPathSupport;
-    
-    static private ErrorHandler errorHandler;
     
     static Class xpathSupportClass;
     
@@ -117,173 +102,6 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     final Node node;
     private TemplateSequenceModel children;
     private NodeModel parent;
-    
-    /**
-     * Sets the DOM_WRAPPER parser implementation to be used when building {@link NodeModel} objects from XML files or from
-     * {@link InputStream} with the static convenience methods of {@link NodeModel}. Otherwise FreeMarker itself doesn't
-     * use this.
-     * 
-     * @see #getDocumentBuilderFactory()
-     * 
-     * @deprecated It's a bad practice to change static fields, as if multiple independent components do that in the
-     *             same JVM, they unintentionally affect each other. Therefore it's recommended to leave this static
-     *             value at its default.
-     */
-    @Deprecated
-    static public void setDocumentBuilderFactory(DocumentBuilderFactory docBuilderFactory) {
-        synchronized (STATIC_LOCK) {
-            NodeModel.docBuilderFactory = docBuilderFactory;
-        }
-    }
-    
-    /**
-     * Returns the DOM_WRAPPER parser implementation that is used when building {@link NodeModel} objects from XML files or from
-     * {@link InputStream} with the static convenience methods of {@link NodeModel}. Otherwise FreeMarker itself doesn't
-     * use this.
-     * 
-     * @see #setDocumentBuilderFactory(DocumentBuilderFactory)
-     */
-    static public DocumentBuilderFactory getDocumentBuilderFactory() {
-        synchronized (STATIC_LOCK) {
-            if (docBuilderFactory == null) {
-                DocumentBuilderFactory newFactory = DocumentBuilderFactory.newInstance();
-                newFactory.setNamespaceAware(true);
-                newFactory.setIgnoringElementContentWhitespace(true);
-                docBuilderFactory = newFactory;  // We only write it out when the initialization was full 
-            }
-            return docBuilderFactory;
-        }
-    }
-    
-    /**
-     * Sets the error handler to use when parsing the document with the static convenience methods of {@link NodeModel}.
-     * 
-     * @deprecated It's a bad practice to change static fields, as if multiple independent components do that in the
-     *             same JVM, they unintentionally affect each other. Therefore it's recommended to leave this static
-     *             value at its default.
-     *             
-     * @see #getErrorHandler()
-     */
-    @Deprecated
-    static public void setErrorHandler(ErrorHandler errorHandler) {
-        synchronized (STATIC_LOCK) {
-            NodeModel.errorHandler = errorHandler;
-        }
-    }
-
-    /**
-     * @since 2.3.20
-     * 
-     * @see #setErrorHandler(ErrorHandler)
-     */
-    static public ErrorHandler getErrorHandler() {
-        synchronized (STATIC_LOCK) {
-            return NodeModel.errorHandler;
-        }
-    }
-    
-    /**
-     * Convenience method to create a {@link NodeModel} from a SAX {@link InputSource}; please see the security warning
-     * further down. Adjacent text nodes will be merged (and CDATA sections are considered as text nodes) as with
-     * {@link #mergeAdjacentText(Node)}. Further simplifications are applied depending on the parameters. If all
-     * simplifications are turned on, then it applies {@link #simplify(Node)} on the loaded DOM_WRAPPER.
-     * 
-     * <p>
-     * Note that {@code parse(...)} is only a convenience method, and FreeMarker itself doesn't use it (except when you
-     * call the other similar static convenience methods, as they may build on each other). In particular, if you want
-     * full control over the {@link DocumentBuilderFactory} used, create the {@link Node} with your own
-     * {@link DocumentBuilderFactory}, apply {@link #simplify(Node)} (or such) on it, then call
-     * {@link NodeModel#wrap(Node)}.
-     * 
-     * <p>
-     * <b>Security warning:</b> If the XML to load is coming from a source that you can't fully trust, you shouldn't use
-     * this method, as the {@link DocumentBuilderFactory} it uses by default supports external entities, and so it
-     * doesn't prevent XML External Entity (XXE) attacks. Note that XXE attacks are not specific to FreeMarker, they
-     * affect all XML parsers in general. If that's a problem in your application, OWASP has a cheat sheet to set up a
-     * {@link DocumentBuilderFactory} that has limited functionality but is immune to XXE attacks. Because it's just a
-     * convenience method, you can just use your own {@link DocumentBuilderFactory} and do a few extra steps instead
-     * (see earlier).
-     * 
-     * @param removeComments
-     *            Whether to remove all comment nodes (recursively); this is like calling {@link #removeComments(Node)}
-     * @param removePIs
-     *            Whether to remove all processing instruction nodes (recursively); this is like calling
-     *            {@link #removePIs(Node)}
-     */
-    static public NodeModel parse(InputSource is, boolean removeComments, boolean removePIs)
-        throws SAXException, IOException, ParserConfigurationException {
-        DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
-        ErrorHandler errorHandler = getErrorHandler();
-        if (errorHandler != null) builder.setErrorHandler(errorHandler);
-        final Document doc;
-        try {
-        	doc = builder.parse(is);
-        } catch (MalformedURLException e) {
-    		// This typical error has an error message that is hard to understand, so let's translate it:
-        	if (is.getSystemId() == null && is.getCharacterStream() == null && is.getByteStream() == null) {
-        		throw new MalformedURLException(
-        				"The SAX InputSource has systemId == null && characterStream == null && byteStream == null. "
-        				+ "This is often because it was created with a null InputStream or Reader, which is often because "
-        				+ "the XML file it should point to was not found. "
-        				+ "(The original exception was: " + e + ")");
-        	} else {
-        		throw e;
-        	}
-        }
-        if (removeComments && removePIs) {
-            simplify(doc);
-        } else {
-            if (removeComments) {
-                removeComments(doc);
-            }
-            if (removePIs) {
-                removePIs(doc);
-            }
-            mergeAdjacentText(doc);
-        }
-        return wrap(doc);
-    }
-    
-    /**
-     * Same as {@link #parse(InputSource, boolean, boolean) parse(is, true, true)}; don't miss the security warnings
-     * documented there.
-     */
-    static public NodeModel parse(InputSource is) throws SAXException, IOException, ParserConfigurationException {
-        return parse(is, true, true);
-    }
-    
-    
-    /**
-     * Same as {@link #parse(InputSource, boolean, boolean)}, but loads from a {@link File}; don't miss the security
-     * warnings documented there.
-     */
-    static public NodeModel parse(File f, boolean removeComments, boolean removePIs) 
-    throws SAXException, IOException, ParserConfigurationException {
-        DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
-        ErrorHandler errorHandler = getErrorHandler();
-        if (errorHandler != null) builder.setErrorHandler(errorHandler);
-        Document doc = builder.parse(f);
-        if (removeComments && removePIs) {
-            simplify(doc);
-        } else {
-            if (removeComments) {
-                removeComments(doc);
-            }
-            if (removePIs) {
-                removePIs(doc);
-            }
-            mergeAdjacentText(doc);
-        }
-        return wrap(doc);
-    }
-    
-    /**
-     * Same as {@link #parse(InputSource, boolean, boolean) parse(source, true, true)}, but loads from a {@link File};
-     * don't miss the security warnings documented there.
-     */
-    static public NodeModel parse(File f) throws SAXException, IOException, ParserConfigurationException {
-        return parse(f, true, true);
-    }
     
     protected NodeModel(Node node) {
         this.node = node;
@@ -450,6 +268,14 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
                 && ((NodeModel) other).node.equals(node);
     }
     
+    /**
+     * Creates a {@link NodeModel} from a DOM {@link Node}. It's strongly recommended modify the {@link Node} with
+     * {@link #simplify(Node)}, so the DOM will be easier to process in templates.
+     * 
+     * @param node
+     *            The DOM node to wrap. This is typically an {@link Element} or a {@link Document}, but all kind of node
+     *            types are supported. If {@code null}, {@code null} will be returned.
+     */
     static public NodeModel wrap(Node node) {
         if (node == null) {
             return null;
@@ -464,6 +290,9 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
             case Node.TEXT_NODE : result = new CharacterDataNodeModel((org.w3c.dom.CharacterData) node); break;
             case Node.PROCESSING_INSTRUCTION_NODE : result = new PINodeModel((ProcessingInstruction) node); break;
             case Node.DOCUMENT_TYPE_NODE : result = new DocumentTypeModel((DocumentType) node); break;
+            default: throw new IllegalArgumentException(
+                    "Unsupported node type: " + node.getNodeType() + " ("
+                    + node.getClass().getName() + ")");
         }
         return result;
     }

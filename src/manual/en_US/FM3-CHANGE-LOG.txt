@@ -102,3 +102,7 @@ the FreeMarer 3 changelog here:
   - Removed the deprecated BeansWrapper.nullModel setting. So null is always wrapped to null now.
   - Removed the overridable BeansWrapper.finetuneMethodAppearance method, which was deprecated by the
     finetuneMethodAppearance setting (BeansWrapper.setFinetuneMethodAppearance).
+  - Removed NodeModel static utility classes dealing with parsing XML to DOM. How it's best to do that is environment
+    and application dependent, and it has security implications. Since XML loading/parsing it's not the topic of the
+    project, these were removed. Static methods that simplify an already loaded DOM have remained, because that's
+    FreeMarker-specific functionality.

@@ -24,8 +24,8 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.impl.dom.NodeModel;
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.util.XMLLoader;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.InputSource;
@@ -36,7 +36,7 @@ public class DOMSiblingTest extends TemplateTest {
     @Before
     public void setUp() throws SAXException, IOException, ParserConfigurationException {
         InputSource is = new InputSource(getClass().getResourceAsStream("DOMSiblingTest.xml"));
-        addToDataModel("doc", NodeModel.parse(is));
+        addToDataModel("doc", XMLLoader.toModel(is));
     }
 
     @Test

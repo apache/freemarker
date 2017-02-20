@@ -21,12 +21,10 @@ package org.apache.freemarker.core.model.impl.dom;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.StringReader;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.model.impl.dom.NodeModel;
+import org.apache.freemarker.test.util.XMLLoader;
 import org.junit.Test;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
@@ -36,11 +34,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class DOMConvenienceStaticsTest {
+public class DOMSimplifiersTest {
 
     private static final String COMMON_TEST_XML
             = "<!DOCTYPE a []><?p?><a>x<![CDATA[y]]><!--c--><?p?>z<?p?><b><!--c--></b><c></c>"
@@ -79,12 +75,12 @@ public class DOMConvenienceStaticsTest {
         String expected = "<!DOCTYPE ...><?p?><a>%x<![CDATA[y]]><!--c--><?p?>%z<?p?><b><!--c--></b><c/>"
                    + "<d>%a<e>%c</e>%b<!--c--><!--c--><!--c--><?p?><?p?><?p?></d>"
                    + "<f><![CDATA[1]]>%2</f></a><!--c-->";
-        assertEquals(expected, toString(toDOM(COMMON_TEST_XML)));
+        assertEquals(expected, toString(XMLLoader.toDOM(COMMON_TEST_XML)));
     }
 
     @Test
     public void testMergeAdjacentText() throws Exception {
-        Document dom = toDOM(COMMON_TEST_XML);
+        Document dom = XMLLoader.toDOM(COMMON_TEST_XML);
         NodeModel.mergeAdjacentText(dom);
         assertEquals(
                 "<!DOCTYPE ...><?p?><a>%xy<!--c--><?p?>%z<?p?><b><!--c--></b><c/>"
@@ -95,7 +91,7 @@ public class DOMConvenienceStaticsTest {
 
     @Test
     public void testRemoveComments() throws Exception {
-        Document dom = toDOM(COMMON_TEST_XML);
+        Document dom = XMLLoader.toDOM(COMMON_TEST_XML);
         NodeModel.removeComments(dom);
         assertEquals(
                 "<!DOCTYPE ...><?p?><a>%x<![CDATA[y]]><?p?>%z<?p?><b/><c/>"
@@ -106,7 +102,7 @@ public class DOMConvenienceStaticsTest {
 
     @Test
     public void testRemovePIs() throws Exception {
-        Document dom = toDOM(COMMON_TEST_XML);
+        Document dom = XMLLoader.toDOM(COMMON_TEST_XML);
         NodeModel.removePIs(dom);
         assertEquals(
                 "<!DOCTYPE ...><a>%x<![CDATA[y]]><!--c-->%z<b><!--c--></b><c/>"
@@ -136,14 +132,14 @@ public class DOMConvenienceStaticsTest {
     private void testSimplify(String expected, String content)
             throws SAXException, IOException, ParserConfigurationException {
         {
-            Document dom = toDOM(content);
+            Document dom = XMLLoader.toDOM(content);
             NodeModel.simplify(dom);
             assertEquals(expected, toString(dom));
         }
         
         // Must be equivalent:
         {
-            Document dom = toDOM(content);
+            Document dom = XMLLoader.toDOM(content);
             NodeModel.removeComments(dom);
             NodeModel.removePIs(dom);
             NodeModel.mergeAdjacentText(dom);
@@ -152,23 +148,12 @@ public class DOMConvenienceStaticsTest {
         
         // Must be equivalent:
         {
-            Document dom = toDOM(content);
+            Document dom = XMLLoader.toDOM(content);
             NodeModel.removeComments(dom);
             NodeModel.removePIs(dom);
             NodeModel.simplify(dom);
             assertEquals(expected, toString(dom));
         }
-    }
-
-    private Document toDOM(String content) throws SAXException, IOException, ParserConfigurationException {
-        DocumentBuilder builder =  NodeModel.getDocumentBuilderFactory().newDocumentBuilder();
-        ErrorHandler errorHandler =  NodeModel.getErrorHandler();
-        if (errorHandler != null) builder.setErrorHandler(errorHandler);
-        return builder.parse(toInputSource(content));
-    }
-
-    private InputSource toInputSource(String content) {
-        return new InputSource(new StringReader(content));
     }
 
     private String toString(Document doc) {

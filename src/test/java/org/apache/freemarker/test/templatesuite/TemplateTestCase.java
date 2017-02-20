@@ -86,6 +86,7 @@ import org.apache.freemarker.test.util.AssertEqualsDirective;
 import org.apache.freemarker.test.util.AssertFailsDirective;
 import org.apache.freemarker.test.util.FileTestCase;
 import org.apache.freemarker.test.util.NoOutputDirective;
+import org.apache.freemarker.test.util.XMLLoader;
 import org.junit.Ignore;
 import org.xml.sax.InputSource;
 
@@ -319,7 +320,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("mMixed", mMixed);
         } else if (simpleTestName.equals("default-xmlns")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
-            NodeModel nm = NodeModel.parse(is);
+            NodeModel nm = XMLLoader.toModel(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.equals("multimodels")) {
             dataModel.put("test", "selftest");
@@ -355,23 +356,23 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
         } else if (simpleTestName.equals("xmlns1")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns.xml"));
-            NodeModel nm = NodeModel.parse(is);
+            NodeModel nm = XMLLoader.toModel(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.equals("xmlns2")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns2.xml"));
-            NodeModel nm = NodeModel.parse(is);
+            NodeModel nm = XMLLoader.toModel(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.equals("xmlns3") || simpleTestName.equals("xmlns4")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns3.xml"));
-            NodeModel nm = NodeModel.parse(is);
+            NodeModel nm = XMLLoader.toModel(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.equals("xmlns5")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
-            NodeModel nm = NodeModel.parse(is);
+            NodeModel nm = XMLLoader.toModel(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.equals("xml-ns_prefix-scope")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xml-ns_prefix-scope.xml"));
-            NodeModel nm = NodeModel.parse(is);
+            NodeModel nm = XMLLoader.toModel(is);
             dataModel.put("doc", nm);
         } else if (simpleTestName.startsWith("sequence-builtins")) {
             Set<String> abcSet = new TreeSet<>();
