@@ -77,7 +77,8 @@ the FreeMarer 3 changelog here:
   write protected (non-configurable). Also now they come from the pool that ObjectWrapper builders use.
 - WrappingTemplateModel.objectWrapper is now final, and its statically stored default value can't be set anymore.
 - Removed SimpleObjectWrapper deprecated paramerless constructor
-- Removed ResourceBundleLocalizedString and LocalizedString: Hardly anybody has discovered these, and they had no JUnit coverage.
+- Removed ResourceBundleLocalizedString and LocalizedString: Hardly anybody has discovered these, and they had no
+  JUnit coverage.
 - Added early draft of TemplateResolver, renamed TemplateCache to DefaultTemplateResolver. TemplateResolver is not
   yet directly used in Configuration. This was only added in a hurry, so that it's visible why the
   o.a.f.core.templateresolver subpackage name makes sense.
@@ -91,3 +92,6 @@ the FreeMarer 3 changelog here:
 - Changed the default of logTemplateExceptions to false.
 - Removed `String Configurable.getSetting(String)` and `Properties getSettings()`. It has never worked well,
   and is impossible to implement properly.
+- Even for setting values that are class names without following `()` or other argument list, the INSTANCE field and
+  the builder class will be searched now, and used instead of the constructor of the class. Earlier they weren't for
+  backward compatibility.

@@ -2090,18 +2090,16 @@ public class Configurable {
      *   <li>
      *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
      *      a public static {@code INSTANCE} field, the value of that filed will be the value of the expression, and
-     *      the constructor won't be called. Note that if you use the backward compatible
-     *      syntax, where these's no parenthesis after the class name, then it will not look for {@code INSTANCE}.
+     *      the constructor won't be called.
      *   </li>
      *   <li>
      *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
      *      instead with the given constructor arguments, and the JavaBean properties of that builder instance will be
      *      set. After that, the public <tt>build()</tt> method of the instance will be called, whose return value
      *      will be the value of the whole expression. (The builder class and the <tt>build()</tt> method is simply
-     *      found by name, there's no special interface to implement.) Note that if you use the backward compatible
-     *      syntax, where these's no parenthesis after the class name, then it will not look for builder class. Note
-     *      that if you have a builder class, you don't actually need a <tt><i>className</i></tt> class (since 2.3.24);
-     *      after all, <tt><i>className</i>Builder.build()</tt> can return any kind of object. 
+     *      found by name, there's no special interface to implement.)Note that if you have a builder class, you don't
+     *      actually need a <tt><i>className</i></tt> class (since 2.3.24); after all,
+     *      <tt><i>className</i>Builder.build()</tt> can return any kind of object. 
      *   </li>
      *   <li>
      *      <p>Currently, the values of arguments and properties can only be one of these:
@@ -2134,10 +2132,7 @@ public class Configurable {
      *     rarely useful, apart from using {@code null}).
      *   </li>
      *   <li>
-     *     <p>The top-level object builder expressions may omit {@code ()}. In that case, for backward compatibility,
-     *     the {@code INSTANCE} field and the builder class is not searched, so the instance will be always
-     *     created with its parameterless constructor. (This behavior will possibly change in 2.4.) The {@code ()}
-     *     can't be omitted for nested expressions.
+     *     <p>The top-level object builder expressions may omit {@code ()}.
      *   </li>
      *   <li>
      *     <p>The following classes can be referred to with simple (unqualified) name instead of fully qualified name:

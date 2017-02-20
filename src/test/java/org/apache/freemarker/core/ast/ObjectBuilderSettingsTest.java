@@ -176,11 +176,11 @@ public class ObjectBuilderSettingsTest {
     @Test
     public void builderTest() throws Exception {
         {
-            // Backward-compatible mode, no builder:
+            // `()`-les syntax:
             TestBean2 res = (TestBean2) _ObjectBuilderSettingEvaluator.eval(
                     "org.apache.freemarker.core.ast.ObjectBuilderSettingsTest$TestBean2",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
-            assertFalse(res.built);
+            assertTrue(res.built);
             assertEquals(0, res.x);
         }
         
@@ -211,14 +211,14 @@ public class ObjectBuilderSettingsTest {
 
     @Test
     public void staticInstanceTest() throws Exception {
-        // Backward compatible mode:
+        // ()-les syntax:
         {
             TestBean5 res = (TestBean5) _ObjectBuilderSettingEvaluator.eval(
                     "org.apache.freemarker.core.ast.ObjectBuilderSettingsTest$TestBean5",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
             assertEquals(0, res.i);
             assertEquals(0, res.x);
-            assertNotSame(TestBean5.INSTANCE, res);
+            assertSame(TestBean5.INSTANCE, res); //!
         }
         
         {
@@ -266,13 +266,11 @@ public class ObjectBuilderSettingsTest {
         }
         
         {
-            // Backward-compatible mode
             TestBean3 res = (TestBean3) _ObjectBuilderSettingEvaluator.eval(
                     "org.apache.freemarker.core.ast.ObjectBuilderSettingsTest$TestBean3",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
             assertEquals(0, res.x);
-            assertFalse(res.isWriteProtected());
-            res.setX(2);
+            assertTrue(res.isWriteProtected()); // Still uses a builder
         }
     }
 
@@ -457,18 +455,6 @@ public class ObjectBuilderSettingsTest {
             assertSame(ArithmeticEngine.BIGDECIMAL_ENGINE, cfg.getArithmeticEngine());
             assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-            assertEquals(Configuration.VERSION_3_0_0,
-                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
-        }
-
-        {
-            Properties props = new Properties();
-            props.setProperty(
-                    Configurable.OBJECT_WRAPPER_KEY,
-                    "org.apache.freemarker.core.model.impl.beans.BeansWrapper");
-            cfg.setSettings(props);
-            assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
-            assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(Configuration.VERSION_3_0_0,
                     ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }

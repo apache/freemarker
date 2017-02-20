@@ -89,9 +89,6 @@ public class _ObjectBuilderSettingEvaluator {
     // Parser state:
     private int pos;
     
-    // Parsing results:
-    private boolean modernMode = false;
-    
     private _ObjectBuilderSettingEvaluator(
             String src, int pos, Class expectedClass, boolean allowNull, _SettingEvaluationEnvironment env) {
         this.src = src;
@@ -126,12 +123,7 @@ public class _ObjectBuilderSettingEvaluator {
         Object value;
         
         skipWS();
-        try {
-            value = ensureEvaled(fetchValue(false, true, false, true));
-        } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
-            e.rethrowLegacy();
-            value = null; // newer reached
-        }
+        value = ensureEvaled(fetchValue(false, true, false, true));
         skipWS();
         
         if (pos != src.length()) {
@@ -181,8 +173,6 @@ public class _ObjectBuilderSettingEvaluator {
             }
             exp.className = shorthandToFullQualified(fetchedClassName);
             if (!fetchedClassName.equals(exp.className)) {
-                // Before 2.3.21 only full-qualified class names were allowed
-                modernMode = true;
                 exp.canBeStaticField = false;
             }
         }
@@ -209,9 +199,6 @@ public class _ObjectBuilderSettingEvaluator {
     }
 
     private void fetchParameterListInto(ExpressionWithParameters exp) throws _ObjectBuilderSettingEvaluationException {
-        // Before 2.3.21 there was no parameter list
-        modernMode = true;
-        
         skipWS();
         if (fetchOptionalChar(")") != ')') { 
             do {
@@ -867,30 +854,6 @@ public class _ObjectBuilderSettingEvaluator {
             
             Class cl;
             
-            if (!modernMode) {
-                try {
-                    try {
-                        return _ClassUtil.forName(className).newInstance();
-                    } catch (InstantiationException e) {
-                        throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
-                    } catch (IllegalAccessException e) {
-                        throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
-                    } catch (ClassNotFoundException e) {
-                        throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
-                    }
-                } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
-                    if (!canBeStaticField) {
-                        throw e;
-                    }
-                    // Silently try to interpret className as static filed, throw the original exception if that fails. 
-                    try {
-                        return getStaticFieldValue(className);
-                    } catch (_ObjectBuilderSettingEvaluationException e2) {
-                        throw e;
-                    }
-                }
-            }
-
             boolean clIsBuilderClass;
             try {
                 cl = _ClassUtil.forName(className + BUILDER_CLASS_POSTFIX);
@@ -1087,30 +1050,6 @@ public class _ObjectBuilderSettingEvaluator {
         @Override
         protected boolean getAllowPositionalParameters() {
             return false;
-        }
-        
-    }
-    
-    private static class LegacyExceptionWrapperSettingEvaluationExpression
-            extends _ObjectBuilderSettingEvaluationException {
-
-        public LegacyExceptionWrapperSettingEvaluationExpression(Throwable cause) {
-            super("Legacy operation failed", cause);
-            if (!(
-                    (cause instanceof ClassNotFoundException) 
-                    || (cause instanceof InstantiationException)
-                    || (cause instanceof IllegalAccessException)
-                    )) {
-                throw new IllegalArgumentException();
-            }
-        }
-
-        public void rethrowLegacy() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-            Throwable cause = getCause();
-            if (cause instanceof ClassNotFoundException) throw (ClassNotFoundException) cause;
-            if (cause instanceof InstantiationException) throw (InstantiationException) cause;
-            if (cause instanceof IllegalAccessException) throw (IllegalAccessException) cause;
-            throw new BugException();
         }
         
     }
