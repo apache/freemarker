@@ -45,13 +45,6 @@ public class TemplateConstructorsTest {
         final String content = "From a String...";
         final String encoding = "UTF-16LE";
         {
-            Template t = new Template(name, createReader());
-            assertEquals(name, t.getName());
-            assertEquals(name, t.getSourceName());
-            assertEquals(READER_CONTENT, t.toString());
-            assertNull(t.getEncoding());
-        }
-        {
             Template t = new Template(name, createReader(), cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());

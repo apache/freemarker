@@ -22,12 +22,16 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._TemplateAPI;
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
 
@@ -76,7 +80,6 @@ import org.apache.freemarker.core.util._NullArgumentException;
  */
 public final class TemplateConfiguration extends Configurable implements ParserConfiguration {
 
-    private boolean parentConfigurationSet;
     private Integer tagSyntax;
     private Integer namingConvention;
     private Boolean whitespaceStripping;
@@ -87,12 +90,12 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private Integer tabSize;
 
     /**
-     * Creates a new instance. The parent will be {@link Configuration#getDefaultConfiguration()} initially, but it will
+     * Creates a new instance. The parent will be {@code null} initially, but it will
      * be changed to the real parent {@link Configuration} when this object is added to the {@link Configuration}. (It's
      * not allowed to add the same instance to multiple {@link Configuration}-s).
      */
     public TemplateConfiguration() {
-        super(Configuration.getDefaultConfiguration());
+        super((Configuration) null);
     }
 
     /**
@@ -105,8 +108,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             throw new IllegalArgumentException("The parent of a TemplateConfiguration can only be a Configuration");
         }
         
-        if (parentConfigurationSet) {
-            if (getParent() != cfg) {
+        Configurable parent = getParent();
+        if (parent != null) {
+            if (parent != cfg) {
                 throw new IllegalStateException(
                         "This TemplateConfiguration is already associated with a different Configuration instance.");
             }
@@ -114,7 +118,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         
         super.setParent(cfg);
-        parentConfigurationSet = true;
     }
 
     /**
@@ -137,12 +140,15 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * Returns the parent {@link Configuration}, or {@code null} if none was associated yet.
      */
     public Configuration getParentConfiguration() {
-        return parentConfigurationSet ? (Configuration) getParent() : null;
+        return (Configuration) getParent();
     }
 
     private Configuration getNonNullParentConfiguration() {
-        checkParentConfigurationSet();
-        return (Configuration) getParent();
+        Configurable parent = getParent();
+        if (parent == null) {
+            throw new IllegalStateException("The TemplateConfiguration wasn't associated with a Configuration yet.");
+        }
+        return (Configuration) parent;
     }
     
     /**
@@ -167,10 +173,12 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             setBooleanFormat(tc.getBooleanFormat());
         }
         if (tc.isCustomDateFormatsSet()) {
-            setCustomDateFormats(mergeMaps(getCustomDateFormats(), tc.getCustomDateFormats(), false));
+            setCustomDateFormats(mergeMaps(
+                    isCustomDateFormatsSet() ? getCustomDateFormats() : null, tc.getCustomDateFormats(), false));
         }
         if (tc.isCustomNumberFormatsSet()) {
-            setCustomNumberFormats(mergeMaps(getCustomNumberFormats(), tc.getCustomNumberFormats(), false));
+            setCustomNumberFormats(mergeMaps(
+                    isCustomNumberFormatsSet() ? getCustomNumberFormats() : null, tc.getCustomNumberFormats(), false));
         }
         if (tc.isDateFormatSet()) {
             setDateFormat(tc.getDateFormat());
@@ -242,10 +250,10 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             setLazyAutoImports(tc.getLazyAutoImports());
         }
         if (tc.isAutoImportsSet()) {
-            setAutoImports(mergeMaps(getAutoImports(), tc.getAutoImports(), true));
+            setAutoImports(mergeMaps(isAutoImportsSet() ? getAutoImports() : null, tc.getAutoImports(), true));
         }
         if (tc.isAutoIncludesSet()) {
-            setAutoIncludes(mergeLists(getAutoIncludes(), tc.getAutoIncludes()));
+            setAutoIncludes(mergeLists(isAutoIncludesSet() ? getAutoIncludes() : null, tc.getAutoIncludes()));
         }
         
         tc.copyDirectCustomAttributes(this, true);
@@ -567,10 +575,296 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     public Version getIncompatibleImprovements() {
         return getNonNullParentConfiguration().getIncompatibleImprovements();
     }
+    
+    
 
-    private void checkParentConfigurationSet() {
-        if (!parentConfigurationSet) {
-            throw new IllegalStateException("The TemplateConfiguration wasn't associated with a Configuration yet.");
+    @Override
+    public Locale getLocale() {
+        try {
+            return super.getLocale();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public TimeZone getTimeZone() {
+        try {
+            return super.getTimeZone();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public TimeZone getSQLDateAndTimeTimeZone() {
+        try {
+            return super.getSQLDateAndTimeTimeZone();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String getNumberFormat() {
+        try {
+            return super.getNumberFormat();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats() {
+        try {
+            return super.getCustomNumberFormats();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
+        try {
+            return super.getCustomNumberFormat(name);
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean hasCustomFormats() {
+        try {
+            return super.hasCustomFormats();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String getBooleanFormat() {
+        try {
+            return super.getBooleanFormat();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String getTimeFormat() {
+        try {
+            return super.getTimeFormat();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String getDateFormat() {
+        try {
+            return super.getDateFormat();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String getDateTimeFormat() {
+        try {
+            return super.getDateTimeFormat();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormats() {
+        try {
+            return super.getCustomDateFormats();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public TemplateDateFormatFactory getCustomDateFormat(String name) {
+        try {
+            return super.getCustomDateFormat(name);
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public TemplateExceptionHandler getTemplateExceptionHandler() {
+        try {
+            return super.getTemplateExceptionHandler();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public ArithmeticEngine getArithmeticEngine() {
+        try {
+            return super.getArithmeticEngine();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public ObjectWrapper getObjectWrapper() {
+        try {
+            return super.getObjectWrapper();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String getOutputEncoding() {
+        try {
+            return super.getOutputEncoding();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String getURLEscapingCharset() {
+        try {
+            return super.getURLEscapingCharset();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public TemplateClassResolver getNewBuiltinClassResolver() {
+        try {
+            return super.getNewBuiltinClassResolver();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean getAutoFlush() {
+        try {
+            return super.getAutoFlush();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean getShowErrorTips() {
+        try {
+            return super.getShowErrorTips();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean isAPIBuiltinEnabled() {
+        try {
+            return super.isAPIBuiltinEnabled();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean getLogTemplateExceptions() {
+        try {
+            return super.getLogTemplateExceptions();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean getLazyImports() {
+        try {
+            return super.getLazyImports();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public Boolean getLazyAutoImports() {
+        try {
+            return super.getLazyAutoImports();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public Map<String, String> getAutoImports() {
+        try {
+            return super.getAutoImports();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<String> getAutoIncludes() {
+        try {
+            return super.getAutoIncludes();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public String[] getCustomAttributeNames() {
+        try {
+            return super.getCustomAttributeNames();
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
+        }
+    }
+
+    @Override
+    public Object getCustomAttribute(String name) {
+        try {
+            return super.getCustomAttribute(name);
+        } catch (NullPointerException e) {
+            getNonNullParentConfiguration();
+            throw e;
         }
     }
 

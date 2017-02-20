@@ -114,15 +114,14 @@ public class Template extends Configurable {
      * delegate directly or indirectly.
      */
     private Template(String name, String sourceName, Configuration cfg, ParserConfiguration customParserConfiguration) {
-        super(toNonNull(cfg));
+        super(cfg);
+        if (cfg == null) {
+            throw new IllegalArgumentException("\"cfg\" can't be null");
+        }
         this.name = name;
         this.sourceName = sourceName;
-        templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
+        templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
         parserConfiguration = customParserConfiguration != null ? customParserConfiguration : getConfiguration();
-    }
-
-    private static Configuration toNonNull(Configuration cfg) {
-        return cfg != null ? cfg : Configuration.getDefaultConfiguration();
     }
 
     /**
@@ -305,32 +304,6 @@ public class Template extends Configurable {
         DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
-    }
-
-    /**
-     * Equivalent to {@link #Template(String, Reader, Configuration)
-     * Template(name, reader, null)}.
-     * 
-     * @deprecated This constructor uses the "default" {@link Configuration}
-     * instance, which can easily lead to erroneous, unpredictable behavior.
-     * See more {@link Configuration#getDefaultConfiguration() here...}.
-     */
-    @Deprecated
-    public Template(String name, Reader reader) throws IOException {
-        this(name, reader, null);
-    }
-
-    /**
-     * Only meant to be used internally.
-     * 
-     * @deprecated Has problems setting actualTagSyntax and templateLanguageVersion; will be removed in 2.4.
-     */
-    @Deprecated
-    // [2.4] remove this
-    Template(String name, TemplateElement rootElement, Configuration cfg) {
-        this(name, null, cfg, (ParserConfiguration) null);
-        this.rootElement = rootElement;
-        DebuggerService.registerTemplate(this);
     }
     
     /**
