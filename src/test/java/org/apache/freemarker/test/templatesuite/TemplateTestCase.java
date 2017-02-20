@@ -157,7 +157,7 @@ public class TemplateTestCase extends FileTestCase {
         } else if ("input_encoding".equals(param)) {
             conf.setDefaultEncoding(value);
         // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.
-        } else if (!Configuration.INCOMPATIBLE_IMPROVEMENTS.equals(param)) {
+        } else if (!Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY.equals(param)) {
             try {
                 conf.setSetting(param, value);
             } catch (TemplateException e) {

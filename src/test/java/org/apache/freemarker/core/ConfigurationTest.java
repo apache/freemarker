@@ -1067,7 +1067,7 @@ public class ConfigurationTest extends TestCase {
     public void testSetICIViaSetSettingAPI() throws TemplateException {
         Configuration cfg = new Configuration();
         assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
-        cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, "3.0.0"); // This is the only valid value ATM...
+        cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0"); // This is the only valid value ATM...
         assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
     }
 

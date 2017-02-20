@@ -1099,19 +1099,6 @@ public class _StringUtil {
     }
     
     /**
-     * Used internally by the XML DOM_WRAPPER wrapper to check if the subvariable name is just an element name, or a more
-     * complex XPath expression.
-     * 
-     * @return whether the name is a valid XML element name. (This routine might only be 99% accurate. REVISIT)
-     * 
-     * @deprecated Don't use this outside FreeMarker; it's name if misleading, and it doesn't follow the XML specs.
-     */
-    @Deprecated
-    static public boolean isXMLID(String name) {
-        return _ExtDomApi.isXMLNameLike(name);
-    }
-    
-    /**
      * @return whether the qname matches the combination of nodeName, nsURI, and environment prefix settings.
      */
     static public boolean matchesName(String qname, String nodeName, String nsURI, Environment env) {

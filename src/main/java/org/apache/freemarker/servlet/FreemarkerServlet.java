@@ -621,7 +621,7 @@ public class FreemarkerServlet extends HttpServlet {
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
                         || name.equals(Configurable.OBJECT_WRAPPER_KEY)
                         || name.equals(INIT_PARAM_TEMPLATE_PATH)
-                        || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS)) {
+                        || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY)) {
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
                     if (getInitParameter(Configuration.DEFAULT_ENCODING_KEY) != null) {

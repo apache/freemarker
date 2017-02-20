@@ -391,7 +391,7 @@ public class Configurable {
      * Creates a new instance. Normally you do not need to use this constructor,
      * as you don't use <code>Configurable</code> directly, but its subclasses.
      */
-    public Configurable(Configurable parent) {
+    protected Configurable(Configurable parent) {
         this.parent = parent;
         locale = null;
         numberFormat = null;
@@ -2012,10 +2012,6 @@ public class Configurable {
      *       See {@link Configuration#setIncompatibleImprovements(Version)}.
      *       <br>String value: version number like {@code 2.3.20}.
      *       
-     *   <li><p>{@code "incompatible_enhancements"}:
-     *       See: {@link Configuration#setIncompatibleEnhancements(String)}.
-     *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
-     *        
      *   <li><p>{@code "recognize_standard_file_extensions"}:
      *       See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},

@@ -84,15 +84,6 @@ public class DeepUnwrap {
         return unwrap(model, true);
     }
     
-    /**
-     * @deprecated the name of this method is mistyped. Use 
-     * {@link #permissiveUnwrap(TemplateModel)} instead.
-     */
-    @Deprecated
-    public static Object premissiveUnwrap(TemplateModel model) throws TemplateModelException {
-        return unwrap(model, true);
-    }
-    
     private static Object unwrap(TemplateModel model, boolean permissive) throws TemplateModelException {
         Environment env = Environment.getCurrentEnvironment();
         TemplateModel nullModel = null;

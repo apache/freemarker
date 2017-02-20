@@ -216,25 +216,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TEMPLATE_UPDATE_DELAY_KEY = TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE;
     
-    /**
-     * Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23
-     * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
-     */
-    @Deprecated
-    public static final String AUTO_IMPORT_KEY_SNAKE_CASE = "auto_import";
-    /**
-     * Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23
-     * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_CAMEL_CASE} instead.
-     */
-    @Deprecated
-    public static final String AUTO_IMPORT_KEY_CAMEL_CASE = "autoImport";
-    /**
-     * Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints.
-     * @deprecated Use {@link Configurable#AUTO_IMPORT_KEY_SNAKE_CASE} instead.
-     */
-    @Deprecated
-    public static final String AUTO_IMPORT_KEY = AUTO_IMPORT_KEY_SNAKE_CASE;
-    
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String AUTO_INCLUDE_KEY_SNAKE_CASE = "auto_include";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
@@ -297,13 +278,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE = "incompatibleImprovements";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
-    
-    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
-    @Deprecated
-    public static final String INCOMPATIBLE_IMPROVEMENTS = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
-    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
-    @Deprecated
-    public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
     
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
         // Must be sorted alphabetically!
@@ -387,12 +361,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_3_0_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_3_0_0;
-    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
-    @Deprecated
-    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
-    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
-    @Deprecated
-    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
     private static final String NULL = "null";
     private static final String DEFAULT = "default";
@@ -1359,31 +1327,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
-    }
-    
-    /**
-     * @deprecated Use {@link #Configuration(Version)}, or
-     *    as last chance, {@link #setIncompatibleImprovements(Version)} instead.
-     */
-    @Deprecated
-    public void setIncompatibleEnhancements(String version) {
-        setIncompatibleImprovements(new Version(version));
-    }
-    
-    /**
-     * @deprecated Use {@link #getIncompatibleImprovements()} instead.
-     */
-    @Deprecated
-    public String getIncompatibleEnhancements() {
-        return incompatibleImprovements.toString();
-    }
-    
-    /**
-     * @deprecated Use {@link #getIncompatibleImprovements()} instead.
-     */
-    @Deprecated
-    public int getParsedIncompatibleEnhancements() {
-        return getIncompatibleImprovements().intValue();
     }
     
     /**
@@ -2585,8 +2528,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             } else if (INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE.equals(name)
                     || INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE.equals(name)) {
                 setIncompatibleImprovements(new Version(value));
-            } else if (INCOMPATIBLE_ENHANCEMENTS.equals(name)) {
-                setIncompatibleEnhancements(value);
             } else if (TEMPLATE_LOADER_KEY_SNAKE_CASE.equals(name) || TEMPLATE_LOADER_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetTemplateLoader();
@@ -2676,6 +2617,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         if ("defaultCharset".equals(name)) {
             return DEFAULT_ENCODING_KEY_CAMEL_CASE;
         }
+        if (name.equals("incompatible_enhancements")) {
+            return INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
+        }
+        if (name.equals("incompatibleEnhancements")) {
+            return INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE;
+        }
+        
         return super.getCorrectedNameForUnknownSetting(name);
     }
     

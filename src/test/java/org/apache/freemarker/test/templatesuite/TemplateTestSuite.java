@@ -218,9 +218,7 @@ public class TemplateTestSuite extends TestSuite {
         
         final List<Version> icisToTest;
         {
-            final String testCaseIcis = testCaseSettings.get(Configuration.INCOMPATIBLE_IMPROVEMENTS) != null
-                    ? testCaseSettings.get(Configuration.INCOMPATIBLE_IMPROVEMENTS)
-                    : testCaseSettings.get(Configuration.INCOMPATIBLE_ENHANCEMENTS);
+            final String testCaseIcis = testCaseSettings.get(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY);
                     
             icisToTest = testCaseIcis != null ? parseVersionList(testCaseIcis) : testSuiteIcis;
             if (icisToTest.isEmpty()) {
