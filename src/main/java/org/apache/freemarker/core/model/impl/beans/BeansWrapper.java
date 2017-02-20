@@ -762,18 +762,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         return new APIModel(obj, this);
     }
 
-    /**
-     * @deprecated override {@link #getModelFactory(Class)} instead. Using this
-     * method will now bypass wrapper caching (if it's enabled) and always 
-     * result in creation of a new wrapper. This method will be removed in 2.4
-     * @param object The object to wrap
-     * @param factory The factory that wraps the object
-     */
-    @Deprecated
-    protected TemplateModel getInstance(Object object, ModelFactory factory) {
-        return factory.create(object, this);
-    }
-
     private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
         @Override
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
