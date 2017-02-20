@@ -108,3 +108,5 @@ the FreeMarer 3 changelog here:
     FreeMarker-specific functionality.
   - Removed parameterless DefaultObjectWrapper and BeansWrapper constructors. Now specifying the
     incomplatibleImprovement version is required.
+  - Removed the static default Configuration instance. (It's not possible to create a template with null Configuration
+    constructor argument anymore.)

@@ -115,9 +115,7 @@ public class Template extends Configurable {
      */
     private Template(String name, String sourceName, Configuration cfg, ParserConfiguration customParserConfiguration) {
         super(cfg);
-        if (cfg == null) {
-            throw new IllegalArgumentException("\"cfg\" can't be null");
-        }
+        _NullArgumentException.check("cfg", cfg);
         this.name = name;
         this.sourceName = sourceName;
         templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
@@ -177,9 +175,7 @@ public class Template extends Configurable {
      *            {@link StringReader} need not be closed.) The {@link Reader} need not be buffered, because this
      *            method ensures that it will be read in few kilobyte chunks, not byte by byte.
      * @param cfg
-     *            The Configuration object that this Template is associated with. If this is {@code null}, the "default"
-     *            {@link Configuration} object is used, which is highly discouraged, because it can easily lead to
-     *            erroneous, unpredictable behavior. (See more {@link Configuration#getDefaultConfiguration() here...})
+     *            The Configuration object that this Template is associated with. Can't be {@code null}.
      * 
      * @since 2.3.22
      */

@@ -404,10 +404,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
     }
     
-    private final static Object defaultConfigLock = new Object();
-
-    private static volatile Configuration defaultConfig;
-
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
     private int autoEscapingPolicy = ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY;
@@ -708,51 +704,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void clearEncodingMap() {
         localeToCharsetMap.clear();
-    }
-
-    /**
-     * Returns the default (singleton) Configuration object. Note that you can
-     * create as many separate configurations as you wish; this global instance
-     * is provided for convenience, or when you have no reason to use a separate
-     * instance.
-     * 
-     * @deprecated The usage of the static singleton (the "default")
-     * {@link Configuration} instance can easily cause erroneous, unpredictable
-     * behavior. This is because multiple independent software components may use
-     * FreeMarker internally inside the same application, so they will interfere
-     * because of the common {@link Configuration} instance. Each such component
-     * should use its own private {@link Configuration} object instead, that it
-     * typically creates with <code>new Configuration()</code> when the component
-     * is initialized.
-     */
-    @Deprecated
-    static public Configuration getDefaultConfiguration() {
-        Configuration defaultConfig = Configuration.defaultConfig;
-        if (defaultConfig == null) {
-            synchronized (defaultConfigLock) {
-                defaultConfig = Configuration.defaultConfig;
-                if (defaultConfig == null) {
-                    defaultConfig = new Configuration();
-                    Configuration.defaultConfig = defaultConfig; 
-                }
-            }
-        }
-        return defaultConfig;
-    }
-
-    /**
-     * Sets the Configuration object that will be retrieved from future calls
-     * to {@link #getDefaultConfiguration()}.
-     * 
-     * @deprecated Using the "default" {@link Configuration} instance can
-     * easily lead to erroneous, unpredictable behaviour.
-     * See more {@link Configuration#getDefaultConfiguration() here...}.
-     */
-    @Deprecated
-    static public void setDefaultConfiguration(Configuration config) {
-        synchronized (defaultConfigLock) {
-            defaultConfig = config;
-        }
     }
     
     /**
