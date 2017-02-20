@@ -99,3 +99,6 @@ the FreeMarer 3 changelog here:
 - Removed several deprecated methods and constants. Some notes:
   - strict_bean_models configuration setting was removed, as it should be set on the BeansWrapper itself
   - .template_name now means the same as .current_template_name (it doesn't emulate 2.3 glitches anymore)
+  - Removed the deprecated BeansWrapper.nullModel setting. So null is always wrapped to null now.
+  - Removed the overridable BeansWrapper.finetuneMethodAppearance method, which was deprecated by the
+    finetuneMethodAppearance setting (BeansWrapper.setFinetuneMethodAppearance).

@@ -63,7 +63,6 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util.WriteProtectable;
 import org.apache.freemarker.core.util._ClassUtil;
@@ -262,52 +261,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @since 2.3.22
      */
     protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean writeProtected, boolean finalizeConstruction) {
-        // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
-        if (bwConf.getMethodAppearanceFineTuner() == null) {
-            Class<?> thisClass = getClass();
-            boolean overridden = false;
-            boolean testFailed = false;
-            try {
-                while (!overridden
-                        && thisClass != DefaultObjectWrapper.class
-                        && thisClass != BeansWrapper.class
-                        && thisClass != SimpleObjectWrapper.class) {
-                    try {
-                        thisClass.getDeclaredMethod("finetuneMethodAppearance",
-                                new Class<?>[] { Class.class, Method.class, MethodAppearanceDecision.class });
-                        overridden = true;
-                    } catch (NoSuchMethodException e) {
-                        thisClass = thisClass.getSuperclass();
-                    }
-                }
-            } catch (Throwable e) {
-                // The security manager sometimes doesn't allow this
-                LOG.info("Failed to check if finetuneMethodAppearance is overidden in {}"
-                        + "; acting like if it was, but this way it won't utilize the shared class introspection "
-                        + "cache.", thisClass.getName(),
-                        e);
-                overridden = true;
-                testFailed = true;
-            }
-            if (overridden) {
-                if (!testFailed && !ftmaDeprecationWarnLogged) {
-                    LOG.warn("Overriding " + BeansWrapper.class.getName() + ".finetuneMethodAppearance is deprecated "
-                            + "and will be banned sometimes in the future. Use setMethodAppearanceFineTuner instead.");
-                    ftmaDeprecationWarnLogged = true;
-                }
-                bwConf = (BeansWrapperConfiguration) bwConf.clone(false);
-                bwConf.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
-
-                    @Override
-                    public void process(
-                            MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
-                        finetuneMethodAppearance(in.getContainingClass(), in.getMethod(), out);
-                    }
-                    
-                });
-            }
-        }
-
         incompatibleImprovements = bwConf.getIncompatibleImprovements();  // normalized
         
         simpleMapWrapper = bwConf.isSimpleMapWrapper();
@@ -1498,19 +1451,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     ClassIntrospector getClassIntrospector() {
         return classIntrospector;
-    }
-    
-    /**
-     * @deprecated Use {@link #setMethodAppearanceFineTuner(MethodAppearanceFineTuner)};
-     *     no need to extend this class anymore.
-     *     Soon this method will be final, so trying to override it will break your app.
-     *     Note that if the {@code methodAppearanceFineTuner} property is set to non-{@code null}, this method is not
-     *     called anymore.
-     */
-    @Deprecated
-    protected void finetuneMethodAppearance(
-            Class<?> clazz, Method m, MethodAppearanceDecision decision) {
-        // left everything on its default; do nothing
     }
     
     /**

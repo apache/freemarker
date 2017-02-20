@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Method;
-
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -37,26 +37,8 @@ import org.junit.runners.JUnit4;
 public class FineTuneMethodAppearanceTest {
 
     @Test
-    public void detectNoOwerride() throws TemplateModelException {
-        assertNull(new DefaultObjectWrapper().getMethodAppearanceFineTuner());
-        assertNull(new DefaultObjectWrapperNoOverride().getMethodAppearanceFineTuner());
-        assertNull(new DefaultObjectWrapperNoOverrideExt().getMethodAppearanceFineTuner());
-    }
-    
-    @Test
-    public void legacyWayOfConfiguring() throws TemplateModelException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapperOverride();
-        ow.setExposeFields(true);
-        checkIfProperlyWrapped(ow.wrap(new C()));
-        
-        ow = new DefaultObjectWrapperOverrideExt();
-        ow.setExposeFields(true);
-        checkIfProperlyWrapped(ow.wrap(new C()));
-    }
-
-    @Test
     public void newWayOfConfiguring() throws TemplateModelException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper();
+        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
         ow.setMethodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE);
         ow.setExposeFields(true);
         checkIfProperlyWrapped(ow.wrap(new C()));
@@ -81,20 +63,4 @@ public class FineTuneMethodAppearanceTest {
         public String getV3() { return "getV3()"; }
     }
     
-    static class DefaultObjectWrapperNoOverride extends DefaultObjectWrapper {
-        
-    }
-
-    static class DefaultObjectWrapperNoOverrideExt extends DefaultObjectWrapperNoOverride { }
-    
-    static class DefaultObjectWrapperOverride extends DefaultObjectWrapper {
-
-        @Override
-        protected void finetuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision out) {
-            GetlessMethodsAsPropertyGettersRule.INSTANCE.legacyProcess(clazz, m, out);
-        }
-        
-    }
-    
-    static class DefaultObjectWrapperOverrideExt extends DefaultObjectWrapperOverride { }
 }
