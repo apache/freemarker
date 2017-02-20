@@ -963,18 +963,14 @@ public class ConfigurationTest extends TestCase {
             
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             assertEquals(sysDefTZ, cfg.getTimeZone());
-            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
             cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
             assertEquals(sysDefTZ, cfg.getTimeZone());
-            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
             
             TimeZone newSysDefTZ = TimeZone.getTimeZone("GMT+09");
             TimeZone.setDefault(newSysDefTZ);
             assertEquals(sysDefTZ, cfg.getTimeZone());
-            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
             cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
             assertEquals(newSysDefTZ, cfg.getTimeZone());
-            assertEquals(newSysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
         } finally {
             TimeZone.setDefault(origSysDefTZ);
         }
@@ -988,19 +984,15 @@ public class ConfigurationTest extends TestCase {
             
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             assertNull(cfg.getSQLDateAndTimeTimeZone());
-            assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
             
             cfg.setSQLDateAndTimeTimeZone(null);
             assertNull(cfg.getSQLDateAndTimeTimeZone());
-            assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
             
             cfg.setSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "JVM default");
             assertEquals(sysDefTZ, cfg.getSQLDateAndTimeTimeZone());
-            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
             
             cfg.setSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "null");
             assertNull(cfg.getSQLDateAndTimeTimeZone());
-            assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         } finally {
             TimeZone.setDefault(origSysDefTZ);
         }
@@ -1015,40 +1007,32 @@ public class ConfigurationTest extends TestCase {
         // cfg:
         assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
         assertNull(cfg.getSQLDateAndTimeTimeZone());
-        assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env:
         assertEquals(TimeZone.getDefault(), env1.getTimeZone());
         assertNull(env1.getSQLDateAndTimeTimeZone());
-        assertEquals("null", env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env 2:
         assertEquals(TimeZone.getDefault(), env2.getTimeZone());
         assertNull(env2.getSQLDateAndTimeTimeZone());
-        assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         
         env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
         // cfg:
         assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
         assertNull(cfg.getSQLDateAndTimeTimeZone());
-        assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env:
         assertEquals(TimeZone.getDefault(), env1.getTimeZone());
         assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-        assertEquals(_DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         
         TimeZone localTZ = TimeZone.getTimeZone("Europe/Brussels");
         env1.setTimeZone(localTZ);
         // cfg:
         assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
         assertNull(cfg.getSQLDateAndTimeTimeZone());
-        assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env:
         assertEquals(localTZ, env1.getTimeZone());
         assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-        assertEquals(_DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env 2:
         assertEquals(TimeZone.getDefault(), env2.getTimeZone());
         assertNull(env2.getSQLDateAndTimeTimeZone());
-        assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         
         TimeZone otherTZ1 = TimeZone.getTimeZone("GMT+05");
         TimeZone otherTZ2 = TimeZone.getTimeZone("GMT+06");
@@ -1057,17 +1041,12 @@ public class ConfigurationTest extends TestCase {
         // cfg:
         assertEquals(otherTZ1, cfg.getTimeZone());
         assertEquals(otherTZ2, cfg.getSQLDateAndTimeTimeZone());
-        assertEquals(otherTZ1.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
-        assertEquals(otherTZ2.getID(), cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env:
         assertEquals(localTZ, env1.getTimeZone());
         assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-        assertEquals(_DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         // env 2:
         assertEquals(otherTZ1, env2.getTimeZone());
         assertEquals(otherTZ2, env2.getSQLDateAndTimeTimeZone());
-        assertEquals(otherTZ1.getID(), env2.getSetting(Configurable.TIME_ZONE_KEY));
-        assertEquals(otherTZ2.getID(), env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         
         try {
             setTimeZoneToNull(env2);
@@ -1078,8 +1057,6 @@ public class ConfigurationTest extends TestCase {
         env2.setSQLDateAndTimeTimeZone(null);
         assertEquals(otherTZ1, env2.getTimeZone());
         assertNull(env2.getSQLDateAndTimeTimeZone());
-        assertEquals(otherTZ1.getID(), env2.getSetting(Configurable.TIME_ZONE_KEY));
-        assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
     }
 
     @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Expected to fail")

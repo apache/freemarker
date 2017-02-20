@@ -89,3 +89,5 @@ the FreeMarer 3 changelog here:
 - All CacheStorage-s must be thread safe from now on (removed ConcurrentCacheStorage marker interface)
 - Removed support for incompatibleImprovements before 3.0.0. So currently 3.0.0 is the only support value.
 - Changed the default of logTemplateExceptions to false.
+- Removed `String Configurable.getSetting(String)` and `Properties getSettings()`. It has never worked well,
+  and is impossible to implement properly.

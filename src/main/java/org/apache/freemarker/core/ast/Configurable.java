@@ -327,7 +327,6 @@ public class Configurable {
     };
 
     private Configurable parent;
-    private Properties properties;
     private HashMap<Object, Object> customAttributes;
     
     private Locale locale;
@@ -378,59 +377,25 @@ public class Configurable {
      */
     protected Configurable(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        
         parent = null;
-        properties = new Properties();
-        
         locale = Locale.getDefault();
-        properties.setProperty(LOCALE_KEY, locale.toString());
-        
         timeZone = TimeZone.getDefault();
-        properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
-        
         sqlDataAndTimeTimeZone = null;
-        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(sqlDataAndTimeTimeZone));
-        
         numberFormat = "number";
-        properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
-        
         timeFormat = "";
-        properties.setProperty(TIME_FORMAT_KEY, timeFormat);
-        
         dateFormat = "";
-        properties.setProperty(DATE_FORMAT_KEY, dateFormat);
-        
         dateTimeFormat = "";
-        properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
-        
         templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
                 incompatibleImprovements);
-        properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
-        
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
-        properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
-        
         objectWrapper = Configuration.getDefaultObjectWrapper(incompatibleImprovements);
-        // bug: setProperty missing
-        
         autoFlush = Boolean.TRUE;
-        properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
-        
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
-        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
-        
         showErrorTips = Boolean.TRUE;
-        properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
-        
         apiBuiltinEnabled = Boolean.FALSE;
-        properties.setProperty(API_BUILTIN_ENABLED_KEY, apiBuiltinEnabled.toString());
-        
         logTemplateExceptions = Boolean.FALSE;
-        properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, logTemplateExceptions.toString());
-        
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
-
         setBooleanFormat(C_TRUE_FALSE);
         
         customAttributes = new HashMap();
@@ -454,26 +419,7 @@ public class Configurable {
         locale = null;
         numberFormat = null;
         templateExceptionHandler = null;
-        properties = new Properties(parent.properties);
         customAttributes = new HashMap(0);
-    }
-    
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        Configurable copy = (Configurable) super.clone();
-        if (properties != null) {
-            copy.properties = new Properties(properties);
-        }
-        if (customAttributes != null) {
-            copy.customAttributes = (HashMap) customAttributes.clone();
-        }
-        if (autoImports != null) {
-            copy.autoImports = (LinkedHashMap<String, String>) autoImports.clone();
-        }
-        if (autoIncludes != null) {
-            copy.autoIncludes = (ArrayList<String>) autoIncludes.clone();
-        }
-        return copy;
     }
     
     /**
@@ -516,7 +462,6 @@ public class Configurable {
     public void setLocale(Locale locale) {
         _NullArgumentException.check("locale", locale);
         this.locale = locale;
-        properties.setProperty(LOCALE_KEY, locale.toString());
     }
 
     /**
@@ -550,7 +495,6 @@ public class Configurable {
     public void setTimeZone(TimeZone timeZone) {
         _NullArgumentException.check("timeZone", timeZone);
         this.timeZone = timeZone;
-        properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
     }
 
     /**
@@ -633,7 +577,6 @@ public class Configurable {
     public void setSQLDateAndTimeTimeZone(TimeZone tz) {
         sqlDataAndTimeTimeZone = tz;
         sqlDataAndTimeTimeZoneSet = true;
-        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, tz != null ? tz.getID() : "null");
     }
     
     /**
@@ -688,7 +631,6 @@ public class Configurable {
     public void setNumberFormat(String numberFormat) {
         _NullArgumentException.check("numberFormat", numberFormat);
         this.numberFormat = numberFormat;
-        properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
     }
     
     /**
@@ -840,7 +782,6 @@ public class Configurable {
         }
         
         this.booleanFormat = booleanFormat; 
-        properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
         
         if (booleanFormat.equals(C_TRUE_FALSE)) {
             // C_TRUE_FALSE is the default for BC, but it's not a good default for human audience formatting, so we
@@ -949,7 +890,6 @@ public class Configurable {
     public void setTimeFormat(String timeFormat) {
         _NullArgumentException.check("timeFormat", timeFormat);
         this.timeFormat = timeFormat;
-        properties.setProperty(TIME_FORMAT_KEY, timeFormat);
     }
 
     /**
@@ -979,7 +919,6 @@ public class Configurable {
     public void setDateFormat(String dateFormat) {
         _NullArgumentException.check("dateFormat", dateFormat);
         this.dateFormat = dateFormat;
-        properties.setProperty(DATE_FORMAT_KEY, dateFormat);
     }
 
     /**
@@ -1087,7 +1026,6 @@ public class Configurable {
     public void setDateTimeFormat(String dateTimeFormat) {
         _NullArgumentException.check("dateTimeFormat", dateTimeFormat);
         this.dateTimeFormat = dateTimeFormat;
-        properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
     }
 
     /**
@@ -1206,7 +1144,6 @@ public class Configurable {
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         _NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
         this.templateExceptionHandler = templateExceptionHandler;
-        properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
     }
 
     /**
@@ -1233,7 +1170,6 @@ public class Configurable {
     public void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
         _NullArgumentException.check("arithmeticEngine", arithmeticEngine);
         this.arithmeticEngine = arithmeticEngine;
-        properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
     }
 
     /**
@@ -1260,7 +1196,6 @@ public class Configurable {
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         _NullArgumentException.check("objectWrapper", objectWrapper);
         this.objectWrapper = objectWrapper;
-        properties.setProperty(OBJECT_WRAPPER_KEY, objectWrapper.getClass().getName());
     }
 
     /**
@@ -1290,12 +1225,6 @@ public class Configurable {
      */
     public void setOutputEncoding(String outputEncoding) {
         this.outputEncoding = outputEncoding;
-        // java.util.Properties doesn't allow null value!
-        if (outputEncoding != null) {
-            properties.setProperty(OUTPUT_ENCODING_KEY, outputEncoding);
-        } else {
-            properties.remove(OUTPUT_ENCODING_KEY);
-        }
         outputEncodingSet = true;
     }
     
@@ -1322,12 +1251,6 @@ public class Configurable {
      */
     public void setURLEscapingCharset(String urlEscapingCharset) {
         this.urlEscapingCharset = urlEscapingCharset;
-        // java.util.Properties doesn't allow null value!
-        if (urlEscapingCharset != null) {
-            properties.setProperty(URL_ESCAPING_CHARSET_KEY, urlEscapingCharset);
-        } else {
-            properties.remove(URL_ESCAPING_CHARSET_KEY);
-        }
         urlEscapingCharsetSet = true;
     }
     
@@ -1361,8 +1284,6 @@ public class Configurable {
     public void setNewBuiltinClassResolver(TemplateClassResolver newBuiltinClassResolver) {
         _NullArgumentException.check("newBuiltinClassResolver", newBuiltinClassResolver);
         this.newBuiltinClassResolver = newBuiltinClassResolver;
-        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY,
-                newBuiltinClassResolver.getClass().getName());
     }
 
     /**
@@ -1405,7 +1326,6 @@ public class Configurable {
      */
     public void setAutoFlush(boolean autoFlush) {
         this.autoFlush = Boolean.valueOf(autoFlush);
-        properties.setProperty(AUTO_FLUSH_KEY, String.valueOf(autoFlush));
     }
     
     /**
@@ -1436,7 +1356,6 @@ public class Configurable {
      */
     public void setShowErrorTips(boolean showTips) {
         showErrorTips = Boolean.valueOf(showTips);
-        properties.setProperty(SHOW_ERROR_TIPS_KEY, String.valueOf(showTips));
     }
     
     /**
@@ -1467,7 +1386,6 @@ public class Configurable {
      */
     public void setAPIBuiltinEnabled(boolean value) {
         apiBuiltinEnabled = Boolean.valueOf(value);
-        properties.setProperty(API_BUILTIN_ENABLED_KEY, String.valueOf(value));
     }
 
     /**
@@ -1503,7 +1421,6 @@ public class Configurable {
      */
     public void setLogTemplateExceptions(boolean value) {
         logTemplateExceptions = Boolean.valueOf(value);
-        properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, String.valueOf(value));
     }
 
     /**
@@ -2438,36 +2355,6 @@ public class Configurable {
 	            " setting isn't a " + BeansWrapper.class.getName() + ".");
 	}
 	((BeansWrapper) objectWrapper).setStrict(strict);
-    }
-    
-    /**
-     * Returns the textual representation of a setting.
-     * @param key the setting key. Can be any of standard <tt>XXX_KEY</tt>
-     * constants, or a custom key.
-     *
-     * @deprecated It's not possible in general to convert setting values to string,
-     *     and thus it's impossible to ensure that {@link #setSetting(String, String)} will work with
-     *     the returned value correctly.
-     */
-    @Deprecated
-    public String getSetting(String key) {
-        return properties.getProperty(key);
-    }
-    
-    /**
-     * This meant to return the String-to-String <code>Map</code> of the
-     * settings. So it actually should return a <code>Properties</code> object,
-     * but it doesn't by mistake. The returned <code>Map</code> is read-only,
-     * but it will reflect the further configuration changes (aliasing effect).
-     *
-     * @deprecated This method was always defective, and certainly it always
-     *     will be. Don't use it. (Simply, it's hardly possible in general to
-     *     convert setting values to text in a way that ensures that
-     *     {@link #setSettings(Properties)} will work with them correctly.)
-     */
-    @Deprecated
-    public Map getSettings() {
-        return Collections.unmodifiableMap(properties);
     }
     
     protected Environment getEnvironment() {

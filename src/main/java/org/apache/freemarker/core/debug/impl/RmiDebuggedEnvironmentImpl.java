@@ -184,8 +184,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         
         @Override
         public TemplateModel get(String key) throws TemplateModelException {
-            String s = configurable.getSetting(key);
-            return s == null ? null : new SimpleScalar(s);
+            return null; // TODO
         }
 
     }
