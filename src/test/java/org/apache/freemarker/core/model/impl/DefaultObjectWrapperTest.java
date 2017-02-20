@@ -90,11 +90,6 @@ public class DefaultObjectWrapperTest {
     private final static DefaultObjectWrapper OW300 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0)
             .build();
 
-    private final static DefaultObjectWrapper OW300NM = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
-    static {
-        OW300NM.setNullModel(NullModel.INSTANCE);
-    }
-
     private final static DefaultObjectWrapper OW300CA = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
     static {
         OW300CA.setForceLegacyNonListCollections(false);
@@ -351,15 +346,6 @@ public class DefaultObjectWrapperTest {
         {
             assertTrue(((TemplateHashModel) OW300.wrap(Collections.emptyMap())).isEmpty());
         }
-
-        {
-            final TemplateHashModelEx hash = (TemplateHashModelEx) OW300NM.wrap(testMap);
-            assertSame(NullModel.INSTANCE, hash.get("b"));
-            assertNull(hash.get("e"));
-
-            assertCollectionTMEquals(hash.keys(), "a", "b", "c", "d");
-            assertCollectionTMEquals(hash.values(), 1, null, "C", Collections.singletonList("x"));
-        }
     }
 
     private void assertCollectionTMEquals(TemplateCollectionModel coll, Object... expectedItems)
@@ -442,15 +428,6 @@ public class DefaultObjectWrapperTest {
                 assertThat(e.getMessage(), containsString("no more"));
             }
         }
-
-        {
-            List testList = new ArrayList<>();
-            testList.add(null);
-
-            final TemplateSequenceModel seq = (TemplateSequenceModel) OW300NM.wrap(testList);
-            assertSame(NullModel.INSTANCE, seq.get(0));
-            assertNull(seq.get(1));
-        }
     }
 
     @Test
@@ -479,24 +456,13 @@ public class DefaultObjectWrapperTest {
         {
             final String[] testArray = new String[] { "a", null, "c" };
 
-            {
-                TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testArray);
-                assertEquals(3, seq.size());
-                assertNull(seq.get(-1));
-                assertEquals("a", ((TemplateScalarModel) seq.get(0)).getAsString());
-                assertNull(seq.get(1));
-                assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
-                assertNull(seq.get(3));
-            }
-
-            {
-                TemplateSequenceModel seq = (TemplateSequenceModel) OW300NM.wrap(testArray);
-                assertNull(seq.get(-1));
-                assertEquals("a", ((TemplateScalarModel) seq.get(0)).getAsString());
-                assertSame(NullModel.INSTANCE, seq.get(1));
-                assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
-                assertNull(seq.get(3));
-            }
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testArray);
+            assertEquals(3, seq.size());
+            assertNull(seq.get(-1));
+            assertEquals("a", ((TemplateScalarModel) seq.get(0)).getAsString());
+            assertNull(seq.get(1));
+            assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
+            assertNull(seq.get(3));
         }
 
         {
@@ -658,24 +624,12 @@ public class DefaultObjectWrapperTest {
         Set set = new HashSet();
         set.add(null);
 
-        {
-            DefaultObjectWrapper dow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
-            dow.setForceLegacyNonListCollections(false);
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) dow.wrap(set);
-            assertEquals(1, coll.size());
-            assertFalse(coll.isEmpty());
-            assertNull(coll.iterator().next());
-        }
-
-        {
-            DefaultObjectWrapper dow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
-            dow.setForceLegacyNonListCollections(false);
-            dow.setNullModel(NullModel.INSTANCE);
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) dow.wrap(set);
-            assertEquals(1, coll.size());
-            assertFalse(coll.isEmpty());
-            assertEquals(NullModel.INSTANCE, coll.iterator().next());
-        }
+        DefaultObjectWrapper dow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+        dow.setForceLegacyNonListCollections(false);
+        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) dow.wrap(set);
+        assertEquals(1, coll.size());
+        assertFalse(coll.isEmpty());
+        assertNull(coll.iterator().next());
     }
 
     @Test
@@ -867,17 +821,6 @@ public class DefaultObjectWrapperTest {
 
         public String toString(Object o) {
             return o.toString();
-        }
-
-    }
-
-    private static final class NullModel implements TemplateModel, AdapterTemplateModel {
-
-        final static NullModel INSTANCE = new NullModel();
-
-        @Override
-        public Object getAdaptedObject(Class hint) {
-            return null;
         }
 
     }

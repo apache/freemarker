@@ -95,6 +95,7 @@ the FreeMarer 3 changelog here:
 - Even for setting values that are class names without following `()` or other argument list, the INSTANCE field and
   the builder class will be searched now, and used instead of the constructor of the class. Earlier they weren't for
   backward compatibility.
+- Removed the deprecated BeansWrapper.nullModel setting. So null is always wrapped to null now.
 - Removed several deprecated methods and constants. Some notes:
   - strict_bean_models configuration setting was removed, as it should be set on the BeansWrapper itself
   - .template_name now means the same as .current_template_name (it doesn't emulate 2.3 glitches anymore)

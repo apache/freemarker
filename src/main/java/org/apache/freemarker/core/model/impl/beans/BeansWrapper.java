@@ -173,7 +173,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     // things from buggy user code.
     private volatile boolean writeProtected;
     
-    private TemplateModel nullModel = null;
     private int defaultDateType; // initialized by PropertyAssignments.apply
     private ObjectWrapper outerIdentity = this;
     private boolean methodsShadowItems = true;
@@ -741,21 +740,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
     
     /**
-     * Sets the null model. This model is returned from the {@link #wrap(Object)} method whenever the wrapped object is
-     * {@code null}. It defaults to {@code null}, which is dealt with quite strictly on engine level, however you can
-     * substitute an arbitrary (perhaps more lenient) model, like an empty string. For proper working, the
-     * {@code nullModel} should be an {@link AdapterTemplateModel} that returns {@code null} for
-     * {@link AdapterTemplateModel#getAdaptedObject(Class)}.
-     * 
-     * @deprecated Changing the {@code null} model can cause a lot of confusion; don't do it.
-     */
-    @Deprecated
-    public void setNullModel(TemplateModel nullModel) {
-        checkModifiable();
-        this.nullModel = nullModel;
-    }
-    
-    /**
      * Returns the version given with {@link #BeansWrapper(Version)}, normalized to the lowest version where a change
      * has occurred. Thus, this is not necessarily the same version than that was given to the constructor.
      * 
@@ -778,7 +762,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Wraps the object with a template model that is most specific for the object's
      * class. Specifically:
      * <ul>
-     * <li>if the object is null, returns the {@link #setNullModel(TemplateModel) null model},</li>
      * <li>if the object is a Number returns a {@link NumberModel} for it,</li>
      * <li>if the object is a Date returns a {@link DateModel} for it,</li>
      * <li>if the object is a Boolean returns 
@@ -796,7 +779,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     @Override
     public TemplateModel wrap(Object object) throws TemplateModelException {
-        if (object == null) return nullModel;
+        if (object == null) return null;
         return modelCache.getInstance(object);
     }
     
@@ -962,7 +945,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private Object tryUnwrapTo(final TemplateModel model, Class<?> targetClass, final int typeFlags,
             final Map<Object, Object> recursionStops) 
     throws TemplateModelException {
-        if (model == null || model == nullModel) {
+        if (model == null) {
             return null;
         }
         
