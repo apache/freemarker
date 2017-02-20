@@ -20,7 +20,6 @@
 package org.apache.freemarker.core.ast;
 
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Token;
 
 /**
  * <b>Internal API - subject to change:</b> Represent a node in the parsed template (either a {@link Expression} or a
@@ -166,10 +165,6 @@ public abstract class TemplateObject {
         return true;
     }
 
-    /**
-     * @deprecated This method will be removed in FreeMarker 2.4 because of architectural changes!
-     */
-    @Deprecated
     public Template getTemplate() {
         return template;
     }

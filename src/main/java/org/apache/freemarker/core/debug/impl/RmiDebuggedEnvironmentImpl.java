@@ -313,9 +313,16 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
             if ("mainNamespace".equals(key)) {
                 return ((Environment) configurable).getMainNamespace();
             }
-            if ("template".equals(key)) {
+            if ("mainTemplate".equals(key)) {
                 try {
-                    return (TemplateModel) getCachedWrapperFor(((Environment) configurable).getTemplate());
+                    return (TemplateModel) getCachedWrapperFor(((Environment) configurable).getMainTemplate());
+                } catch (RemoteException e) {
+                    throw new TemplateModelException(e);
+                }
+            }
+            if ("currentTemplate".equals(key)) {
+                try {
+                    return (TemplateModel) getCachedWrapperFor(((Environment) configurable).getCurrentTemplate());
                 } catch (RemoteException e) {
                     throw new TemplateModelException(e);
                 }

@@ -184,14 +184,6 @@ abstract public class TemplateElement extends TemplateObject {
         return childCount == 0;
     }
 
-    /**
-     * @deprecated Meaningless; simply returns if the node currently has any child nodes.
-     */
-    @Deprecated
-    public boolean getAllowsChildren() {
-        return !isLeaf();
-    }
-
     public int getIndex(TemplateElement node) {
         for (int i = 0; i < childCount; i++) {
             if (childBuffer[i].equals(node)) {
@@ -215,22 +207,6 @@ abstract public class TemplateElement extends TemplateObject {
                 : Collections.enumeration(Collections.EMPTY_LIST);
     }
 
-    /**
-     * @deprecated Internal API - even internally, use {@link #getChild(int)} instead.
-     */
-    @Deprecated
-    public TemplateElement getChildAt(int index) {
-        if (childCount == 0) {
-            throw new IndexOutOfBoundsException("Template element has no children");
-        }
-        try {
-            return childBuffer[index];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            // nestedElements was a List earlier, so we emulate the same kind of exception
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + childCount);
-        }
-    }
-
     public void setChildAt(int index, TemplateElement element) {
         if (index < childCount && index >= 0) {
             childBuffer[index] = element;
@@ -239,16 +215,6 @@ abstract public class TemplateElement extends TemplateObject {
         } else {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + childCount);
         }
-    }
-
-    /**
-     * The element whose child this element is, or {@code null} if this is the root node.
-     * 
-     * @deprecated Don't use in internal code either; use {@link #getParentElement()} there.
-     */
-    @Deprecated
-    public TemplateElement getParent() {
-        return parent;
     }
     
     /**

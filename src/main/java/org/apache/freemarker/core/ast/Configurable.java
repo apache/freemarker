@@ -195,13 +195,6 @@ public class Configurable {
     public static final String URL_ESCAPING_CHARSET_KEY = URL_ESCAPING_CHARSET_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
-    public static final String STRICT_BEAN_MODELS_KEY_SNAKE_CASE = "strict_bean_models";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
-    public static final String STRICT_BEAN_MODELS_KEY_CAMEL_CASE = "strictBeanModels";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
-    public static final String STRICT_BEAN_MODELS_KEY = STRICT_BEAN_MODELS_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String AUTO_FLUSH_KEY_SNAKE_CASE = "auto_flush";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
     public static final String AUTO_FLUSH_KEY_CAMEL_CASE = "autoFlush";
@@ -264,10 +257,6 @@ public class Configurable {
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
     
-    /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
-    @Deprecated
-    public static final String STRICT_BEAN_MODELS = STRICT_BEAN_MODELS_KEY;
-    
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
@@ -290,7 +279,6 @@ public class Configurable {
         OUTPUT_ENCODING_KEY_SNAKE_CASE,
         SHOW_ERROR_TIPS_KEY_SNAKE_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
-        STRICT_BEAN_MODELS_KEY,
         TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE,
         TIME_FORMAT_KEY_SNAKE_CASE,
         TIME_ZONE_KEY_SNAKE_CASE,
@@ -319,7 +307,6 @@ public class Configurable {
         OUTPUT_ENCODING_KEY_CAMEL_CASE,
         SHOW_ERROR_TIPS_KEY_CAMEL_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
-        STRICT_BEAN_MODELS_KEY_CAMEL_CASE,
         TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE,
         TIME_FORMAT_KEY_CAMEL_CASE,
         TIME_ZONE_KEY_CAMEL_CASE,
@@ -360,16 +347,6 @@ public class Configurable {
     private Boolean lazyAutoImports;
     private boolean lazyAutoImportsSet;
     
-    /**
-     * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
-     * 
-     * @deprecated This shouldn't even be public; don't use it.
-     */
-    @Deprecated
-    public Configurable() {
-        this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-    }
-
     /**
      * Intended to be called from inside FreeMarker only.
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -2249,9 +2226,6 @@ public class Configurable {
             } else if (URL_ESCAPING_CHARSET_KEY_SNAKE_CASE.equals(name)
                     || URL_ESCAPING_CHARSET_KEY_CAMEL_CASE.equals(name)) {
                 setURLEscapingCharset(value);
-            } else if (STRICT_BEAN_MODELS_KEY_SNAKE_CASE.equals(name)
-                    || STRICT_BEAN_MODELS_KEY_CAMEL_CASE.equals(name)) {
-                setStrictBeanModels(_StringUtil.getYesNo(value));
             } else if (AUTO_FLUSH_KEY_SNAKE_CASE.equals(name) || AUTO_FLUSH_KEY_CAMEL_CASE.equals(name)) {
                 setAutoFlush(_StringUtil.getYesNo(value));
             } else if (SHOW_ERROR_TIPS_KEY_SNAKE_CASE.equals(name) || SHOW_ERROR_TIPS_KEY_CAMEL_CASE.equals(name)) {
@@ -2338,18 +2312,6 @@ public class Configurable {
             tz = TimeZone.getTimeZone(value);
         }
         return tz;
-    }
-
-    /**
-     * @deprecated Set this on the {@link ObjectWrapper} itself. 
-     */
-    @Deprecated
-    public void setStrictBeanModels(boolean strict) {
-	if (!(objectWrapper instanceof BeansWrapper)) {
-	    throw new IllegalStateException("The value of the " + OBJECT_WRAPPER_KEY +
-	            " setting isn't a " + BeansWrapper.class.getName() + ".");
-	}
-	((BeansWrapper) objectWrapper).setStrict(strict);
     }
     
     protected Environment getEnvironment() {

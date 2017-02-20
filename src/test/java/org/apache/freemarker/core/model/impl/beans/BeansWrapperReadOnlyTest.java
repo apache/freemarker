@@ -25,10 +25,11 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util.WriteProtectable;
+import org.apache.freemarker.core.util._ClassUtil;
 
 import junit.framework.TestCase;
 
@@ -45,13 +46,13 @@ public class BeansWrapperReadOnlyTest extends TestCase {
     }
     
     public void testBeansWrapper() throws Exception {
-        BeansWrapper bw = new BeansWrapper();
+        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_3_0_0);
         bw.writeProtect();
         checkAllPropertiesReadOnly(bw);
     }
 
     public void testDefaultObjectWrapper() throws Exception {
-        BeansWrapper bw = new DefaultObjectWrapper();
+        BeansWrapper bw = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
         bw.writeProtect();
         checkAllPropertiesReadOnly(bw);        
     }

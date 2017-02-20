@@ -19,13 +19,13 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import java.lang.ref.Reference;
 
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.ClassIntrospector;
-import org.apache.freemarker.core.model.impl.beans.MethodAppearanceFineTuner;
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecision;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class BeansWrapperCachesTest {
 
     @Test
     public void introspectionSettingChanges() {
-        BeansWrapper bw = new BeansWrapper();
+        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_3_0_0);
         ClassIntrospector ci1 = bw.getClassIntrospector();
         checkRegisteredModelFactories(ci1, bw.getStaticModels(), bw.getEnumModels(), bw.getModelCache());
         

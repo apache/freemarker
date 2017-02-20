@@ -165,7 +165,6 @@ public final class Environment extends Configurable {
     private final Namespace mainNamespace;
     private Namespace currentNamespace, globalNamespace;
     private HashMap<String, Namespace> loadedLibs;
-    private Configurable legacyParent; // [FM3] Get rid of this
 
     private boolean inAttemptBlock;
     private Throwable lastThrowable;
@@ -206,27 +205,6 @@ public final class Environment extends Configurable {
         this.out = out;
         this.rootDataModel = rootDataModel;
         importMacros(template);
-    }
-
-    /**
-     * Despite its name it just returns {@link #getParent()}. If {@link Configuration#getIncompatibleImprovements()} is
-     * at least 2.3.22, then that will be the same as {@link #getMainTemplate()}. Otherwise the returned value follows
-     * the {@link Environment} parent switchings that occur at {@code #include}/{@code #import} and {@code #nested}
-     * directive calls, that is, it's not very meaningful outside FreeMarker internals.
-     * 
-     * @deprecated Use {@link #getMainTemplate()} instead (or {@link #getCurrentNamespace()} and then
-     *             {@link Namespace#getTemplate()}); the value returned by this method is often not what you expect when
-     *             it comes to macro/function invocations.
-     */
-    @Deprecated
-    public Template getTemplate() {
-        return (Template) getParent();
-    }
-
-    /** Returns the same value as pre-IcI 2.3.22 getTemplate() did. */
-    Template getTemplate230() {
-        Template legacyParent = (Template) this.legacyParent;
-        return legacyParent != null ? legacyParent : getTemplate();
     }
 
     /**
@@ -304,7 +282,7 @@ public final class Environment extends Configurable {
             clearCachedValues();
             try {
                 doAutoImportsAndIncludes(this);
-                visit(getTemplate().getRootTreeNode());
+                visit(getMainTemplate().getRootTreeNode());
                 // It's here as we must not flush if there was an exception.
                 if (getAutoFlush()) {
                     out.flush();
@@ -386,11 +364,7 @@ public final class Environment extends Configurable {
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
 
-    /**
-     * @deprecated Should be internal API
-     */
-    @Deprecated
-    public void visit(final TemplateElement element,
+    void visit(final TemplateElement element,
             TemplateDirectiveModel directiveModel, Map args,
             final List bodyParameterNames) throws TemplateException, IOException {
         visit(new TemplateElement[] { element }, directiveModel, args, bodyParameterNames);
@@ -558,10 +532,6 @@ public final class Environment extends Configurable {
             currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;
 
-            final Configurable prevParent;
-            prevParent = getParent();
-            legacyParent = currentNamespace.getTemplate();
-
             localContextStack = invokingMacroContext.prevLocalContextStack;
             if (invokingMacroContext.nestedContentParameterNames != null) {
                 pushLocalContext(bodyCtx);
@@ -574,7 +544,6 @@ public final class Environment extends Configurable {
                 }
                 currentMacroContext = invokingMacroContext;
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
-                legacyParent = prevParent;
                 localContextStack = prevLocalContextStack;
             }
         }
@@ -2472,13 +2441,13 @@ public final class Environment extends Configurable {
     }
 
     private Object getIncludedTemplateCustomLookupCondition() {
-        return getTemplate().getCustomLookupCondition();
+        return getCurrentTemplate().getCustomLookupCondition();
     }
 
     private String getIncludedTemplateEncoding() {
         String encoding;
         // [FM3] This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
-        encoding = getTemplate().getEncoding();
+        encoding = getCurrentTemplate().getEncoding();
         if (encoding == null) {
             encoding = configuration.getEncoding(getLocale());
         }
@@ -2496,15 +2465,9 @@ public final class Environment extends Configurable {
     public void include(Template includedTemplate)
             throws TemplateException, IOException {
         final Template prevTemplate;
-        prevTemplate = getTemplate();
-        legacyParent = includedTemplate;
 
         importMacros(includedTemplate);
-        try {
-            visit(includedTemplate.getRootTreeNode());
-        } finally {
-            legacyParent = prevTemplate;
-        }
+        visit(includedTemplate.getRootTreeNode());
     }
 
     /**
@@ -2792,7 +2755,7 @@ public final class Environment extends Configurable {
         private Template template;
 
         Namespace() {
-            template = Environment.this.getTemplate();
+            template = Environment.this.getMainTemplate();
         }
 
         Namespace(Template template) {
@@ -2803,7 +2766,7 @@ public final class Environment extends Configurable {
          * @return the Template object with which this Namespace is associated.
          */
         public Template getTemplate() {
-            return template == null ? Environment.this.getTemplate() : template;
+            return template == null ? Environment.this.getMainTemplate() : template;
         }
         
         void setTemplate(Template template) {

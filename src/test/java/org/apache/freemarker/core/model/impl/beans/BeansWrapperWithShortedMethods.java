@@ -20,8 +20,8 @@
 package org.apache.freemarker.core.model.impl.beans;
 
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 
 /**
  * Used so that the order in which the methods are added to the introspection cache is deterministic. 
@@ -29,6 +29,7 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 public abstract class BeansWrapperWithShortedMethods extends BeansWrapper {
     
     public BeansWrapperWithShortedMethods(boolean desc) {
+        super(Configuration.VERSION_3_0_0);
         setMethodSorter(new AlphabeticalMethodSorter(desc));
     }
 

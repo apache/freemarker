@@ -25,7 +25,6 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
-import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,35 +76,25 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
     }
 
     private static final String PRINT_ALL_FTL
-            = "t=${.templateName}, ct=${.currentTemplateName!'-'}, mt=${.mainTemplateName!'-'}";
+            = "ct=${.currentTemplateName!'-'}, mt=${.mainTemplateName!'-'}";
     
-    @Test
-    public void testTemplateName() throws IOException, TemplateException {
-        getConfiguration().setTemplateLoader(createTemplateLoader(".templateName"));
-        assertMainFtlOutput(false);
-    }
-
     @Test
     public void testMainTemplateName() throws IOException, TemplateException {
         getConfiguration().setTemplateLoader(createTemplateLoader(".mainTemplateName"));
-        assertMainFtlOutput(true);
-    }
-
-    private void assertMainFtlOutput(boolean allMain) throws IOException, TemplateException {
-        String expected
-                = "In main: main.ftl\n"
-                + "In imp: imp.ftl\n"
+        assertOutputForNamed("main.ftl",
+                "In main: main.ftl\n"
+                + "In imp: main.ftl\n"
                 + "In main: main.ftl\n"
                 + "main.ftl\n"
                 + "{main.ftl}\n"
                 + "In imp call imp:\n"
                 + "main.ftl\n"
-                + "{imp.ftl}\n"
+                + "{main.ftl}\n"
                 + "After: main.ftl\n"
                 + "In main: main.ftl\n"
-                + "In inc: inc.ftl\n"
+                + "In inc: main.ftl\n"
                 + "In inc call imp:\n"
-                + "inc.ftl\n"
+                + "main.ftl\n"
                 + "{main.ftl}\n"
                 + "In main: main.ftl\n"
                 + "main.ftl\n"
@@ -113,12 +102,7 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
                 + "In inc call imp:\n"
                 + "main.ftl\n"
                 + "{main.ftl}\n"
-                + "In main: main.ftl\n";
-        if (allMain) {
-            expected = _StringUtil.replace(expected, "imp.ftl", "main.ftl");
-            expected = _StringUtil.replace(expected, "inc.ftl", "main.ftl");
-        }
-        assertOutputForNamed("main.ftl", expected);
+                + "In main: main.ftl\n");
     }
 
     @Test
@@ -162,24 +146,24 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
         
         // In nameless templates, the deprecated .templateName is "", but the new variables are missing values. 
         assertOutput(new Template(null, PRINT_ALL_FTL + "; <#include 'inc.ftl'>", getConfiguration()),
-                "t=, ct=-, mt=-; Inc: t=inc.ftl, ct=inc.ftl, mt=-");
+                "ct=-, mt=-; Inc: ct=inc.ftl, mt=-");
         
         assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <#include 'inc.ftl'>", getConfiguration()),
-                "t=foo.ftl, ct=foo.ftl, mt=foo.ftl; Inc: t=inc.ftl, ct=inc.ftl, mt=foo.ftl");
+                "ct=foo.ftl, mt=foo.ftl; Inc: ct=inc.ftl, mt=foo.ftl");
     }
 
     @Test
     public void testInInterpretTemplate() throws TemplateException, IOException {
         getConfiguration().setSharedVariable("t", PRINT_ALL_FTL);
         assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <@t?interpret />", getConfiguration()),
-                "t=foo.ftl, ct=foo.ftl, mt=foo.ftl; "
-                + "t=foo.ftl->anonymous_interpreted, ct=foo.ftl->anonymous_interpreted, mt=foo.ftl");
+                "ct=foo.ftl, mt=foo.ftl; "
+                + "ct=foo.ftl->anonymous_interpreted, mt=foo.ftl");
         assertOutput(new Template(null, PRINT_ALL_FTL + "; <@t?interpret />", getConfiguration()),
-                "t=, ct=-, mt=-; "
-                + "t=nameless_template->anonymous_interpreted, ct=nameless_template->anonymous_interpreted, mt=-");
+                "ct=-, mt=-; "
+                + "ct=nameless_template->anonymous_interpreted, mt=-");
         assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <@[t,'bar']?interpret />", getConfiguration()),
-                "t=foo.ftl, ct=foo.ftl, mt=foo.ftl; "
-                + "t=foo.ftl->bar, ct=foo.ftl->bar, mt=foo.ftl");
+                "ct=foo.ftl, mt=foo.ftl; "
+                + "ct=foo.ftl->bar, mt=foo.ftl");
     }
     
 }

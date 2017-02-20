@@ -500,12 +500,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     public boolean isRecognizeStandardFileExtensionsSet() {
         return recognizeStandardFileExtensions != null;
     }
-    
-    @Override
-    public void setStrictBeanModels(boolean strict) {
-        throw new UnsupportedOperationException(
-                "Setting strictBeanModels on " + TemplateConfiguration.class.getSimpleName() + " level isn't supported.");
-    }
 
     public String getEncoding() {
         return encoding != null ? encoding : getNonNullParentConfiguration().getDefaultEncoding();

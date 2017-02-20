@@ -3938,7 +3938,7 @@ MixedContent MixedContent() :
             if (begin == null) {
                 begin = elem;
             }
-            mixedContent.addElement(elem);
+            mixedContent.addChild(elem);
         }
     )+
     {

@@ -19,11 +19,15 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -33,7 +37,7 @@ public class BeansWrapperMiscTest {
 
     @Test
     public void booleans() throws Exception {
-        final BeansWrapper bw = new BeansWrapper();
+        final BeansWrapper bw = new BeansWrapper(Configuration.VERSION_3_0_0);
 
         assertTrue(((TemplateBooleanModel) bw.wrap(Boolean.TRUE)).getAsBoolean());
         assertFalse(((TemplateBooleanModel) bw.wrap(Boolean.FALSE)).getAsBoolean());

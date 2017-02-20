@@ -25,14 +25,11 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.debug.impl.DebuggerService;
 
 /**
- * <b>Internal API - subject to change: A debug breakpoint inserted into the template</b> 
- * 
- * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
- *             it.
+ * Don't use this; used internally by FreeMarker, might changes without notice.
+ * A debug breakpoint inserted into the template 
  */
-@Deprecated
-public class DebugBreak extends TemplateElement {
-    public DebugBreak(TemplateElement nestedBlock) {
+public class _DebugBreak extends TemplateElement {
+    public _DebugBreak(TemplateElement nestedBlock) {
         addChild(nestedBlock);
         copyLocationFrom(nestedBlock);
     }

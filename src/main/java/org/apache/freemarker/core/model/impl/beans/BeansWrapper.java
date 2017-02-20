@@ -86,13 +86,6 @@ import org.slf4j.Logger;
 public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     
     private static final Logger LOG = _CoreLogs.BEANS_WRAPPER;
-
-    /**
-     * @deprecated Use {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} instead. It's not a public field
-     *             anyway.
-     */
-    @Deprecated
-    static final Object CAN_NOT_UNWRAP = ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
     
     private static final Constructor<?> ENUMS_MODEL_CTOR = enumsModelCtor();
     
@@ -188,18 +181,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private boolean strict;  // initialized by PropertyAssignments.apply
     
     private final Version incompatibleImprovements;
-    
-    /**
-     * Creates a new instance with the incompatible-improvements-version specified in
-     * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
-     * 
-     * @deprecated Use {@link BeansWrapperBuilder} or, in rare cases, {@link #BeansWrapper(Version)} instead.
-     */
-    @Deprecated
-    public BeansWrapper() {
-        this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-        // Attention! Don't change fields here, as the instance is possibly already visible to other threads.  
-    }
     
     /**
      * Use {@link BeansWrapperBuilder} instead of the public constructors if possible.

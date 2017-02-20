@@ -22,13 +22,9 @@ package org.apache.freemarker.core.ast;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * <b>Internal API - subject to change:</b> A template element where the content is ignored, a Comment.
- * 
- * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
- *             it.
+ * A template element where the content is ignored, a Comment.
  */
-@Deprecated
-public final class Comment extends TemplateElement {
+final class Comment extends TemplateElement {
 
     private final String text;
 

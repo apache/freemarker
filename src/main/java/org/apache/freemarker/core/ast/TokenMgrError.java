@@ -159,18 +159,6 @@ public String getMessage() {
       this.detail = detail;
       errorCode = reason;
    }
-
-   /**
-    * @since 2.3.20
-    * 
-    * @deprecated If you know the end position, use {@link #TokenMgrError(String, int, int, int, int, int)} instead.
-    */
-   @Deprecated
-public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) {
-       this(detail, reason, errorLine, errorColumn, 0, 0);
-      endLineNumber = null;
-      endColumnNumber = null;
-    }
    
    /**
     * @since 2.3.21

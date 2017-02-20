@@ -79,10 +79,6 @@ public class ParseException extends IOException implements FMParserConstants {
      */
     protected String eol = _SecurityUtil.getSystemProperty("line.separator", "\n");
 
-    /** @deprecated Will be remove without replacement in 2.4. */
-    @Deprecated
-    protected boolean specialConstructor;  
-
     private String templateName;
 
     /**
@@ -101,7 +97,6 @@ public class ParseException extends IOException implements FMParserConstants {
             ) {
         super("");
         currentToken = currentTokenVal;
-        specialConstructor = true;
         expectedTokenSequences = expectedTokenSequencesVal;
         tokenImage = tokenImageVal;
         lineNumber = currentToken.next.beginLine;
@@ -131,7 +126,7 @@ public class ParseException extends IOException implements FMParserConstants {
      */
     @Deprecated
     public ParseException(String description, int lineNumber, int columnNumber) {
-        this(description, null, lineNumber, columnNumber, null);
+        this(description, (Template) null, lineNumber, columnNumber, 0, 0, null);
     }
 
     /**
@@ -155,30 +150,6 @@ public class ParseException extends IOException implements FMParserConstants {
                         cause);      
     }
     
-    /**
-     * @deprecated Use {@link #ParseException(String, Template, int, int, int, int)} instead, as IDE-s need the end
-     * position of the error too.
-     * @since 2.3.20
-     */
-    @Deprecated
-    public ParseException(String description, Template template, int lineNumber, int columnNumber) {
-        this(description, template, lineNumber, columnNumber, null);      
-    }
-
-    /**
-     * @deprecated Use {@link #ParseException(String, Template, int, int, int, int, Throwable)} instead, as IDE-s need
-     * the end position of the error too.
-     * @since 2.3.20
-     */
-    @Deprecated
-    public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
-        this(description,
-                template == null ? null : template.getSourceName(),
-                        lineNumber, columnNumber,
-                        0, 0,
-                        cause);      
-    }
-
     /**
      * @since 2.3.20
      */

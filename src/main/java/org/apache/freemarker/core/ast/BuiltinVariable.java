@@ -200,16 +200,12 @@ final class BuiltinVariable extends Expression {
         if (name == CURRENT_NODE || name == NODE || name == CURRENT_NODE_CC) {
             return env.getCurrentVisitorNode();
         }
-        if (name == TEMPLATE_NAME || name == TEMPLATE_NAME_CC) {
-            // The behavior of env.getTemplate() was changed with IcI 2.3.22, but there was an unintended side effect
-            // of changing the behavior of .template_name, which was oms with IcI 2.3.23. IcI 2.3.22 deliberately
-            // remains broken.
-            return (new SimpleScalar(env.getTemplate230().getName()));
-        }
         if (name == MAIN_TEMPLATE_NAME || name == MAIN_TEMPLATE_NAME_CC) {
             return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getName());
         }
-        if (name == CURRENT_TEMPLATE_NAME || name == CURRENT_TEMPLATE_NAME_CC) {
+        // [FM3] Some of these two should be removed.
+        if (name == CURRENT_TEMPLATE_NAME || name == CURRENT_TEMPLATE_NAME_CC
+                || name == TEMPLATE_NAME || name == TEMPLATE_NAME_CC) {
             return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getName());
         }
         if (name == PASS) {

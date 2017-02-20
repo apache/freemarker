@@ -29,10 +29,6 @@ import java.util.Set;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.BuiltIn;
-import org.apache.freemarker.core.ast.BuiltinVariable;
-import org.apache.freemarker.core.ast.HTMLOutputFormat;
-import org.apache.freemarker.core.ast.UndefinedOutputFormat;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
@@ -48,8 +44,12 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput("${.data_model?is_hash?c}", "true");
         assertOutput("${.localeObject.toString()}", "de_DE");
         assertOutput("${.locale_object.toString()}", "de_DE");
-        assertOutput("${.templateName?length}", "0");
-        assertOutput("${.template_name?length}", "0");
+        assertOutput("${.templateName!'null'}", "null");
+        assertOutput("${.template_name!'null'}", "null");
+        assertOutput("${.currentTemplateName!'null'}", "null");
+        assertOutput("${.current_template_name!'null'}", "null");
+        assertOutput("${.mainTemplateName!'null'}", "null");
+        assertOutput("${.main_template_name!'null'}", "null");
         assertOutput("${.outputEncoding}", "utf-8");
         assertOutput("${.output_encoding}", "utf-8");
         assertOutput("${.outputFormat}", UndefinedOutputFormat.INSTANCE.getName());

@@ -19,11 +19,11 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 
 import junit.framework.TestCase;
 
@@ -35,7 +35,7 @@ public abstract class AbstractParallelIntrospectionTest extends TestCase {
     private static final int ITERATIONS = 20000;
     private static final double CACHE_CLEARING_CHANCE = 0.01;
     
-    private BeansWrapper beansWrapper = new BeansWrapper();
+    private BeansWrapper beansWrapper = new BeansWrapper(Configuration.VERSION_3_0_0);
     
     public AbstractParallelIntrospectionTest(String name) {
         super(name);

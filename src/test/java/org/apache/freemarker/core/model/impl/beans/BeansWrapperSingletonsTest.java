@@ -339,7 +339,6 @@ public class BeansWrapperSingletonsTest extends TestCase {
     }
     
     public void testClassInrospectorCache() throws TemplateModelException {
-        assertFalse(new BeansWrapper().isClassIntrospectionCacheRestricted());
         assertFalse(new BeansWrapper(Configuration.VERSION_3_0_0).isClassIntrospectionCacheRestricted());
         assertTrue(new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build().isClassIntrospectionCacheRestricted());
         

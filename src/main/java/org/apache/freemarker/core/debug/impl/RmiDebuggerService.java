@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.DebugBreak;
+import org.apache.freemarker.core.ast._DebugBreak;
 import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.ast.TemplateElement;
 import org.apache.freemarker.core.ast._CoreAPI;
@@ -191,7 +191,7 @@ extends
             return;
         }
         TemplateElement parent = _CoreAPI.getParentElement(te);
-        DebugBreak db = new DebugBreak(te);
+        _DebugBreak db = new _DebugBreak(te);
         // TODO: Ensure there always is a parent by making sure
         // that the root element in the template is always a MixedContent
         // Also make sure it doesn't conflict with anyone's code.
@@ -281,10 +281,10 @@ extends
         if (te == null) {
             return;
         }
-        DebugBreak db = null;
+        _DebugBreak db = null;
         while (te != null) {
-            if (te instanceof DebugBreak) {
-                db = (DebugBreak) te;
+            if (te instanceof _DebugBreak) {
+                db = (_DebugBreak) te;
                 break;
             }
             te = _CoreAPI.getParentElement(te);
@@ -337,7 +337,7 @@ extends
         int count = te.getChildCount();
         for (int i = 0; i < count; ++i) {
             TemplateElement child = _CoreAPI.getChildElement(te, i);
-            while (child instanceof DebugBreak) {
+            while (child instanceof _DebugBreak) {
                 TemplateElement dbchild = _CoreAPI.getChildElement(child, 0); 
                 te.setChildAt(i, dbchild);
                 child = dbchild;

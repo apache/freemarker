@@ -30,22 +30,6 @@ final class MixedContent extends TemplateElement {
 
     MixedContent() { }
     
-    /**
-     * @deprecated Use {@link #addChild(TemplateElement)} instead.
-     */
-    @Deprecated
-    void addElement(TemplateElement element) {
-        addChild(element);
-    }
-
-    /**
-     * @deprecated Use {@link #addChild(int, TemplateElement)} instead.
-     */
-    @Deprecated
-    void addElement(int index, TemplateElement element) {
-        addChild(index, element);
-    }
-    
     @Override
     TemplateElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
