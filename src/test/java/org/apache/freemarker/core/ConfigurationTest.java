@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
@@ -1150,8 +1151,20 @@ public class ConfigurationTest extends TestCase {
         cfg.setTemplateUpdateDelayMilliseconds(100);
         assertEquals(100L, cfg.getTemplateUpdateDelayMilliseconds());
         
-        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5");
-        assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
+        try {
+            cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5");
+            assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
+        } catch (SettingValueAssignmentException e) {
+            assertThat(e.getCause().getMessage(), containsStringIgnoringCase("unit must be specified"));
+        }
+        cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "0");
+        assertEquals(0L, cfg.getTemplateUpdateDelayMilliseconds());
+        try {
+            cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5 foo");
+            assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
+        } catch (SettingValueAssignmentException e) {
+            assertThat(e.getCause().getMessage(), containsStringIgnoringCase("\"foo\""));
+        }
         
         cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "3 ms");
         assertEquals(3L, cfg.getTemplateUpdateDelayMilliseconds());

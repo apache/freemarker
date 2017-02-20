@@ -1637,6 +1637,10 @@ public class _StringUtil {
         return sb.toString();
     }
 
+    public static boolean isASCIIDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+    
     public static boolean isUpperUSASCII(char c) {
         return c >= 'A' && c <= 'Z';
     }

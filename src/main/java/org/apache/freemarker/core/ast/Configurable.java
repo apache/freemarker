@@ -2349,13 +2349,18 @@ public class Configurable {
     /**
      * @since 2.3.21
      */
-    protected TemplateException settingValueAssignmentException(String name, String value, Throwable cause) {
+    protected final TemplateException settingValueAssignmentException(String name, String value, Throwable cause) {
         return new SettingValueAssignmentException(getEnvironment(), name, value, cause);
     }
+
+    protected final TemplateException invalidSettingValueException(String name, String value) {
+        return invalidSettingValueException(name, value, null);
+    }
     
-    protected TemplateException invalidSettingValueException(String name, String value) {
+    protected final TemplateException invalidSettingValueException(String name, String value, String reason) {
         return new _MiscTemplateException(getEnvironment(),
-                "Invalid value for setting ", new _DelayedJQuote(name), ": ", new _DelayedJQuote(value));
+                "Invalid value for setting ", new _DelayedJQuote(name), ": ", new _DelayedJQuote(value),
+                (reason != null ? ": " : null), (reason != null ? reason : null));
     }
     
     /**

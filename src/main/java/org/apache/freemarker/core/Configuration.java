@@ -2418,25 +2418,38 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             } else if (TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE.equals(name)) {
-                long multipier;
-                String valueWithoutUnit;
-                if (value.endsWith("ms")) {
-                    multipier = 1;
-                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 2));
-                } else if (value.endsWith("s")) {
-                    multipier = 1000;
-                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
-                } else if (value.endsWith("m")) {
-                    multipier = 1000 * 60;
-                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
-                } else if (value.endsWith("h")) {
-                    multipier = 1000 * 60 * 60;
-                    valueWithoutUnit = rightTrim(value.substring(0, value.length() - 1));
-                } else {
-                    multipier = 1000;  // Default is seconds for backward compatibility
-                    valueWithoutUnit = value;
+                final String valueWithoutUnit;
+                final String unit;
+                int numberEnd = 0;
+                while (numberEnd < value.length() && !Character.isAlphabetic(value.charAt(numberEnd))) {
+                    numberEnd++;
                 }
-                setTemplateUpdateDelayMilliseconds(Integer.parseInt(valueWithoutUnit) * multipier);
+                valueWithoutUnit = value.substring(0, numberEnd).trim();
+                unit = value.substring(numberEnd).trim();
+                
+                final long multipier;
+                if (unit.equals("ms")) {
+                    multipier = 1;
+                } else if (unit.equals("s")) {
+                    multipier = 1000;
+                } else if (unit.equals("m")) {
+                    multipier = 1000 * 60;
+                } else if (unit.equals("h")) {
+                    multipier = 1000 * 60 * 60;
+                } else if (!unit.isEmpty()) {
+                    throw invalidSettingValueException(name, value,
+                            "Unrecognized time unit " + _StringUtil.jQuote(unit) + ". Valid units are: ms, s, m, h");
+                } else {
+                    multipier = 0;
+                }
+                
+                int parsedValue = Integer.parseInt(valueWithoutUnit);
+                if (multipier == 0 && parsedValue != 0) {
+                    throw invalidSettingValueException(name, value,
+                            "Time unit must be specified for a non-0 value (examples: 500 ms, 3 s, 2 m, 1 h).");
+                }
+                
+                setTemplateUpdateDelayMilliseconds(parsedValue * multipier);
             } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);

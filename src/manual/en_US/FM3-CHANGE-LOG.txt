@@ -110,3 +110,5 @@ the FreeMarer 3 changelog here:
     incomplatibleImprovement version is required.
   - Removed the static default Configuration instance. (It's not possible to create a template with null Configuration
     constructor argument anymore.)
+  - When specifying the templateUpdateDelay configuration setting with a String (with Properties), the time unit is
+    required, unless the value is 0.
