@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.core.model.impl.dom;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Environment;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!

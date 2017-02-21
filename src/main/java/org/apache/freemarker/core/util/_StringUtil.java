@@ -29,9 +29,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.ast.BugException;
-import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.model.impl.dom._ExtDomApi;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */

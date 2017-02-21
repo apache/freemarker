@@ -21,7 +21,7 @@ package org.apache.freemarker.core.model;
 
 import java.util.List;
 
-import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.util.DeepUnwrap;
 
 /**

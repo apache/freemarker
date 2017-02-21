@@ -45,9 +45,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecision;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecisionInput;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.slf4j.Logger;
 

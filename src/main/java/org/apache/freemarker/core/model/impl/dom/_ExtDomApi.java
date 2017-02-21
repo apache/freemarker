@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.model.impl.dom;
 
-import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.Environment;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!

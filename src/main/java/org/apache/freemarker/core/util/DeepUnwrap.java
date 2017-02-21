@@ -22,7 +22,7 @@ package org.apache.freemarker.core.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;

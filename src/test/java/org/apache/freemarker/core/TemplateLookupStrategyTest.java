@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Locale;
 
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;

@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.test.util;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
 
 /**
  * An exception that is related to a named parameter of a directive or function.

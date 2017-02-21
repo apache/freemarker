@@ -42,12 +42,12 @@ import java.util.TreeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.freemarker.core.ASTPrinter;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.ast.ASTPrinter;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMethodModel;

@@ -29,8 +29,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.freemarker.core.ast._DelayedJQuote;
-import org.apache.freemarker.core.ast._TemplateModelException;
+import org.apache.freemarker.core._DelayedJQuote;
+import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;

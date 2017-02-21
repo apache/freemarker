@@ -45,28 +45,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.ast.BaseNTemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.CombinedMarkupOutputFormat;
-import org.apache.freemarker.core.ast.Configurable;
-import org.apache.freemarker.core.ast.Configurable.SettingValueAssignmentException;
-import org.apache.freemarker.core.ast.Configurable.UnknownSettingException;
-import org.apache.freemarker.core.ast.ConfigurableTest;
-import org.apache.freemarker.core.ast.CustomHTMLOutputFormat;
-import org.apache.freemarker.core.ast.DummyOutputFormat;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.EpochMillisDivTemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.EpochMillisTemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.HTMLOutputFormat;
-import org.apache.freemarker.core.ast.HexTemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.MarkupOutputFormat;
-import org.apache.freemarker.core.ast.OutputFormat;
-import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.ast.RTFOutputFormat;
-import org.apache.freemarker.core.ast.TemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.UndefinedOutputFormat;
-import org.apache.freemarker.core.ast.UnregisteredOutputFormatException;
-import org.apache.freemarker.core.ast.XMLOutputFormat;
+import org.apache.freemarker.core.Configurable.SettingValueAssignmentException;
+import org.apache.freemarker.core.Configurable.UnknownSettingException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -911,7 +891,7 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.getRegisteredCustomOutputFormats().isEmpty());
         
         cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
-                "[org.apache.freemarker.core.ast.CustomHTMLOutputFormat(), org.apache.freemarker.core.ast.DummyOutputFormat()]");
+                "[org.apache.freemarker.core.CustomHTMLOutputFormat(), org.apache.freemarker.core.DummyOutputFormat()]");
         assertEquals(
                 ImmutableList.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE),
                 new ArrayList(cfg.getRegisteredCustomOutputFormats()));

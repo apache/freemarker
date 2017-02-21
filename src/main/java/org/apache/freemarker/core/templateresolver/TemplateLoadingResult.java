@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
+import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
 

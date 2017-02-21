@@ -21,7 +21,7 @@ package org.apache.freemarker.servlet.jsp;
 
 import javax.servlet.jsp.PageContext;
 
-import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;

@@ -43,10 +43,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;

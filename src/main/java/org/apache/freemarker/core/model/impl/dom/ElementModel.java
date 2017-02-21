@@ -21,8 +21,8 @@ package org.apache.freemarker.core.model.impl.dom;
 
 import java.util.Collections;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;

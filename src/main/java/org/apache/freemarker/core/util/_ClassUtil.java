@@ -19,42 +19,7 @@
 
 package org.apache.freemarker.core.util;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.Macro;
-import org.apache.freemarker.core.ast.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateCollectionModelEx;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateMethodModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateNodeModel;
-import org.apache.freemarker.core.model.TemplateNodeModelEx;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
-import org.apache.freemarker.core.model.impl.beans.BeanModel;
-import org.apache.freemarker.core.model.impl.beans.BooleanModel;
-import org.apache.freemarker.core.model.impl.beans.CollectionModel;
-import org.apache.freemarker.core.model.impl.beans.DateModel;
-import org.apache.freemarker.core.model.impl.beans.EnumerationModel;
-import org.apache.freemarker.core.model.impl.beans.IteratorModel;
-import org.apache.freemarker.core.model.impl.beans.MapModel;
 import org.apache.freemarker.core.model.impl.beans.NumberModel;
-import org.apache.freemarker.core.model.impl.beans.OverloadedMethodsModel;
-import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
-import org.apache.freemarker.core.model.impl.beans.StringModel;
 
 public class _ClassUtil {
     

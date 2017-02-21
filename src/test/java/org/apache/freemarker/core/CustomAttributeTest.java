@@ -28,8 +28,6 @@ import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.apache.freemarker.core.ast.CustomAttribute;
-import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.util._NullWriter;
 import org.junit.Test;
 

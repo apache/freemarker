@@ -20,10 +20,10 @@ package org.apache.freemarker.manualtest;
 
 import java.util.Locale;
 
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.TemplateNumberFormat;
-import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.TemplateValueFormatException;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateNumberFormat;
+import org.apache.freemarker.core.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.TemplateValueFormatException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 

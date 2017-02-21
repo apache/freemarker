@@ -24,13 +24,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.freemarker.core.AliasTemplateDateFormatFactory;
+import org.apache.freemarker.core.AliasTemplateNumberFormatFactory;
+import org.apache.freemarker.core.BaseNTemplateNumberFormatFactory;
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateDateFormatFactory;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.AliasTemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.AliasTemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.BaseNTemplateNumberFormatFactory;
-import org.apache.freemarker.core.ast.TemplateDateFormatFactory;
-import org.apache.freemarker.core.ast.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.TemplateNumberFormatFactory;
 import org.junit.Test;
 
 @SuppressWarnings("boxing")

@@ -24,11 +24,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.freemarker.core.ast.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.ast._DelayedFTLTypeDescription;
-import org.apache.freemarker.core.ast._DelayedOrdinal;
-import org.apache.freemarker.core.ast._ErrorDescriptionBuilder;
-import org.apache.freemarker.core.ast._TemplateModelException;
+import org.apache.freemarker.core.TemplateMarkupOutputModel;
+import org.apache.freemarker.core._DelayedFTLTypeDescription;
+import org.apache.freemarker.core._DelayedOrdinal;
+import org.apache.freemarker.core._ErrorDescriptionBuilder;
+import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;

@@ -23,8 +23,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.freemarker.core.ast._DelayedShortClassName;
-import org.apache.freemarker.core.ast._TemplateModelException;
+import org.apache.freemarker.core._DelayedShortClassName;
+import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;

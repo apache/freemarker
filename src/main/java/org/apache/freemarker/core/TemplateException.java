@@ -27,14 +27,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.Expression;
-import org.apache.freemarker.core.ast.InvalidReferenceException;
-import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.ast.TemplateElement;
-import org.apache.freemarker.core.ast.TemplateObject;
-import org.apache.freemarker.core.ast._CoreAPI;
-import org.apache.freemarker.core.ast._ErrorDescriptionBuilder;
 import org.apache.freemarker.core.util._CollectionUtil;
 
 /**
@@ -49,8 +41,8 @@ public class TemplateException extends Exception {
     // Set in constructor:
     private transient _ErrorDescriptionBuilder descriptionBuilder;
     private final transient Environment env;
-    private final transient Expression blamedExpression;
-    private transient TemplateElement[] ftlInstructionStackSnapshot;
+    private final transient ASTExpression blamedExpression;
+    private transient _ASTElement[] ftlInstructionStackSnapshot;
     
     // Calculated on demand:
     private String renderedFtlInstructionStackSnapshot;  // clalc. from ftlInstructionStackSnapshot 
@@ -140,7 +132,7 @@ public class TemplateException extends Exception {
      *          with "template element" granularity, and this can be used to point to the expression inside the
      *          template element.    
      */
-    protected TemplateException(Throwable cause, Environment env, Expression blamedExpr,
+    protected TemplateException(Throwable cause, Environment env, ASTExpression blamedExpr,
             _ErrorDescriptionBuilder descriptionBuilder) {
         this(null, cause, env, blamedExpr, descriptionBuilder);
     }
@@ -148,7 +140,7 @@ public class TemplateException extends Exception {
     private TemplateException(
             String renderedDescription,
             Throwable cause,            
-            Environment env, Expression blamedExpression,
+            Environment env, ASTExpression blamedExpression,
             _ErrorDescriptionBuilder descriptionBuilder) {
         // Note: Keep this constructor lightweight.
         
@@ -194,7 +186,7 @@ public class TemplateException extends Exception {
         synchronized (lock) {
             if (!positionsCalculated) {
                 // The expressions is the argument of the template element, so we prefer it as it's more specific. 
-                TemplateObject templateObject = blamedExpression != null
+                ASTNode templateObject = blamedExpression != null
                         ? blamedExpression
                         : (
                                 ftlInstructionStackSnapshot != null && ftlInstructionStackSnapshot.length != 0
@@ -284,7 +276,7 @@ public class TemplateException extends Exception {
         }
     }
 
-    private TemplateElement getFailingInstruction() {
+    private _ASTElement getFailingInstruction() {
         if (ftlInstructionStackSnapshot != null && ftlInstructionStackSnapshot.length > 0) {
             return ftlInstructionStackSnapshot[0];
         } else {
@@ -539,7 +531,7 @@ public class TemplateException extends Exception {
         }
     }
     
-    Expression getBlamedExpression() {
+    ASTExpression getBlamedExpression() {
         return blamedExpression;
     }
 

@@ -21,7 +21,7 @@ package org.apache.freemarker.core.templateresolver;
 import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
+import org.apache.freemarker.core.TemplateConfiguration;
 
 /**
  * Returns the given {@link TemplateConfiguration} directly, or another {@link TemplateConfigurationFactory}'s result, when

@@ -24,9 +24,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
 
 /**

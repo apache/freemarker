@@ -27,7 +27,7 @@ options
 
 PARSER_BEGIN(FMParser)
 
-package org.apache.freemarker.core.ast;
+package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.model.*;
@@ -274,8 +274,8 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is a String Literal
      */
-    private void notStringLiteral(Expression exp, String expected) throws ParseException {
-        if (exp instanceof StringLiteral) {
+    private void notStringLiteral(ASTExpression exp, String expected) throws ParseException {
+        if (exp instanceof ASTExpStringLiteral) {
             throw new ParseException(
                     "Found string literal: " + exp + ". Expecting: " + expected,
                     exp);
@@ -285,8 +285,8 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is a Number Literal
      */
-    private void notNumberLiteral(Expression exp, String expected) throws ParseException {
-        if (exp instanceof NumberLiteral) {
+    private void notNumberLiteral(ASTExpression exp, String expected) throws ParseException {
+        if (exp instanceof ASTExpNumberLiteral) {
             throw new ParseException(
                     "Found number literal: " + exp.getCanonicalForm() + ". Expecting " + expected,
                     exp);
@@ -296,8 +296,8 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is a boolean Literal
      */
-    private void notBooleanLiteral(Expression exp, String expected) throws ParseException {
-        if (exp instanceof BooleanLiteral) {
+    private void notBooleanLiteral(ASTExpression exp, String expected) throws ParseException {
+        if (exp instanceof ASTExpBooleanLiteral) {
             throw new ParseException("Found: " + exp.getCanonicalForm() + ". Expecting " + expected, exp);
         }
     }
@@ -305,8 +305,8 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is a Hash Literal
      */
-    private void notHashLiteral(Expression exp, String expected) throws ParseException {
-        if (exp instanceof HashLiteral) {
+    private void notHashLiteral(ASTExpression exp, String expected) throws ParseException {
+        if (exp instanceof ASTExpHashLiteral) {
             throw new ParseException(
                     "Found hash literal: " + exp.getCanonicalForm() + ". Expecting " + expected,
                     exp);
@@ -316,10 +316,10 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is a List Literal
      */
-    private void notListLiteral(Expression exp, String expected)
+    private void notListLiteral(ASTExpression exp, String expected)
             throws ParseException
     {
-        if (exp instanceof ListLiteral) {
+        if (exp instanceof ASTExpListLiteral) {
             throw new ParseException(
                     "Found list literal: " + exp.getCanonicalForm() + ". Expecting " + expected,
                     exp);
@@ -329,7 +329,7 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is a literal other than of the numerical type
      */
-    private void numberLiteralOnly(Expression exp) throws ParseException {
+    private void numberLiteralOnly(ASTExpression exp) throws ParseException {
         notStringLiteral(exp, "number");
         notListLiteral(exp, "number");
         notHashLiteral(exp, "number");
@@ -339,7 +339,7 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is not a string.
      */
-    private void stringLiteralOnly(Expression exp) throws ParseException {
+    private void stringLiteralOnly(ASTExpression exp) throws ParseException {
         notNumberLiteral(exp, "string");
         notListLiteral(exp, "string");
         notHashLiteral(exp, "string");
@@ -349,22 +349,22 @@ public class FMParser {
     /**
      * Throw an exception if the expression passed in is a literal other than of the boolean type
      */
-    private void booleanLiteralOnly(Expression exp) throws ParseException {
+    private void booleanLiteralOnly(ASTExpression exp) throws ParseException {
         notStringLiteral(exp, "boolean (true/false)");
         notListLiteral(exp, "boolean (true/false)");
         notHashLiteral(exp, "boolean (true/false)");
         notNumberLiteral(exp, "boolean (true/false)");
     }
 
-    private Expression escapedExpression(Expression exp) {
+    private ASTExpression escapedExpression(ASTExpression exp) {
         if (!escapes.isEmpty()) {
-            return ((EscapeBlock) escapes.getFirst()).doEscape(exp);
+            return ((ASTDirEscape) escapes.getFirst()).doEscape(exp);
         } else {
             return exp;
         }
     }
 
-    private boolean getBoolean(Expression exp, boolean legacyCompat) throws ParseException {
+    private boolean getBoolean(ASTExpression exp, boolean legacyCompat) throws ParseException {
         TemplateModel tm = null;
         try {
             tm = exp.eval(null);
@@ -418,7 +418,7 @@ public class FMParser {
         return size != 0 ? (ParserIteratorBlockContext) iteratorBlockContexts.get(size - 1) : null; 
     }
     
-    private void checkLoopVariableBuiltInLHO(String loopVarName, Expression lhoExp, Token biName)
+    private void checkLoopVariableBuiltInLHO(String loopVarName, ASTExpression lhoExp, Token biName)
             throws ParseException {
         int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
         for (int i = size - 1; i >= 0; i--) {
@@ -1423,16 +1423,16 @@ TOKEN:
 // expression syntax.
 
 /**
- * This is the same as OrExpression, since
- * the OR is the operator with the lowest
+ * This is the same as ASTExpOr, since
+ * OR is the operator with the lowest
  * precedence.
  */
-Expression Expression() :
+ASTExpression ASTExpression() :
 {
-    Expression exp;
+    ASTExpression exp;
 }
 {
-    exp = OrExpression()
+    exp = ASTExpOr()
     {
         return exp;
     }
@@ -1443,27 +1443,27 @@ Expression Expression() :
  * or a possibly more complex expression bounded
  * by parentheses.
  */
-Expression PrimaryExpression() :
+ASTExpression PrimaryExpression() :
 {
-    Expression exp;
+    ASTExpression exp;
 }
 {
     (
-        exp = NumberLiteral()
+        exp = ASTExpNumberLiteral()
         |   
-        exp = HashLiteral()
+        exp = ASTExpHashLiteral()
         |   
-        exp = StringLiteral(true)
+        exp = ASTExpStringLiteral(true)
         |   
-        exp = BooleanLiteral()
+        exp = ASTExpBooleanLiteral()
         |   
-        exp = ListLiteral()
+        exp = ASTExpListLiteral()
         |   
-        exp = Identifier()
+        exp = ASTExpVariable()
         |   
         exp = Parenthesis()
         |   
-        exp = BuiltinVariable()
+        exp = ASTExpBuiltInVariable()
     )
     (
         LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXCLAM> | <TERMINATING_EXCLAM> | <EXISTS>)
@@ -1474,17 +1474,17 @@ Expression PrimaryExpression() :
     }
 }
 
-Expression Parenthesis() :
+ASTExpression Parenthesis() :
 {
-    Expression exp, result;
+    ASTExpression exp, result;
     Token start, end;
 }
 {
     start = <OPEN_PAREN>
-    exp = Expression()
+    exp = ASTExpression()
     end = <CLOSE_PAREN>
     {
-        result = new ParentheticalExpression(exp);
+        result = new ASTExpParenthesis(exp);
         result.setLocation(template, start, end);
         return result;
     }
@@ -1495,17 +1495,17 @@ Expression Parenthesis() :
  * more unary operators. (The only unary operator we
  * currently have is the NOT.)
  */
-Expression UnaryExpression() :
+ASTExpression UnaryExpression() :
 {
-    Expression exp, result;
+    ASTExpression exp, result;
     boolean haveNot = false;
     Token t = null, start = null;
 }
 {
     (
-        result = UnaryPlusMinusExpression()
+        result = ASTExpNegateOrPlus()
         |
-        result = NotExpression()
+        result = ASTExpNot()
         |
         result = PrimaryExpression()
     )
@@ -1514,10 +1514,10 @@ Expression UnaryExpression() :
     }
 }
 
-Expression NotExpression() : 
+ASTExpression ASTExpNot() : 
 {
     Token t;
-    Expression exp, result = null;
+    ASTExpression exp, result = null;
     ArrayList nots = new ArrayList();
 }
 {
@@ -1527,7 +1527,7 @@ Expression NotExpression() :
     exp = PrimaryExpression()
     {
         for (int i = 0; i < nots.size(); i++) {
-            result = new NotExpression(exp);
+            result = new ASTExpNot(exp);
             Token tok = (Token) nots.get(nots.size() -i -1);
             result.setLocation(template, tok, exp);
             exp = result;
@@ -1536,9 +1536,9 @@ Expression NotExpression() :
     }
 }
 
-Expression UnaryPlusMinusExpression() :
+ASTExpression ASTExpNegateOrPlus() :
 {
-    Expression exp, result;
+    ASTExpression exp, result;
     boolean isMinus = false;
     Token t;
 }
@@ -1550,15 +1550,15 @@ Expression UnaryPlusMinusExpression() :
     )
     exp = PrimaryExpression()
     {
-        result = new UnaryPlusMinusExpression(exp, isMinus);  
+        result = new ASTExpNegateOrPlus(exp, isMinus);  
         result.setLocation(template, t, exp);
         return result;
     }
 }
 
-Expression AdditiveExpression() :
+ASTExpression AdditiveExpression() :
 {
-    Expression lhs, rhs, result;
+    ASTExpression lhs, rhs, result;
     boolean plus;
 }
 {
@@ -1577,7 +1577,7 @@ Expression AdditiveExpression() :
             if (plus) {
 	            // plus is treated separately, since it is also
 	            // used for concatenation.
-                result = new AddConcatExpression(lhs, rhs);
+                result = new ASTExpAddOrConcat(lhs, rhs);
             } else {
                 numberLiteralOnly(lhs);
                 numberLiteralOnly(rhs);
@@ -1596,9 +1596,9 @@ Expression AdditiveExpression() :
  * A unary expression followed by zero or more
  * unary expressions with operators in between.
  */
-Expression MultiplicativeExpression() :
+ASTExpression MultiplicativeExpression() :
 {
-    Expression lhs, rhs, result;
+    ASTExpression lhs, rhs, result;
     int operation = ArithmeticExpression.TYPE_MULTIPLICATION;
 }
 {
@@ -1629,9 +1629,9 @@ Expression MultiplicativeExpression() :
 }
 
 
-Expression EqualityExpression() :
+ASTExpression EqualityExpression() :
 {
-    Expression lhs, rhs, result;
+    ASTExpression lhs, rhs, result;
     Token t;
 }
 {
@@ -1651,7 +1651,7 @@ Expression EqualityExpression() :
 	        notHashLiteral(rhs, "scalar");
 	        notListLiteral(lhs, "scalar");
 	        notListLiteral(rhs, "scalar");
-	        result = new ComparisonExpression(lhs, rhs, t.image);
+	        result = new ASTExpComparison(lhs, rhs, t.image);
 	        result.setLocation(template, lhs, rhs);
         }
     ]
@@ -1660,9 +1660,9 @@ Expression EqualityExpression() :
     }
 }
 
-Expression RelationalExpression() :
+ASTExpression RelationalExpression() :
 {
-    Expression lhs, rhs, result;
+    ASTExpression lhs, rhs, result;
     Token t;
 }
 {
@@ -1690,7 +1690,7 @@ Expression RelationalExpression() :
             notListLiteral(rhs, "scalar");
             notStringLiteral(lhs, "number");
             notStringLiteral(rhs, "number");
-            result = new ComparisonExpression(lhs, rhs, t.image);
+            result = new ASTExpComparison(lhs, rhs, t.image);
             result.setLocation(template, lhs, rhs);
         }
     ]
@@ -1699,9 +1699,9 @@ Expression RelationalExpression() :
     }
 }
 
-Expression RangeExpression() :
+ASTExpression RangeExpression() :
 {
-    Expression lhs, rhs = null, result;
+    ASTExpression lhs, rhs = null, result;
     int endType;
     Token dotDot = null;
 }
@@ -1712,20 +1712,20 @@ Expression RangeExpression() :
         (
             (
                 (
-                    <DOT_DOT_LESS> { endType = Range.END_EXCLUSIVE; }
+                    <DOT_DOT_LESS> { endType = ASTExpRange.END_EXCLUSIVE; }
                     |
-                    <DOT_DOT_ASTERISK> { endType = Range.END_SIZE_LIMITED; }
+                    <DOT_DOT_ASTERISK> { endType = ASTExpRange.END_SIZE_LIMITED; }
                 )
                 rhs = AdditiveExpression()
             )
             | 
             (
-                dotDot = <DOT_DOT> { endType = Range.END_UNBOUND; }
+                dotDot = <DOT_DOT> { endType = ASTExpRange.END_UNBOUND; }
                 [
                     LOOKAHEAD(AdditiveExpression())
                     rhs = AdditiveExpression()
                     {
-                        endType = Range.END_INCLUSIVE;
+                        endType = ASTExpRange.END_INCLUSIVE;
                     }
                 ]
             )
@@ -1736,7 +1736,7 @@ Expression RangeExpression() :
                 numberLiteralOnly(rhs);
             }
            
-            Range range = new Range(lhs, rhs, endType);
+            ASTExpRange range = new ASTExpRange(lhs, rhs, endType);
             if (rhs != null) {
                 range.setLocation(template, lhs, rhs);
             } else {
@@ -1753,9 +1753,9 @@ Expression RangeExpression() :
 
 
 
-Expression AndExpression() :
+ASTExpression ASTExpAnd() :
 {
-    Expression lhs, rhs, result;
+    ASTExpression lhs, rhs, result;
 }
 {
     lhs = EqualityExpression() { result = lhs; }
@@ -1766,7 +1766,7 @@ Expression AndExpression() :
         {
             booleanLiteralOnly(lhs);
             booleanLiteralOnly(rhs);
-            result = new AndExpression(lhs, rhs);
+            result = new ASTExpAnd(lhs, rhs);
             result.setLocation(template, lhs, rhs);
             lhs = result;
         }
@@ -1776,20 +1776,20 @@ Expression AndExpression() :
     }
 }
 
-Expression OrExpression() :
+ASTExpression ASTExpOr() :
 {
-    Expression lhs, rhs, result;
+    ASTExpression lhs, rhs, result;
 }
 {
-    lhs = AndExpression() { result = lhs; }
+    lhs = ASTExpAnd() { result = lhs; }
     (
         LOOKAHEAD(<OR>)
         <OR>
-        rhs = AndExpression()
+        rhs = ASTExpAnd()
         {
             booleanLiteralOnly(lhs);
             booleanLiteralOnly(rhs);
-            result = new OrExpression(lhs, rhs);
+            result = new ASTExpOr(lhs, rhs);
             result.setLocation(template, lhs, rhs);
             lhs = result;
         }
@@ -1799,7 +1799,7 @@ Expression OrExpression() :
     }
 }
 
-ListLiteral ListLiteral() :
+ASTExpListLiteral ASTExpListLiteral() :
 {
     ArrayList values = new ArrayList();
     Token begin, end;
@@ -1809,13 +1809,13 @@ ListLiteral ListLiteral() :
     values = PositionalArgs()
     end = <CLOSE_BRACKET>
     {
-        ListLiteral result = new ListLiteral(values);
+        ASTExpListLiteral result = new ASTExpListLiteral(values);
         result.setLocation(template, begin, end);
         return result;
     }
 }
 
-Expression NumberLiteral() :
+ASTExpression ASTExpNumberLiteral() :
 {
     Token op = null, t;
 }
@@ -1827,42 +1827,42 @@ Expression NumberLiteral() :
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(pCfg.getArithmeticEngine().toNumber(s));
+        ASTExpression result = new ASTExpNumberLiteral(pCfg.getArithmeticEngine().toNumber(s));
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
         return result;
     }
 }
 
-Identifier Identifier() :
+ASTExpVariable ASTExpVariable() :
 {
     Token t;
 }
 {
     t = <ID>
     {
-        Identifier id = new Identifier(t.image);
+        ASTExpVariable id = new ASTExpVariable(t.image);
         id.setLocation(template, t, t);
         return id;
     }
 }
 
-Expression IdentifierOrStringLiteral() :
+ASTExpression IdentifierOrStringLiteral() :
 {
-    Expression exp;
+    ASTExpression exp;
 }
 {
     (
-        exp = Identifier()
+        exp = ASTExpVariable()
         |
-        exp = StringLiteral(false)
+        exp = ASTExpStringLiteral(false)
     )
     {
         return exp;
     }   
 }
 
-BuiltinVariable BuiltinVariable() :
+ASTExpBuiltInVariable ASTExpBuiltInVariable() :
 {
     Token dot, name;
 }
@@ -1870,18 +1870,20 @@ BuiltinVariable BuiltinVariable() :
     dot = <DOT>
     name = <ID>
     {
-        BuiltinVariable result = null;
+        ASTExpBuiltInVariable result = null;
         token_source.checkNamingConvention(name);
 
         TemplateModel parseTimeValue;
         String nameStr = name.image;
-        if (nameStr.equals(BuiltinVariable.OUTPUT_FORMAT) || nameStr.equals(BuiltinVariable.OUTPUT_FORMAT_CC)) {
+        if (nameStr.equals(ASTExpBuiltInVariable.OUTPUT_FORMAT) || nameStr.equals(ASTExpBuiltInVariable.OUTPUT_FORMAT_CC)) {
             parseTimeValue = new SimpleScalar(outputFormat.getName());
-        } else if (nameStr.equals(BuiltinVariable.AUTO_ESC) || nameStr.equals(BuiltinVariable.AUTO_ESC_CC)) {
+        } else if (nameStr.equals(ASTExpBuiltInVariable.AUTO_ESC) || nameStr.equals(ASTExpBuiltInVariable.AUTO_ESC_CC)) {
             parseTimeValue = autoEscaping ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        } else {            parseTimeValue = null;
-        }        
-        result = new BuiltinVariable(name, token_source, parseTimeValue);
+        } else {
+            parseTimeValue = null;
+        }
+        
+        result = new ASTExpBuiltInVariable(name, token_source, parseTimeValue);
         
         result.setLocation(template, dot, name);
         return result;
@@ -1893,9 +1895,9 @@ BuiltinVariable BuiltinVariable() :
  * using the dot or dynamic key name
  * or the args list if this is a method invocation.
  */
-Expression AddSubExpression(Expression exp) :
+ASTExpression AddSubExpression(ASTExpression exp) :
 {
-    Expression result = null;
+    ASTExpression result = null;
 }
 {
     (
@@ -1905,7 +1907,7 @@ Expression AddSubExpression(Expression exp) :
         |
         result = MethodArgs(exp)
         |
-        result = BuiltIn(exp)
+        result = ASTExpBuiltIn(exp)
         |
         result = DefaultTo(exp)
         |
@@ -1916,9 +1918,9 @@ Expression AddSubExpression(Expression exp) :
     }
 }
 
-Expression DefaultTo(Expression exp) :
+ASTExpression DefaultTo(ASTExpression exp) :
 {
-    Expression rhs = null;
+    ASTExpression rhs = null;
     Token t;
 }
 {
@@ -1928,13 +1930,13 @@ Expression DefaultTo(Expression exp) :
         (
             t = <EXCLAM>
             [
-                LOOKAHEAD(Expression())
-                rhs = Expression()
+                LOOKAHEAD(ASTExpression())
+                rhs = ASTExpression()
             ]
         )
     )
     {
-        DefaultToExpression result = new DefaultToExpression(exp, rhs);
+        ASTExpDefault result = new ASTExpDefault(exp, rhs);
         if (rhs == null) {
             result.setLocation(template, exp, t);
         } else {
@@ -1944,24 +1946,24 @@ Expression DefaultTo(Expression exp) :
     }
 }
 
-Expression Exists(Expression exp) :
+ASTExpression Exists(ASTExpression exp) :
 {
     Token t;
 }
 {
     t = <EXISTS>
     {
-        ExistsExpression result = new ExistsExpression(exp);
+        ASTExpExists result = new ASTExpExists(exp);
         result.setLocation(template, exp, t);
         return result;
     }
 }
 
-Expression BuiltIn(Expression lhoExp) :
+ASTExpression ASTExpBuiltIn(ASTExpression lhoExp) :
 {
     Token t = null;
-    BuiltIn result;
-    ArrayList/*<Expression>*/ args = null;
+    ASTExpBuiltIn result;
+    ArrayList/*<ASTExpression>*/ args = null;
     Token openParen;
     Token closeParen;
 }
@@ -1970,7 +1972,7 @@ Expression BuiltIn(Expression lhoExp) :
     t = <ID>
     {
         token_source.checkNamingConvention(t);
-        result = BuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
+        result = ASTExpBuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
         result.setLocation(template, lhoExp, t);
         
         if (!(result instanceof SpecialBuiltIn)) {
@@ -1978,12 +1980,12 @@ Expression BuiltIn(Expression lhoExp) :
         }
 
         if (result instanceof BuiltInForLoopVariable) {
-            if (!(lhoExp instanceof Identifier)) {
+            if (!(lhoExp instanceof ASTExpVariable)) {
                 throw new ParseException(
                         "Expression used as the left hand operand of ?" + t.image
                         + " must be a simple loop variable name.", lhoExp);
             }
-            String loopVarName = ((Identifier) lhoExp).getName();
+            String loopVarName = ((ASTExpVariable) lhoExp).getName();
             checkLoopVariableBuiltInLHO(loopVarName, lhoExp, t);
             ((BuiltInForLoopVariable) result).bindToLoopVariable(loopVarName);
             
@@ -2039,7 +2041,7 @@ Expression BuiltIn(Expression lhoExp) :
 /**
  * production for when a key is specified by <DOT> + keyname
  */
-Expression DotVariable(Expression exp) :
+ASTExpression DotVariable(ASTExpression exp) :
 {
     Token t;
 }
@@ -2077,7 +2079,7 @@ Expression DotVariable(Expression exp) :
             notListLiteral(exp, "hash");
             notStringLiteral(exp, "hash");
             notBooleanLiteral(exp, "hash");
-            Dot dot = new Dot(exp, t.image);
+            ASTExpDot dot = new ASTExpDot(exp, t.image);
             dot.setLocation(template, exp, t);
             return dot;
         }
@@ -2087,19 +2089,19 @@ Expression DotVariable(Expression exp) :
  * production for when the key is specified
  * in brackets.
  */
-Expression DynamicKey(Expression exp) :
+ASTExpression DynamicKey(ASTExpression exp) :
 {
-    Expression arg;
+    ASTExpression arg;
     Token t;
 }
 {
     <OPEN_BRACKET>
-    arg = Expression()
+    arg = ASTExpression()
     t = <CLOSE_BRACKET>
     {
         notBooleanLiteral(exp, "list or hash");
         notNumberLiteral(exp, "list or hash");
-        DynamicKeyName dkn = new DynamicKeyName(exp, arg);
+        ASTExpDynamicKeyName dkn = new ASTExpDynamicKeyName(exp, arg);
         dkn.setLocation(template, exp, t);
         return dkn;
     }
@@ -2108,7 +2110,7 @@ Expression DynamicKey(Expression exp) :
 /**
  * production for an arglist part of a method invocation.
  */
-MethodCall MethodArgs(Expression exp) :
+ASTExpMethodCall MethodArgs(ASTExpression exp) :
 {
         ArrayList args = new ArrayList();
         Token end;
@@ -2119,13 +2121,13 @@ MethodCall MethodArgs(Expression exp) :
         end = <CLOSE_PAREN>
         {
             args.trimToSize();
-            MethodCall result = new MethodCall(exp, args);
+            ASTExpMethodCall result = new ASTExpMethodCall(exp, args);
             result.setLocation(template, exp, end);
             return result;
         }
 }
 
-StringLiteral StringLiteral(boolean interpolate) :
+ASTExpStringLiteral ASTExpStringLiteral(boolean interpolate) :
 {
     Token t;
     boolean raw = false;
@@ -2148,7 +2150,7 @@ StringLiteral StringLiteral(boolean interpolate) :
                 throw new ParseException(e.getMessage(), template, t);
             }
         }
-        StringLiteral result = new StringLiteral(s);
+        ASTExpStringLiteral result = new ASTExpStringLiteral(s);
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
@@ -2158,16 +2160,16 @@ StringLiteral StringLiteral(boolean interpolate) :
     }
 }
 
-Expression BooleanLiteral() :
+ASTExpression ASTExpBooleanLiteral() :
 {
     Token t;
-    Expression result;
+    ASTExpression result;
 }
 {
     (
-        t = <FALSE> { result = new BooleanLiteral(false); }
+        t = <FALSE> { result = new ASTExpBooleanLiteral(false); }
         |
-        t = <TRUE> { result = new BooleanLiteral(true); }
+        t = <TRUE> { result = new ASTExpBooleanLiteral(true); }
     )
     {
         result.setLocation(template, t, t);
@@ -2176,19 +2178,19 @@ Expression BooleanLiteral() :
 }
 
 
-HashLiteral HashLiteral() :
+ASTExpHashLiteral ASTExpHashLiteral() :
 {
     Token begin, end;
-    Expression key, value;
+    ASTExpression key, value;
     ArrayList keys = new ArrayList();
     ArrayList values = new ArrayList();
 }
 {
     begin = <OPENING_CURLY_BRACKET>
     [
-        key = Expression()
+        key = ASTExpression()
         (<COMMA>|<COLON>)
-        value = Expression()
+        value = ASTExpression()
         {
             stringLiteralOnly(key);
             keys.add(key);
@@ -2196,9 +2198,9 @@ HashLiteral HashLiteral() :
         }
         (
             <COMMA>
-            key = Expression()
+            key = ASTExpression()
             (<COMMA>|<COLON>)
-            value = Expression()
+            value = ASTExpression()
             {
                 stringLiteralOnly(key);
                 keys.add(key);
@@ -2208,7 +2210,7 @@ HashLiteral HashLiteral() :
     ]
     end = <CLOSING_CURLY_BRACKET>
     {
-        HashLiteral result = new HashLiteral(keys, values);
+        ASTExpHashLiteral result = new ASTExpHashLiteral(keys, values);
         result.setLocation(template, begin, end);
         return result;
     }
@@ -2218,21 +2220,21 @@ HashLiteral HashLiteral() :
  * A production representing the ${...}
  * that outputs a variable.
  */
-DollarVariable StringOutput() :
+ASTDollarInterpolation StringOutput() :
 {
-    Expression exp;
+    ASTExpression exp;
     Token begin, end;
 }
 {
     begin = <DOLLAR_INTERPOLATION_OPENING>
-    exp = Expression()
+    exp = ASTExpression()
     {
         notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
         notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
     }
     end = <CLOSING_CURLY_BRACKET>
     {
-        DollarVariable result = new DollarVariable(
+        ASTDollarInterpolation result = new ASTDollarInterpolation(
                 exp, escapedExpression(exp),
                 outputFormat,
                 autoEscaping);
@@ -2241,14 +2243,14 @@ DollarVariable StringOutput() :
     }
 }
 
-NumericalOutput NumericalOutput() :
+ASTHashInterpolation ASTHashInterpolation() :
 {
-    Expression exp;
+    ASTExpression exp;
     Token fmt = null, begin, end;
 }
 {
     begin = <HASH_INTERPOLATION_OPENING>
-    exp = Expression() { numberLiteralOnly(exp); }
+    exp = ASTExpression() { numberLiteralOnly(exp); }
     [
         <SEMICOLON>
         fmt = <ID>
@@ -2258,7 +2260,7 @@ NumericalOutput NumericalOutput() :
         MarkupOutputFormat<?> autoEscOF = autoEscaping && outputFormat instanceof MarkupOutputFormat
                 ? (MarkupOutputFormat<?>) outputFormat : null;
     
-        NumericalOutput result;
+        ASTHashInterpolation result;
         if (fmt != null) {
             int minFrac = -1;  // -1 indicates that the value has not been set
             int maxFrac = -1;
@@ -2312,40 +2314,40 @@ NumericalOutput NumericalOutput() :
             if (minFrac > 50 || maxFrac > 50) {// sanity check
                 throw new ParseException("Cannot specify more than 50 fraction digits", template, fmt);
             }
-            result = new NumericalOutput(exp, minFrac, maxFrac, autoEscOF);
+            result = new ASTHashInterpolation(exp, minFrac, maxFrac, autoEscOF);
         } else {  // if format != null
-            result = new NumericalOutput(exp, autoEscOF);
+            result = new ASTHashInterpolation(exp, autoEscOF);
         }
         result.setLocation(template, begin, end);
         return result;
     }
 }
 
-TemplateElement If() :
+_ASTElement If() :
 {
     Token start, end, t;
-    Expression condition;
+    ASTExpression condition;
     TemplateElements children;
-    IfBlock ifBlock;
-    ConditionalBlock cblock;
+    ASTDirIfElseIfElseContainer ifBlock;
+    ASTDirIfOrElseOrElseIf cblock;
 }
 {
     start = <IF>
-    condition = Expression()
+    condition = ASTExpression()
     end = <DIRECTIVE_END>
     children = MixedContentElements()
     {
-        cblock = new ConditionalBlock(condition, children, ConditionalBlock.TYPE_IF);
+        cblock = new ASTDirIfOrElseOrElseIf(condition, children, ASTDirIfOrElseOrElseIf.TYPE_IF);
         cblock.setLocation(template, start, end, children);
-        ifBlock = new IfBlock(cblock);
+        ifBlock = new ASTDirIfElseIfElseContainer(cblock);
     }
     (
         t = <ELSE_IF>
-        condition = Expression()
+        condition = ASTExpression()
         end = LooseDirectiveEnd()
         children = MixedContentElements()
         {
-            cblock = new ConditionalBlock(condition, children, ConditionalBlock.TYPE_ELSE_IF);
+            cblock = new ASTDirIfOrElseOrElseIf(condition, children, ASTDirIfOrElseOrElseIf.TYPE_ELSE_IF);
             cblock.setLocation(template, t, end, children);
             ifBlock.addBlock(cblock);
         }
@@ -2354,7 +2356,7 @@ TemplateElement If() :
             t = <ELSE>
             children = MixedContentElements()
             {
-                cblock = new ConditionalBlock(null, children, ConditionalBlock.TYPE_ELSE);
+                cblock = new ASTDirIfOrElseOrElseIf(null, children, ASTDirIfOrElseOrElseIf.TYPE_ELSE);
                 cblock.setLocation(template, t, t, children);
                 ifBlock.addBlock(cblock);
             }
@@ -2366,11 +2368,11 @@ TemplateElement If() :
     }
 }
 
-AttemptBlock Attempt() :
+ASTDirAttemptRecoverContainer Attempt() :
 {
     Token start, end;
     TemplateElements children;
-    RecoveryBlock recoveryBlock;
+    ASTDirRecover recoveryBlock;
 }
 {
     start = <ATTEMPT>
@@ -2382,13 +2384,13 @@ AttemptBlock Attempt() :
         end = <END_ATTEMPT>
     )
     {
-        AttemptBlock result = new AttemptBlock(children, recoveryBlock);
+        ASTDirAttemptRecoverContainer result = new ASTDirAttemptRecoverContainer(children, recoveryBlock);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-RecoveryBlock Recover() : 
+ASTDirRecover Recover() : 
 {
     Token start;
     TemplateElements children;
@@ -2397,23 +2399,23 @@ RecoveryBlock Recover() :
     start = <RECOVER>
     children = MixedContentElements()
     {
-        RecoveryBlock result = new RecoveryBlock(children);
+        ASTDirRecover result = new ASTDirRecover(children);
         result.setLocation(template, start, start, children);
         return result;
     }
 }
 
-TemplateElement List() :
+_ASTElement List() :
 {
-    Expression exp;
+    ASTExpression exp;
     Token loopVar = null, loopVar2 = null, start, end;
     TemplateElements childrendBeforeElse;
-    ElseOfList elseOfList = null;
+    ASTDirElseOfList elseOfList = null;
     ParserIteratorBlockContext iterCtx;
 }
 {
     start = <LIST>
-    exp = Expression()
+    exp = ASTExpression()
     [
         <AS>
         loopVar = <ID>
@@ -2453,30 +2455,30 @@ TemplateElement List() :
     }
     
     [
-        elseOfList = ElseOfList()
+        elseOfList = ASTDirElseOfList()
     ]
     
     end = <END_LIST>
     {
-        IteratorBlock list = new IteratorBlock(
+        ASTDirList list = new ASTDirList(
                 exp,
                 loopVar != null ? loopVar.image : null,  // null when we have a nested #items
                 loopVar2 != null ? loopVar2.image : null,
                 childrendBeforeElse, iterCtx.hashListing, false);
         list.setLocation(template, start, end);
 
-        TemplateElement result;
+        _ASTElement result;
         if (elseOfList == null) {
             result = list;
         } else {
-            result = new ListElseContainer(list, elseOfList);
+            result = new ASTDirListElseContainer(list, elseOfList);
             result.setLocation(template, start, end);
         }
         return result;
     }
 }
 
-ElseOfList ElseOfList() :
+ASTDirElseOfList ASTDirElseOfList() :
 {
     Token start;
     TemplateElements children;
@@ -2485,15 +2487,15 @@ ElseOfList ElseOfList() :
         start = <ELSE>
         children = MixedContentElements()
         {
-            ElseOfList result = new ElseOfList(children);
+            ASTDirElseOfList result = new ASTDirElseOfList(children);
 	        result.setLocation(template, start, start, children);
 	        return result;
         }
 }
 
-IteratorBlock ForEach() :
+ASTDirList ForEach() :
 {
-    Expression exp;
+    ASTExpression exp;
     Token loopVar, start, end;
     TemplateElements children;
 }
@@ -2501,7 +2503,7 @@ IteratorBlock ForEach() :
     start = <FOREACH>
     loopVar = <ID>
     <IN>
-    exp = Expression()
+    exp = ASTExpression()
     <DIRECTIVE_END>
     {
         ParserIteratorBlockContext iterCtx = pushIteratorBlockContext();
@@ -2517,13 +2519,13 @@ IteratorBlock ForEach() :
         breakableDirectiveNesting--;
         popIteratorBlockContext();
                 
-        IteratorBlock result = new IteratorBlock(exp, loopVar.image, null, children, false, true);
+        ASTDirList result = new ASTDirList(exp, loopVar.image, null, children, false, true);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-Items Items() :
+ASTDirItems ASTDirItems() :
 {
     Token loopVar, loopVar2 = null, start, end;
     TemplateElements children;
@@ -2576,13 +2578,13 @@ Items Items() :
         iterCtx.loopVarName = null;
         iterCtx.loopVar2Name = null;
         
-        Items result = new Items(loopVar.image, loopVar2 != null ? loopVar2.image : null, children);
+        ASTDirItems result = new ASTDirItems(loopVar.image, loopVar2 != null ? loopVar2.image : null, children);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-Sep Sep() :
+ASTDirSep ASTDirSep() :
 {
     Token loopVar, start, end = null;
     TemplateElements children;
@@ -2602,7 +2604,7 @@ Sep Sep() :
         end = <END_SEP>
     ]
     {
-        Sep result = new Sep(children);
+        ASTDirSep result = new ASTDirSep(children);
         if (end != null) {
             result.setLocation(template, start, end);
         } else {
@@ -2612,30 +2614,30 @@ Sep Sep() :
     }
 }
 
-VisitNode Visit() :
+ASTDirVisit Visit() :
 {
     Token start, end;
-    Expression targetNode, namespaces = null;
+    ASTExpression targetNode, namespaces = null;
 }
 {
     start = <VISIT>
-    targetNode = Expression()
+    targetNode = ASTExpression()
     [
         <USING>
-        namespaces = Expression()
+        namespaces = ASTExpression()
     ]
     end = LooseDirectiveEnd()
     {
-        VisitNode result = new VisitNode(targetNode, namespaces);
+        ASTDirVisit result = new ASTDirVisit(targetNode, namespaces);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-RecurseNode Recurse() :
+ASTDirRecurse Recurse() :
 {
     Token start, end = null;
-    Expression node = null, namespaces = null;
+    ASTExpression node = null, namespaces = null;
 }
 {
     (
@@ -2644,24 +2646,24 @@ RecurseNode Recurse() :
         (
             start = <RECURSE>
             [
-                node = Expression()
+                node = ASTExpression()
             ]
             [
                 <USING>
-                namespaces = Expression()
+                namespaces = ASTExpression()
             ]
             end = LooseDirectiveEnd()
         )
     )
     {
         if (end == null) end = start;
-        RecurseNode result = new RecurseNode(node, namespaces);
+        ASTDirRecurse result = new ASTDirRecurse(node, namespaces);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-FallbackInstruction FallBack() :
+ASTDirFallback FallBack() :
 {
     Token tok;
 }
@@ -2671,7 +2673,7 @@ FallbackInstruction FallBack() :
         if (!inMacro) {
             throw new ParseException("Cannot fall back outside a macro.", template, tok);
         }
-        FallbackInstruction result = new FallbackInstruction();
+        ASTDirFallback result = new ASTDirFallback();
         result.setLocation(template, tok, tok);
         return result;
     }
@@ -2680,7 +2682,7 @@ FallbackInstruction FallBack() :
 /**
  * Production used to break out of a loop or a switch block.
  */
-BreakInstruction Break() :
+ASTDirBreak Break() :
 {
     Token start;
 }
@@ -2692,7 +2694,7 @@ BreakInstruction Break() :
                     + " #list with \"as\", #items, #switch (or the deprecated " + forEachDirectiveSymbol() + ")",
                     template, start);
         }
-        BreakInstruction result = new BreakInstruction();
+        ASTDirBreak result = new ASTDirBreak();
         result.setLocation(template, start, start);
         return result;
     }
@@ -2702,16 +2704,16 @@ BreakInstruction Break() :
  * Production used to jump out of a macro.
  * The stop instruction terminates the rendering of the template.
  */
-ReturnInstruction Return() :
+ASTDirReturn Return() :
 {
     Token start, end = null;
-    Expression exp = null;
+    ASTExpression exp = null;
 }
 {
     (
         start = <SIMPLE_RETURN> { end = start; }
         |
-        start = <RETURN> exp = Expression() end = LooseDirectiveEnd()
+        start = <RETURN> exp = ASTExpression() end = LooseDirectiveEnd()
     )
     {
         if (inMacro) {
@@ -2728,42 +2730,42 @@ ReturnInstruction Return() :
             			"A return instruction can only occur inside a macro or function", template, start);
             }
         }
-        ReturnInstruction result = new ReturnInstruction(exp);
+        ASTDirReturn result = new ASTDirReturn(exp);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-StopInstruction Stop() :
+ASTDirStop Stop() :
 {
     Token start = null;
-    Expression exp = null;
+    ASTExpression exp = null;
 }
 {
     (
         start = <HALT>
         |
-        start = <STOP> exp = Expression() LooseDirectiveEnd()
+        start = <STOP> exp = ASTExpression() LooseDirectiveEnd()
     )
     {
-        StopInstruction result = new StopInstruction(exp);
+        ASTDirStop result = new ASTDirStop(exp);
         result.setLocation(template, start, start);
         return result;
     }
 }
 
-TemplateElement Nested() :
+_ASTElement Nested() :
 {
     Token t, end;
     ArrayList bodyParameters;
-    BodyInstruction result = null;
+    ASTDirNested result = null;
 }
 {
     (
         (
             t = <SIMPLE_NESTED>
             {
-                result = new BodyInstruction(null);
+                result = new ASTDirNested(null);
                 result.setLocation(template, t, t);
             }
         )
@@ -2773,7 +2775,7 @@ TemplateElement Nested() :
             bodyParameters = PositionalArgs()
             end = LooseDirectiveEnd()
             {
-                result = new BodyInstruction(bodyParameters);
+                result = new ASTDirNested(bodyParameters);
                 result.setLocation(template, t, end);
             }
         )
@@ -2786,33 +2788,33 @@ TemplateElement Nested() :
     }
 }
 
-TemplateElement Flush() :
+_ASTElement Flush() :
 {
     Token t;
 }
 {
     t = <FLUSH>
     {
-        FlushInstruction result = new FlushInstruction();
+        ASTDirFlush result = new ASTDirFlush();
         result.setLocation(template, t, t);
         return result;
     }
 }
 
-TemplateElement Trim() :
+_ASTElement Trim() :
 {
     Token t;
-    TrimInstruction result = null;
+    ASTDirTOrTrOrTl result = null;
 }
 {
     (
-        t = <TRIM> { result = new TrimInstruction(true, true); }
+        t = <TRIM> { result = new ASTDirTOrTrOrTl(true, true); }
         |
-        t = <LTRIM> { result = new TrimInstruction(true, false); }
+        t = <LTRIM> { result = new ASTDirTOrTrOrTl(true, false); }
         |
-        t = <RTRIM> { result = new TrimInstruction(false, true); }
+        t = <RTRIM> { result = new ASTDirTOrTrOrTl(false, true); }
         |
-        t = <NOTRIM> { result = new TrimInstruction(false, false); }
+        t = <NOTRIM> { result = new ASTDirTOrTrOrTl(false, false); }
     )
     {
         result.setLocation(template, t, t);
@@ -2821,27 +2823,27 @@ TemplateElement Trim() :
 }
 
 
-TemplateElement Assign() :
+_ASTElement Assign() :
 {
     Token start, end;
     int scope;
     Token id = null;
     Token equalsOp;
-    Expression nameExp, exp, nsExp = null;
+    ASTExpression nameExp, exp, nsExp = null;
     String varName;
     ArrayList assignments = new ArrayList();
-    Assignment ass;
+    ASTDirAssignment ass;
     TemplateElements children;
 }
 {
     (
-        start = <ASSIGN> { scope = Assignment.NAMESPACE; }
+        start = <ASSIGN> { scope = ASTDirAssignment.NAMESPACE; }
         |
-        start = <GLOBALASSIGN> { scope = Assignment.GLOBAL; }
+        start = <GLOBALASSIGN> { scope = ASTDirAssignment.GLOBAL; }
         |
-        start = <LOCALASSIGN> { scope = Assignment.LOCAL; }
+        start = <LOCALASSIGN> { scope = ASTDirAssignment.LOCAL; }
         {
-            scope = Assignment.LOCAL;
+            scope = ASTDirAssignment.LOCAL;
             if (!inMacro && !inFunction) {
                 throw new ParseException("Local variable assigned outside a macro.", template, start);
             }
@@ -2849,9 +2851,9 @@ TemplateElement Assign() :
     )
     nameExp = IdentifierOrStringLiteral()
     {
-        varName = (nameExp instanceof StringLiteral)
-                ? ((StringLiteral) nameExp).getAsString()
-                : ((Identifier) nameExp).getName();
+        varName = (nameExp instanceof ASTExpStringLiteral)
+                ? ((ASTExpStringLiteral) nameExp).getAsString()
+                : ((ASTExpVariable) nameExp).getName();
     }
     (
     	(
@@ -2861,7 +2863,7 @@ TemplateElement Assign() :
 			        {
 			           equalsOp = token;
 			        }
-			        exp = Expression()
+			        exp = ASTExpression()
 		        )
 		        |
 		        (
@@ -2873,7 +2875,7 @@ TemplateElement Assign() :
 		        )
 	        )
 	        {
-	            ass = new Assignment(varName, equalsOp.kind, exp, scope);
+	            ass = new ASTDirAssignment(varName, equalsOp.kind, exp, scope);
                 if (exp != null) {
                    ass.setLocation(template, nameExp, exp);
                 } else {
@@ -2891,9 +2893,9 @@ TemplateElement Assign() :
 	            [<COMMA>]
 	            nameExp = IdentifierOrStringLiteral()
 	            {
-	                varName = (nameExp instanceof StringLiteral)
-	                		? ((StringLiteral) nameExp).getAsString()
-	                		: ((Identifier) nameExp).getName();
+	                varName = (nameExp instanceof ASTExpStringLiteral)
+	                		? ((ASTExpStringLiteral) nameExp).getAsString()
+	                		: ((ASTExpVariable) nameExp).getName();
 	            }
 	            (
 	                (
@@ -2901,7 +2903,7 @@ TemplateElement Assign() :
 	                    {
 	                       equalsOp = token;
 	                    }
-	                    exp = Expression()
+	                    exp = ASTExpression()
 	                )
 	                |
 	                (
@@ -2913,7 +2915,7 @@ TemplateElement Assign() :
 	                )
 	            )
 	            {
-	                ass = new Assignment(varName, equalsOp.kind, exp, scope);
+	                ass = new ASTDirAssignment(varName, equalsOp.kind, exp, scope);
 	                if (exp != null) {
 	                   ass.setLocation(template, nameExp, exp);
 	                } else {
@@ -2924,9 +2926,9 @@ TemplateElement Assign() :
 	        )*
 	        [
 	            id = <IN>
-	            nsExp = Expression()
+	            nsExp = ASTExpression()
 	            {
-	                if (scope != Assignment.NAMESPACE) {
+	                if (scope != ASTDirAssignment.NAMESPACE) {
 	                	throw new ParseException("Cannot assign to namespace here.", template, id);
                 	}
 	            }
@@ -2934,14 +2936,14 @@ TemplateElement Assign() :
 	        end = LooseDirectiveEnd()
 	        {
                 if (assignments.size() == 1) {
-                    Assignment a = (Assignment) assignments.get(0);
+                    ASTDirAssignment a = (ASTDirAssignment) assignments.get(0);
                     a.setNamespaceExp(nsExp);
                     a.setLocation(template, start, end);
                     return a;
                 } else {
-		            AssignmentInstruction ai = new AssignmentInstruction(scope);
+		            ASTDirAssignmentsContainer ai = new ASTDirAssignmentsContainer(scope);
 		            for (int i = 0; i< assignments.size(); i++) {
-		                ai.addAssignment((Assignment) assignments.get(i));
+		                ai.addAssignment((ASTDirAssignment) assignments.get(i));
 		            }
 		            ai.setNamespaceExp(nsExp);
 		            ai.setLocation(template, start, end);
@@ -2953,9 +2955,9 @@ TemplateElement Assign() :
 	    (
 	        [
 	            id = <IN>
-	            nsExp = Expression()
+	            nsExp = ASTExpression()
 	            {
-	                if (scope != Assignment.NAMESPACE) {
+	                if (scope != ASTDirAssignment.NAMESPACE) {
 	                	throw new ParseException("Cannot assign to namespace here.", template, id);
 	            	}
 	            }
@@ -2965,26 +2967,26 @@ TemplateElement Assign() :
 	        (
 	            end = <END_LOCAL>
 	            {
-	            	if (scope != Assignment.LOCAL) {
+	            	if (scope != ASTDirAssignment.LOCAL) {
 	            		throw new ParseException("Mismatched assignment tags.", template, end);
 	        		}
 	        	}
 	            |
 	            end = <END_ASSIGN>
 	            {
-	            	if (scope != Assignment.NAMESPACE) {
+	            	if (scope != ASTDirAssignment.NAMESPACE) {
 	            		throw new ParseException("Mismatched assignment tags.", template, end);
 	        		}
 	        	}
 	            |
 	            end = <END_GLOBAL>
 	            {
-	            	if (scope != Assignment.GLOBAL) throw new ParseException(
+	            	if (scope != ASTDirAssignment.GLOBAL) throw new ParseException(
 	            			"Mismatched assignment tags", template, end);
             	}
 	        )
 	        {
-	            BlockAssignment ba = new BlockAssignment(
+	            ASTDirCapturingAssignment ba = new ASTDirCapturingAssignment(
 	                   children, varName, scope, nsExp,
 	                   getMarkupOutputFormat());
 	            ba.setLocation(template, start, end);
@@ -2994,20 +2996,20 @@ TemplateElement Assign() :
     )
 }
 
-Include Include() :
+ASTDirInclude ASTDirInclude() :
 {
-    Expression nameExp;
+    ASTExpression nameExp;
     Token att, start, end;
-    Expression exp, parseExp = null, encodingExp = null, ignoreMissingExp = null;
+    ASTExpression exp, parseExp = null, encodingExp = null, ignoreMissingExp = null;
 }
 {
     start = <_INCLUDE>
-    nameExp = Expression()
+    nameExp = ASTExpression()
     [<SEMICOLON>]
     (
         att = <ID>
         <EQUALS>
-        exp = Expression()
+        exp = ASTExpression()
         {
             String attString = att.image;
             if (attString.equalsIgnoreCase("parse")) {
@@ -3033,40 +3035,40 @@ Include Include() :
     )*
     end = LooseDirectiveEnd()
     {
-        Include result = new Include(template, nameExp, encodingExp, parseExp, ignoreMissingExp);
+        ASTDirInclude result = new ASTDirInclude(template, nameExp, encodingExp, parseExp, ignoreMissingExp);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-LibraryLoad Import() :
+ASTDirImport Import() :
 {
     Token start, end, ns;
-    Expression nameExp;
+    ASTExpression nameExp;
 }
 {
     start = <IMPORT>
-    nameExp = Expression()
+    nameExp = ASTExpression()
     <AS>
     ns = <ID>
     end = LooseDirectiveEnd()
     {
-        LibraryLoad result = new LibraryLoad(template, nameExp, ns.image);
+        ASTDirImport result = new ASTDirImport(template, nameExp, ns.image);
         result.setLocation(template, start, end);
         template.addImport(result);
         return result;
     }
 }
 
-Macro Macro() :
+ASTDirMacro ASTDirMacro() :
 {
     Token arg, start, end;
-    Expression nameExp;
+    ASTExpression nameExp;
     String name;
     ArrayList argNames = new ArrayList();
     HashMap args = new HashMap();
     ArrayList defNames = new ArrayList();
-    Expression defValue = null;
+    ASTExpression defValue = null;
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
     TemplateElements children;
@@ -3088,9 +3090,9 @@ Macro Macro() :
     }
     nameExp = IdentifierOrStringLiteral()
     {
-        name = (nameExp instanceof StringLiteral)
-                ? ((StringLiteral) nameExp).getAsString()
-                : ((Identifier) nameExp).getName();
+        name = (nameExp instanceof ASTExpStringLiteral)
+                ? ((ASTExpStringLiteral) nameExp).getAsString()
+                : ((ASTExpVariable) nameExp).getName();
     }
     [<OPEN_PAREN>]
     (
@@ -3100,7 +3102,7 @@ Macro Macro() :
         ]
         [
             <EQUALS>
-            defValue = Expression()
+            defValue = ASTExpression()
             {
                 defNames.add(arg.image);
                 hasDefaults = true;
@@ -3158,14 +3160,14 @@ Macro Macro() :
         breakableDirectiveNesting = lastBreakableDirectiveNesting;
         
         inMacro = inFunction = false;
-        Macro result = new Macro(name, argNames, args, catchAll, isFunction, children);
+        ASTDirMacro result = new ASTDirMacro(name, argNames, args, catchAll, isFunction, children);
         result.setLocation(template, start, end);
         template.addMacro(result);
         return result;
     }
 }
 
-CompressedBlock Compress() :
+ASTDirCompress Compress() :
 {
     TemplateElements children;
     Token start, end;
@@ -3175,27 +3177,27 @@ CompressedBlock Compress() :
     children = MixedContentElements()
     end = <END_COMPRESS>
     {
-        CompressedBlock cb = new CompressedBlock(children);
+        ASTDirCompress cb = new ASTDirCompress(children);
         cb.setLocation(template, start, end);
         return cb;
     }
 }
 
-TemplateElement UnifiedMacroTransform() :
+_ASTElement UnifiedMacroTransform() :
 {
     Token start = null, end, t;
     HashMap namedArgs = null;
     ArrayList positionalArgs = null, bodyParameters = null;
-    Expression startTagNameExp;
+    ASTExpression startTagNameExp;
     TemplateElements children;
-    Expression exp;
+    ASTExpression exp;
     int pushedCtxCount = 0;
 }
 {
     start = <UNIFIED_CALL>
-    exp = Expression()
+    exp = ASTExpression()
     {
-        if (exp instanceof Identifier || (exp instanceof Dot && ((Dot) exp).onlyHasIdentifiers())) {
+        if (exp instanceof ASTExpVariable || (exp instanceof ASTExpDot && ((ASTExpDot) exp).onlyHasIdentifiers())) {
             startTagNameExp = exp;
         } else {
             startTagNameExp = null;
@@ -3268,15 +3270,15 @@ TemplateElement UnifiedMacroTransform() :
         )
     )
     {
-        TemplateElement result = (positionalArgs != null)
-        		? new UnifiedCall(exp, positionalArgs, children, bodyParameters)
-	            : new UnifiedCall(exp, namedArgs, children, bodyParameters);
+        _ASTElement result = (positionalArgs != null)
+        		? new ASTDirUserDefined(exp, positionalArgs, children, bodyParameters)
+	            : new ASTDirUserDefined(exp, namedArgs, children, bodyParameters);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-TemplateElement Call() :
+_ASTElement Call() :
 {
     Token start, end, id;
     HashMap namedArgs = null;
@@ -3301,11 +3303,11 @@ TemplateElement Call() :
     )
     end = LooseDirectiveEnd()
     {
-        UnifiedCall result = null;
+        ASTDirUserDefined result = null;
         if (positionalArgs != null) {
-            result = new UnifiedCall(new Identifier(macroName), positionalArgs, TemplateElements.EMPTY, null);
+            result = new ASTDirUserDefined(new ASTExpVariable(macroName), positionalArgs, TemplateElements.EMPTY, null);
         } else {
-            result = new UnifiedCall(new Identifier(macroName), namedArgs, TemplateElements.EMPTY, null);
+            result = new ASTDirUserDefined(new ASTExpVariable(macroName), namedArgs, TemplateElements.EMPTY, null);
         }
         result.legacySyntax = true;
         result.setLocation(template, start, end);
@@ -3317,7 +3319,7 @@ HashMap NamedArgs() :
 {
     HashMap result = new HashMap();
     Token t;
-    Expression exp;
+    ASTExpression exp;
 }
 {
     (
@@ -3327,7 +3329,7 @@ HashMap NamedArgs() :
             token_source.SwitchTo(token_source.NAMED_PARAMETER_EXPRESSION);
             token_source.inInvocation = true;
         }             
-        exp = Expression()
+        exp = ASTExpression()
         {
             result.put(t.image, exp);
         }
@@ -3341,14 +3343,14 @@ HashMap NamedArgs() :
 ArrayList PositionalArgs() :
 {
     ArrayList result = new ArrayList();
-    Expression arg;
+    ASTExpression arg;
 }
 {
     [
-        arg = Expression() { result.add(arg); }
+        arg = ASTExpression() { result.add(arg); }
         (
             [<COMMA>]
-            arg = Expression() { result.add(arg); }
+            arg = ASTExpression() { result.add(arg); }
         )*
     ]
     {
@@ -3357,7 +3359,7 @@ ArrayList PositionalArgs() :
 }
 
 
-Comment Comment() :
+ASTComment ASTComment() :
 {
     Token start, end;
     StringBuilder buf = new StringBuilder();
@@ -3370,13 +3372,13 @@ Comment Comment() :
     )
     end = UnparsedContent(start, buf)
     {
-        Comment result = new Comment(buf.toString());
+        ASTComment result = new ASTComment(buf.toString());
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-TextBlock NoParse() :
+ASTStaticText NoParse() :
 {
     Token start, end;
     StringBuilder buf = new StringBuilder();
@@ -3385,27 +3387,27 @@ TextBlock NoParse() :
     start = <NOPARSE>
     end = UnparsedContent(start, buf)
     {
-        TextBlock result = new TextBlock(buf.toString(), true);
+        ASTStaticText result = new ASTStaticText(buf.toString(), true);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-TransformBlock Transform() :
+ASTDirTransform Transform() :
 {
     Token start, end, argName;
-    Expression exp, argExp;
+    ASTExpression exp, argExp;
     TemplateElements children = null;
     HashMap args = null;
 }
 {
     start = <TRANSFORM>
-    exp = Expression()
+    exp = ASTExpression()
     [<SEMICOLON>]
     (
         argName = <ID>
         <EQUALS>
-        argExp = Expression()
+        argExp = ASTExpression()
         {
             if (args == null) args = new HashMap();
             args.put(argName.image, argExp);
@@ -3421,31 +3423,31 @@ TransformBlock Transform() :
         )
     )
     {
-        TransformBlock result = new TransformBlock(exp, args, children);
+        ASTDirTransform result = new ASTDirTransform(exp, args, children);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-SwitchBlock Switch() :
+ASTDirSwitch Switch() :
 {
-    SwitchBlock switchBlock;
-    Case caseIns;
-    Expression switchExp;
+    ASTDirSwitch switchBlock;
+    ASTDirCase caseIns;
+    ASTExpression switchExp;
     Token start, end;
     boolean defaultFound = false;
 }
 {
     start = <SWITCH>
-    switchExp = Expression()
+    switchExp = ASTExpression()
     <DIRECTIVE_END>
     {
         breakableDirectiveNesting++;
-        switchBlock = new SwitchBlock(switchExp);
+        switchBlock = new ASTDirSwitch(switchExp);
     }
     (
         LOOKAHEAD(2)
-        caseIns = Case()
+        caseIns = ASTDirCase()
         {
             if (caseIns.condition == null) {
                 if (defaultFound) {
@@ -3466,31 +3468,31 @@ SwitchBlock Switch() :
     }
 }
 
-Case Case() :
+ASTDirCase ASTDirCase() :
 {
-    Expression exp;
+    ASTExpression exp;
     TemplateElements children;
     Token start;
 }
 {
     [<STATIC_TEXT_WS>]
     (
-        start = <CASE> exp = Expression() <DIRECTIVE_END>
+        start = <CASE> exp = ASTExpression() <DIRECTIVE_END>
         |
         start = <DEFAUL> { exp = null; }
     )
     children = MixedContentElements()
     {
-        Case result = new Case(exp, children);
+        ASTDirCase result = new ASTDirCase(exp, children);
         result.setLocation(template, start, start, children);
         return result;
     }
 }
 
-EscapeBlock Escape() :
+ASTDirEscape Escape() :
 {
     Token variable, start, end;
-    Expression escapeExpr;
+    ASTExpression escapeExpr;
     TemplateElements children;
 }
 {
@@ -3506,10 +3508,10 @@ EscapeBlock Escape() :
     }
     variable = <ID>
     <AS>
-    escapeExpr = Expression()
+    escapeExpr = ASTExpression()
     <DIRECTIVE_END>
     {
-        EscapeBlock result = new EscapeBlock(variable.image, escapeExpr, escapedExpression(escapeExpr));
+        ASTDirEscape result = new ASTDirEscape(variable.image, escapeExpr, escapedExpression(escapeExpr));
         escapes.addFirst(result);
     }
     children = MixedContentElements()
@@ -3524,7 +3526,7 @@ EscapeBlock Escape() :
     }
 }
 
-NoEscapeBlock NoEscape() :
+ASTDirNoEscape NoEscape() :
 {
     Token start, end;
     TemplateElements children;
@@ -3541,22 +3543,22 @@ NoEscapeBlock NoEscape() :
     end = <END_NOESCAPE>
     {
         escapes.addFirst(escape);
-        NoEscapeBlock result = new NoEscapeBlock(children);
+        ASTDirNoEscape result = new ASTDirNoEscape(children);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-OutputFormatBlock OutputFormat() :
+ASTDirOutputFormat OutputFormat() :
 {
     Token start, end;
-    Expression paramExp;
+    ASTExpression paramExp;
     TemplateElements children;
     OutputFormat lastOutputFormat;
 }
 {
     start = <OUTPUTFORMAT>
-    paramExp = Expression()
+    paramExp = ASTExpression()
     <DIRECTIVE_END>
     {
         if (!paramExp.isLiteral()) {
@@ -3627,7 +3629,7 @@ OutputFormatBlock OutputFormat() :
     children = MixedContentElements()
     end = <END_OUTPUTFORMAT>
     {
-        OutputFormatBlock result = new OutputFormatBlock(children, paramExp);
+        ASTDirOutputFormat result = new ASTDirOutputFormat(children, paramExp);
         result.setLocation(template, start, end);
         
         outputFormat = lastOutputFormat;
@@ -3636,7 +3638,7 @@ OutputFormatBlock OutputFormat() :
     }
 }
 
-AutoEscBlock AutoEsc() :
+ASTDirAutoEsc AutoEsc() :
 {
     Token start, end;
     TemplateElements children;
@@ -3653,7 +3655,7 @@ AutoEscBlock AutoEsc() :
     children = MixedContentElements()
     end = <END_AUTOESC>
     {
-        AutoEscBlock result = new AutoEscBlock(children);
+        ASTDirAutoEsc result = new ASTDirAutoEsc(children);
         result.setLocation(template, start, end);
         
         autoEscapingPolicy = lastAutoEscapingPolicy; 
@@ -3662,7 +3664,7 @@ AutoEscBlock AutoEsc() :
     }
 }
 
-NoAutoEscBlock NoAutoEsc() :
+ASTDirNoAutoEsc NoAutoEsc() :
 {
     Token start, end;
     TemplateElements children;
@@ -3678,7 +3680,7 @@ NoAutoEscBlock NoAutoEsc() :
     children = MixedContentElements()
     end = <END_NOAUTOESC>
     {
-        NoAutoEscBlock result = new NoAutoEscBlock(children);
+        ASTDirNoAutoEsc result = new ASTDirNoAutoEsc(children);
         result.setLocation(template, start, end);
         
         autoEscapingPolicy = lastAutoEscapingPolicy;
@@ -3705,20 +3707,20 @@ Token LooseDirectiveEnd() :
     }
 }
 
-PropertySetting Setting() :
+ASTDirSetting Setting() :
 {
     Token start, end, key;
-    Expression value;
+    ASTExpression value;
 }
 {
     start = <SETTING>
     key = <ID>
     <EQUALS>
-    value = Expression()
+    value = ASTExpression()
     end = LooseDirectiveEnd()
     {
         token_source.checkNamingConvention(key);
-        PropertySetting result = new PropertySetting(key, token_source, value, template.getConfiguration());
+        ASTDirSetting result = new ASTDirSetting(key, token_source, value, template.getConfiguration());
         result.setLocation(template, start, end);
         return result;
     }
@@ -3727,9 +3729,9 @@ PropertySetting Setting() :
 /**
  * A production for FreeMarker directives.
  */
-TemplateElement FreemarkerDirective() :
+_ASTElement FreemarkerDirective() :
 {
-    TemplateElement tp;
+    _ASTElement tp;
 }
 {
     // Note that this doesn't include elements like "else", "recover", etc., because those indicate the end
@@ -3743,23 +3745,23 @@ TemplateElement FreemarkerDirective() :
         |
         tp = Assign()
         |
-        tp = Include()
+        tp = ASTDirInclude()
         |
         tp = Import()
         |
-        tp = Macro()
+        tp = ASTDirMacro()
         |
         tp = Compress()
         |
         tp = UnifiedMacroTransform()
         |
-        tp = Items()
+        tp = ASTDirItems()
         |
-        tp = Sep()
+        tp = ASTDirSep()
         |
         tp = Call()
         |
-        tp = Comment()
+        tp = ASTComment()
         |
         tp = NoParse()
         |
@@ -3809,7 +3811,7 @@ TemplateElement FreemarkerDirective() :
  * i.e. text that contains no
  * FreeMarker directives.
  */
-TextBlock PCData() :
+ASTStaticText PCData() :
 {
     StringBuilder buf = new StringBuilder();
     Token t = null, start = null, prevToken = null;
@@ -3833,7 +3835,7 @@ TextBlock PCData() :
     {
         if (stripText && mixedContentNesting == 1) return null;
 
-        TextBlock result = new TextBlock(buf.toString(), false);
+        ASTStaticText result = new ASTStaticText(buf.toString(), false);
         result.setLocation(template, start, t);
         return result;
     }
@@ -3867,9 +3869,9 @@ Token UnparsedContent(Token start, StringBuilder buf) :
 
 TemplateElements MixedContentElements() :
 {
-    TemplateElement[] childBuffer = null;
+    _ASTElement[] childBuffer = null;
     int childCount = 0;
-    TemplateElement elem;
+    _ASTElement elem;
     mixedContentNesting++;
 }
 {
@@ -3880,7 +3882,7 @@ TemplateElements MixedContentElements() :
             |
             elem = StringOutput()
             |
-            elem = NumericalOutput()
+            elem = ASTHashInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -3889,9 +3891,9 @@ TemplateElements MixedContentElements() :
             if (elem != null) {
 	            childCount++;
 	            if (childBuffer == null) {
-	                childBuffer = new TemplateElement[16]; 
+	                childBuffer = new _ASTElement[16]; 
 	            } else if (childBuffer.length < childCount) {
-	                TemplateElement[] newChildBuffer = new TemplateElement[childCount * 2];
+	                _ASTElement[] newChildBuffer = new _ASTElement[childCount * 2];
 	                for (int i = 0; i < childBuffer.length; i++) {
 	                    newChildBuffer[i] = childBuffer[i];
 	                }
@@ -3912,10 +3914,10 @@ TemplateElements MixedContentElements() :
  *
  * @deprecated Use {@link #MixedContentElements} instead.
  */
-MixedContent MixedContent() :
+ASTImplicitParent ASTImplicitParent() :
 {
-    MixedContent mixedContent = new MixedContent();
-    TemplateElement elem, begin = null;
+    ASTImplicitParent mixedContent = new ASTImplicitParent();
+    _ASTElement elem, begin = null;
     mixedContentNesting++;
 }
 {
@@ -3926,7 +3928,7 @@ MixedContent MixedContent() :
             |
             elem = StringOutput()
             |
-            elem = NumericalOutput()
+            elem = ASTHashInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -3953,17 +3955,17 @@ MixedContent MixedContent() :
  *
  * @deprecated Use {@link #MixedContentElements} instead.
  */
-TemplateElement OptionalBlock() :
+_ASTElement OptionalBlock() :
 {
-    TemplateElement tp = null;
+    _ASTElement tp = null;
 }
 {
     [
         LOOKAHEAD(1) // has no effect but to get rid of a spurious warning.
-        tp = MixedContent()
+        tp = ASTImplicitParent()
     ]
     {
-        return tp != null ? tp : new TextBlock(_CollectionUtil.EMPTY_CHAR_ARRAY, false);
+        return tp != null ? tp : new ASTStaticText(_CollectionUtil.EMPTY_CHAR_ARRAY, false);
     }
 }
 
@@ -3971,10 +3973,10 @@ TemplateElement OptionalBlock() :
  * A production freemarker text that may contain
  * ${...} and #{...} but no directives.
  */
-TemplateElement FreeMarkerText() :
+_ASTElement FreeMarkerText() :
 {
-    MixedContent nodes = new MixedContent();
-    TemplateElement elem, begin = null;
+    ASTImplicitParent nodes = new ASTImplicitParent();
+    _ASTElement elem, begin = null;
 }
 {
     (
@@ -3983,7 +3985,7 @@ TemplateElement FreeMarkerText() :
             |
             elem = StringOutput()
             |
-            elem = NumericalOutput()
+            elem = ASTHashInterpolation()
         )
         {
             if (begin == null) {
@@ -4001,7 +4003,7 @@ TemplateElement FreeMarkerText() :
 void HeaderElement() :
 {
     Token key;
-    Expression exp = null;
+    ASTExpression exp = null;
     Token autoEscRequester = null;
 }
 {
@@ -4014,7 +4016,7 @@ void HeaderElement() :
             (
                 key = <ID>
                 <EQUALS>
-                exp = Expression()
+                exp = ASTExpression()
                 {
                     token_source.checkNamingConvention(key);
                 
@@ -4140,15 +4142,15 @@ void HeaderElement() :
 
 Map ParamList() :
 {
-    Identifier id;
-    Expression exp;
+    ASTExpVariable id;
+    ASTExpression exp;
     Map result = new HashMap();
 }
 {
     (
-        id = Identifier()
+        id = ASTExpVariable()
         <EQUALS>
-        exp = Expression() { result.put(id.toString(), exp); }
+        exp = ASTExpression() { result.put(id.toString(), exp); }
         [<COMMA>]
     )+
     {
@@ -4159,12 +4161,12 @@ Map ParamList() :
 /**
  * Parses the already un-escaped content of a string literal (input must not include the quotation marks).
  *
- * @return A {@link List} of {@link String}-s and {@link Interpolation}-s. 
+ * @return A {@link List} of {@link String}-s and {@link ASTInterpolation}-s. 
  */
 List<Object> StaticTextAndInterpolations() :
 {
     Token t;
-    Interpolation interpolation;
+    ASTInterpolation interpolation;
     StringBuilder staticTextCollector = null;
     ArrayList<Object> parts = new ArrayList<Object>();
 }
@@ -4196,7 +4198,7 @@ List<Object> StaticTextAndInterpolations() :
 		    |
             LOOKAHEAD(<HASH_INTERPOLATION_OPENING>)
 		    (
-                interpolation = NumericalOutput()
+                interpolation = ASTHashInterpolation()
 		    )
 	    )
 	    {
@@ -4220,7 +4222,7 @@ List<Object> StaticTextAndInterpolations() :
  * Root production to be used when parsing
  * an entire file.
  */
-TemplateElement Root() :
+_ASTElement Root() :
 {
     TemplateElements children;
 }
@@ -4239,7 +4241,7 @@ TemplateElement Root() :
     children = MixedContentElements()
     <EOF>
     {
-        TemplateElement root = children.asSingleElement(); 
+        _ASTElement root = children.asSingleElement(); 
         root.setFieldsForRootElement();
         root = root.postParseCleanup(stripWhitespace);
         // The cleanup result is possibly an element from deeper:

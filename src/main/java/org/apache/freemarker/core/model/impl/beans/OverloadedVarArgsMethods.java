@@ -23,10 +23,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.freemarker.core.ast.BugException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.util.BugException;
 
 /**
  * Stores the varargs methods for a {@link OverloadedMethods} object.

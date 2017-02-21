@@ -23,7 +23,7 @@ import java.rmi.RemoteException;
 
 /**
  * Represents the debugger-side mirror of a debugged 
- * {@link org.apache.freemarker.core.ast.Environment} object in the remote VM. This interface
+ * {@link org.apache.freemarker.core.Environment} object in the remote VM. This interface
  * extends {@link DebugModel}, and the properties of the Environment are exposed
  * as hash keys on it. Specifically, the following keys are supported:
  * "currentNamespace", "dataModel", "globalNamespace", "knownVariables", 
@@ -32,7 +32,7 @@ import java.rmi.RemoteException;
  * <p>The debug model for the configuration supports key "sharedVariables".
  * <p>Additionally, all of the debug models for environment, template, and 
  * configuration also support all the setting keys of 
- * {@link org.apache.freemarker.core.ast.Configurable} objects. 
+ * {@link org.apache.freemarker.core.Configurable} objects. 
 
  */
 public interface DebuggedEnvironment extends DebugModel {
@@ -44,7 +44,7 @@ public interface DebuggedEnvironment extends DebugModel {
     
     /**
      * Stops the processing of the environment after it was stopped on
-     * a breakpoint. Causes a {@link org.apache.freemarker.core.ast.StopException} to be
+     * a breakpoint. Causes a {@link org.apache.freemarker.core.StopException} to be
      * thrown in the processing thread in the remote VM. 
      */
     public void stop() throws RemoteException;

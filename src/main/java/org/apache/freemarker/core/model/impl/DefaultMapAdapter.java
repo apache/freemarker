@@ -23,8 +23,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.apache.freemarker.core.ast._DelayedJQuote;
-import org.apache.freemarker.core.ast._TemplateModelException;
+import org.apache.freemarker.core._DelayedJQuote;
+import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;

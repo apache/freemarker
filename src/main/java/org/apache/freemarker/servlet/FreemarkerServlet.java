@@ -41,17 +41,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.freemarker.core.Configurable;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ConfigurationException;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.OutputFormat;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.TemplateNotFoundException;
+import org.apache.freemarker.core.UndefinedOutputFormat;
 import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core.ast.Configurable;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.OutputFormat;
-import org.apache.freemarker.core.ast.UndefinedOutputFormat;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -821,7 +821,7 @@ public class FreemarkerServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Page template not found");
                 return;
             }
-        } catch (org.apache.freemarker.core.ast.ParseException e) {
+        } catch (org.apache.freemarker.core.ParseException e) {
             throw newServletExceptionWithFreeMarkerLogging(
                     "Parsing error with template " + _StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         } catch (Exception e) {

@@ -22,9 +22,9 @@ package org.apache.freemarker.core.model.impl.dom;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.BugException;
-import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtil;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;

@@ -19,9 +19,9 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast._ErrorDescriptionBuilder;
+import org.apache.freemarker.core._ErrorDescriptionBuilder;
 
 /**
  * {@link TemplateModel} methods throw this exception if the requested data can't be retrieved.  

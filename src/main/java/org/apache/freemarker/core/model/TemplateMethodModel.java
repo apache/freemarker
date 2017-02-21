@@ -25,7 +25,7 @@ package org.apache.freemarker.core.model;
 
 import java.util.List;
 
-import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.Environment;
 
 /**
  * "method" template language data type: Objects that act like functions. The name comes from that their original

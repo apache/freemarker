@@ -1,0 +1,281 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+#mixed_content  // o.a.f.c.ASTImplicitParent
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: 0  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: null  // Null
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: 0  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..<  // o.a.f.c.ASTExpRange
+            - left-hand operand: 0  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..<  // o.a.f.c.ASTExpRange
+            - left-hand operand: 0  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..<  // o.a.f.c.ASTExpRange
+            - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..<  // o.a.f.c.ASTExpRange
+            - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: *  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - AST-node subtype: "1"  // Integer
+            - right-hand operand: *  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+                - AST-node subtype: "1"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: ?abs  // o.a.f.c.BuiltInsForNumbers$absBI
+                - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                - right-hand operand: "abs"  // String
+            - right-hand operand: ?abs  // o.a.f.c.BuiltInsForNumbers$absBI
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: "abs"  // String
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: ...(...)  // o.a.f.c.ASTExpMethodCall
+                - callee: ?index_of  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
+                    - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: "index_of"  // String
+                - argument value: "x"  // o.a.f.c.ASTExpStringLiteral
+            - right-hand operand: ...(...)  // o.a.f.c.ASTExpMethodCall
+                - callee: ?index_of  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
+                    - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: "index_of"  // String
+                - argument value: "y"  // o.a.f.c.ASTExpStringLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ==  // o.a.f.c.ASTExpComparison
+            - left-hand operand: ..  // o.a.f.c.ASTExpRange
+                - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                - right-hand operand: m  // o.a.f.c.ASTExpVariable
+            - right-hand operand: ..  // o.a.f.c.ASTExpRange
+                - left-hand operand: o  // o.a.f.c.ASTExpVariable
+                - right-hand operand: p  // o.a.f.c.ASTExpVariable
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ==  // o.a.f.c.ASTExpComparison
+            - left-hand operand: ..  // o.a.f.c.ASTExpRange
+                - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                    - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                        - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                        - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                    - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+                    - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+                        - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                        - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                        - AST-node subtype: "0"  // Integer
+                    - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+                    - AST-node subtype: "0"  // Integer
+            - right-hand operand: ..  // o.a.f.c.ASTExpRange
+                - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                    - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                        - left-hand operand: o  // o.a.f.c.ASTExpVariable
+                        - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                    - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+                    - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+                        - left-hand operand: p  // o.a.f.c.ASTExpVariable
+                        - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                        - AST-node subtype: "0"  // Integer
+                    - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+                    - AST-node subtype: "0"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: a  // o.a.f.c.ASTExpVariable
+            - right-hand operand: +...  // o.a.f.c.ASTExpNegateOrPlus
+                - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+                - AST-node subtype: "1"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: a  // o.a.f.c.ASTExpVariable
+                - AST-node subtype: "0"  // Integer
+            - right-hand operand: -...  // o.a.f.c.ASTExpNegateOrPlus
+                - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+                - AST-node subtype: "0"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ..*  // o.a.f.c.ASTExpRange
+            - left-hand operand: *  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: a  // o.a.f.c.ASTExpVariable
+                - AST-node subtype: "1"  // Integer
+            - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ||  // o.a.f.c.ASTExpOr
+            - left-hand operand: &&  // o.a.f.c.ASTExpAnd
+                - left-hand operand: a  // o.a.f.c.ASTExpVariable
+                - right-hand operand: ..  // o.a.f.c.ASTExpRange
+                    - left-hand operand: b  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: c  // o.a.f.c.ASTExpVariable
+            - right-hand operand: d  // o.a.f.c.ASTExpVariable
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // o.a.f.c.ASTDirAssignment
+        - assignment target: "x"  // String
+        - assignment operator: "="  // String
+        - assignment source: ||  // o.a.f.c.ASTExpOr
+            - left-hand operand: &&  // o.a.f.c.ASTExpAnd
+                - left-hand operand: ..  // o.a.f.c.ASTExpRange
+                    - left-hand operand: a  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: null  // Null
+                - right-hand operand: ..  // o.a.f.c.ASTExpRange
+                    - left-hand operand: b  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: null  // Null
+            - right-hand operand: d  // o.a.f.c.ASTExpVariable
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    ${...}  // o.a.f.c.ASTDollarInterpolation
+        - content: ...(...)  // o.a.f.c.ASTExpMethodCall
+            - callee: f  // o.a.f.c.ASTExpVariable
+            - argument value: ..  // o.a.f.c.ASTExpRange
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: null  // Null
+            - argument value: ..  // o.a.f.c.ASTExpRange
+                - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+                    - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                    - AST-node subtype: "0"  // Integer
+                - right-hand operand: null  // Null
+            - argument value: ..  // o.a.f.c.ASTExpRange
+                - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                    - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+                    - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                    - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                    - AST-node subtype: "0"  // Integer
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n\n"  // String
+    @  // o.a.f.c.ASTDirUserDefined
+        - callee: m  // o.a.f.c.ASTExpVariable
+        - argument value: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: *  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - right-hand operand: m  // o.a.f.c.ASTExpVariable
+                - AST-node subtype: "1"  // Integer
+            - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - AST-node subtype: "0"  // Integer
+        - argument value: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
+                - left-hand operand: m  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+            - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: n  // o.a.f.c.ASTExpVariable
+                - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
+                - AST-node subtype: "0"  // Integer
+        - argument value: ..  // o.a.f.c.ASTExpRange
+            - left-hand operand: m  // o.a.f.c.ASTExpVariable
+            - right-hand operand: null  // Null

@@ -22,8 +22,8 @@ package org.apache.freemarker.core.model;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.util.DeepUnwrap;
 
 /**

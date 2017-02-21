@@ -31,10 +31,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast._DelayedJQuote;
-import org.apache.freemarker.core.ast._DelayedShortClassName;
-import org.apache.freemarker.core.ast._ErrorDescriptionBuilder;
-import org.apache.freemarker.core.ast._TemplateModelException;
+import org.apache.freemarker.core._DelayedJQuote;
+import org.apache.freemarker.core._DelayedShortClassName;
+import org.apache.freemarker.core._ErrorDescriptionBuilder;
+import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;

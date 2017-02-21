@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
+import org.apache.freemarker.core.TemplateConfiguration;
 
 /**
  * Creates (or returns) {@link TemplateConfiguration}-s for template sources.

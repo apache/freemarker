@@ -36,21 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.apache.freemarker.core.ast.BugException;
-import org.apache.freemarker.core.ast.Configurable;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.FMParser;
-import org.apache.freemarker.core.ast.LibraryLoad;
-import org.apache.freemarker.core.ast.Macro;
-import org.apache.freemarker.core.ast.OutputFormat;
-import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.ast.ParserConfiguration;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
-import org.apache.freemarker.core.ast.TemplateElement;
-import org.apache.freemarker.core.ast.TemplateSpecifiedEncodingHandler;
-import org.apache.freemarker.core.ast.TextBlock;
-import org.apache.freemarker.core.ast.TokenMgrError;
-import org.apache.freemarker.core.ast._CoreAPI;
+import org.apache.freemarker.core.FMParser;
 import org.apache.freemarker.core.debug.impl.DebuggerService;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -60,6 +46,7 @@ import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
@@ -94,7 +81,7 @@ public class Template extends Configurable {
 
     private Map macros = new HashMap();
     private List imports = new Vector();
-    private TemplateElement rootElement;
+    private _ASTElement rootElement;
     private String encoding, defaultNS;
     private Object customLookupCondition;
     private int actualTagSyntax;
@@ -331,7 +318,7 @@ public class Template extends Configurable {
         } catch (IOException e) {
             throw new BugException("Plain text template creation failed", e);
         }
-        _CoreAPI.replaceText((TextBlock) template.rootElement, content);
+        _CoreAPI.replaceText((ASTStaticText) template.rootElement, content);
         DebuggerService.registerTemplate(template);
         return template;
     }
@@ -402,7 +389,7 @@ public class Template extends Configurable {
     }
     
    /**
-    * Creates a {@link org.apache.freemarker.core.ast.Environment Environment} object, using this template, the data-model provided as
+    * Creates a {@link org.apache.freemarker.core.Environment Environment} object, using this template, the data-model provided as
     * parameter. You have to call {@link Environment#process()} on the return value to set off the actual rendering.
     * 
     * <p>Use this method if you want to do some special initialization on the {@link Environment} before template
@@ -708,7 +695,7 @@ public class Template extends Configurable {
      * @deprecated Should only be used internally, and might will be removed later.
      */
     @Deprecated
-    public void addMacro(Macro macro) {
+    public void addMacro(ASTDirMacro macro) {
         macros.put(macro.getName(), macro);
     }
 
@@ -718,7 +705,7 @@ public class Template extends Configurable {
      * @deprecated Should only be used internally, and might will be removed later.
      */
     @Deprecated
-    public void addImport(LibraryLoad ll) {
+    public void addImport(ASTDirImport ll) {
         imports.add(ll);
     }
 
@@ -734,7 +721,7 @@ public class Template extends Configurable {
      * @param endColumn the last column of the requested source, 1-based
      * @param endLine the last line of the requested source, 1-based
      * 
-     * @see org.apache.freemarker.core.ast.TemplateObject#getSource()
+     * @see org.apache.freemarker.core.ASTNode#getSource()
      */
     public String getSource(int beginColumn,
                             int beginLine,
@@ -874,7 +861,7 @@ public class Template extends Configurable {
      * @deprecated Should only be used internally, and might will be removed later.
      */
     @Deprecated
-    public TemplateElement getRootTreeNode() {
+    public _ASTElement getRootTreeNode() {
         return rootElement;
     }
     
@@ -978,17 +965,17 @@ public class Template extends Configurable {
     }
     
     /**
-     * @return an array of the {@link TemplateElement}s containing the given column and line numbers.
+     * @return an array of the {@link _ASTElement}s containing the given column and line numbers.
      * @deprecated Should only be used internally, and might will be removed later.
      */
     @Deprecated
     public List containingElements(int column, int line) {
         final ArrayList elements = new ArrayList();
-        TemplateElement element = rootElement;
+        _ASTElement element = rootElement;
         mainloop: while (element.contains(column, line)) {
             elements.add(element);
             for (Enumeration enumeration = element.children(); enumeration.hasMoreElements(); ) {
-                TemplateElement elem = (TemplateElement) enumeration.nextElement();
+                _ASTElement elem = (_ASTElement) enumeration.nextElement();
                 if (elem.contains(column, line)) {
                     element = elem;
                     continue mainloop;

@@ -23,9 +23,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.apache.freemarker.core.ast.Configurable;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.StopException;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**

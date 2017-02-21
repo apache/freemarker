@@ -131,7 +131,7 @@
     />
     
     <property name="_javaccOutputDir"
-      value="build/generated-sources/java/org/apache/freemarker/core/ast"
+      value="build/generated-sources/java/org/apache/freemarker/core"
     />
 
     <mkdir dir="${_javaccOutputDir}" />

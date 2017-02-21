@@ -28,10 +28,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.Environment.Namespace;
-import org.apache.freemarker.core.ast.InvalidReferenceException;
-import org.apache.freemarker.core.ast.LibraryLoad;
+import org.apache.freemarker.core.Environment.Namespace;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util._NullWriter;
@@ -51,12 +48,12 @@ public class MistakenlyPublicImportAPIsTest {
         cfg.setTemplateLoader(tl);
         
         Template t1 = new Template(null, "<#import 'imp1' as i1><#import 'imp2' as i2>", cfg);
-        List<LibraryLoad> imports = t1.getImports();
+        List<ASTDirImport> imports = t1.getImports();
         assertEquals(2, imports.size());
         
         {
             Template t2 = new Template(null, "<@i1.m/><@i2.m/>", cfg);
-            for (LibraryLoad libLoad : imports) {
+            for (ASTDirImport libLoad : imports) {
                 t2.addImport(libLoad);
             }
             

@@ -23,10 +23,9 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.BugException;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast._UnexpectedTypeErrorExplainerTemplateModel;
+import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
@@ -35,6 +34,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
 
 /**

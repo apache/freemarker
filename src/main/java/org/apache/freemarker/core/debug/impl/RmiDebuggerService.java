@@ -35,11 +35,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast._DebugBreak;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.TemplateElement;
-import org.apache.freemarker.core.ast._CoreAPI;
+import org.apache.freemarker.core._ASTElement;
+import org.apache.freemarker.core._CoreAPI;
+import org.apache.freemarker.core._ASTDebugBreak;
 import org.apache.freemarker.core.debug.Breakpoint;
 import org.apache.freemarker.core.debug.DebuggerListener;
 import org.apache.freemarker.core.debug.EnvironmentSuspendedEvent;
@@ -186,35 +186,35 @@ extends
     }
 
     private static void insertDebugBreak(Template t, Breakpoint breakpoint) {
-        TemplateElement te = findTemplateElement(t.getRootTreeNode(), breakpoint.getLine());
+        _ASTElement te = findTemplateElement(t.getRootTreeNode(), breakpoint.getLine());
         if (te == null) {
             return;
         }
-        TemplateElement parent = _CoreAPI.getParentElement(te);
-        _DebugBreak db = new _DebugBreak(te);
+        _ASTElement parent = _CoreAPI.getParentElement(te);
+        _ASTDebugBreak db = new _ASTDebugBreak(te);
         // TODO: Ensure there always is a parent by making sure
-        // that the root element in the template is always a MixedContent
+        // that the root element in the template is always a ASTImplicitParent
         // Also make sure it doesn't conflict with anyone's code.
         parent.setChildAt(parent.getIndex(te), db);
     }
 
-    private static TemplateElement findTemplateElement(TemplateElement te, int line) {
+    private static _ASTElement findTemplateElement(_ASTElement te, int line) {
         if (te.getBeginLine() > line || te.getEndLine() < line) {
             return null;
         }
         // Find the narrowest match
         List childMatches = new ArrayList();
         for (Enumeration children = te.children(); children.hasMoreElements(); ) {
-            TemplateElement child = (TemplateElement) children.nextElement();
-            TemplateElement childmatch = findTemplateElement(child, line);
+            _ASTElement child = (_ASTElement) children.nextElement();
+            _ASTElement childmatch = findTemplateElement(child, line);
             if (childmatch != null) {
                 childMatches.add(childmatch);
             }
         }
         //find a match that exactly matches the begin/end line
-        TemplateElement bestMatch = null;
+        _ASTElement bestMatch = null;
         for (int i = 0; i < childMatches.size(); i++) {
-            TemplateElement e = (TemplateElement) childMatches.get(i);
+            _ASTElement e = (_ASTElement) childMatches.get(i);
 
             if ( bestMatch == null ) {
                 bestMatch = e;
@@ -277,14 +277,14 @@ extends
     }
 
     private void removeDebugBreak(Template t, Breakpoint breakpoint) {
-        TemplateElement te = findTemplateElement(t.getRootTreeNode(), breakpoint.getLine());
+        _ASTElement te = findTemplateElement(t.getRootTreeNode(), breakpoint.getLine());
         if (te == null) {
             return;
         }
-        _DebugBreak db = null;
+        _ASTDebugBreak db = null;
         while (te != null) {
-            if (te instanceof _DebugBreak) {
-                db = (_DebugBreak) te;
+            if (te instanceof _ASTDebugBreak) {
+                db = (_ASTDebugBreak) te;
                 break;
             }
             te = _CoreAPI.getParentElement(te);
@@ -292,7 +292,7 @@ extends
         if (db == null) {
             return;
         }
-        TemplateElement parent = _CoreAPI.getParentElement(db); 
+        _ASTElement parent = _CoreAPI.getParentElement(db); 
         parent.setChildAt(parent.getIndex(db), _CoreAPI.getChildElement(db, 0));
     }
     
@@ -333,12 +333,12 @@ extends
         }
     }
     
-    private void removeDebugBreaks(TemplateElement te) {
+    private void removeDebugBreaks(_ASTElement te) {
         int count = te.getChildCount();
         for (int i = 0; i < count; ++i) {
-            TemplateElement child = _CoreAPI.getChildElement(te, i);
-            while (child instanceof _DebugBreak) {
-                TemplateElement dbchild = _CoreAPI.getChildElement(child, 0); 
+            _ASTElement child = _CoreAPI.getChildElement(te, i);
+            while (child instanceof _ASTDebugBreak) {
+                _ASTElement dbchild = _CoreAPI.getChildElement(child, 0); 
                 te.setChildAt(i, dbchild);
                 child = dbchild;
             }

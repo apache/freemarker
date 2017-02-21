@@ -26,11 +26,11 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.freemarker.core.ast.BugException;
-import org.apache.freemarker.core.ast._DelayedConversionToString;
-import org.apache.freemarker.core.ast._DelayedJQuote;
-import org.apache.freemarker.core.ast._TemplateModelException;
+import org.apache.freemarker.core._DelayedConversionToString;
+import org.apache.freemarker.core._DelayedJQuote;
+import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
 
 /**

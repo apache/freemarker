@@ -22,9 +22,9 @@ package org.apache.freemarker.test.util;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast._CoreAPI;
+import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;

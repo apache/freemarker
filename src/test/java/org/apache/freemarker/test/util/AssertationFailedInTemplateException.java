@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.test.util;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
 
 /**
  * Fills the role of {@link junit.framework.AssertionFailedError}, but carries the template location information.  

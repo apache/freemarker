@@ -34,9 +34,9 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.ParseException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;

@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast._UnexpectedTypeErrorExplainerTemplateModel;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;

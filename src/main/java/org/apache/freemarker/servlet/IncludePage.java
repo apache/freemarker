@@ -36,10 +36,10 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast._DelayedFTLTypeDescription;
-import org.apache.freemarker.core.ast._MiscTemplateException;
+import org.apache.freemarker.core._DelayedFTLTypeDescription;
+import org.apache.freemarker.core._MiscTemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;

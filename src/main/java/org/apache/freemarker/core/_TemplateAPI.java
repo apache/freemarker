@@ -21,9 +21,6 @@ package org.apache.freemarker.core;
 
 import java.util.Set;
 
-import org.apache.freemarker.core.ast.Expression;
-import org.apache.freemarker.core.ast.OutputFormat;
-import org.apache.freemarker.core.ast.TemplateObject;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.util._NullArgumentException;
 
@@ -50,7 +47,7 @@ public class _TemplateAPI {
         }
     }
     
-    public static int getTemplateLanguageVersionAsInt(TemplateObject to) {
+    public static int getTemplateLanguageVersionAsInt(ASTNode to) {
         return getTemplateLanguageVersionAsInt(to.getTemplate());
     }
 
@@ -114,7 +111,7 @@ public class _TemplateAPI {
         }
     }
     
-    public static Expression getBlamedExpression(TemplateException e) {
+    public static ASTExpression getBlamedExpression(TemplateException e) {
         return e.getBlamedExpression();
     }
     

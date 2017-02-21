@@ -23,8 +23,8 @@ import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.util._SecurityUtil;
 
 /**

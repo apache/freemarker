@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ast.TemplateConfiguration;
+import org.apache.freemarker.core.TemplateConfiguration;
 import org.junit.Test;
 
 public class TemplateConfigurationFactoryTest {

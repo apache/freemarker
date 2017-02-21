@@ -32,7 +32,6 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Locale;
 
-import org.apache.freemarker.core.ast.ParseException;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util._NullWriter;
 

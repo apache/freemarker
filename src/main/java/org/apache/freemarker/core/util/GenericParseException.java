@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.ast.ParseException;
+import org.apache.freemarker.core.ParseException;
 
 /**
  * Exception thrown when a we want to parse some text but its format doesn't match the expectations. This is a quite

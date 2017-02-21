@@ -1,0 +1,59 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+#mixed_content  // o.a.f.c.ASTImplicitParent
+    ${...}  // o.a.f.c.ASTDollarInterpolation
+        - content: ?trim  // o.a.f.c.BuiltInsForStringsBasic$trimBI
+            - left-hand operand: x  // o.a.f.c.ASTExpVariable
+            - right-hand operand: "trim"  // String
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    ${...}  // o.a.f.c.ASTDollarInterpolation
+        - content: ...(...)  // o.a.f.c.ASTExpMethodCall
+            - callee: ?left_pad  // o.a.f.c.BuiltInsForStringsBasic$padBI
+                - left-hand operand: x  // o.a.f.c.ASTExpVariable
+                - right-hand operand: "left_pad"  // String
+            - argument value: 5  // o.a.f.c.ASTExpNumberLiteral
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    ${...}  // o.a.f.c.ASTDollarInterpolation
+        - content: ...(...)  // o.a.f.c.ASTExpMethodCall
+            - callee: ?left_pad  // o.a.f.c.BuiltInsForStringsBasic$padBI
+                - left-hand operand: x  // o.a.f.c.ASTExpVariable
+                - right-hand operand: "left_pad"  // String
+            - argument value: 5  // o.a.f.c.ASTExpNumberLiteral
+            - argument value: "-"  // o.a.f.c.ASTExpStringLiteral
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    ${...}  // o.a.f.c.ASTDollarInterpolation
+        - content: ?then(...)  // o.a.f.c.BuiltInsWithParseTimeParameters$then_BI
+            - left-hand operand: x  // o.a.f.c.ASTExpVariable
+            - right-hand operand: "then"  // String
+            - argument value: "y"  // o.a.f.c.ASTExpStringLiteral
+            - argument value: "n"  // o.a.f.c.ASTExpStringLiteral
+    #text  // o.a.f.c.ASTStaticText
+        - content: "\n"  // String
+    ${...}  // o.a.f.c.ASTDollarInterpolation
+        - content: ?switch(...)  // o.a.f.c.BuiltInsWithParseTimeParameters$switch_BI
+            - left-hand operand: x  // o.a.f.c.ASTExpVariable
+            - right-hand operand: "switch"  // String
+            - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
+            - argument value: 11  // o.a.f.c.ASTExpNumberLiteral
+            - argument value: 2  // o.a.f.c.ASTExpNumberLiteral
+            - argument value: 22  // o.a.f.c.ASTExpNumberLiteral
+            - argument value: 33  // o.a.f.c.ASTExpNumberLiteral

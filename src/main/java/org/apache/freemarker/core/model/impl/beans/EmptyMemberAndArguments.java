@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import org.apache.freemarker.core.ast._DelayedOrdinal;
+import org.apache.freemarker.core._DelayedOrdinal;
 
 /**
  * Describes a failed member lookup. Instances of this must not be cached as instances may store the actual argument

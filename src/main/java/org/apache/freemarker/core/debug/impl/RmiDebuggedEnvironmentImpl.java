@@ -32,10 +32,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.freemarker.core.Configurable;
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.ast.Configurable;
-import org.apache.freemarker.core.ast.Environment;
 import org.apache.freemarker.core.debug.DebugModel;
 import org.apache.freemarker.core.debug.DebuggedEnvironment;
 import org.apache.freemarker.core.model.TemplateCollectionModel;

@@ -28,8 +28,8 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ast._ObjectBuilderSettingEvaluator;
-import org.apache.freemarker.core.ast._SettingEvaluationEnvironment;
+import org.apache.freemarker.core._ObjectBuilderSettingEvaluator;
+import org.apache.freemarker.core._SettingEvaluationEnvironment;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;

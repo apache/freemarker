@@ -21,9 +21,9 @@ package org.apache.freemarker.core.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.Macro;
-import org.apache.freemarker.core.ast.TemplateMarkupOutputModel;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateMarkupOutputModel;
+import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
@@ -680,8 +680,8 @@ public final class FTLUtil {
                 appendTemplateModelTypeName(sb, typeNamesAppended, primaryInterface);
             }
 
-            if (tm instanceof Macro) {
-                appendTypeName(sb, typeNamesAppended, ((Macro) tm).isFunction() ? "function" : "macro");
+            if (_CoreAPI.isMacroOrFunction(tm)) {
+                appendTypeName(sb, typeNamesAppended, _CoreAPI.isFunction(tm) ? "function" : "macro");
             }
 
             appendTemplateModelTypeName(sb, typeNamesAppended, tm.getClass());

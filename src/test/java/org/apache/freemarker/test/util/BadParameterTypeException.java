@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.test.util;
 
-import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util._StringUtil;
 

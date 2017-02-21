@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.model;
 
-import org.apache.freemarker.core.ast.ArithmeticEngine;
+import org.apache.freemarker.core.ArithmeticEngine;
 
 /**
  * "number" template language data type; an object that stores a number. There's only one numerical type as far as the
