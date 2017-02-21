@@ -42,7 +42,7 @@ import com.google.common.collect.ImmutableList;
 public class TemplateLookupStrategyTest {
 
     @Test
-    public void testSetSetting() throws TemplateException {
+    public void testSetSetting() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
 

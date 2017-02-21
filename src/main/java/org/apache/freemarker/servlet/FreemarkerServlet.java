@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
@@ -1315,7 +1316,7 @@ public class FreemarkerServlet extends HttpServlet {
             } else {
                 try {
                     config.setSetting(Configurable.OBJECT_WRAPPER_KEY, wrapper);
-                } catch (TemplateException e) {
+                } catch (ConfigurationException e) {
                     throw new RuntimeException("Failed to set " + Configurable.OBJECT_WRAPPER_KEY, e);
                 }
                 return config.getObjectWrapper();

@@ -18,13 +18,12 @@
  */
 package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.ast.ParseException;
-import org.junit.Test;
-
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 public class FTLUtilTest {
 
@@ -66,7 +65,7 @@ public class FTLUtilTest {
     }
 
     @Test
-    public void testUnescapeStringLiteralPart() throws ParseException {
+    public void testUnescapeStringLiteralPart() throws Exception {
         assertEquals("", FTLUtil.unescapeStringLiteralPart(""));
         assertEquals("1", FTLUtil.unescapeStringLiteralPart("1"));
         assertEquals("123", FTLUtil.unescapeStringLiteralPart("123"));

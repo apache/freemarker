@@ -262,7 +262,7 @@ public class ConfigurationTest extends TestCase {
     
     @Test
     @SuppressWarnings("boxing")
-    public void testGetTemplateOverloads() throws IOException, TemplateException {
+    public void testGetTemplateOverloads() throws Exception {
         final Locale hu = new Locale("hu", "HU");
         final String latin1 = "ISO-8859-1";
         final String latin2 = "ISO-8859-2";
@@ -536,8 +536,8 @@ public class ConfigurationTest extends TestCase {
         assertNull(cfg.getTemplate("missing.ftl", hu, custLookupCond, utf8, true, true));
     }
 
-    private void assertOutputEquals(final String expectedContent, final Template t) throws TemplateException,
-            IOException {
+    private void assertOutputEquals(final String expectedContent, final Template t) throws ConfigurationException,
+            IOException, TemplateException {
         StringWriter sw = new StringWriter();
         t.process(null, sw);
         assertEquals(expectedContent, sw.toString());
@@ -951,7 +951,7 @@ public class ConfigurationTest extends TestCase {
         assertFalse(cfg.isRecognizeStandardFileExtensionsExplicitlySet());
      }
     
-    public void testSetTimeZone() throws TemplateException {
+    public void testSetTimeZone() throws ConfigurationException {
         TimeZone origSysDefTZ = TimeZone.getDefault();
         try {
             TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
@@ -972,7 +972,7 @@ public class ConfigurationTest extends TestCase {
         }
     }
     
-    public void testSetSQLDateAndTimeTimeZone() throws TemplateException {
+    public void testSetSQLDateAndTimeTimeZone() throws ConfigurationException {
         TimeZone origSysDefTZ = TimeZone.getDefault();
         try {
             TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
@@ -994,7 +994,7 @@ public class ConfigurationTest extends TestCase {
         }
     }
 
-    public void testTimeZoneLayers() throws TemplateException, IOException {
+    public void testTimeZoneLayers() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Template t = new Template(null, "", cfg);
         Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
@@ -1060,14 +1060,14 @@ public class ConfigurationTest extends TestCase {
         env2.setTimeZone(null);
     }
     
-    public void testSetICIViaSetSettingAPI() throws TemplateException {
+    public void testSetICIViaSetSettingAPI() throws ConfigurationException {
         Configuration cfg = new Configuration();
         assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
         cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0"); // This is the only valid value ATM...
         assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
     }
 
-    public void testSetLogTemplateExceptionsViaSetSettingAPI() throws TemplateException {
+    public void testSetLogTemplateExceptionsViaSetSettingAPI() throws ConfigurationException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertFalse(cfg.getLogTemplateExceptions());
         cfg.setSetting(Configurable.LOG_TEMPLATE_EXCEPTIONS_KEY, "true");
@@ -1140,7 +1140,7 @@ public class ConfigurationTest extends TestCase {
     }
 
     @Test
-    public void testTemplateUpdateDelay() throws IOException, TemplateException {
+    public void testTemplateUpdateDelay() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertEquals(DefaultTemplateResolver.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS, cfg.getTemplateUpdateDelayMilliseconds());
@@ -1253,7 +1253,7 @@ public class ConfigurationTest extends TestCase {
             cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
                     "{ 'x': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
             fail();
-        } catch (TemplateException e) {
+        } catch (ConfigurationException e) {
             assertThat(e.getCause().getMessage(), allOf(
                     containsString(EpochMillisTemplateDateFormatFactory.class.getName()),
                     containsString(TemplateNumberFormatFactory.class.getName())));
@@ -1308,7 +1308,7 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.setSetting(Configuration.TAB_SIZE_KEY_SNAKE_CASE, "x");
             fail();
-        } catch (TemplateException e) {
+        } catch (ConfigurationException e) {
             assertThat(e.getCause(), instanceOf(NumberFormatException.class));
         }
     }
@@ -1379,7 +1379,7 @@ public class ConfigurationTest extends TestCase {
             cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
                     "{ 'x': " + HexTemplateNumberFormatFactory.class.getName() + "() }");
             fail();
-        } catch (TemplateException e) {
+        } catch (ConfigurationException e) {
             assertThat(e.getCause().getMessage(), allOf(
                     containsString(HexTemplateNumberFormatFactory.class.getName()),
                     containsString(TemplateDateFormatFactory.class.getName())));
@@ -1451,7 +1451,7 @@ public class ConfigurationTest extends TestCase {
         assertTrue(env.hasCustomFormats());
     }
     
-    public void testNamingConventionSetSetting() throws TemplateException {
+    public void testNamingConventionSetSetting() throws ConfigurationException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
@@ -1466,7 +1466,7 @@ public class ConfigurationTest extends TestCase {
         assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
     }
 
-    public void testLazyImportsSetSetting() throws TemplateException {
+    public void testLazyImportsSetSetting() throws ConfigurationException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertFalse(cfg.getLazyImports());
@@ -1477,7 +1477,7 @@ public class ConfigurationTest extends TestCase {
         assertFalse(cfg.getLazyImports());
     }
     
-    public void testLazyAutoImportsSetSetting() throws TemplateException {
+    public void testLazyAutoImportsSetSetting() throws ConfigurationException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         assertNull(cfg.getLazyAutoImports());
@@ -1649,13 +1649,13 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.setSetting("classic_compatible", "true");
             fail();
-        } catch (TemplateException e) {
+        } catch (ConfigurationException e) {
             assertThat(e.getMessage(), allOf(containsString("removed"), containsString("3.0.0")));
         }
         try {
             cfg.setSetting("strict_syntax", "true");
             fail();
-        } catch (TemplateException e) {
+        } catch (ConfigurationException e) {
             assertThat(e.getMessage(), allOf(containsString("removed"), containsString("3.0.0")));
         }
     }

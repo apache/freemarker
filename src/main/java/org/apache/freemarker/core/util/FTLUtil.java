@@ -18,15 +18,42 @@
  */
 package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.ast.Environment;
-import org.apache.freemarker.core.ast.Macro;
-import org.apache.freemarker.core.ast.ParseException;
-import org.apache.freemarker.core.ast.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.*;
-import org.apache.freemarker.core.model.impl.beans.*;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.freemarker.core.ast.Environment;
+import org.apache.freemarker.core.ast.Macro;
+import org.apache.freemarker.core.ast.TemplateMarkupOutputModel;
+import org.apache.freemarker.core.model.AdapterTemplateModel;
+import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateCollectionModelEx;
+import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateNodeModel;
+import org.apache.freemarker.core.model.TemplateNodeModelEx;
+import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateTransformModel;
+import org.apache.freemarker.core.model.WrapperTemplateModel;
+import org.apache.freemarker.core.model.impl.beans.BeanModel;
+import org.apache.freemarker.core.model.impl.beans.BooleanModel;
+import org.apache.freemarker.core.model.impl.beans.CollectionModel;
+import org.apache.freemarker.core.model.impl.beans.DateModel;
+import org.apache.freemarker.core.model.impl.beans.EnumerationModel;
+import org.apache.freemarker.core.model.impl.beans.IteratorModel;
+import org.apache.freemarker.core.model.impl.beans.MapModel;
+import org.apache.freemarker.core.model.impl.beans.NumberModel;
+import org.apache.freemarker.core.model.impl.beans.OverloadedMethodsModel;
+import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
+import org.apache.freemarker.core.model.impl.beans.StringModel;
 
 /**
  * Static utility methods that perform tasks specific to the FreeMarker Template Language (FTL).
@@ -165,9 +192,9 @@ public final class FTLUtil {
      *
      * @param s String literal <em>without</em> the surrounding quotation marks
      * @return String with all escape sequences resolved
-     * @throws ParseException if there string contains illegal escapes
+     * @throws GenericParseException if there string contains illegal escapes
      */
-    public static String unescapeStringLiteralPart(String s) throws ParseException {
+    public static String unescapeStringLiteralPart(String s) throws GenericParseException {
 
         int idx = s.indexOf('\\');
         if (idx == -1) {
@@ -180,7 +207,7 @@ public final class FTLUtil {
         do {
             buf.append(s.substring(bidx, idx));
             if (idx >= lidx) {
-                throw new ParseException("The last character of string literal is backslash", 0, 0);
+                throw new GenericParseException("The last character of string literal is backslash");
             }
             char c = s.charAt(idx + 1);
             switch (c) {
@@ -256,13 +283,13 @@ public final class FTLUtil {
                     if (x < idx) {
                         buf.append((char) y);
                     } else {
-                        throw new ParseException("Invalid \\x escape in a string literal", 0, 0);
+                        throw new GenericParseException("Invalid \\x escape in a string literal");
                     }
                     bidx = idx;
                     break;
                 }
                 default:
-                    throw new ParseException("Invalid escape sequence (\\" + c + ") in a string literal", 0, 0);
+                    throw new GenericParseException("Invalid escape sequence (\\" + c + ") in a string literal");
             }
             idx = s.indexOf('\\', bidx);
         } while (idx != -1);

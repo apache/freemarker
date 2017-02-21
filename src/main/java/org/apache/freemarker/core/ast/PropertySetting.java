@@ -22,10 +22,9 @@ package org.apache.freemarker.core.ast;
 import java.util.Arrays;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._TemplateAPI;
-import org.apache.freemarker.core.ast.FMParserTokenManager;
-import org.apache.freemarker.core.ast.Token;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -121,7 +120,11 @@ final class PropertySetting extends TemplateElement {
         } else {
             strval = value.evalAndCoerceToStringOrUnsupportedMarkup(env);
         }
-        env.setSetting(key, strval);
+        try {
+            env.setSetting(key, strval);
+        } catch (ConfigurationException e) {
+            throw new _MiscTemplateException(env, e.getMessage(), e.getCause());
+        }
         return null;
     }
     

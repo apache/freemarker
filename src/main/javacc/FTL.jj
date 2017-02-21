@@ -2144,13 +2144,9 @@ StringLiteral StringLiteral(boolean interpolate) :
         } else {
 	        try {
 	            s = FTLUtil.unescapeStringLiteralPart(t.image.substring(1, t.image.length() -1));
-	        } catch (ParseException pe) {
-	            pe.lineNumber = t.beginLine;
-	            pe.columnNumber = t.beginColumn;
-	            pe.endLineNumber = t.endLine;
-	            pe.endColumnNumber = t.endColumn;
-	            throw pe;
-	        }
+            } catch (GenericParseException e) {
+                throw new ParseException(e.getMessage(), template, t);
+            }
         }
         StringLiteral result = new StringLiteral(s);
         result.setLocation(template, t, t);

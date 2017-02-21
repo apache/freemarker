@@ -2330,7 +2330,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     @Override
-    public void setSetting(String name, String value) throws TemplateException {
+    public void setSetting(String name, String value) throws ConfigurationException {
         boolean unknown = false;
         try {
             if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {

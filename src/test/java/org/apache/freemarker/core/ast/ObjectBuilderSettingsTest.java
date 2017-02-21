@@ -391,7 +391,7 @@ public class ObjectBuilderSettingsTest {
     }
 
     @Test
-    public void configurationPropertiesTest() throws TemplateException {
+    public void configurationPropertiesTest() throws Exception {
         final Configuration cfg = new Configuration(Configuration.getVersion());
         
         {

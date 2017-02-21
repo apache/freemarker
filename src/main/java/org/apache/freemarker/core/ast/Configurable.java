@@ -20,7 +20,6 @@
 package org.apache.freemarker.core.ast;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -41,6 +40,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
@@ -66,6 +66,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.GenericParseException;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
@@ -2129,9 +2130,9 @@ public class Configurable {
      * @param value the string that describes the new value of the setting.
      * 
      * @throws UnknownSettingException if the name is wrong.
-     * @throws TemplateException if the new value of the setting can't be set for any other reasons.
+     * @throws SettingValueAssignmentException if the new value of the setting can't be set for any other reasons.
      */
-    public void setSetting(String name, String value) throws TemplateException {
+    public void setSetting(String name, String value) throws ConfigurationException {
         boolean unknown = false;
         try {
             if (LOCALE_KEY.equals(name)) {
@@ -2247,10 +2248,10 @@ public class Configurable {
                         } else if (segmentKey.equals(TRUSTED_TEMPLATES)) {
                             trustedTemplates = segmentValue;
                         } else {
-                            throw new ParseException(
+                            throw new GenericParseException(
                                     "Unrecognized list segment key: " + _StringUtil.jQuote(segmentKey) +
                                             ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
-                                            TRUSTED_TEMPLATES + "\"", 0, 0);
+                                            TRUSTED_TEMPLATES + "\"");
                         }
                     }
                     setNewBuiltinClassResolver(
@@ -2319,11 +2320,11 @@ public class Configurable {
     /**
      * Creates the exception that should be thrown when a setting name isn't recognized.
      */
-    protected TemplateException unknownSettingException(String name) {
+    protected final UnknownSettingException unknownSettingException(String name) {
         Version removalVersion = getRemovalVersionForUnknownSetting(name);
         return removalVersion != null
-                ? new UnknownSettingException(getEnvironment(), name, removalVersion)
-                : new UnknownSettingException(getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
+                ? new UnknownSettingException(name, removalVersion)
+                : new UnknownSettingException(name, getCorrectedNameForUnknownSetting(name));
     }
 
     /**
@@ -2346,11 +2347,9 @@ public class Configurable {
         return null;
     }
     
-    /**
-     * @since 2.3.21
-     */
-    protected final TemplateException settingValueAssignmentException(String name, String value, Throwable cause) {
-        return new SettingValueAssignmentException(getEnvironment(), name, value, cause);
+    protected final SettingValueAssignmentException settingValueAssignmentException(
+            String name, String value, Throwable cause) {
+        return new SettingValueAssignmentException(name, value, cause);
     }
 
     protected final TemplateException invalidSettingValueException(String name, String value) {
@@ -2364,38 +2363,37 @@ public class Configurable {
     }
     
     /**
-     * The setting name was not recognized. 
+     * Thrown by {@link Configuration#setSetting(String, String)}; The setting name was not recognized. 
      */
-    public static class UnknownSettingException extends _MiscTemplateException {
+    @SuppressWarnings("serial")
+    public static class UnknownSettingException extends ConfigurationException {
 
-        private UnknownSettingException(Environment env, String name, String correctedName) {
-            super(env,
-                    "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
-                    correctedName == null
-                            ? "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) });
+        private UnknownSettingException(String name, String correctedName) {
+            super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
+                    + (correctedName == null ? "" : ". You may meant: " + _StringUtil.jQuote(correctedName)));
         }
 
-        private UnknownSettingException(Environment env, String name, Version removedInVersion) {
-            super(env,
-                    "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
-                    removedInVersion == null
-                            ? "" : new Object[] { ". This setting was removed in version ", removedInVersion });
+        private UnknownSettingException(String name, Version removedInVersion) {
+            super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
+                    + (removedInVersion == null ? "" : ". This setting was removed in version " + removedInVersion));
         }
         
     }
 
     /**
-     * The setting name was recognized, but its value couldn't be parsed or the setting couldn't be set for some 
-     * other reason. This exception always has a cause exception.
+     * Thrown by {@link Configuration#setSetting(String, String)}; The setting name was recognized, but its value
+     * couldn't be parsed or the setting couldn't be set for some other reason. This exception should always have a
+     * cause exception.
      *  
      * @since 2.3.21
      */
-    public static class SettingValueAssignmentException extends _MiscTemplateException {
+    @SuppressWarnings("serial")
+    public static class SettingValueAssignmentException extends ConfigurationException {
         
-        private SettingValueAssignmentException(Environment env, String name, String value, Throwable cause) {
-            super(cause, env,
-                    "Failed to set FreeMarker configuration setting ", new _DelayedJQuote(name),
-                    " to value ", new _DelayedJQuote(value), "; see cause exception.");
+        private SettingValueAssignmentException(String name, String value, Throwable cause) {
+            super("Failed to set FreeMarker configuration setting " + _StringUtil.jQuote(name)
+                    + " to value " + _StringUtil.jQuote(value) + "; see cause exception.", cause);
+            _NullArgumentException.check("cause", cause);
         }
         
     }
@@ -2403,11 +2401,11 @@ public class Configurable {
     /**
      * Set the settings stored in a <code>Properties</code> object.
      * 
-     * @throws TemplateException if the <code>Properties</code> object contains
+     * @throws ConfigurationException if the <code>Properties</code> object contains
      *     invalid keys, or invalid setting values, or any other error occurs
      *     while changing the settings.
      */    
-    public void setSettings(Properties props) throws TemplateException {
+    public void setSettings(Properties props) throws ConfigurationException {
         final _SettingEvaluationEnvironment prevEnv = _SettingEvaluationEnvironment.startScope();
         try {
             for (String key : props.stringPropertyNames()) {
@@ -2416,21 +2414,6 @@ public class Configurable {
         } finally {
             _SettingEvaluationEnvironment.endScope(prevEnv);
         }
-    }
-    
-    /**
-     * Reads a setting list (key and element pairs) from the input stream.
-     * The stream has to follow the usual <code>.properties</code> format.
-     *
-     * @throws TemplateException if the stream contains
-     *     invalid keys, or invalid setting values, or any other error occurs
-     *     while changing the settings.
-     * @throws IOException if an error occurred when reading from the input stream.
-     */
-    public void setSettings(InputStream propsIn) throws TemplateException, IOException {
-        Properties p = new Properties();
-        p.load(propsIn);
-        setSettings(p);
     }
 
     /**
@@ -2573,16 +2556,16 @@ public class Configurable {
         if (parent != null) parent.doAutoImportsAndIncludes(env);
     }
 
-    protected List<String> parseAsList(String text) throws ParseException {
+    protected final List<String> parseAsList(String text) throws GenericParseException {
         return new SettingStringParser(text).parseAsList();
     }
 
-    protected List<KeyValuePair<List<String>>> parseAsSegmentedList(String text)
-    throws ParseException {
+    protected final List<KeyValuePair<List<String>>> parseAsSegmentedList(String text)
+    throws GenericParseException {
         return new SettingStringParser(text).parseAsSegmentedList();
     }
     
-    protected HashMap parseAsImportList(String text) throws ParseException {
+    protected final HashMap parseAsImportList(String text) throws GenericParseException {
         return new SettingStringParser(text).parseAsImportList();
     }
     
@@ -2618,7 +2601,7 @@ public class Configurable {
             ln = text.length();
         }
 
-        List<KeyValuePair<List<String>>> parseAsSegmentedList() throws ParseException {
+        List<KeyValuePair<List<String>>> parseAsSegmentedList() throws GenericParseException {
             List<KeyValuePair<List<String>>> segments = new ArrayList();
             List<String> currentSegment = null;
             
@@ -2634,24 +2617,23 @@ public class Configurable {
                     segments.add(new KeyValuePair<List<String>>(item, currentSegment));
                 } else {
                     if (currentSegment == null) {
-                        throw new ParseException(
+                        throw new GenericParseException(
                                 "The very first list item must be followed by \":\" so " +
-                                "it will be the key for the following sub-list.",
-                                0, 0);
+                                "it will be the key for the following sub-list.");
                     }
                     currentSegment.add(item);
                 }
                 
                 if (c == ' ') break;
-                if (c != ',' && c != ':') throw new ParseException(
+                if (c != ',' && c != ':') throw new GenericParseException(
                         "Expected \",\" or \":\" or the end of text but " +
-                        "found \"" + c + "\"", 0, 0);
+                        "found \"" + c + "\"");
                 p++;
             }
             return segments;
         }
 
-        ArrayList parseAsList() throws ParseException {
+        ArrayList parseAsList() throws GenericParseException {
             char c;
             ArrayList seq = new ArrayList();
             while (true) {
@@ -2660,15 +2642,15 @@ public class Configurable {
                 seq.add(fetchStringValue());
                 c = skipWS();
                 if (c == ' ') break;
-                if (c != ',') throw new ParseException(
+                if (c != ',') throw new GenericParseException(
                         "Expected \",\" or the end of text but " +
-                        "found \"" + c + "\"", 0, 0);
+                        "found \"" + c + "\"");
                 p++;
             }
             return seq;
         }
 
-        HashMap parseAsImportList() throws ParseException {
+        HashMap parseAsImportList() throws GenericParseException {
             char c;
             HashMap map = new HashMap();
             while (true) {
@@ -2677,30 +2659,30 @@ public class Configurable {
                 String lib = fetchStringValue();
 
                 c = skipWS();
-                if (c == ' ') throw new ParseException(
-                        "Unexpected end of text: expected \"as\"", 0, 0);
+                if (c == ' ') throw new GenericParseException(
+                        "Unexpected end of text: expected \"as\"");
                 String s = fetchKeyword();
-                if (!s.equalsIgnoreCase("as")) throw new ParseException(
-                        "Expected \"as\", but found " + _StringUtil.jQuote(s), 0, 0);
+                if (!s.equalsIgnoreCase("as")) throw new GenericParseException(
+                        "Expected \"as\", but found " + _StringUtil.jQuote(s));
 
                 c = skipWS();
-                if (c == ' ') throw new ParseException(
-                        "Unexpected end of text: expected gate hash name", 0, 0);
+                if (c == ' ') throw new GenericParseException(
+                        "Unexpected end of text: expected gate hash name");
                 String ns = fetchStringValue();
                 
                 map.put(ns, lib);
 
                 c = skipWS();
                 if (c == ' ') break;
-                if (c != ',') throw new ParseException(
+                if (c != ',') throw new GenericParseException(
                         "Expected \",\" or the end of text but "
-                        + "found \"" + c + "\"", 0, 0);
+                        + "found \"" + c + "\"");
                 p++;
             }
             return map;
         }
 
-        String fetchStringValue() throws ParseException {
+        String fetchStringValue() throws GenericParseException {
             String w = fetchWord();
             if (w.startsWith("'") || w.startsWith("\"")) {
                 w = w.substring(1, w.length() - 1);
@@ -2708,11 +2690,11 @@ public class Configurable {
             return FTLUtil.unescapeStringLiteralPart(w);
         }
 
-        String fetchKeyword() throws ParseException {
+        String fetchKeyword() throws GenericParseException {
             String w = fetchWord();
             if (w.startsWith("'") || w.startsWith("\"")) {
-                throw new ParseException(
-                    "Keyword expected, but a string value found: " + w, 0, 0);
+                throw new GenericParseException(
+                    "Keyword expected, but a string value found: " + w);
             }
             return w;
         }
@@ -2727,9 +2709,9 @@ public class Configurable {
             return ' ';
         }
 
-        private String fetchWord() throws ParseException {
-            if (p == ln) throw new ParseException(
-                    "Unexpeced end of text", 0, 0);
+        private String fetchWord() throws GenericParseException {
+            if (p == ln) throw new GenericParseException(
+                    "Unexpeced end of text");
 
             char c = text.charAt(p);
             int b = p;
@@ -2751,7 +2733,7 @@ public class Configurable {
                     p++;
                 }
                 if (p == ln) {
-                    throw new ParseException("Missing " + q, 0, 0);
+                    throw new GenericParseException("Missing " + q);
                 }
                 p++;
                 return text.substring(b, p);
@@ -2765,7 +2747,7 @@ public class Configurable {
                     p++;
                 } while (p < ln);
                 if (b == p) {
-                    throw new ParseException("Unexpected character: " + c, 0, 0);
+                    throw new GenericParseException("Unexpected character: " + c);
                 } else {
                     return text.substring(b, p);
                 }

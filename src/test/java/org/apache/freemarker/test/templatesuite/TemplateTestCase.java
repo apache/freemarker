@@ -43,6 +43,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
@@ -160,7 +161,7 @@ public class TemplateTestCase extends FileTestCase {
         } else if (!Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY.equals(param)) {
             try {
                 conf.setSetting(param, value);
-            } catch (TemplateException e) {
+            } catch (ConfigurationException e) {
                 throw new RuntimeException(
                         "Failed to set setting " +
                         _StringUtil.jQuote(param) + " to " +

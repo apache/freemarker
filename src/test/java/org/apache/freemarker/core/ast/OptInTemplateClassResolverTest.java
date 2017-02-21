@@ -25,10 +25,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ast.OptInTemplateClassResolver;
-import org.apache.freemarker.core.ast.TemplateClassResolver;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -123,8 +122,8 @@ public class OptInTemplateClassResolverTest extends TestCase {
         }
     }
     
-    public void testSettingParser() throws TemplateException {
-        Configuration cfg = new Configuration();
+    public void testSettingParser() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         cfg.setSetting("new_builtin_class_resolver",
                 "trusted_templates: foo.ftl, \"lib/*\"");
@@ -186,7 +185,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
         try {
             cfg.setSetting("new_builtin_class_resolver", "wrong: foo");
             fail();
-        } catch (TemplateException e) {
+        } catch (ConfigurationException e) {
             // Expected
         }
         
