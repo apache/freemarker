@@ -41,18 +41,6 @@ public final class ServletContextHashModel implements TemplateHashModel {
         servletctx = servlet.getServletContext();
         this.wrapper = wrapper;
     }
-    
-    /**
-     * @deprecated use 
-     * {@link #ServletContextHashModel(GenericServlet, ObjectWrapper)} instead.
-     */
-    @Deprecated
-    public ServletContextHashModel(
-        ServletContext servletctx, ObjectWrapper wrapper) {
-        servlet = null;
-        this.servletctx = servletctx;
-        this.wrapper = wrapper;
-    }
 
     @Override
     public TemplateModel get(String key) throws TemplateModelException {

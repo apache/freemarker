@@ -214,17 +214,6 @@ public class TemplateException extends Exception {
             }
         }
     }
-    
-    /**
-     * @deprecated Java 1.4 has introduced {@link #getCause()} - use that instead, especially as this can't return
-     * runtime exceptions and errors as is.
-     */
-    @Deprecated
-    public Exception getCauseException() {
-        return getCause() instanceof Exception
-                ? (Exception) getCause()
-                : new Exception("Wrapped to Exception: " + getCause(), getCause());
-    }
 
     /**
      * Returns the snapshot of the FTL stack trace at the time this exception was created.
@@ -468,26 +457,6 @@ public class TemplateException extends Exception {
                 calculatePosition();
             }
             return lineNumber;
-        }
-    }
-
-    /**
-     * Returns the name ({@link Template#getName()}) of the template where the error has occurred, or {@code null} if
-     * the information isn't available. This shouldn't be used for showing the error position; use
-     * {@link #getTemplateSourceName()} instead.
-     * 
-     * @deprecated Use {@link #getTemplateSourceName()} instead, unless you are really sure that this is what you want.
-     *             This method isn't really deprecated, it's just marked so to warn users about this.
-     * 
-     * @since 2.3.21
-     */
-    @Deprecated
-    public String getTemplateName() {
-        synchronized (lock) {
-            if (!positionsCalculated) {
-                calculatePosition();
-            }
-            return templateName;
         }
     }
 
