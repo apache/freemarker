@@ -30,10 +30,10 @@ import freemarker.template.TemplateModelException;
 /**
  * A holder for builtins that deal with null left-hand values.
  */
-class ExistenceBuiltins {
+class BuiltInsForExistenceHandling {
 
     // Can't be instantiated
-    private ExistenceBuiltins() { }
+    private BuiltInsForExistenceHandling() { }
 
     private static abstract class ExistenceBuiltIn extends BuiltIn {
     
@@ -56,7 +56,7 @@ class ExistenceBuiltins {
         
     }
     
-    static class defaultBI extends ExistenceBuiltins.ExistenceBuiltIn {
+    static class defaultBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
         
         @Override
         TemplateModel _eval(final Environment env) throws TemplateException {
@@ -94,7 +94,7 @@ class ExistenceBuiltins {
             };
     }
     
-    static class existsBI extends ExistenceBuiltins.ExistenceBuiltIn {
+    static class existsBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             return evalMaybeNonexistentTarget(env) == null ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
@@ -106,7 +106,7 @@ class ExistenceBuiltins {
         }
     }
 
-    static class has_contentBI extends ExistenceBuiltins.ExistenceBuiltIn {
+    static class has_contentBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             return Expression.isEmpty(evalMaybeNonexistentTarget(env))
@@ -120,7 +120,7 @@ class ExistenceBuiltins {
         }
     }
 
-    static class if_existsBI extends ExistenceBuiltins.ExistenceBuiltIn {
+    static class if_existsBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
         @Override
         TemplateModel _eval(Environment env)
                 throws TemplateException {

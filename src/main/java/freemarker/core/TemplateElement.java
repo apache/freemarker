@@ -259,11 +259,11 @@ abstract public class TemplateElement extends TemplateObject {
 
     final void setChildBufferCapacity(int capacity) {
         int ln = childCount;
-        TemplateElement[] newRegulatedChildBuffer = new TemplateElement[capacity];
+        TemplateElement[] newChildBuffer = new TemplateElement[capacity];
         for (int i = 0; i < ln; i++) {
-            newRegulatedChildBuffer[i] = childBuffer[i];
+            newChildBuffer[i] = childBuffer[i];
         }
-        childBuffer = newRegulatedChildBuffer;
+        childBuffer = newChildBuffer;
     }
 
     /**
@@ -277,27 +277,27 @@ abstract public class TemplateElement extends TemplateObject {
      * Inserts a new nested element at the given index, which can also be one higher than the current highest index.
      */
     final void addChild(int index, TemplateElement nestedElement) {
-        final int lRegulatedChildCount = childCount;
+        final int childCount = this.childCount;
 
-        TemplateElement[] lRegulatedChildBuffer = childBuffer;
-        if (lRegulatedChildBuffer == null) {
-            lRegulatedChildBuffer = new TemplateElement[INITIAL_REGULATED_CHILD_BUFFER_CAPACITY];
-            childBuffer = lRegulatedChildBuffer;
-        } else if (lRegulatedChildCount == lRegulatedChildBuffer.length) {
-            setChildBufferCapacity(lRegulatedChildCount != 0 ? lRegulatedChildCount * 2 : 1);
-            lRegulatedChildBuffer = childBuffer;
+        TemplateElement[] childBuffer = this.childBuffer;
+        if (childBuffer == null) {
+            childBuffer = new TemplateElement[INITIAL_REGULATED_CHILD_BUFFER_CAPACITY];
+            this.childBuffer = childBuffer;
+        } else if (childCount == childBuffer.length) {
+            setChildBufferCapacity(childCount != 0 ? childCount * 2 : 1);
+            childBuffer = this.childBuffer;
         }
         // At this point: nestedElements == this.nestedElements, and has sufficient capacity.
 
-        for (int i = lRegulatedChildCount; i > index; i--) {
-            TemplateElement movedElement = lRegulatedChildBuffer[i - 1];
+        for (int i = childCount; i > index; i--) {
+            TemplateElement movedElement = childBuffer[i - 1];
             movedElement.index = i;
-            lRegulatedChildBuffer[i] = movedElement;
+            childBuffer[i] = movedElement;
         }
         nestedElement.index = index;
         nestedElement.parent = this;
-        lRegulatedChildBuffer[index] = nestedElement;
-        childCount = lRegulatedChildCount + 1;
+        childBuffer[index] = nestedElement;
+        this.childCount = childCount + 1;
     }
 
     final TemplateElement getChild(int index) {
@@ -451,8 +451,8 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     private TemplateElement getLastChild() {
-        final int regulatedChildCount = this.childCount;
-        return regulatedChildCount == 0 ? null : childBuffer[regulatedChildCount - 1];
+        final int childCount = this.childCount;
+        return childCount == 0 ? null : childBuffer[childCount - 1];
     }
 
     private TemplateElement getFirstLeaf() {

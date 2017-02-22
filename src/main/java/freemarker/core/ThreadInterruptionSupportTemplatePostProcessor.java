@@ -58,8 +58,8 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
             return;
         }
         
-        final int regulatedChildrenCount = te.getChildCount();
-        for (int i = 0; i < regulatedChildrenCount; i++) {
+        final int childCount = te.getChildCount();
+        for (int i = 0; i < childCount; i++) {
             addInterruptionChecks(te.getChild(i));
         }
         
