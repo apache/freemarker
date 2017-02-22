@@ -722,7 +722,7 @@ public class Configurable {
      *   {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time}, and then if, for example,
      *   {@code time_zone} is GMT+00:00, the
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
-     *   those are the time zone correct renderings, those values probably was meant to shown "as is".
+     *   those are the time zone correct renderings, those values are probably meant to be shown "as is".
      *   
      *   <li>You may wonder why this setting isn't simply "SQL time zone", since the time zone related behavior of JDBC
      *   applies to {@link java.sql.Timestamp java.sql.Timestamp} too. FreeMarker assumes that you have set up your
