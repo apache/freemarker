@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #return}.
  */
-public final class ASTDirReturn extends _ASTElement {
+final class ASTDirReturn extends _ASTElement {
 
     private ASTExpression exp;
 
