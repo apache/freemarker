@@ -51,6 +51,7 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
+import org.apache.freemarker.core.outputformat.impl.CSSOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.CombinedMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.JSONOutputFormat;
