@@ -22,7 +22,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 
-public abstract class BuiltInForNodeEx extends ASTExpBuiltIn {
+abstract class BuiltInForNodeEx extends ASTExpBuiltIn {
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel model = target.eval(env);

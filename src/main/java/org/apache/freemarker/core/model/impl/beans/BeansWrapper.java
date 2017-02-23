@@ -881,7 +881,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     /**
-     * See {@link #tryUnwrap(TemplateModel, Class, int, boolean)}.
+     * See {@link #tryUnwrapTo(TemplateModel, Class, int)}.
      */
     private Object tryUnwrapTo(final TemplateModel model, Class<?> targetClass, final int typeFlags,
             final Map<Object, Object> recursionStops) 
