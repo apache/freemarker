@@ -68,10 +68,6 @@ public class Template extends Configurable {
 
     private static final int READER_BUFFER_SIZE = 8192;
     
-    /** This is only non-null during parsing. It's used internally to make some information available through the
-     *  Template API-s earlier than the parsing was finished. */
-    private transient FMParser parser;
-
     private Map macros = new HashMap();
     private List imports = new Vector();
     private _ASTElement rootElement;
@@ -216,8 +212,7 @@ public class Template extends Configurable {
 
     /**
      * Same as {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}, but allows
-     * specifying a non-default (non-{@link TemplateSpecifiedEncodingHandler#DEFAULT}) behavior regarding encoding
-     * specified in the template content.
+     * specifying the {@code streamToUnmarkWhenEncEstabd} {@link InputStream}.
      *
      * @param streamToUnmarkWhenEncEstabd
      *         If not {@code null}, when during the parsing we reach a point where we know that no {@link
@@ -248,7 +243,7 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                parser = _CoreAPI.newFMParser(
+                FMParser parser = _CoreAPI.newFMParser(
                         this, reader, actualParserConfiguration, streamToUnmarkWhenEncEstabd);
                 try {
                     rootElement = parser.Root();
@@ -267,8 +262,6 @@ public class Template extends Configurable {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
                 throw exc.toParseException(this);
-            } finally {
-                parser = null;
             }
         } catch (ParseException e) {
             e.setTemplateName(getSourceName());

@@ -29,5 +29,5 @@ public interface WrapperTemplateModel extends TemplateModel {
     /**
      * Retrieves the original object wrapped by this model.
      */
-    public Object getWrappedObject();
+    Object getWrappedObject();
 }

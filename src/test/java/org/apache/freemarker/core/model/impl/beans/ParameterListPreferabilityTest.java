@@ -314,7 +314,7 @@ public class ParameterListPreferabilityTest extends TestCase {
                 },
                 new Object[] { "a", "b" });
         
-        /** Subclassing is more important than primitive-VS-boxed: */
+        // Subclassing is more important than primitive-VS-boxed:
         testAllCmpPermutationsInc(
                 new Class[][] {
                     new Class[] { boolean.class, boolean.class, boolean.class, String.class },
@@ -333,7 +333,7 @@ public class ParameterListPreferabilityTest extends TestCase {
                 },
                 new Object[] { true, false, true, "a" });
         
-        /** Subclassing is more important than primitive-VS-boxed: */
+        // Subclassing is more important than primitive-VS-boxed:
         testAllCmpPermutationsInc(
                 new Class[][] {
                     new Class[] { int.class, int.class, int.class, String.class },

@@ -242,7 +242,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("s4", w5.wrap("world"));
         } else if (simpleTestName.equals("beans")) {
             dataModel.put("array", new String[] { "array-0", "array-1"});
-            dataModel.put("list", Arrays.asList(new String[] { "list-0", "list-1", "list-2"}));
+            dataModel.put("list", Arrays.asList("list-0", "list-1", "list-2"));
             Map<Object, Object> tmap = new HashMap<>();
             tmap.put("key", "value");
             Object objKey = new Object();

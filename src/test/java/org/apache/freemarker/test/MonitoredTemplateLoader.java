@@ -255,9 +255,7 @@ public class MonitoredTemplateLoader implements TemplateLoader {
                     return false;
             } else if (!name.equals(other.name))
                 return false;
-            if (resultStatus != other.resultStatus)
-                return false;
-            return true;
+            return resultStatus == other.resultStatus;
         }
         
     }

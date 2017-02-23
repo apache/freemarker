@@ -88,11 +88,11 @@ public class TLDParsingTest {
 
         TemplateMethodModelEx function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase");
         assertNotNull(function);
-        TemplateScalarModel result = (TemplateScalarModel) function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") }));
+        TemplateScalarModel result = (TemplateScalarModel) function.exec(Arrays.asList(new SimpleScalar("abc")));
         assertEquals("ABC", result.getAsString());
         function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase2");
         assertNotNull(function);
-        result = (TemplateScalarModel) function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") }));
+        result = (TemplateScalarModel) function.exec(Arrays.asList(new SimpleScalar("abc")));
         assertEquals("ABC", result.getAsString());
     }
 

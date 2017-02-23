@@ -53,7 +53,6 @@ public class TemplateException extends Exception {
     private boolean blamedExpressionStringCalculated;
     private String blamedExpressionString;
     private boolean positionsCalculated;
-    private String templateName;
     private String templateSourceName;
     private Integer lineNumber; 
     private Integer columnNumber; 
@@ -194,7 +193,6 @@ public class TemplateException extends Exception {
                 // Line number blow 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
                     final Template template = templateObject.getTemplate();
-                    templateName = template != null ? template.getName() : null;
                     templateSourceName = template != null ? template.getSourceName() : null;
                     lineNumber = Integer.valueOf(templateObject.getBeginLine());
                     columnNumber = Integer.valueOf(templateObject.getBeginColumn());
@@ -389,7 +387,7 @@ public class TemplateException extends Exception {
                                 out.printStandardStackTrace(rootCause);
                             }
                         } catch (Throwable exc) {
-                            ; // ignore
+                            // ignore
                         }
                     }
                 }

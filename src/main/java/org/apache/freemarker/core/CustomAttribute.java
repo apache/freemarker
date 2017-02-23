@@ -127,7 +127,7 @@ public class CustomAttribute {
         if (scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        return ((Configurable) template).getCustomAttribute(key, this);
+        return template.getCustomAttribute(key, this);
     }
     
     /**
@@ -156,7 +156,7 @@ public class CustomAttribute {
         if (scope != SCOPE_CONFIGURATION) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        return ((Configurable) cfg).getCustomAttribute(key, this);
+        return cfg.getCustomAttribute(key, this);
     }
     
     /**
@@ -205,7 +205,7 @@ public class CustomAttribute {
         if (scope != SCOPE_TEMPLATE) {
             throw new UnsupportedOperationException("This is not a template-scope attribute");
         }
-        ((Configurable) template).setCustomAttribute(key, value);
+        template.setCustomAttribute(key, value);
     }
 
     /**
@@ -237,7 +237,7 @@ public class CustomAttribute {
         if (scope != SCOPE_CONFIGURATION) {
             throw new UnsupportedOperationException("This is not a configuration-scope attribute");
         }
-        ((Configurable) cfg).setCustomAttribute(key, value);
+        cfg.setCustomAttribute(key, value);
     }
     
     private Environment getRequiredCurrentEnvironment() {

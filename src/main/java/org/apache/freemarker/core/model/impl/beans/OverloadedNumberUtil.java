@@ -312,14 +312,14 @@ class OverloadedNumberUtil {
         }
     }
 
-    static interface ByteSource { Byte byteValue(); }
-    static interface ShortSource { Short shortValue(); }
-    static interface IntegerSource { Integer integerValue(); }
-    static interface LongSource { Long longValue(); }
-    static interface FloatSource { Float floatValue(); }
-    static interface DoubleSource { Double doubleValue(); }
-    static interface BigIntegerSource { BigInteger bigIntegerValue(); }
-    static interface BigDecimalSource { BigDecimal bigDecimalValue(); }
+    interface ByteSource { Byte byteValue(); }
+    interface ShortSource { Short shortValue(); }
+    interface IntegerSource { Integer integerValue(); }
+    interface LongSource { Long longValue(); }
+    interface FloatSource { Float floatValue(); }
+    interface DoubleSource { Double doubleValue(); }
+    interface BigIntegerSource { BigInteger bigIntegerValue(); }
+    interface BigDecimalSource { BigDecimal bigDecimalValue(); }
     
     /**
      * Superclass of "Or"-ed numerical types. With an example, a {@code int} 1 has the fallback type {@code byte}, as

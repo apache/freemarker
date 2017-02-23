@@ -38,38 +38,36 @@ public interface TemplateDateModel extends TemplateModel {
      * It is not known whether the date represents a date, a time, or a date-time value.
      * This often leads to exceptions in templates due to ambiguities it causes, so avoid it if possible.
      */
-    public static final int UNKNOWN = 0;
+    int UNKNOWN = 0;
 
     /**
      * The date model represents a time value (no date part).
      */
-    public static final int TIME = 1;
+    int TIME = 1;
 
     /**
      * The date model represents a date value (no time part).
      */
-    public static final int DATE = 2;
+    int DATE = 2;
 
     /**
      * The date model represents a date-time value (also known as timestamp).
      */
-    public static final int DATETIME = 3;
+    int DATETIME = 3;
     
-    public static final List TYPE_NAMES =
+    List TYPE_NAMES =
         Collections.unmodifiableList(
             Arrays.asList(
-                new String[] {
-                    "UNKNOWN", "TIME", "DATE", "DATETIME"
-                }));
+                    "UNKNOWN", "TIME", "DATE", "DATETIME"));
     /**
      * Returns the date value. The return value must not be {@code null}.
      */
-    public Date getAsDate() throws TemplateModelException;
+    Date getAsDate() throws TemplateModelException;
 
     /**
      * Returns the type of the date. It can be any of {@link #TIME}, 
      * {@link #DATE}, or {@link #DATETIME}.
      */
-    public int getDateType();
+    int getDateType();
     
 }

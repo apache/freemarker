@@ -226,7 +226,7 @@ public class TemplateNameFormatTest {
     }
     
     @Test
-    public void assertBackslashNotSpecialWith23() throws MalformedTemplateNameException, ParseException, IOException {
+    public void assertBackslashNotSpecialWith23() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
@@ -276,7 +276,7 @@ public class TemplateNameFormatTest {
     }
 
     @Test
-    public void assertBackslashNotAllowed() throws MalformedTemplateNameException, ParseException, IOException {
+    public void assertBackslashNotAllowed() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateLoader(new ByteArrayTemplateLoader());
         cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);

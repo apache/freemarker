@@ -117,7 +117,7 @@ public abstract class TemplateResolver {
      *        operation.
      */
     public abstract void removeTemplateFromCache(String name, Locale locale, String encoding, boolean parse)
-            throws IOException, UnsupportedOperationException;;
+            throws IOException, UnsupportedOperationException;
 
     /**
      * Converts a name to a template root directory based name, so that it can be used to find a template without

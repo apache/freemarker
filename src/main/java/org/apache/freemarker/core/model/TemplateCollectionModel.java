@@ -43,6 +43,6 @@ public interface TemplateCollectionModel extends TemplateModel {
     /**
      * Retrieves a template model iterator that is used to iterate over the elements in this collection.
      */
-    public TemplateModelIterator iterator() throws TemplateModelException;
+    TemplateModelIterator iterator() throws TemplateModelException;
 
 }

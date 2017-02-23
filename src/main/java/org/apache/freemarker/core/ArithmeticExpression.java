@@ -51,7 +51,7 @@ final class ArithmeticExpression extends ASTExpression {
     }
 
     static TemplateModel _eval(Environment env, ASTNode parent, Number lhoNumber, int operator, Number rhoNumber)
-            throws TemplateException, _MiscTemplateException {
+            throws TemplateException {
         ArithmeticEngine ae = EvalUtil.getArithmeticEngine(env, parent); 
         switch (operator) {
             case TYPE_SUBSTRACTION : 

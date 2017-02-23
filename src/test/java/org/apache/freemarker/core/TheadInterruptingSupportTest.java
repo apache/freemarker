@@ -139,6 +139,7 @@ public class TheadInterruptingSupportTest {
             @Override
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
+                // Deliberate infinite loop
                 while (true) {
                     body.render(_NullWriter.INSTANCE);
                 }

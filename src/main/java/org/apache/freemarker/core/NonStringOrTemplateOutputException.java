@@ -39,8 +39,8 @@ public class NonStringOrTemplateOutputException extends UnexpectedTypeException 
             STRING_COERCABLE_TYPES_AND_TOM[i] = NonStringException.STRING_COERCABLE_TYPES[i];
         }
         STRING_COERCABLE_TYPES_AND_TOM[i] = TemplateMarkupOutputModel.class;
-    };
-    
+    }
+
     private static final String DEFAULT_DESCRIPTION
             = "Expecting " + NonStringOrTemplateOutputException.STRING_COERCABLE_TYPES_OR_TOM_DESC + " value here";
 

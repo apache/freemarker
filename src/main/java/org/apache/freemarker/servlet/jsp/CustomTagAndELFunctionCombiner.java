@@ -42,7 +42,7 @@ import org.apache.freemarker.core.util._ClassUtil;
  * the two. As FTL as no separate namespace for "tags" and functions, both aspect has to be implemented by the same
  * value.
  * 
- * @sine 2.3.25
+ * @since 2.3.25
  */
 @SuppressWarnings("rawtypes")
 class CustomTagAndELFunctionCombiner {
@@ -89,7 +89,7 @@ class CustomTagAndELFunctionCombiner {
 
     private static class CombinedTemplateModel {
         // Marker only
-    };
+    }
 
     private static class TemplateDirectiveModelAndSimpleMethodModel extends CombinedTemplateModel
             implements TemplateDirectiveModel, TemplateMethodModelEx, TemplateSequenceModel,

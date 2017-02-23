@@ -66,7 +66,7 @@ class JspTagModelBase {
         Method dynaSetter;
         try {
             dynaSetter = tagClass.getMethod("setDynamicAttribute",
-                            new Class[] {String.class, String.class, Object.class});
+                    String.class, String.class, Object.class);
         } catch (NoSuchMethodException nsme) {
             dynaSetter = null;
         }

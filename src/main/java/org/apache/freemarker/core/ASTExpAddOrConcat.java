@@ -65,7 +65,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
             ASTNode parent,
             ASTExpression leftExp, TemplateModel leftModel,
             ASTExpression rightExp, TemplateModel rightModel)
-            throws TemplateModelException, TemplateException, NonStringException {
+            throws TemplateException {
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel) {
             Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
             Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, rightExp);

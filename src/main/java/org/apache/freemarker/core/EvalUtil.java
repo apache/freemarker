@@ -114,8 +114,8 @@ class EvalUtil {
     
     /**
      * Compares values according the rules of the FTL comparator operators; if the {@link ASTExpression}-s are
-     * accessible, use {@link #compare(ASTExpression, int, String, ASTExpression, ASTExpression, Environment)} instead, as
-     * that gives better error messages.
+     * accessible, use {@link #compare(ASTExpression, int, String, ASTExpression, ASTExpression, Environment)} instead,
+     * as that gives better error messages.
      * 
      * @param leftValue maybe {@code null}, which will usually cause the appropriate {@link TemplateException}. 
      * @param operator one of the {@code COMP_OP_...} constants, like {@link #CMP_OP_EQUALS}.
@@ -217,8 +217,8 @@ class EvalUtil {
             try {
                 cmpResult = ae.compareNumbers(leftNum, rightNum);
             } catch (RuntimeException e) {
-                throw new _MiscTemplateException(defaultBlamed, e, env, new Object[]
-                        { "Unexpected error while comparing two numbers: ", e });
+                throw new _MiscTemplateException(defaultBlamed, e, env,
+                        "Unexpected error while comparing two numbers: ", e);
             }
         } else if (leftValue instanceof TemplateDateModel && rightValue instanceof TemplateDateModel) {
             TemplateDateModel leftDateModel = (TemplateDateModel) leftValue;
@@ -243,7 +243,6 @@ class EvalUtil {
             }
             
             if (leftDateType != rightDateType) {
-                ;
                 throw new _MiscTemplateException(defaultBlamed, env,
                         "Can't compare dates of different types. Left date type is ",
                         TemplateDateModel.TYPE_NAMES.get(leftDateType), ", right date type is ",
@@ -330,7 +329,6 @@ class EvalUtil {
      *            Tip to display if the value type is not coercable, but it's sequence or collection.
      * 
      * @return Never {@code null}
-     * @throws TemplateException 
      */
     static Object coerceModelToStringOrMarkup(TemplateModel tm, ASTExpression exp, String seqTip, Environment env)
             throws TemplateException {
@@ -434,8 +432,7 @@ class EvalUtil {
     private static String coerceModelToTextualCommon(
             TemplateModel tm, ASTExpression exp, String seqHint, boolean supportsTOM, boolean returnNullOnNonCoercableType,
             Environment env)
-            throws TemplateModelException, InvalidReferenceException, TemplateException,
-                    NonStringOrTemplateOutputException, NonStringException {
+            throws TemplateException {
         if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
         } else if (tm == null) {

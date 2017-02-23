@@ -28,8 +28,8 @@ package org.apache.freemarker.core.templateresolver;
  * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
  */
 public interface CacheStorage {
-    public Object get(Object key);
-    public void put(Object key, Object value);
-    public void remove(Object key);
-    public void clear();
+    Object get(Object key);
+    void put(Object key, Object value);
+    void remove(Object key);
+    void clear();
 }

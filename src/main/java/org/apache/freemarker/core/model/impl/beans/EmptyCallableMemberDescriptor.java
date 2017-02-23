@@ -30,6 +30,6 @@ final class EmptyCallableMemberDescriptor extends MaybeEmptyCallableMemberDescri
     static final EmptyCallableMemberDescriptor NO_SUCH_METHOD = new EmptyCallableMemberDescriptor();
     static final EmptyCallableMemberDescriptor AMBIGUOUS_METHOD = new EmptyCallableMemberDescriptor();
     
-    private EmptyCallableMemberDescriptor() { };
-    
+    private EmptyCallableMemberDescriptor() { }
+
 }

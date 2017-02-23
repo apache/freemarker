@@ -128,7 +128,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env)
-    throws UnexpectedTypeException, InvalidReferenceException, TemplateException {
+    throws TemplateException {
         final TemplateSequenceModel targetSeq;
         final String targetStr;
         if (targetModel instanceof TemplateSequenceModel) {

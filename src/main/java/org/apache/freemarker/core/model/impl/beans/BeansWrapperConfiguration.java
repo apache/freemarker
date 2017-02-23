@@ -122,9 +122,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         if (outerIdentity != other.outerIdentity) return false;
         if (strict != other.strict) return false;
         if (useModelCache != other.useModelCache) return false;
-        if (!classIntrospectorFactory.equals(other.classIntrospectorFactory)) return false;
-        
-        return true;
+        return classIntrospectorFactory.equals(other.classIntrospectorFactory);
     }
     
     protected Object clone(boolean deepCloneKey) {

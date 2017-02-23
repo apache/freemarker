@@ -95,8 +95,7 @@ final class ASTHashInterpolation extends ASTInterpolation {
         // We must use Format even if hasFormat == false.
         // Some locales may use non-Arabic digits, thus replacing the
         // decimal separator in the result of toString() is not enough.
-        String s = fmth.format.format(num);
-        return s;
+        return fmth.format.format(num);
     }
 
     @Override

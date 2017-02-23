@@ -175,8 +175,7 @@ public class _StringUtil {
     private static boolean maybeCDataEndGT(String s, int i) {
         if (i == 0) return true;
         if (s.charAt(i - 1) != ']') return false;
-        if (i == 1 || s.charAt(i - 2) == ']') return true;
-        return false;
+        return i == 1 || s.charAt(i - 2) == ']';
     }
 
     private static void XMLOrHTMLEnc(String s, char[] apos, Writer out) throws IOException {
@@ -648,7 +647,7 @@ public class _StringUtil {
     }
     
     /**
-     * Same as {@link #jQuoteNoXSS(String)} but also escapes <code>'&lt;'</code>
+     * Same as {@link #jQuote(String)} but also escapes <code>'&lt;'</code>
      * as <code>\</code><code>u003C</code>. This is used for log messages to prevent XSS
      * on poorly written Web-based log viewers. 
      */
@@ -904,11 +903,10 @@ public class _StringUtil {
                             sb.append(toHexDigit(c & 0xF));
                         } else {
                             sb.append('u');
-                            int cp = c;
-                            sb.append(toHexDigit((cp >> 12) & 0xF));
-                            sb.append(toHexDigit((cp >> 8) & 0xF));
-                            sb.append(toHexDigit((cp >> 4) & 0xF));
-                            sb.append(toHexDigit(cp & 0xF));
+                            sb.append(toHexDigit((c >> 12) & 0xF));
+                            sb.append(toHexDigit((c >> 8) & 0xF));
+                            sb.append(toHexDigit((c >> 4) & 0xF));
+                            sb.append(toHexDigit(c & 0xF));
                         }
                     } else {  // escapeType == ESC_BACKSLASH
                         sb.append(c);

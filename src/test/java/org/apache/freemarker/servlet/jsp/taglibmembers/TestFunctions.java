@@ -73,7 +73,7 @@ public final class TestFunctions {
 
     @SuppressWarnings("boxing")
     public static Map<String, Integer> testMap() {
-        return ImmutableMap.<String, Integer>of("a", 1, "b", 2, "c", 3);
+        return ImmutableMap.of("a", 1, "b", 2, "c", 3);
     }
     
 }

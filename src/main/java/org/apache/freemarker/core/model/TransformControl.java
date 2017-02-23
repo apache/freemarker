@@ -39,25 +39,25 @@ public interface TransformControl {
      * template engine to repeat transform body evaluation and feed
      * it again to the transform.
      */
-    public static final int REPEAT_EVALUATION = 0;
+    int REPEAT_EVALUATION = 0;
 
     /**
      * Constant returned from {@link #afterBody()} that tells the
      * template engine to end the transform and close the writer.
      */
-    public static final int END_EVALUATION = 1;
+    int END_EVALUATION = 1;
  
     /**
      * Constant returned from {@link #onStart()} that tells the
      * template engine to skip evaluation of the body.
      */
-    public static final int SKIP_BODY = 0;
+    int SKIP_BODY = 0;
     
     /**
      * Constant returned from {@link #onStart()} that tells the
      * template engine to evaluate the body.
      */
-    public static final int EVALUATE_BODY = 1;
+    int EVALUATE_BODY = 1;
 
     /**
      * Called before the body is evaluated for the first time.
@@ -69,7 +69,7 @@ public interface TransformControl {
      * and feed it to the writer</li>
      * </ul>
      */
-    public int onStart() throws TemplateModelException, IOException;
+    int onStart() throws TemplateModelException, IOException;
     
     /**
      * Called after the body has been evaluated.
@@ -80,7 +80,7 @@ public interface TransformControl {
      * transform body and feed it again to the writer.</li>
      * </ul>
      */
-    public int afterBody() throws TemplateModelException, IOException;
+    int afterBody() throws TemplateModelException, IOException;
     
     /**
      * Called if any exception occurs during the transform between the
@@ -97,5 +97,5 @@ public interface TransformControl {
      * other checked exception will cause the engine to rethrow it as
      * a {@link java.lang.reflect.UndeclaredThrowableException}.
      */
-    public void onError(Throwable t) throws Throwable;
+    void onError(Throwable t) throws Throwable;
 }

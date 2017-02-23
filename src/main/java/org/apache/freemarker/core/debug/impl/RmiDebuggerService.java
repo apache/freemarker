@@ -118,7 +118,7 @@ extends
                 try {
                     denv.wait();
                 } catch (InterruptedException e) {
-                    ;// Intentionally ignored
+                    // Intentionally ignored
                 }
             }
             return denv.isStopped();

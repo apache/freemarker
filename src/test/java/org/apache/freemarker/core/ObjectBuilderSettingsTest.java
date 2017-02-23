@@ -1389,8 +1389,7 @@ public class ObjectBuilderSettingsTest {
             if (map == null) {
                 if (other.map != null) return false;
             } else if (!map.equals(other.map)) return false;
-            if (n != other.n) return false;
-            return true;
+            return n == other.n;
         }
         
     }

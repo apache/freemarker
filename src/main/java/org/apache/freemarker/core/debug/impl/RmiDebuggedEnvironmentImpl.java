@@ -161,15 +161,13 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
     }
     
     private static class DebugConfigurableModel extends DebugMapModel {
-        static final List KEYS = Arrays.asList(new String[]
-        {
-            Configurable.ARITHMETIC_ENGINE_KEY,
-            Configurable.BOOLEAN_FORMAT_KEY,
-            Configurable.LOCALE_KEY,
-            Configurable.NUMBER_FORMAT_KEY,
-            Configurable.OBJECT_WRAPPER_KEY,
-            Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY
-        });
+        static final List KEYS = Arrays.asList(
+                Configurable.ARITHMETIC_ENGINE_KEY,
+                Configurable.BOOLEAN_FORMAT_KEY,
+                Configurable.LOCALE_KEY,
+                Configurable.NUMBER_FORMAT_KEY,
+                Configurable.OBJECT_WRAPPER_KEY,
+                Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY);
 
         final Configurable configurable;
         
@@ -226,10 +224,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
     
     private static class DebugTemplateModel extends DebugConfigurableModel {
         private static final List KEYS = composeList(DebugConfigurableModel.KEYS, 
-            Arrays.asList(new String[] {
-                "configuration", 
-                "name",
-                }));
+            Arrays.asList("configuration", "name"));
     
         private final SimpleScalar name;
 
@@ -261,14 +256,13 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
 
     private static class DebugEnvironmentModel extends DebugConfigurableModel {
         private static final List KEYS = composeList(DebugConfigurableModel.KEYS, 
-            Arrays.asList(new String[] {
-                "currentNamespace",
-                "dataModel",
-                "globalNamespace",
-                "knownVariables",
-                "mainNamespace",
-                "template",
-                 }));
+            Arrays.asList(
+                    "currentNamespace",
+                    "dataModel",
+                    "globalNamespace",
+                    "knownVariables",
+                    "mainNamespace",
+                    "template"));
     
         private TemplateModel knownVariables = new DebugMapModel()
         {

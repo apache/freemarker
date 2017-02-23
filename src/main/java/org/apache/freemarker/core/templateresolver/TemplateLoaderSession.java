@@ -65,11 +65,11 @@ public interface TemplateLoaderSession {
      * <p>The caller of {@link TemplateLoader#createSession()} has to guarantee that {@link #close()} will be called on
      * the created session.
      */
-    public void close() throws IOException;
+    void close() throws IOException;
     
     /**
      * Tells if this session is closed.
      */
-    public boolean isClosed();
+    boolean isClosed();
 
 }

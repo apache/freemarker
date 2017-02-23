@@ -648,7 +648,7 @@ public class DefaultObjectWrapperTest {
 
     @Test
     public void testIteratorWrapping() throws TemplateModelException, ClassNotFoundException {
-        final List<String> list = ImmutableList.<String> of("a", "b", "c");
+        final List<String> list = ImmutableList.of("a", "b", "c");
         Iterator<String> it = list.iterator();
         TemplateCollectionModel coll = (TemplateCollectionModel) OW300.wrap(it);
 
@@ -933,6 +933,6 @@ public class DefaultObjectWrapperTest {
             return tupple;
         }
         
-    };
-    
+    }
+
 }

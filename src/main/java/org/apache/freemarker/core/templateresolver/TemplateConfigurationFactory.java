@@ -65,7 +65,6 @@ public abstract class TemplateConfigurationFactory {
                 throw new IllegalStateException(
                         "The TemplateConfigurationFactory is already bound to another Configuration");
             }
-            return;
         } else {
             this.cfg = cfg;
             setConfigurationOfChildren(cfg);

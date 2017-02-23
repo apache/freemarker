@@ -92,7 +92,7 @@ public abstract class ModelCache {
         }
     }
 
-    private final TemplateModel lookup(Object object) {
+    private TemplateModel lookup(Object object) {
         ModelReference ref = null;
         // NOTE: we're doing minimal synchronizations -- which can lead to
         // duplicate wrapper creation. However, this has no harmful side-effects and
@@ -107,7 +107,7 @@ public abstract class ModelCache {
         return null;
     }
 
-    private final void register(TemplateModel model, Object object) {
+    private void register(TemplateModel model, Object object) {
         synchronized (modelCache) {
             // Remove cleared references
             for (; ; ) {

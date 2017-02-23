@@ -146,6 +146,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
             try {
                 Thread.sleep(5);
             } catch (InterruptedException ie) {
+                // Ignored
             }
             synchronized (map) {
                 mapCopy = copyMap(map);

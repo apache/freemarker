@@ -881,7 +881,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     }
 
     /**
-     * See {@try #tryUnwrap(TemplateModel, Class, int, boolean)}.
+     * See {@link #tryUnwrap(TemplateModel, Class, int, boolean)}.
      */
     private Object tryUnwrapTo(final TemplateModel model, Class<?> targetClass, final int typeFlags,
             final Map<Object, Object> recursionStops) 
@@ -1554,7 +1554,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         if (ENUMS_MODEL_CTOR != null) {
             try {
                 return (ClassBasedModelFactory) ENUMS_MODEL_CTOR.newInstance(
-                        new Object[] { wrapper });
+                        wrapper);
             } catch (Exception e) {
                 throw new UndeclaredThrowableException(e);
             }
@@ -1570,7 +1570,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             // If they are, return the appropriate constructor for enum models
             return Class.forName(
                 "org.apache.freemarker.core.model.impl.beans._EnumModels").getDeclaredConstructor(
-                        new Class[] { BeansWrapper.class });
+                    BeansWrapper.class);
         } catch (Exception e) {
             // Otherwise, return null
             return null;

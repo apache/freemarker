@@ -457,7 +457,7 @@ public class DefaultTemplateResolverTest {
     }
     
     @Test
-    public void testTemplateNameFormatException() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+    public void testTemplateNameFormatException() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         try {

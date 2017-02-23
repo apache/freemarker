@@ -124,6 +124,6 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
             throw new RuntimeException("Not implemented in this dummy.");
         }
         
-    };
-    
+    }
+
 }

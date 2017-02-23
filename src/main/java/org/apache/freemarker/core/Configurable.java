@@ -2450,7 +2450,7 @@ public class Configurable {
      */
     void copyDirectCustomAttributes(Configurable target, boolean overwriteExisting) {
         synchronized (customAttributes) {
-            for (Entry<? extends Object, ? extends Object> custAttrEnt : customAttributes.entrySet()) {
+            for (Entry<?, ?> custAttrEnt : customAttributes.entrySet()) {
                 Object custAttrKey = custAttrEnt.getKey();
                 if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
                     if (custAttrKey instanceof String) {

@@ -30,5 +30,5 @@ public interface TemplateModelAdapter {
     /**
      * @return the template model this object is wrapping.
      */
-    public TemplateModel getTemplateModel();
+    TemplateModel getTemplateModel();
 }

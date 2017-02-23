@@ -49,6 +49,6 @@ public interface TemplateMethodModelEx extends TemplateMethodModel {
      *     object wrapper}.
      */
     @Override
-    public Object exec(List arguments) throws TemplateModelException;
+    Object exec(List arguments) throws TemplateModelException;
     
 }

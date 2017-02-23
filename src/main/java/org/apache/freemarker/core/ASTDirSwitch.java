@@ -74,7 +74,9 @@ final class ASTDirSwitch extends _ASTElement {
             if (!processedCase && defaultCase != null) {
                 env.visit(defaultCase);
             }
-        } catch (ASTDirBreak.Break br) {}
+        } catch (ASTDirBreak.Break br) {
+            // #break was called
+        }
         return null;
     }
 

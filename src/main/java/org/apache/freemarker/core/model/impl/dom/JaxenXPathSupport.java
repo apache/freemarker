@@ -204,8 +204,7 @@ class JaxenXPathSupport implements XPathSupport {
         int lastSlash = templatePath.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath.substring(0, lastSlash + 1);
         systemId = env.toFullTemplateName(templatePath, systemId);
-        Template raw = env.getConfiguration().getTemplate(systemId, env.getLocale(), encoding, false);
-        return raw;
+        return env.getConfiguration().getTemplate(systemId, env.getLocale(), encoding, false);
     }
 
     private static InputSource createInputSource(String publicId, Template raw) throws IOException, SAXException {
@@ -235,5 +234,5 @@ class JaxenXPathSupport implements XPathSupport {
         int getCallCount() {
             return callCount;
         }
-    };
+    }
 }

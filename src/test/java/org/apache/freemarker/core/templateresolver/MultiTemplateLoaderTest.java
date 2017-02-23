@@ -48,7 +48,7 @@ public class MultiTemplateLoaderTest {
         stl2.putTemplate("2.ftl", "2");
         stl2.putTemplate("both.ftl", "both 2");
         
-        MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { stl1, stl2 });
+        MultiTemplateLoader mtl = new MultiTemplateLoader(stl1, stl2);
         assertEquals("1", getTemplateContent(mtl, "1.ftl"));
         assertEquals("2", getTemplateContent(mtl, "2.ftl"));
         assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
@@ -72,7 +72,7 @@ public class MultiTemplateLoaderTest {
         ByteArrayTemplateLoader stl2 = new ByteArrayTemplateLoader();
         stl2.putTemplate("both.ftl", "both 2".getBytes(StandardCharsets.UTF_8));
 
-        MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { stl1, stl2 });
+        MultiTemplateLoader mtl = new MultiTemplateLoader(stl1, stl2);
         mtl.setSticky(sticky);
         
         assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));

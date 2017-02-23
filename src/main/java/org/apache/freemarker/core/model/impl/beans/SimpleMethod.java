@@ -73,8 +73,7 @@ class SimpleMethod {
                     Integer.valueOf(arguments.size()), " was given.");
         }
          
-        Object[] args = unwrapArguments(arguments, argTypes, isVarArg, wrapper);
-        return args;
+        return unwrapArguments(arguments, argTypes, isVarArg, wrapper);
     }
 
     private Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,

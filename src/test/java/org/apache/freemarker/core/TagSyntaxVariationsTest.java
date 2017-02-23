@@ -156,7 +156,7 @@ public class TagSyntaxVariationsTest extends TestCase {
      * @param expected the expected output or <tt>null</tt> if we expect
      * a parsing error.
      */
-    private static final void test(
+    private static void test(
             Configuration cfg, String template, String expected)
             throws TemplateException, IOException {
         Template t = null;

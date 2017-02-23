@@ -185,12 +185,12 @@ class BuiltInsForStringsMisc {
                         parentTemplate.getConfiguration(), pCfg,
                         null);
             } catch (IOException e) {
-                throw new _MiscTemplateException(this, e, env, new Object[] {
-                            "Template parsing with \"?", key, "\" has failed with this error:\n\n",
-                            MessageUtil.EMBEDDED_MESSAGE_BEGIN,
-                            new _DelayedGetMessage(e),
-                            MessageUtil.EMBEDDED_MESSAGE_END,
-                            "\n\nThe failed expression:" });
+                throw new _MiscTemplateException(this, e, env,
+                        "Template parsing with \"?", key, "\" has failed with this error:\n\n",
+                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessage(e),
+                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        "\n\nThe failed expression:");
             }
             
             interpretedTemplate.setLocale(env.getLocale());

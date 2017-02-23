@@ -684,9 +684,9 @@ public class FreemarkerServlet extends HttpServlet {
                     overrideResponseLocale = initParamValueToEnum(value, OverrideResponseLocale.values());
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = _StringUtil.getYesNo(value);
-                } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
+                } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {
                     metaInfTldSources = parseAsMetaInfTldLocations(value);
-                } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {;
+                } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {
                     List newClasspathTlds = new ArrayList();
                     if (classpathTlds != null) {
                         newClasspathTlds.addAll(classpathTlds);

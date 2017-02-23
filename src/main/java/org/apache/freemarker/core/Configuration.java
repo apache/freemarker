@@ -549,7 +549,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     // Package visible as Configurable needs this to initialize the field defaults.
-    final static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
+    static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
         return TemplateExceptionHandler.DEBUG_HANDLER;
     }
     
@@ -1467,8 +1467,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             throw new IllegalArgumentException("The \"" + outerName + "\" output format can't be used in "
                     + "...{...} expression, because it's not a markup format.");
         }
-        MarkupOutputFormat outerOF = (MarkupOutputFormat) of;
-        return outerOF;
+        return (MarkupOutputFormat) of;
     }
     
     /**
@@ -2587,8 +2586,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
     }
     
-    private void doAutoIncludes(Environment env, Template t) throws TemplateException, IOException,
-            TemplateNotFoundException, MalformedTemplateNameException, ParseException {
+    private void doAutoIncludes(Environment env, Template t) throws TemplateException, IOException {
         // We can't store autoIncludes in LinkedHashSet-s because setAutoIncludes(List) allows duplicates,
         // unfortunately. Yet we have to prevent duplicates among Configuration levels, with the lowest levels having
         // priority. So we build some Set-s to do that, but we avoid the most common cases where they aren't needed.

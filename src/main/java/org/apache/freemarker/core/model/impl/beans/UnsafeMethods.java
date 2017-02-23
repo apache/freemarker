@@ -45,7 +45,7 @@ class UnsafeMethods {
         return UNSAFE_METHODS.contains(method);        
     }
     
-    private static final Set createUnsafeMethodsSet() {
+    private static Set createUnsafeMethodsSet() {
         Properties props = new Properties();
         InputStream in = BeansWrapper.class.getResourceAsStream(UNSAFE_METHODS_PROPERTIES);
         if (in == null) {

@@ -46,9 +46,9 @@ public class _ClassUtil {
                 return Class.forName(className, true, ctcl);
             }
         } catch (ClassNotFoundException e) {
-            ;// Intentionally ignored
+            // Intentionally ignored
         } catch (SecurityException e) {
-            ;// Intentionally ignored
+            // Intentionally ignored
         }
         // Fall back to the defining class loader of the FreeMarker classes 
         return Class.forName(className);

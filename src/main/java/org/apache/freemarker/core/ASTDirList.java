@@ -239,8 +239,8 @@ final class ASTDirList extends _ASTElement {
         }
 
         void loopForItemsElement(Environment env, _ASTElement[] childBuffer, String loopVarName, String loopVar2Name)
-                    throws NonSequenceOrCollectionException, TemplateModelException, InvalidReferenceException,
-                    TemplateException, IOException {
+                    throws
+                TemplateException, IOException {
             try {
                 if (alreadyEntered) {
                     throw new _MiscTemplateException(env,
@@ -261,16 +261,14 @@ final class ASTDirList extends _ASTElement {
          * each list item once, otherwise once if {@link #listedValue} isn't empty.
          */
         private boolean executeNestedContent(Environment env, _ASTElement[] childBuffer)
-                throws TemplateModelException, TemplateException, IOException, NonSequenceOrCollectionException,
-                InvalidReferenceException {
+                throws TemplateException, IOException {
             return !hashListing
                     ? executedNestedContentForCollOrSeqListing(env, childBuffer)
                     : executedNestedContentForHashListing(env, childBuffer);
         }
 
         private boolean executedNestedContentForCollOrSeqListing(Environment env, _ASTElement[] childBuffer)
-                throws TemplateModelException, IOException, TemplateException,
-                NonSequenceOrCollectionException, InvalidReferenceException {
+                throws IOException, TemplateException {
             final boolean listNotEmpty;
             if (listedValue instanceof TemplateCollectionModel) {
                 final TemplateCollectionModel collModel = (TemplateCollectionModel) listedValue;
@@ -333,7 +331,7 @@ final class ASTDirList extends _ASTElement {
         }
 
         private boolean executedNestedContentForHashListing(Environment env, _ASTElement[] childBuffer)
-                throws TemplateModelException, IOException, TemplateException {
+                throws IOException, TemplateException {
             final boolean hashNotEmpty;
             if (listedValue instanceof TemplateHashModelEx) {
                 TemplateHashModelEx listedHash = (TemplateHashModelEx) listedValue; 

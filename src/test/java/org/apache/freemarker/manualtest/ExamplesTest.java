@@ -53,10 +53,8 @@ public abstract class ExamplesTest extends TemplateTest {
 
     protected void setupTemplateLoaders(Configuration cfg) {
         cfg.setTemplateLoader(new MultiTemplateLoader(
-                new TemplateLoader[] {
-                        new ByteArrayTemplateLoader(),
-                        new ClassTemplateLoader(getClass(), "")
-                }));
+                new ByteArrayTemplateLoader(),
+                new ClassTemplateLoader(getClass(), "")));
     }
     
 }

@@ -21,4 +21,4 @@ package org.apache.freemarker.core.model;
 
 import java.io.Serializable;
 
-interface SerializableTemplateBooleanModel extends TemplateBooleanModel, Serializable {};
+interface SerializableTemplateBooleanModel extends TemplateBooleanModel, Serializable {}

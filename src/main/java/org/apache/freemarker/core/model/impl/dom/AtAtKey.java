@@ -42,7 +42,7 @@ enum AtAtKey {
         return key;
     }
 
-    private AtAtKey(String key) {
+    AtAtKey(String key) {
         this.key = key;
     }
     

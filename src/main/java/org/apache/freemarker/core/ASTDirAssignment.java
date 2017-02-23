@@ -208,8 +208,7 @@ final class ASTDirAssignment extends _ASTElement {
             }
             if (canonical) buf.append(">");
         }
-        String result = buf.toString();
-        return result;
+        return buf.toString();
     }
     
     @Override

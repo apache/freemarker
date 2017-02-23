@@ -97,11 +97,11 @@ public class TemplateConstructorsTest {
         }
     }
     
-    private final Reader createReader() {
+    private Reader createReader() {
         return new StringReader(READER_CONTENT);
     }
 
-    private final Reader createReaderForceUTF8() {
+    private Reader createReaderForceUTF8() {
         return new StringReader(READER_CONTENT_FORCE_UTF8);
     }
     

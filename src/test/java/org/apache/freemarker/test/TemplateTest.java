@@ -82,8 +82,7 @@ public abstract class TemplateTest {
     }
 
     private Template createTemplate(String ftl) throws IOException {
-        Template t = new Template(null, ftl, getConfiguration());
-        return t;
+        return new Template(null, ftl, getConfiguration());
     }
 
     protected void assertOutputForNamed(String name, String expectedOut) throws IOException, TemplateException {
@@ -130,8 +129,7 @@ public abstract class TemplateTest {
     protected String getOutput(Template t) throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         t.process(getDataModel(), out);
-        String actualOut = out.toString();
-        return actualOut;
+        return out.toString();
     }
     
     protected Configuration createConfiguration() throws Exception {

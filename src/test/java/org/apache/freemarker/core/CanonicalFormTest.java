@@ -57,7 +57,7 @@ public class CanonicalFormTest extends FileTestCase {
     }
     
     private void assertCanonicalFormOf(String ftlFileName)
-            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+            throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateLoader(
                 new CopyrightCommentRemoverTemplateLoader(

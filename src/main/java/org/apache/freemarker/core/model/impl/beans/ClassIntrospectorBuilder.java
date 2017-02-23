@@ -90,9 +90,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         if (exposeFields != other.exposeFields) return false;
         if (exposureLevel != other.exposureLevel) return false;
         if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
-        if (methodSorter != other.methodSorter) return false;
-        
-        return true;
+        return methodSorter == other.methodSorter;
     }
     
     public int getExposureLevel() {

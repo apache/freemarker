@@ -221,7 +221,7 @@ public class WebAppTemplateLoader implements TemplateLoader {
                     }
                 }
             } catch (SecurityException e) {
-                ;// ignore
+                // ignore
             }
         }
 

@@ -24,10 +24,10 @@ package org.apache.freemarker.core;
  */
 final class ASTDirTOrTrOrTl extends _ASTElement {
     
-    private final int TYPE_T = 0;  
-    private final int TYPE_LT = 1;  
-    private final int TYPE_RT = 2;  
-    private final int TYPE_NT = 3;  
+    private static final int TYPE_T = 0;
+    private static final int TYPE_LT = 1;
+    private static final int TYPE_RT = 2;
+    private static final int TYPE_NT = 3;
 
     final boolean left, right;
 

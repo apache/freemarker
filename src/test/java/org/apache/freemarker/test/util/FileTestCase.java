@@ -46,7 +46,7 @@ public abstract class FileTestCase extends TestCase {
         super(name);
     }
 
-    protected void assertFilesEqual(String testCaseFileName) throws FileNotFoundException, IOException {
+    protected void assertFilesEqual(String testCaseFileName) throws IOException {
         try {
             multilineAssertEquals(
                     loadFile(getExpectedFileFor(testCaseFileName)),
@@ -144,19 +144,19 @@ public abstract class FileTestCase extends TestCase {
         return new File(url.getFile());
     }
 
-    protected String loadFile(File f) throws FileNotFoundException, IOException {
+    protected String loadFile(File f) throws IOException {
         return TestUtil.removeTxtCopyrightComment(loadFile(f, getDefaultCharset()));
     }
     
-    protected String loadFile(File f, String charset) throws FileNotFoundException, IOException {
+    protected String loadFile(File f, String charset) throws IOException {
         return loadString(new FileInputStream(f), charset);
     }
 
-    protected String loadResource(String resourceName) throws FileNotFoundException, IOException {
+    protected String loadResource(String resourceName) throws IOException {
         return loadResource(resourceName, getDefaultCharset());
     }
     
-    protected String loadResource(String resourceName, String charset) throws FileNotFoundException, IOException {
+    protected String loadResource(String resourceName, String charset) throws IOException {
         return loadString(new FileInputStream(new File(getTestClassDirectory(), resourceName)), charset);
     }
     

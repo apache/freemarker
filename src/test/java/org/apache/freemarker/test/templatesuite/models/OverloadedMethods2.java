@@ -1004,7 +1004,7 @@ public class OverloadedMethods2 {
         return new MyBooleanWrapperAsAnotherBooleanModel(); 
     }
     
-    public String bugReport363(Map<String, ? extends Object> fields, List<?> listField) {
+    public String bugReport363(Map<String, ?> fields, List<?> listField) {
         return "Executed: testMethod(Map fields, List listField) on input: fields=" + fields
                 + " and listField=" + listField;
     }

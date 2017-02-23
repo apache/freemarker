@@ -66,12 +66,8 @@ public class Listables {
         LINKED_LIST = list;
     }
 
-    private static final List<Integer> EMPTY_LINKED_LIST;
-    static {
-        List<Integer> list = new LinkedList<>();
-        EMPTY_LINKED_LIST = list;
-    }
-    
+    private static final List<Integer> EMPTY_LINKED_LIST = new LinkedList<>();
+
     private static final Set<Integer> SET;
     static {
         Set<Integer> set = new TreeSet<>();

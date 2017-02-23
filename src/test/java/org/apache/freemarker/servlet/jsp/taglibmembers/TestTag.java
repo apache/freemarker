@@ -91,7 +91,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally {
         }
     }
     
-    private static final String getFirstLine(String s) {
+    private static String getFirstLine(String s) {
         int brIdx = s.indexOf('\n');
         if (brIdx == -1) brIdx = s.indexOf('\r');
         return brIdx == -1 ? s : s.substring(0, brIdx);

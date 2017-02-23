@@ -270,8 +270,7 @@ public class _ErrorDescriptionBuilder {
     private String[] splitToLines(String s) {
         s = _StringUtil.replace(s, "\r\n", "\n");
         s = _StringUtil.replace(s, "\r", "\n");
-        String[] lines = _StringUtil.split(s, '\n');
-        return lines;
+        return _StringUtil.split(s, '\n');
     }
     
     /**

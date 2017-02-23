@@ -691,7 +691,7 @@ public final class Environment extends Configurable {
     private void setMacroContextLocalsFromArguments(
             final ASTDirMacro.Context macroCtx,
             final ASTDirMacro macro,
-            final Map namedArgs, final List positionalArgs) throws TemplateException, _MiscTemplateException {
+            final Map namedArgs, final List positionalArgs) throws TemplateException {
         String catchAllParamName = macro.getCatchAll();
         if (namedArgs != null) {
             final SimpleHash catchAllParamValue;
@@ -1517,13 +1517,12 @@ public final class Environment extends Configurable {
     }
     
     TemplateDateFormat getTemplateDateFormat(TemplateDateModel tdm, ASTExpression tdmSourceExpr, boolean useTempModelExc)
-            throws TemplateModelException, TemplateException {
+            throws TemplateException {
         Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
         
-        TemplateDateFormat format = getTemplateDateFormat(
+        return getTemplateDateFormat(
                 tdm.getDateType(), date.getClass(), tdmSourceExpr,
                 useTempModelExc);
-        return format;
     }
 
     /**

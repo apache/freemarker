@@ -460,17 +460,17 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
             try {
                 useXalanXPathSupport();
             } catch (Exception e) {
-                ; // ignore
+                // ignore
             }
             if (xpathSupportClass == null) try {
             	useSunInternalXPathSupport();
             } catch (Exception e) {
-            	; // ignore
+                // ignore
             }
             if (xpathSupportClass == null) try {
                 useJaxenXPathSupport();
             } catch (Exception e) {
-                ; // ignore
+                // ignore
             }
         }
     }

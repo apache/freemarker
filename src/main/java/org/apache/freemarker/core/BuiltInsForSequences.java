@@ -848,9 +848,7 @@ class BuiltInsForSequences {
 
     private static boolean isBuggySeqButGoodCollection(
             TemplateModel model) {
-        return model instanceof CollectionModel
-                ? !((CollectionModel) model).getSupportsIndexedAccess()
-                : false;
+        return model instanceof CollectionModel && !((CollectionModel) model).getSupportsIndexedAccess();
     }
     
     private static boolean modelsEqual(

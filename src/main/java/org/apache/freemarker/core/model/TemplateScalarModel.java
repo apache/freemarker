@@ -31,7 +31,7 @@ public interface TemplateScalarModel extends TemplateModel {
     /**
      * A constant value to use as the empty string.
      */
-    public TemplateModel EMPTY_STRING = new SimpleScalar("");
+    TemplateModel EMPTY_STRING = new SimpleScalar("");
 
     /**
      * Returns the string representation of this model. Don't return {@code null}, as that will cause exception.
@@ -40,6 +40,6 @@ public interface TemplateScalarModel extends TemplateModel {
      * Objects of this type should be immutable, that is, calling {@link #getAsString()} should always return the same
      * value as for the first time.
      */
-    public String getAsString() throws TemplateModelException;
+    String getAsString() throws TemplateModelException;
 
 }

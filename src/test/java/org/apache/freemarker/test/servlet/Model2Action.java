@@ -32,6 +32,6 @@ public interface Model2Action {
      * @return The servlet-relative path to forward to, or {@code null} if we expect it to be specified with the
      *          {@value Model2TesterServlet#VIEW_PARAM_NAME} request parameter.
      */
-    public String execute(final HttpServletRequest req, final HttpServletResponse resp) throws Exception;
+    String execute(final HttpServletRequest req, final HttpServletResponse resp) throws Exception;
 
 }

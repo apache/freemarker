@@ -28,8 +28,8 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
  */
 final class ASTExpNegateOrPlus extends ASTExpression {
     
-    private final int TYPE_MINUS = 0;
-    private final int TYPE_PLUS = 1;
+    private static final int TYPE_MINUS = 0;
+    private static final int TYPE_PLUS = 1;
 
     private final ASTExpression target;
     private final boolean isMinus;

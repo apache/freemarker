@@ -45,5 +45,5 @@ public interface AdapterTemplateModel extends TemplateModel {
      * @return the underlying object, or its value accommodated for the hint
      * class.
      */
-    public Object getAdaptedObject(Class<?> hint);
+    Object getAdaptedObject(Class<?> hint);
 }

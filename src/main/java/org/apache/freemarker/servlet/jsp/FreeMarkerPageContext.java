@@ -69,7 +69,6 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private static final Class OBJECT_CLASS = Object.class;
         
     private final Environment environment;
-    private final int incompatibleImprovements;
     private List tags = new ArrayList();
     private List outs = new ArrayList();
     private final GenericServlet servlet;
@@ -82,7 +81,6 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     
     protected FreeMarkerPageContext() throws TemplateModelException {
         environment = Environment.getCurrentEnvironment();
-        incompatibleImprovements = environment.getConfiguration().getIncompatibleImprovements().intValue();
 
         TemplateModel appModel = environment.getGlobalVariable(
                 FreemarkerServlet.KEY_APPLICATION_PRIVATE);

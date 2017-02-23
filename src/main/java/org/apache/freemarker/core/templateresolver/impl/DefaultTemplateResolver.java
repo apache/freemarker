@@ -473,9 +473,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
     
     private static final Method INIT_CAUSE = getInitCauseMethod();
     
-    private static final Method getInitCauseMethod() {
+    private static Method getInitCauseMethod() {
         try {
-            return Throwable.class.getMethod("initCause", new Class[] { Throwable.class });
+            return Throwable.class.getMethod("initCause", Throwable.class);
         } catch (NoSuchMethodException e) {
             return null;
         }

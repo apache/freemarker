@@ -85,7 +85,7 @@ final class RegexpHelper {
             patternCache.put(patternKey, result);
         }
         return result;
-    };
+    }
 
     private static class PatternCacheKey {
         private final String patternString;

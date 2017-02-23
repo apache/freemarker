@@ -35,8 +35,7 @@ public class TabSizeTest extends TemplateTest {
 
     @Override
     protected Configuration createConfiguration() throws Exception {
-        Configuration cfg = super.createConfiguration();
-        return cfg;
+        return super.createConfiguration();
     }
 
     @Test
@@ -76,7 +75,7 @@ public class TabSizeTest extends TemplateTest {
     }
 
     protected void assertErrorColumnNumber(int expectedColumn, String templateSource)
-            throws TemplateNotFoundException, MalformedTemplateNameException, IOException {
+            throws IOException {
         addTemplate("t", templateSource);
         try {
             getConfiguration().getTemplate("t");

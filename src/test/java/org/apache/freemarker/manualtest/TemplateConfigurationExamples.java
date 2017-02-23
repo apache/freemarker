@@ -110,8 +110,8 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getTemplate("t.subject.ftl").getOutputFormat());
         assertEquals(PlainTextOutputFormat.INSTANCE, cfg.getTemplate("mail/t.subject.ftl").getOutputFormat());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.body.ftl").getOutputFormat());
-    };
-    
+    }
+
     @Test
     public void example3() throws Exception {
         Configuration cfg = getConfiguration();

@@ -38,7 +38,7 @@ import org.junit.Test;
 public class TemplatGetEncodingTest {
 
     @Test
-    public void test() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+    public void test() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         {
             cfg.setDefaultEncoding("ISO-8859-2");

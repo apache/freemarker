@@ -134,7 +134,7 @@ class MessageUtil {
         if (brIdx != -1) {
             s = s.substring(0, brIdx);
             isTruncated = true;
-        };
+        }
         brIdx = s.indexOf('\r');
         if (brIdx != -1) {
             s = s.substring(0, brIdx);

@@ -211,7 +211,7 @@ public class TemplateTestSuite extends TestSuite {
         final boolean noOutput;
         {
             String s = _StringUtil.emptyToNull(testCaseElem.getAttribute(ATTR_NO_OUTPUT));
-            noOutput = s == null ? false : _StringUtil.getYesNo(s);
+            noOutput = s != null && _StringUtil.getYesNo(s);
         }
 
         final Map<String, String> testCaseSettings = getCaseFMSettings(testCaseElem);

@@ -158,7 +158,7 @@ public class _CoreAPI {
      * ATTENTION: This is used by https://github.com/kenshoo/freemarker-online. Don't break backward
      * compatibility without updating that project too! 
      */
-    static final public void addThreadInterruptedChecks(Template template) {
+    static public void addThreadInterruptedChecks(Template template) {
         try {
             new ThreadInterruptionSupportTemplatePostProcessor().postProcess(template);
         } catch (TemplatePostProcessorException e) {
@@ -166,12 +166,12 @@ public class _CoreAPI {
         }
     }
     
-    static final public void checkHasNoNestedContent(TemplateDirectiveBody body)
+    static public void checkHasNoNestedContent(TemplateDirectiveBody body)
             throws NestedContentNotSupportedException {
         NestedContentNotSupportedException.check(body);
     }
     
-    static final public void replaceText(ASTStaticText textBlock, String text) {
+    static public void replaceText(ASTStaticText textBlock, String text) {
         textBlock.replaceText(text);
     }
 
@@ -180,7 +180,7 @@ public class _CoreAPI {
      *             if the type of the some of the values isn't as expected
      */
     public static void checkSettingValueItemsType(String somethingsSentenceStart, Class<?> expectedClass,
-            Collection<? extends Object> values) {
+            Collection<?> values) {
         if (values == null) return;
         for (Object value : values) {
             if (!expectedClass.isInstance(value)) {

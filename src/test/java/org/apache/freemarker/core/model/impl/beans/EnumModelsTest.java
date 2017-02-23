@@ -77,7 +77,7 @@ public class EnumModelsTest {
         assertNull(eAfterClean.get("C"));
     }
     
-    public static enum E {
+    public enum E {
         A, B;
 
         @Override

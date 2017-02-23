@@ -227,7 +227,7 @@ public final class ResourcesExtractor {
         return finalJarFile;        
     }
 
-    private static void jarDirectory(File srcDir, File jarFile) throws FileNotFoundException, IOException {
+    private static void jarDirectory(File srcDir, File jarFile) throws IOException {
         boolean finished = false;
         try {
             FileOutputStream fileOut = new FileOutputStream(jarFile);

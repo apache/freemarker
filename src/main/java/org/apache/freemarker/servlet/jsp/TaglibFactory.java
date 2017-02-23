@@ -1127,7 +1127,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     public static final class WebInfPerLibJarMetaInfTldSource extends MetaInfTldSource {
         public final static WebInfPerLibJarMetaInfTldSource INSTANCE = new WebInfPerLibJarMetaInfTldSource();
-        private WebInfPerLibJarMetaInfTldSource() { }; 
+        private WebInfPerLibJarMetaInfTldSource() { }
     }
 
     /**
@@ -1162,8 +1162,8 @@ public class TaglibFactory implements TemplateHashModel {
          */
         public Pattern getRootContainerPattern() {
             return rootContainerPattern;
-        };
-        
+        }
+
     }
 
     /**
@@ -1176,7 +1176,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     public static final class ClearMetaInfTldSource extends MetaInfTldSource {
         public final static ClearMetaInfTldSource INSTANCE = new ClearMetaInfTldSource();
-        private ClearMetaInfTldSource() { }; 
+        private ClearMetaInfTldSource() { }
     }
     
     private interface TldLocation {
@@ -1185,13 +1185,13 @@ public class TaglibFactory implements TemplateHashModel {
          * Reads the TLD file.
          * @return Not {@code null}
          */
-        public abstract InputStream getInputStream() throws IOException;
+        InputStream getInputStream() throws IOException;
         
         /**
          * The absolute URL of the TLD file.
          * @return Not {@code null}
          */
-        public abstract String getXmlSystemId() throws IOException;
+        String getXmlSystemId() throws IOException;
     }
 
     private interface InputStreamFactory {
@@ -1480,7 +1480,7 @@ public class TaglibFactory implements TemplateHashModel {
             return tagsAndFunctions.isEmpty();
         }
 
-        private static final Map parseToTagsAndFunctions(
+        private static Map parseToTagsAndFunctions(
                 ServletContext ctx, TldLocation tldLocation, ObjectWrapper objectWrapper) throws IOException, SAXException {
             final TldParserForTaglibBuilding tldParser = new TldParserForTaglibBuilding(objectWrapper);
             
