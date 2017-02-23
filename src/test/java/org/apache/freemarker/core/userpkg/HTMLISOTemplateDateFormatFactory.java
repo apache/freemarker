@@ -16,12 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.userpkg;
 
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.InvalidFormatParametersException;
+import org.apache.freemarker.core.TemplateDateFormat;
+import org.apache.freemarker.core.TemplateDateFormatFactory;
+import org.apache.freemarker.core.TemplateFormatUtil;
+import org.apache.freemarker.core.TemplateValueFormatException;
+import org.apache.freemarker.core.UnformattableValueException;
+import org.apache.freemarker.core.UnknownDateTypeFormattingUnsupportedException;
+import org.apache.freemarker.core.UnparsableValueException;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;

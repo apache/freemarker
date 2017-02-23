@@ -26,6 +26,8 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.userpkg.HTMLISOTemplateDateFormatFactory;
+import org.apache.freemarker.core.userpkg.PrintfGTemplateNumberFormatFactory;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Before;
 import org.junit.Test;

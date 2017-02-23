@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
+import org.apache.freemarker.core.userpkg.PrintfGTemplateNumberFormatFactory;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 

@@ -16,10 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.userpkg;
 
 import java.util.Locale;
 
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.InvalidFormatParametersException;
+import org.apache.freemarker.core.TemplateFormatUtil;
+import org.apache.freemarker.core.TemplateNumberFormat;
+import org.apache.freemarker.core.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.TemplateValueFormatException;
+import org.apache.freemarker.core.UnformattableValueException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.util._NumberUtil;

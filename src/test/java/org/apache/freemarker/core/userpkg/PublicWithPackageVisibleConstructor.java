@@ -17,12 +17,10 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.subpkg;
+package org.apache.freemarker.core.userpkg;
 
-public class PackageVisibleAllWithBuilderBuilder {
+public class PublicWithPackageVisibleConstructor {
+
+    PublicWithPackageVisibleConstructor() { }
     
-    public PackageVisibleAllWithBuilder build() {
-        return new PackageVisibleAllWithBuilder();
-    }
-
 }

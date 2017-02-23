@@ -17,22 +17,8 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.subpkg;
+package org.apache.freemarker.core.userpkg;
 
-public class PublicWithMixedConstructors {
-    
-    private final String s;
+public class PublicAll {
 
-    public PublicWithMixedConstructors(Integer x) {
-        s = "Integer";
-    }
-
-    PublicWithMixedConstructors(int x) {
-        s = "int";
-    }
-
-    public String getS() {
-        return s;
-    }
-    
 }

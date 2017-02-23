@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.subpkg;
+package org.apache.freemarker.core.userpkg;
 
 class PackageVisibleWithPublicConstructor {
     

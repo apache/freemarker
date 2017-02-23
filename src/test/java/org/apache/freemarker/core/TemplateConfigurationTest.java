@@ -54,6 +54,12 @@ import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
+import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
+import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
+import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
+import org.apache.freemarker.core.userpkg.LocAndTZSensitiveTemplateDateFormatFactory;
+import org.apache.freemarker.core.userpkg.LocaleSensitiveTemplateNumberFormatFactory;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.junit.Test;
 

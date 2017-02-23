@@ -17,8 +17,10 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.subpkg;
+package org.apache.freemarker.core.userpkg;
 
-public class PublicAll {
+class PackageVisibleAllWithBuilder {
 
+    PackageVisibleAllWithBuilder() {}
+    
 }

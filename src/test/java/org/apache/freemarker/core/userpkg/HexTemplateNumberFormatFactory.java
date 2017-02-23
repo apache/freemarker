@@ -16,18 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.userpkg;
 
 import java.util.Locale;
 
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.InvalidFormatParametersException;
+import org.apache.freemarker.core.TemplateFormatUtil;
+import org.apache.freemarker.core.TemplateNumberFormat;
+import org.apache.freemarker.core.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.UnformattableValueException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.util._NumberUtil;
 
-public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
+public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
 
-    public static final LocaleSensitiveTemplateNumberFormatFactory INSTANCE = new LocaleSensitiveTemplateNumberFormatFactory();
+    public static final HexTemplateNumberFormatFactory INSTANCE = new HexTemplateNumberFormatFactory();
     
-    private LocaleSensitiveTemplateNumberFormatFactory() {
+    private HexTemplateNumberFormatFactory() {
         // Defined to decrease visibility
     }
     
@@ -35,36 +42,34 @@ public class LocaleSensitiveTemplateNumberFormatFactory extends TemplateNumberFo
     public TemplateNumberFormat get(String params, Locale locale, Environment env)
             throws InvalidFormatParametersException {
         TemplateFormatUtil.checkHasNoParameters(params);
-        return new LocaleSensitiveTemplateNumberFormat(locale);
+        return HexTemplateNumberFormat.INSTANCE;
     }
 
-    private static class LocaleSensitiveTemplateNumberFormat extends TemplateNumberFormat {
-    
-        private final Locale locale;
+    private static class HexTemplateNumberFormat extends TemplateNumberFormat {
+
+        private static final HexTemplateNumberFormat INSTANCE = new HexTemplateNumberFormat();
         
-        private LocaleSensitiveTemplateNumberFormat(Locale locale) {
-            this.locale = locale;
-        }
+        private HexTemplateNumberFormat() { }
         
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
                 throws UnformattableValueException, TemplateModelException {
-            Number n = numberModel.getAsNumber();
+            Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
-                return n + "_" + locale;
+                return Integer.toHexString(_NumberUtil.toIntExact(n));
             } catch (ArithmeticException e) {
                 throw new UnformattableValueException(n + " doesn't fit into an int");
             }
         }
-    
+
         @Override
         public boolean isLocaleBound() {
-            return true;
+            return false;
         }
-    
+
         @Override
         public String getDescription() {
-            return "test locale sensitive";
+            return "hexadecimal int";
         }
         
     }

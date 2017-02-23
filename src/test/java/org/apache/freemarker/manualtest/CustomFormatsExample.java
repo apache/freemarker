@@ -26,11 +26,11 @@ import java.util.Map;
 
 import org.apache.freemarker.core.AliasTemplateDateFormatFactory;
 import org.apache.freemarker.core.AliasTemplateNumberFormatFactory;
-import org.apache.freemarker.core.BaseNTemplateNumberFormatFactory;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateDateFormatFactory;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
 import org.junit.Test;
 
 @SuppressWarnings("boxing")

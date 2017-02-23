@@ -49,13 +49,13 @@ import java.util.TimeZone;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.subpkg.PublicWithMixedConstructors;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
+import org.apache.freemarker.core.userpkg.PublicWithMixedConstructors;
 import org.apache.freemarker.core.util.WriteProtectable;
 import org.junit.Test;
 
@@ -966,7 +966,7 @@ public class ObjectBuilderSettingsTest {
     public void visibilityTest() throws Exception {
         try {
             _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.subpkg.PackageVisibleAll()",
+                    "org.apache.freemarker.core.userpkg.PackageVisibleAll()",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
@@ -975,7 +975,7 @@ public class ObjectBuilderSettingsTest {
 
         try {
             _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.subpkg.PackageVisibleWithPublicConstructor()",
+                    "org.apache.freemarker.core.userpkg.PackageVisibleWithPublicConstructor()",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
@@ -984,7 +984,7 @@ public class ObjectBuilderSettingsTest {
 
         try {
             _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.subpkg.PublicWithPackageVisibleConstructor()",
+                    "org.apache.freemarker.core.userpkg.PublicWithPackageVisibleConstructor()",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
@@ -993,14 +993,14 @@ public class ObjectBuilderSettingsTest {
         
         {
             Object o = _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.subpkg.PublicAll()",
+                    "org.apache.freemarker.core.userpkg.PublicAll()",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
-            assertEquals(org.apache.freemarker.core.subpkg.PublicAll.class, o.getClass());
+            assertEquals(org.apache.freemarker.core.userpkg.PublicAll.class, o.getClass());
         }
         
         {
             Object o = _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.subpkg.PublicWithMixedConstructors(1)",
+                    "org.apache.freemarker.core.userpkg.PublicWithMixedConstructors(1)",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
             assertEquals("Integer", ((PublicWithMixedConstructors) o).getS());
         }
@@ -1008,9 +1008,9 @@ public class ObjectBuilderSettingsTest {
         
         {
             Object o = _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.subpkg.PackageVisibleAllWithBuilder()",
+                    "org.apache.freemarker.core.userpkg.PackageVisibleAllWithBuilder()",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
-            assertEquals("org.apache.freemarker.core.subpkg.PackageVisibleAllWithBuilder", o.getClass().getName());
+            assertEquals("org.apache.freemarker.core.userpkg.PackageVisibleAllWithBuilder", o.getClass().getName());
         }
     }
 
