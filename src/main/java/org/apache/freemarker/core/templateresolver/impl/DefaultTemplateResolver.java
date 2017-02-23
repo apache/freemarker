@@ -32,11 +32,9 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.MarkReleaserTemplateSpecifiedEncodingHandler;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.TemplateSpecifiedEncodingHandler;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
@@ -566,14 +564,14 @@ public class DefaultTemplateResolver extends TemplateResolver {
         {
             Reader reader = templateLoaderResult.getReader();
             InputStream inputStream = templateLoaderResult.getInputStream();
-            TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler;
+            InputStream markedInputStream;
             if (reader != null) {
                 if (inputStream != null) {
                     throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()
                             + ", both getReader() and getInputStream() has returned non-null.");
                 }
                 initialEncoding = null;  // No charset decoding has happened
-                templateSpecifiedEncodingHandler = TemplateSpecifiedEncodingHandler.DEFAULT; 
+                markedInputStream = null;
             } else if (inputStream != null) {
                 if (parseAsFTL) {
                     // We need mark support, to restart if the charset suggested by <#ftl encoding=...> differs
@@ -582,9 +580,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
                         inputStream = new BufferedInputStream(inputStream);
                     }
                     inputStream.mark(Integer.MAX_VALUE); // Mark is released after the 1st FTL tag
-                    templateSpecifiedEncodingHandler = new MarkReleaserTemplateSpecifiedEncodingHandler(inputStream);
+                    markedInputStream = inputStream;
                 } else {
-                    templateSpecifiedEncodingHandler = null; 
+                    markedInputStream = null;
                 }
                 // Regarding buffering worries: On the Reader side we should only read in chunks (like through a
                 // BufferedReader), so there shouldn't be a problem if the InputStream is not buffered. (Also, at least
@@ -599,7 +597,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 if (parseAsFTL) {
                     try {
                         template = new Template(name, sourceName, reader, config, tc,
-                                initialEncoding, templateSpecifiedEncodingHandler);
+                                initialEncoding, markedInputStream);
                     } catch (Template.WrongEncodingException wee) {
                         final String templateSpecifiedEncoding = wee.getTemplateSpecifiedEncoding();
                         
@@ -615,7 +613,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                         }
                         
                         template = new Template(name, sourceName, reader, config, tc,
-                                templateSpecifiedEncoding, templateSpecifiedEncodingHandler);
+                                templateSpecifiedEncoding, markedInputStream);
                     }
                 } else {
                     // Read the contents into a StringWriter, then construct a single-text-block template from it.

@@ -78,8 +78,7 @@ public class FMParser {
     private int autoEscapingPolicy;
     private boolean autoEscaping;
     private ParserConfiguration pCfg;
-    private TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler;
-    private boolean templateSpecifiedEncodingHandlerInvoked;
+    private InputStream streamToUnmarkWhenEncEstabd;
 
     /** Keeps track of #list and #foreach nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
@@ -98,9 +97,8 @@ public class FMParser {
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
 
-    FMParser(Template template, Reader reader, ParserConfiguration pCfg,
-    		TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) {
-        this(template, true, readerToTokenManager(reader, pCfg), pCfg, templateSpecifiedEncodingHandler);
+    FMParser(Template template, Reader reader, ParserConfiguration pCfg, InputStream streamToUnmarkWhenEncEstabd) {
+        this(template, true, readerToTokenManager(reader, pCfg), pCfg, streamToUnmarkWhenEncEstabd);
     }
 
     private static FMParserTokenManager readerToTokenManager(Reader reader, ParserConfiguration pCfg) {
@@ -110,14 +108,13 @@ public class FMParser {
     }
 
     FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg,
-    		TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) {
+    		InputStream streamToUnmarkWhenEncEstabd) {
         this(tkMan);
 
         _NullArgumentException.check(pCfg);
         this.pCfg = pCfg;
         
-        _NullArgumentException.check(templateSpecifiedEncodingHandler);
-        this.templateSpecifiedEncodingHandler = templateSpecifiedEncodingHandler;
+        this.streamToUnmarkWhenEncEstabd = streamToUnmarkWhenEncEstabd;
 
         _NullArgumentException.check(template);
         this.template = template;
@@ -4041,8 +4038,15 @@ void HeaderElement() :
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
                             }
-                            templateSpecifiedEncodingHandlerInvoked = true;
-                            templateSpecifiedEncodingHandler.handle(vs, template.getEncoding());
+                            if (template.getEncoding() != null && vs != null
+                                    && !template.getEncoding().equalsIgnoreCase(vs)) {
+                                throw new Template.WrongEncodingException(vs, template.getEncoding());
+                            }
+                            // There will be no WrongEncodingException exception, release mark buffer:
+                            if (streamToUnmarkWhenEncEstabd != null) {
+                                streamToUnmarkWhenEncEstabd.mark(0);
+                                streamToUnmarkWhenEncEstabd = null;
+                            }
                         } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE") || ks.equals("stripWhitespace")) {
                             this.stripWhitespace = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("STRIP_TEXT") || ks.equals("stripText")) {
@@ -4232,9 +4236,10 @@ _ASTElement Root() :
         HeaderElement()
     ]
     {
-        if (!templateSpecifiedEncodingHandlerInvoked) {
-	        templateSpecifiedEncodingHandlerInvoked = true;
-	        templateSpecifiedEncodingHandler.handle(null, template.getEncoding());
+        // There will be no WrongEncodingException exception, release mark buffer:
+        if (streamToUnmarkWhenEncEstabd != null) {
+            streamToUnmarkWhenEncEstabd.mark(0);
+	        streamToUnmarkWhenEncEstabd = null;
         }
     }
     

@@ -19,14 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import java.io.BufferedReader;
-import java.io.FilterReader;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -218,26 +211,27 @@ public class Template extends Configurable {
            String name, String sourceName, Reader reader,
            Configuration cfg, ParserConfiguration customParserConfiguration,
            String encoding) throws IOException {
-       this(name, sourceName, reader, cfg, customParserConfiguration, encoding,
-               TemplateSpecifiedEncodingHandler.DEFAULT);
+       this(name, sourceName, reader, cfg, customParserConfiguration, encoding, null);
     }
-   
-   /**
-    * Same as {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}, but allows
-    * specifying a non-default (non-{@link TemplateSpecifiedEncodingHandler#DEFAULT}) behavior regarding encoding
-    * specified in the template content.
-    *  
-    * @param templateSpecifiedEncodingHandler Not {@code null}.
-    * 
-    * @since 2.3.26
-    */
+
+    /**
+     * Same as {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}, but allows
+     * specifying a non-default (non-{@link TemplateSpecifiedEncodingHandler#DEFAULT}) behavior regarding encoding
+     * specified in the template content.
+     *
+     * @param streamToUnmarkWhenEncEstabd
+     *         If not {@code null}, when during the parsing we reach a point where we know that no {@link
+     *         WrongEncodingException} will be thrown, {@link InputStream#mark(int) mark(0)} will be called on this.
+     *         This is meant to be used when the reader parameter is a {@link InputStreamReader}, and this parameter is
+     *         the underlying {@link InputStream}, and you have a mark at the beginning of the {@link InputStream} so
+     *         that you can retry if a {@link WrongEncodingException} is thrown without extra I/O. As keeping that
+     *         mark consumes some resources, so you may want to release it as soon as possible.
+     */
    public Template(
            String name, String sourceName, Reader reader,
            Configuration cfg, ParserConfiguration customParserConfiguration,
-           String encoding, TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) throws IOException {
+           String encoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException {
         this(name, sourceName, cfg, customParserConfiguration);
-       
-        _NullArgumentException.check("templateSpecifiedEncodingHandler", templateSpecifiedEncodingHandler);
 
        setEncoding(encoding);
         LineTableBuilder ltbReader;
@@ -255,7 +249,7 @@ public class Template extends Configurable {
             
             try {
                 parser = _CoreAPI.newFMParser(
-                        this, reader, actualParserConfiguration, templateSpecifiedEncodingHandler);
+                        this, reader, actualParserConfiguration, streamToUnmarkWhenEncEstabd);
                 try {
                     rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {

@@ -64,8 +64,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
                 FMParserTokenManager tkMan = new FMParserTokenManager(
                         simpleCharacterStream);
                 
-                FMParser parser = new FMParser(parentTemplate, false, tkMan, pcfg,
-                        TemplateSpecifiedEncodingHandler.DEFAULT);
+                FMParser parser = new FMParser(parentTemplate, false, tkMan, pcfg, null);
                 // We continue from the parent parser's current state:
                 parser.setupStringLiteralMode(parentTkMan, outputFormat);
                 try {

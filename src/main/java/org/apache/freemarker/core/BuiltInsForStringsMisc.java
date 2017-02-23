@@ -94,7 +94,7 @@ class BuiltInsForStringsMisc {
                     }
                     
                     FMParser parser = new FMParser(
-                            parentTemplate, false, tkMan, pCfg, TemplateSpecifiedEncodingHandler.DEFAULT);
+                            parentTemplate, false, tkMan, pCfg, null);
                     
                     exp = parser.ASTExpression();
                 } catch (TokenMgrError e) {

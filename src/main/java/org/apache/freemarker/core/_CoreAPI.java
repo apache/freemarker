@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
@@ -212,8 +213,8 @@ public class _CoreAPI {
     }
     
     public static FMParser newFMParser(Template template, Reader reader, ParserConfiguration pCfg,
-            TemplateSpecifiedEncodingHandler templateSpecifiedEncodingHandler) {
-        return new FMParser(template, reader, pCfg, templateSpecifiedEncodingHandler);
+            InputStream streamToUnmarkWhenEncEstabd) {
+        return new FMParser(template, reader, pCfg, streamToUnmarkWhenEncEstabd);
     }
     
     public static boolean isMacroOrFunction(TemplateModel m) {
