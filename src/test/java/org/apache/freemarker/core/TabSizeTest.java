@@ -23,11 +23,6 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ParseException;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 

@@ -28,10 +28,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.InvalidReferenceException;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.Environment.LazilyInitializedNamespace;
 import org.apache.freemarker.core.Environment.Namespace;
 import org.apache.freemarker.core.model.WrappingTemplateModel;

@@ -25,9 +25,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collections;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
 import org.junit.Test;
 
 public class EncodingOverrideTest {

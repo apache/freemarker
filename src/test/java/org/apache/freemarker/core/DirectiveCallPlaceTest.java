@@ -26,12 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.freemarker.core.CallPlaceCustomDataInitializationException;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.DirectiveCallPlace;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.ASTDirUserDefined;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;

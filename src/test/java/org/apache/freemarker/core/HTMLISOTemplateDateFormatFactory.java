@@ -22,9 +22,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
 import org.apache.freemarker.core.util._DateUtil.DateParseException;

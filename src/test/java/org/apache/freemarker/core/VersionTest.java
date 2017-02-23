@@ -19,11 +19,14 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.Date;
 
-import org.apache.freemarker.core.Version;
 import org.junit.Test;
 
 @SuppressWarnings("boxing")

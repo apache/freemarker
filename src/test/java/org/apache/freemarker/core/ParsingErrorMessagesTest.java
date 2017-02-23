@@ -23,9 +23,6 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ParseException;
-import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.util._StringUtil;
 import org.junit.Test;
 

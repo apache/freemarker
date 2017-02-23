@@ -27,10 +27,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.freemarker.core.templateresolver.TemplateLoader;
-import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
-import org.apache.freemarker.core.templateresolver.TemplateLoadingResultStatus;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;

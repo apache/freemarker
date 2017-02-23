@@ -20,7 +20,6 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;

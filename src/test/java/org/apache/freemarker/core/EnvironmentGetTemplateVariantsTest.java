@@ -26,11 +26,6 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;

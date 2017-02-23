@@ -24,7 +24,6 @@ import javax.servlet.ServletContext;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.servlet.FreemarkerServlet;
-import org.apache.freemarker.servlet.jsp.TaglibFactory;
 
 public class JspTestFreemarkerServlet extends FreemarkerServlet {
 

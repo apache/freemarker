@@ -18,12 +18,12 @@
  */
 package org.apache.freemarker.manualtest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
-import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;

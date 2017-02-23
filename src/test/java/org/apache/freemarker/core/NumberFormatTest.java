@@ -31,15 +31,6 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.freemarker.core.AliasTemplateNumberFormatFactory;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateConfiguration;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.TemplateNumberFormat;
-import org.apache.freemarker.core.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.UndefinedCustomFormatException;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;

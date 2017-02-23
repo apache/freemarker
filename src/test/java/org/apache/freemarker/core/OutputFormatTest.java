@@ -28,8 +28,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
 
-import org.apache.freemarker.core.outputformat.*;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;

@@ -22,13 +22,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.InvalidFormatParametersException;
-import org.apache.freemarker.core.TemplateDateFormat;
-import org.apache.freemarker.core.TemplateDateFormatFactory;
-import org.apache.freemarker.core.TemplateFormatUtil;
-import org.apache.freemarker.core.UnformattableValueException;
-import org.apache.freemarker.core.UnparsableValueException;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 

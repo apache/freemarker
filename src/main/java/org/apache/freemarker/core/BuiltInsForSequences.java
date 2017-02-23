@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -43,7 +44,6 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
 import org.apache.freemarker.core.model.impl.beans.CollectionModel;
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtil;
 

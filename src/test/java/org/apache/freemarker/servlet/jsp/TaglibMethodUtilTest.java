@@ -19,11 +19,10 @@
 
 package org.apache.freemarker.servlet.jsp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Method;
 
-import org.apache.freemarker.servlet.jsp.TaglibMethodUtil;
 import org.junit.Test;
 
 public class TaglibMethodUtilTest {

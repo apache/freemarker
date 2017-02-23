@@ -26,11 +26,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.CustomAttribute;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateConfiguration;
-import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;

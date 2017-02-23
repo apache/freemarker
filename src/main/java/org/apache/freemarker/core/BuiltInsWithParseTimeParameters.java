@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.freemarker.core.Token;
 import org.apache.freemarker.core.model.TemplateModel;
 
 

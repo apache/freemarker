@@ -33,7 +33,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.MockServletContext;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
-import org.apache.freemarker.servlet.InitParamParser;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;

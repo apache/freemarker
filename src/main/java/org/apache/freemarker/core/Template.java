@@ -19,7 +19,16 @@
 
 package org.apache.freemarker.core;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FilterReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collections;

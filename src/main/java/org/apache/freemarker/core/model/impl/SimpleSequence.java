@@ -24,7 +24,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.freemarker.core.model.*;
+import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.RichObjectWrapper;
+import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 
 /**

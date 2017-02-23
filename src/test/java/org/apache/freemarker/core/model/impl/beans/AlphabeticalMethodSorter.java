@@ -25,8 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.apache.freemarker.core.model.impl.beans.MethodSorter;
-
 class AlphabeticalMethodSorter implements MethodSorter {
 
     private final boolean desc;

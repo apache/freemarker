@@ -46,7 +46,7 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.outputformat.*;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;

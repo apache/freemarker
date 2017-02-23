@@ -37,9 +37,9 @@ import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core._ASTDebugBreak;
 import org.apache.freemarker.core._ASTElement;
 import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core._ASTDebugBreak;
 import org.apache.freemarker.core.debug.Breakpoint;
 import org.apache.freemarker.core.debug.DebuggerListener;
 import org.apache.freemarker.core.debug.EnvironmentSuspendedEvent;

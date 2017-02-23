@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;

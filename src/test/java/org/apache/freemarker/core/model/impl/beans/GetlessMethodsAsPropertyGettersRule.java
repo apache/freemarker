@@ -23,8 +23,6 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
-import org.apache.freemarker.core.model.impl.beans.MethodAppearanceFineTuner;
-import org.apache.freemarker.core.model.impl.beans.SingletonCustomizer;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecision;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper.MethodAppearanceDecisionInput;
 

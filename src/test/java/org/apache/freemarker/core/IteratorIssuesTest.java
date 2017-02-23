@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;

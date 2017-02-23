@@ -21,8 +21,6 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.templatesuite.models.Listables;

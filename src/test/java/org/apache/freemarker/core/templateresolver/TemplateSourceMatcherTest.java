@@ -18,17 +18,12 @@
  */
 package org.apache.freemarker.core.templateresolver;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.templateresolver.AndMatcher;
-import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
-import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
-import org.apache.freemarker.core.templateresolver.NotMatcher;
-import org.apache.freemarker.core.templateresolver.OrMatcher;
-import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
-import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.junit.Test;
 
 public class TemplateSourceMatcherTest {

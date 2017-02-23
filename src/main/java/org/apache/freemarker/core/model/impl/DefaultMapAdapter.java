@@ -27,6 +27,7 @@ import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
@@ -35,7 +36,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
-import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 
 /**
  * Adapts a {@link Map} to the corresponding {@link TemplateModel} interface(s), most importantly to

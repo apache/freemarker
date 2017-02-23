@@ -38,14 +38,6 @@ import java.util.Enumeration;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ASTExpression;
-import org.apache.freemarker.core.ASTImplicitParent;
-import org.apache.freemarker.core.ParameterRole;
-import org.apache.freemarker.core.ParseException;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core._ASTElement;
-import org.apache.freemarker.core.ASTNode;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util._ClassUtil;

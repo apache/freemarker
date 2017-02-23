@@ -28,8 +28,6 @@ import java.util.Set;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.MethodAppearanceFineTuner;
 
 /**
  * A hack to keep some unit tests producing exactly the same results on Java 8 as on Java 5-7, by hiding members

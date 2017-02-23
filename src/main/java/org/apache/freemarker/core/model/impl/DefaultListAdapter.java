@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
+import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -33,8 +35,6 @@ import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
-import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
-import org.apache.freemarker.core.model.RichObjectWrapper;
 
 /**
  * Adapts a {@link List} to the corresponding {@link TemplateModel} interface(s), most importantly to

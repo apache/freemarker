@@ -35,13 +35,13 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
-import org.apache.freemarker.core.util._CollectionUtil;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.impl.URLTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl._TemplateLoaderUtils;
+import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
 
 /**

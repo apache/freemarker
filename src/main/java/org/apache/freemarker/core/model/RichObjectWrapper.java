@@ -19,10 +19,6 @@
 
 package org.apache.freemarker.core.model;
 
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
-
 /**
  * <b>Experimental - subject to change:</b> Union of the interfaces that a typical feature rich {@link ObjectWrapper} is
  * expected to implement.

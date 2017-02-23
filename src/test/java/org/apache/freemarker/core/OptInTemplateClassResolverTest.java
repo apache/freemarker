@@ -24,13 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ConfigurationException;
-import org.apache.freemarker.core.OptInTemplateClassResolver;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateClassResolver;
-import org.apache.freemarker.core.TemplateException;
-
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 

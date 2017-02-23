@@ -20,8 +20,6 @@ package org.apache.freemarker.core;
 
 import java.util.List;
 
-import org.apache.freemarker.core.Token;
-
 
 abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
 

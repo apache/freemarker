@@ -34,9 +34,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.Configurable;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.util._StringUtil;
 import org.junit.Test;
 

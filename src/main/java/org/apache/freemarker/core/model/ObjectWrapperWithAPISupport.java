@@ -19,11 +19,6 @@
 
 package org.apache.freemarker.core.model;
 
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
-
 /**
  * <b>Experimental - subject to change:</b> Implemented by {@link ObjectWrapper}-s to help {@link TemplateModel}-s to
  * implement the {@code someValue?api} operation.

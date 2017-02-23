@@ -23,8 +23,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.freemarker.core.model.impl.beans._MethodUtil;
-
 import junit.framework.TestCase;
 
 public class IsMoreSpecificParameterTypeTest extends TestCase {

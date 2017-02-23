@@ -19,10 +19,9 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertThat;
 
-import org.apache.freemarker.core.ASTDirSetting;
 import org.junit.Test;
 
 public class SettingDirectiveTest {

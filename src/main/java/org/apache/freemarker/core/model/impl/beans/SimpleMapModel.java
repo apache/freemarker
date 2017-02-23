@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
@@ -35,7 +36,6 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.CollectionAndSequence;
 import org.apache.freemarker.core.model.impl.MapKeyValuePairIterator;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.model.RichObjectWrapper;
 
 /**
  * Model used by {@link BeansWrapper} when <tt>simpleMapWrapper</tt>

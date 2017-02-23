@@ -33,8 +33,8 @@ import java.util.Random;
 
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.debug.Debugger;
-import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
+import org.apache.freemarker.core.util._SecurityUtil;
 import org.slf4j.Logger;
 
 /**

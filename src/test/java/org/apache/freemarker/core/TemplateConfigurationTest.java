@@ -49,10 +49,10 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.commons.collections.ListUtils;
+import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.junit.Test;

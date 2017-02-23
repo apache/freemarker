@@ -22,11 +22,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.Configurable;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.test.TemplateTest;

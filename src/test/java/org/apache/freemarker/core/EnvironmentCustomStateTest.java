@@ -21,9 +21,6 @@ package org.apache.freemarker.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
 import org.junit.Test;
 
 public class EnvironmentCustomStateTest {

@@ -24,11 +24,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.ThreadInterruptionSupportTemplatePostProcessor.TemplateProcessingThreadInterruptedException;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;

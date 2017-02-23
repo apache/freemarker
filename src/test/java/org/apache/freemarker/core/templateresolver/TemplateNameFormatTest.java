@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ParseException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;

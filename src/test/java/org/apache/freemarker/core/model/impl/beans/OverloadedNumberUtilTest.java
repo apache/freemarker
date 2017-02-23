@@ -22,9 +22,6 @@ package org.apache.freemarker.core.model.impl.beans;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.apache.freemarker.core.model.impl.beans.OverloadedNumberUtil;
-import org.apache.freemarker.core.model.impl.beans.TypeFlags;
-
 import junit.framework.TestCase;
 
 @SuppressWarnings("boxing")

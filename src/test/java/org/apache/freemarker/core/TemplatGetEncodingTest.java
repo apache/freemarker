@@ -26,11 +26,6 @@ import static org.junit.Assert.assertSame;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ParseException;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
 import org.junit.Test;

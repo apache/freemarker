@@ -36,7 +36,6 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;

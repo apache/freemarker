@@ -21,8 +21,8 @@ package org.apache.freemarker.core;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.util._LocaleUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Creates an alias to another format, so that the format can be referred to with a simple name in the template, rather

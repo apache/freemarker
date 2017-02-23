@@ -22,10 +22,6 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ParseException;
-import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.test.CopyrightCommentRemoverTemplateLoader;
 import org.apache.freemarker.test.util.FileTestCase;

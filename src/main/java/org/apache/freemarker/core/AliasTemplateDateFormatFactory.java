@@ -22,8 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.util._LocaleUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Creates an alias to another format, so that the format can be referred to with a simple name in the template, rather

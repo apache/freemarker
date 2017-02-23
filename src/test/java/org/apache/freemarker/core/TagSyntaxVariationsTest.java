@@ -23,10 +23,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.ParseException;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.util._StringUtil;
 
 import junit.framework.TestCase;
