@@ -55,6 +55,7 @@ import org.apache.freemarker.core.outputformat.impl.CSSOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.CombinedMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.JSONOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.JavaScriptOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
