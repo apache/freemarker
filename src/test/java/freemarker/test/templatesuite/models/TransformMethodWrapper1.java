@@ -28,7 +28,7 @@ import freemarker.template.utility.XmlEscape;
 /**
  * Simple test of the interaction between MethodModels and TransformModels.
  */
-public class TransformMethodWrapper1 extends Object implements TemplateMethodModel {
+public class TransformMethodWrapper1 implements TemplateMethodModel {
 
     /**
      * Executes a method call.

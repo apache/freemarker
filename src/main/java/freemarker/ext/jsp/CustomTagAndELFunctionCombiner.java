@@ -42,7 +42,7 @@ import freemarker.template.utility.ClassUtil;
  * the two. As FTL as no separate namespace for "tags" and functions, both aspect has to be implemented by the same
  * value.
  * 
- * @sine 2.3.25
+ * @since 2.3.25
  */
 @SuppressWarnings("rawtypes")
 class CustomTagAndELFunctionCombiner {

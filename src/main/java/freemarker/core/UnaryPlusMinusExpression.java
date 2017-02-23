@@ -26,8 +26,8 @@ import freemarker.template.TemplateNumberModel;
 
 final class UnaryPlusMinusExpression extends Expression {
     
-    private final int TYPE_MINUS = 0;
-    private final int TYPE_PLUS = 1;
+    private static final int TYPE_MINUS = 0;
+    private static final int TYPE_PLUS = 1;
 
     private final Expression target;
     private final boolean isMinus;

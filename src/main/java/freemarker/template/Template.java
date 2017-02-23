@@ -81,10 +81,6 @@ public class Template extends Configurable {
 
     private static final int READER_BUFFER_SIZE = 4096;
     
-    /** This is only non-null during parsing. It's used internally to make some information available through the
-     *  Template API-s earlier than the parsing was finished. */
-    private transient FMParser parser;
-
     private Map macros = new HashMap();
     private List imports = new Vector();
     private TemplateElement rootElement;
@@ -245,7 +241,7 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                parser = new FMParser(this, reader, actualParserConfiguration);
+                FMParser parser = new FMParser(this, reader, actualParserConfiguration);
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -263,8 +259,6 @@ public class Template extends Configurable {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
                 throw exc.toParseException(this);
-            } finally {
-                parser = null;
             }
         } catch (ParseException e) {
             e.setTemplateName(getSourceName());

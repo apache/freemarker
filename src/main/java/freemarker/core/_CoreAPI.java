@@ -182,7 +182,7 @@ public class _CoreAPI {
      *             if the type of the some of the values isn't as expected
      */
     public static void checkSettingValueItemsType(String somethingsSentenceStart, Class<?> expectedClass,
-            Collection<? extends Object> values) {
+            Collection<?> values) {
         if (values == null) return;
         for (Object value : values) {
             if (!expectedClass.isInstance(value)) {
