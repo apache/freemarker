@@ -21,10 +21,10 @@ package org.apache.freemarker.manualtest;
 import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.RTFOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.TemplateConfiguration;
-import org.apache.freemarker.core.XMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;

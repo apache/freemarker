@@ -19,6 +19,7 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 abstract class MarkupOutputFormatBoundBuiltIn extends SpecialBuiltIn {

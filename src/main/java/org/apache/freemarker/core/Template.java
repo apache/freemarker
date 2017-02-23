@@ -29,13 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.apache.freemarker.core.FMParser;
 import org.apache.freemarker.core.debug.impl.DebuggerService;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;

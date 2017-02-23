@@ -30,8 +30,8 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.TemplateHTMLOutputModel;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.TemplateHTMLOutputModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModelException;

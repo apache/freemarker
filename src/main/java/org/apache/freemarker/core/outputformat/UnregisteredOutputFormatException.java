@@ -16,25 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat;
+
+import org.apache.freemarker.core.Configuration;
 
 /**
- * Stores RTF markup to be printed; used with {@link RTFOutputFormat}.
+ * Thrown by {@link Configuration#getOutputFormat(String)}.
  * 
  * @since 2.3.24
  */
-public final class TemplateRTFOutputModel extends CommonTemplateMarkupOutputModel<TemplateRTFOutputModel> {
-    
-    /**
-     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
-     */
-    TemplateRTFOutputModel(String plainTextContent, String markupContent) {
-        super(plainTextContent, markupContent);
-    }
+@SuppressWarnings("serial")
+public class UnregisteredOutputFormatException extends Exception {
 
-    @Override
-    public RTFOutputFormat getOutputFormat() {
-        return RTFOutputFormat.INSTANCE;
+    public UnregisteredOutputFormatException(String message) {
+        this(message, null);
+    }
+    
+    public UnregisteredOutputFormatException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

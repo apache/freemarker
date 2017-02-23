@@ -22,9 +22,11 @@ package org.apache.freemarker.core;
 import java.io.StringReader;
 import java.util.List;
 
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.FTLUtil;
 
 /**

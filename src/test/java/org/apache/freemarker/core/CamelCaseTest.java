@@ -27,12 +27,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.freemarker.core.ASTExpBuiltIn;
-import org.apache.freemarker.core.ASTExpBuiltInVariable;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.UndefinedOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;

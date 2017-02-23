@@ -28,6 +28,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 
 /**
  * AST directive node: Like {@code <#local x>...</#local>}.

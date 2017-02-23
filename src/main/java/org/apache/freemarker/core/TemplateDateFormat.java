@@ -23,6 +23,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
 /**

@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;

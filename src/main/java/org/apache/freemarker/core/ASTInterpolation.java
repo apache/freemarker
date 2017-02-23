@@ -18,6 +18,8 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
+
 /**
  * AST interpolation node superclass.
  */

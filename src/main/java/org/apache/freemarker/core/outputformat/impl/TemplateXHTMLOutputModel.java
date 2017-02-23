@@ -16,19 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
 
-import org.apache.freemarker.core.CommonTemplateMarkupOutputModel;
+import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
-public final class CustomTemplateHTMLModel extends CommonTemplateMarkupOutputModel<CustomTemplateHTMLModel> {
+/**
+ * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
+ * 
+ * @since 2.3.24
+ */
+public final class TemplateXHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXHTMLOutputModel> {
     
-    CustomTemplateHTMLModel(String plainTextContent, String markupContent) {
+    /**
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     */
+    TemplateXHTMLOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
     }
 
     @Override
-    public CustomHTMLOutputFormat getOutputFormat() {
-        return CustomHTMLOutputFormat.INSTANCE;
+    public XHTMLOutputFormat getOutputFormat() {
+        return XHTMLOutputFormat.INSTANCE;
     }
 
 }

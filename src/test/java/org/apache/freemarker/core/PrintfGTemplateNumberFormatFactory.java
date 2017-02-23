@@ -22,13 +22,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Locale;
 
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.InvalidFormatParametersException;
-import org.apache.freemarker.core.TemplateFormatUtil;
-import org.apache.freemarker.core.TemplateNumberFormat;
-import org.apache.freemarker.core.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.UnformattableValueException;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.util._StringUtil;

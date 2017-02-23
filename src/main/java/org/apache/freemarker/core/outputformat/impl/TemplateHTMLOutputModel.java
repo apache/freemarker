@@ -16,35 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
+
+import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
 /**
- * Stores combined markup to be printed; used with {@link CombinedMarkupOutputFormat}.
+ * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
  * 
  * @since 2.3.24
  */
-public final class TemplateCombinedMarkupOutputModel
-        extends CommonTemplateMarkupOutputModel<TemplateCombinedMarkupOutputModel> {
-    
-    private final CombinedMarkupOutputFormat outputFormat;
+public final class TemplateHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateHTMLOutputModel> {
     
     /**
      * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
-     * 
-     * @param outputFormat
-     *            The {@link CombinedMarkupOutputFormat} format this value is bound to. Because
-     *            {@link CombinedMarkupOutputFormat} has no singleton, we have to pass it in, unlike with most other
-     *            {@link CommonTemplateMarkupOutputModel}-s.
      */
-    TemplateCombinedMarkupOutputModel(String plainTextContent, String markupContent,
-            CombinedMarkupOutputFormat outputFormat) {
+    TemplateHTMLOutputModel(String plainTextContent, String markupContent) {
         super(plainTextContent, markupContent);
-        this.outputFormat = outputFormat; 
     }
 
     @Override
-    public CombinedMarkupOutputFormat getOutputFormat() {
-        return outputFormat;
+    public HTMLOutputFormat getOutputFormat() {
+        return HTMLOutputFormat.INSTANCE;
     }
 
 }

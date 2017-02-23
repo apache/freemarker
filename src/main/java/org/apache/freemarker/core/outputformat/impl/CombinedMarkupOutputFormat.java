@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
 
 import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 
 /**
  * Represents two markup formats nested into each other. For example, markdown nested into HTML.

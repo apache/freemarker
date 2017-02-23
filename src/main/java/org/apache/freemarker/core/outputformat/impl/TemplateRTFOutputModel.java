@@ -16,19 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
 
-import org.apache.freemarker.core.CommonTemplateMarkupOutputModel;
+import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
-public class TemplateDummyOutputModel extends CommonTemplateMarkupOutputModel<TemplateDummyOutputModel> {
-
-    TemplateDummyOutputModel(String plainTextContent, String markupContet) {
-        super(plainTextContent, markupContet);
+/**
+ * Stores RTF markup to be printed; used with {@link RTFOutputFormat}.
+ * 
+ * @since 2.3.24
+ */
+public final class TemplateRTFOutputModel extends CommonTemplateMarkupOutputModel<TemplateRTFOutputModel> {
+    
+    /**
+     * See {@link CommonTemplateMarkupOutputModel#CommonTemplateMarkupOutputModel(String, String)}.
+     */
+    TemplateRTFOutputModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
     }
 
     @Override
-    public DummyOutputFormat getOutputFormat() {
-        return DummyOutputFormat.INSTANCE;
+    public RTFOutputFormat getOutputFormat() {
+        return RTFOutputFormat.INSTANCE;
     }
-    
+
 }

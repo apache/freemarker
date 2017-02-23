@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
 
-import static org.apache.freemarker.core.RTFOutputFormat.*;
-import static org.junit.Assert.*;
+import static org.apache.freemarker.core.outputformat.impl.RTFOutputFormat.INSTANCE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.TemplateRTFOutputModel;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat._OutputFormatTestAPI;
 import org.junit.Test; 
 
 public class RTFOutputFormatTest {
@@ -64,16 +66,16 @@ public class RTFOutputFormatTest {
     public void testFromPlainTextByEscaping() throws TemplateModelException {
         String plainText = "a\\b";
         TemplateRTFOutputModel mo = INSTANCE.fromPlainTextByEscaping(plainText);
-        assertSame(plainText, mo.getPlainTextContent());
-        assertNull(mo.getMarkupContent()); // Not the MO's duty to calculate it!
+        assertSame(plainText, _OutputFormatTestAPI.getPlainTextContent(mo));
+        assertNull(_OutputFormatTestAPI.getMarkupContent(mo)); // Not the MO's duty to calculate it!
     }
 
     @Test
     public void testFromMarkup() throws TemplateModelException {
         String markup = "a \\par b";
         TemplateRTFOutputModel mo = INSTANCE.fromMarkup(markup);
-        assertSame(markup, mo.getMarkupContent());
-        assertNull(mo.getPlainTextContent()); // Not the MO's duty to calculate it!
+        assertSame(markup, _OutputFormatTestAPI.getMarkupContent(mo));
+        assertNull(_OutputFormatTestAPI.getPlainTextContent(mo)); // Not the MO's duty to calculate it!
     }
     
     @Test
@@ -117,8 +119,8 @@ public class RTFOutputFormatTest {
     }
     
     private void assertMO(String pc, String mc, TemplateRTFOutputModel mo) {
-        assertEquals(pc, mo.getPlainTextContent());
-        assertEquals(mc, mo.getMarkupContent());
+        assertEquals(pc, _OutputFormatTestAPI.getPlainTextContent(mo));
+        assertEquals(mc, _OutputFormatTestAPI.getMarkupContent(mo));
     }
     
     @Test

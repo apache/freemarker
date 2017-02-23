@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat;
+
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 
 /**
  * Common superclass for implementing {@link TemplateMarkupOutputModel}-s that belong to a

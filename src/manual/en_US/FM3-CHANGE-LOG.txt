@@ -70,6 +70,7 @@ the FreeMarer 3 changelog here:
   were moved to org.apache.freemarker.core.model, and template loading and caching related classes
   to org.apache.freemarker.core.templateresolver (because later we will have a class called
   TemplateResolver, which is the central class of loading and caching and template name rules).
+  OutputFormat realted classes were moved to org.apache.freemarker.core.outputformat.
   freemarker.ext.beans were moved under org.apache.freemarker.core.model.impl.beans for now (but later
   we only want a DefaultObject wrapper, no BeansWrapper, so this will change) and freemarker.ext.dom
   was moved to org.apache.freemarker.core.model.impl.dom.

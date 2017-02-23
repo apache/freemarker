@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.util.FTLUtil;
 
 /**

@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.model;
 
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
  * "markup output" template language data-type; stores markup (some kind of "rich text" / structured format, as opposed

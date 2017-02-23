@@ -375,16 +375,6 @@
       sourcepath="build/javadoc-sources"
       destdir="build/api"
       doctitle="FreeMarker ${version}"
-      packagenames="
-        org.apache.freemarker.core.*,
-    	org.apache.freemarker.core.debug.*,
-    	org.apache.freemarker.core.templateresolver.*,
-        org.apache.freemarker.core.model.*,
-    	org.apache.freemarker.core.model.impl.*,
-    	org.apache.freemarker.core.model.impl.beans.*,
-    	org.apache.freemarker.core.model.impl.dom.*,
-        org.apache.freemarker.servlet.*,
-    	org.apache.freemarker.servlet.jsp.*"
       use="true"
       version="true"
       author="true"

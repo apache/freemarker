@@ -16,60 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.userpkg;
 
 import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 
-/**
- * Represents the Rich Text Format output format (MIME type "application/rtf", name "RTF"). This format escapes by
- * default (via {@link _StringUtil#RTFEnc(String)}). The {@code ?rtf} built-in silently bypasses template output values
- * of the type produced by this output format ({@link TemplateRTFOutputModel}).
- * 
- * @since 2.3.24
- */
-public final class RTFOutputFormat extends CommonMarkupOutputFormat<TemplateRTFOutputModel> {
-
-    /**
-     * The only instance (singleton) of this {@link OutputFormat}.
-     */
-    public static final RTFOutputFormat INSTANCE = new RTFOutputFormat();
+public class DummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOutputModel> {
     
-    private RTFOutputFormat() {
-        // Only to decrease visibility
+    public static final DummyOutputFormat INSTANCE = new DummyOutputFormat();
+    
+    private DummyOutputFormat() {
+        // hide
     }
-    
+
     @Override
     public String getName() {
-        return "RTF";
+        return "dummy";
     }
 
     @Override
     public String getMimeType() {
-        return "application/rtf";
+        return "text/dummy";
     }
 
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        _StringUtil.RTFEnc(textToEsc, out);
+        out.write(escapePlainText(textToEsc));
     }
 
     @Override
     public String escapePlainText(String plainTextContent) {
-        return _StringUtil.RTFEnc(plainTextContent);
+        return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
     }
 
     @Override
     public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("rtf");
+        return false;
     }
 
     @Override
-    protected TemplateRTFOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
-        return new TemplateRTFOutputModel(plainTextContent, markupContent);
+    protected TemplateDummyOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
+        return new TemplateDummyOutputModel(plainTextContent, markupContent);
     }
-
+    
 }

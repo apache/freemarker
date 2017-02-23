@@ -18,6 +18,8 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.outputformat.OutputFormat;
+
 /**
  * Represents the JavaScript output format (MIME type "application/javascript", name "JavaScript"). This format doesn't
  * support escaping.

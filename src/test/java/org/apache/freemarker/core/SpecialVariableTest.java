@@ -22,12 +22,9 @@ package org.apache.freemarker.core;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
 
-import org.apache.freemarker.core.ASTExpBuiltInVariable;
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.PlainTextOutputFormat;
-import org.apache.freemarker.core.UndefinedOutputFormat;
-import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 

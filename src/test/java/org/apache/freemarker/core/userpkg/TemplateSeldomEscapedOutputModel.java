@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.userpkg;
 
-/**
- * @since 2.3.24
- */
-public class UnregisteredOutputFormatException extends Exception {
+import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
-    public UnregisteredOutputFormatException(String message) {
-        this(message, null);
+public class TemplateSeldomEscapedOutputModel extends CommonTemplateMarkupOutputModel<TemplateSeldomEscapedOutputModel> {
+
+    TemplateSeldomEscapedOutputModel(String plainTextContent, String markupContet) {
+        super(plainTextContent, markupContet);
+    }
+
+    @Override
+    public SeldomEscapedOutputFormat getOutputFormat() {
+        return SeldomEscapedOutputFormat.INSTANCE;
     }
     
-    public UnregisteredOutputFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

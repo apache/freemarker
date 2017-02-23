@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat;
 
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.TemplateHTMLOutputModel;
 
 /**
  * Superclass of {@link OutputFormat}-s that represent a "markup" format, which is any format where certain character
@@ -30,10 +34,10 @@ import org.apache.freemarker.core.model.TemplateModelException;
  * {@link Configuration#setOutputFormat(OutputFormat)}.)
  * 
  * <p>
- * An {@link OutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair (like
- * {@link HTMLOutputFormat} has {@link TemplateHTMLOutputModel}). The {@link OutputFormat} implements the operations
- * related to {@link TemplateMarkupOutputModel} objects of that kind, while the {@link TemplateMarkupOutputModel} only
- * encapsulates the data (the actual markup or text).
+ * A {@link MarkupOutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair
+ * (like {@link HTMLOutputFormat} has {@link TemplateHTMLOutputModel}). The {@link OutputFormat} implements the
+ * operations related to {@link TemplateMarkupOutputModel} objects of that kind, while the
+ * {@link TemplateMarkupOutputModel} only encapsulates the data (the actual markup or text).
  * 
  * <p>
  * To implement a custom output format, you may want to extend {@link CommonMarkupOutputFormat}.

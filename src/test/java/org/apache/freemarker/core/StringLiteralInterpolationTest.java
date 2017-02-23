@@ -21,10 +21,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.InvalidReferenceException;
-import org.apache.freemarker.core.RTFOutputFormat;
-import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 

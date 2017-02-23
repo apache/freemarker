@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 
 import java.util.Set;
 
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.util._NullArgumentException;
 

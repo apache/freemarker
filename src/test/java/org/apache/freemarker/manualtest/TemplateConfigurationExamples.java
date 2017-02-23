@@ -23,12 +23,12 @@ import static org.junit.Assert.*;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.PlainTextOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
-import org.apache.freemarker.core.UndefinedOutputFormat;
-import org.apache.freemarker.core.XMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;

@@ -16,37 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.userpkg;
 
-/**
- * Represents the JSON output format (MIME type "application/json", name "JSON"). This format doesn't support escaping.
- * 
- * @since 2.3.24
- */
-public class JSONOutputFormat extends OutputFormat {
+import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
-    /**
-     * The only instance (singleton) of this {@link OutputFormat}.
-     */
-    public static final JSONOutputFormat INSTANCE = new JSONOutputFormat();
+public final class CustomTemplateHTMLModel extends CommonTemplateMarkupOutputModel<CustomTemplateHTMLModel> {
     
-    private JSONOutputFormat() {
-        // Only to decrease visibility
-    }
-    
-    @Override
-    public String getName() {
-        return "JSON";
+    CustomTemplateHTMLModel(String plainTextContent, String markupContent) {
+        super(plainTextContent, markupContent);
     }
 
     @Override
-    public String getMimeType() {
-        return "application/json";
-    }
-
-    @Override
-    public boolean isOutputFormatMixingAllowed() {
-        return false;
+    public CustomHTMLOutputFormat getOutputFormat() {
+        return CustomHTMLOutputFormat.INSTANCE;
     }
 
 }

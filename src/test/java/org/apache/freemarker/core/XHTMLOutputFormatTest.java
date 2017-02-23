@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.XHTMLOutputFormat.*;
+import static org.apache.freemarker.core.outputformat.impl.XHTMLOutputFormat.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;

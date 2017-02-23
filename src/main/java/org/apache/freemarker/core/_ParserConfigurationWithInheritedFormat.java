@@ -18,6 +18,8 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.outputformat.OutputFormat;
+
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  */ 

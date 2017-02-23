@@ -16,57 +16,62 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
 
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * Represents the HTML output format.
+ * Represents the XML output format (MIME type "application/xml", name "XML"). This format escapes by default (via
+ * {@link _StringUtil#XMLEnc(String)}). The {@code ?html}, {@code ?xhtml} and {@code ?xml} built-ins silently bypass
+ * template output values of the type produced by this output format ({@link TemplateXHTMLOutputModel}).
  * 
  * @since 2.3.24
  */
-public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<CustomTemplateHTMLModel> {
+public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLOutputModel> {
 
-    public static final CustomHTMLOutputFormat INSTANCE = new CustomHTMLOutputFormat();
-    
-    private CustomHTMLOutputFormat() {
+    /**
+     * The only instance (singleton) of this {@link OutputFormat}.
+     */
+    public static final XMLOutputFormat INSTANCE = new XMLOutputFormat();
+
+    private XMLOutputFormat() {
         // Only to decrease visibility
     }
-    
+
     @Override
     public String getName() {
-        return "HTML";
+        return "XML";
     }
 
     @Override
     public String getMimeType() {
-        return "text/html";
+        return "application/xml";
     }
 
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
-        // This is lazy - don't do it in reality.
-        out.write(escapePlainText(textToEsc));
+        _StringUtil.XMLEnc(textToEsc, out);
     }
 
     @Override
     public String escapePlainText(String plainTextContent) {
-        return _StringUtil.XHTMLEnc(plainTextContent.replace('x', 'X'));
+        return _StringUtil.XMLEnc(plainTextContent);
     }
 
     @Override
     public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
+        return builtInName.equals("xml");
     }
 
     @Override
-    protected CustomTemplateHTMLModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
-        return new CustomTemplateHTMLModel(plainTextContent, markupContent);
+    protected TemplateXMLOutputModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
+        return new TemplateXMLOutputModel(plainTextContent, markupContent);
     }
 
 }

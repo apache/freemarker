@@ -16,40 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
+
+import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
- * Represents the output format used when the template output format is undecided. This is the default output format if
- * FreeMarker can't select anything more specific (see
- * {@link Configuration#setTemplateConfigurations(org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory)}). This format doesn't
- * support auto-escaping ({@link Configuration#setAutoEscapingPolicy(int)}). It will print
- * {@link TemplateMarkupOutputModel}-s as is (doesn't try to convert them).
- * 
- * @see PlainTextOutputFormat
+ * Represents the JSON output format (MIME type "application/json", name "JSON"). This format doesn't support escaping.
  * 
  * @since 2.3.24
  */
-public final class UndefinedOutputFormat extends OutputFormat {
+public class JSONOutputFormat extends OutputFormat {
 
-    public static final UndefinedOutputFormat INSTANCE = new UndefinedOutputFormat();
+    /**
+     * The only instance (singleton) of this {@link OutputFormat}.
+     */
+    public static final JSONOutputFormat INSTANCE = new JSONOutputFormat();
     
-    private UndefinedOutputFormat() {
+    private JSONOutputFormat() {
         // Only to decrease visibility
     }
-
-    @Override
-    public boolean isOutputFormatMixingAllowed() {
-        return true;
-    }
-
+    
     @Override
     public String getName() {
-        return "undefined";
+        return "JSON";
     }
 
     @Override
     public String getMimeType() {
-        return null;
+        return "application/json";
+    }
+
+    @Override
+    public boolean isOutputFormatMixingAllowed() {
+        return false;
     }
 
 }

@@ -18,6 +18,8 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.outputformat.OutputFormat;
+
 /**
  * <b>Don't implement this interface yourself</b>; use the existing implementation(s). This interface is implemented by
  * classes that hold settings that affect parsing. New parser settings can be added in new FreeMarker versions, which

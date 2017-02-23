@@ -16,20 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.CombinedMarkupOutputFormat;
-import org.apache.freemarker.core.HTMLOutputFormat;
-import org.apache.freemarker.core.MarkupOutputFormat;
-import org.apache.freemarker.core.RTFOutputFormat;
-import org.apache.freemarker.core.TemplateCombinedMarkupOutputModel;
-import org.apache.freemarker.core.XMLOutputFormat;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
+import org.apache.freemarker.core.outputformat._OutputFormatTestAPI;
 import org.junit.Test; 
 
 public class CombinedMarkupOutputFormatTest {
@@ -121,16 +119,16 @@ public class CombinedMarkupOutputFormatTest {
     public void testFromPlainTextByEscaping() throws TemplateModelException {
         String plainText = "a\\b&c";
         TemplateCombinedMarkupOutputModel mo = HTML_RTF.fromPlainTextByEscaping(plainText);
-        assertSame(plainText, mo.getPlainTextContent());
-        assertNull(mo.getMarkupContent()); // Not the MO's duty to calculate it!
+        assertSame(plainText, _OutputFormatTestAPI.getPlainTextContent(mo));
+        assertNull(_OutputFormatTestAPI.getMarkupContent(mo)); // Not the MO's duty to calculate it!
     }
 
     @Test
     public void testFromMarkup() throws TemplateModelException {
         String markup = "a \\par <b>";
         TemplateCombinedMarkupOutputModel mo = HTML_RTF.fromMarkup(markup);
-        assertSame(markup, mo.getMarkupContent());
-        assertNull(mo.getPlainTextContent()); // Not the MO's duty to calculate it!
+        assertSame(markup, _OutputFormatTestAPI.getMarkupContent(mo));
+        assertNull(_OutputFormatTestAPI.getPlainTextContent(mo)); // Not the MO's duty to calculate it!
     }
     
     @Test
@@ -185,8 +183,8 @@ public class CombinedMarkupOutputFormatTest {
     }
     
     private void assertMO(String pc, String mc, TemplateCombinedMarkupOutputModel mo) {
-        assertEquals(pc, mo.getPlainTextContent());
-        assertEquals(mc, mo.getMarkupContent());
+        assertEquals(pc, _OutputFormatTestAPI.getPlainTextContent(mo));
+        assertEquals(mc, _OutputFormatTestAPI.getMarkupContent(mo));
     }
     
     @Test

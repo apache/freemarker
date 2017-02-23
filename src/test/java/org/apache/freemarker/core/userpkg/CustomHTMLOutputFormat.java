@@ -16,56 +16,57 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.userpkg;
 
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
+import org.apache.freemarker.core.util._StringUtil;
 
-public class SeldomEscapedOutputFormat extends CommonMarkupOutputFormat<TemplateSeldomEscapedOutputModel> {
+/**
+ * Represents the HTML output format.
+ * 
+ * @since 2.3.24
+ */
+public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<CustomTemplateHTMLModel> {
+
+    public static final CustomHTMLOutputFormat INSTANCE = new CustomHTMLOutputFormat();
     
-    public static final SeldomEscapedOutputFormat INSTANCE = new SeldomEscapedOutputFormat();
-    
-    private SeldomEscapedOutputFormat() {
-        // hide
+    private CustomHTMLOutputFormat() {
+        // Only to decrease visibility
     }
-
+    
     @Override
     public String getName() {
-        return "seldomEscaped";
+        return "HTML";
     }
 
     @Override
     public String getMimeType() {
-        return "text/seldomEscaped";
+        return "text/html";
     }
 
     @Override
     public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+        // This is lazy - don't do it in reality.
         out.write(escapePlainText(textToEsc));
     }
 
     @Override
     public String escapePlainText(String plainTextContent) {
-        return plainTextContent.replaceAll("(\\.|\\\\)", "\\\\$1");
+        return _StringUtil.XHTMLEnc(plainTextContent.replace('x', 'X'));
     }
 
     @Override
     public boolean isLegacyBuiltInBypassed(String builtInName) {
-        return false;
+        return builtInName.equals("html") || builtInName.equals("xml") || builtInName.equals("xhtml");
     }
 
     @Override
-    public boolean isAutoEscapedByDefault() {
-        return false;
+    protected CustomTemplateHTMLModel newTemplateMarkupOutputModel(String plainTextContent, String markupContent) {
+        return new CustomTemplateHTMLModel(plainTextContent, markupContent);
     }
 
-    @Override
-    protected TemplateSeldomEscapedOutputModel newTemplateMarkupOutputModel(
-            String plainTextContent, String markupContent) {
-        return new TemplateSeldomEscapedOutputModel(plainTextContent, markupContent);
-    }
-    
 }

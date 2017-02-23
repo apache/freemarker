@@ -18,6 +18,8 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.outputformat.OutputFormat;
+
 /**
  * Represents the CSS output format (MIME type "text/css", name "CSS"). This format doesn't support escaping.
  * 

@@ -16,41 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.outputformat.impl;
+
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
- * Represents the plain text output format (MIME type "text/plain", name "plainText"). This format doesn't support
- * escaping. This format doesn't allow mixing in template output values of other output formats.
+ * Represents the output format used when the template output format is undecided. This is the default output format if
+ * FreeMarker can't select anything more specific (see
+ * {@link Configuration#setTemplateConfigurations(org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory)}). This format doesn't
+ * support auto-escaping ({@link Configuration#setAutoEscapingPolicy(int)}). It will print
+ * {@link TemplateMarkupOutputModel}-s as is (doesn't try to convert them).
  * 
- * <p>
- * The main difference from {@link UndefinedOutputFormat} is that this format doesn't allow inserting values of another
- * output format into itself (unless they can be converted to plain text), while {@link UndefinedOutputFormat} would
- * just insert the foreign "markup" as is. Also, this format has {"text/plain"} MIME type, while
- * {@link UndefinedOutputFormat} has {@code null}.
+ * @see PlainTextOutputFormat
  * 
  * @since 2.3.24
  */
-public final class PlainTextOutputFormat extends OutputFormat {
+public final class UndefinedOutputFormat extends OutputFormat {
 
-    public static final PlainTextOutputFormat INSTANCE = new PlainTextOutputFormat();
+    public static final UndefinedOutputFormat INSTANCE = new UndefinedOutputFormat();
     
-    private PlainTextOutputFormat() {
+    private UndefinedOutputFormat() {
         // Only to decrease visibility
     }
 
     @Override
     public boolean isOutputFormatMixingAllowed() {
-        return false;
+        return true;
     }
 
     @Override
     public String getName() {
-        return "plainText";
+        return "undefined";
     }
 
     @Override
     public String getMimeType() {
-        return "text/plain";
+        return null;
     }
 
 }

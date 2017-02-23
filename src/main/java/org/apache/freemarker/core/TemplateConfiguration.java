@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
 
